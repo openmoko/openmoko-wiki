@@ -1,171 +1,24 @@
-{{Neo1973}}
+== Processor ==
 
-Openmoko is a software distribution stack that sits on top of a [[hardware]] platform.  The [[Neo1973]] phone is the first hardware platform to take advantage of Openmoko.  You can find specifics of the [[:Category:Neo1973 Hardware | Neo1973 Hardware]] by reviewing this introduction page and the pages in the category as shown at the bottom of this page.
+Samsung S3C2410A
 
-'''Note that this page is about the first Openmoko phone which is now discontinued. See details on the second Openmoko phone at this page - [[Neo FreeRunner GTA02 Hardware]].'''
+== Flash ==
 
-[[Image:Gta01b v3 top.jpg|thumb|400px|display (top) side]]
-[[Image:Gta01b v3 bottom.jpg|thumb|400px|component (back) side]]
+64MB Samsung NAND flash attached to S3C2410 NAND controller
 
-==User experiences of Phase 0 hardware==
-[[Wishlist:Neo1973_P0_Review]]
+== RAM ==
 
-==User reports of robustness==
-User experiences - drops onto concrete - ... [[Neo1973 Robustness]]
+128MB SDRAM, combined with the Flash in multichip package
 
-== Physical Dimensions ==
-* 120.7 x 62 x 18.5 mm (4.75 x 2.44 x 0.728 inch)
-* 184 +/- 5 g (6.5 ounces)
-* For the purposes of acquiring/cutting a properly sized screen protector, the display hole of the case is about 45 x 59 mm, while the top cover internal frame can house up to a 53 x 74 mm protector; sizes much larger than the display hole would obviously necessitate removing the front cover for installation.
-* A Useful size comparison between the Neo1973, iPhone, Motorola A1200 and the SEM600i can be seen at [http://www.sizeasy.com/page/size_comparison/5512-Neo1973-vs-Apple-iPhone-vs-M600i-2-vs-A-1200 sizeasy]
+== GSM/GPRS ==
 
-== Main components ==
+The GSM/GPRS modem is Texas Instruments Calypso based
 
-{|
-|-
-! style="width:250px" | Component 
-! Chip or Info
-|-
-| ''' Main Components '''
-|
-|- 
-| Processor
-| [[Samsung S3C2410]]
-|-
-| NAND-Flash
-| 64MB into [[Samsung K9F1208U0B]]
-|-
-| SDRAM
-| 128MB from the 2 [[Samsung K4M511633C]]
-|-
-| [[GSM]]/[[GPRS]]
-| Texas Instruments Calypso based, probably [[TI Calypso D751992AZHH]]
-|-
-| [[GPS]]/[[AGPS]]
-| [[Hammerhead PMB 2520]].
-|-
-| microSD-Card
-| Supported throught the [[Samsung_S3C2410]]
-|-
-| LCD
-|
-|-
-| &nbsp;&nbsp; LCD Module (LCM)
-| [[TPO TD028TTEC1]] module 
-|-
-| style='vertical-align:top' | &nbsp;&nbsp;  Touch Screen
-| More info, see [[TPO TD028TTEC1]]
-|-
-| Stylus
-| Seemingly identical to [http://cgi.ebay.com/4in1-PDA-Stylus-LED-Light-Torch-Laser-Pointer-Pen-h7_W0QQitemZ280089656134QQihZ018QQcategoryZ48677QQrdZ1QQcmdZViewItem this one on ebay]
-|-
-| Bluetooth
-|
-|-
-| &nbsp;&nbsp; Bluetooth module
-| [[Delta DFBM-CS320 Class2 Module]]
-|-
-| Bluetooth Headset
-| This one is wired via PCM bus from the CSR Bluetooth chip to the Wolfson codec.
-|-
-| style='vertical-align:top' | Vibrator
-|
-* Driver: https://svn.openmoko.org/trunk/src/target/kernel/patches/gta01-vibrator.patch
-* Connected to: S3C2410 GPIO
-* Controllable via /sys/class/leds/gta01:vibrator
-|-
-| USB Host 
-| inside the [[Samsung S3C2410]]
-|-
-| USB Device 
-| inside the [[Samsung S3C2410]]
-|-
-| style='vertical-align:top' | I2C Devices
-| The I2C is a simple communication standard intended to move small amounts of data a few inches between chips.
-Please see [[I2C | Neo I2C Devices]] for more information & a list of devices & the addresses currently in use & documented for the Neo1973.
-|-
-| Audio
-| See also: [[Neo1973 Audio Subsystem]]
-|-
-| &nbsp;&nbsp; Wolfson Codec 
-| [[WM8753]]
-|-
-| &nbsp;&nbsp; Stereo Amplifier 
-| [[LM4857]]
-|-
-| &nbsp;&nbsp; Analog wired Headset
-| [[Analog wired Headset]]
-|-
-| [[Neo_1973_GTA01_Power_Management|Power Management]]
-| [[Philips PCF50606]]
-|-
-| Battery 
-| [[Neo1973 Battery]]
-|-
-| style='vertical-align:top' | Buttons
-|
-* [[Neo1973 Power Button|The Power Button]]
-* [[Neo1973 AUX Button|The "Aux" button]]
-|-
-| Case
-| [[Neo1973 case schematics]]
-|}
+== AGPS ==
 
-<!--
-Todo for [[User:dolfje]] (please do not remove): 
-* Add info of sdcard slot (=Transflash slot)
-* Add info of the vibrators to a new wikipage
--->
+FIXME
 
-== Alternate cases ==
-A number of alternate case designs have been suggested and requested.
-[[Alternate Neo1973 case designs]]
 
-== Hardware revisions==
-{{Main|GTA01 revisions}}
+== SD-Card ==
 
-===Debug Connector===
-{{Main|Debug Board v2}}
-
-===Test points===
-
-* GSM RTS - H-TP1531
-* GSM CTS - H-TP1530
-* GSM Modem on - R10818 - ungrounded end
-* GSM_EN - R1501 (not present) - ungrounded end
-
-== Distinguishing hardware revisions ==
-=== Inside the [[U-Boot]] ===
-Every hardware revision has its own u-boot image type.  Thus, the U-Boot has the revision hard-coded.
-The hardware revision is passed on to the kernel via the ATAG mechanism (ATAG_REVISION)
-
-=== Inside the [[Kernel]] ===
-The kernel receives the ATAG_REVISION during bootup, and saves its contents in the "system_rev" global variable.
-
-=== From Userspace ===
-The kernel exports the system_rev variable in /proc/cpuinfo as "Revision :" line.
-
-??? So does GTA01Bv4 equal the cat /proc/cpuinfo output of
- Hardware        : GTA01
- Revision        : 0240
-
-== Approval ==
-*CE compliance is needed before a product can be sold in the EU. The CE mark indicates that a product complies to the relevant legislation, defined in the  [http://ec.europa.eu/enterprise/newapproach/standardization/harmstds/reflist.html harmonised standards]. This refers also to the most relevant, for the Neo1973,  [http://ec.europa.eu/enterprise/newapproach/standardization/harmstds/reflist/emc.html Directive 89/336/EEC on electromagnetic compatibility] (EMC is the art of assuring [http://en.wikipedia.org/wiki/Electromagnetic_compatibility electromagnetic compatibility] between products). The standards are defined by [http://www.cenelec.org CENELEC] (European Committee for Electrotechnical Standardization), but not verified by any authority. It is the responsibilty of the manufacturer to convince himself that a product is in compliance, and is obligated to be able to prove this (with relevant technical documentation) for a specific product to the authorities on request. Whether the current Phase 1 devices are actually tested against the directives are unknown, no documentation has been disclosed, other than the fact that the devices bear the CE mark.
-
-*[http://www.fcc.gov/ FCC]
-
-===GTA01 FCC test report===
-
-[http://people.openmoko.org/tony_tu/GTA01/certificate/FCC/ FCC test report]
-
-===GTA01 CE test report===
-
-[http://people.openmoko.org/tony_tu/GTA01/certificate/CE/ CE test report]
-
-===GTA01 NCC test report===
-
-For Taiwan Import usage:
-
-[http://people.openmoko.org/tony_tu/GTA01/certificate/NCC/ NCC test report]
-
-[[Category:Neo1973 Hardware]]
+miniSD or Transflash, TBD.
