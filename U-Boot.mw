@@ -1,3 +1,5 @@
+== General ==
+
 The GTA01 uses the [http://u-boot.sourceforge.net/ u-boot] bootloader.
 
 More information on u-boot can be found at [http://www.denx.de/wiki/DULG] and [http://linuxdevices.com/articles/AT5085702347.html].
@@ -31,3 +33,13 @@ If you want to do bootloader development on the QT2410, it's easier to work with
 To do so, you need to edit the u-boot/include/configs/qt2410.h file, and change the "if 0" in Line 32 into a "if 1", then recompile with "make".
 
 The resulting "u-boot.bin" is _NOT SUITABLE_ for NAND flash, but only for direct execution from within ram, e.g. by using the [[s3c2410_boot_usb]] program.
+
+== Creating bootable images ==
+
+u-boot needs bootable images (such as kernels, but also initrd and others) in form of a so-called ''uImage''.  In order to create a ''uImage'' from e.g. a ''vmlinux'' kernel image, you can proceed as follows:
+
+<pre>
+objcopy -O binary -R .note -R .comment -S vmlinux linux.bin
+gzip -9 linux.bin
+u-boot/tools/mkimage -A arm -O linux -T kernel -C gzip -a 30008000 -e 30008000 -n "Kernel Image QT2410" -d linux.bin.gz uImage
+</pre>
