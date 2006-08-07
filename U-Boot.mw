@@ -98,3 +98,67 @@ Saving Environment to NAND...
 Erasing Nand...Writing to Nand... done
 QT2410 # 
 </pre>
+
+
+=== MMC/SD ===
+
+in order to initialize a MMC/SD card, you have to use the ``mmcinit'' command.
+<pre>
+QT2410 # mmcinit
+trying to detect SD Card...
+MMC found. Card desciption is:
+Manufacturer ID = 58d564
+HW/FW Revision = 3 8
+Product Name = 21DN!@X�
+Serial Number = 445303
+Month = 5
+Year = 2000
+READ_BL_LEN=15, C_SIZE_MULT=7, C_SIZE=3197
+size = 4208984064
+</pre>
+
+afterwards, you can read ext2 and fat filesystems like:
+<pre>
+QT2410 # ext2ls mmc 0
+<DIR>       1024 .
+<DIR>       1024 ..
+<DIR>      12288 lost+found
+         1544788 uImage
+</pre>
+
+=== NAND ===
+
+<pre>
+QT2410 # help nand
+nand info                  - show available NAND devices
+nand device [dev]     - show or set current device
+nand read[.jffs2]     - addr off size
+nand write[.jffs2]    - addr off size - read/write `size' bytes starting
+    at offset `off' to/from memory address `addr'
+nand erase [clean] [off size] - erase `size' bytes from
+    offset `off' (entire device if not specified)
+nand bad - show bad blocks
+nand dump[.oob] off - dump page
+nand scrub - really clean NAND erasing bad blocks (UNSAFE)
+nand markbad off - mark bad block at offset (UNSAFE)
+nand biterr off - make a bit error at offset (UNSAFE)
+</pre>
+
+==== Loading Kernel from NAND ====
+
+<pre>
+QT2410 # nand read 0x32000000 0x34000 0x200000
+
+NAND read: device 0 offset 212992, size 2097152 ...  2097152 bytes read: OK
+QT2410 # bootm 0x32000000
+## Booting image at 32000000 ...
+   Image Name:   Kernel Image QT2410
+   Created:      2006-08-06  20:23:01 UTC
+   Image Type:   ARM Linux Kernel Image (gzip compressed)
+   Data Size:    1546258 Bytes =  1.5 MB
+   Load Address: 30008000
+   Entry Point:  30008000
+   Verifying Checksum ... OK
+   Uncompressing Kernel Image ... OK
+Starting kernel ...
+</pre>
