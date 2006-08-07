@@ -43,3 +43,58 @@ objcopy -O binary -R .note -R .comment -S vmlinux linux.bin
 gzip -9 linux.bin
 u-boot/tools/mkimage -A arm -O linux -T kernel -C gzip -a 30008000 -e 30008000 -n "Kernel Image QT2410" -d linux.bin.gz uImage
 </pre>
+
+== Bootloader prompt ==
+
+The bootloader is currently configured to waid for three seconds.  If a key press on the serial port is received within those three seconds, auto-boot is aborted.
+
+<pre>
+U-Boot 1.1.4-ga2c95a72-dirty (Aug  6 2006 - 22:05:48)
+
+DRAM:  64 MB
+Flash: 512 kB
+NAND:  64 MiB
+In:    serial
+Out:   serial
+Err:   serial
+
+cs8900a chipid 0x630e
+Hit any key to stop autoboot:  0 
+QT2410 #
+</pre>
+
+=== Auto-boot ===
+
+Auto-boot executes the command[s] specified in the ''bootcmd'' environment variable. The default configuration is:
+<pre>
+QT2410 # printenv
+bootcmd=mmcinit; ext2load mmc 0 0x32000000 uImage; bootm 0x32000000
+</pre>
+
+This basically tells us that it will copy a file called "uImage" from the SD-Card to memory address 0x32000000 and then try to boot it.  
+
+=== Environment ===
+
+u-boot is configured to manage a non-volatile environment that is stored in NAND flash.  You can use the commands to read/alter/store the environment in the following example:
+<pre>
+QT2410 # printenv
+bootcmd=mmcinit; ext2load mmc 0 0x32000000 uImage; bootm 0x32000000
+bootdelay=3
+baudrate=115200
+ipaddr=10.0.0.110
+serverip=10.0.0.1
+netmask=255.255.255.0
+bootargs=root=/dev/mmcblk0p1 console=ttySAC0,115200 loglevel=8 rootdelay=10
+stdin=serial
+stdout=serial
+stderr=serial
+
+Environment size: 271/16380 bytes
+QT2410 # setenv bootdelay 10
+QT2410 # printenv bootdelay
+bootdelay=10
+QT2410 # saveenv
+Saving Environment to NAND...
+Erasing Nand...Writing to Nand... done
+QT2410 # 
+</pre>
