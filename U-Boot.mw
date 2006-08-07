@@ -162,3 +162,39 @@ QT2410 # bootm 0x32000000
    Uncompressing Kernel Image ... OK
 Starting kernel ...
 </pre>
+
+=== TFTP ===
+
+The QT2410 cs8900a Ethernet can be used to download images via network.
+
+First, you have to make sure that ''ipaddr'', ''serverip'', ''ethaddr' and ''netmaskk'' are set correctly in the environment:
+
+<pre>
+QT2410 # printenv
+ethaddr=00:01:02:03:04:05
+netmask=255.255.255.0
+ipaddr=192.168.100.100
+serverip=192.168.100.1
+</pre>
+
+==== TFTP kernel download ====
+
+<pre>
+QT2410 # tftpboot 0x32000000
+*** Warning: no boot file name; using 'C0A86464.img'
+TFTP from server 192.168.100.1; our IP address is 192.168.100.100
+Filename 'C0A86464.img'.
+Load address: 0x32000000
+Loading: #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         ##########################################
+done
+Bytes transferred = 1544788 (179254 hex)
+</pre>
+
+you can then commence booting via
+<pre>
+QT2410# bootm 0x32000000
+</pre>
