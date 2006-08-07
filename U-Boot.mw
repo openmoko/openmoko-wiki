@@ -163,6 +163,28 @@ QT2410 # bootm 0x32000000
 Starting kernel ...
 </pre>
 
+==== Writing new bootloader to NAND ====
+
+The following set of commands loads the file u-boot.bin from ext2/mmc and flashes it into the
+bootloader flash partition:
+
+<pre>
+QT2410 # ext2load mmc 0 0x32000000 u-boot.bin
+QT2410 # nand erase 0x00000000 0x30000
+QT2410 # nand write 0x32000000 0x00000000 0x30000
+</pre>
+
+==== Writing kernel to NAND ====
+
+The following set of commands loads the file uImage from ext2/mmc and flashes it into the
+kernel flash partition:
+
+<pre>
+QT2410 # ext2load mmc 0 0x32000000 uImage
+QT2410 # nand erase 0x00034000 0x200000
+QT2410 # nand write 0x32000000 0x00034000 0x200000
+</pre>
+
 === TFTP ===
 
 The QT2410 cs8900a Ethernet can be used to download images via network.
