@@ -10,3 +10,18 @@ However, the vanilla u-boot doesn't support many of the features that GTA01 need
 * Support to display bootup logo / status on S3C2410 Framebuffer
 
 [[User:HaraldWelte]] is working on those issues, and in fact most of them have already been implemented.
+
+
+== Bootloader source code ==
+
+The current bootloader source code can be found at [http://people.gta01.hmw-consulting.de/laforge/src/u-boot/current ]. You will need the original tar.bz2 archive as well as the u-boot-qt2410.patch.
+
+Untar the sources, apply the patch.  run "make qt2410_config", run "make".  You will get a resulting "u-boot.bin" image, which you can directly flash (either using existing bootloader or [[sjf2410-linux]]) into NAND.
+
+== Bootloader development ==
+
+If you want to do bootloader development on the QT2410, it's easier to work with a bootloader image that can be downloaded via USB into RAM instead of flashing.
+
+To do so, you need to edit the u-boot/include/configs/qt2410.h file, and change the "if 0" in Line 32 into a "if 1", then recompile with "make".
+
+The resulting "u-boot.bin" is _NOT SUITABLE_ for NAND flash, but only for direct execution from within ram, e.g. by using the [[s3c2410_boot_usb]] program.
