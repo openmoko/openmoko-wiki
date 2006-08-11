@@ -6,7 +6,23 @@ To create a root file system image for storage in NAND flash, we use the mkfs.jf
 
 is a typical command.  It creates a FS image for our erase block size of 16k, padded to 0x700000 bytes in length from the files contained in the ''/tmp/jffsroot'' directory and stores the FS image in ''rootfs.jffs2''.
 
-This image can then be installed on the target device via the [[u-boot]] bootloader, e.g.
+== Using pre-created root fs image ==
+
+=== OpenEmbedded ===
+
+OpenEmbedded will itself create a jffs2 image at the end of the build process.
+
+Once the build server is running, it will create root filesystem images for us.
+
+=== demo JFFS2 root image ===
+
+At the moment there is a very basic root fs image available from http://people.gta01.hmw-consulting.de/laforge/
+
+Please note that this image will take ages to boot the first time, since this boot finishes the installation process.
+
+== Flashing a root filesystem into NAND ==
+
+The image can then be installed on the target device via the [[u-boot]] bootloader, e.g.
 
  QT2410 # tftpboot 0x32000000 rootfs.jffs2
  QT2410 # nand erase 0x634000 0x39cc000
