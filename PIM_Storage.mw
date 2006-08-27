@@ -1,123 +1,32 @@
 == Overview ==
-PIM storage describes a means of storing data in an extensible and cross-referencable way.
-In the [[SHR]] distribution you find a solution for syncing PIM data based on ics-files with other devices (see [[SHR User Manual]] further details) or [http://projects.openmoko.org/projects/pisi/ PISI-project].
+PIM storage describes a means of storing data in an extensible and cross-referencable way. 
 
 == Goals & Objectives ==
 * Method to exchange data between all applications completely transparent
 * Personal data security / encryption
 * Great bidirectional sync of personal data
-* Easy method for [[Backup|backup]] (ideally this should be automatic)
+* Easy method for backup (ideally this should be automatic)
 * Real-time incremental search
-* Autocomplete of personal data information
+* Autcomplete of personal data information
 
 == Use Cases ==
-* I would like to attach arbitrary data to a contact (AKA: custom fields)
-* I would like some level of integration with automatic switching of profiles. For example, it would be cool to automatically backup my personal data to my desktop PC when I get home.
+* I would like to attach abritray data to a contact (AKA: custom fields)
+* I would like some level of integration with automatic switching of profiles. For example, it would b e cool to automatically backup my personal data to my desktop PC when I get home.
 * I want to type the first few numbers of a phone number and be presented a list of matching contacts.
-** I'd rather take a person, choose home/work, choose land-line/mobile and not bother with numbers anymore. Useful when I'm on my way to meet that person, or the person has his/her birthday, i.e. the person is already listed on my screen!
-* I want to add a contact to multiple groups (AKA: categories)
-* I want to be able to send my contact info to other Openmoko devices over bluetooth
-* I want to be able to two-way sync all calendar, contacts (and tasks) with a GroupDAV server (e.g. Citadel) over-the-air
+* I want to add a contact to multiple groups
 
 == Constraints ==
 (TBD)
 
 == Implementation Recommendations ==
-* This will be based on [http://labs.o-hand.com/embedded-eds/ Embedded EDS], this way we will can directly use Evolution data, get OpenSync for free, and eventually be able to talk to a Microsoft Exchange Server using the Novell Connector.
-* Alternatively: Go for a radically different approach: Use [http://en.wikipedia.org/wiki/Topic_Maps Topic Maps] to store PIM data, use Topic Map's integrated merging features for syncing. --[[user:xbaldauf|xbaldauf]]
-** Topic Maps allow multi-way sync, storage of arbitrary data (including categories, and even a hierarchy of categories), integration of PIM data which is separated otherwise (calendar, addressbook, personal notes, representing networks who knows whom and who works for whom and on which project, ...), multiple entries for each field (e.g. multiple addresses, multiple names, multiple phone numbers, ...)
+* Usually a real database like SQLite might make a lot of sense here.
+* Embedded EDS might be something to look into.
 
 == Interactions ==
-* Embedded EDS needs libglade2, [[D-Bus]], and libdb.
+(TBD)
 
 == Unresolved Issues ==
-* Synchronizing w/ Outlook
-* Synchronizing w/ MacOS X - most Macs have bluetooth builtin and OSX addressbook supports BT sync.
-* Synchronizing w/ Google services
-
-Possible solutions:
-* mokod - An Openmoko daemon to run on host operating systems
-* [http://syncevolution.org Syncevolution] can sync with [http://www.scheduleworld.com/ Scheduleworld] which can sync with Google, and other programs.
-* Hack the [http://libsyncml.opensync.org libsyncml] stack to work in OpenMoko and sync with [http://opensync.org OpenSync]. Solve the connectivity problem and move the supporting-the-other-peers to modular, plugin based OpenSync.
-
-== Convert a vCard file ==
-The following script converts a VCard file into an HTML-table, that can be viewed with midori browser [[PIM VCard converter vcard2om.pl]]. The script can be modified to create SQL-Commands to import. The script can be used as a iterim solution for have vCards available on your Freerunner.
-
-The script converts a vCard file from the SD card to a html-File:
-  Source:     /media/card/pim/contacts.vcf
-  Destination: /home/root/.evolution/vCards.html
-
-== Import/Export of Calendar Data for PIM-Storage==
-This Import/Export can be realized by syncing an ics Calendar File (e.g. std.ics from Kontact-KDE, ...) by parsing this ICS-file (iCal) and import the ics-file to the PIM-Storage on the OpenMoko device. Make sure you have sqlite3 client installed
-<pre>opkg install sqlite3</pre>
-
-The PIM database file on the OpenMoko device is located at
-<pre>/home/root/Applications/Qtopia/qtopia_db.sqlite</pre>
-You can handle the file with sqlite (see [[Import Vcf Contacts]]):
-<pre>
-  sqlite3 ~/Applications/Qtopia/qtopia_db.sqlite
-</pre>
-For parsing the ics-File (iCal) on the OpenMoko device you need to install Perl
-<pre>opkg install perl</pre>
-<b>Remark:</b> The following desciption shows a possbible additional concept for PIM storage for import/export by application of OpenSource perl libraries that can be used to realized the concept.
-
-Lets name the perl scripts <tt>ics2qtcal.pl</tt> and <tt>qtcal2ics.pl</tt>.
-* <tt>ics2qtcal.pl</tt> will parse the ics-file and import it to the qtopia PIM storage. The script should have 2 parameters: (Par1) Input ics-file e.g. <tt>std.ics</tt> (Par2) Ouput sqlite-file - e.g. <tt>qtopia_db.sqlite</tt>.
-* <tt>qtcal2ics.pl</tt> will export the qtopia PIM storage to an ics-file. The script should have 2 parameters: (Par1) Input sqlite-file - e.g. <tt>qtopia_db.sqlite</tt>  (Par2) Ouput ics-file - e.g. <tt>std.ics</tt>.
- 
-For parsing the ICS-file there are several CPAN perl libraries available 
-* Date::iCal [http://search.cpan.org/~rbow/Date-ICal-1.72/lib/Date/ICal.pm http://search.cpan.org/~rbow/Date-ICal-1.72/lib/Date/ICal.pm] 
-* Tie::iCal [http://search.cpan.org/~bsdz/Tie-iCal-0.14/lib/Tie/iCal.pm http://search.cpan.org/~bsdz/Tie-iCal-0.14/lib/Tie/iCal.pm] will create an array of hashes to handle all attributes of an ical record. 
-
-After parsing the ics-file a file <tt>import.sql</tt> with SQL-Commands should be generated for importing the calendar dates via <tt>sqlite3</tt> to the qtopia PIM storage <tt>ics2qtcal.pl</tt>. In a first step of realisation of <tt>ics2qtcal.pl</tt>  the old qtopia-db can be backuped and a full import of.
-Create a directory <tt>remotecal</tt> in <tt>~/Applications/Qtopia</tt>
-<pre>
-  mkdir ~/Applications/Qtopia/remotecal
-</pre>
-All temporary data during the import/export process can be stored in that directory.
-The ics-File is on the Linux-Computer with IP <tt>192.168.0.200</tt> and an accout <tt>user</tt>. Lets assume that the ics-file is stored by the PIM <i>Kontact</i> in the directory <tt>/home/user/.kde/share/apps/korganizer/</tt> on an Linux machine with SSH daemon running, that is not blocked by the firewall (check setting for SSH-daemon in firewall on Desktop computer). KDE-Kontact stores the calendar data in <tt>std.ics</tt>. This file should be used to update PIM storage. To automate this task a shell script might be useful. Lets call the following script for syncing the ics-file to OpenMoko device <tt>sync4ics2openmoko.sh</tt>.
-<pre>
- #!/usr/bin/sh
- cd ~/Applications/Qtopia
- rsync -avz -e ssh user@192.168.0.200:/home/user/.kde/share/apps/korganizer/std.ics std.ics
- mv qtopia_db.sqlite qtopia_db.sqlite.backup
- perl /path_to_the_script/ics2qtcal.pl std.ics qtopia_db.sqlite
-</pre> 
-When all scripts mentioned above are in place, generate an icon in <tt>/usr/share/application</tt>, that calls <tt>sync4ics2openmoko.sh</tt> and syncs you desktop computer PIM data with the Openmoko device. After using the OpenMoko-PIM you should create to copy the kontact-KDE ics-file parse it and copy it to the qtopia database. The following lines show the content of desktop Icon file <tt>sync2openmoko.desktop</tt>
-<pre>
-[Desktop Entry]
-Name=iCal2OpenMoko
-Comment=Syncing ics calendar to Openmoko 
-Exec=sh /path_to_the_script/sync4ics2openmoko.sh
-Terminal=1
-Type=Application
-Icon=phone.png
-Categories=Application;PIM
-StartupNotify=True
-</pre>
-In the <tt>Exec</tt> you specifiy the command to be executed when you click on the icon. The can also be called from the terminal by calling:
-<pre>
- sh /path_to_the_script/sync4ics2openmoko.sh
-</pre>
-When you call the script you have to enter the password of the aacount <tt>user</tt> on the desktop computer. 192.168.0.200 is the IP of the desktop computer. It can be replaced by any IP you have your home directory with the ICS file on. Because you need to enter a password so far, it might be inconvient for an automated update. To automate this process see [http://troy.jdmz.net/rsync/index.html http://troy.jdmz.net/rsync/index.html] for using rsync and ssh without authentication.
-<tt>sync4ics2openmoko.sh</tt> calls the perl script <tt>ics2qtcal.pl</tt>. 
-The perl script <tt>ics2qtcal.pl</tt> generates the SQL commands, store the commands in the file <tt>import.sql</tt> and calls the <tt>sqlite3</tt> and import the calendar data in the sqlite-database via executing the SQL-Commands in <tt>import.sql</tt>.
-
-To avoid to have the same events 2 times in the PIM storage the existing OpenMoko database should be exported first via <tt>qtcal2ics.pl</tt> to the file <tt>qtopia.ics</tt>  removing events from the SQL imput that already exist in the SQL database. Records that have changed should be updated via SQL commands.
-<pre>
- ....
- mv qtopia_db.sqlite qtopia_db.sqlite.backup
- perl /path_to_the_script/qtcal2ics.pl qtopia_db.sqlite qtopia.ics 
- perl /path_to_the_script/ics2qtcal.pl std.ics qtopia_db.sqlite qtopia.ics
-</pre> 
-<b>Remark:</b> The perl scripts mentioned above are not programmed yet (Jan 19th 2009), they show a solution for syncing. The development of the perl scripts <tt>ics2qtcal.pl</tt> and <tt>qtcal2ics.pl</tt> mentioned above can be helpful in converting ical formats to and from the OpenMoko device anyway. If anyone has created a protype of the scripts mentioned above, icons for syncing etc. the links can be provided here.
-<b>Edit by mossroy</b> : Some work in progress on the ics2qtcal.pl script can be found here : [http://mossroy.free.fr/ics2qtcal/ http://mossroy.free.fr/ics2qtcal/]. See discussion (in French) : [http://openmoko-fr.org/forum/viewtopic.php?pid=15162 http://openmoko-fr.org/forum/viewtopic.php?pid=15162] : any feedback would be welcome.
+(TBD)
 
 == Questions and Answers ==
-* Q: When will an Embedded EDS specification be available? i.e. How I can get applications to store and retrieve data from in it, in a compatible way?
-* Q: Will it out of the box synchronize with the Kontact PIM suite (KDE)? See work around in section above for export/export of PIM-storage (some work has to done Jan 19th 2009). 
-* A: Development stopped since [http://projects.openmoko.org/projects/pisi/ PISI-project] was setup. See [[SHR User Manual]] for further details.
-
-
-[[Category:PIM]]
-[[Category:Software ideas]]
+(None)
