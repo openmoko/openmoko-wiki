@@ -1,3 +1,5 @@
+== GSM 02.07 MS requirements ==
+
 The GSM 02.07 specification (Version 7.1.0 Release 1998) lists a table of required and optional features of MS (mobile stations):
 
 <pre>
@@ -77,8 +79,39 @@ We need to support SMS 'properly', i.e. display it to the user, and acknowledge 
 The user has to be told if his SMS memory overflows.
 
 === 1.12 Service Indicator ===
-?
+We need to indicate sufficient signal strength and whether we're registered.  This is done via
+the dockapp.
 
 === 1.13 Autocalling restriction capabilities ===
 
-I suppose this has already been implemented in the TI Calypso GSM firmware, since otherwise it in itself would not be GSM compliant.
+I suppose this has already been implemented in the [[TI Calypso]] GSM firmware, since otherwise it in itself would not be GSM compliant.
+
+=== 1.14 Emergency Calls capabilities ===
+
+Has to be implemented according to Teleservice 12 (see GSM 02.03 [2] and GSM 02.30 [7]). Need to check those requirements!
+
+=== 1.15 Dual Tone Multi Frequency function (DTMF) ===
+We need to be able to initiate [[DTMF]] in accordance with specifications GSM 02.03 [2] and GSM 03.14 [11]. This will put some additional requirements on both the dialler application and the GSM library/daemon infrastructure, since the [[DTMF]] tones are not actually transmitted as tones on the
+voice channel, but actually signalled as messages through the GSM network into the [[MSC]] (Mobile Switching Centre), which then creates the tones into to the voice channel.
+
+=== 1.16 Subscription Identity Management ===
+No problem. This just says the we need to support [[SIM]] cards in their 'normal' way.
+
+=== 1.19 Support of Encryption A5/1 and A5/2 ===
+Those are the two standard GSM ciphers for the [[MS]]-[[BTS]] interface. [[TI Calypso]] does this.
+
+=== 1.20 Short Message Service Cell Broadcast ===
+We need to support receiving SMS Cell Broadcast.  Interestingly, the requirement doesn't say we need to actually support displaying them :)  Reception is supposedly handled within [[TI Calypso]]. Anyway, we should display them.
+
+NOTE: The short message service cell broadcast teleservice is described in specification GSM 02.03 [2].
+
+=== 1.21 Short Message Service Cell Broadcast DRX ===
+Some battery power saving mode for not listening to all cell broadcasts.  TODO: Check whether TI Calypso supports this, and how we configure it. It's optional. But we care about power saving!
+
+=== 1.26 Ciphering Indicator === 
+We need to support displaying whether any cipher (A5/...) is active, or whether the voice call is currently unencrypted.  We also need to support restriction of this feature by the SIM module.
+
+TODO: This will probably be another dockapp.
+
+=== 1.30 Support of GPRS Encryption ===
+TI Calypso does that for us.
