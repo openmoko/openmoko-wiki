@@ -1,0 +1,53 @@
+== PCF50606 ==
+The PCF50606 is the Power Management Unit used in GTA01.  Apparently this unit is very popular in MP3 players, as the Rockbox project has talked a lot about writing a driver for it (but hasn't completed any, as far as we know).
+
+=== Voltage Regulators ===
+
+{| border="1" cellspacing="0" cellpadding="2"
+|----- bgcolor="#eeeeff"
+! Name
+! Voltage
+! Users
+|-
+| DCD
+| 3.3V
+| NAND FLASH, SDRAM, S3C2410 Memory and IO
+|-
+| DCUD
+| 1.8V
+| S3C2410 Core
+|-
+| DCDFB
+| 3.3V
+| I/O 3.3V, [[LM4857]] Digital, Vibrator
+|-
+| D3
+| 3.3V
+| [[WM8976]] Audio Codec, [[LM4757]] Anaolog ??
+|-
+| D2
+| 0.9..3.3V (variable)
+| microSD Slot
+|-
+| D1
+| 3.3V
+| VRF (GSM RF ?)
+|-
+| IO
+| 2.8V
+| VTCXO 
+|-
+| LP
+| 3.3V
+| LP LCM + Panel?
+|}
+=== Register dump after bootup ===
+
+Since blob has built-in I2C support for the S3C2410, we can read out the register set of the PC50606 using a simple command:
+<pre>
+GTA01 # imd 0x08 0x00 0x3c
+0000: 4d 7b 48 01 00 00 00 00 64 05 43 23 00 00 01 01    M{H.....d.C#....
+0010: 00 7f 7f 3f 07 3f 1f ff 00 00 ff d0 c8 00 30 88    ...?.?........0.
+0020: 00 83 30 f8 c2 c4 90 f8 01 05 14 10 55 13 00 00    ..0.........U...
+0030: 00 00 00 00 0e 80 4d 4d 04 00 00 00    ......MM....
+</pre>
