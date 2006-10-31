@@ -189,6 +189,19 @@ QT2410 # nand erase 0x00034000 0x200000
 QT2410 # nand write 0x32000000 0x00034000 0x200000
 </pre>
 
+==== Writing rootfs to NAND ====
+
+The following set of commands loads the file rootfs.jffs2 from ext2/mmc and flashes it into the
+rootfs flash partition:
+
+<pre>
+QT2410 # ext2load mmc 0 0x32000000 rootfs.jffs2
+QT2410 # nand erase 0x00634000 0x39cc000
+QT2410 # nand write 0x32000000 0x00634000 real_size_of_rootfs_in_hex
+</pre>
+
+Please note that this will only work with root file system sizes that are smaller than the amount of memory above 0x32000000, which in the case of 64MB SDRAM is something like 32MB.
+
 === TFTP ===
 
 The QT2410 cs8900a Ethernet can be used to download images via network.
