@@ -86,6 +86,44 @@ Since Asoc is currently lacking both a S3C2410 platform driver and a [[WM8976]] 
 
 At the time of this writing, asoc-v0.12 (http://www.rpsys.net/openzaurus/patches/alsa/asoc-v0.12.patch) is current.  It was written against a 2.6.17 kernel and therefore matches perfectly with our GTA01 kernel.
 
+=== 911 Button ===
+
+The 911 button is supported via the "gta01kbd" driver in the kernel (drivers/input/keyboard/gta01kbd.c).  
+
+It creates an input event device that only issues "KEY_PHONE" press/unpress events.
+
+=== Power Management Unit (PMU) ===
+
+The PMU is supported via the "pcf50606" driver in the kernel (drivers/i2c/chips/pcf50606.c).
+
+This driver provides a number of userspace interfaces for the various bits and pieces of the PMU
+
+==== RTC ====
+
+The real-time clock, including the alarm feature, is implemented as standard RTC (/dev/rtc).
+
+==== Watchdog ====
+
+The PMU-integrated watchdog is implemented using the standard watchdog character device.
+
+==== Voltage Regulators ====
+
+The voltage regulators are exported to userspace using sysfs, much like lm_sensors.
+
+Every regulator can be read (and written!).  The format is ASCII in millivolts.
+
+<pre>
+root@fic-gta01:/sys/devices/platform/s3c2410-i2c/i2c-0/0-0008$ ls -l /sys/bus/i2c/devices/0-0008/voltage_*
+-rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_d1reg
+-rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_d2reg
+-rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_d3reg
+-rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_dcd
+-rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_dcde
+-rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_dcud
+-rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_lpreg
+root@fic-gta01:/sys/devices/platform/s3c2410-i2c/i2c-0/0-0008$ cat voltage_dcd
+1300
+</pre>
 
 == Kernel TODO ==
 
