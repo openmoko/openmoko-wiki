@@ -1,247 +1,29 @@
-== NAND basics ==
-
-NAND memory has quite unique characteristics.
-
-* When it is erased, all bits are set to 1' (you will see 0xff on all bytes in a hexdump)
-* You can change as many bits as you want to '0'
-* You cannot set a bit back to '1' by using a regular write.  You have to erase a whole '''erase block''' to do so
-* The number of erase cycles per block is limited.  Once you have reached the limit, some bits will not get back to 0xff
-** In the case of the chip in the Neo1973, this is 100000 guaranteed per-block erase cycles.
-=== NAND page ===
-
-A NAND page consists of a number of data bytes (512 in the Neo1973 GTA01 case, 2048 in the GTA02 case) plus a number of out-of-band (OOB) bytes (GTA01: 16, GTA02: 64).
-
-Only the data bytes are used for application data.  The OOB bytes are used for
-* Marking an erase block as bad (first or second page of erase block)
-* Storing ECC (error correction codes)
-* Storing filesystem specific information (JFFS2)
-
-=== NAND erase block ===
-
-A erase block consists of multiple pages.  In the Neo1973 GTA01 case, every erase block has 32 pages, resulting in 16kBytes (hex: 0x4000) of data bytes (without OOB).  GTA02 has 128kByte large erase blocks.
-
 == Problem ==
-
-=== Bad Blocks ===
 
 NAND memory apparently gets shipped with blocks that are already bad.  The vendor just marks those blocks as bad, thus resulting in higher yield and lower per-unit cost.
 
-The flash contains four kinds of blocks (16kBytes):
-* Factory-Default bad blocks
-** Samsung marks the 6th OOB byte as non 0xFF in the first and/or second page in blocks that are bad
-* Worn-out bad blocks
-* Good blocks
-* The first block.
-**This block is guaranteed to not require error correction up to 1000 writes. This is needed as initial boot code can't do ECC.
-
-We are also guaranteed that a minimum of 4026 blocks (out of the total 4096) are good.  This means up to 70 blocks (1.3MBytes) can be dead, resulting in a total guaranteed amount of working NAND storage of 65961984 bytes.
-
-==== Backup ====
-You may want to backup the "Factory-Default bad blocks" just in case you accidentally delete it.<br>
-The u-boot command ''"nand bad"'' lists the offsets of the bad blocks.
+There is some number of blocks at the beginning which are guaranteed to be good.  That number is currently unknown for our NAND chip.
 
 == Solution ==
 
-The solution is split into various pieces, one at each level.
+The solution is split into various pieces
 
-=== Boot loader ===
+=== Bootloader ===
 
-==== first-stage ====
+The bootloader itself contains a small first-stage bootloader for the [[Steppingstone]]. 
 
-The boot loader itself contains a small first-stage boot loader for the [[S3C2410 Steppingstone]].
-
-This code (mostly written in ARM assembly) was altered to detect and skip bad blocks.  This means, the first stage bootloader can itself extend over bad blocks.
-
-This also means that the  flashing routine needs to detect and skip bad blocks, resulting in a u-boot image that can have gaping holes ;)  The existing "traditional" [[sjf2410-linux]] JTAG flashing program is not detecting bad blocks (Note: this might be changed through a compile option, see below)
-
-==== Environment ====
-
-The [[u-boot]] environment is traditionally stored at a fixed location within the NAND flash.  This is not acceptable, since it could be a factory-set bad block.
-
-The solution that was implemented for Openmoko/Neo1973 was to put the in-flash address of the environment into the out-of-band (OOB) area of the first block (the one which is guaranteed to be good).  Since the environment address is unlikely to change often, the 1000 erase cycles guaranteed for the first block are good enough.
-
-The exact location is byte 8..15 of the 16byte OOB area, starting with the four ASCII bytes '''ENVO''', followed by the little-endian 32bit unsigned integer of the NAND address where the environment is located.
-
-The u-boot "dynenv get" command can be used to read out a pre-programmed Environment offset from NAND, and the "dynenv set" can be used to write the offset (if the last eight bytes of OOB area are erased (0xff)).
-
-==== Partition Table ====
-
-:''See also [[Partitions]].''
-
-Since those up to 80 factory-bad blocks can be located about anywhere in NAND, we have to accomodate for this worst case.  However, we cannot just make every partition 1.3MB larger than it needs to be, since this would waste a lot of otherwise good flash.
-
-The only solution to this (that Harald could think of) is to dynamically calculate a partition table for each device.  Every NAND flash has different factory-bad blocks at different locations, thus the partition table on every NAND flash will look different.
-
-So as an example, let's assume we have a 0x30000 (196k) bytes sized partition for u-boot, starting at address 0 in NAND.  If there were no bad blocks, it would extend from 0x00000 to 0x30000.  From 0x30000 to 0x230000 (2MB) we have the kernel partition.
-
-Let's now assume that blocks 0x20000 and 0x28000 (each 0x4000 in size) are marked as factory-bad.  Thus, in order to have 0x30000 bytes of usable storage, the uboot partition actually extends from 0x00000 to 0x38000.  This shifts the start address of the kernel partition to 0x38000.
-
-If the kernel partition contains more bad blocks, the start address of the rootfs partition (following the e kernel partition) is further shifted down to the end.
-
-Those calculations have been implemented as u-boot "dynpart" command.  Once you issue "dynpart", the partition configuration is put in the "mtdparts" environment variable.  If you "saveenv" the environment, it is saved into the non-volatile environment partition.
-
-==== Bad Block Table (BBT) ====
-
-Since the usual bad block marker in the OOB area does not allow us to distinguish between factory-bad and worn-out-bad blocks, we need to store this information elsewhere.  This place is called bad-block table (BBT) and is stored as a bitmap in the last two good blocks at the end of NAND.  To increase security, a backup of those two blocks is kept in the two preceding good blocks as well.
-
-The BBT location itself is identified by special markers (BBT0/BBT1) in the OOB area of the first page of the respective erase blocks.
-
-The BBT consists of two bits per block which distinguish the three conditions (factory-bad/worn-out/good).
-
-Both u-boot and Linux implement the same BBT layout and thus interoperate quite well.
-
-===== BBT creation =====
-
-The BBT is created once a BBT-implementing u-boot is started for the first time.  The BBT scanning code assumes that the NAND is '''completely erased''', i.e. only contains 0xff as content.  Any block that contains bytes != 0xff in the OOB is marked as "factory bad" block.
-
-==== Flashing kernel/rootfs from u-boot ====
-
-The kernel is contained in its own [[Partitions|partition]].  We have to flash it using the
-nand write.e
-command, and read it later again via
-nand read.e
-command.  Those two variants (as opposed to their non-".e"-postfixed versions) simply skip bad blocks
-
-As opposed to using fixed NAND flash addresses, we can use the mtd partition names.  Thus, the magic of device-specific dynamic partition layout is all hidden neatly from the user.  A flash command using a partiton name looks like:
-
-nand write.e 0x32000000 kernel
-
-Where 0x32000000 is the source address in RAM, and 'kernel' is the name of the kernel partition.
+This code (which Harald wrote in ARM assembly) needs to be altered to detect and skip bad blocks.  At this time, the bootloader could itself extend over bad blocks.  However, how do we first flash the bootloader into NAND? The JTAG flashing program has no support for detecting bad blocks.
 
 === Kernel ===
 
-==== Bad block table ====
+The kernel is contained in its own partiton [[QT2410#NAND]].  We have to flash it using the
+ nand write.e
+command, and read it later again via
+ nand read.e
+command.  Those two variants (as opposed to their non-".e"-postfixed versions) simply skip bad blocks
 
-In order to maintain the BBT created by u-boot, the kernel needs to have BBT support enabled.  Unfortunately the mainline kernel doesn't have a CONFIG option for it, so if you're not using the -moko kernel tree, you have to manually patch the s3c2410 nand driver to enable the BBT option.
+=== Root Filesystem ==
 
-=== Flash Tool ===
-
-==== sjf2410 (during development) ====
-
-The [[sjf2410-linux]] tool has a compile-time option to check (and skip) bad blocks.  If we use this for flashing u-boot, we will preserve the bad block info, once u-boot steppingstone code has been enhanced to skip bad blocks.
-
-However, even if the bad-block skipping works,  sjf2410-linux only supports the extremely slow parallel-port based JTAG adaptors.  Also, the overall flashing process is getting quite complicated. sjf2410-linux could thus only be used for flashing the bootloader. Everything else has to be done by some more intelligent software anyway.
-
-==== JTAG / OpenOCD / u-boot RAM based ====
-
-This method is actually quite neat, and based on [[U-Boot#Using_JTAG_to_boot_from_RAM]].
-
-The idea is to use JTAG to download and execute a special version of u-boot.  This u-boot then automatically scans the whole NAND and creates the BBT.  The process can be monitored and controlled by the developer (or some script).  The chronological steps are
-
-# Make sure NAND flash is completely erased
-# Use JTAG to reset and halt the device
-<pre>
-> reset halt
-target halted in ARM state due to debug request, current mode: Supervisor
-cpsr: 0x400000d3 pc: 0x00000000
-MMU: disabled, D-Cache: disabled, I-Cache: disabled
-</pre>
-
-# Use JTAG to download lowlevel bootup code to address 0
-<pre>
-> load_binary /space/misc/gta01/u-boot.git/foo.bin 0
-downloaded 332 byte in 0s 21899us
-</pre>
-
-# Use JTAG to create breakpoint at 0x33f80000
-<pre>
-> bp 0x33f80000 4 hw
-breakpoint added at address 0x33f80000
-</pre>
-
-# Use JTAG to run up to that breakpoint
-<pre>
-> resume
-Target 0 resumed
-> Target 0 halted
-target halted in ARM state due to breakpoint, current mode: Supervisor
-cpsr: 0x600000d3 pc: 0x33f80000
-MMU: disabled, D-Cache: disabled, I-Cache: enabled
-</pre>
-
-# Use JTAG to download u-boot-ram image to 0x33f80000
-<pre>
-> load_binary /space/misc/gta01/u-boot.git/u-boot.bin.ram 0x33f80000
-downloaded 135692 byte in 6s 567264us
-</pre>
-
-# Use JTAG to resume at 0x33f80000
-<pre>
-> resume
-Target 0 resumed
-</pre>
-
-At this point, the display backlight gets bright and we see the following familiar prompt on the serial console:
-<pre>
-U-Boot 1.1.6 (Jan 13 2007 - 23:44:23)
-
-DRAM:  128 MB
-NAND:
-</pre>
-
-# Wait until u-boot has created BBT
-<pre>
-64 MiB
-*** Warning - bad CRC or NAND, using default environment
-
-In:    serial
-Out:   serial
-Err:   serial
-Hit any key to stop autoboot:  0
-GTA01Bv2 #
-</pre>
-
-# Execute 'dynpart' command to calculate [[Partitions|partition]] offsets
-<pre>
-GTA01Bv2 # dynpart
-mtdparts mtdparts=gta01-0:0x00030000(u-boot),0x00004000(u-boot env),0x00208000(kernel),0x00400000(initrd),0x039c4000(rootfs)
-</pre>
-
-# Execute 'dynenv set' command to write environment partition offset to OOB of block 0
-{{note|you MUST use the name of the  u-boot environment partition from the output of 'dynpart' }}
-<pre>
-GTA01Bv2 # dynenv set u-boot_env
-45 4e 56 30 - 00 00 03 00
-GTA01Bv2 #
-</pre>
-
-# Execute 'saveenv' command to write environment into its partition
-<pre>
-GTA01Bv2 # saveenv
-Saving Environment to NAND...
-Erasing Nand...Writing to Nand... done
-</pre>
-
-# Use JTAG (or microSD) to read uboot-nand image into RAM
-# Use u-boot 'write.e' command to write uboot-nand image to uboot partition in NAND
-# Use JTAG (or microSD) to read kernel uImage into RAM
-# Use u-boot 'write.e' command to write uImage to kernel partition in NAND
-# Use JTAG (or microSD) to read JFFS2 rootfs image into RAM
-# Use u-boot 'write.jffs2' command to write jffs2 image to rootfs partition in NAND
-# Reset and boot
-
-=== Clearing BadBlocks ===
-# install a terminal application (for example minicom, neocon - which is more easily)
-# set up your terminal:
-## For minicon:
-### disable flow control
-### disable the modem initialisation string (-o flag for minicom)
-### the device to connect to will be /dev/ttyACM0 (if this is the only acm device connected to your machine)
-## For neocon:
-### download neocon from: http://svn.openmoko.org/developers/werner/neocon
-### use make command to compile neocon.c
-### read more from: http://wiki.openmoko.org/wiki/NeoCon
-# minicon: make sure you have the cdc_acm driver compiled for your kernel (CONFIG_USB_ACM=m or y, see higher up on this page)
-# both of them: boot into the u-boot menu, the /dev/ttyACM0 should appear as soon as that happens
-# both of them: execute the following commands (for neocon, it's rather slow when you type commands), in order (this will erase your entire flash):
-<pre>
-nand bad
-nand scrub
-nand createbbt
-dynpart
-dynenv set u-boot_env
-saveenv
-</pre>
-you should be set
-kudos to mmontour and PaulFertser for finding this method and sharing it with me
-[[Category:Flash]]
+The root filesystem uses JFFS2, which is already bad block tolerant.  It, too, has to be written using the
+ nand write.e
+command in [[u-boot]]
