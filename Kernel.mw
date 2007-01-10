@@ -86,6 +86,46 @@ Since Asoc is currently lacking both a S3C2410 platform driver and a [[WM8976]] 
 
 At the time of this writing, asoc-v0.12 (http://www.rpsys.net/openzaurus/patches/alsa/asoc-v0.12.patch) is current.  It was written against a 2.6.17 kernel and therefore matches perfectly with our GTA01 kernel.
 
+=== Bluetooth ===
+
+We're using the stock bluez implementation of the linux kernel.
+
+==== Power Management ====
+
+The bluetooth basically has the following preconditions
+* BT_EN 
+* The Voltage regulator set up properly
+* The ohci-hcd driver being loaded
+
+
+==== Getting started ====
+
+<pre>
+root@fic-gta01:~$ hciconfig hci0 up
+root@fic-gta01:~$ hcitool  scan
+Scanning ...
+        00:14:9A:77:A2:02       A780
+root@fic-gta01:~$ hcitool inq 00:14:9A:77:A2:02 
+Inquiring ...
+        00:14:9A:77:A2:02       clock offset: 0x55df    class: 0x502204
+root@fic-gta01:~$ hcitool cc 00:14:9A:77:A2:02 
+root@fic-gta01:~$ hcitool con                 
+Connections:
+        < ACL 00:14:9A:77:A2:02 handle 42 state 1 lm MASTER 
+root@fic-gta01:~$ hcitool info 00:14:9A:77:A2:02
+Requesting information ...
+        BD Address:  00:14:9A:77:A2:02
+        Device Name: A780
+        LMP Version: 1.1 (0x1) LMP Subversion: 0x700
+        Manufacturer: Broadcom Corporation (15)
+        Features: 0xff 0xff 0x0d 0x00 0x00 0x00 0x00 0x00
+                <3-slot packets> <5-slot packets> <encryption> <slot offset> 
+                <timing accuracy> <role switch> <hold mode> <sniff mode> 
+                <park state> <RSSI> <channel quality> <SCO link> <HV2 packets> 
+                <HV3 packets> <u-law log> <A-law log> <CVSD> <power control> 
+                <transparent SCO> 
+</pre>
+
 === 911 Button ===
 
 The 911 button is supported via the "gta01kbd" driver in the kernel (drivers/input/keyboard/gta01kbd.c).  
