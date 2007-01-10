@@ -49,6 +49,48 @@ If you boot with "tft=b" ('b' for big), the timings for the SHARP 640x480 TFT pa
 
 In this section we will outline a couple of the GTA01 specific kernel drivers / features / subsystems
 
+=== GSM ===
+
+==== Power Management ====
+
+The gta01_pm_gsm driver implements GSM power management.
+
+It exports the following sysfs based interface
+<pre>
+root@fic-gta01:/$ ls -l /sys/bus/platform/devices/gta01-pm-gsm.0/
+-rw-r--r--    1 root     root         4096 Feb  1 09:58 download
+-rw-r--r--    1 root     root         4096 Feb  1 09:58 power_on
+-rw-r--r--    1 root     root         4096 Feb  1 09:58 reset
+</pre>
+
+===== Powering up =====
+<pre>
+root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/power_on 
+gta01-pm-gsm gta01-pm-gsm.0: powering up GSM, thus disconnecting serial console
+</pre>
+
+===== Powering down =====
+<pre>
+root@fic-gta01:~$ echo "0" > /sys/bus/platform/devices/gta01-pm-gsm.0/power_on 
+gta01-pm-gsm gta01-pm-gsm.0: powered down GSM, thus enabling serial console
+</pre>
+
+===== Resetting =====
+<pre>
+root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/reset 
+root@fic-gta01:~$ echo "0" > /sys/bus/platform/devices/gta01-pm-gsm.0/reset 
+</pre>
+
+===== Activating GSM baseband download mode =====
+<pre>
+root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/download
+</pre>
+
+===== De-activating GSM baseband download mode =====
+<pre>
+root@fic-gta01:~$ echo "0" > /sys/bus/platform/devices/gta01-pm-gsm.0/download
+</pre>
+
 === Asound driver ===
 
 ==== high-level requirements ====
