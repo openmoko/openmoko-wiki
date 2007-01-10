@@ -91,6 +91,31 @@ root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/download
 root@fic-gta01:~$ echo "0" > /sys/bus/platform/devices/gta01-pm-gsm.0/download
 </pre>
 
+=== GPS ===
+
+==== Power Management ====
+
+The gta01_pm_gps kernel driver offers a sysfs based interface:
+<pre>
+root@fic-gta01:~$ ls -l /sys/bus/platform/devices/gta01-pm-gps.0/     
+-rw-r--r--    1 root     root         4096 Feb  1 09:14 power_avdd_3v
+-rw-r--r--    1 root     root         4096 Feb  1 09:14 power_lp_io_3v3
+-rw-r--r--    1 root     root         4096 Feb  1 09:14 power_pll_core_2v5
+-rw-r--r--    1 root     root            0 Feb  1 09:14 power_sequence
+-rw-r--r--    1 root     root         4096 Feb  1 09:14 power_vtxco_2v8
+-rw-r--r--    1 root     root         4096 Feb  1 09:14 pwron
+-rw-r--r--    1 root     root         4096 Feb  1 09:14 reset
+</pre>
+
+The power_avdd_3v, power_lp_io_3v3, power_pll_core_2v5, power_vtxco_2v8, pwron and reset files represent the state of the respective signal.
+
+The <b>power_sequence</b> file implements power-up/power-down sequence in accordance with the GlobalLocate data sheet.
+
+===== Powering up =====
+ root@fic-gta01:~$ echo "power_up" > /sys/bus/platform/devices/gta01-pm-gps.0/power_sequence 
+===== Powering down =====
+ root@fic-gta01:~$ echo "power_down" > /sys/bus/platform/devices/gta01-pm-gps.0/power_sequence
+
 === Asound driver ===
 
 ==== high-level requirements ====
