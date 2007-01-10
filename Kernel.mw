@@ -93,10 +93,44 @@ We're using the stock bluez implementation of the linux kernel.
 ==== Power Management ====
 
 The bluetooth basically has the following preconditions
-* BT_EN 
+* BT_EN being set
 * The Voltage regulator set up properly
 * The ohci-hcd driver being loaded
 
+The gta01_pm_bt driver implements the following files:
+<pre>
+root@fic-gta01:/$ ls -l /sys/devices/platform/gta01-pm-bt.0
+-rw-r--r--    1 root     root         4096 Feb  1 09:52 power_on
+-rw-r--r--    1 root     root         4096 Feb  1 09:52 reset
+</pre>
+
+===== Powering up the device =====
+
+<pre>
+root@fic-gta01:/$ echo "1" >  /sys/devices/platform/gta01-pm-bt.0/power_on  
+usb 1-1: new full speed USB device using s3c2410-ohci and address 4
+usb 1-1: configuration #1 chosen from 1 choice
+</pre>
+
+===== Powering down the device =====
+<pre>
+root@fic-gta01:/$ echo "0" >  /sys/devices/platform/gta01-pm-bt.0/power_on 
+usb 1-1: USB disconnect, address 3
+</pre>
+
+===== Asserting reset (low-active) =====
+<pre>
+root@fic-gta01:/$ echo "0" >  /sys/devices/platform/gta01-pm-bt.0/reset 
+root@fic-gta01:/$ usb 1-1: USB disconnect, address 2
+</pre>
+
+===== De-asserting reset (low-active) =====
+<pre>
+root@fic-gta01:/$ echo "1" >  /sys/devices/platform/gta01-pm-bt.0/reset 
+s3c2410-ohci s3c2410-ohci: wakeup
+usb 1-1: new full speed USB device using s3c2410-ohci and address 3
+usb 1-1: configuration #1 chosen from 1 choice
+</pre>
 
 ==== Getting started ====
 
