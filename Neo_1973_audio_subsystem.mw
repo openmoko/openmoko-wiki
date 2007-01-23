@@ -1,0 +1,101 @@
+== Voice Calls ==
+
+=== using phone-internal microphone and speaker ===
+
+This is teh default case.
+
+* microphone path
+** input: built in microphone attached to wolfson MIC2/MIC2N
+** routed from wolfson MIC2/MIC2N to MONO1/MONO2
+** arrives at GSM Modem input MICIP/MICIN
+* speaker path
+** input: GSM Modem attached to wolfson RXN/RXP
+** routed from wolfson RXN/RXP to ROUT1/LOUT1
+** arrives on LM4857 RIN/LIN
+** routed on LM4856 to EP+/EP-
+
+=== using analog (4pin 2.5mm) headset ===
+
+This is also a quite common case, since we ship the headset with the
+phone
+
+Headset Detection is done via GPIO on S3C2410
+
+* microphone path
+** input: headset mic vial HS_MIC attached to wolfson MIC1
+** routed from wolfson MIC1 to MONO1/MONO2
+** arrives at GSM Modem input MICIP/MICIN
+* speaker path
+** input: GSM Modem attached to wolfson RXN/RXP
+** routed from wolfson RXN/RXP to ROUT1/LOUT1
+** arrives on LM4857 RIN/LIN
+** routed on LM4856 to LHP/RHP
+
+=== using bluetooth headset ===
+
+Headset detection via software
+
+* microphone path
+** input: from bluetooth via PCM interface to wolfson
+** wolfson: DAC
+** wolfson routes analog signal to MONO1/MONO2
+** arrives at GSM Modem input MICIP/MICIN
+* speaker path
+** input: GSM Modem attached to wolfson RXN/RXP
+** wolfson: ADC
+** wolfson: routes digital signal to PCM
+** arrives on bluetooth chip via PCM
+
+== Multimedia ==
+
+=== sound playback to speakers ===
+
+This is an important mode since it is also required for ringtone
+playback
+
+* speaker path 
+** input: from S3C2410 via IIS interface to wolfson
+** wolfson: DAC
+** wolfson: route to ROUT1/LOUT1
+** LM4857: arrives on RIN/LIN
+** LM4857: route to LLS+-/RLS+-
+
+=== sound playback to headphone ===
+
+* speaker path
+** input: from S3C2410 via IIS interface to wolfson
+** wolfson: DAC
+** wolfson: route to ROUT1/LOUT1
+** LM4857: arrives on RIN/LIN
+** routed on LM4856 to LHP/RHP
+
+=== voice recording === 
+
+This is mainly used to record notes
+
+* microphone path
+** can be from built-in mic
+** or from headset
+** or bluetooth headset
+
+== Call recording ==
+
+This is a nice wishlist item.  The user should be able to receive the
+full-duplex audio from the wolfson codec, and record it using the
+S3C2410 IIS.  
+
+=== recording ===
+
+FIXME
+
+=== playback ===
+
+FIXME
+
+== Important issues/pitfalls ==
+
+=== Ringtone while hedset playbac ===
+
+If the user is listening to music on the headset, do we want to mix the
+ringtones only into the headset audio, or actually interrupt and play it
+on the speaker?
