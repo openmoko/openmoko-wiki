@@ -1,20 +1,57 @@
+== NAND basics ==
+
+FIXME.
+
 == Problem ==
 
-NAND memory apparently gets shipped with blocks that are already bad.  The vendor just marks those blocks as bad, thus resulting in higher yield and lower per-unit cost.
+=== Bad Blocks ===
+
+NAND memory apparently gets shipped with blocks that are already bad.  The vendor just marks those blocks as bad, thus resulting in higher yield and lower per-unit cost.  Thus, the flash will in the end contain three kinds of blocks:
+* Factory-Default bad blocks
+* Worn-out bad blocks
+* Good blocks
 
 The only block that is guaranteed to be good, is the first block (first 16kBytes).
 
-We are also guaranteed that a minimum of 4016 blocks (out of the 4096) are good.  This means up to 80 blocks (320kBytes) can be dead.
+We are also guaranteed that a minimum of 4016 blocks (out of the total 4096) are good.  This means up to 80 blocks (1.3MBytes) can be dead, resulting in a total guaranteed amount of working NAND storage of 65798144 bytes.
 
 == Solution ==
 
-The solution is split into various pieces
+The solution is split into various pieces, one at each level.
 
 === Boot loader ===
 
+==== first-stage ====
+
 The boot loader itself contains a small first-stage boot loader for the [[S3C2410 Steppingstone]]. 
 
-This code (which Harald wrote in ARM assembly) needs to be altered to detect and skip bad blocks.  At this time, the bootloader could itself extend over bad blocks.  However, how do we first flash the bootloader into NAND? The JTAG flashing program has no support for detecting bad blocks.
+This code (mostly written in ARM assembly) was altered to detect and skip bad blocks.  This means, the first stage bootloader can itself extend over bad blocks.  
+
+This also menas that the  flashing routine needs to detect and skip bad blocks, resulting in a u-boot image that can have gaping holes ;)  The existing "traditional" [[sjf2410-linux]] JTAG flashing program is not detecting bad blocks (Note: this might be changed through a compile option, see below)
+
+==== Environment ====
+
+The [[u-boot]] environment is traditionally stored at a fixed location within the NAND flash.  This is not acceptable, since it could be a factory-set bad block.
+
+The solution that was implemented for OpenMoko/Neo1973 was to put the in-flash address of the environment into the out-of-band (OOB) area of the first block (the one which is guaranteed to be good).  Since the environment address is unlikely to change often, the 1000 erase cycles guaranteed for the first block are good enough.
+
+The exact location is byte 8..15 of the 16byte OOB area, starting with the four ASCII bytes '''ENVO''', followed by the little-endian 32bit unsigned integer of the NAND address where the environment is located.
+
+The u-boot "dynenv get" command can be used to read out a pre-programmed Environment offset from NAND, and the "dynenv set" can be used to write the offset (if the last eight bytes of OOB area are erased (0xff)).
+
+==== Partition Table ====
+
+Since those up to 80 factory-bad blocks can be located about anywhere in NAND, we have to accomodate for this worst case.  However, we cannot just make every partition 1.3MB larger than it needs to be, since this would waste a lot of otherwise good flash.
+
+The only solution to this (that Harald could think of) is to dynamically calculate a partition table for each device.  Every NAND flash has different factory-bad blocks at different locations, thus the partition table on every NAND flash will look different.
+
+So as an example, lets' assume we have a 0x30000 (196k) bytes sized partition for u-boot, starting ad address 0 in NAND.  If there were no bad blocks, it would extend from 0x00000 to 0x30000.  From 0x30000 to 0x230000 (2MB) we have the kernel partition.
+
+Let's now assume that blocks 0x20000 and 0x28000 (each 0x4000 in size) are marked as factory-bad.  Thus, in order to have 0x30000 bytes of usable storage, the uboot partition actually extends from 0x00000 to 0x38000.  This shifts the start address of the kernel partition to 0x38000.  
+
+If the kernel partition contains more bad blocks, the start address of the rootfs partition (following the e kernel partition) is further shifted down to the end.
+
+Those calculations have been implemented as u-boot "dynpart" command.  Once you issue "dynpart", the partition configuration is put in the "mtdparts" environment variable.  If you "saveenv" the environment, it is saved into the non-volatile environment partition.
 
 === Kernel ===
 
