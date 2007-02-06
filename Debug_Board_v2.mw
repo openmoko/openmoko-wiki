@@ -1,6 +1,63 @@
 
+Architecture of the second version of the Neo1973 debug board:
+[[Image:Debugboard v2 concept.jpg]]
+
+
+== Overview ==
+
+=== Key components ===
+
+==== USB Hub ====
+
+This bus-powered hub 
+* attaches to the laptop using its upstream port
+* attaches to the FT2232-for-JTAG using downstream port 1
+* attaches to the FT232-for-serial using downstream port 2
+* attaches to the phone using downstream port 3
+
+Using the hub, you can have access to the phone, JTAG and serial simultaneously, through a single USB cable.
+
+You can actually even charge the phone (100mA slow charge) using that downstream port.
+
+For the hub, we can use the TUSB2046B chip, which is very common and easily available.
+
+==== JTAG using FT2232 ====
+
+Basiacally, we integrate a USB-JTAG adaptor similar to the [Amontec JTAGkey-tiny].  The actual design of what we want to use can be found at 
+http://www.joernonline.de/dw/doku.php?id=en:projects:oocdlink
+
+This provides us full JTAG debugging, at about 150times the speed of the wiggler
+
+The actual JTAG port is connected with
+* the phone (via debug flex cable)
+* A separate 20-pin header using standard ARM-JTAG pinout
+** this allows the user to use this device as JTAG adaptor even for other arm-based devices
+
+==== Serial Port ====
+
+Instead of replicating a true RS232 port, we use a USB serial converter chip,
+such as the FT232 or the PL2303.   It is attached (without level shifter) to the phone's debug port.
+
+As it turns out, we can even use the second port of the FT2232 simultaneously with the JTAG.  So no extra FT232 or PL2303 is required.
+
+===== Tri-State Serial Port =====
+
+The serial port needs a tri-state driver, since it is both connected to the GSM modem AND to the debug board.  We drive the tri-state driver by an inverted GSM_EN signal (pin 7 on FPC connector).
 
 
 == History ==
 
 We previously had [[Debug Board v1]]
+
+=== Changes from v1 to v2 ===
+
+* get rid of ethernet
+** we don't need it, and
+** we especially don't want a 40pin parallel 66MHz bus going between two pcb's
+* get rid of 7-segment LED displays
+** not really needed.  We have a serial port
+** could be replaced by one or two GPIO LED's
+* get rid of built-in wiggler
+** nobody has a parallel port on the laptop these days
+* get rid of li-ion battery (including charger)
+** the device can be fully usb powered by the laptop
