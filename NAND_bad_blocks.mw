@@ -67,9 +67,7 @@ Both u-boot and Linux implement the same BBT layout and thus interoperate quite 
 
 The BBT is created once a BBT-implementing u-boot is started for the first time.  The BBT scanning code assumes that the NAND is '''completely erased''', i.e. only contains 0xff as content.  Any block that contains bytes != 0xff in the OOB is marked as "factory bad" block.
 
-=== Kernel ===
-
-==== Flashing from u-boot ====
+==== Flashing kernel/rootfs from u-boot ====
 
 The kernel is contained in its own partiton [[QT2410#NAND]].  We have to flash it using the
  nand write.e
@@ -83,25 +81,40 @@ As opposed to using fixed NAND flash addresses, we can use the mtd partition nam
 
 Where 0x32000000 is the source address in RAM, and 'kernel' is the name of the kernel partition.
 
-=== Root Filesystem ===
+=== Kernel ===
 
-The root filesystem uses JFFS2, which is already bad block tolerant.  It, too, has to be written using the
- nand write.e
-command in [[u-boot]]
+==== Bad block table ====
+
+In order to maintain the BBT created by u-boot, the kernel needs to have BBT support enabled.  Unfortunately the mainline kernel doesn't have a CONFIG option for it, so if you're not using the -moko kernel tree, you have to manually patch the s3c2410 nand driver to enable the BBT option.
 
 === Flash Tool ===
 
 ==== sjf2410 (during development) ====
+
 The [[sjf2410-linux]] tool has a compile-time option to check (and skip) bad blocks.  If we use this for flashing u-boot, we will preserve the bad block info, once u-boot steppingstone code has been enhanced to skip bad blocks.
 
-==== for production? ====
+However, even if the bad-block skipping works,  sjf2410-linux only supports the extremely slow parallel-port based JTAG adaptors.  Also, the overall flashing process is getting quite complicated. sjf2410-linux could thus only be used for flashing the bootloader. Everything else has to be done by some more intelligent software anyway.
 
-I have no idea how flashing during the production process is supposed to happen.
+==== JTAG / OpenOCD / u-boot RAM based ====
 
-== Tentative new Flash memory layout ==
+This method is actually quite neat, and based on [[Bootloader#Using_JTAG_to_boot_from_RAM]].  
 
- start      size       name
- 0x00000000 0x00030000 196KB u-boot
- 0x00030000 0x00004000  16KB u-boot environment 
- 0x00034000 0x00200000   2MB kernel 
- 0x00234000 ...              jffs2
+The idea is to use JTAG to download and execute a special version of u-boot.  This u-boot then automatically scans the whole NAND and creates the BBT.  The process can be monitored and controlled by the developer (or some script).  The chronological steps are
+
+# make sure NAND flash is completely erased
+# use JTAG to reset and halt the device
+# use JTAG to download lowlevel bootup code to address 0
+# use JTAG to create breakpoint at 0x33f80000
+# use JTAG to run up to that breakpoint
+# use JTAG to download u-boot-ram image to 0x33f80000
+# use JTAG to resume at 0x33f80000
+# wait until u-boot has created BBT
+# execute 'dynpart' command to calculate partition offsets
+# execute 'dynenv set' command to write environment partition offset to OOB of block 0
+# use JTAG (or microSD) to read uboot-nand image into RAM
+# use u-boot 'write.e' command to write uboot-nand image to uboot partition in NAND
+# use JTAG (or microSD) to read kernel uImage into RAM
+# use u-boot 'write.e' command to write uImage to kernel partition in NAND
+# use JTAG (or microSD) to read JFFS2 rootfs image into RAM
+# use u-boot 'write.e' command to write jffs2 image to rootfs partition in NAND
+# reset and boot
