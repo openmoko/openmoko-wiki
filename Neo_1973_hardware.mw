@@ -42,23 +42,59 @@ This one is wired via PCM bus from the CSR Bluetooth chip to the Wolfson codec.
 
 == History ==
 
-=== GTA01v3 ===
+=== GTA01 ===
 
-This was the initial hardware revision that was provided to the software team.
+This is the most simple, non-bluetooth version of the prototype.
 
-=== GTA01v4 ===
+==== GTA01v3 ====
 
-This was a slightly improved version of the hardware, though still with a number of serious bugs.
+First generation of prototypes that was given to internal OpenMoko software developers.
 
+Unfortunately not useful at all due to non-working touchscreen.
 
-=== GTA01Bv2 ===
+* ATAG_REVISION: 0x0000130
 
-This was the first hardware that (after applying some post-production hotfixes) worked completely.
+==== GTA01v4 ====
 
-=== GTA01Bv3 ===
+Second generation of prototypes that was given to Harald + Mickey.
 
-This is the hardware revision that we ship during Phase-0.
+Unfortunately still not useful due to half-working touchscreen.
 
-=== GTA01Bv4 ===
+* ATAG_REVISION: 0x00000140
 
-This is the hardware revision that we ship in Phase-1
+=== GTA01B ===
+
+This is the bluetooth-enabled fork of GTA01
+
+==== GTA01Bv2 ====
+
+This is the first produced version of the bluetooth-enabled version.
+
+* ATAG_REVISION: 0x00000220
+
+==== GTA01Bv3 ====
+
+This is the second produced version of the bluetooth-enabled version. It contains mainly GPS-related fixes.
+
+* ATAG_REVISION: 0x00000230
+
+This is the version that is shipped in Phase 0
+
+==== GTA01Bv4 ====
+
+This is the version that is shipped in Phase 1
+
+== Distinguishing hardware revisions ==
+
+=== Inside the [[Bootloader]] ===
+
+Every hardware revision has its own u-boot image type.  Thus, the bootloader has the revision hard-coded.
+The hardware revision is passed on to the kernel via the ATAG mechanism (ATAG_REVISION)
+
+=== Inside the [[Kernel]] ===
+
+The kernel receives the ATAG_REVISION during bootup, and saves its contents in the "system_rev" global variable.
+
+=== From Userspace ===
+
+The kernel exports the system_rev variable in /proc/cpuinfo as "Revision :" line.
