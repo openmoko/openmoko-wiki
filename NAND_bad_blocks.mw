@@ -69,11 +69,19 @@ The BBT is created once a BBT-implementing u-boot is started for the first time.
 
 === Kernel ===
 
+==== Flashing from u-boot ====
+
 The kernel is contained in its own partiton [[QT2410#NAND]].  We have to flash it using the
  nand write.e
 command, and read it later again via
  nand read.e
 command.  Those two variants (as opposed to their non-".e"-postfixed versions) simply skip bad blocks
+
+As opposed to using fixed NAND flash addresses, we can use the mtd partition names.  Thus, the magic of device-specific dynamic partition layout is all hidden neatly from the user.  A flash command using a partiton name looks like:
+
+ nand write.e 0x32000000 kernel
+
+Where 0x32000000 is the source address in RAM, and 'kernel' is the name of the kernel partition.
 
 === Root Filesystem ===
 
