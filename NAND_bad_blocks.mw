@@ -1,6 +1,24 @@
 == NAND basics ==
 
-FIXME.
+NAND memory has quite unique characteristics.  
+
+* When it is erased, all bits are set to 1' (you will see 0xff on all bytes in a hexdump)
+* You can change as many bits as you want to '0'
+* You cannot set a bit back to '1' by using a regular write.  You have to erase a whole '''erase block''' to do so
+* The number of erase cycles per block is limited.  Once you have reached the limit, some bits will not get back to 0xff
+
+=== NAND page ===
+
+A NAND page consists of a number of data bytes (512 in the Neo1973 case) plus a number of out-of-band (OOB) bytes (16 in the Neo1973 case).
+
+Only the data bytes are used for application data.  The OOB bytes are used for
+* marking an erase block as bad (first or second page of erase block)
+* storing ECC (error correction codes)
+* storing filesystem specific information (JFFS2)
+
+=== NAND erase block ===
+
+A erase block consists of multiple pages.  In the Neo1973 case, every erase block has 32 pages, resulting in 16kBytes (hex: 0x4000) of data bytes (without OOB).
 
 == Problem ==
 
