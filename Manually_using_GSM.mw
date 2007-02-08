@@ -1,0 +1,65 @@
+
+This is a short guide how to manually get GSM going.
+
+== Requirements ==
+
+* GTA01Bv2 or GTA01Bv3 with very recent u-boot bootloader, providing usbtty (serial over USB) support)
+* Do not connect any debug board!
+
+
+== Walk-Through ==
+
+=== Booting the system ===
+
+* Make sure the rootfs you use has 'auto usb0' in /etc/network/interfaces
+* Configure the host's usb0 interface to 192.168.0.200 netmask 255.255.255.0
+* ssh to root@192.168.0.201
+
+=== Powering up the GSM Modem ===
+
+* load the "gta01_pm_gsm.ko" kernel module
+ root@fic-gta01:~$ modprobe gta01_pm_gsm.ko
+* verify there is no getty or any other app running on /dev/ttySAC0 
+ root@fic-gta01:~$ lsof | grep ttySAC0
+* power-up the GSM Modem
+ root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/power_on
+* access the GSM Modem UART
+<pre>
+root@fic-gta01:~$ cu -l /dev/ttySAC
+Connected.
+AT-Command Interpreter Ready
+OK
+</pre>
+
+=== Registering with the Network ===
+
+* enter the following commands:
+<pre>
+ATE1
+OK
+AT+CFUN=1
+ERROR
+AT+CPIN="...."
+OK
+AT+COPS
+OK
+</pre>
+
+=== Anwering an incoming call ===
+<pre>
+RING
+ATA
+OK
+</pre>
+
+=== Dialling an outgoing call ===
+
+<pre>
+ATD012340234;
+</pre>
+
+=== Hanging up ===
+<pre>
+ATH
+OK
+</pre>
