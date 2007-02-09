@@ -3,11 +3,12 @@
 == Main components ==
 === Processor ===
 
-The main Processor (CPU) of the Neo1973 is a Samsung S3C2410A-266 (Capable of running up to 266 MHz)
+The main Processor (CPU) of the Neo1973 is a Samsung S3C2410AL-26 (Capable of running up to 266 MHz)
 
 * Product Homepage: http://www.samsung.com/products/semiconductor/MobileSoC/ApplicationProcessor/ARM9Series/S3C2410/S3C2410.htm
 * User Manual: http://www.samsung.com/Products/Semiconductor/MobileSoC/ApplicationProcessor/ARM9Series/S3C2410/2410UserManual.pdf
 * BSDL File: http://www.samsung.com/Products/Semiconductor/MobileSoC/ApplicationProcessor/ARM9Series/S3C2410/S3C2410_BGA_BSDLJTAGFILE.bsd
+* GPIO Assignments: https://svn.openmoko.org/trunk/doc/hardware/GTA01Bv3/gpio.txt
 
 === Flash ===
 
@@ -15,16 +16,25 @@ The main Processor (CPU) of the Neo1973 is a Samsung S3C2410A-266 (Capable of ru
 
 * Product Homepage: http://www.samsung.com/products/semiconductor/NANDFlash/SLC_SmallBlock/512Mbit/K9F1208U0B/K9F1208U0B.htm
 * Data Sheet: http://www.samsung.com/Products/Semiconductor/NANDFlash/SLC_SmallBlock/512Mbit/K9F1208U0B/ds_k9f1208x0b_rev03.pdf
+* Connected to: S3C2410 NAND controller
+
+This is the only flash memory in the device.  The S3C2410 boots directly from nand, using the [[Steppingstone]].
+
+We only use free software, no proprietary flash file systems.  For a full description of how it is used, see [[NAND_bad_blocks]]
 
 === RAM ===
 
 128MB SDRAM (2x Samsung K4M511633C) attached to S3C2410 SDRAM controller
 * Product Homepage: http://www.samsung.com/Products/Semiconductor/MobileSDRAM/MobileSDRSDRAM/512Mbit/K4M511633C/K4M511633C.htm
 * Data Sheet: http://www.samsung.com/Products/Semiconductor/MobileSDRAM/MobileSDRSDRAM/512Mbit/K4M511633C/ds_k4m511633c.pdf
+* Connected to: S3C2410 
 
 === GSM/GPRS ===
 
 The GSM/GPRS modem is Texas Instruments Calypso based.
+
+* Connected to: S3C2410 UART1 (full-uart, RxD, TxD, CTS, RTS), /dev/ttySAC0 in userspace
+* PM Driver: https://svn.openmoko.org/trunk/src/target/kernel/patches/gta01-power_control.patch
 
 ==== CALYPSO digital baseband ====
 
@@ -39,17 +49,50 @@ Product Homepage: http://focus.ti.com/general/docs/wtbu/wtbuproductcontent.tsp?t
 Product Homepage: http://focus.ti.com/general/docs/wtbu/wtbuproductcontent.tsp?templateId=6123&navigationId=12296&contentId=4701
 
 === AGPS ===
-Hammerhead AGPS from Global Locate
+Hammerhead AGPS from Global Locate.
+
+* Connected to: S3C2410 UART2 (full-uart, RxD, TxD, CTS, RTS) /dev/ttySAC1 in userspace
+* Driver: Implemented as userspace agps daemon (agpsd)
+* PM Driver: https://svn.openmoko.org/trunk/src/target/kernel/patches/gta01-power_control.patch
 
 === SD-Card ===
 
-microSD aka Transflash
+The Neo1973 has one MicroSD aka Transflash slot.
+* Connected to: S3C2410 MMC/SD controller
+* Driver: https://svn.openmoko.org/trunk/src/target/kernel/patches/s3c_mci.patch
+* Backlight Driver: https://svn.openmoko.org/trunk/src/target/kernel/patches/gta01-backlight.patch
+
+=== Touch Screen ===
+
+* Connected to: S3C2410 TS controller
+* Driver: https://svn.openmoko.org/trunk/src/target/kernel/patches/qt2410-touchscreen.patch* Backlight Driver: 
+
+=== LCD Display Module (LCM) ===
+
+* Driver: https://svn.openmoko.org/trunk/src/target/kernel/patches/gta01-jbt6k74.patch
 
 === Bluetooth ===
+
+* Driver: Stock Linux Kernel BlueZ
+* Connects to: S3C2410 USB Host controller (OHCI)
+* PM Driver: https://svn.openmoko.org/trunk/src/target/kernel/patches/gta01-power_control.patch
+
+=== Vibrator ===
+
+* Driver: https://svn.openmoko.org/trunk/src/target/kernel/patches/gta01-vibrator.patch
+
+=== USB Device ===
+
+The USB Device controller is inside the S3C2410 
+* Driver: https://svn.openmoko.org/trunk/src/target/kernel/patches/s3c2410_udc.patch
 
 === Audio ===
 
 ==== Wolfson Codec ====
+
+There's a WM8573 Wolfson Microelectronics Codec.
+* Connected to: S3C2410 IIS interface
+* Driver: https://svn.openmoko.org/trunk/src/target/kernel/patches/asoc.patch
 
 ==== Analog wired Headset ====
 
@@ -60,6 +103,14 @@ The headsets used by Motorola smartphones (A780,A1200, ...) have a compatible co
 ==== Bluetooth Headset ====
 
 This one is wired via PCM bus from the CSR Bluetooth chip to the Wolfson codec.
+
+=== Power Management ===
+
+A Philips PCF50606 is used for power management.
+
+* Data Sheet: http://www.rockbox.org/twiki/pub/Main/DataSheets/pcf50606.pdf
+* Connected to: S3C2410 via I2C, client address is 0x08. 
+* Driver Source: https://svn.openmoko.org/trunk/src/target/kernel/patches/gta01-pcf50606.patch
 
 == History ==
 
