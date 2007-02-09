@@ -112,6 +112,11 @@ u-boot/tools/mkimage -A arm -O linux -T kernel -C gzip -a 30008000 -e 30008000 -
 
 == Bootloader prompt ==
 
+The bootloader prompt is available either on the serial console (via [[Debug Board]]), or as virtual USB Serial device (USB CDC_ACM).
+Whether the serial port or usb i used depends on the u-boot environment variables '''stdin''', '''stdout''' and '''stderr'''.
+
+Whether or not you use usbtty, the first couple of messages will always be displayed on the serial console.
+
 The bootloader is currently configured to waid for three seconds.  If a key press on the serial port is received within those three seconds, auto-boot is aborted.
 
 <pre>
@@ -133,11 +138,11 @@ QT2410 #
 
 Auto-boot executes the command[s] specified in the ''bootcmd'' environment variable. The default configuration is:
 <pre>
-QT2410 # printenv
-bootcmd=mmcinit; ext2load mmc 0 0x32000000 uImage; bootm 0x32000000
+GTA01Bv2 # printenv
+bootcmd=nand read.e 0x32000000 kernel; bootm 0x32000000
 </pre>
 
-This basically tells us that it will copy a file called "uImage" from the SD-Card to memory address 0x32000000 and then try to boot it.  
+This basically tells us that it will load the content of the NAND partition '''kernel''' to memory address 0x32000000 and then try to boot it.  
 
 === Environment ===
 
