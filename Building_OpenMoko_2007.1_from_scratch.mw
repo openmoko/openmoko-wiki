@@ -1,0 +1,425 @@
+'''Building OpenMoko from scratch'' Walk-Through
+
+according to Werner Almesberger <werner@openmoko.org>.
+
+
+This is a guide describing how I set up a running OpenMoko
+system from scratch.
+
+Do not treat this like a shell script! There are various configuration items you
+need to set (or skip, as it may be), operations that depend on how your
+host(s) are set up, and also on the revision of the target platform.
+
+Instead, look at each step, read the instructions, and copy and paste what
+makes sense for you, and adapt what you disagree with. Links to original and
+background material in the Wiki are included wherever useful.
+
+Please note that this file isn't actively maintained and is guaranteed to
+suffer bit rot as I begin to use more and more shortcuts in the build
+process. Furthermore, naming and other preferences are my own, may have
+little to do with what is considered common or even "official" style. If you
+find anything particularly stupid, please let me know
+
+===  Roles  ===
+
+The build process may spread over multiple machines. They have the following
+roles:
+
+* BUILD - build host, with quick access to the files and CPU power. Must have Internet access.
+* LAB - lab machine connected to the debug board (serial and JTAG) and to USB on the Neo (since this will probably be just a single machine, the roles are not further divided)
+* CARD - machine with a USB-attached SD/MMC card reader
+
+All machines are assumed to share the same filesystem layout. In the title of
+each of the section below, the respective role is indicated. "(all)" is for
+settings that apply to all machines, or that - for simplicity - can be
+applied to all of them.
+
+=== Directory layout (all) ===
+
+<pre>
+$OMDIR (/home/moko)	base directory for the whole tree
+  openmoko/		files from OpenMoko subversion (SVN) repository
+  openembedded/	files from OpenEmbedded (OE) Monotone repository
+  sources/		cached downloads of OE
+  build/		OE build directory
+</pre>
+
+===  Environment variables (all) ===
+
+For simplicity, we just set these environment variables on all hosts
+involved. If you're not comfortable with this, feel free to weed out the ones
+you don't need.
+
+Our base directory (configure this for local arrangements):
+
+ export OMDIR=/home/moko
+
+The path to the sources/ directory on the buildhost, in SCP path name syntax
+(replace "werner" with your user name):
+
+ export BUILDHOST_SRC=werner@buildhost.openmoko.org:/space/fic/openmoko/sources/
+
+The search path for BitBake files. Note that the order is of vital
+importance.
+
+ export BBPATH=$OMDIR/build:$OMDIR/openmoko/trunk/oe:$OMDIR/openembedded
+
+===  Permissions (BUILD) ===
+
+In order to perform the build process, you have to obtain the following
+permissions:
+
+* write access to the OpenMoko SVN repository (in principle, it should be possible to simplify this to read access. For further study.)
+
+===  Prerequisites (BUILD)  ===
+
+There must be at least 7 GB of free space on $OMDIR.
+
+In addition to the traditional development tools (gcc, patch, etc.), the
+following packages must be installed on the build host:
+<pre>
+#   subversion	version control system used by OpenMoko and others
+#   quilt	patch management system used by the Linux kernel and others
+#   monotone	version control system used by OpenEmbedded. Needs a recent
+#		version, e.g., 0.32, although also 0.31 should work.
+#   diffstat	the OE build process wants this
+#   texi2html	this too
+#   git		version control system used by the Linux kernel and others.
+#		Do not confuse this with the "GNU Interactive Tools"
+</pre>
+
+Furthermore, the following package can be installed optionally:
+<pre>
+#   psycho	Python just-in-time compiler. Speeds up BitBake considerably.
+#		Strongly recommended.
+</pre>
+
+Gentoo users can obtain all this with (note that, at the time of writing, Monotone 0.32 isn't available without setting the ~x86 keyword):
+
+<pre>
+echo 'dev-util/monotone ~'`readlink /etc/make.profile | awk -F / '{print $6}'`\
+  >>/etc/portage/package.keywords
+emerge -u subversion quilt monotone diffstat texi2html dev-util/git psyco
+</pre>
+
+If the local user name does not match the user name with which you access SVN, you can put the following script in your PATH before the regular location of "svn" (usually /usr/bin/).
+
+Here, we assume that $HOME/bin is searched early enough. Replace "werner"
+with your user name.
+<pre>
+cat <<EOF >$HOME/bin/svn
+#!/bin/sh
+exec `type -path svn` --username=werner "\$@"
+EOF
+chmod +x $HOME/bin/svn
+</pre>
+
+===  Prerequisites (LAB)  ===
+
+The following package must be installed on the 
+* xc - a simple communications program for the serial port
+
+Gentoo users can obtain this with:
+ emerge -u xc
+
+===  Assumptions (LAB, CARD) ===
+
+There are the following assumptions about hardware setup and devices:
+
+* the serial console of the Neo phone is connected to /dev/ttyS0 on LAB [[Debug_Board]]
+* the JTAG [[wiggler]] is connected to /dev/parport0 on LAB. See [[Debug Board]] and 
+[[Connecting_GTA01Bv2_with_Debug_Board]]
+* cards inserted in the SD/MMC card reader appear as /dev/uba on CARD and can be mounted on /mnt/tmp (we'll specify the mount point explicitly, so it only has to be there, but we don't need /etc/fstab to reflect this). If in doubt,
+ mkdir -p /mnt/tmp
+
+===  OpenEmbedded build: initial downloads (BUILD) ===
+First, we obtain a snapshot of the OpenEmbedded-based tree used by OpenMoko, plus the OE build tool called BitBake.
+
+==== Obtaining OpenMoko SVN tree ====
+
+Obtain revision 887 of the OpenMoko tree. This is a "known to be good", version (provided the fixes below are applied). Unfortunately, at some places, "current" versions of upstream packages may get included, thus the build may still fail. If it does, you may wish to inform the authorities.
+
+The checkout should take about 45 minutes over an Internet connection with a round-trip time to svn.openmoko.org of 350 ms.
+
+<pre>
+cd $OMDIR
+svn co -r 887 https://svn.openmoko.org/ openmoko
+</pre>
+
+==== Installing BitBake ====
+
+Install version 1.6 of BitBake, the build tool of OE. (This is quick.)
+
+<pre>
+svn co http://svn.berlios.de/svnroot/repos/bitbake/branches/bitbake-1.6/ bitbake
+cd bitbake
+./setup.py install
+cd ..
+</pre>
+
+==== Obtaining OpenEmbedded snapshot ====
+
+Obtain a snapshot of the Monotone repository of OpenEmbedded, then update it
+to the latest version, and finally check out our "known to be good" revision.
+We extract things into $OMDIR/openembedded. OE.mnt.bz2 is about 100 MB.
+
+<pre>
+wget http://www.openembedded.org/snapshots/OE.mtn.bz2
+bunzip2 OE.mtn.bz2
+mtn --db=OE.mtn pull monotone.openembedded.org org.openembedded.dev
+mtn --db=OE.mtn checkout --branch=org.openembedded.dev -r f499733e6db527846e1a48cf70f9862d6b3798ae openembedded
+</pre>
+
+{{note|For advanced users: if you ever want to update to the latest version of
+the repository, you would do a "pull" (see above), followed by:
+ cd $OMDIR/openembedded && mnt update}}
+
+
+Set up the directories for the cache of upstream files and all material
+related to local builds, then put our configuration file there:
+[[OpenMoko#Setting_up_an_OpenMoko_SDK]]
+
+<pre>
+mkdir -p sources build/conf build/tmp/stamps/armv4t-linux
+cat <<EOF >build/conf/local.conf
+MACHINE = "fic-gta01"
+DISTRO = "openmoko"
+BUILD_ARCH = "`uname -m`"
+EOF
+</pre>
+
+=== OpenEmbedded build: fixes (BUILD) ===
+
+There are unfortunately some problems in the build process. 
+The following fixes work around them:
+
+ cd $OMDIR/sources
+
+* upstream moves old packages away, gratuitously breaking downstreams
+
+ wget http://ftp.mozilla.org/pub/mozilla.org/js/older-packages/js-1.5.tar.gz
+ touch ../build/tmp/stamps/armv4t-linux/js-1.5-r0.do_fetch
+
+* us2.samba.org mirror has vanished
+
+ wget http://us4.samba.org/samba/ftp/stable/samba-3.0.14a.tar.gz
+ touch ../build/tmp/stamps/armv4t-linux/samba-3.0.14a-r15.do_fetch
+
+* ghastly patch with CRLF and trailing blanks
+
+ perl -pi.orig -e 's/ *$//;s/\r//g' ../openembedded/packages/gcc/gcc-4.1.1/gcc-4.1.1-pr13685-1.patch
+
+=== OpenEmbedded build (BUILD) ===
+
+openmoko/trunk/oe/conf/site.conf expects the OpenMoko-specific OE packages in $OMDIR/oe
+
+ cd $OMDIR
+ ln -s openmoko/trunk/oe .
+
+We're now ready to run the build. This will take a while.
+
+ cd $OMDIR/build
+ bitbake openmoko-devel-image
+
+Note that the build will stop several times to ask for SVN access and whether
+to accept certificates. If you're not quick enough to respond, the underlying
+session may time out. In this case, just restart "bitbake
+openmoko-devel-image" and it will pick up from where it left off.
+
+The whole build process involved numerous downloads, takes about 7 hours
+on an Athlon 64 3200+ (about 1.5h of delays were caused by ftp.debian.org not
+working properly during this test run), and ends with a message like this:
+
+ Build statistics:
+   Attempted builds: 4
+
+{{note|THE INSTRUCTIONS BELOW YIELD A SETUP WITHOUT BAD BLOCK HANDLING}
+
+We're in the process of migrating to a configuration of u-boot and kernel
+that can skip bad blocks in the NAND Flash. If your NAND Flash has no bad
+blocks, you can proceed safely, and migrate later.
+
+{note|if your OpenMoko tree is considerably newer than SVN revision 687, even
+the default kernel may already support bad blocks. The instructions below
+will then need updating}
+
+=== Flash boot loader into NAND (LAB) ===
+
+As a first step, we transfer the u-boot bootloader into NAND Flash, through
+the JTAG interface. We use JTAG, since this is the most basic way for doing
+this, ensuring that we don't depend on as little to work on the Neo as
+possible.
+
+For this, the u-boot image for to right the board version and the desired
+build date must be chosen. E.g., an image built for a gta01bv2 board on
+February 3, 2007 at 13:40:41 would be called
+u-boot_nand-gta01bv2-20070203134041.bin
+
+If this is the first build, there will only be one image for each board
+version, thus we can use wildcards. Change the gta01bv2 below to gta01v3 or
+gta01v4, if necessary.
+
+See also: [[Sjf2410-linux]]
+
+<pre>
+cd $OMDIR/build/tmp/deploy/images
+
+( echo 0; echo 0; echo 0; echo 2; ) ./sjf2410 /f:`echo u-boot_nand-gta01bv2-*.bin`
+</pre>
+
+This will take approximately 12 minutes.
+
+
+=== Copy kernel and root FS to microSD card (CARD) ===
+
+There are several ways to provide the Neo with its kernel and the root file
+system. The most self-contained way is to put everything into NAND Flash.
+To transfer the files to the Neo, we first place them on the microSD card.
+
+Memory cards, including microSD, usually come pre-formatted with VFAT. If we
+prefer ext2 (e.g., because we want to store a real Linux file system on the
+card as well), the following steps are needed:
+<pre>
+sfdisk -c /dev/uba 1 83
+mke2fs -m0 /dev/uba1
+tune2fs -c0 -i0 /dev/uba1
+
+Note however that leaving the card with VFAT makes it easier to swap data
+with other people.
+
+Next, we copy the kernel uImage and the root file system image to the card.
+As discussed in the previous section, we can use wildcards if this is our
+first build.
+<pre>
+cd $OMDIR/build/tmp/deploy/images
+mount /dev/uba1 /mnt/tmp
+cp uImage-2.6-moko7-r1-fic-gta01-*.bin /mnt/tmp/uImage
+cp openmoko-devel-image-fic-gta01-*.rootfs.jffs2 /mnt/tmp/rootfs.jffs2
+umount /mnt/tmp
+</pre>
+
+Now, insert the microSD card into the Neo, but don't power it on yet.
+(If you did anyway, don't worry. We'll power cycle it later.)
+
+=== Serial console (LAB) ===
+
+We use a serial console connecting through the debug board. This example uses
+"xc", which is a small and simple communications program. Many people prefer
+the considerably more bloated "minicom", which will work as well.
+
+* Prepare xc configuration
+<pre>
+cat <<EOF >~/xc.init
+set bps 115200
+terminal
+EOF
+</pre>
+
+* Connect to the target
+ xc -l /dev/ttyS0 -t
+
+
+=== Start the Neo and enter the boot prompt (LAB) ===
+
+Our first interaction with the target. This this doesn't work, please check
+that the debug board is connected properly to the serial port.
+
+Disconnect power, wait a couple of minutes, then connect power. You may have
+to press the power button on the Neo, next to the USB port, to turn it on.
+
+Some people have observed stability issues if the device was reset without
+power cycling, yet details of what is really happening aren't very clear yet.
+
+On the serial console, a message like this should appear:
+<pre>
+U-Boot 1.2.0 (Feb  3 2007 - 13:07:21)
+Press any key to enter the boot prompt:
+GTA01Bv2 #
+</pre>
+
+Note that the boot prompt changes with the hardware revision you have. If the
+message does not appear after a few seconds, try power cycling again.
+
+If xc responds to pressing a button with
+"Verify that you are trying to use a valid and operational tty port."
+the port may be stuck, waiting for DCD to be asserted. The quickest way to
+get out of this situation is to disconnect the serial cable from the debug
+board, run the following command
+ while ! stty -F /dev/ttyS0 clocal; do : ; done
+
+stick with something metallic into the connector, and keep on fumbling with
+it until DCD gets set and the loop above stops spitting out error messages.
+
+=== Flash kernel and root FS into NAND (LAB) ===
+
+We now load the kernel and the root FS from the microSD card into memory and
+subsequently transfer them to NAND Flash. All this is done by entering
+commands at the boot prompt.
+
+See also: [[U-boot]]
+
+* Before we start, we erase all the NAND Flash, except for the area containing the boot loader itself (0 to 0x30000)
+
+ GTA01Bv2 # nand erase 0x30000 0x3fd0000
+
+* Initialize the SD/MMC interface. The "Product Name" shown will be
+just binary garbage. This is expected behaviour.
+
+ GTA01Bv2 # mmc
+
+* Load the uImage file into memory. 
+{{note|this assumes we're using FAT. Use "ext2load" instead if using ext2}}
+
+ GTA01Bv2 # fatload mmc 0 0x32000000 uImage
+
+* Write the uImage from memory to NAND Flash
+
+ GTA01Bv2 # nand write.e 0x32000000 0x00034000 0x200000
+
+* The root file system is next. We need to specify the correct size,
+which is shown at the end of "fatload" or "ext2load".
+
+ GTA01Bv2 # fatload mmc 0 0x32000000 rootfs.jffs2
+
+{note|It will say something like "22724608 bytes read". You can convert this to hex, e.g., with bc:
+ % bc
+ obase=16
+ 22724608
+ 15AC000
+ ^D
+}}
+
+ GTA01Bv2 # nand write.e 0x32000000 0x00634000 0x15AC000
+
+The last argument is the hex number obtained from "bc"
+
+###  Configure the boot loader  ###############################################
+#
+# Last but not least, we have to set up the boot loader to automatically boot
+# from Flash. This is in fact easy, since we've already wiped out the
+# environment, and can thus simply let it restore the default settings.
+#
+
+#
+# ---------- We reset to force the boot loader to use the default settings.
+#
+# GTA01Bv2 # reset
+#
+# ---------- Wait until the "U-Boot [...]" message, then hit a key.
+# ---------- It will display 
+# ---------- "*** Warning - bad CRC or NAND, using default environment"
+#
+# ---------- Save the restored settings in NAND
+#
+# GTA01Bv2 # saveenv
+#
+# ---------- Power cycle to boot the Neo (see remarks above)
+#
+
+
+###  END  #####################################################################
+#
+# Congratulations ! You've just completed level 1 of the OpenMoko adventure.
+#
+###############################################################################
+</pre>
