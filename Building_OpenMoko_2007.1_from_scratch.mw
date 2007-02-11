@@ -2,9 +2,9 @@
  |__TOC__
  |}
 
-'''Building OpenMoko from scratch'' Walk-Through
+=Building OpenMoko from scratch=
 
-according to Werner Almesberger <werner@openmoko.org>.
+... according to Werner Almesberger <werner@openmoko.org>.
 
 
 This is a guide describing how I set up a running OpenMoko
@@ -24,6 +24,7 @@ process. Furthermore, naming and other preferences are my own, may have
 little to do with what is considered common or even "official" style. If you
 find anything particularly stupid, please let me know
 
+
 == Preparation ==
 
 ===  Roles  ===
@@ -40,7 +41,9 @@ each of the section below, the respective role is indicated. "(all)" is for
 settings that apply to all machines, or that - for simplicity - can be
 applied to all of them.
 
-=== Directory layout (all) ===
+
+=== Directory layout ===
+'''(Roles: all)'''
 
 <pre>
 $OMDIR (/home/moko)	base directory for the whole tree
@@ -50,7 +53,9 @@ $OMDIR (/home/moko)	base directory for the whole tree
   build/		OE build directory
 </pre>
 
-===  Environment variables (all) ===
+
+===  Environment variables ===
+'''(Roles: all)'''
 
 For simplicity, we just set these environment variables on all hosts
 involved. If you're not comfortable with this, feel free to weed out the ones
@@ -70,14 +75,18 @@ importance.
 
  export BBPATH=$OMDIR/build:$OMDIR/openmoko/trunk/oe:$OMDIR/openembedded
 
-===  Permissions (BUILD) ===
+
+===  Permissions  ===
+'''(Role: BUILD)'''
 
 In order to perform the build process, you have to obtain the following
 permissions:
 
 * write access to the OpenMoko SVN repository (in principle, it should be possible to simplify this to read access. For further study.)
 
-===  Prerequisites (BUILD)  ===
+
+===  Prerequisites  ===
+'''(Role: BUILD)'''
 
 There must be at least 7 GB of free space on $OMDIR.
 
@@ -114,7 +123,9 @@ EOF
 chmod +x $HOME/bin/svn
 </pre>
 
-===  Prerequisites (LAB)  ===
+
+===  Prerequisites  ===
+'''(Role: LAB)'''
 
 The following package must be installed on the 
 * xc - a simple communications program for the serial port
@@ -122,7 +133,9 @@ The following package must be installed on the
 Gentoo users can obtain this with:
  emerge -u xc
 
-===  Assumptions (LAB, CARD) ===
+
+===  Assumptions  ===
+'''(Roles: LAB, CARD)'''
 
 There are the following assumptions about hardware setup and devices:
 
@@ -132,12 +145,16 @@ There are the following assumptions about hardware setup and devices:
 * cards inserted in the SD/MMC card reader appear as /dev/uba on CARD and can be mounted on /mnt/tmp (we'll specify the mount point explicitly, so it only has to be there, but we don't need /etc/fstab to reflect this). If in doubt,
  mkdir -p /mnt/tmp
 
+
 == Obtaining Sources and build system ==
 
-===  OpenEmbedded build: initial downloads (BUILD) ===
+===  OpenEmbedded build: initial downloads  ===
+
 First, we obtain a snapshot of the OpenEmbedded-based tree used by OpenMoko, plus the OE build tool called BitBake.
 
+
 ==== Obtaining OpenMoko SVN tree ====
+'''(Role: BUILD)'''
 
 Obtain revision 887 of the OpenMoko tree. This is a "known to be good", version (provided the fixes below are applied). Unfortunately, at some places, "current" versions of upstream packages may get included, thus the build may still fail. If it does, you may wish to inform the authorities.
 
@@ -148,7 +165,9 @@ cd $OMDIR
 svn co -r 887 https://svn.openmoko.org/ openmoko
 </pre>
 
+
 ==== Installing BitBake ====
+'''(Role: BUILD)'''
 
 Install version 1.6 of BitBake, the build tool of OE. (This is quick.)
 
@@ -159,7 +178,9 @@ cd bitbake
 cd ..
 </pre>
 
+
 ==== Obtaining OpenEmbedded snapshot ====
+'''(Role: BUILD)'''
 
 Obtain a snapshot of the Monotone repository of OpenEmbedded, then update it
 to the latest version, and finally check out our "known to be good" revision.
@@ -169,7 +190,8 @@ We extract things into $OMDIR/openembedded. OE.mnt.bz2 is about 100 MB.
 wget http://www.openembedded.org/snapshots/OE.mtn.bz2
 bunzip2 OE.mtn.bz2
 mtn --db=OE.mtn pull monotone.openembedded.org org.openembedded.dev
-mtn --db=OE.mtn checkout --branch=org.openembedded.dev -r f499733e6db527846e1a48cf70f9862d6b3798ae openembedded
+mtn --db=OE.mtn checkout --branch=org.openembedded.dev \
+  -r f499733e6db527846e1a48cf70f9862d6b3798ae openembedded
 </pre>
 
 {{note|For advanced users: if you ever want to update to the latest version of
@@ -190,7 +212,9 @@ BUILD_ARCH = "`uname -m`"
 EOF
 </pre>
 
-=== OpenEmbedded build: fixes (BUILD) ===
+
+=== OpenEmbedded build: fixes ===
+'''(Role: BUILD)'''
 
 There are unfortunately some problems in the build process. 
 The following fixes work around them:
@@ -209,11 +233,14 @@ The following fixes work around them:
 
 * ghastly patch with CRLF and trailing blanks
 
- perl -pi.orig -e 's/ *$//;s/\r//g' ../openembedded/packages/gcc/gcc-4.1.1/gcc-4.1.1-pr13685-1.patch
+ perl -pi.orig -e 's/ *$//;s/\r//g' \
+   ../openembedded/packages/gcc/gcc-4.1.1/gcc-4.1.1-pr13685-1.patch
+
 
 == Building ==
 
-=== OpenEmbedded build (BUILD) ===
+=== OpenEmbedded build ===
+'''(Role: BUILD)'''
 
 openmoko/trunk/oe/conf/site.conf expects the OpenMoko-specific OE packages in $OMDIR/oe
 
@@ -230,12 +257,13 @@ to accept certificates. If you're not quick enough to respond, the underlying
 session may time out. In this case, just restart "bitbake
 openmoko-devel-image" and it will pick up from where it left off.
 
-The whole build process involved numerous downloads, takes about 7 hours
+The whole build process involves numerous downloads, takes about 7 hours
 on an Athlon 64 3200+ (about 1.5h of delays were caused by ftp.debian.org not
 working properly during this test run), and ends with a message like this:
 
  Build statistics:
    Attempted builds: 4
+
 
 {{note|THE INSTRUCTIONS BELOW YIELD A SETUP WITHOUT BAD BLOCK HANDLING}
 
@@ -247,9 +275,11 @@ blocks, you can proceed safely, and migrate later.
 the default kernel may already support bad blocks. The instructions below
 will then need updating}
 
+
 == Installation ==
 
-=== Flash boot loader into NAND (LAB) ===
+=== Flash boot loader into NAND ===
+'''(Role: LAB)'''
 
 As a first step, we transfer the u-boot bootloader into NAND Flash, through
 the JTAG interface. We use JTAG, since this is the most basic way for doing
@@ -270,13 +300,15 @@ See also: [[Sjf2410-linux]]
 <pre>
 cd $OMDIR/build/tmp/deploy/images
 
-( echo 0; echo 0; echo 0; echo 2; ) ./sjf2410 /f:`echo u-boot_nand-gta01bv2-*.bin`
+( echo 0; echo 0; echo 0; echo 2; ) |
+  ./sjf2410 /f:`echo u-boot_nand-gta01bv2-*.bin`
 </pre>
 
 This will take approximately 12 minutes.
 
 
-=== Copy kernel and root FS to microSD card (CARD) ===
+=== Copy kernel and root FS to microSD card ===
+'''(Role: CARD)'''
 
 There are several ways to provide the Neo with its kernel and the root file
 system. The most self-contained way is to put everything into NAND Flash.
@@ -289,6 +321,7 @@ card as well), the following steps are needed:
 sfdisk -c /dev/uba 1 83
 mke2fs -m0 /dev/uba1
 tune2fs -c0 -i0 /dev/uba1
+</pre>
 
 Note however that leaving the card with VFAT makes it easier to swap data
 with other people.
@@ -307,7 +340,9 @@ umount /mnt/tmp
 Now, insert the microSD card into the Neo, but don't power it on yet.
 (If you did anyway, don't worry. We'll power cycle it later.)
 
-=== Serial console (LAB) ===
+
+=== Serial console ===
+'''(Role: LAB)'''
 
 We use a serial console connecting through the debug board. This example uses
 "xc", which is a small and simple communications program. Many people prefer
@@ -325,7 +360,8 @@ EOF
  xc -l /dev/ttyS0 -t
 
 
-=== Start the Neo and enter the boot prompt (LAB) ===
+=== Start the Neo and enter the boot prompt ===
+'''(Role: LAB)'''
 
 Our first interaction with the target. This this doesn't work, please check
 that the debug board is connected properly to the serial port.
@@ -356,7 +392,9 @@ board, run the following command
 stick with something metallic into the connector, and keep on fumbling with
 it until DCD gets set and the loop above stops spitting out error messages.
 
-=== Flash kernel and root FS into NAND (LAB) ===
+
+=== Flash kernel and root FS into NAND ===
+'''(Role: LAB)'''
 
 We now load the kernel and the root FS from the microSD card into memory and
 subsequently transfer them to NAND Flash. All this is done by entering
@@ -399,7 +437,9 @@ which is shown at the end of "fatload" or "ext2load".
 
 The last argument is the hex number obtained from "bc"
 
+
 === Configure the boot loader ===
+'''(Role: LAB)'''
 
 Last but not least, we have to set up the boot loader to automatically boot
 from Flash. This is in fact easy, since we've already wiped out the
@@ -418,4 +458,4 @@ Wait until the "U-Boot [...]" message, then hit a key. It will display
 
 ==  END ==
 
-Congratulations ! You've just completed level 1 of the OpenMoko adventure.
+'''Congratulations !''' You've just completed level 1 of the OpenMoko adventure.
