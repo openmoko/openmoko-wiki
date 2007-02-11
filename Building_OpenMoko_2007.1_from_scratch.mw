@@ -305,17 +305,15 @@ There are several ways to provide the Neo with its kernel and the root file
 system. The most self-contained way is to put everything into NAND Flash.
 To transfer the files to the Neo, we first place them on the microSD card.
 
-Memory cards, including microSD, usually come pre-formatted with VFAT. If we
-prefer ext2 (e.g., because we want to store a real Linux file system on the
-card as well), the following steps are needed:
+Memory cards, including microSD, usually come pre-formatted with VFAT. We
+prefer ext2 (e.g., because we may want to store a real Linux file system on the
+card as well). The following steps are needed to convert the card from VFAT to
+ext2:
 <pre>
 sfdisk -c /dev/uba 1 83
 mke2fs -m0 /dev/uba1
 tune2fs -c0 -i0 /dev/uba1
 </pre>
-
-Note however that leaving the card with VFAT makes it easier to swap data
-with other people.
 
 Next, we copy the kernel uImage and the root file system image to the card.
 As discussed in the previous section, we can use wildcards if this is our
@@ -330,7 +328,6 @@ umount /mnt/tmp
 
 Now, insert the microSD card into the Neo, but don't power it on yet.
 (If you did anyway, don't worry. We'll power cycle it later.)
-
 
 === Serial console ===
 '''(Role: LAB)'''
