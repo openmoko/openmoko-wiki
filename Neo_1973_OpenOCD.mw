@@ -29,9 +29,16 @@ OpenOCD Revision 82 and later have been proven to work with our [[QT2410]] and [
 
 == Known Bugs ==
 
-* CP15 register read/write of ARM920T core not working
+=== CP15 register read/write of ARM920T core not working ===
 
 This has been reported upstream. Bugfix pending.
+
+=== number of discovered devices in JTAG chain doesn't match configuration ===
+
+You get something like:
+ Error:   jtag.c:1224 jtag_examine_chain(): number of discovered devices in JTAG chain (51) doesn't match configuration (1)
+
+This seems like a libftdi initialization bug.  Sometimes the FT2232 doesn't get completely reset into a sane state at startup of OpenOCD.  Please unplug the USB cable from the [[Amontec JTAGkey]] / [[Debug Board]] and re-plug.  It should immediately work the next time.  Bugfix would be appreciated a lot!
 
 == OpenOCD and [[Debug Board]] ==
 
