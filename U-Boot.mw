@@ -306,6 +306,43 @@ you can switch the device off from the bootloader prompt.
 
 ==== Battery charger related ====
 
+For a detailed description of the charger basics, see [[Neo1973 Battery Charger]].
+
+===== Inquiring the charger state =====
+
+You can get the current charger status by issuing
+ neo1973 charger status
+
+The following modes are possible:
+
+* idle - no charging
+* trickle - FIXME
+* pre - 
+* fast_cccv - Fast (500mA) charging, using Constant-Current followed by Constant Voltage (Li-Ion)
+
+===== Disabling battery charging =====
+
+You can disable battery charging (until the next reboot) by issuing
+ neo1973 charger off
+
+===== Forcing fast charge =====
+
+Using
+ neo1973 charger fast
+you can force the PMU to try to do a fast (500mA) charge of the battery. It will abort if the battery is in over temperature or some other error condition occurs.
+
+===== Enabling / Disabling automatic fast charge =====
+
+Autofast is a feature of the PCF50606 PMU.  It means that the fast_cccv mode will be automatically selected if a charger with suitable voltage is plugged in, and the battery not in over temperature condition.
+
+{{warning|This is potentially dangerous.  Only enable autofast if you ARE SURE that you can draw 500mA from the USB connector.  This is the case with a wall outlet charger, or if you are attached to a self-powered hub or a desktop PC root hub.  Bus powered hubs and some laptops only provide 100mA on their USB ports and can thus not support fast charging}}
+
+You can enable or disable autofast by 
+ neo1973 charger autofast
+and
+ neo1973 charger !autofast
+respectively.
+
 ==== Backlight ====
 
 You can switch the backlight on and off by using
