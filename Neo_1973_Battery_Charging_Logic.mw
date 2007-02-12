@@ -1,0 +1,19 @@
+The battery charging logic is embedded into our [[https://wiki.openmoko.org/wiki/Neo1973_Hardware#Power_Management|PCF50606 PMU]] (Power Management Unit).
+
+The PCF50606 suppors a variety of battery charging modes.
+
+{{warning|While we have spent a significant amount on various safe-guards such as battery-internal overcurrent/overvoltage protection, manual twisting with low-level charger control aspects is not recommended.  It might render either the battery or the charging circuit damaged.}}
+
+== Charging Modes ==
+
+=== Pre Charge ===
+
+Pre Charge is how the PMU calls the charging mode in which we draw up to 100mA charging current from the USB socket.  This mode is safe to use on any USB socket, since USB per specification always can supply at least 100mA on every downstream facing port.
+
+However, 100mA charging at a 1200mAh battery means 12hrs charging time, not very practical at all.
+
+=== Fast Charge ===
+
+Fast Charge is how the PMU calls the charging mode in which we draw up to 500mA charging current from the USB socket.  This mode can only be used if the USB stack on the host controller has selected a '''USB Configuration''' in which the device exports the need for 500mA.
+
+Thus, by default, if you apply +5V to the USB device socket, we draw only 100mA.  After a host controller has issued SET_CONFIGURATION config request on a configuration with 500mA in the config descriptor, the Neo1973 software ([[kernel]]) enable the fast charging mode.
