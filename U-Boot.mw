@@ -280,6 +280,58 @@ QT2410 # nand write.e 0x32000000 rootfs real_size_of_rootfs_in_hex
 
 Please note that this will only work with root file system sizes that are smaller than the amount of memory above 0x32000000, which in the case of 64MB SDRAM is something like 32MB.
 
+=== Neo1973 related commands ===
+
+Our version of u-boot supports a couple of Neo1973 specific commands:
+<pre>
+GTA01Bv2 # help neo1973
+neo1973 neo1973 info - display phone informantion
+neo1973 power-off - switch off the phone
+neo1973 charger status - display charger status
+neo1973 charger autofast - enable automatic fast (500mA) charging
+neo1973 charger !autofast - disable automatic fast (500mA) charging
+neo1973 charger fast - enable fast (500mA) charging
+neo1973 charger off - disable charging
+neo1973 backlight (on|off) - switch backlight on or off
+neo1973 vibrator (on|off) - switch vibrator on or off
+neo1973 266MHz (on|off) - switch 266MHz on or off
+</pre>
+
+==== Power-off ====
+
+Using
+ neo1973 power-off
+
+you can switch the device off from the bootloader prompt.
+
+==== Battery charger related ====
+
+==== Backlight ====
+
+You can switch the backlight on and off by using
+ neo1973 backlight on
+and
+ neo1973 backlight off
+respectively.
+
+==== Vibrator ====
+
+You can switch the vibrator on and off by using
+ neo1973 vibrator on
+and 
+ neo1973 vibrator off
+respectively.
+
+==== 266MHz clock ====
+
+You can re-configure the [[S3C2410]] PLL to generate a 266 MHz core cpu clock (rather than the 200MHz default) by using
+ neo1973 266MHz on
+and
+ neo1973 266MHz off
+respectively.
+
+{{warning|The current hardware (as of GTA01Bv3) does not run stable at 266MHz yet!}}
+
 === TFTP on QT2410 ===
 
 The QT2410 cs8900a Ethernet can be used to download images via network.
@@ -293,6 +345,7 @@ netmask=255.255.255.0
 ipaddr=192.168.100.100
 serverip=192.168.100.1
 </pre>
+
 
 ==== TFTP kernel download ====
 
