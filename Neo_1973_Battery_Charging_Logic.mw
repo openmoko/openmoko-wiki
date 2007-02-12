@@ -1,104 +1,19 @@
-The [[Neo1973 Battery]] charging logic is embedded into our [[Neo1973 GTA01 Power Management|PCF50606 Power Management]] Unit (PMU).
+The battery charging logic is embedded into our [[https://wiki.openmoko.org/wiki/Neo1973_Hardware#Power_Management|PCF50606 PMU]] (Power Management Unit).
 
-The PCF50606 supports a variety of [[Neo1973 Battery]] charging modes, based around the hardware limitations of USB.
+The PCF50606 suppors a variety of battery charging modes.
 
-Some USB hubs only provide up to 100mA per device.
-If more than the available current is drawn from them, they may be reset, or power off.
-This resets all devices connected to the USB bus, possibly causing data loss.
-So, fast charge mode is only enabled after the Neo is told that it is safe to charge at this current. 
-
-{{warning|While we have spent a significant amount on various safe-guards such as battery-internal overcurrent/overvoltage protection, manual twisting with low-level charger control aspects is not recommended.  It might damage either the [[battery]] or charging circuit.}}
-
-{{warning|Because the Neo1973 is overly conservative with drawing power from USB, it will often NOT charge with the full 500mA. Also, it is currently unclear how "off" a powered down Neo really is. So to avoid having to go through the emergency charging procedure outlined below (which will keep you from using your Neo for hours) make sure that you pull the battery from the device when you are not using it. This issue must be fixed in GTA02 as the current behavior is not end user compatible. }}
-
+{{warning|While we have spent a significant amount on various safe-guards such as battery-internal overcurrent/overvoltage protection, manual twisting with low-level charger control aspects is not recommended.  It might render either the battery or the charging circuit damaged.}}
 
 == Charging Modes ==
 
 === Pre Charge ===
 
-The default mode is what the PMU calls '''Pre Charge''', in which it draws 100mA charging current from the USB socket.  This mode is safe to use on any USB socket, since the USB  specification mandates that 100mA is always available.
+Pre Charge is how the PMU calls the charging mode in which we draw up to 100mA charging current from the USB socket.  This mode is safe to use on any USB socket, since USB per specification always can supply at least 100mA on every downstream facing port.
 
-In practice, 40mA is the approximate charging current in this mode, meaning fully charging a 1200mAh [[Neo1973 Battery]] will take around 40hrs charging time, which is not very practical at all.
-
-In this mode, /sys/devices/platform/s3c2410-i2c/i2c-adapter/i2c-0/0-0008/chgmode reports 'pre'
+However, 100mA charging at a 1200mAh battery means 12hrs charging time, not very practical at all.
 
 === Fast Charge ===
 
-Fast Charge is what the PMU calls the charging mode in which we draw up to 500mA charging current from the USB socket.  This mode can only be used if the USB stack on the host controller has selected a '''USB Configuration''' for the Neo which allows it to draw 500mA.
+Fast Charge is how the PMU calls the charging mode in which we draw up to 500mA charging current from the USB socket.  This mode can only be used if the USB stack on the host controller has selected a '''USB Configuration''' in which the device exports the need for 500mA.
 
-By default, if you apply +5V to the USB device socket, we draw only 100mA.
- 
-In this mode, /sys/devices/platform/s3c2410-i2c/i2c-adapter/i2c-0/0-0008/chgmode reports 'fast_cccv'
-
-==== Fast Charge (CCCV) ====
-
-Fast charging, using first constant current, later constant voltage.  This is what we use for our Li-Ion [[Neo1973 Battery]]
-
-==== Fast Charge (CVCC) ====
-
-[[Category:Neo1973 Hardware]]
-
-== Neo 1973 emergency charging ==
-
-=== from deep discharged battery ===
-
-A deep discharged battery is one where the terminal voltage is below the minimal voltage threshold.  The Neo1973 (specifically: The PCF50606 PMU) will not power-on the device. ''see also [[Neo1973 GTA01 Power Management]]
-
-If you make sure to remove the USB cable and put a deep discharged battery into the Neo1973, the battery can still be charged.  All you need to do is to provide 5V to the USB socket, by either connecting the Neo1973 to some USB port or a dumb USB charger.
-
-The battery will charge only with 100mA, and it will take a couple of hours until the battery is again charged to a level where it can power the phone.
-
-{{note|Please do not press the power button before you have waited for something like four hours. If you do so, the phone might [partially] power up, and draw more power than the 100mA supplied by the charger/USB, and so begin discharging itself again.
-
-If you did press the power button, 
-#Remove the battery, 
-#Wait a moment,
-#Insert the battery
-#Connect the charger or USB.}}
-
-The procedure to follow is:
-# '''Open Case.
-# '''Remove Battery.
-# '''Wait 20s.''' ''This resets the hardware, and makes sure nothing is drawing current during the next stage.
-# '''Insert the Battery.'''
-# '''Plug into a USB host, or USB charger.''' ''At this time, the battery will be charging at a low rate.
-# '''Wait 1 hour.'''  At this time, the battery will be approximately 5% charged, which should run the Neo for several minutes.  ''This time needs to be resolved: it is not quite clear how long to charge a deeply discharged battery before the device is able to request a 500 mA fast charge current.
-# '''If you have a USB host, plug it into a port capable of sourcing 500mA and load the appropriate drivers, so the neo can negotiate to draw 500mA.
-
-*If you have a dumb charger, see the [[U-Boot]] page for how to add a u-boot menu entry to turn on fast-charging.
-
-==Proposals for alternative charging schemes==
-
-An alternate method - for example sensing if there is no USB communication from the host for 30 seconds - as may be the case with dumb 'USB chargers' - would need to be used to be compatible with the vast majority of already existing hardware. 
-This has a small risk of causing buses it is connected to in suspend mode, when they are not active, to crash, and is not compliant with the specification. 
-
-:The USB spec requires the host to reply in a much shorter time than 30 seconds. Waiting that long is overkill and would be very annoying if you were trying to charge with something like a [http://www.21st-century-goods.com/page/21st/PROD/AHPG crank charger].
-
-Another option would be to detect a short between D+ and D-, according to the recent [http://www.usb.org/developers/devclass_docs/batt_charging_1_0.zip USB Battery Charging Specification]; see [http://bugzilla.openmoko.org/cgi-bin/bugzilla/show_bug.cgi?id=685 bug 685].
-
-==How to measure battery current==
-
-Cut a strip of double-sided PCB, the thinner the better (or glue two strips of single-sided PCB back-to-back).  The width of this strip should be equal to the width of one battery contact.  Solder wires to both sides.  Polish the copper with steel wool or very fine sandpaper.  File down the plastic on the battery around one contact, so that this "current probe" can easily slide in between the battery contact and the phone contact.  (Be careful that it cannot touch more than one battery contact, so as not to short out the battery!) Connect the two wires to a current meter, so that it is in series between the battery and the phone.  A current range of 500 or 1000 mA is most appropriate.  (At 500mA it will occasionally peg the meter.)
-
-[http://ecloud.org/gallery/main.php?g2_itemId=199 Photos of this kind of setup]
-
-[http://www.youtube.com/v/HzqzlA8NE2Y The video]
-
-==Power management overview script==
-
-Save the following as a script, somewhere in your path, e.g. /usr/local/bin/pow, and chmod a+rx to make it executable:
-<pre>
-#!/bin/sh
-echo "charge current    " `cat /sys/devices/platform/s3c2410-i2c/i2c-adapter/i2c-0/0-0008/chgcur`
-echo "charge mode       " `cat /sys/devices/platform/s3c2410-i2c/i2c-adapter/i2c-0/0-0008/chgmode`
-echo "charge state      " `cat /sys/devices/platform/s3c2410-i2c/i2c-adapter/i2c-0/0-0008/chgstate`
-echo "batt temp " `cat /sys/devices/platform/s3c2410-i2c/i2c-adapter/i2c-0/0-0008/battemp`
-echo "batt voltage      " `cat /sys/devices/platform/s3c2410-i2c/i2c-adapter/i2c-0/0-0008/battvolt`
-echo "BT power  " `cat /sys/devices/platform/s3c2410-i2c/i2c-adapter/i2c-0/0-0008/neo1973-pm-bt.0/power_on`
-echo "GPS power " `cat /sys/devices/platform/s3c2410-i2c/i2c-adapter/i2c-0/0-0008/neo1973-pm-gps.0/pwron`
-</pre>
-
-==[http://bugzilla.openmoko.org/cgi-bin/bugzilla/buglist.cgi?short_desc_type=anywordssubstr&short_desc=battery+charging+charger+charge&product=Neo1973+Hardware&product=Openmoko&long_desc_type=allwordssubstr&long_desc=&bug_file_loc_type=allwordssubstr&bug_file_loc=&bug_status=NEW&bug_status=ASSIGNED&bug_status=REOPENED&bug_status=RESOLVED&bug_status=VERIFIED&bug_status=CLOSED&rep_platform=Neo1973&emailassigned_to1=1&emailtype1=substring&email1=&emailassigned_to2=1&emailreporter2=1&emailcc2=1&emailtype2=substring&email2=&bugidtype=include&bug_id=&votes=&changedin=&chfieldfrom=&chfieldto=Now&chfieldvalue=&cmdtype=doit&order=Bug+Number&field0-0-0=noop&type0-0-0=noop&value0-0-0= Related bugs]==
-
-[[Category:Neo1973 Hardware]]
-[[Category:Battery]]
+Thus, by default, if you apply +5V to the USB device socket, we draw only 100mA.  After a host controller has issued SET_CONFIGURATION config request on a configuration with 500mA in the config descriptor, the Neo1973 software ([[kernel]]) enable the fast charging mode.
