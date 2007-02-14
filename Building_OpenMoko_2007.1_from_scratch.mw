@@ -404,8 +404,7 @@ See also: [[U-boot]]
 
  GTA01Bv2 # mmc
 
-* Load the uImage file into memory. 
-{{note|this assumes we're using FAT. Use "ext2load" instead if using ext2}}
+* Load the uImage file into memory.
 
  GTA01Bv2 # ext2load mmc 0 0x32000000 uImage
 
@@ -413,22 +412,11 @@ See also: [[U-boot]]
 
  GTA01Bv2 # nand write.e 0x32000000 0x00034000 0x200000
 
-* The root file system is next. We need to specify the correct size, which is shown at the end of "fatload" or "ext2load".
+* The root file system is next. We need to specify the correct size, which is shown at the end of "ext2load", e.g., "0x1608000)" in this case:
 
  GTA01Bv2 # ext2load mmc 0 0x32000000 rootfs.jffs2
-
-{{note|It will say something like "22724608 bytes read". You can convert this to hex, e.g., with bc:
- % bc
- obase=16
- 22724608
- 15AC000
- ^D
-}}
-
- GTA01Bv2 # nand write.e 0x32000000 0x00634000 0x15AC000
-
-The last argument is the hex number obtained from "bc"
-
+ 23101440 (0x1608000) bytes read
+ GTA01Bv2 # nand write.e 0x32000000 0x00634000 0x1608000
 
 === Configure the boot loader ===
 '''(Role: LAB)'''
