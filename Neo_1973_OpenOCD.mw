@@ -42,4 +42,47 @@ This seems like a libftdi initialization bug.  Sometimes the FT2232 doesn't get 
 
 == OpenOCD and [[Debug Board]] ==
 
+=== libftdi-0.8 ===
+
 If you wan to use OpenOCD with our Debug Board v2, and want to use the serial port simultaneously with OpenOCD, you '''need libftdi-0.8 or later'''.  Chances are high that your distribution still ships an earlier version of libftdi, so you might want to download it from http://www.intra2net.com/de/produkte/opensource/ftdi/ and build yourself.
+
+=== openocd.cfg ===
+
+This is an openocd.cfg that is known to work with [[Debug Board]], [[Neo1973 Hardware#GTA01Bv3]] and OpenOCD 130:
+<pre>
+telnet_port 4444
+gdb_port 3333
+interface ft2232
+jtag_speed 0
+ft2232_vid_pid 0x1457 0x5118
+ft2232_layout "jtagkey"
+reset_config trst_and_srst
+jtag_device 4 0x1 0xf 0xe
+daemon_startup attach
+target arm920t little reset_run 0 arm920t
+working_area 0 0x200000 0x4000 backup
+run_and_halt_time 0 5000
+</pre>
+
+=== Using OpenOCD telnet interface ===
+
+The telnet interface can be accessed using
+ telnet localhost 4444
+
+it provides a plethora of functions for debugging. You might be interested in
+<pre>
+reset
+reset halt
+resume
+poll
+reg
+load_binary
+mdw
+mww
+</pre>
+
+=== Using OpenOCD and gdb for remote debugging ===
+
+TBD
+
+== Ope
