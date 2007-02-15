@@ -386,29 +386,33 @@ We now load the kernel and the root FS from the microSD card into memory and
 subsequently transfer them to NAND Flash. All this is done by entering
 commands at the boot prompt.
 
+Each time we want to write new data to the NAND Flash, we first have to erase
+the previous content. We do this individually for each partition. While it would
+also be possible to erase some or all relevant partitions in one step, this would
+require the user to look up addresses from the partition table and to perform
+calculations which are inconvenient at best.
+
 See also: [[U-boot]]
-
-* Before we start, we erase all the NAND Flash, except for the area containing the boot loader itself (0 to 0x30000)
-
- GTA01Bv2 # nand erase 0x30000 0x3fd0000
 
 * Initialize the SD/MMC interface. The "Product Name" shown will be just binary garbage. This is expected behaviour.
 
  GTA01Bv2 # mmc
 
-* Load the uImage file into memory.
+* Load the uImage file into memory. "ext2load" stores the number of bytes read as a hexadecimal number in the environment variable "filesize".
 
  GTA01Bv2 # ext2load mmc 0 0x32000000 uImage
 
-* Write the uImage from memory to NAND Flash
+* Erase the kernel partition and write the uImage from memory to NAND Flash
 
- GTA01Bv2 # nand write.e 0x32000000 0x00034000 0x200000
+ GTA01Bv2 # nand erase kernel
+ GTA01Bv2 # nand write.e 0x32000000 kernel ${filesize}
 
 * The root file system is next. We need to specify the correct size, which is shown at the end of "ext2load", e.g., "0x1608000)" in this case:
 
  GTA01Bv2 # ext2load mmc 0 0x32000000 rootfs.jffs2
  23101440 (0x1608000) bytes read
- GTA01Bv2 # nand write.e 0x32000000 0x00634000 0x1608000
+ GTA01Bv2 # nand erase rootfs
+ GTA01Bv2 # nand write.e 0x32000000 rootfs ${filesize}
 
 === Configure the boot loader ===
 '''(Role: LAB)'''
