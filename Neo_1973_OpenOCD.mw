@@ -83,6 +83,31 @@ mww
 
 === Using OpenOCD and gdb for remote debugging ===
 
-TBD
+First, you will need a suitable cross-gdb (a gdb that runs on your host architecture, e.g. i386, but works with code for arm).  In OpenEmbedded, you can build such a cross-gcc by using
+ bitbake  gdb-cross
 
-== Ope
+If you want to debug the kernel, you can then start this gdb with
+ $ arm-linux-gdb vmlinux
+
+which will give you something like
+<pre>
+GNU gdb 6.6
+Copyright (C) 2006 Free Software Foundation, Inc.
+GDB is free software, covered by the GNU General Public License, and you are
+welcome to change it and/or distribute copies of it under certain conditions.
+Type "show copying" to see the conditions.
+There is absolutely no warranty for GDB.  Type "show warranty" for details.
+This GDB was configured as "--host=i686-linux --target=arm-linux"...
+(gdb) 
+</pre>
+
+We now need to connect to the OpenOCD daemon, which is done using the '''target remote''' command.  In this particular example, we did already halt the target by issuing '''halt''' on the '''telnet''' command line
+
+<pre>
+(gdb) target remote localhost:3333
+Remote debugging using localhost:3333
+warning: shared library handler failed to enable breakpoint
+0xc0129b8c in memmove () at include/asm/current.h:9
+9       {
+(gdb)
+</pre>
