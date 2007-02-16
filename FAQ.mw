@@ -1,0 +1,198 @@
+Questions and Answers that don't seem to fit elsewhere
+
+=== Q: How do I install and manage software on OpenMoko? ===
+A: ipkg: http://handhelds.org/moin/moin.cgi/Ipkg
+
+=== Q: Is there an emulator available for OpenMoko? ===
+A: QEMU is a good place to start, and we should be able to run almost all OpenMoko
+apps with it. For a good start with the QEMU emulator visit:
+http://www.aurel32.net/info/debian_arm_qemu.php
+
+Another is Xoo. Koen says: "Xoo should be enough for most apps people will develop,
+since most don't need access to
+the gsm uart directly. If you're hardcore you could use qemu + xoo, but that still doesn't
+emulate all the hardware quirks (e.g. unaligned access)". Xoo is at:
+http://projects.o-hand.com/xoo
+
+Update: Stefan Schmidt has resized the Neo1973 Mock-up and writen a small description for xoo. In his words:
+
+It's not really useable at all, as you need a really high screen
+resolution to fit the whole picture on your screen. And of course the
+dpi are wrong. Even no buttons because I can't remember where they are
+at the case.
+
+http://www.datenfreihafen.org/~stefan/OpenMoko/neo1973-xoo-device.tar.bz2
+
+Start with 'xoo --device /path/to/neo1973.xml'
+
+=== Q: Where can I find some type of tutorial for a 'Hello, world' on OpenMoko? ===
+
+A: This should get you started:
+http://www.gtk.org/tutorial/
+
+=== Q: What is the rationale behind the exclusion of WiFi? ===
+
+A: See [wiki:OpenMoko/InternetAccess Getting Internet access]
+
+=== Q: Can I bridge to an Ethernet (wired or unwired) network via a suitable Bluetooth enabled router? ===
+
+A: See [wiki:OpenMoko/InternetAccess Getting Internet access]
+
+=== Q: How can I compile programs for the Neo1973? ===
+
+A: See [wiki:OpenMoko/ToolChain the Tool Chain]
+
+=== Q: What providers in the USA provide the GSM required for Neo 1973? ===
+
+A: Wikipedia has a list of providers and technologies at
+http://en.wikipedia.org/wiki/List_of_United_States_mobile_phone_companies
+A brief look gives the impression that T-Mobile and Cingular (which is
+renaming itself AT&T) seem to be the only major ones.
+
+=== Q: Why is only USB 1.1 provided? ===
+
+A: The SoC handles the USB, and it's only
+capable of 1.1. As to why not a spiffier SoC, we presume that
+keeping the costs reasonable has something to do with it.
+But this shouldn't have too negative an impact:
+USB 1.1 are almost certainly OK for a phone: this is not a
+high-performance cluster node, just a power-saving phone.
+In particular, 11mps WLan works perfect with USB 1.1. I guess 54mps will
+work ok too, albeit perhaps a bit slower then they could.
+
+The main problem (with more powerful SoC) is not to provide a USB2.0
+host port in the device.  The main problem is power.  You need a pretty
+powerful DC/DC step-up converter to provide the 5V power supply to the
+USB bus.  And you have to provide at least up to 100mA - but to support
+all devices, 500mA.
+
+It's not a technical problem per se.
+
+It's just that you have to have one extra (powerful) DC/DC step-up
+converter in the device, something that vendors of phones (and other
+devices) usually don't put there for cost, battery life time and PCB
+footprint reasons.
+
+=== Q: Can the Neo charge and use devices on a USB hub at the same time? ===
+
+A: When the Neo is connected to a DOWNSTREAM port of a powered USB hub, it will start charging. 
+It will also be able to access all devices connected to the hub while charging.
+
+If you plug the Neo into an UPSTREAM port of any powered USB hub,
+you can access any (low-speed,full-speed) usb device on that hub but the NEO will not charge.
+This is because UPSTREAM ports on USB hubs are not powered.
+
+FIC product development is looking in providing something that
+conveniently solves this problem.
+
+=== Q: What are the details of the USB port on the Neo1973? How does it compare to USB On-The-Go? ===
+
+A: The Neo1973 will have mini-USB-B. It will NOT be USB On-The-Go. 
+OTG is a complex specification, and it comprises way more than just
+a AB socket, but also electrical and software components which cannot be
+provide by the S3C2410.
+
+You will need a special Mini-B to regular-B cable. 
+(Can someone specify what the "special" requirement is? 
+How is this different from a standared Mini-B to regular-B cable?)
+
+=== Q: Will OpenMoko "Just Work" with Mac OS X? ===
+
+A: There has been some discussion of this on the mailing list. There is motivation, and there are interested developers. 
+Not being a Mac OS X user, I don't know enough
+to summarize the discussion to answer this question. Can someone please fill in?
+
+A: For IP over USB cable connectivity, it is planned to improve/adapt the AJZaurusUSB driver allowing to ssh into the OpenMoko
+
+A: It is expected that (Bluetooth/UB) SyncML based interoperation for
+contacts and events can easily be achieved by a patch
+to the Apple iSync configuration tables.
+
+A: There is an open source implementation of Cocoa (GNUstep) that aims to run MacOS X compatible applications (sort of
+PPC/x86/ARM universal binaries) on OpenMoko devices: mySTEP
+
+=== Q: Can PalmOS apps applications be port to run on OpenMoko? ===
+
+A: Making legacy apps written for the "Garnet" OS (née "Palm OS") run on Linux
+is decidedly non-trivial. An emulator for this is going to be part of the
+ACCESS Linux Platform.
+
+PalmOS uses a very different model from Linux:  it doesn't really have a concept of a file per se; instead, all of memory is seen as a "soup" of records to access and manipulate (this isn't strictly true, as files had to be grafted on when removable flash was supported.  But it's close enough, from a developer's standpoint).  Also, the GUI toolkit looks very, very different from GTK.  The result is that a very well-written, modular program that carefully separates its core algorithms from its user interface and data input and output can be ported by replacing those components.  A program written by a mere mortal programmer is likely to have all these components intertwined to a point that a port will be challenging to say the least.
+
+The ACCESS Linux Platform will include POSE, an emulator that simulates a Palm device on a Linux host.  This emulator has been around a long time; one expects that it will also run on OpenMoko, but this has to be considered a short-term bandaid rather than a long-term solution.
+
+=== Q: Will a JTAG port be made available? ===
+
+A:  The "Hacker's Lunchbox" will make this kind of stuff easy. Details will be provided
+by Sean/FIC later.
+
+=== Q: What are the relevant X11 details? ===
+
+A: See [:OpenMoko/Hardware] for a link to the xdpyinfo.
+
+=== Q: Does it include a camera? ===
+
+A: No, see [:OpenMoko/Hardware] for details on what it does include.  With the USB port and a powered hub, you should be able to attach to any external camera.
+
+=== Q: What is the battery life? ===
+
+A: ?
+
+=== Q: How heavy is it? ===
+
+A: ?
+
+(It would be nice if someone who knows the answers put
+the battery life and weight specs on the hardware page - thx).
+
+=== Q: How I can put my hands on Neo1973? How can I buy one? ===
+
+A: See [http://lists.openmoko.org/pipermail/announce/2007-January/000000.html the time line] for when the phone is available. To be informed when it is available, subscribe to [http://lists.openmoko.org/mailman/listinfo/announce the mailing list announce].
+
+=== Q: Who is eligible to buy a Neo1973 in Phase 1 (developer phase)? ===
+
+A: These are the official Neo1973 requirements: Phase 1 buyers need to:
+
+ * have fun hacking devices
+ * find their way through prototype software and hardware without much documentation
+ * share the dream of a device powered by free software
+ * not expect a consumer-level device
+ * come up with new ideas for exploring the age of mobile computing
+
+Ideally they also:
+
+ * can spot bugs and submit patches
+ * love to cooperate with a community improving the software
+
+(Michael Lauer http://openmoko.org/)
+
+=== Q: On the lists on lists.openmoko.org, should replies be added above or below the original text? ===
+
+A: Please reply UNDER post.
+
+=== Q: What is the relationship of OpenMoko to the Neo 1973? What is the hardware and what is the software? ===
+
+A: Neo1973 is the hardware from FIC.  OpenMoko is pure software.
+
+=== Q: How can I find out if a question or topic has already been discussed on the mailing lists? ===
+
+A: By searching the mailing list archives. For example, using Google searches:
+
+ site:openmoko.org text
+
+For example, to search for accelerometer:
+
+ site:openmoko.org accelerometer
+
+If you only want to read the "official" mails from FIC people or from OpenMoko people:
+
+ site:openmoko.org text "at fic.com.tw"
+ site:openmoko.org text "at openmoko.org"
+
+For example to search for "release date" from FIC people:
+
+ site:openmoko.org "release date" "at fic.com.tw"
+
+=== Q: Are there any LEDs on the Neo 1973? ===
+
+A: The Neo1973 v1 will have no LEDs beside the screen backlight
