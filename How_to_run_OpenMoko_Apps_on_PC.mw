@@ -1,15 +1,45 @@
 ===Install dependencies===
 
 * use aptitude, apt-get, urpmi, or whatever your distro supports
-** Under ubuntu: apt-get install libgtk2.0-dev pulls in everything necessary
 * you will probably need
 ** gtk-dev
 ** pango-dev
 ** atk-dev
-** qmake from Qt4 (libqt4-dev on Debian)
+** qmake from Qt4 (libqt4-dev on Debian) -- this is optional and required only if you do not use auto-tools method
 
-===Build everything in one run using Qmake===
+* Under ubuntu: apt-get install libgtk2.0-dev pulls in everything necessary
+
+===Build the binaries===
+====Build using GNU auto-tools====
+
+=====Set up the environment=====
+
+  export OPENMOKODIR=<svn-checkout>/src/target/OM-2007
+  cd $OPENMOKODIR/openmoko-libs
+  ./autogen.sh
+  make
+  sudo make install
+
+This will install the libraries in /usr/local/lib. If you prefer a non-system location, edit autogen.sh (and remember that an SVN update may undo that) to  add a "--prefix=MYDIR" option for where you want to put the compiled stuff. You can the run "make install" without sudo. One approacj is to put stuff at the source root, by appending the option: "--prefix=$OPENMOKODIR".
+
+=====Compiling sample apps=====
+
+  cd $OPENMOKODIR/examples/...
+  ./autogen.sh
+  make
+  sudo make install
+
+If you used --prefix in the previous step to place the libraries elsewhere, make sure you edit autogen.sh to reflect that. I guess the proper way to do this is to set the PKG_CONFIG_PATH variable. You can of course drop the sudo then.
+
+  ...
+  export PKG_CONFIG_PATH=$OPENMOKODIR/lib/pkgconfig
+  ./configure ...
+
+
+====Build using QMake (the mickeyl way)====
 {{Note|qmake is Mickey's preferred build tool, it probably doesn't work if you're not him. Please use autotools...}}
+
+=====Build everything in one run using Qmake=====
 
   cd <svn-checkout>/src/target/OM-2007
   . ./makevars.sh
@@ -18,21 +48,21 @@
 
 Now the applications should be found in ./bin.
 
-===Set your theme to OpenMoko===
+===Run the examples===
+
+====Set your theme to OpenMoko====
 
 Edit $HOME/.gtkrc-2.0 to something like that:
 
   include "<PATH-to-svn-checkout>/src/target/OM-2007/artwork/themes/openmoko-standard/gtk-2.0/gtkrc"
 
-===Run the examples===
-
-==== Naked ====
+==== Naked execution ====
 
   bin/openmoko-stylus-demo
   bin/openmoko-finger-demo
   bin/openmoko-chordmaster
 
-==== In Xoo ===
+==== Execution within Xoo ====
 
 Adjust svn://src/target/OM-2007/devel/scripts/launch-xoo to your needs (you may need to build some dependencies forehand)
 Then set DISPLAY=:1 and run the examples
