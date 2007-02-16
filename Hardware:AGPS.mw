@@ -80,4 +80,22 @@ A: yes.
 
 ===== Q: Can choosing to use GPS (even with A-GPS disabled) enable others to track me?  Is there a mode where this is not the case? =====
 
-A: ?
+A: The reciever does not emit significant amounts of RF - unless you are literally within centimeters of the device, it's not possible to pick it up. The other alternative would be that the supplied agpsd is trojaned, and can be asked somehow to report on your position.
+The position is entirely computed in agpsd, the GPS hardware cannot know it, it's too dumb.
+
+====== Q: What is DGPS, can DGPS and A-GPS work together?
+
+A: [http://www.oc.nps.navy.mil/oc2902w/gps/dgpsnote.html An overview of DGPS] Differential GPS is basically a way of removing systematic per-satellite errors from various causes (satellite clock drift, atmospheric effects) for 'nearby' recievers, given one reciever that knows where it is.
+
+The per-satellite range errors to a satellite are around 2-3 metres typically. These per-satellite errors are similar for users close to each other.
+These corrections are broadcast by radio in much of the USA (which the neo cannot pick up).
+
+If you can download error information from a nearby source, then you can obtain positions that are much more accurate than without this information. Perhaps well under 1m radius of error, instead of 2 or 3. In some applications this may be of use.
+
+It may be that the apgsd cannot do this, and it will require reverse engineering.
+
+In any case, this would be another few hundred bytes a minute while this is active. (the error information rapidly ages).
+
+Any stationary reciever - even a neo on charge, with a good signal, can produce useful error information. If it had a cheap internet connection at the same time, it could be constantly updating a global error model, for use by other neo owners.
+
+It may be that the apgsd cannot do this, and it will require reverse engineering.
