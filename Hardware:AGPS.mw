@@ -1,150 +1,74 @@
-[[GPS]] is a satellite based positioning system. '''Assisted GPS''', or '''A-GPS''' was introduced to enhance performance.
+== Neo1973's A(ssisted) GPS ==
 
-Conventional GPS had difficulty providing reliable positions in environments surrounded by tall buildings - the so-called 'urban canyon', as well as indoors and under heavy tree cover.
+More info on GPS in general and the OpenMoko chip in particular.
 
-Under these conditions, the GPS signal is often of very poor quality, making it hard for receivers to obtain a position. In addition, when first turned on in these conditions, a non-'''A-GPS''' may not be able to download the orbital information from the GPS satellites, rendering it unable to function until it has a clear signal for around one minute.
+===== Q: Has anybody here ever used AGPS? I'd like to hear your experiences. =====
 
-An '''A-GPS''' receiver can address these problems in several ways, using an ''Assistance Server'':
-*The Assistance Server has a good satellite signal, and lots of computation power, so it can compare fragmentary signals relayed to it by cell phones, with the satellite signal it receives directly, and then inform the cell phone or emergency services of the cell phone's position.
-*It can supply orbital data for the GPS satellites to the cell phone, enabling the cell phone to lock to the satellites when it otherwise could not, and autonomously calculate its position.
-*It can have better knowledge of ionospheric conditions and other errors affecting the GPS signal than the cell phone alone, enabling more precise calculation of position.
+Everybody who has used a modern GPS has used AGPS. It is usually called warm-start or hot-start. AGPS is purely a marketing term. To calculate the position a GPS chip needs:
+     * almanac = coarse position of satellites
+     * ephemeris = precise positon of satellites
 
+The almanac is broadcast in a loop of 12.5 minutes and valid for at least six weeks. The ephemeris is broadcast in a loop of 30 seconds and valid for ~2 hours.
 
-The AGPS chip in the Neo1973 is called Hammerhead, and it is the same chip used in TomTom one devices, which incidentally run Linux, too. See [[Hammerhead/Protocol]]. GTA01 hardware needs a userland binary-only driver called [[gllin]] for Hammerhead to work.
-With AGPS, the Hammerhead brief information page specifies 1s fix time for a position with 5m error.
-According to the [http://lists.openmoko.org/pipermail/neo1973-hardware/2008-January/000307.html Openmoko hardware devel list] the GTA02 hardware has fully open-source gps software stack and does not need any binary driver.
+Time is mostly irrelevant, as modern chips synchronise within a second with the satellites.
 
-AGPS is purely a marketing term. 
-To calculate the position a GPS chip needs:
-* ''almanac'' = coarse position of satellites
-* ''ephemeris'' = precise position of satellites
+The receiver chipsets store this data in flash and load it from there onto the chip in order to _assist_ the hot or warm start.
 
-The almanac is broadcast in a loop of 12.5 minutes and nominally valid for a week but could in general be used for several weeks. The ephemeris is broadcast in a loop of 30 seconds and valid for 4 hours, 2h before and after the time of applicability.
+AGPS now means to load the almanac and the ephemeris from elsewhere, i.e. via a network. For example for free from the american government: http://www.navcen.uscg.gov/gps/precise/default.htm
 
-Receiver chipsets store this data in flash and load it from there onto the chip in order to _assist_ the hot or warm start.
+_A_GPS is a nice convenience yet the success and proper functioning of TomTom and Navigon PDAs shows that you don't need that at all.
 
-One form of AGPS is simply to get this data from elsewhere. Over the internet, or through a dedicated connection, to avoid the 30s or more downloading it from the satellites would take.
+===== Q: The chip in the Neo1973 is a Global Locate AGPS. Anybody know what type? Hammerhead maybe? =====
+A 1: It is probably the same chipset as in ipaq hw6[59]15: http://wiki.xda-developers.com/index.php?pagename=SableGPS
+A 2: Should be Hammerhead.
 
-The supplied binary driver software for the Hammerhead in the Neo1973 supports only downloading data similar to the almanac from a site provided by Global Locate, paid for by license fee on the chip.
+===== Q: I understand the concept of assisted GPS. But does the phone have it's own antenna/receiver so that it can work without 'assistance'? =====
 
-An open-source driver, in companion with [[Server:A-GPS]] may do any of the solutions mentioned at the beginning.
+A: See above, the important part is the GPS and not the assistance. Antenna is thus compulsory.
 
-The amount of data needed is small - 0.5K/day or so.
+===== Q: Has anybody info on the whereabouts of assistance servers, especially in Belgium and Europe? =====
 
-If the spot you charge your neo happens to have a GPS signal, downloading the almanac from the satellites while it charges is essentially free, and takes no Internet access at all. Do this daily, and you get most of the benefit of AGPS.
+A: Can be anywhere on the net. Alternatively a service from the cellphone operators.
+===== Q: Using the assistance servers will probably mean that I will have to pay for that service. Any idea of the costs? =====
 
+A: They use the low cost of their chip as selling point. Their website implies that this is a service that comes with the chip. I'd call it not very clever if they are going to charge you - it would change their image from lowcost to money grabber and the reverse engineering of their binary protocol would happen even faster.
 
+Last but not least: Global Locate boasts itself to get a first fix in 8 sec without AGPS. The importance of AGPS depends whether the part of their website you are reading is targeted at cell phone operators, or not.
 
-== Q: What is DGPS, can DGPS and A-GPS work together? ==
+===== Q: Is there any "A-GPS standard" whatsoever? =====
 
-A: [http://www.oc.nps.navy.mil/oc2902w/gps/dgpsnote.html An overview of DGPS] Differential GPS is basically a way of removing systematic per-satellite errors from various causes (satellite clock drift, atmospheric effects) for 'nearby' receivers, given one receiver that knows where it is.
+A: no. It's a broad term for many variants of GPS
+===== Q: I have heard elsewhere (Wikipedia) that in A-GPS the computation effort is shared between the device and the A-GPS Server. According to a previous post, the device just downloads the ephemeris table so there isn't any  actual "computation sharing", but rather a download of a pre-computed table download. Correct? =====
 
-The per-satellite range errors to a satellite are around 2-3 metres typically. These per-satellite errors are similar for users close to each other.
-These corrections are broadcast by radio in much of the USA (which the neo cannot pick up).
+A: As far as I understand it: yes.  I will ask our GPS engineer to comment
+on those questions.
 
-If you can download error information from a nearby source, then you can obtain positions that are much more accurate than without this information. Perhaps well under 1m radius of error, instead of 2 or 3. In some applications this may be of use.
+===== Q: A-GPS involves additional data traffic and thus (potential) additional costs. Does it use a normal GSM/GPRS IP-based data transfer? does it use some out-of-band GSM/GPRS control messages? or does it get data from broadcasts in the local cell (e.g. GSM cell-broadcast)? =====
 
-It may be that the apgsd cannot do this, and it will require reverse engineering.
+A: GPRS.  so its up to you whether you want that extra traffic (and
+cost, unless you're flat) or not.
+===== Q: if the answer to above is GPRS: is it possible to estimate in advance how much additional traffic (in Kbytes/day of full operation)? =====
 
-In any case, this would be another few hundred bytes a minute while this is active. (the  error information rapidly ages).
+A: I am sure it's a quite fixed amount of 
 
-Any stationary receiver - even a neo on charge, with a good signal, can produce useful error information. If it had a cheap internet connection at the same time, it could be constantly updating a global error model, for use by other neo owners.
+===== Q: Are there any known estimations on the overall (A)GPS performance on the Neo (esp. fix time) =====
 
-It may be that the apgsd cannot do this, and it will require reverse engineering.
+A: There are some numbers in the data sheet of our GPS chipset vendor, but
+that data sheet is closed.  I will ask them to give us some
+document/numbers that we can publicize.
 
+===== Q: Coming to the Neo1973. In order to save costs, can the "Assisted" function in A-GPS be disabled through software API? =====
 
-== Q: What is WAAS, can WAAS and A-GPS work together? ==
+A: yes, it can be disabled through preferences.
 
-A: [http://en.wikipedia.org/wiki/WAAS WAAS] stands for Wide Area Augmentation system; it is the US implementation of a DGPS technique that works over continental wide areas: SBAS or Satellite Based Augmentation System. 
-SBAS differs from local DGPS in that the correction signals are transmitted by other GPS-compatible geo-stationary satellites (nicked named GEO).
-To date, there are three implementations of SBAS:
-* WAAS for the united states
-* EGNOS for Europe
-* MSAS for India
+===== Q: Is it possible to tell whether A-GPS is actually in use or not? =====
 
-Thanks to a much better ionospheric model, an SBAS enabled GPS receiver will offer a much more accurate position than GPS in standalone mode (down to 1 meter accuracy). As with GPS, the GEO satellites have unique identifier called PRN or SVID. GPS satellites PRN are numbered from 1 to 50 (current maximum is 32) and GEO satellites start at PRN 120. The reception of SBAS messages requires that the device locks one of the GEO satellites. In theory it is possible to get those SBAS messages (i.e. in the internet as for Almanacs and Ephemeris using A-GPS) but this method is not standardized and the Neo Ublox AGPS is most certainly not able to work that way. If such a technique was implemented, it would enter the definition of A-GPS but A-GPS is not directly related to WAAS.
+A: yes. either you have enabled it in preferences or nor ;)
 
-== Q: Is an open-source GPS daemon able to be distributed by FIC? ==
-[http://www.fas.org/spp/starwars/offdocs/itar/p121.htm A web copy of the ITAR - International Traffic in Arms Regulation legislation, currently in force in the US]
+===== Q: Is it possible to tell/know which is the A-GPS server currently in use? =====
 
-While stupid, this defines
+A: yes.
 
-----
-... GPS receiving equipment with any of the following characteristics:
-...
-   (2) Designed for producing navigation results above 60,000 feet altitude
-       and at 1,000 knots velocity or greater;
-----
+===== Q: Can choosing to use GPS (even with A-GPS disabled) enable others to track me?  Is there a mode where this is not the case? =====
 
-as being a munition.
-This is right after the section prohibiting rockets that can be used to deorbit satellites on a specific target, and just before nuclear weapons design and test equipment.
-
-And just because it's stupid doesn't mean they won't kick the doors in - or prevent it from sale and levy huge fines, after the gleefull lawyers at Apple point it out. (you need DOD licenses to import/export)
-
-The plugin for the gpsd daemon presumably implements this limit.
-
-Much established hardware has pretty much confirmed that it's OK to do it this way - as long as it's closed source, you can point at the evil hackers, and say that you never did it.
-
-An open source plugin for gpsd distributed with the neo might raise other issues, namely that at some point in the code, there is a self-documented if(velocity>1000kt) test, which can be trivially commented out.
-(the hardware must be able to do this, the velocity of a satellite towards and away from the user greatly exceeds 1000 knots.)
-
-If I was FIC, I would at the very least want a good legal opinion on if an open source gpsd plugin (perhaps a user contributed one after decoding the binary stream that the hammerhead puts out) can be safely distributed, before doing so.
-
---[[User:Morricone|Morricone]] 11:15, 16 February 2007 (CET) You forget, that FIC is not located in the USA, so US laws do not apply.
-
-Very true, however, this would mean that it could not be imported into the US.
-Also that anyone from FIC involved in this could not travel to the US without fear of arrest.
-The penalties are really quite high.
---[[User:Speedevil|Speedevil]] 14:10, 16 February 2007 (CET)
-
-Isn't this resriction implemented in the chipset? wouldn't the chipset itself be illegal in the US without these restrictions?
---[[User:Kiney|Kiney]] 22:20, 14 March 2007 (CET)
-
-The chipset is too dumb. It does not know the position or the velocity. This is only computed in the host CPU. --[[User:Speedevil|Speedevil]] 06:17, 25 March 2007 (CEST)
-
-The chipset has to be able to correlate signals in a much shorter time at high velocity. This can't be done by sw-driver. Even if you could post-process raw data in sw, it would never yield the up to date velocity and speed, and for DOD it's not critical if the device can tell where and how fast it was 30sec ago, as you can't guide missiles this way.
-Exactly that's why the chipset isn't restricted by this law - DOD regulations would never allow to sell "dangerous" hw that's "secured" by a security-by-obscurity-driver only. Otherwise atomic bombs would be free to sell, as long as you don't deliver the activation code ;-) <br>
-The whole crux around closed source drivers is same as it ever was: royalties and warranty. (even GSM fw is closed mainly due to warranty reasons)<br> --[[User:JOERG|jOERG]] 06:00,  2008-10-07 (CEST)
-
-
-However, there must be some code/license bypass to this.
-I'm not supporting license and restriction violation, but legal way to provide opensource gpsd.
-For example:
-
-1) put gpsd in for example LGPL, then provide restriction module as a must, and put module under license that allows open source code, but doesn't allow changes that will break gps module usage restrictions - this way gpsd works, and all restrictions are preserved.
-
-2) Put gpsd into GPL with explicit restriction on code forks that change restriction.
-
-3) Make an end-user license agreement that he will not use it above 60000ft, and 1000knots.
-
-4) mixture of 1,2,3
-<snip>
-If you can't solve restrictions, transfer it.
---[[User:Milos|Milos]] 13:17, 27 July2007 (CEST)
-
-License restrictions won't work.
-The legislation does not say "A GPS receiver capable of...unless it is restricted by license".
-The question is simple: Would hardware distributed with open-source software that effectively has the "unrestrict" switch documented fall under the definitions of a GPS receiver within the meaning of the legislation.
-If it does, then FIC simply can't distribute it (at least within the USA).
-
-If it doesn't, then there is no problem.
-
-However, this is only plausibly answerable by a lawyer specialising in ITAR.
-
-The (snipped) analogy to guns is not correct - the correct analogy is to devices that might or might not be nuclear weapons test equipment. That's what this bit of law also deals with.
-
-Anyway. The closed-source daemon works just fine (mostly). It can be wrapped in a chroot for the paranoid, but simply distributing this will work for the medium term. If users choose to install other drivers, that's their problem. --[[User:Speedevil|Speedevil]] 15:34, 28 June 2007 (CEST)
-
-
-The open-source driver could very well be available online, and FIC can just ship the binary with the Neo1973.  Since there already is NMEA information available, producing a very stable open-source GPS driver may take awhile.  Some users (not developers) may not care how the GPS information is acquired, as long as it just "works".  As a marketing perspective, it would be nice to say that the Neo1973 software is completely open source...
-
-The ITAR legislation may not apply, considering the phone is currently not "''Designed for'' producing navigation results above 60,000 feet altitude and at 1,000 knots velocity or greater;"
-
---[[User:Ciphercast|Ciphercast]] 04:26, 22 July 2007 (CEST)
-
-I would choose to implement "artificial" software design limits, i.e. choose data types/data rages that only allow for lets say 32'000 feet height or 512 knots per second. That would not break daily use (512 knots = 589 Miles or mach 0,8) and no "function" to circumvent the limits would be documented with the product or the product source. A "hacker" would be needed to change the source, recompile, relink and repackage it, not mentioning the possible breaking of some/all apps. Assuming that "designed for" does not mean you have to actively protect against missusage, like using a magic key in the bus protocol, you should be compliant to to the law if you keep the source code straight, i.e. do not point this out.
---[[User:Memed|Memed]] 22:46, 2 February 2008 (CET)
-
-'''This is unlikely to be an issue in the GTA02''' as the GPS receiver module should take care of it. The GTA02 uses a [http://www.u-blox.com/products/atr0635.html ATR0635] and on page 9 of the datasheet (Table 3-1: Performance Specification) states the module is limited to "Altitude 18,000 m Velocity 515 m/s One of the limits may be exceeded but not both." - in other words, the chip solves the GPS equations, and if the user's speed and velocity exceed the ITER-imposed limits it will stop outputting a fix. The datasheet does not specify exactly how the chip will behave in this situation, but most likely the [http://www.gpsinformation.org/dale/nmea.htm#GGA serial NMEA data output] will change the 'fix quality' value to 'invalid' and zero or stop updating the other parameters in the NMEA data. The practical upshot of this is: The closed-source GPS module's software takes care of ITAR compliance. [[User:Mike1024|Mike1024]] 17:25, 19 July 2008 (UTC)
-
-[[Category:GPS]]
+A: ?
