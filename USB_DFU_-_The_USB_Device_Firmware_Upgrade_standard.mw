@@ -1,5 +1,3 @@
-{{Languages|USB DFU - The USB Device Firmware Upgrade standard}}
-
 USB Device Firmware Upgrade (DFU) is an official USB device class specification of the USB Implementers Forum.
 
 It specifies a vendor and device independent way of updating the firmware of a USB device.  The idea is to have only one vendor-independent firmware update tool as part of the operating system, which can then (given a particular firmware image) be downloaded into the device.
@@ -8,33 +6,27 @@ In addition to firmware download, it also specifies firmware upload, i.e. loadin
 
 The current version is 1.1, it can be found for free download at http://www.usb.org/developers/devclass_docs/DFU_1.1.pdf
 
-Despite its clear architecture and DFU being an official USB standard, very few companies are known to have implemented it in their products.  In the Free Software / Hardware area, most notably the [http://www.openpcd.org/ OpenPCD] project has used it for their Free RFID readers.
+Despite its clear architecture and DFU being an official USB standard, very few companies are known to have implemented it in their products.  In the Free Software / Hardware area, most notably the [[http://www.openpcd.org/ OpenPCD]] project has used it for their Free RFID readers.  
 
-== Openmoko and USB DFU ==
+== OpenMoko and USB DFU ==
 
-Since Openmoko is a big supporter of open standards and protocols, it has chosen USB DFU as the way to do "firmware" (actually, general software) updates on its official devices.
-
-=== USB DFU host utility ===
-
-Please see [[dfu-util]] for more information.
+Since OpenMoko is a big supporter of open standards and protocols, it has chosen USB DFU as the way to do "firmware" (actually, general software) updates on its official devices.
 
 === USB DFU on the Neo1973 ===
 
-The DFU implementation is part of our version of the [[u-boot]] bootloader.
-
-You can use it with any USB DFU 1.1 compliant utility.  We also have developed our own [[dfu-util]] program.
+The DFU implementation is part of our version of the [[u-boot]] [[Bootloader]].  Once the implementation has stabilized and received some cleanups, we are trying to merge this into the upstream u-boot tree.
 
 ==== Type of DFU Download ====
 
-The Neo1973 has enough SDRAM to accomodate a download mechanism according to Chapter 6.1 Mechanism "1." (to receive the entire image into a buffer and perform the actual programming during the manifestation phase).  We are using this mechanism for the u-boot [[Partitions|partition]] to prevent users from "bricking" their device if something goes wrong during the transfer.
-
-For other [[Partitions|partitions]] (kernel, rootfs, ...) however, future devices will have more NAND than SDRAM.  Thus, we implement a download mechanism according Chapter 6.1 Mechanism "2." for all non-bootloader partitions.
+The Neo1973 has enough SDRAM to accomodate a download mechanism according to Chapter 6.1 Mechanism "1." (to receive the entire image into a buffer and perform the actual programming during the manifesetation phase).  Thus, we can first transfer the firmware, then do checksum verification, and finally flash it into the NAND flash.
 
 ==== USB DFU Interfaces ====
 
-The DFU in the Neo1973 has a USB Alternate Interface name "RAM 0x32000000" number 0 for downloading executable code into RAM (address 0x32000000) and executing it. The rest of the Alternate Interfaces are for each internal NAND flash [[Partitions|partition]].
+The Neo1973 has the following USB Interfaces for DFU:
 
-{{Languages|USB DFU}}
-
-[[Category:Flashing Openmoko]]
-[[Category:USB|USB]]
+# RAM.  This downloads executable code into RAM (address 0x32000000) and executes it
+# the u-boot bootloader partition in NAND flash
+# the u-boot environment partition in NAND flash
+# the kernel partition in NAND flash
+# the splash partition in NAND flash
+# the rootfs partition in NAND flash.
