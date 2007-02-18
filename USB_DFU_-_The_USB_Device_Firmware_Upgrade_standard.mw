@@ -1,0 +1,32 @@
+USB Device Firmware Upgrade (DFU) is an official USB device class specification of the USB Implementers Forum.
+
+It specifies a vendor and device independent way of updating the firmware of a USB device.  The idea is to have only one vendor-independent firmware update tool as part of the operating system, which can then (given a particular firmware image) be downloaded into the device.
+
+In addition to firmware download, it also specifies firmware upload, i.e. loading the currently installed device firmware to the USB Host.
+
+The current version is 1.1, it can be found for free download at http://www.usb.org/developers/devclass_docs/DFU_1.1.pdf
+
+Despite its clear architecture and DFU being an official USB standard, very few companies are known to have implemented it in their products.  In the Free Software / Hardware area, most notably the [[http://www.openpcd.org/ OpenPCD]] project has used it for their Free RFID readers.  
+
+== OpenMoko and USB DFU ==
+
+Since OpenMoko is a big supporter of open standards and protocols, it has chosen USB DFU as the way to do "firmware" (actually, general software) updates on its official devices.
+
+=== USB DFU on the Neo1973 ===
+
+The DFU implementation is part of our version of the [[u-boot]] [[Bootloader]].  Once the implementation has stabilized and received some cleanups, we are trying to merge this into the upstream u-boot tree.
+
+==== Type of DFU Download ====
+
+The Neo1973 has enough SDRAM to accomodate a download mechanism according to Chapter 6.1 Mechanism "1." (to receive the entire image into a buffer and perform the actual programming during the manifesetation phase).  Thus, we can first transfer the firmware, then do checksum verification, and finally flash it into the NAND flash.
+
+==== USB DFU Interfaces ====
+
+The Neo1973 has the following USB Interfaces for DFU:
+
+# RAM.  This downloads executable code into RAM (address 0x32000000) and executes it
+# the u-boot bootloader partition in NAND flash
+# the u-boot environment partition in NAND flash
+# the kernel partition in NAND flash
+# the splash partition in NAND flash
+# the rootfs partition in NAND flash.
