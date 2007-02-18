@@ -1,6 +1,11 @@
 The battery charging logic is embedded into our [[Neo1973_Hardware#Power_Management|PCF50606 PMU]] (Power Management Unit).
 
-The PCF50606 suppors a variety of battery charging modes.
+The PCF50606 suppors a variety of battery charging modes, based around the hardware limitations of USB.
+
+USB hubs may only provide up to 100mA per device.
+If more than the available current is drawn from them, they may be reset, or power off.
+This resets all devices connected to the USB bus, possibly causing data loss.
+So, fast charge mode is only enabled after the Neo is told that it is safe to charge at this current. Or optionally if there is no communication from the host for 30 seconds - as may be the case with dumb 'USB chargers'.
 
 {{warning|While we have spent a significant amount on various safe-guards such as battery-internal overcurrent/overvoltage protection, manual twisting with low-level charger control aspects is not recommended.  It might render either the battery or the charging circuit damaged.}}
 
