@@ -203,3 +203,30 @@ FIXME: no idea what this is for
 == Kernel API ==
 
 == Userspace API ==
+
+== Approximate power draw of various subsystems. Estimated from datasheets.==
+
+The battery has a total of 1200mAh, at 3.6V. This is approximately 3500mAh, once power supply losses are taken into account.
+
+* LCD 
+**  200mW with backlight at full brightness
+**  40mW with backlight at 10%
+***  Based on similar 2.8" LCDs.
+* CPU
+**  320mW @ 200MHz
+**  450mW @ 266MHz
+**  140mW @ 200MHz idle.
+**  50mW @ 12MHz (slow mode)
+*** These include fudge factors for RAM and other systems, from the CPU datasheet.
+* Bluetooth ?
+* GSM ?
+* GPS
+** 25mA
+*** Based on comparison with a broadly similar (though not as fully featured chip [http://www.maxim-ic.com/appnotes.cfm/an_pk/3447 from Maxim]
+
+USB seems unlikely to work in slow mode. The LCD controller is unknown - the product notes say that it has RAM, which may imply it can self-refresh.
+
+This would imply that with the CPU constantly on in low power mode, GPS and GSM blipping on and off, and display off, the worst case power consumption is probably around 70mW, leading to a battery life of 2 days.
+If the CPU is turned off, battery life rises significantly.
+
+With everything on, playing video with sound, for example should get well over 4 hours.
