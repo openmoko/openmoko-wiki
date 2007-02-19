@@ -24,14 +24,16 @@ A erase block consists of multiple pages.  In the Neo1973 case, every erase bloc
 
 === Bad Blocks ===
 
-NAND memory apparently gets shipped with blocks that are already bad.  The vendor just marks those blocks as bad, thus resulting in higher yield and lower per-unit cost.  Thus, the flash will in the end contain three kinds of blocks:
+NAND memory apparently gets shipped with blocks that are already bad.  The vendor just marks those blocks as bad, thus resulting in higher yield and lower per-unit cost.  
+
+The flash contains four kinds of blocks (16kBytes):
 * Factory-Default bad blocks
 * Worn-out bad blocks
 * Good blocks
+* The first block.
+**This block is guaranteed to not require error correction up to 1000 writes. This is needed as initial boot code can't do ECC.
 
-The only block that is guaranteed to be good, is the first block (first 16kBytes).
-
-We are also guaranteed that a minimum of 4016 blocks (out of the total 4096) are good.  This means up to 80 blocks (1.3MBytes) can be dead, resulting in a total guaranteed amount of working NAND storage of 65798144 bytes.
+We are also guaranteed that a minimum of 4026 blocks (out of the total 4096) are good.  This means up to 70 blocks (1.3MBytes) can be dead, resulting in a total guaranteed amount of working NAND storage of 65961984 bytes.
 
 == Solution ==
 
