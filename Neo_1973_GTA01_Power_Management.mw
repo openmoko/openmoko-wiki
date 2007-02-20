@@ -1,4 +1,6 @@
-== S3C2410 ==
+== S3C2410 SoC ==
+
+This is an overview about the S3C2410 power states / modes and their capabilities
 
 The S3C2410 has the following modes:
 
@@ -44,8 +46,109 @@ The number of wake-up sources is more restricted in this mode:
 In order to fully support Power_off mode, we need to
 * Be able to switch off VDDi/VDDiarm/VDDi_MPLL/VDDi_UPLL separately from VDDalive, using a switch based on the PWREN signal
 
+== PCF50606 PMU ==
+
+This is an overview of the PCF50606 power modes / state transitions
+
+=== NOPOWER ===
+
+Condition: Vbat < Vverylowbat && Vback < Vlowback && Vchgvin < Vlowchg
+
+Human-Readable: If main battery voltage < 2.7V and backup battery voltage < 1.3V and charger voltage < 2.7V
+
+=== SAVE ===
+
+Condition: Vbat < Vverylowbat && (Vback > Vlowback || Vchgvin > Vlowchg)
+
+Human-readable: If main battery voltage < 2.7V and at least backup battery voltage > 1.3V or charger voltage > 2.7V.
+
+=== STANDBY ===
+
+Condition: Vbat > Vverylowbat
+
+Human-readable: If main battery voltage > 2.7V
+
+=== ACTIVE ===
+
+Condition: Vbat > Vlowbat
+Human-Readable: If main battery voltage > 2.8V (configurable up to 3.4V)
+Transition from STANDBY to ACTIVE: If ONKEY button is pressed, or RTC Alarm, or EXTON or charger insert or pen-down by touchscreen (we don't use the PMU TS controller)
+
+== JBT6K74 LCM ==
+
+=== Deep Standby ===
+
+In this mode, only the supply power is activated
+
+=== Sleep ===
+
+Holds register data with clock stopped
+
+=== Normal ===
+
+Fully powered up and operational
 
 == System Level ==
+
+This is a description of the system-level power management.
+
+=== System Power states ===
+
+==== SYS_NO_POWER ====
+
+In this state, there is no main battery and no USB charger voltage applied
+
+* PCF50606: SAVE
+* S3C2410: unpowered
+* JBT6K74: unpowered by PMU
+* GSM: unpovered because no Vbatt
+* GPS: unpowered by PMU
+* Bluetooth: unpowered by PMU
+
+==== SYS_POWER_OFF ====
+
+This is the regular, "switched off" state of the device.
+
+* PCF50606: STANDBY
+* S3C2410: unpowered by PMU
+* GSM: Powered down by driving MODEM_ON to LOW
+* GPS: unpowererd by PMU
+* JBT6K74: unpowered by PMU
+* Bluetooth: unpowered by PMU
+
+==== SYS_POWER_ON_FULL ====
+
+This is the regular, "fully switched on" state of the device, during user interaction
+
+* PCF50606: ACTIVE
+* S3C2410: NORMAL
+* GSM: Powered up by driving MODEM_ON to HIGH
+* GPS: Depending usage / configuration
+* Bluetooth: Depending usage / configuration
+* JBT6K74: NORMAL
+
+==== SYS_POWER_ON_SCRSAVE ====
+
+This is the screen saver mode, if user doesn't interact with LCM for some time (SCRSAVE_TIMEOUT), default 30sec.
+
+* PCF50606: ACTIVE
+* S3C2410: SLOW or IDLE
+* GSM: Powered up by driving MODEM_ON to HIGH
+* GPS: Depending usage / configuration
+* Bluetooth : Depending usage / configuration
+* JBT6K74: SLEEP
+
+
+==== SYS_SLEEP ====
+
+This is the power saving mode, if user doesn't interact with LCM within SLEEP_TIMEOUT after SYS_POWER_ON_SCRSAVE was entered, default 30sec.
+
+* PCF50606: ACTIVE
+* S3C2410: Power_off
+* GSM: Powered up by driving MODEM_ON to HIGH
+* GPS: TBD
+* Bluetooth: Powered down by PMU
+* JBT6K74: Deep Standby
 
 === Wake-up reasons ===
 
