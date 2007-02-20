@@ -1,47 +1,3 @@
-
-== System Level ==
-
-=== Wake-up reasons ===
-
-In the following events, we want the main CPU to be able to be woken up:
-
-==== Events from GSM ====
-
-* Incoming phone call
-* Incoming SMS
-* Loss of network signal
-
-===== Implementation =====
-
-The GSM daemon configures the GSM Modem in a way to only report the required unsolicited result codes to the UART.  The CPU then needs to wake-up as soon as characters arrive at the UART.
-
-{{note|The S3C2410 cannot resume from Power_off on UART input data. We need to connect either RTS/CTS to EINT, or send some other signals via GSM Modem GPIO to the EINT[0..15] pins of the S3C2410}}
-
-==== Button Press ====
-
-If somebody pushes either the [[Neo1973 911 Button]] or the [[Neo1973 Power Button]], the system shall wake up
-
-===== Implementation =====
-
-====== Power Button ======
-During suspend, the PMU is configured to allow PWRONF events to generate interrupts to the CPU.
-
-{{note|Currently, the PMU IRQ is connected to EINT16, i.e. an interrupt source that cannot wake-up from Power_off mode!}}
-
-====== 911 Button ======
-The 911 button is connected to a EINT source that can wake-up the CPU from Poewer_off. 
-
-This means that resuming on 911 button will work out-of-the-box
-
-==== Charger Events ====
-
-If a charger plug (or any other USB device) is connected, the device shall resume and update the battery [charger] status. Also, charger errors such as over/undervoltage, over/under-temperature shall be reported.
-
-===== Implementation =====
-During suspend, the PMU is configured to allow EXTONR,CHGERR and related events to generate interrupts to the CPU.
-
-{{note|Currently, the PMU IRQ is connected to EINT16, i.e. an interrupt source that cannot wake-up from Power_off mode!}}
-
 == S3C2410 ==
 
 The S3C2410 has the following modes:
@@ -87,6 +43,51 @@ The number of wake-up sources is more restricted in this mode:
 
 In order to fully support Power_off mode, we need to
 * Be able to switch off VDDi/VDDiarm/VDDi_MPLL/VDDi_UPLL separately from VDDalive, using a switch based on the PWREN signal
+
+
+== System Level ==
+
+=== Wake-up reasons ===
+
+In the following events, we want the main CPU to be able to be woken up:
+
+==== Events from GSM ====
+
+* Incoming phone call
+* Incoming SMS
+* Loss of network signal
+
+===== Implementation =====
+
+The GSM daemon configures the GSM Modem in a way to only report the required unsolicited result codes to the UART.  The CPU then needs to wake-up as soon as characters arrive at the UART.
+
+{{note|The S3C2410 cannot resume from Power_off on UART input data. We need to connect either RTS/CTS to EINT, or send some other signals via GSM Modem GPIO to the EINT[0..15] pins of the S3C2410}}
+
+==== Button Press ====
+
+If somebody pushes either the [[Neo1973 911 Button]] or the [[Neo1973 Power Button]], the system shall wake up
+
+===== Implementation =====
+
+====== Power Button ======
+During suspend, the PMU is configured to allow PWRONF events to generate interrupts to the CPU.
+
+{{note|Currently, the PMU IRQ is connected to EINT16, i.e. an interrupt source that cannot wake-up from Power_off mode!}}
+
+====== 911 Button ======
+The 911 button is connected to a EINT source that can wake-up the CPU from Poewer_off. 
+
+This means that resuming on 911 button will work out-of-the-box
+
+==== Charger Events ====
+
+If a charger plug (or any other USB device) is connected, the device shall resume and update the battery [charger] status. Also, charger errors such as over/undervoltage, over/under-temperature shall be reported.
+
+===== Implementation =====
+During suspend, the PMU is configured to allow EXTONR,CHGERR and related events to generate interrupts to the CPU.
+
+{{note|Currently, the PMU IRQ is connected to EINT16, i.e. an interrupt source that cannot wake-up from Power_off mode!}}
+
 
 == Voltages ==
 
