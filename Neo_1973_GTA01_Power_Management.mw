@@ -1,4 +1,56 @@
+
+== System Level ==
+
+FIXME
+
+== S3C2410 ==
+
+The S3C2410 has the following modes:
+
+=== Normal Mode ===
+
+This is the most power-consuming mode.  Regular operation at full clock speed (266MHz).
+The typical power consumption is 335mW in this mode.
+
+We can dynamically reduce the CPU core clock speed to lower frequencies, if required.
+
+=== Idle Mode ===
+
+In this mode, FCLK to the CPU core is switched off.  This reduces the power consumption to about half the typical 'Normal mode' consumption: 177mW
+
+==== Wake-up sources ====
+
+any interrupt.
+
+=== Slow Mode ===
+
+In slow mode, FCLK is tied to the external crystal, i.e. 12MHz in our case.  The CPU core, SDRAM and bus clocks are also running at 12MHz.
+
+This reduces the power consumption to typically 33mW.
+
+==== Wake-up sources ====
+
+none, we can just use our slowly running code to switch back to Normal mode, if it's required.
+
+=== Power_off Mode ===
+
+In Power_off mode, only the SDRAM is held in refresh, and the SoC-internal wake-up logic and  RTC is powered.  This means that the overall power consumption of the CPU goes down to max. 100uA, which translates to 200uW at 2.0V core voltage.
+
+==== Wake-up sources ====
+
+The number of wake-up sources is more restricted in this mode:
+
+* EINT[0...15]
+* RTC Alarm Interrupt
+* nBATT_FAULT pin
+
+==== System design considerations ====
+
+In order to fully support Power_off mode, we need to
+* Be able to switch off VDDi/VDDiarm/VDDi_MPLL/VDDi_UPLL separately from VDDalive, using a switch based on the PWREN signal
+
 == Voltages ==
+
 
 === VB ===
 
