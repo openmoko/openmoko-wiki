@@ -1,0 +1,37 @@
+== Purpose ==
+
+dfu-util is a program that implements the Host (PC) side of the [[USB DFU]] (Universal Serial Bus Device Firmware Upgrade) protocol.
+
+In the OpenMoko project, we use this program to communicate with our specially enhanced [[u-boot]] boot loader, which implements the DFU device side.
+
+Using dfu-util and your Neo1973, you can
+* transfer and flash partitions to [[NAND Flash]], such as 
+** The Linux [[kernel]]
+** The root file system partition
+** The splash screen partition
+** The u-boot environment
+** Last, but not least: The [[u-boot]] bootloader itself.
+* transfer anything into Neo1973 RAM
+** this can be used for fast development cycles of low-level code such as kernels without flashing them
+* read out the current NAND partitions
+** this is an easy and efficient way of doing full backups of your phone
+
+== Phrasebook ==
+
+There's no full-fledged manual yet.  Instead, some examples:
+
+=== Flashing the kernel ===
+
+ dfu-util -a 3 -t 4093 -D /path/to/uImage
+
+=== Flashing the bootloader ===
+
+ dfu-util -a 1 -t 4093 -D /path/to/u-boot.bin
+
+=== Copying a kernel into RAM ===
+
+ dfu-util -a 0 -t 4093 -D /path/to/uImage
+
+Once this has finished, the kernel will be available at the default load address of 0x32000000 in Neo1973 RAM. 
+
+{{note|You cannot transfer more than 2MB of data into RAM using this method}}
