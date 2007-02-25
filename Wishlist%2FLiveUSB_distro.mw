@@ -1,193 +1,34 @@
-{{wishlist}}
+An openmoko device could act as the perfect geeky swiss knive: go anywhere with your Linux desktop and tools
 
-==Introduction==
+When in storage device mode, a host computer should be able to boot on it, presenting a grub menu offering to boot into several images / partitions (payloads) on the transflash: memtest, UBCD (the ultimate boot cd), a lightweight security oriented livecd distro, you name it... 
 
-NOTE: this page may be renamed: portable desktop
+Usually, all you need for this with an USB storage device (flash USB stick or external drive) is a partition, flagged "bootable" (see fdisk), containing aa boot loader (say grub). But the problem is that specifications vary between motherboards, so there are variants and mandatory requirements to define (here would be a good idea), so that one can optimize/maximize the compatibility.
 
-An openmoko device could act as '''the perfect geeky swiss knive''': go anywhere with your Linux desktop and tools.
+Similar functionality can be found in the Wizpy portable media player:
+http://en.wikipedia.org/wiki/Wizpy
 
-YES, there are tons of liveCDs out there, but CDs/DVDs:
-* get easily damaged
-* don't fit in a pocket (except for businesscard-sized ones ; too exotic...)
-* don't update or save settings/personal data without a supplementary USB device
+The booted payloads must'nt rely on dedicated partitionning; for instance, Ubuntu's boot menu offers memtest execution, here's the grub config line (/boot/grub/menu.lst):
 
-YES, there are LiveUSB distros but:
-* a Neo/Openmoko device IS sort of an USB stick; one object is better than two
-* you may carry my cellphone everywhere, what about usb sticks or cds ?
+title           Ubuntu, memtest86+
+root            (hd0,2)
+kernel          /memtest86+.bin
+quiet
+boot
 
-The biggest argument against these ones is that you'd have to carry an USB cable with you... But it's a standard one, which is good news :) An integrated zippable plug could be an interesting add-on...
+The file is located /boot/memtest86+.bin
+What's this file? An ISO? ....
 
-Similar functionality can be found in [http://en.wikipedia.org/wiki/Wizpy the Wizpy portable media player], but relies on different methods for working under Windows (cd-rom emulation).
+TODO:
+- can one do the same with a distro
+- how to have a writable system (to keep changes)
+- can it already be done?
+- partitions or binary images?
+- what are the compatibility tricks?
 
-When the openmoko device is in mass storage mode, a host computer should be able to boot on it, presenting a grub menu offering to boot into several images / partitions (payloads) on the transflash: memtest, UBCD (the ultimate boot cd), a lightweight security oriented livecd distro, you name it... 
+Requirements:
+- The booted OS should be able to access to openmoko's personal data (ex contacts directory, media files...)
+- the device should charge at the same time
+- integrate qemu for in-other-OSes loading (without rebooting)
+- if possible, the device should still work normally: act as gprs modem, phone
 
-It's sometimes called Live USB: from [http://en.wikipedia.org/wiki/Live_USB Wikipedia LiveUSB definition], ''A live USB is a USB flash drive containing a full operating system which can be booted from. Live USBs are closely related to Live CDs, and are sometimes used interchangeably. Like Live CDs, Live USBs can be used for system administration, data recovery, or the testing of operating system distributions without committing to a permanent installation on the local hard drive. Many of the smaller Linux distributions can also be used from a USB flash drive.''
-
-Usually, all you need for this with an USB storage device (flash USB stick or external drive) is a partition, flagged "bootable" (see fdisk), containing a boot loader (say grub). But the problem is that specifications vary between motherboards, so there are variants and mandatory requirements to define (here would be a good idea), so that one can optimize/maximize the compatibility.
-
-==The perfect geek knife==
-
-We may want to start our own distro with the following constraints:
-* Multiboot: small utilities/compilations + bull blown light OS
-* Aiming at maximum hardware compatibility, possibly using liveCD technology (knoppix-based distros)
-* Aiming at minimum resource+system footprint, and boot speed
-* Being able to install software temporary (for the session) or permanently, upgradable
-* Being able to use the phone features at the same time (access pim, data & calls)
-
-Optimally, being able to charge the device while plugged in would be great too.
-
-==About USB Booting==
-
-From [http://www.damnsmalllinux.org/wiki/index.php/USB_Booting DSL Wiki]:
-
-Older computer BIOS usually do not support direct booting from a USB device. Around 2001, PC motherboard manufacturers started to add USB boot support.
-
-There are two common BIOS methods for direct USB booting:
-* One method is called the "USBHDD" method and it is used to support the booting of standard USB mass storage devices that are configured like a normal PC hard drive.
-* The other method is called the "USBZIP" method and it supports booting from a USB storage device that behaves like the original IOMEGA ZIP drive with USB support. 
-
-Most computers (just about all Dells, for example) made today have a BIOS that supports the USBHDD method so I expect that this will eventually become the standard way to boot a USB device. However, many motherboards will support BOTH methods, and many older motherboards have USBZIP support.
-
-Some newer BIOSs which support USB 2.0 will not boot from an older pen drive. Using a USB 2.0 compliant one usually solves this problem. Also, some older BIOSs which only support USB 1.1 will not boot from newer drives which support USB 2.0!
-
-Some USB keys don't boot. If this is the case, it may be possible to fix them by installing a new master boot record. (Most keys boot OK by default; some cannot be fixed even by doing this. However, it helps in some cases). Run the command:
-
-lilo -M /dev/$usbdevice
-
-(where usbdevice is the key, ex: /dev/sdb, checking '''dmesg''' shall give the appropriate one when plugging the neo in mass storage mode)
-
-==USB Booting in Neo1973's kernel==
-
-Although there is very little information about it, the g_storage kernel module is responsible for the Neo's mass storage mode. The boot-or-not criteria might rely on this very module.
-
-==TODO==
-
-Testing/further research has to be conducted to determine:
-* if a bootable-flagged partition / grub doesn't mess openmoko up
-* if the phone can still act as a phone, or if the booted os can use the gprs functions
-* if the phone can recharge on mass storage mode (from the usb cable)
-* if a dedicated partition for each payload is needed (see memtest example...)
-* if multi-boot is possible: grub?
-
-==Linux distro Howto's: liveUSB creation==
-
-In short:
-#Mount USB drive, with e.g. mount /dev/sda1 /flash - can be either FAT16 or FAT32!
-#Mount ISO image, with e.g. mount /tmp/dsl-3.2.iso /tmp/iso -o loop
-#Copy all contents from ISO to USB drive: cp -vr /tmp/iso/* /flash/
-#Rename and move syslinux files to root directory: mv /flash/boot/isolinux/* /flash/
-#Rename isolinux.cfg: mv /flash/isolinux.cfg /flash/syslinux.cfg
-#Unmount USB drive: umount /flash
-#Install syslinux: syslinux /dev/sda1 and eventually set the MBR boot flag for this partition (with fdisk). 
-
-*Fedora Core's [http://revisor.fedoraunity.org Revisor] enables easy GUI-driven ISO customization, allowing to choose the output medium (CD/DVD/USB)
-*[http://www.damnsmalllinux.org/wiki/index.php/Installing_to_a_USB_Flash_Drive Installing DSL to USB device - using grub]
-*[http://wiki.debian.org/BootUsb Debian BootUSB - using Lilo]
-*[http://www.debuntu.org/how-to-install-ubuntu-linux-on-usb-bar Howto install ubuntu (or any other distro) on usb stick]
-*[http://www.gentoo.org/doc/en/liveusb.xml Gentoo on usb stick]
-*[http://pendrivelinux.com/ Windows & Linux tutorials & resources]:     
-    * Flash installation via Windows: XUbuntu, DSL, Knoppix, Slax, MiniMe
-    * Flash installation via Linux: Ubuntu Edgy, Knoppix, PCLinuxOS
-
-'''Transflash partitioning schema example'''
-
-* 2 Gb: /dev/sd? (where N is the transflash's number)
-* 700 Mb: /dev/sd?1 : containing bootable iso, FAT16
-* 1300 Mb: /dev/sd?2 : openmoko & bootable os home partition, EXT3?
-* + eventually a swap
-
-The limitation of this method is that the booted OS is static (not-self modifiable). There's the option to install linux using the partition, but it's not really mobility-oriented (liveCDs are optimized for maximum autoconfiguration).
-
-==Alternative methods==
-
-===Booting ISO files ?===
-
-* Grub? From [http://www.freesoftwaremagazine.com/articles/grub_intro#comment-12900 How to install grub on an usb pendrive]:
-    If you want to boot from a iso file on a harddisk, do something in menu.lst like
-    title Boot from iso on a harddisk
-    map (hdX,Y)/your.iso (hdZ)
-    map --rehook
-    chainloader (hdZ)+1
-    rootnoverify (hdZ)
-    boot
-
-Grub & memdisk can boot floppy images, but (AFAIK) not isos. Example from the stock /boot/grub/menu.lst ubuntu:
-    title           Ubuntu, memtest86+
-    root            (hd0,2)
-    kernel          /memtest86+.bin
-    quiet
-    boot
-
-''Using the memdisk kernel from the syslinux package, you can load disk images and execute them in a non-emulated environment.''
-
-* [http://www.knoppix.net/wiki/Cheat_Codes knoppix '''bootfrom''' cheatcode]
-
-    bootfrom=/dev/hda1/KNX.iso 
-
-Bootfrom needs access to a running Knoppix-System '''with the same Kernel as the Bootkernel''', before it is able to mount the partition / ISO-Image.  
-
-* Maybe there's a way to achieve a boot cd iso selecter see ([http://www.linuxquestions.org/questions/showthread.php?t=528840 this post])
-* virtualization-oriented distro... ex [http://unit.aist.go.jp/itri/knoppix/xen/index-en.html Xenoppix] Cons: would work best only on modern VT-capable computers. What about a very minimal distribution (say DSL without X) kqemu-enblaed, booting into an ncurses iso-loader? The delicate part would be on the networking side.
-
-===Zero-Install / Networked systems===
-
-*[http://klik.atekon.de/wiki/index.php/Main_Page Klik] with more than 1000 packages ported. See [http://klik.atekon.de/wiki/index.php/Comparison comparison chart].
-*[http://0install.net/index.html The Zero Install System], with automatic dependancies, upgrading. See [http://0install.net/matrix.html] comparison chart.
-*Why not rolling a [http://wiki.rpath.com/wiki/Conary:Concepts Conary/RPath-based] distro, based on [http://www.rpath.com/rbuilder/project/rpath/ rPath linux] reference distribution ? Or choose within the available ones...
-* The FUSE [http://httpfs.sourceforge.net/net_boot.htm httpfs] may allow pure http net booting, downloading files from a distant livecd only when needed (this image may be very minimal though).
-* [http://developer.amazonwebservices.com/connect/thread.jspa?threadID=10271&start=75&tstart=0 some people] are thinking of using Amazon S3 as virtual disk
-
-===Using Qemu to boot Linux from a flash drive within Windows===
-
-The following tutorial explains how to use Qemu to boot Linux from a portable USB flash device while still working within Windows. This Enables the user to have both systems running at the same time eliminating the need to restart the PC and set your BIOS options to boot Linux.
-
-[http://www.pendrivelinux.com/2007/03/09/use-qemu-to-boot-linux-from-windows/ PendriveLinux article]
-
-===Putting a vnc server on openmoko + IP over USB or BlueTooth/Wifi===
-
-That's another alternative :) Will bring a VGA-sized capture screen. However, given the current animated behaviour in openmoko, performance will be poor.
-
-===The BlackDog project===
-
-"When plugged into the host computer’s USB port, BlackDog starts up, '''automatically launching the X Window system for Windows Xming and a software NAT router via an autorun application that the BlackDog presents to the host through a virtual USB CD-ROM. Once those applications are running, the virtual USB CD-ROM drive disconnects, and a virtual USB-to-Ethernet adapter is connected to provide the communications link.'''
-
-The host machine’s monitor, keyboard, mouse, and Internet connection are used by the BlackDog for the duration of the session."
-
-The [http://en.wikipedia.org/wiki/BlackDog BlackDog server] project has lots of interesting concepts (and software). Could [http://www.jasonkolb.com/weblog/2006/11/idea_7_personal.html personal servers] change the face of computing ? Together with biometry, ''they open up the possibility of carrying your personal server, or an extension of it, with you on your physical person. The reason this is so exciting is because it enables biometric authentication that doesn't require shipping your biometric data to a third party'.
-
-==Interesting distros/payloads==
-
-'''System diagnostics / recovery'''
-*[http://en.wikipedia.org/wiki/Memtest Memtest86+] Very small
-*[http://www.ultimatebootcd.com/ The Ultimate Boot CD]
-*[http://www.sysresccd.org/Main_Page System Rescue CD]
-*[http://www.tux.org/pub/people/kent-robotti/looplinux/rip/ Recovery IS Possible] < 80 MB
-
-'''General purpose'''
-*[http://jinx-linux.sourceforge.net/ jinx-linux] < 50 MB
-*[http://knoppix.com/ Knoppix] 700 MB CD-ROM
-*[http://www.puppylinux.org PuppyLinux] < 100 MB
-*[http://www.damnsmalllinux.org DSL] ~50 MB
-*[http://gentoo-wiki.com/TinyGentoo#What_is_this_.3F TinyGentoo] 5 MB
-
-'''Security-oriented''': pentesting, forensics, anonymous webbrowsing
-*[http://www.darknet.org.uk/2006/03/10-best-security-live-cd-distros-pen-test-forensics-recovery/ List of Security distros]
-*[http://www.remote-exploit.org/backtrack.html Backtrack Livecd]
-*[http://en.wikipedia.org/wiki/Anonym.OS Anonym.OS: browse the web anonymously]
-*[http://dban.sourceforge.net/ Darik's Boot and Nuke]: ''dangerous''
-*[http://byzgl.sourceforge.net/wiki/index.php/Main_Page Byzantine OS] is a webkiosk appliance (32/48 MB)
-
-The SabayonLinux distro offers a lot of [http://www.sabayonlinux.org/wiki/index.php?title=Sabayon_Linux#Boot_Methods_for_special_ways_of_using_Sabayon boot cheatcodes], such as booting onto GeexBox. We should take a look at the method used.
-
-'''[http://www.livecdlist.com/ List of live distros @ livecdlist.com]''' ''Includes sizes''
-
-'''[http://en.wikipedia.org/wiki/List_of_LiveDistros List of live distros @ wikipedia]'''
-
-'''[http://distrowatch.com/dwres.php?resource=cd List of live distros @ distrowatch]'''
-
-'''[http://en.wikipedia.org/wiki/Live_USB Wikipedia LiveUSB article]'''
-
-
-
-[[Category:Software ideas]]
-[[Category:Hardware ideas]]
+The only function used by the host computer is the storage device
