@@ -14,11 +14,15 @@ Since OpenMoko is a big supporter of open standards and protocols, it has chosen
 
 === USB DFU on the Neo1973 ===
 
-The DFU implementation is part of our version of the [[u-boot]] bootloader.  Once the implementation has stabilized and received some cleanups, we are trying to merge this into the upstream u-boot tree.
+The DFU implementation is part of our version of the [[u-boot]] bootloader.
+
+You can use it with any USB DFU 1.1 compliant utility.  We also have developed our own [[dfu-util]] program.
 
 ==== Type of DFU Download ====
 
-The Neo1973 has enough SDRAM to accomodate a download mechanism according to Chapter 6.1 Mechanism "1." (to receive the entire image into a buffer and perform the actual programming during the manifestation phase).  Thus, we can first transfer the firmware, then do checksum verification, and finally flash it into the NAND flash in one go.
+The Neo1973 has enough SDRAM to accomodate a download mechanism according to Chapter 6.1 Mechanism "1." (to receive the entire image into a buffer and perform the actual programming during the manifestation phase).  We are using this mechanism for the u-boot partition to prevent users from "bricking" their device if something goes wrong during the transfer.
+
+For other partitions (kernel, rootfs, ...) however, future devices will have more NAND than SDRAM.  Thus, we implement a download mechanism according Chapter 6.1 Mechanism "2." for all non-bootloader partitions.
 
 ==== USB DFU Interfaces ====
 
