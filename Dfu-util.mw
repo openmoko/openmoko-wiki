@@ -1,116 +1,37 @@
-{{Languages|Dfu-util}}
+== Purpose ==
 
 dfu-util is a program that implements the Host (PC) side of the [[USB DFU]] (Universal Serial Bus Device Firmware Upgrade) protocol.
 
-In the Openmoko project, we use this program to communicate with our specially enhanced [[U-Boot]], which implements the DFU device side.
+In the OpenMoko project, we use this program to communicate with our specially enhanced [[u-boot]] boot loader, which implements the DFU device side.
 
-Using dfu-util and your smartphone, you can
-* transfer and flash [[Partitions|partitions]] in internal [[NAND Flash]].
-* transfer anything into RAM
+Using dfu-util and your Neo1973, you can
+* transfer and flash partitions to [[NAND Flash]], such as 
+** The Linux [[kernel]]
+** The root file system partition
+** The splash screen partition
+** The u-boot environment
+** Last, but not least: The [[u-boot]] bootloader itself.
+* transfer anything into Neo1973 RAM
 ** this can be used for fast development cycles of low-level code such as kernels without flashing them
-* read out the current internal NAND [[Partitions|partitions]]
+* read out the current NAND partitions
 ** this is an easy and efficient way of doing full backups of your phone
 
-== Source Code ==
-Dfu-util is currently maintained at http://dfu-util.gnumonks.org/.
+== Phrasebook ==
 
-On Debian and Ubuntu, you'll need libusb-dev:
-sudo apt-get install libusb-dev autogen pkg-config autotools-dev autoconf automake
+There's no full-fledged manual yet.  Instead, some examples:
 
-On Fedora you'll need libusb-devel and libusb-static:
-yum install libusb-devel libusb-static
+=== Flashing the kernel ===
 
-On Gentoo you can:
-emerge -va openmoko-dfu-util
+ dfu-util -a 3 -t 4093 -D /path/to/uImage
 
-You can check out and build the latest version of dfu-util using the following git command:<br>
-git clone git://git.openezx.org/dfu-util.git
-<br>
-cd dfu-util<br>
-./autogen.sh<br>
-./configure<br>
-make
+=== Flashing the bootloader ===
 
-The resulting binary is dfu-util/src/dfu-util.
+ dfu-util -a 1 -t 4093 -D /path/to/u-boot.bin
 
-== Binaries ==
+=== Copying a kernel into RAM ===
 
-Binary packages will be [http://downloads.openmoko.org/distro/releases/Om2008.9/dfu-util made available] as part of the regular Openmoko builds. Currently, there is a dfu-util for Linux/i386.
+ dfu-util -a 0 -t 4093 -D /path/to/uImage
 
-You need to make the downloaded file (dfu-util) executable with:
-<pre>
-chmod +x dfu-util
-</pre>
-you can then run it with
-<pre>
-./dfu-util
-</pre>
-see below for full instructions.
+Once this has finished, the kernel will be available at the default load address of 0x32000000 in Neo1973 RAM. 
 
-=== Debian ===
-[http://packages.debian.org/dfu-util dfu-util 0.0+r4880-1 is packaged] for Debian ''>= lenny'', so can be installed with: <tt>apt-get install dfu-util</tt>
-
-=== Ubuntu ===
-[http://packages.ubuntu.com/dfu-util dfu-util 0.0+r4067-3.1 is packaged] for Ubuntu ''>= intrepid (8.10)'', so can be installed with: <tt>apt-get install dfu-util</tt>
-
-=== Slackware ===
-[http://downloads.sourceforge.net/slackfr-packs/dfu-util-svn4686-i686-1cfdev12.1.tgz dfu-util is packaged] for '''Slackware''' (12.1), so can be installed with: <tt>pkgtool</tt>
-
-A newer SlackBuild is also available on [http://slackbuilds.org/repository/13.1/system/dfu-util/ slackbuilds.org]
-
-=== Arch Linux ===
-[http://aur.archlinux.org/packages.php?ID=21385 dfu-util is packaged] for Arch Linux, so can be installed with makepkg
-
-=== openSuSE ===
-The links below install rpm packaged dfu-util in (open)SuSE :
-
-[http://software.opensuse.org/ymp/home:worldcitizen/SLE_10/dfu-util.ymp 1-Click Install for SLE 10]
-
-[http://software.opensuse.org/ymp/home:worldcitizen/SLE_11/dfu-util.ymp 1-Click Install for SLE 11]
-
-[http://software.opensuse.org/ymp/home:worldcitizen/openSUSE_10.3/dfu-util.ymp 1-Click Install for openSuSE 10.3]
-
-[http://software.opensuse.org/ymp/home:worldcitizen/openSUSE_11.0/dfu-util.ymp 1-Click Install for openSuSE 11.0]
-
-[http://software.opensuse.org/ymp/home:worldcitizen/openSUSE_11.1/dfu-util.ymp 1-Click Install for openSuSE 11.1]
-
-[http://software.opensuse.org/ymp/home:worldcitizen/openSUSE_Factory/dfu-util.ymp 1-Click Install for openSuSE Factory]
-
-=== CentOS ===
-[http://download.opensuse.org/repositories/home:/worldcitizen/CentOS_5/ Centos 5]
-
-=== Fedora ===
-[http://download.opensuse.org/repositories/home:/worldcitizen/Fedora_10/ Fedora 9]
-
-[http://download.opensuse.org/repositories/home:/worldcitizen/Fedora_10/ Fedora 10]
-
-=== Mandriva ===
-[http://download.opensuse.org/repositories/home:/worldcitizen/Mandriva_2008/ Mandriva 2008]
-
-[http://download.opensuse.org/repositories/home:/worldcitizen/Mandriva_2009/ Mandriva 2009]
-
-=== RHEL ===
-[http://download.opensuse.org/repositories/home:/worldcitizen/RHEL_5/ RHEL 5]
-
-=== Gentoo ===
-DFU-Util is in the main tree under the name [http://packages.gentoo.org/package/app-mobilephone/openmoko-dfu-util openmoko-dfu-util].
-
-=== Windows ===
-Currently, there is a largely untested binary for Win32 (see [[Dfu-util-windows]]). Windows users can refer to [[No_Linux]] for a more tested approach.
-
-=== Mac ===
-Compiling dfu-util on Mac:
-* http://lists.openmoko.org/pipermail/community/2007-July/008438.html
-* [[User:SNMoore]]
-* [[MacOS_X#Flashing_to_your_device]]
-* [[Openmoko Flasher]] has a precompiled binary in the App bundle
-
-== Manual ==
-
-See [[Manuals/Dfu-util]]
-
-== See also ==
-*[[Flashing the Neo 1973]]
-*[[Flashing the Neo FreeRunner]]
-
-[[Category:Flashing Openmoko]]
+{{note|You cannot transfer more than 2MB of data into RAM using this method}}
