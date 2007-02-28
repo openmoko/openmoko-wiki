@@ -128,6 +128,124 @@ The bootloader is currently configured to waid for three seconds.  If a key pres
 
 Just by connecting the phone in u-boot mode to your Linux pc should make it detect a [[CDC ACM]] device, and you should get a new tty device called /dev/ttySAC0.  Use your favourite terminal emulator (minicom, cu, zc, ...) to access it like any other serial port.
 
+First, you should try to check whether the USB device shows up in 'lsusb' while you're running in u-boot mode:
+
+<pre>
+# lsusb -d 1457:5119
+Bus 005 Device 079: ID 1457:5119  
+</pre>
+
+<pre>
+# lsusb -v -d 1457:5119
+Bus 005 Device 079: ID 1457:5119  
+Device Descriptor:
+  bLength                18
+  bDescriptorType         1
+  bcdUSB               1.10
+  bDeviceClass            2 Communications
+  bDeviceSubClass         0 
+  bDeviceProtocol         0 
+  bMaxPacketSize0        16
+  idVendor           0x1457 
+  idProduct          0x5119 
+  bcdDevice            0.00
+  iManufacturer           1 OpenMoko, Inc
+  iProduct                2 Neo1973 Bootloader U-Boot 1.2.0-g6c7cac8c-dirty-moko3
+  iSerial                 3 0000000
+  bNumConfigurations      1
+  Configuration Descriptor:
+    bLength                 9
+    bDescriptorType         2
+    wTotalLength           85
+    bNumInterfaces          3
+    bConfigurationValue     1
+    iConfiguration          4 TTY via USB
+    bmAttributes         0xc0
+      Self Powered
+    MaxPower                0mA
+    Interface Descriptor:
+      bLength                 9
+      bDescriptorType         4
+      bInterfaceNumber        0
+      bAlternateSetting       0
+      bNumEndpoints           1
+      bInterfaceClass         2 Communications
+      bInterfaceSubClass      2 Abstract (modem)
+      bInterfaceProtocol      1 AT-commands (v.25ter)
+      iInterface              6 Control Interface
+      CDC Header:
+        bcdCDC               0.6e
+      CDC Call Management:
+        bmCapabilities       0x00
+        bDataInterface          1
+      CDC ACM:
+        bmCapabilities       0x00
+      CDC Union:
+        bMasterInterface        0
+        bSlaveInterface         1 
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x81  EP 1 IN
+        bmAttributes            3
+          Transfer Type            Interrupt
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0010  1x 16 bytes
+        bInterval             255
+    Interface Descriptor:
+      bLength                 9
+      bDescriptorType         4
+      bInterfaceNumber        1
+      bAlternateSetting       0
+      bNumEndpoints           2
+      bInterfaceClass        10 CDC Data
+      bInterfaceSubClass      0 Unused
+      bInterfaceProtocol      0 
+      iInterface              5 Bulk Data Interface
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x02  EP 2 OUT
+        bmAttributes            2
+          Transfer Type            Bulk
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0010  1x 16 bytes
+        bInterval             255
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x83  EP 3 IN
+        bmAttributes            2
+          Transfer Type            Bulk
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0010  1x 16 bytes
+        bInterval             255
+    Interface Descriptor:
+      bLength                 9
+      bDescriptorType         4
+      bInterfaceNumber        2
+      bAlternateSetting       0
+      bNumEndpoints           0
+      bInterfaceClass       254 Application Specific Interface
+      bInterfaceSubClass      1 Device Firmware Update
+      bInterfaceProtocol      1 
+      iInterface              7 USB Device Firmware Upgrade
+Device Status:     0x0001
+  Self Powered
+</pre>
+
+Next, you can access it using your favourite terminal program.
+
+Then, if the environment is not set correctly, you will need to use the current console (e.g. serial console) to set
+<pre>
+GTA01Bv2 # setenv stderr usbtty
+GTA01Bv2 # setenv stdout usbtty
+GTA01Bv2 # setenv stdin usbtty
+</pre>
+
 ==== Typical u-boot prompt ====
 
 <pre>
