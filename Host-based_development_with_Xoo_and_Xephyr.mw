@@ -1,175 +1,35 @@
-This page introduces you to the most efficient way to create new software for the Openmoko platform. Note that there is a VMware image where this environment has been prebuilt for you.
-''Does anyone know where to find this VMWare image??''
-
-==Host-based development==
-
-This term means you develop most of your application in your standard desktop environment until it's almost finished. Then you can use a [[Toolchain]] to cross-compile your application for the Neo1973. Host-based development is incredibly more efficient since you can use your (typically) fast computer, large monitor, ... Compiling for your host also means that your edit-run-debug turnaround cycles are much faster, because you can skip the uploading-to-neo step.
-
-==Xoo and Xephyr==
-[http://projects.o-hand.com/xoo/ Xoo] is a GTK2 based graphical wrapper around a ‘Windowed’ X Server.  The X server is typically '''Xnest''', the nested X server, or [http://projects.o-hand.com/xephyr Xephyr].  It is intended for embedded developers that want to simulate a target device (with an '''accurate''' display size, working hardware buttons, etc) on a desktop machine. 
-
-Note that Xoo is not required to simulate Openmoko hardware - it just improves the presentation.
-
-==Prerequisites==
-
-===Part I (precompiled software)===
-
-You need to install some software that is usually not present on a desktop system, but used on the Neo1973. Some of this software has already been precompiled by your friendly distribution packager, so you don't need to compile it yourself. Most likely you can install the following packages from your distribution repository:
-
-* gtk-doc-tools
-* libstartup-notification0-dev
-* libapm-dev
-* libgpgme11-dev
-* libgtk2.0-dev
-* libebook1.2-dev
-* libecal1.2-dev
-* libnotify-dev
-* libpulse-dev
-* libcurl4-openssl-dev (or libcurl4-gnutls-dev)
-* matchbox-window-manager
-* matchbox-keyboard
-* pulseaudio
-* xephyr ( package is called xserver-xephyr on ubuntu and debian )
-* xoo
+One of good ways to get started developing is getting rootfs working on host machine, since most of us doesn't have real hardware.
 
 
-Ubuntu-Specific Packages
-* gnome-common (does this belong above?)
-* ubuntu-mobile-dev (this depends on many other development packages; some are necessary, others optional)
+== Getting rootfs ==
+Use the [[MokoMakefile|Building OpenMoko using the MokoMakefile]] to get rootfs, just before make openmoko-devel-image run 
+ # sed 's/fic-gta01/x86/' build/conf/local.conf
+than just run make openmoko-devel-image. After a while(half of day) you should have in build/tmp/image/ file openmoko-devel-image-x86-$(DATE).rootfs.tar.gz mine is here [http://www.ms.mff.cuni.cz/~kupem6am/openmoko-devel-image-x86-20070227064250.rootfs.tar.gz].
 
-
-Other Useful Packages
-* libasound2-dev (needed to compile openmoko-dialer2 ([[User:Tomjoad]]))
-
-
-Gentoo users run just
- # emerge <package>
-
-''note'': To get the Xephyr package installed Gentoo users have to rebuild the x11-base/xorg-server package with the "kdrive" use flag enabled ([http://gentoo-wiki.com/Scratchbox#Xephyr_support link])
-
-
-Debian/Ubuntu
- $ sudo apt-get install <package>
-For Fedora, you can use
- # yum install <package>
-For Mandriva, you may try
- # urpmi <package>
-
+== Install Xoo on your host ==
+For gentoo users run just
+ # emerge xoo
 for any other find a way how to do it in your distro.
+== Making X cooperate ==
+* Make sure your iptables do not prevent you from connecting to port 6000(x11) on localhost
 
-===Part II (building from source)===
+* Make sure your X is listening on port 6000(X11) on localhost (netstat is friend)
 
-You also need some software that is typically not found in your distribution repository, either because it's too new, too specific, or unheard of.
+* Enable conection from localhost
+ # xhost localhost
+== Preparing rootfs ==
+* Unpack rootfs file in any directory and cd to that dir.
 
-Most likely you will need to compile the following packages for your distribution:
+* Get dev files in rootfs
+ # sudo mount --bind /dev/ rootfs/dev/
 
-* matchbox-panel-2
-* libjana
-* libipkg
-
-To compile and install matchbox-panel-2:
-
- mkdir -f /local/pkg/ohand
- cd /local/pkg/ohand
- svn co http://svn.o-hand.com/repos/matchbox/trunk matchbox
- cd matchbox/matchbox-panel-2
- ./autogen.sh
- make
- sudo make install
-
-To compile and install libjana:
-
- mkdir -f /local/pkg/ohand
- cd /local/pkg/ohand
- svn co http://svn.o-hand.com/repos/jana/trunk jana
- cd jana
- ./autogen.sh
- make
- sudo make install
-
-To compile and install libipkg:
-
- mkdir -f /local/pkg/handhelds.org
- cd /local/pkg/handhelds.org
- wget http://downloads.openmoko.org/developer/sources/ipkg-0.99.163.tar.gz
- tar xzf ipkg-0.99.163.tar.gz
- cd ipkg-0.99.163
- ./configure
- make
- sudo make install
-
-==Building the Openmoko core==
-
-First we download the Openmoko subversion repository:
-
-  mkdir -f /local/pkg/openmoko
-  cd /local/pkg/openmoko
-  svn co http://svn.openmoko.org/trunk/src src
-
-Then you compile the software contained there, e.g. you will definitely want to compile at least:
-
-In directory src/target/:
-* [http://svnweb.openmoko.org/trunk/src/target/gsm/ gsmd]
-* [http://svnweb.openmoko.org/trunk/src/target/opkg/ opkg]
-
-In directory src/target/OM-2007.2/artwork:
-* [http://svnweb.openmoko.org/trunk/src/target/OM-2007.2/artwork/icons/ icons]
-
-In directory src/target/OM-2007.2/libraries/:
-* [http://svnweb.openmoko.org/trunk/src/target/OM-2007.2/libraries/libmokoui2/ libmokoui2]
-* [http://svnweb.openmoko.org/trunk/src/target/OM-2007.2/libraries/libmokopanelui2/ libmokopanelui2]
-* [http://svnweb.openmoko.org/trunk/src/target/OM-2007.2/libraries/libmokojournal2/ libmokojournal2]
-* [http://svnweb.openmoko.org/trunk/src/target/OM-2007.2/libraries/libmokogsmd2/ libmokogsmd2]
-
-In directory src/target/OM-2007.2/daemons/:
-* [http://svnweb.openmoko.org/trunk/src/target/OM-2007.2/daemons/neod/ neod]
-
-In directory src/target/OM-2007.2/panel-plugins/:
-* [http://svnweb.openmoko.org/trunk/src/target/OM-2007.2/panel-plugins/openmoko-panel-gsm/ openmoko-panel-gsm]
-* [http://svnweb.openmoko.org/trunk/src/target/OM-2007.2/panel-plugins/openmoko-panel-usb/ openmoko-panel-usb]
-* [http://svnweb.openmoko.org/trunk/src/target/OM-2007.2/panel-plugins/openmoko-panel-battery/ openmoko-panel-battery]
-* [http://svnweb.openmoko.org/trunk/src/target/OM-2007.2/panel-plugins/openmoko-panel-gps/ openmoko-panel-gps]
-* [http://svnweb.openmoko.org/trunk/src/target/OM-2007.2/panel-plugins/openmoko-panel-bt/ openmoko-panel-bt]
-
-In directory src/target/OM-2007.2/applications:
-* [http://svnweb.openmoko.org/trunk/src/target/OM-2007.2/applications/openmoko-today2/ openmoko-today2]
-* [http://svnweb.openmoko.org/trunk/src/target/OM-2007.2/applications/openmoko-dialer2/ openmoko-dialer2]
-* [http://svnweb.openmoko.org/trunk/src/target/OM-2007.2/applications/openmoko-calculator2/ openmoko-calculator2]
-* [http://svnweb.openmoko.org/trunk/src/target/OM-2007.2/applications/openmoko-appmanager2/ openmoko-appmanager2]
-
-Each of these packages can be compiled with the well-known-triple of:
-
- ./configure (or ./autogen.sh, if it's the first time)
- make
- make install
-
-==Data files==
-
-Some of the data files are not yet installed. We will create links so that Openmoko finds the data files and uses them directly from the svn directories that you have checked out. To create the links:
-
-  mkdir /usr/local/share/matchbox
-  cd /usr/local/share/matchbox
-  sudo ln -s /local/pkg/openmoko/src/target/OM-2007.2/misc/openmoko-today2-folders vfolders
-
-  cd /usr/share/themes
-  sudo ln -s /local/pkg/openmoko/src/target/OM-2007.2/artwork/themes/openmoko-standard-2
-
-==Starting the nested Openmoko==
-
-We have prepared a script for you that starts Xoo and all the necessary X clients in one run. The script is online at 
-* [http://svnweb.openmoko.org/trunk/src/host/xoo/om-launch om-launch]
-
-==Creating a new application==
-
-{{todo|...}}
-
-==Using a Neo1973 as external GSM modem==
-
-{{todo|...}}
-
-==Using an external GPS device==
-
-{{todo|...}}
-
-{{Languages|Host-based development with Xoo and Xephyr}}
-[[Category:Emulation]]
+* Chroot to rootfs
+ # sudo chroot rootfs /bin/sh
+== Getting it up ==
+In another term start xoo, good idea is to download [http://www.datenfreihafen.org/~stefan/OpenMoko/neo1973-xoo-device.tar.bz2] and run
+ # xoo --device neo1973.xml
+In chrooted enviroment export display to connect to started xoo
+ # export DISPLAY=localhost:1.0
+and start window manager.
+ # x-window-manager
+By this time you should have matchbox running in Xoo window.
