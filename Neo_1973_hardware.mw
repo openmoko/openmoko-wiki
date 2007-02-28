@@ -201,6 +201,26 @@ This is the second produced version of the bluetooth-enabled version. It contain
 
 This is the version that is shipped in Phase 0
 
+===== Errata =====
+
+====== PMU unable to resume from suspend ======
+
+Due to use of wrong GPIO/EINT pin, the PMU cannot wake-up the phone after suspend.  This means, specifically, '''the following events can not bring the phone back from suspend-to-ram''':
+* PMU RTC Alarm
+* Power button press
+* Charger events (charger insertion/removal/error)
+* Low battery
+
+====== Stand-by time extremely low ======
+
+This is due to a design bug resulting in at least 30mA additional standby current, since we cannot properly switch off the power supply to the S3C2410 PLL's.  There is nothing we can do to change this with post-production fixes.  GTA01Bv4 will address this issue.
+
+====== GSM doesn't resume phone from suspend ======
+
+The GSM modem currently doesn't signalize a wakeup interrupt to the S3C2410 in case there's some noteworthy event, such as incoming call, loss of network, incoming SMS or the like.
+
+This is a serious issue, but can be fixed with a GSM Modem Firmware update.
+
 ==== GTA01Bv4 ====
 
 This is the version that will be shipped in Phase 1
