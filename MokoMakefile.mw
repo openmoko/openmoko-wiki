@@ -1,32 +1,46 @@
+==MokoMakefile==
 MokoMakefile is a fully automated way of setting up an OpenMoko development environment.  It is an invaluable tool for getting new developers up and running with a build environment which is configured the same as all the other existing developers.  It brings the same repeatability to build environment creation and maintenance as that which OpenEmbedded brings to the main task of actually building embedded software distributions.
 
 Note that MokoMakefile does *not* replace bitbake, or svn, or monotone, or openembedded, or qmake, or anything else.  It is a wrapper around all that to make it easy to set up and maintain a development environment that fully complies with the setup instructions published by OpenMoko.
 
 MokoMakefile is developed by [[User:RodWhitby|Rod Whitby]] - it is not an official product of OpenMoko (although I would be happy for them to pick it up and use it internally).  If there is any discrepancy between the [[Building_OpenMoko_from_scratch|official OpenMoko build instructions]], and the operation of the MokoMakefile, then you should consider the official instructions to be correct.
 
+=== Installation ===
 Here are the steps to use it:
 
-1/ Make sure your build host is set up according to:
+1 - Make sure your build host is set up according to:
    http://www.openembedded.org/wiki/OEandYourDistro
-2/ Create your $OMDIR directory
+2 - Create your $OMDIR directory:
    mkdir /home/moko ; cd /home/moko
-3/ Grab MokoMakefile
+3 - Grab MokoMakefile:
    wget http://www.rwhitby.net/files/openmoko/Makefile
-4/ Set up the environment
+4 - Set up the environment:
    make setup
-5/ Start building
+5 - Start building:
    make openmoko-devel-image
 
 This will set up the recommended directory structure as described in [[Building OpenMoko from scratch]], will download all the required software (from the right places with the right versions), and will immediately start building an image.
 
 Once you have done this, you can choose to continue using the MokoMakefile to initiate your subsequent builds, or you can go into the build directory and run bitbake commands manually.  The choice is yours.
 
-'''TIP:''' You can reduce the amount of consumed disk space significantly by adding
+===Updating the environment=== 
+For easy maintenance of your build environment the following commands are available.
+
+1 - To update the OE repository to the latest version:
+   make update 
+2 - To get the latest makefile version:
+   make update-makefile 
+
+
+A quick way to rebuild a new image with the latest updates:
+   make update ;make update-makefile ;make setup; make openmoko-devel-image
+
+===Tips=== 
+You can reduce the amount of consumed disk space significantly by adding
    INHERIT += "rm_work"
 in your local.conf (e.g. /home/moko/build/conf/local.conf). This will remove the contents of build/tmp/work/*/foo directory after each one builds correctly.
 
-MokoMakefile is recommended by 2 out of 2 new developer on #openmoko, and one of them said "For some reason last night I couldn't get my manual install of everything to work (bb complained about my bbpath I think) ... but with your makefile, it works great!"
-
+MokoMakefile is recommended by 3 out of 3 new developer on #openmoko, and one of them said "For some reason last night I couldn't get my manual install of everything to work (bb complained about my bbpath I think) ... but with your makefile, it works great!"
 
 Project page:
 http://mokomakefile.projects.openmoko.org/
