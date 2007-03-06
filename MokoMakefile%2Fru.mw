@@ -1,9 +1,9 @@
 ==MokoMakefile==
-MokoMakefile это полностью автоматизированный способ установки окружения для разработки Openmoko. It is an invaluable tool for getting new developers up and running with a build environment which is configured the same as all the other existing developers.  It brings the same repeatability to build environment creation and maintenance as that which OpenEmbedded brings to the main task of actually building embedded software distributions.
+MokoMakefile это полностью автоматизированный способ установки окружения для разработки OpenMoko. It is an invaluable tool for getting new developers up and running with a build environment which is configured the same as all the other existing developers.  It brings the same repeatability to build environment creation and maintenance as that which OpenEmbedded brings to the main task of actually building embedded software distributions.
 
-Имейте ввиду, что MokoMakefile *не* заменяет bitbake, или svn, или monotone, или openembedded, или qmake, или что то еще. Это "оболочка" вокруг всего этого для простой установки и поддержки окружения разработчика и полностью соотвествует инструкциям по установке, опубликованным Openmoko.
+Имейте ввиду, что MokoMakefile *не* заменяет bitbake, или svn, или monotone, или openembedded, или qmake, или что то еще. Это "оболочка" вокруг всего этого для простой установки и поддержки окружения разработчика и полностью соотвествует инструкциям по установке, опубликованным OpenMoko.
 
-MokoMakefile разработан [[User:RodWhitby|Rod Whitby]] - это не официальный Openmoko продукт. Если обнаруживается любое расхождение между [[Building_Openmoko_from_scratch|официальными инструкциями по сборке Openmoko (en)]] и действиями MokoMakefile, тогда вы должны следовать официальным инструкциям, как более правильным.
+MokoMakefile разработан [[User:RodWhitby|Rod Whitby]] - это не официальный OpenMoko продукт. Если обнаруживается любое расхождение между [[Building_OpenMoko_from_scratch|официальными инструкциями по сборке OpenMoko (en)]] и действиями MokoMakefile, тогда вы должны следовать официальным инструкциям, как более правильным.
 
 === Установка ===
 Шаги по установке:
@@ -19,7 +19,7 @@ MokoMakefile разработан [[User:RodWhitby|Rod Whitby]] - это не о
 5 - Начните сборку:
    make openmoko-devel-image
 
-MokoMakefile создаст рекомендуемые директории как описано в [[Building Openmoko from scratch]], скачает все необходимое программного обеспечение (из нужного места и нужной версии), и сразу же начнет создание образа.
+MokoMakefile создаст рекомендуемые директории как описано в [[Building OpenMoko from scratch]], скачает все необходимое программного обеспечение (из нужного места и нужной версии), и сразу же начнет создание образа.
 
 Когда все будет готово, вы можете выбрать между продолжать использовать MokoMakefile для ваших последующих разработок или заходить в директории с исходниками и запускать bitbake вручную. Выбор за вами.
 
@@ -29,7 +29,7 @@ For easy maintenance of your build environment the following commands are availa
 1 - Для обновления MokoMakefile до последней версии:
    make update-makefile 
 
-2 - Для обновления локального репозитория Openmoko и MokoMakefile патчей до последней версии:
+2 - Для обновления локального репозитория OpenMoko и MokoMakefile патчей до последней версии:
    make update
 
 3 - Для уверенности, что самые последние изменения в структуру директории учтены:
@@ -38,42 +38,10 @@ For easy maintenance of your build environment the following commands are availa
 Быстрый способ сборки нового образа с последними обновлениями:
    make update-makefile; make update; make setup; make openmoko-devel-image
 
-===Сообщения о проблемах===
-
-Сначала убедитесь, что проблема воспроизводится после выполнения
-
- make update-makefile ; make update ; make setup
-
-потом
-
- make clean-package-<foo>
-
-(где <foo> имя пакета на котором возникла ошибка)
-
-затем
-
- make all
-
-Если проблема воспроизведется после выполнения этих команд три раза подряд, не стесняйтесь и сообщите про нее rwhitby на [http://wiki.openmoko.org/wiki/Development_resources#IRC IRC] канале #openmoko.
-
 ===Советы=== 
-*Вы можете уменьшить занимаемое место на диске добавлением
+Вы можете уменьшить занимаемое место на диске добавлением
    INHERIT += "rm_work"
 в ваш local.conf (например /home/moko/build/conf/local.conf). Это удалит содержание директории build/tmp/work/*/<пакет> после успешной сборки пакета.
-
-
-*Если у вас появилась ошибка с monotone похожая на эту:
-   mtn: misuse: database /home/moko/OE.mtn is laid out according to an old schema
-вам нужно обновить OE.mtn. Выполните следующую команду находясь в /home/moko:
-   # mtn --db OE.mtn db migrate
-
-
-* Для людей имеющих несколько процессоров (или dual-core) этот маленкий патч будет полезен, что бы сборка шла быстрее.
-Отредактируйте local.conf и добавте строчки:
- PARALLEL_MAKE = "-j 4"
- BB_NUMBER_THREADS = "4"
-
-Измените значения PARALLEL_MAKE и BB_NUMBER_THREADS на более подходящие для вашей машины.
 
 ===Рекомендательные отзывы=== 
 MokoMakefile рекомендован 3 из 3 новых разработчиков на канале #openmoko, и один из них сказал: "По некоторой причине сегодня ночью я не смог запустить мою ручную сборку (bb ругалось на мой bbpath я думаю) ... но с твоим makefile все заработало!" ("For some reason last night I couldn't get my manual install of everything to work (bb complained about my bbpath I think) ... but with your makefile, it works great!")
@@ -81,8 +49,4 @@ MokoMakefile рекомендован 3 из 3 новых разработчик
 Страница проекта:
 http://mokomakefile.projects.openmoko.org/
 
-
 {{Languages|MokoMakefile}}
-
-[[Category:Application Developer/ru]]
-[[Category:System Developers/ru]]
