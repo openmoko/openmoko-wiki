@@ -1,0 +1,325 @@
+== General ==
+
+The Kernel on the GTA01 is based on a vanilla 2.6.17.7 Linux kernel from [http://www.kernel.org/ kernel.org].
+
+Some additional patches are required for
+* S3C2410 Usb Device Controller
+** We use the driver from iPaq H1940 linux project
+* S3C2410 SD Card Controller
+** We use the driver from the [http://www.tomtom.com/gpl.php TomTom GO kernel]
+* [[QT2410]] machine support
+** This is just some glue that puts all pieces together
+* S3C2410 touch screen driver
+** Again from iPaq H1940 linux project
+* GTA01 machine support
+** Some glue/configuration to pull all pieces together
+* [[GSM Communication Infrastructure]]
+** The kernel-level part (TS07.10 line discipline, GPRS line discipline)
+
+== Kernel Patchset ==
+
+The latest patchset against the abovementioned vanilla kernel can be found at https://svn.openmoko.org/trunk/src/target/kernel/patches/. This is a so-called "[http://savannah.nongnu.org/projects/quilt quilt] patchset".  In order to apply it, you have to untar it into a "patches" directory below the "linux-2.6.x" directory, and then call "quilt push -a", which pushes all patches onto the kernel.
+
+== Kernel Configuration ==
+
+The latest kernel configuration can be found at https://svn.openmoko.org/trunk/oe/packages/linux/linux-gta01/defconfig-fic-gta01.  Just copy it to the linux-2.6.x/.config file.
+
+== Kernel building ==
+
+The kernel build is executed as normal.  We actually only need the "vmlinux" target, not the "zImage".
+
+== Bootable kernel image ==
+
+A bootable kernel image called ''uImage'' is available from [https://buildhost.openmoko.org/tmp/gta01/deploy/images/])
+
+== Creating a bootable kernel image ==
+u-boot needs all images (such as kernel, initrd, ...) in the form of an uImage.  This is basically just a special header adding CRC protection, version information, etc. Pleaes see [[u-boot]] for details.
+
+
+== Kernel Boot Parameters ==
+
+Since the [[QT2410]] can be used with different liquid crystal modules (LCMs), the kernel images for the QT2410 have a boot parameter "tft":
+* If you boot without any tft= parameter, the 'stock' qt2410 240x320 TFT panel is assumed.
+* If you boot with "tft=b" ('b' for big), the timings for the SHARP 8" 640x480 TFT panel are used.
+* If you boot with "tft=p" ('p' for production), the timings for the 2.8" 480x640 TFT panel are used.
+
+== Kernel Subsystems ==
+
+In this section we will outline a couple of the GTA01 specific kernel drivers / features / subsystems
+
+=== GSM ===
+
+==== Power Management ====
+
+The '''gta01_pm_gsm''' driver implements GSM power management (this means, if this is compiled as a module, you have to load the gta01_pm_gsm.ko module first)
+
+It exports the following sysfs based interface
+<pre>
+root@fic-gta01:/$ ls -l /sys/bus/platform/devices/gta01-pm-gsm.0/
+-rw-r--r--    1 root     root         4096 Feb  1 09:58 download
+-rw-r--r--    1 root     root         4096 Feb  1 09:58 power_on
+-rw-r--r--    1 root     root         4096 Feb  1 09:58 reset
+</pre>
+
+===== Powering up =====
+<pre>
+root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/power_on 
+gta01-pm-gsm gta01-pm-gsm.0: powering up GSM, thus disconnecting serial console
+</pre>
+
+===== Powering down =====
+<pre>
+root@fic-gta01:~$ echo "0" > /sys/bus/platform/devices/gta01-pm-gsm.0/power_on 
+gta01-pm-gsm gta01-pm-gsm.0: powered down GSM, thus enabling serial console
+</pre>
+
+===== Resetting =====
+<pre>
+root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/reset 
+root@fic-gta01:~$ echo "0" > /sys/bus/platform/devices/gta01-pm-gsm.0/reset 
+</pre>
+
+===== Activating GSM baseband download mode =====
+<pre>
+root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/download
+</pre>
+
+===== De-activating GSM baseband download mode =====
+<pre>
+root@fic-gta01:~$ echo "0" > /sys/bus/platform/devices/gta01-pm-gsm.0/download
+</pre>
+
+=== GPS ===
+
+==== Power Management ====
+
+The gta01_pm_gps kernel driver offers a sysfs based interface:
+<pre>
+root@fic-gta01:~$ ls -l /sys/bus/platform/devices/gta01-pm-gps.0/     
+-rw-r--r--    1 root     root         4096 Feb  1 09:14 power_avdd_3v
+-rw-r--r--    1 root     root         4096 Feb  1 09:14 power_lp_io_3v3
+-rw-r--r--    1 root     root         4096 Feb  1 09:14 power_pll_core_2v5
+-rw-r--r--    1 root     root            0 Feb  1 09:14 power_sequence
+-rw-r--r--    1 root     root         4096 Feb  1 09:14 power_vtxco_2v8
+-rw-r--r--    1 root     root         4096 Feb  1 09:14 pwron
+-rw-r--r--    1 root     root         4096 Feb  1 09:14 reset
+</pre>
+
+The power_avdd_3v, power_lp_io_3v3, power_pll_core_2v5, power_vtxco_2v8, pwron and reset files represent the state of the respective signal.
+
+The <b>power_sequence</b> file implements power-up/power-down sequence in accordance with the GlobalLocate data sheet.
+
+===== Powering up =====
+ root@fic-gta01:~$ echo "power_up" > /sys/bus/platform/devices/gta01-pm-gps.0/power_sequence 
+===== Powering down =====
+ root@fic-gta01:~$ echo "power_down" > /sys/bus/platform/devices/gta01-pm-gps.0/power_sequence
+
+=== Asound driver ===
+
+==== High-level requirements ====
+
+The GTA01 audio subsystem is fairly complex, even though the high-level requirements for the sound driver are simple.
+The features we need to support
+
+* voice call support
+** passing through the microphone signal to the GSM Modem
+** passing through the GSM Modem audio output to the integrated speaker(s)
+** the microphone input mixer gain will be statically configured according to the dynamic requirements
+** the audio volume that is sent to the GSM modem can be adjusted via line out level
+** the audio volume incoming (from GSM modem -> codec) can be adjusted via speaker out level
+* voice call recording support
+** the user is able to record phone conversations on digital storage inside the phone. Format will be ogg (not important to driver)
+** ideally, the user can choose between recording only incoming or outgoing signal, or both.
+** for both, we'd need to mix both microphone and line-in signals before recording. is this possible?
+* voice call playback support
+** the user is able to playback recorded files during a conversation.  this means that PCM playback needs to be mixed with mic input before being passed to line-out (and to the GSM modem)
+* media playback support
+** an audio player can play back mp3/ogg/flac/... files and output sound via integrated speakers or headphone
+* headphone jack switch
+** this is connected to a GPIO of the S3C2410. How to best integrate this with the sound driver? It should just be handled like any other headphone jack reporting of e.g. laptop computers.
+
+For more details see [[Neo1973 Audio Subsystem]]
+
+=== Bluetooth ===
+
+We're using the stock bluez implementation of the linux kernel.
+
+==== Power Management ====
+
+The bluetooth basically has the following preconditions
+* BT_EN being set
+* The Voltage regulator set up properly
+* The ohci-hcd driver being loaded
+
+The gta01_pm_bt driver implements the following files:
+<pre>
+root@fic-gta01:/$ ls -l /sys/devices/platform/gta01-pm-bt.0
+-rw-r--r--    1 root     root         4096 Feb  1 09:52 power_on
+-rw-r--r--    1 root     root         4096 Feb  1 09:52 reset
+</pre>
+
+===== Powering up the device =====
+
+<pre>
+root@fic-gta01:/$ echo "1" >  /sys/devices/platform/gta01-pm-bt.0/power_on  
+usb 1-1: new full speed USB device using s3c2410-ohci and address 4
+usb 1-1: configuration #1 chosen from 1 choice
+</pre>
+
+===== Powering down the device =====
+<pre>
+root@fic-gta01:/$ echo "0" >  /sys/devices/platform/gta01-pm-bt.0/power_on 
+usb 1-1: USB disconnect, address 3
+</pre>
+
+===== Asserting reset (low-active) =====
+<pre>
+root@fic-gta01:/$ echo "0" >  /sys/devices/platform/gta01-pm-bt.0/reset 
+root@fic-gta01:/$ usb 1-1: USB disconnect, address 2
+</pre>
+
+===== De-asserting reset (low-active) =====
+<pre>
+root@fic-gta01:/$ echo "1" >  /sys/devices/platform/gta01-pm-bt.0/reset 
+s3c2410-ohci s3c2410-ohci: wakeup
+usb 1-1: new full speed USB device using s3c2410-ohci and address 3
+usb 1-1: configuration #1 chosen from 1 choice
+</pre>
+
+==== Getting started ====
+
+<pre>
+root@fic-gta01:~$ hciconfig hci0 up
+root@fic-gta01:~$ hcitool  scan
+Scanning ...
+        00:14:9A:77:A2:02       A780
+root@fic-gta01:~$ hcitool inq 00:14:9A:77:A2:02 
+Inquiring ...
+        00:14:9A:77:A2:02       clock offset: 0x55df    class: 0x502204
+root@fic-gta01:~$ hcitool cc 00:14:9A:77:A2:02 
+root@fic-gta01:~$ hcitool con                 
+Connections:
+        < ACL 00:14:9A:77:A2:02 handle 42 state 1 lm MASTER 
+root@fic-gta01:~$ hcitool info 00:14:9A:77:A2:02
+Requesting information ...
+        BD Address:  00:14:9A:77:A2:02
+        Device Name: A780
+        LMP Version: 1.1 (0x1) LMP Subversion: 0x700
+        Manufacturer: Broadcom Corporation (15)
+        Features: 0xff 0xff 0x0d 0x00 0x00 0x00 0x00 0x00
+                <3-slot packets> <5-slot packets> <encryption> <slot offset> 
+                <timing accuracy> <role switch> <hold mode> <sniff mode> 
+                <park state> <RSSI> <channel quality> <SCO link> <HV2 packets> 
+                <HV3 packets> <u-law log> <A-law log> <CVSD> <power control> 
+                <transparent SCO> 
+</pre>
+
+=== AUX Button ===
+
+The AUX button (formerly 911 button) is supported via the "gta01kbd" driver in the kernel (drivers/input/keyboard/gta01kbd.c).  
+
+It creates an input event device that only issues "KEY_PHONE" press/unpress events.
+
+=== Power Management Unit (PMU) ===
+
+The PMU is supported via the "pcf50606" driver in the kernel (drivers/i2c/chips/pcf50606.c).
+
+This driver provides a number of userspace interfaces for the various bits and pieces of the PMU
+
+==== Power Button, Charger insertion ====
+
+The PMU creates an input device that supports the following keys:
+* KEY_POWER: power button of GTA01
+* KEY_POWER2: USB power supply insert/remove
+* KEY_BATTERY: Charger insert/remove
+
+==== RTC ====
+
+The real-time clock, including the alarm feature, is implemented as standard RTC (/dev/rtc).
+
+==== Watchdog ====
+
+The PMU-integrated watchdog is implemented using the standard watchdog character device.
+
+==== Voltage Regulators ====
+
+The voltage regulators are exported to userspace using sysfs, much like lm_sensors.
+
+Every regulator can be read (and written!).  The format is ASCII in millivolts.
+
+<pre>
+root@fic-gta01:/sys/devices/platform/s3c2410-i2c/i2c-0/0-0008$ ls -l /sys/bus/i2c/devices/0-0008/voltage_*
+-rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_d1reg
+-rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_d2reg
+-rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_d3reg
+-rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_dcd
+-rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_dcde
+-rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_dcud
+-rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_lpreg
+-rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_ioreg
+root@fic-gta01:/sys/devices/platform/s3c2410-i2c/i2c-0/0-0008$ cat voltage_dcd
+1300
+</pre>
+
+==== Battery Voltage ====
+
+The battery voltage (in millivolts) can be read via sysfs
+
+<pre>
+root@fic-gta01:~$ cat /sys/bus/i2c/devices/0-0008/battvolt 
+3767
+</pre>
+
+==== Battery charging current ====
+
+The battery charging current (in milliamperes) can be read via sysfs
+
+<pre>
+root@fic-gta01:~$ cat /sys/bus/i2c/devices/0-0008/chgcur 
+0
+</pre>
+
+==== Battery temperature ====
+
+The battery temperature (in centigrades) can be read via sysfs
+
+<pre>
+root@fic-gta01:~$ cat /sys/bus/i2c/devices/0-0008/battemp
+25
+</pre>
+
+== Kernel TODO ==
+
+=== Various ===
+* speed up in-kernel boot process
+** delay calibration
+** framebuffer takes ages
+
+===  TS07.10 multiplex ===
+
+=== PCF50606 ===
+* fix conversion problems when setting alarm time/date
+* check conversion table for temperature
+* implement 'persistent alarm setting' (see mail from mickey)
+
+=== Backlight ===
+* later: implement smooth fade-in, fade-out
+
+=== Vibrator ===
+* implement it as LED driver
+* test it
+* later: implement PWM
+
+=== USB device driver ===
+* test switching between usb host and usb device
+
+=== Power Management ===
+* test, debug and fix suspend on user request
+* test, debug and fix wakeup on
+** IRQ on serial UART (GSM)
+** IRQ on serial UART (GPS)
+** IRQ from PMU (charger insert/remove or the like)
+** IRQ from ADC/touchscreen
+** 911 button press (GPIO IRQ)
+** headphone jack insert/remove
+{{Languages|Kernel}}
