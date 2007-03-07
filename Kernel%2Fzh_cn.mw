@@ -1,4 +1,4 @@
-== General ==
+== 概述 ==
 
 The Kernel on the GTA01 is based on a vanilla 2.6.17.7 Linux kernel from [http://www.kernel.org/ kernel.org].
 
@@ -16,19 +16,19 @@ Some additional patches are required for
 * [[GSM Communication Infrastructure]]
 ** The kernel-level part (TS07.10 line discipline, GPRS line discipline)
 
-== Kernel Patchset ==
+== 内核补丁 ==
 
 The latest patchset against the abovementioned vanilla kernel can be found at https://svn.openmoko.org/trunk/src/target/kernel/patches/. This is a so-called "[http://savannah.nongnu.org/projects/quilt quilt] patchset".  In order to apply it, you have to untar it into a "patches" directory below the "linux-2.6.x" directory, and then call "quilt push -a", which pushes all patches onto the kernel.
 
-== Kernel Configuration ==
+== 内核配置 ==
 
 The latest kernel configuration can be found at https://svn.openmoko.org/trunk/oe/packages/linux/linux-gta01/defconfig-fic-gta01.  Just copy it to the linux-2.6.x/.config file.
 
-== Kernel building ==
+== 内核构建 ==
 
 The kernel build is executed as normal.  We actually only need the "vmlinux" target, not the "zImage".
 
-== Bootable kernel image ==
+== 可启动的内核映像 ==
 
 A bootable kernel image called ''uImage'' is available from [https://buildhost.openmoko.org/tmp/gta01/deploy/images/])
 
@@ -36,14 +36,14 @@ A bootable kernel image called ''uImage'' is available from [https://buildhost.o
 u-boot needs all images (such as kernel, initrd, ...) in the form of an uImage.  This is basically just a special header adding CRC protection, version information, etc. Pleaes see [[u-boot]] for details.
 
 
-== Kernel Boot Parameters ==
+== 内核启动参数 ==
 
 Since the [[QT2410]] can be used with different liquid crystal modules (LCMs), the kernel images for the QT2410 have a boot parameter "tft":
 * If you boot without any tft= parameter, the 'stock' qt2410 240x320 TFT panel is assumed.
 * If you boot with "tft=b" ('b' for big), the timings for the SHARP 8" 640x480 TFT panel are used.
 * If you boot with "tft=p" ('p' for production), the timings for the 2.8" 480x640 TFT panel are used.
 
-== Kernel Subsystems ==
+== 内核子系统 ==
 
 In this section we will outline a couple of the GTA01 specific kernel drivers / features / subsystems
 
@@ -73,7 +73,7 @@ root@fic-gta01:~$ echo "0" > /sys/bus/platform/devices/gta01-pm-gsm.0/power_on
 gta01-pm-gsm gta01-pm-gsm.0: powered down GSM, thus enabling serial console
 </pre>
 
-===== Resetting =====
+===== 复位 =====
 <pre>
 root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/reset 
 root@fic-gta01:~$ echo "0" > /sys/bus/platform/devices/gta01-pm-gsm.0/reset 
@@ -140,7 +140,7 @@ The features we need to support
 
 For more details see [[Neo1973 Audio Subsystem]]
 
-=== Bluetooth ===
+=== 蓝牙 ===
 
 We're using the stock bluez implementation of the linux kernel.
 
@@ -233,11 +233,11 @@ The PMU creates an input device that supports the following keys:
 * KEY_POWER2: USB power supply insert/remove
 * KEY_BATTERY: Charger insert/remove
 
-==== RTC ====
+==== 实时时钟 ====
 
 The real-time clock, including the alarm feature, is implemented as standard RTC (/dev/rtc).
 
-==== Watchdog ====
+==== 看门狗 ====
 
 The PMU-integrated watchdog is implemented using the standard watchdog character device.
 
@@ -279,7 +279,7 @@ root@fic-gta01:~$ cat /sys/bus/i2c/devices/0-0008/chgcur
 0
 </pre>
 
-==== Battery temperature ====
+==== 电池温度 ====
 
 The battery temperature (in centigrades) can be read via sysfs
 
@@ -288,7 +288,7 @@ root@fic-gta01:~$ cat /sys/bus/i2c/devices/0-0008/battemp
 25
 </pre>
 
-== Kernel TODO ==
+== 内核TODO列表 ==
 
 === Various ===
 * speed up in-kernel boot process
@@ -310,7 +310,7 @@ root@fic-gta01:~$ cat /sys/bus/i2c/devices/0-0008/battemp
 * test it
 * later: implement PWM
 
-=== USB device driver ===
+=== USB设备驱动 ===
 * test switching between usb host and usb device
 
 === Power Management ===
