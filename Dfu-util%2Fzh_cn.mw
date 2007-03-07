@@ -1,1 +1,125 @@
+== Purpose ==
+
+dfu-util is a program that implements the Host (PC) side of the [[USB DFU]] (Universal Serial Bus Device Firmware Upgrade) protocol.
+
+In the OpenMoko project, we use this program to communicate with our specially enhanced [[u-boot]] boot loader, which implements the DFU device side.
+
+Using dfu-util and your Neo1973, you can
+* transfer and flash partitions to [[NAND Flash]], such as 
+** The Linux [[kernel]]
+** The root file system partition
+** The splash screen partition
+** The u-boot environment
+** Last, but not least: The [[u-boot]] bootloader itself.
+* transfer anything into Neo1973 RAM
+** this can be used for fast development cycles of low-level code such as kernels without flashing them
+* read out the current NAND partitions
+** this is an easy and efficient way of doing full backups of your phone
+
+== Source Code ==
+
+dfu-util can be found at http://svn.openmoko.org/trunk/src/host/dfu-util/
+
+Binary packages will be made available as part of the regular [[OpenMoko]] builds
+
+== Reference Documentation ==
+
+=== Command-line options ===
+
+==== --help ====
+
+<pre>
+dfu-util - (C) 2007 by OpenMoko Inc.
+This program is Free Software and has ABSOLUTELY NO WARRANTY
+
+Usage: dfu-util [options] ...
+  -h --help                     Print this help message
+  -V --version                  Print the version number
+  -l --list                     List the currently attached DFU capable USB devices
+  -d --device vendor:product    Specify Vendor/Product ID of DFU device
+  -c --cfg config_nr            Specify the Configuration of DFU device
+  -i --intf intf_nr             Specify the DFU Interface number
+  -a --alt alt_nr               Specify the Altseting of the DFU Interface
+  -t --transfer-size            Specify the number of bytes per USB Transfer
+  -U --upload file              Read firmware from device into <file>
+  -D --download file            Write firmware from <file> into device
+  -R --reset                    Issue USB Reset signalling once we're finished
+</pre>
+
+==== --list ====
+
+Using the --list option, you can list the available DFU capable devices, their configuration, interface and altsettings.
+Below is an example for a current Neo1973 phone in u-boot '''Runtime Mode'''
+<pre>
+# ./dfu-util --list
+dfu-util - (C) 2007 by OpenMoko Inc.
+This program is Free Software and has ABSOLUTELY NO WARRANTY
+
+Found DFU Runtime: [0x1457:0x5119] devnum=0, cfg=0, intf=2, alt=0, name="USB Device Firmware Upgrade"
+</pre>
+
+Below is an example for a current Neo1973 phone in u-boot '''DFU Mode'''
+<pre>
+# ./dfu-util --list
+dfu-util - (C) 2007 by OpenMoko Inc.
+This program is Free Software and has ABSOLUTELY NO WARRANTY
+
+Found DFU: [0x1457:0x5119] devnum=16, cfg=0, intf=0, alt=0, name="RAM 0x32000000"
+Found DFU: [0x1457:0x5119] devnum=16, cfg=0, intf=0, alt=1, name="u-boot"
+Found DFU: [0x1457:0x5119] devnum=16, cfg=0, intf=0, alt=2, name="u-boot_env"
+Found DFU: [0x1457:0x5119] devnum=16, cfg=0, intf=0, alt=3, name="kernel"
+Found DFU: [0x1457:0x5119] devnum=16, cfg=0, intf=0, alt=4, name="splash"
+Found DFU: [0x1457:0x5119] devnum=16, cfg=0, intf=0, alt=5, name="rootfs"
+</pre>
+
+This shows you six interfaces, all in '''configuration 0''' and '''interface 0''', with altsetting 0...4.  The name is currently not yet defined, but will be added to one of the upcoming u-boot releases.  The mapping on the Neo1973 is as follows:
+
+* 0: RAM
+* 1: 'u-boot' partition
+* 2: 'u-boot_env' partition
+* 3: 'kernel' partition
+* 4: 'splash' partition
+* 5: 'rootfs' partition
+
+==== --device ====
+
+You can specify the USB Vendor and Product ID of the device you want to program:
+
+ dfu-util --device 0x1457:0x5119
+
+If you only have one standards-compliant DFU device attached to your PC, this is optional.  However, as soon as you have multiple DFU devices, dfu-util will detect this and abort, asking you to specify which device it shall use.
+
+==== --transfer-size ====
+
+Specifies the size of each individual USB transfer.  If you don't use it, the maximum possible size for your combination of host operating system and USB device is chosen (for optimal performance).
+
+==== --download ====
+
+download the given file into the device.
+
+==== --upload ====
+
+upload from the DFU device into the given file[name].
+
+{{note|Upload support is currently broken}}
+
+== Phrasebook ==
+
+There's no full-fledged manual yet.  Instead, some examples:
+
+=== Flashing the kernel ===
+
+ dfu-util -a 3 -R -D /path/to/uImage
+
+=== Flashing the bootloader ===
+
+ dfu-util -a 1 -R -D /path/to/u-boot.bin
+
+=== Copying a kernel into RAM ===
+
+ dfu-util -a 0 -R -D /path/to/uImage
+
+Once this has finished, the kernel will be available at the default load address of 0x32000000 in Neo1973 RAM. 
+
+{{note|You cannot transfer more than 2MB of data into RAM using this method}}
 {{Languages|Dfu-util}}
