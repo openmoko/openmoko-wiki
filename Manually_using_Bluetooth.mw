@@ -21,6 +21,45 @@ We want to be able to use the Neo1973 as a HID device, being able to use it as c
 
 Bluetooth should behave just like our usbnet and provide full TCP/IP access to the phone.  BNEP has to be used.
 
+On the laptop:
+* Start bluetooth
+ elara /home/alphaone # /etc/init.d/bluetooth start
+
+* Start pand as server
+ elara /home/alphaone # pand -s
+
+* As soon as pand is started on the phone configure your IP address
+ elara /home/alphaone # ip a add 10.0.0.1/24 dev bnep0
+ elara /home/alphaone # ip l set bnep0 up
+
+* Configure IP forwarding and masquerading to your liking
+
+On the phone:
+* Insert the module and power up bluetooth
+ root@fic-gta01:~$ modprobe gta01-pm-bt
+ root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-bt.0/power_on 
+
+* Scan for the laptop
+ root@fic-gta01:~$ hcitool scan
+ Scanning ...
+         00:0E:6D:C0:0l:6A       Sho
+         00:20:E0:5A:FE:C8       BlueZ (0)
+
+* Connect to the laptop pand
+ root@fic-gta01:~$ pand -c 00:20:E0:5A:FE:C8
+
+* Configure your IP address
+ ip a add 10.0.0.2/24 dev bnep0
+ ip r add default via 10.0.0.1
+
+* Enjoy
+ root@fic-gta01:~$ wget http://www-public.tu-bs.de:8080/~y0019680/tmp/thereisnophone.mp3 
+ Connecting to www-public.tu-bs.de[134.169.9.108]:8080
+ thereisnophone.mp3   100****************************************************|   266 KB 00:00:00 ETA
+ root@fic-gta01:~$ madplay thereisnophone.mp3 
+ MPEG Audio Decoder 0.15.2 (beta) - Copyright (C) 2000-2004 Robert Leslie et al.
+ 630 frames decoded (0:00:22.6), -0.9 dB peak amplitude, 0 clipped samples
+
 === A2DP ===
 
 
