@@ -63,5 +63,28 @@ Watch the screen of the Neo. The following things should happen:
 
 == Errata ==
 
-# u-boot can power-off the phone while in DFU mode
-# /usr/share/common-licenses is not populated (printed GPL/LGPL included)
+=== power-off while DFU ===
+
+u-boot can power-off the phone while in DFU mode :(
+
+==== Workaround ====
+
+Either press the AUX button frequently to keep the phone from shutting off while the transfer is  in progress, ''or'' access the u-boot console to increase boot_menu_timeout to some large value (in seconds).
+
+=== Licenses not in rootfs image ===
+
+/usr/share/common-licenses is not populated
+
+==== Workaround ====
+
+printed GPL/LGPL included
+
+=== rootfs update causes what seems like bad blocks ===
+
+Since we do block-by-block erasing of the flash during DFU, the 'rootfs' partition is not erased completely before writing a new JFFS2 image to NAND, if the rootfs image is smaller than the flash size
+
+==== Workaround ====
+
+Either use the 'pad' option to '''mkfs.jffs2' when creating the image '''or''' use
+ GTA01Bv3#  nand erase.jffs2 rootfs
+on the bootloader console before using DFU to flash a new rootfs image
