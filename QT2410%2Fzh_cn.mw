@@ -1,1 +1,50 @@
+Armzone QT2410
+
+The armzone.com qt2410 is a 90% compatible chinese remake of Samsungs SMDK2410.  Unfortunately it's only 90% compatible, not 100% - and those 10% difference are only marginally documented.
+
+== 概述 ==
+
+The QT2410 consists of a Mainboard and a "Kernel board".  The kernel board is plugged into a 144pin SD Card socket.
+
+== Boot Selection ==
+
+The QT2410 has a 512kByte NOR flash located on the mainboard (SST39VF400A) plus a 64MB NAND flash located on the kernel board (Samsung K9F1208U0B).  The kernel board features a small switch to select whether to boot from NAND or to boot from NOR.
+
+== USB Downloader in NOR ==
+
+The NOR flash is pre-programmed with a small program called "S3C2410X USB Downloader ver 0.2".  This program listens on the usb device port for some software download.  After the download has finished, it will jump to the code it has just downloaded.
+
+The original QT2410 ships some bogus windows program to send software to the board.  [[User:HaraldWelte]] has written some code called [[s3c2410_boot_usb]] to interface the USB downloader from a Linux host.
+
+== JTAG flashing ==
+
+The NAND and NOR flash can be flashed via JTAG.  This is discouraged by all means, since it is extremely time-consuming. Samsung / Armzone ship (again) a windows based program for flashing, called sjf2410.
+[[User:HaraldWelte]] has done a Linux port of sjf2410, called [[sjf2410-linux]].  Using it you can re-program the [[Bootloader]] into NAND in case something strange happened.
+
+
+== Memory Layout ==
+
+=== NAND ===
+The 64MB NAND Flash is partitioned as follows:
+
+ 0x00000000: u-boot, 196kByte (can shrink later, lots of debug code)
+ 0x00030000: u-boot environment, 16kByte (cannot shrink, 16k erase size of NAND)
+ 0x00034000: kernel, 2MB (0x200000 bytes)
+ 0x00234000: initrd, 4MB (0x400000 bytes)
+ 0x00634000: jffs2, 59,184kB (0x39cc000 bytes)
+ 0x03ffffff: end
+
+=== Physical ===
+
+ 0x00000000: [[S3C2410 Steppingstone]]
+ 0x19000300: CS8900A Ethernet
+ 0x30000000: SDRAM start
+ 0x30000100: Arm-Tag "ATAG" structure passing from bootloader to kernel
+ 0x30008000: Default load address for decompressed kernel
+ 0x32000000: Default load address for compressed kernel u-boot image
+ 0x33d00000: Default frame buffer start address
+ 0x33d4b000: Default frame buffer end address (240x320, 16bpp)
+ 0x33f5f000: MALLOC_BASE of u-boot
+ 0x33f80000: TEXT_BASE of u-boot
+ 0x33ffffff: End of RAM
 {{Languages|QT2410}}
