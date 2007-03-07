@@ -1,54 +1,49 @@
-== 概述 ==
+== General ==
 
-GTA01上所使用的内核基于来自[http://www.kernel.org/ kernel.org]未经修改的Linux 2.6.21.3内核。 
+The Kernel on the GTA01 is based on a vanilla 2.6.17.7 Linux kernel from [http://www.kernel.org/ kernel.org].
 
-针对如下设备还需要一些额外的补丁
-* S3C2410 Usb设备控制器
-** 我们使用来自iPaq H1940 linux项目的驱动程序
-* S3C2410 SD卡控制器
-** 我们使用来自[http://www.tomtom.com/gpl.php TomTom GO kernel]的驱动程序
-* [[QT2410]]支持
+Some additional patches are required for
+* S3C2410 Usb Device Controller
+** We use the driver from iPaq H1940 linux project
+* S3C2410 SD Card Controller
+** We use the driver from the [http://www.tomtom.com/gpl.php TomTom GO kernel]
+* [[QT2410]] machine support
 ** This is just some glue that puts all pieces together
-* S3C2410触摸屏驱动程序
-** 来自iPaq H1940 linux项目
-* GTA01支持
+* S3C2410 touch screen driver
+** Again from iPaq H1940 linux project
+* GTA01 machine support
 ** Some glue/configuration to pull all pieces together
 * [[GSM Communication Infrastructure]]
 ** The kernel-level part (TS07.10 line discipline, GPRS line discipline)
 
-== 内核补丁 ==
+== Kernel Patchset ==
 
-针对上述未经修改的内核的补丁集可以从[https://svn.openmoko.org/trunk/src/target/kernel/patches/ https://svn.openmoko.org/trunk/src/target/kernel/patches/]下载，这是一个 "[http://savannah.nongnu.org/projects/quilt quilt] patchset"。你必须把它解压到"linux-2.6.x"目录的"patches"文件夹，然后使用"quilt push -a"命令，这个命令将把所有的补丁打到内核里。
+The latest patchset against the abovementioned vanilla kernel can be found at https://svn.openmoko.org/trunk/src/target/kernel/patches/. This is a so-called "[http://savannah.nongnu.org/projects/quilt quilt] patchset".  In order to apply it, you have to untar it into a "patches" directory below the "linux-2.6.x" directory, and then call "quilt push -a", which pushes all patches onto the kernel.
 
-例如，解压2.6.21.1内核tarball，然后使用如下命令来把最新的补丁打到内核里：
-    cd linux-2.6.21.1
-    svn co https://svn.openmoko.org/trunk/src/target/kernel/patches
-    quilt push -a
-注意2.6.21.1 may not be the correct kernel to build against - see previous section to determine just which kernel version to download and patch.
+== Kernel Configuration ==
 
-== 内核配置 ==
+The latest kernel configuration can be found at https://svn.openmoko.org/trunk/oe/packages/linux/linux-gta01/defconfig-fic-gta01.  Just copy it to the linux-2.6.x/.config file.
 
-最新的内核配置文件可以从[https://svn.openmoko.org/trunk/oe/packages/linux/linux-gta01/defconfig-fic-gta01 https://svn.openmoko.org/trunk/oe/packages/linux/linux-gta01/defconfig-fic-gta01]下载。将它复制到linux-2.6.x/目录下并保存为.config文件。
-
-== 内核构建 ==
+== Kernel building ==
 
 The kernel build is executed as normal.  We actually only need the "vmlinux" target, not the "zImage".
 
-== 可引导的内核映像 ==
+== Bootable kernel image ==
 
-A bootable kernel image called ''uImage'' is available from [https://buildhost.openmoko.org/tmp/gta01/deploy/images/]
+A bootable kernel image called ''uImage'' is available from [https://buildhost.openmoko.org/tmp/gta01/deploy/images/])
 
-== 创建一个可引导的内核映像 ==
-u-boot要求所有的映像文件以uImage格式进行封装(比如内核，initrd，...)。This is basically just a special header adding CRC protection, version information, etc. Pleaes see [[u-boot/zh_cn|u-boot]] for details.
+== Creating a bootable kernel image ==
+u-boot needs all images (such as kernel, initrd, ...) in the form of an uImage.  This is basically just a special header adding CRC protection, version information, etc. Pleaes see [[u-boot]] for details.
 
-== 内核启动参数 ==
+
+== Kernel Boot Parameters ==
 
 Since the [[QT2410]] can be used with different liquid crystal modules (LCMs), the kernel images for the QT2410 have a boot parameter "tft":
 * If you boot without any tft= parameter, the 'stock' qt2410 240x320 TFT panel is assumed.
 * If you boot with "tft=b" ('b' for big), the timings for the SHARP 8" 640x480 TFT panel are used.
 * If you boot with "tft=p" ('p' for production), the timings for the 2.8" 480x640 TFT panel are used.
 
-== 内核子系统 ==
+== Kernel Subsystems ==
 
 In this section we will outline a couple of the GTA01 specific kernel drivers / features / subsystems
 
@@ -66,7 +61,7 @@ root@fic-gta01:/$ ls -l /sys/bus/platform/devices/gta01-pm-gsm.0/
 -rw-r--r--    1 root     root         4096 Feb  1 09:58 reset
 </pre>
 
-===== powering up =====
+===== Powering up =====
 <pre>
 root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/power_on 
 gta01-pm-gsm gta01-pm-gsm.0: powering up GSM, thus disconnecting serial console
@@ -78,7 +73,7 @@ root@fic-gta01:~$ echo "0" > /sys/bus/platform/devices/gta01-pm-gsm.0/power_on
 gta01-pm-gsm gta01-pm-gsm.0: powered down GSM, thus enabling serial console
 </pre>
 
-===== 复位 =====
+===== Resetting =====
 <pre>
 root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/reset 
 root@fic-gta01:~$ echo "0" > /sys/bus/platform/devices/gta01-pm-gsm.0/reset 
@@ -145,7 +140,7 @@ The features we need to support
 
 For more details see [[Neo1973 Audio Subsystem]]
 
-=== 蓝牙 ===
+=== Bluetooth ===
 
 We're using the stock bluez implementation of the linux kernel.
 
@@ -238,11 +233,11 @@ The PMU creates an input device that supports the following keys:
 * KEY_POWER2: USB power supply insert/remove
 * KEY_BATTERY: Charger insert/remove
 
-==== 实时时钟 ====
+==== RTC ====
 
 The real-time clock, including the alarm feature, is implemented as standard RTC (/dev/rtc).
 
-==== 看门狗 ====
+==== Watchdog ====
 
 The PMU-integrated watchdog is implemented using the standard watchdog character device.
 
@@ -284,7 +279,7 @@ root@fic-gta01:~$ cat /sys/bus/i2c/devices/0-0008/chgcur
 0
 </pre>
 
-==== 电池温度 ====
+==== Battery temperature ====
 
 The battery temperature (in centigrades) can be read via sysfs
 
@@ -293,7 +288,7 @@ root@fic-gta01:~$ cat /sys/bus/i2c/devices/0-0008/battemp
 25
 </pre>
 
-== 内核TODO列表 ==
+== Kernel TODO ==
 
 === Various ===
 * speed up in-kernel boot process
@@ -315,7 +310,7 @@ root@fic-gta01:~$ cat /sys/bus/i2c/devices/0-0008/battemp
 * test it
 * later: implement PWM
 
-=== USB设备驱动 ===
+=== USB device driver ===
 * test switching between usb host and usb device
 
 === Power Management ===
@@ -327,7 +322,4 @@ root@fic-gta01:~$ cat /sys/bus/i2c/devices/0-0008/battemp
 ** IRQ from ADC/touchscreen
 ** 911 button press (GPIO IRQ)
 ** headphone jack insert/remove
-
 {{Languages|Kernel}}
-
-[[Category:Kernel/zh cn]]
