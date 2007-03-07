@@ -1,6 +1,6 @@
 [[Image:Uboot-s3c2410fb.jpg|thumb|300px|u-boot on Neo1973 console]] [[Image:Neo1973 uboot splash closeup.jpg|thumb|300px|u-boot boot menu on Neo1973]]
 
-== General ==
+== 概述 ==
 
 The GTA01 uses the [http://u-boot.sourceforge.net/ u-boot] bootloader.
 
@@ -18,17 +18,17 @@ However, the vanilla u-boot doesn't support many of the features that GTA01 need
 
 [[User:HaraldWelte]] is working on those issues, and in fact most of them have already been implemented.
 
-== Bootloader source code ==
+== 引导装载程序源代码 ==
 
 The current bootloader patches can be found at http://svn.openmoko.org/trunk/src/target/u-boot/patches/. 
 
 Untar the sources, apply the patch.  run "make gta01bv3_config" (or gta01bv2_config, or whatever hardware revision you have), run "make".  You will get a resulting "u-boot.bin" image, which you can directly flash (either using existing bootloader or [[sjf2410-linux]]) into NAND.
 
-== Bootloader binary ==
+== 引导装载程序二进制文件 ==
 
 The latest bootloader binary builds can be found at http://buildhost.openmoko.org/tmp/gta01/deploy/images/ .  It should be written to the NAND flash address 0x00000000 (size 0x30000)
 
-== Bootloader development ==
+== 引导装载程序开发 ==
 
 === QT2410 ===
 If you want to do bootloader development on the QT2410, it's easier to work with a bootloader image that can be downloaded via USB into RAM instead of flashing.
@@ -114,7 +114,7 @@ gzip -9 linux.bin
 u-boot/tools/mkimage -A arm -O linux -T kernel -C gzip -a 30008000 -e 30008000 -n "Kernel Image QT2410" -d linux.bin.gz uImage
 </pre>
 
-== Boot menu ==
+== 启动菜单 ==
 [[Image:Neo1973 uboot menu.jpg|thumb|400px|u-boot boot menu on Neo1973]]
 
 As of the Phase-0 release, our u-boot version now features an on-screen boot menu.
@@ -131,7 +131,7 @@ By pressing the [[Neo1973 AUX button]] you can cycle through the menu items.  Us
 
 You can add items to the boot menu by setting environment variables.  FIXME.
 
-== Bootloader prompt ==
+== 引导装载程序命令提示行 ==
 
 === Accessing the bootloader prompt ===
 The bootloader prompt is available either on the serial console (via [[Debug Board]]), or as virtual USB Serial device (USB CDC_ACM).
@@ -282,7 +282,7 @@ GTA01Bv3 #
 
 === Commands on the bootloader prompt ===
 
-==== Auto-boot ====
+==== 自动引导 ====
 
 Auto-boot executes the command[s] specified in the ''bootcmd'' environment variable. The default configuration is:
 <pre>
@@ -292,7 +292,7 @@ bootcmd=setenv bootargs ${bootargs_base} ${mtdparts}; nand read.e 0x32000000 ker
 
 This basically tells us that it will load the content of the NAND partition '''kernel''' to memory address 0x32000000 and then try to boot it.  
 
-==== Environment ====
+==== 环境变量 ====
 
 u-boot is configured to manage a non-volatile environment that is stored in NAND flash.  You can use the commands to read/alter/store the environment in the following example:
 <pre>
@@ -330,7 +330,7 @@ Note: When setting multiple commands, e.g. for bootcmd, you need to escape the '
 GTA01Bv3 # setenv bootcmd mmcinit\; ext2load mmc 0 0x32000000 uImage\; bootm 0x32000000
 </pre>
 
-==== MMC/SD ====
+==== MMC/SD卡 ====
 
 in order to initialize a MMC/SD card, you have to use the ``mmcinit'' command.
 <pre>
@@ -526,7 +526,7 @@ GTA01Bv2 # s3c2410 speed get
 FCLK = 101 MHz, HCLK = 50 MHz, PCLK = 50 MHz
 </pre>
 
-===== 266MHz clock =====
+===== 266MHz时钟 =====
 
 You can re-configure the [[S3C2410]] PLL to generate a 266 MHz core cpu clock (rather than the 200MHz default) by using
  GTA01Bv2 # s3c2410 speed set 266 
@@ -536,7 +536,7 @@ respectively.
 
 {{warning|The current hardware (as of GTA01Bv3) only runs stable at 266MHz if you do not attach aynthing (esp. the FPC / [[Debug Board]] to the Debug Port}}
 
-==== TFTP on QT2410 ====
+==== QT2410上的TFTP ====
 
 The QT2410 cs8900a Ethernet can be used to download images via network.
 
@@ -595,5 +595,5 @@ If it supports DFU, you should see the following snippet towards the end of the 
       iInterface              0 
 </pre>
 
-For information on how to do firmware upgrades, please see [[dfu-util]].
+关于如何进行固件升级的信息，请看[[dfu-util]]。
 {{Languages|Bootloader}}
