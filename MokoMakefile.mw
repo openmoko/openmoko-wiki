@@ -50,22 +50,10 @@ Then you need to upgrade OE.mtn  Use the following command while in /home/moko:
    # mtn --db OE.mtn db migrate
 
 
-For people with multiple CPU's (or dual-core ones) this small patch might be useful to build things faster
-
- --- Makefile.bak        2007-03-07 20:49:40.937825664 +0200
- +++ Makefile    2007-03-08 10:47:49.291062294 +0200
- @@ -116,7 +116,9 @@
-         [ -e build/conf/local.conf ] || \
-         ( echo 'MACHINE = "fic-gta01"' > build/conf/local.conf ; \
-           echo 'DISTRO = "openmoko"' >> build/conf/local.conf ; \
- -         echo 'BUILD_ARCH = "'`uname -m`'"' >> build/conf/local.conf )
- +         echo 'BUILD_ARCH = "'`uname -m`'"' >> build/conf/local.conf ; \
- +         echo 'PARALLEL_MAKE = "-j 4"' >> build/conf/local.conf ; \
- +         echo 'BB_NUMBER_THREADS = "4"' >> build/conf/local.conf )
- 
-  setup-env:
-         [ -e setup-env ] || \
-
+For people with multiple CPU's (or dual-core ones) this small patch might be useful to build things faster.
+Edit the local.conf and add the following lines:
+ PARALLEL_MAKE = "-j 4"
+ BB_NUMBER_THREADS = "4"
 
 Change the PARALLEL_MAKE and BB_NUMBER_THREADS values to something that suits better if it chokes your machine.
 
