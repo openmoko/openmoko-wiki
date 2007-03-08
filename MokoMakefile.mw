@@ -53,19 +53,21 @@ Then you need to upgrade OE.mtn  Use the following command while in /home/moko:
 For people with multiple CPU's (or dual-core ones) this small patch might be useful to build things faster
 
  --- Makefile.bak        2007-03-07 20:49:40.937825664 +0200
- +++ Makefile    2007-03-07 20:49:21.936742852 +0200
- @@ -116,7 +116,8 @@
+ +++ Makefile    2007-03-08 10:47:49.291062294 +0200
+ @@ -116,7 +116,9 @@
          [ -e build/conf/local.conf ] || \
          ( echo 'MACHINE = "fic-gta01"' > build/conf/local.conf ; \
            echo 'DISTRO = "openmoko"' >> build/conf/local.conf ; \
  -         echo 'BUILD_ARCH = "'`uname -m`'"' >> build/conf/local.conf )
  +         echo 'BUILD_ARCH = "'`uname -m`'"' >> build/conf/local.conf ; \
- +         echo 'PARALLEL_MAKE = "-j 4"' >> build/conf/local.conf )
+ +         echo 'PARALLEL_MAKE = "-j 4"' >> build/conf/local.conf ; \
+ +         echo 'BB_NUMBER_THREADS = "4"' >> build/conf/local.conf )
  
   setup-env:
          [ -e setup-env ] || \
 
-Change the -j value to something that suits better if it chokes your machine.
+
+Change the PARALLEL_MAKE and BB_NUMBER_THREADS values to something that suits better if it chokes your machine.
 
 ===Testimonials=== 
 MokoMakefile is recommended by 3 out of 3 new developers on #openmoko, and one of them said "For some reason last night I couldn't get my manual install of everything to work (bb complained about my bbpath I think) ... but with your makefile, it works great!"
