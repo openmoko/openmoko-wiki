@@ -114,20 +114,65 @@ RSTR=`+COPS: (2,"E-Plus","E-Plus","26203"),(3,"o2 - de","o2 - de","26207"),(3,"V
 (please add items to this list if you're missing more features)
 
 * Phone related functions
-** Airplane mode / gsmd stop
+** Airplane mode / gsmd stop (this will be done outside gsmd, by using runlevels / upstart)
+** obtain manufacturer/model/revision/IMEI
+
 * Network related functions
 ** obtain list of available operators
 ** select operator out of the list
 ** obtain list of operator names
-** query field strength
+** query field strength (rather than just events)
+
 * SMS related features
 ** send SMS
 ** receive SMS
+** obtain IMSI
+** access to SIM-card stored SMS
+
 * SIM related functions
 ** read phonebook entry
 ** write phonebook entry
+
 * GPRS related functions
 ** set up GPRS link, use it via separate DLC of TS07.10 multiplex
+
 * gsmd internal infrastructure
 ** fine-grained event subscriptions (rather than wildcard-subscribe)
 ** possibility to specify log-level from command line
+** logfile re-opening on SIGUSR1 or SIGHUP (logrotate)
+** permission handling
+** d-bus interface
+
+== Implementation Thoughts ==
+
+=== State tracking ===
+
+gsmd needs to do apropriate state tracking of the underlying GSM hardware.  For many of the state transition we only get events from the GSM Modem, but don't have apropriate query commands.  Thus, assuming gsmd runs all the time, applications can come and go, but still have an idea about the current state of the modem, even if they missed the initial state transitions.
+
+Also, gsmd state tracking allows us to allow for safer interoperability of multiple applications.  If i.e. one applications has just started an outgoing call, gsmd can detect another application who intends to interfere with that and deny access
+
+==== device power state ====
+
+* modem completely off, not responding to AT commands
+* modem responding to AT commands, but powered off (CFUN=0)
+* modem responding to AT commands, in some power saving mode
+* modem responding to AT commands, powered on, fully operational (CFUN=1)
+
+==== network registration state ====
+
+* not registered to any network, not trying to register
+* not registred to any network, searching/trying to register
+* registered to home network (including cellID)
+* registered to roaming network (including cellID)
+
+==== ciphering indication state ====
+
+* ciphering indications not supported by modem
+* ciphering indications supported, but disabled in SIM
+* ciphering indications supported, ciphering active
+* ciphering indications supported, ciphering inactive
+
+==== call state ====
+
+* idle
+* busy
