@@ -1,62 +1,38 @@
-==Запуск Openmoko на ПК с Xoo==
+Хорошее начало разработки - получение rootfs, поскольку большинство из Вас не имеют настоящего оборудования.
 
-Для запуска Openmoko на обычном ПК (x86/x86_64) необходимо собрать Openmoko для x86-платформы или скачать уже собранный образ (называемый rootfs), а также настроить X-сервер, эмулирующий экран Neo1973.
 
-== rootfs ==
-
-=== Сборка ===
-
-Для сборки rootfs для платформы x86 воспользуйтесь инструкцией [[MokoMakefile|Building Openmoko using the MokoMakefile]], с единственной поправкой: перед запуском
- make openmoko-devel-image
-замените целевую платформу с fic-gta01 на x86 в файле настроек сборки:
+== Получение rootfs ==
+Используйте [[MokoMakefile|Building OpenMoko using the MokoMakefile]] чтоб получить rootfs, just before make openmoko-devel-image run 
  # sed 's/fic-gta01/x86/' build/conf/local.conf
-Сборка занимает где-то пол-дня. Результатом будет образ <code>openmoko-devel-image-x86-$(DATE).rootfs.tar.gz</code> в директории <code>build/tmp/image/</code>.
+than just run make openmoko-devel-image. After a while(half of day) you should have in build/tmp/image/ file openmoko-devel-image-x86-$(DATE).rootfs.tar.gz mine is here [http://www.ms.mff.cuni.cz/~kupem6am/openmoko-devel-image-x86-20070227064250.rootfs.tar.gz].
 
-=== Готовые образы ===
-
-Образ, собранный [[User:Magon]], лежит тут: [http://www.ms.mff.cuni.cz/~kupem6am/openmoko-devel-image-x86-20070227064250.rootfs.tar.gz].
-
-== Установка Xoo для x86 ==
-Пользователи Gentoo могут взять Xoo из портежей:
- # echo "x11-misc/xoo" >> /etc/portage/package.keywords
+== Установка Xoo на Ваш хост ==
+Для пользователей gentoo выполните
  # emerge xoo
-Пользователи debian/ubuntu - из своего репозитория (debian testing/unstable, ubuntu universe):
+для Debian/Ububuntu
  # apt-get install xoo xnest
+остальные - найдите способ как это делается для Вашего дистрибутива.
 
-== Установка Xoo для AMD64(EM64T) ==
-Пользователи Gentoo так же могут взять Xoo из портежей:
- # echo "x11-misc/xoo" >> /etc/portage/package.keywords
- # emerge xoo
+== Создание X соединения ==
+* Убедитесь, что iptables не перпятствует Вашему соединеию на порт 6000(x11) к localhost
 
-Отредактировать файл /usr/portage/x11-misc/xoo/xoo-0.7.ebuild
-изменив KEYWORDS="~x86" на KEYWORDS="~x86 amd64"
-и 
-ebuild /usr/portage/x11-misc/xoo/xoo-0.7.ebuild digest
-(Вариант плохой, но на один раз сойдёт!)
+* Убедитесь, что Ваши X слушают порт 6000(X11) на localhost (netstat поможет)
 
-{{Note|Просьба к пользователям других дистрибутивов: рассказать, есть ли в ваших репозиториях xoo, и как его поставить.}}
-
-== Подготовка X-сервера ==
-* Убедитесь, что iptables не препятствует соединению на порт 6000(x11) к localhost.
-* Убедитесь, что X-сервер слушает порт 6000(x11) на localhost (скажем, с помощью netstat). Если не слушает - поищите в загрузочных-скриптах X-сервера соответствующую настройку.
-* Разрешите доступ к X-серверу без аутентикации с localhost:
+* Выполните соединение с localhost
  # xhost localhost
-
-{{Note|Если вы работаете на многопользовательской машине, то раздача доступа к X-серверу для всех пользователей localhost может быть опасной - любой локальный пользователь сможет подсоединиться к вашему X-серверу и рисовать на нём окошки, а также перехватывать события клавиатуры и мыши. Используйте аутентикацию MIT-MAGIC-COOKIE-1 вместо xhost, если для вас это актуально!}}
-
 == Подготовка rootfs ==
 * Распакуйте файлы rootfs в любой каталог и перейдите в него.
-* Смонтируйте каталог /dev в rootfs:
+
+* Получите файлы устройств из rootfs
  # sudo mount --bind /dev/ rootfs/dev/
-* Выполните chroot в rootfs:
+
+* Chroot to rootfs
  # sudo chroot rootfs /bin/sh
-== Запуск ==
-В другом терминале запустите Xoo ([http://www.datenfreihafen.org/~stefan/OpenMoko/neo1973-xoo-device.tar.bz2 здесь] лежит "шкурка" Neo1973 для Xoo):
+== Getting it up ==
+In another term start xoo, good idea is to download [http://www.datenfreihafen.org/~stefan/OpenMoko/neo1973-xoo-device.tar.bz2] and run
  # xoo --device neo1973.xml
-В чруте запустите оконный менеджер:
- # DISPLAY=localhost:1.0 x-window-manager
-В окошке Xoo должен запуститься matchbox.
-
-{{Languages|Host-based development with Xoo and Xephyr}}
-
-[[Category:Emulation/ru]]
+In chrooted enviroment export display to connect to started xoo
+ # export DISPLAY=localhost:1.0
+and start window manager.
+ # x-window-manager
+By this time you should have matchbox running in Xoo window.
