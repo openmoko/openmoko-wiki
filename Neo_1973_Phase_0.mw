@@ -64,35 +64,50 @@ Watch the screen of the Neo. The following things should happen:
 == Errata ==
 
 === power-off while DFU ===
-
 u-boot can power-off the phone while in DFU mode :(
 
 ==== Workaround ====
-
 Either press the AUX button frequently to keep the phone from shutting off while the transfer is  in progress, ''or'' access the u-boot console to increase boot_menu_timeout to some large value (in seconds) and restart.
 
-=== Licenses not in rootfs image ===
+==== Solution ====
+Update to a more recent u-boot revision.  All builds with svn revision '''1284''' or later address this issue.
 
+=== Licenses not in rootfs image ===
 /usr/share/common-licenses is not populated
 
 ==== Workaround ====
-
 printed GPL/LGPL included
 
 === rootfs update causes what seems like bad blocks ===
-
 Since we do block-by-block erasing of the flash during DFU, the 'rootfs' partition is not erased completely before writing a new JFFS2 image to NAND, if the rootfs image is smaller than the flash size
 
 ==== Workaround ====
-
 Either use the 'pad' option to '''mkfs.jffs2' when creating the image '''or''' use
  GTA01Bv3#  nand erase clean rootfs
 on the bootloader console before using DFU to flash a new rootfs image
 
 === Mechanical stress to microSD lid can cause short-circuit ===
-
 If you operate the microSD slot without a card inserted, while the device is powered on, plus put some mechanical stress to it, it can short-circuit the contact pins, resulting in 3.3V supply voltage short-circuit.
 
 ==== Workaround ====
-
 Please do not power the phone without microSD card inserted.  Especially, never try to switch cards without unpowering the phone completely.
+
+=== Random system crashes ===
+Due to a bug in the GPIO initialization routines of our [[u-boot]] patchset up to '''moko5''', we had memory corruption as soon as more than 64MB of SDRAM were used.
+
+==== Workaround ====
+None. 
+
+==== Solution ====
+The real solution is to update to a more recent u-boot revision, such as http://buildhost.openmoko.org/tmp/deploy/images/u-boot-gta01bv3-r3_0_0_1321.bin
+
+=== Rootfs corrulted after flashing via DFU ===
+The [[USB DFU]] code for handling the JFFS2 root filesystem partition did not properly erase the rest of the partition, in case you are flashing an image that is smaller than the physical size of the rootfs partition.
+
+==== Workaround ====
+Manually issue
+ nand erase clean rootfs
+on the [[u-boot]] commandline before flashing a new rootfs image.
+
+==== Solution ====
+Use a u-boot image svn rev. 1306 or higher.
