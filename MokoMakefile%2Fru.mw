@@ -39,9 +39,23 @@ For easy maintenance of your build environment the following commands are availa
    make update-makefile; make update; make setup; make openmoko-devel-image
 
 ===Советы=== 
-Вы можете уменьшить занимаемое место на диске добавлением
+*Вы можете уменьшить занимаемое место на диске добавлением
    INHERIT += "rm_work"
 в ваш local.conf (например /home/moko/build/conf/local.conf). Это удалит содержание директории build/tmp/work/*/<пакет> после успешной сборки пакета.
+
+
+*Если у вас появилась ошибка с monotone похожая на эту:
+   mtn: misuse: database /home/moko/OE.mtn is laid out according to an old schema
+вам нужно обновить OE.mtn. Выполните следующую команду находясь в /home/moko:
+   # mtn --db OE.mtn db migrate
+
+
+* Для людей имеющих несколько процессоров (или dual-core) этот маленкий патч будет полезен, что бы сборка шла быстрее.
+Отредактируйте local.conf и добавте строчки:
+ PARALLEL_MAKE = "-j 4"
+ BB_NUMBER_THREADS = "4"
+
+Измените значения PARALLEL_MAKE и BB_NUMBER_THREADS на более подходящие для вашей машины.
 
 ===Рекомендательные отзывы=== 
 MokoMakefile рекомендован 3 из 3 новых разработчиков на канале #openmoko, и один из них сказал: "По некоторой причине сегодня ночью я не смог запустить мою ручную сборку (bb ругалось на мой bbpath я думаю) ... но с твоим makefile все заработало!" ("For some reason last night I couldn't get my manual install of everything to work (bb complained about my bbpath I think) ... but with your makefile, it works great!")
