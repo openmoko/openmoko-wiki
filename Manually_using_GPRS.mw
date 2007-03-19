@@ -1,0 +1,126 @@
+You need to have GSM parts already initialized, with modem logged in to the network, for this to work. It is best to test it by doing test call.
+
+You'll need /etc/ppp/chap-secrets: (I used tabs in this file, I hope that does not matter).
+
+# Secrets for authentication using CHAP
+# client        server  secret                  IP addresses
+"gprs"  *       "gprs"  *
+
+You'll need /etc/ppp/gprs:
+
+# File:
+# gprs
+#
+# Description:
+# This file holds the serial cable and IrDA pppd options for GPRS phones
+
+# To give some debug info
+# debug
+
+# Serial device to which terminal is connected;
+/dev/ttySAC0
+holdoff 3
+
+# Serial port line speed
+115200
+
+# Hardware flow control needs to be used with serial cable.
+# With IrDA it should be disabled with nocrtscts option.
+crtscts  # serial cable
+#nocrtscts # IrDA
+
+# To keep pppd on the terminal
+nodetach
+
+# Connect script
+connect /etc/ppp/gprs-connect-chat
+
+# IP addresses:
+# - accept peers idea of our local address and set address peer as 10.0.0.1
+# (any address would do, since IPCP gives 0.0.0.0 to it)
+# - if you use the 10. network at home or something and pppd rejects it,
+# change the address to something else
+:160.218.160.218
+
+# pppd must not propose any IP address to the peer!
+noipdefault
+
+# Accept peers idea of our local address
+ipcp-accept-local
+
+# Ignore carrier detect signal from the modem
+local
+
+# No ppp compression
+novj
+novjccomp
+
+# Disconnect script
+disconnect /etc/ppp/gprs-disconnect-chat
+
+# Add default route
+defaultroute
+
+#a neco pro udrzeni linky
+lcp-echo-interval 300
+lcp-echo-failure 40000
+
+user "gprs"
+#noauth
+#auth login +chap -pap
+
+And you'll need /etc/ppp/gprs-connect-chat, probably needs "x" bit.
+
+#!/bin/sh
+#
+# File:
+# chat-gprs-connect
+#
+# Description:
+# chat script to open Sonera GPRS service with GPRS phones. If ppp
+# negotiation stalls, try restarting the phone. To try with other GPRS
+# operator setting, change the PDP contex setting. The settings work with
+# all Ericsson models, but Nokia 8310 does not suppor QoS parameters with
+# AT commands, so just delete those lines and it'll work.
+#
+# Set PDP context CID=1, protocol=IP, APN=internet:
+# AT+CGDCONT=1,"IP","internet","",0,0
+#
+# Set CID=1 QoS requirements from the network, not supported by 8310:
+# AT+CGQREQ=1,0,0,0,0,0
+#
+# Set CID=1 minimum acceptable QoS parameters, not supported by 8310:
+# AT+CGQMIN=1,0,0,0,0,0
+#
+# 'Call' CID=1 (activate PDP context one, perform GPRS attach):
+# ATD*99***1#
+#
+# was "internet.open.s"
+#
+# V connectu bylo "ip","internet"
+# The actual chat script:
+exec chat                                               \
+TIMEOUT         22                              \
+ECHO            ON                              \
+ABORT           '\nBUSY\r'                      \
+ABORT           '\nERROR\r'                     \
+ABORT           '\nNO ANSWER\r'                 \
+ABORT           '\nNO CARRIER\r'                \
+ABORT           '\nNO DIALTONE\r'               \
+ABORT           '\nRINGING\r\n\r\nRINGING\r'    \
+SAY             "Press CTRL-C to close the connection at any stage!"    \
+SAY             "\ndefining PDP context...\n"   \
+""              "\d" \
+""              "atz" \
+OK              "ate1" \
+OK              'at+cgdcont=1,"ip","internet","0.0.0.0",0,0' \
+TIMEOUT         22      \
+OK              ATDT*99***1#    \
+TIMEOUT         22              \
+SAY             "\nwaiting for connect...\n"    \
+CONNECT         ""                              \
+SAY             "\nConnected." \
+SAY             "\nIf the following ppp negotiations fail,\n"   \
+SAY             "try restarting the phone.\n"
+
+You may need to adjust APN name in at+cgdcont line. Then, after initializing GSM, you should be to initialize GPRS by pppd file /etc/ppp/gprs. Good luck!
