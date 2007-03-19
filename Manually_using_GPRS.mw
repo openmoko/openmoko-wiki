@@ -1,451 +1,126 @@
-{{note| These instructions are for OM2008.8 .  If you are using the FSO stack, see [[GPRS_FSO]].}}
+You need to have GSM parts already initialized, with modem logged in to the network, for this to work. It is best to test it by doing test call.
 
-The GPRS connection is made using the PPP protocol to a server identified by an "APN" at the network operator.   Once a GPRS connection is made, it is possible to [[#Sharing_the_GPRS_connection_with_a_computer|share that connection with a connected computer]], allowing that computer to access the internet through the phone!
+You'll need /etc/ppp/chap-secrets: (I used tabs in this file, I hope that does not matter).
 
-= Option 1: With GSM multiplexing and with a GUI =
-
-{{note|The following does not appear to work if you have a SIM PIN.  The dialog to enter your SIM PIN never pops up and the GSM multiplexing daemon continuous loops and runs into a SIM PIN error.}}
-
-GSM multiplexing allows both a GPRS connection and a phone call to be handled at the same time.  By default, [[Om 2008.8]] does not multiplex the GSM device.  The [[FSO]] distribution, however, introduces GSM multiplexing with a new service and a DBus API to that service.  The instructions to modify the OM2008.8 distribution to make use of GSM multiplexing and allow you to start GPRS from a GUI can be found here: http://freeyourphone.de/portal_v1/viewtopic.php?f=21&t=295 ('''Note:''' Script package seems to be no longer be available, but a later post in the thread links to a version at [http://fyp-archiv.relei.de/ http://fyp-archiv.relei.de/].)
-
-== gsm0710muxd ==
-
-There are two sources, where you can find gsm0710muxd.
-
-=== From OM2008.8 repositories ===
-
-Good news, working gsm0710muxd can be installed just by typing "opkg install gsm0710muxd"
-
-NOTE: ASU2008.12 boots in 45s and gsm0710muxd has probably not enough time to initialize GSM modem (gsm0710muxd is unable to provide working tty device to qtopia => qpe fails to open GSM modem and quits)
-==> Some kind of delay may be needed in /etc/X11/Xsession.d/89qtopia
-
-==> It has also been suggested on the mailing lists that an "update-rc.d gsm0710muxd defaults 11" be issued to get this to start earlier in the boot process to give the modem a chance to initialize before QPE starts.
-
-=== From Angstrom Repositories ===
-
-If the gsm0710muxd that is found in the OM2008.8 repository refuses to work, you can use the one from the Angstrom Repositories (see [[Repositories]]) instead.
-
-Alternatively, if you simply want to download all the packages, you can get them from here:
-
-http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/gsm0710muxd_0.9.1+r0-gitr3ff86b129640b647ccba3d86eb243d864671b039-r0_armv4t.ipk
-
-I don't know if the package got renamed but that one wasn't in there the one i downloaded was
-
-http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/gsm0710muxd_0.9.2+gitr79e10fe8ad0828e5be9a5c087ac9ee04956674c1-r0.1_armv4t.ipk
-
-haven't gotten past this step yet well see how / if it works. :)
-
-This link was working for me on 11.12.2008 (I've successfully muxed GSM device and sent command for echo reduction - http://lists.openmoko.org/pipermail/community/2008-August/028495.html)
-
-http://shr.bearstech.com/shr-testing/ipk/armv4t/gsm0710muxd-dbg_0.9.2+gitr12+d8b36b923ef69a64cb5a2d3bca799d772b9c73c3-r0.1_armv4t.ipk
-
-and the dependencies from here:
-
-http://www.angstrom-distribution.org/repo/?pkgname=gsm0710muxd
-
-Make sure that you install the armv4t versions of all packages.
-
-=== Common part ===
-
-The most important step after installing gsm0710muxd is to tell QPE to use the MUX instead of the device directly.  If you follow the instructions in the link above, there is a step that replaces the 89qtopia init script with one from their script package.  The key difference is the addition of the following lines that tells QPE to use the MUX:
-
-in /etc/X11/Xsession.d/89qtopia
-
-    identvar=$(date +%s)<br/>
-    ptsvar=$(dbus-send --system --print-reply --type=method_call --dest=org.pyneo.muxer /org/pyneo/Muxer
-    org.freesmartphone.GSM.MUX.AllocChannel string:$identvar | grep string | awk -F '"' '{ print $2 }')<br/>
-    export QTOPIA_PHONE_DEVICE=$ptsvar
-
-The [[#Some APN names for reference|APN Reference]] table may come in handy when you are looking for the required network specific information for the other scripts.
-
-Once you follow through with all the instructions, you will notice that the "Services" GUI will crash.  This has to do with this bug: http://docs.openmoko.org/trac/ticket/1718
-
-The fix is to change the "init()" call on line 82 of /usr/lib/python2.5/site-packages/gtk-2.0/gtk/_init_.py  to "_init()" (add an underscore).
-
-You may also have to modify your /etc/resolv.conf file and add the nameserver (DNS Server) of your service provider if you have DNS resolution problems.
-
-Then, hopefully, you should be up in running with GPRS and a GUI to turn it on and off.  Note that you can use the command line scripts "gprson" and "gprsoff" in place of the GUI if you need to do some debugging.
-
-= Option 2: With GSM multiplexing and without a GUI =
-
-You will have to get gsm0710muxd the same way as detailed in Option 1.
-
-'''1) In /etc/rc5.d start gsm0710muxd before gsmd:'''
-* S34gsm0710muxd -> ../init.d/gsm0710muxd
-* S35gsmd -> ../init.d/gsmd
-
-'''2) Modify S35gsmd so it can start either with or without gsm0710muxd:'''
-<pre>
-...
-case "$1" in
-start)
-if [ "$(pidof gsm0710muxd)" ] ; then
-id=$(date +%s)
-GSM_DEV=$(dbus-send --system --print-reply --type=method_call --dest=org.pyneo.muxer /org/pyneo/Muxer org.freesmartphone.GSM.MUX.AllocChannel string:$id | grep string | cut -d \" -f 2)
-else
-[ -n "$GSM_POW" ] && ( echo "0" >$GSM_POW; sleep 1 )
-[ -n "$GSM_POW" ] && ( echo "1" >$GSM_POW; sleep 1 )
-[ -n "$GSM_RES" ] && ( echo "1" >$GSM_RES; sleep 1 )
-[ -n "$GSM_RES" ] && ( echo "0" >$GSM_RES; sleep 2 )
-fi
-
-if [ ! "$GSM_DEV" ] ; then
-echo "GSM_DEV was not set"
-exit 1
-fi
-
-echo -n "Starting GSM daemon: "
-start-stop-daemon -S -x /usr/sbin/gsmd -- gsmd -p $GSM_DEV $GSMD_OPTS -d -l /var/log/gsmd
-
-if [ $? = 0 ]; then
-echo "gsmd."
-else
-echo "(failed.)"
-fi
-;;
-stop)
-if [ ! "$(pidof gsm0710muxd)" ] ; then
-[ -n "$GSM_POW" ] && echo "0" >$GSM_POW
-fi
-
-echo -n "Stopping GSM daemon: "
-...
-</pre>
-
-'''3) Remove the tty from /etc/ppp/peers/simyo''' (replace simyo with your provider).
-
-'''4) Use a ppp start script like this:'''
-<pre>
-$ cat /usr/local/bin/ppp-start
-#!/bin/sh
-
-id=$(date +%s)
-TTY=$(dbus-send --system --print-reply --type=method_call --dest=org.pyneo.muxer /org/pyneo/Muxer org.freesmartphone.GSM.MUX.AllocChannel string:$id | grep string | cut -d \" -f 2)
-logger -t ppp-start "using tty $TTY"
-pppd $TTY call simyo
-</pre>
-
-'''5) Use "killall pppd" to terminate the PPP connection.'''
-
-
-[[:Image:Gsmmuxd.trace.txt|Here]] is some strace information from gsm0710muxd, showing how the daemon responds when receiving a call when GPRS is up.
-
-[http://www.teaparty.net/technotes/openmoko-2.html#GPRS Here] is Tom's documentation on how he got it working (under 2008.08), with config files and example output.
-
-= Option 3: Without GSM multiplexing and without a GUI =
-
-[Important Note: It has been pointed out that this is only for 2007.2 and not for the 2008.8 images.  If someone can confirm this and update this comment with more detail it would help out this page.  Thanks]
-
-The program that implements PPP on Linux is [[pppd]], which we need to configure and run to get a connection. When that is working, we can configure pppd to wait until it's needed before it connects, and to disconnect if the connection becomes idle. Further, we can start pppd in the background during the boot process.
-
-== Configuring pppd for manual connections ==
-
-You'll need /etc/ppp/peers/gprs:
-<pre>
-# Uncomment the following if you want some debug.
-#debug
-#logfile /var/volatile/log/pppd.log
-lock
-/dev/ttySAC0 115200
-crtscts
-connect /etc/ppp/gprs-connect-chat
-disconnect /etc/ppp/gprs-disconnect-chat
-hide-password
-usepeerdns
-ipcp-accept-local
-noauth
-noipdefault
-novj
-novjccomp
-defaultroute
-replacedefaultroute
-# Reopen the connection if it fails, pausing for a while.
-persist
-holdoff 15
-# Check the line every 20 seconds and presume
-# the peer is gone if no replay for 4 times.
-lcp-echo-interval 20
-lcp-echo-failure 4
-</pre>
-Comment : some ISP (ZeroForfait for example) does not accept compression control protocol request. if you have something like "Protocol-Reject for 'Compression Control Protocol' (0x80fd) received" in your logs, add 
-<pre>
-noccp 
-</pre>
-Comment by Vasco: I also had to include this in order to survive a "'''IPCP: timeout sending Config-Requests'''" sporadic error that dropped my connection right in the beginning:
-<pre>
-ipcp-restart 10
-</pre>
-
-
-Depending on the APN, you may need password authentication using CHAP or PAP. In /etc/ppp/pap-secrets you can add the following default line for "password-less" connections:
-
-<pre>
-# client        server  secret                  IP addresses
-*               *       ""                      *
-</pre>
-
-For CHAP, lines in /etc/ppp/chap-secrets are used. For PAP, the lines are in /etc/ppp/pap-secrets. The client should match the "user" option in pppd the config file (below). You can use * to mean any here, but the option user "" doesn't mean empty!
-
-For example:
-
-<pre>
 # Secrets for authentication using CHAP
 # client        server  secret                  IP addresses
-"user"         *       "password"                  *
-</pre>
+"gprs"  *       "gprs"  *
 
-For this you need the following options in /etc/ppp/peers/gprs:
+You'll need /etc/ppp/gprs:
 
-<pre>
-# username to use for authentication, should match "client" in /etc/ppp/{chap,pap}-secrets
-user "user"
-</pre>
+# File:
+# gprs
+#
+# Description:
+# This file holds the serial cable and IrDA pppd options for GPRS phones
 
-== gprs-connect-chat, version 1 ==
+# To give some debug info
+# debug
 
-You'll also need /etc/ppp/gprs-connect-chat (needs "chmod +x"):
+# Serial device to which terminal is connected;
+/dev/ttySAC0
+holdoff 3
 
-<pre>
-#!/bin/sh -e
-exec chat -v -S -s\
-TIMEOUT 15\
-"" "\K\K\K\d+++ATH"\
-OK-AT-OK ATZ\
-OK ATE1\
-ABORT BUSY\
-ABORT DELAYED\
-ABORT "NO ANSWER"\
-ABORT "NO DIALTONE"\
-ABORT VOICE\
-ABORT ERROR\
-ABORT RINGING\
-TIMEOUT 60\
-OK AT+CFUN=1\
-OK AT+COPS\
-OK AT+CGDCONT=1,\"IP\",\"internet\"\
-OK ATD*99#\
-CONNECT /n/d
-</pre>
+# Serial port line speed
+115200
 
-<b>Note:</b> In the 3rd last line, replace the word <i>internet</i> by your provider's APN (listed below).
+# Hardware flow control needs to be used with serial cable.
+# With IrDA it should be disabled with nocrtscts option.
+crtscts  # serial cable
+#nocrtscts # IrDA
 
-<b>(08/18/08) Note:</b> I needed to add the command "AT+CMOD=2" (formatted as "OK AT+CMOD=2\" without the quotes) in order to get GPRS working with the above script (otherwise it would ERROR on the CFUN, COPS, or the ATD if the other two were removed).  I have T-Mobile (US) with the $5.99 "tzones" addon, which works with Minimo as it supports HTTP proxy setups.
+# To keep pppd on the terminal
+nodetach
 
-Notes:
-AT+CMOD=?
-0 single mode
-1 alternating voice/fax (teleservice 61)
-2 alternating voice/data (bearer service 61)
-3 voice followed by data (bearer service 81)
-also all other values below 128 are reserved by this ETS
-<br>
-AT+CFUN=?
-0 minimum functionality
-1 full functionality   ("full functionality" is where the highest level of power is drawn)
-2 disable phone transmit RF circuits only
-3 disable phone receive RF circuits only
-4 disable phone both transmit and receive RF circuits
-5...127 reserved for manufacturers as intermediate states between full and minimum functionality
-<br>
+# Connect script
+connect /etc/ppp/gprs-connect-chat
 
-<b>Note:</b>
-It seems that you cannot copy and paste the connect/disconnect scripts as they are, since you need an additional whitespace after each line (e.g. OK ATE1 \ instead of OK ATE1\ etc).
+# IP addresses:
+# - accept peers idea of our local address and set address peer as 10.0.0.1
+# (any address would do, since IPCP gives 0.0.0.0 to it)
+# - if you use the 10. network at home or something and pppd rejects it,
+# change the address to something else
+:160.218.160.218
 
-== gprs-connect-chat, version 2 ==
+# pppd must not propose any IP address to the peer!
+noipdefault
 
-Update: On my freerunner the first AT+CFUN=1 always generated ERROR. I managed to get gprs work by using the following script from http://lists.openmoko.org/pipermail/community/2008-July/023246.html:
+# Accept peers idea of our local address
+ipcp-accept-local
 
-<pre>
-#!/bin/sh -e
-exec /usr/sbin/chat -v \
-TIMEOUT 10 \
-OK-AT-'' ''\
-ABORT BUSY\
-ABORT DELAYED\
-ABORT "NO ANSWER"\
-ABORT "NO DIALTONE"\
-ABORT VOICE\
-ABORT ERROR\
-ABORT RINGING\
-TIMEOUT 30 \
-'' ATZ\
-OK ATE1\
-OK AT+CFUN=1\
-ERROR AT+CPIN=\"XXXX\"\         << USE YOUR OWN
-OK AT+COPS\
-OK AT+CGDCONT=1,\"IP\",\"internet\"\
-OK 'ATDT*99***1#'\
-CONNECT ''
-</pre>
+# Ignore carrier detect signal from the modem
+local
 
-The error seems to vary a bit, sometimes it's before AT+COPS, sometimes as above. I have two versions of the gprs-connect-chat, which I vary between depending on which is needed. Or is there a way to specify two acceptable answers like {OK,ERROR}?
+# No ppp compression
+novj
+novjccomp
 
-You will need to adjust the APN name "internet" in at+cgdcont line and possibly the phone number in the ATD line to match what your network operator provides. See below in the table "Some APN names for reference" for the right settings for your operator.
+# Disconnect script
+disconnect /etc/ppp/gprs-disconnect-chat
 
-== gprs-disconnect-chat ==
+# Add default route
+defaultroute
 
-Also good to have is /etc/ppp/gprs-disconnect-chat (needs "chmod +x"):
+#a neco pro udrzeni linky
+lcp-echo-interval 300
+lcp-echo-failure 40000
 
-<pre>
-#!/bin/sh -e
-/usr/sbin/chat -v\
-ABORT OK\
-ABORT BUSY\
-ABORT DELAYED\
-ABORT "NO ANSWER"\
-ABORT "NO CARRIER"\
-ABORT "NO DIALTONE"\
-ABORT VOICE\
-ABORT ERROR\
-ABORT RINGING\
-TIMEOUT 12\
-"" "\K\K\K\d+++ATH"\
-"NO CARRIER-AT-OK" "\c"
-</pre>
+user "gprs"
+#noauth
+#auth login +chap -pap
 
-== Starting PPP connection ==
+And you'll need /etc/ppp/gprs-connect-chat, probably needs "x" bit.
 
-The following script can be used to start the ppp connection. First it stops gsmd because gsmd may put the phone in a unknown state. It then turns on the power to the phone, modifies the ownership, and then creates a tty connection. Finally it starts [[pppd]] with the gprs settings.
-
-<pre>
-/etc/init.d/gsmd stop
-echo "1" > /sys/bus/platform/devices/neo1973-pm-gsm.0/power_on
-chown uucp.uucp /dev/ttySAC0
-stty -F /dev/ttySAC0 crtscts
-pppd call gprs
-</pre>
-
-If you are having problems connecting ensure you have a good GSM signal and replace the last line with the below line. This will allow you to see the details of the connection on the console.
-
-<pre>
-pppd debug nodetach call gprs
-</pre>
-
-The config above will establish a persistant link over gprs. The battery will run low in less than an hour. See an example for an on-demand config below.
-
-=== Resolve.conf issues ===
-
-The latest build seems to have solved the following issue, it should be automatically updated by pppd.
-
-If you expeience DNS issues after connecting to DNS you may need a proper /etc/resolv.conf:
-
-<pre>
-ln -sf /var/run/resolv.conf /etc
-</pre>
-
-If needed put your nameserver for usb-net into /var/run/resolv.conf, not in /etc.
-
-The image does not set a correct resolv.conf. i do so with an
-
-<pre>
-echo  nameserver 192.168.0.201 > /var/run/resolv.conf
-</pre>
-
-in the right place. because a post-up in /etc/network/interfaces is not supported i do that in /etc/network/if-up.d/08setupdns
-
-another problem is pppd's /etc/ppp/ip-down.d/92removedns which does not properly remove the link when shuting down ppp. my fix is this script:
-
-<pre>
-#!/bin/sh
-ACTUALCONF=/var/run/resolv.conf
-PPPCONF=/var/run/ppp/resolv.conf
-if [ -f $PPPCONF ] ; then
-if [ -f $ACTUALCONF ] ; then
-if [ ! -h $ACTUALCONF -o ! "`readlink $ACTUALCONF 2>&1`" = "$PPPCONF" ] ; then
-mv $ACTUALCONF $ACTUALCONF.ppporig
-fi
-fi
-
-ln -sf $PPPCONF $ACTUALCONF
-fi
-</pre>
-
-
-
-=== Some APN names for reference ===
-{{Main|GPRS APN table}}
-
-== Starting pppd automatically ==
-
-Once you have finished debugging your gprs-connect-chat and gprs options files, you may wish to automatically connect whenever needed and hang up when finished.  Make sure you understand the impact of this change to your carrier plan billing.  This is not recommended unless you have a large-use or unlimited data plan.  These scripts do NOT prompt you before connecting.
-
-=== On-demand connection settings ===
-
-Additional settings are needed if you want the actual connection to be up only while there is traffic. In the 'gprs' file above, insert the following, making sure 'nodetach' is commented out.  If 'nodetach' is on, the boot process will stop when it starts pppd. Also remove the option 'persist' mentioned above.
-
-<pre>
-
-# Wait until needed before connecting
-demand
-
-# Disconnect if idle for given amount of seconds
-idle 20
-
-</pre>
-
-=== Start on boot (method 1) ===
-
-Add the following definition to /etc/network/interfaces:
-<pre>
-auto ppp0
-iface ppp0 inet ppp
-provider gprs
-</pre>
-
-That should be it. Now you can use 'ifup ppp0' and 'ifdown ppp0' manually too.
-
-=== Start on boot (method 2) ===
-
-Create the following file as /etc/ppp/ppp_on_boot (needs chmod +x).  The /etc/init.d/ppp script will call it to set up the daemon.
-<pre>
 #!/bin/sh
 #
-#   Rename this file to ppp_on_boot and pppd will be fired up as
-#   soon as the system comes up, connecting to `provider'.
+# File:
+# chat-gprs-connect
 #
-#   If you also make this file executable, and replace the first line
-#   with just "#!/bin/sh", the commands below will be executed instead.
+# Description:
+# chat script to open Sonera GPRS service with GPRS phones. If ppp
+# negotiation stalls, try restarting the phone. To try with other GPRS
+# operator setting, change the PDP contex setting. The settings work with
+# all Ericsson models, but Nokia 8310 does not suppor QoS parameters with
+# AT commands, so just delete those lines and it'll work.
 #
+# Set PDP context CID=1, protocol=IP, APN=internet:
+# AT+CGDCONT=1,"IP","internet","",0,0
+#
+# Set CID=1 QoS requirements from the network, not supported by 8310:
+# AT+CGQREQ=1,0,0,0,0,0
+#
+# Set CID=1 minimum acceptable QoS parameters, not supported by 8310:
+# AT+CGQMIN=1,0,0,0,0,0
+#
+# 'Call' CID=1 (activate PDP context one, perform GPRS attach):
+# ATD*99***1#
+#
+# was "internet.open.s"
+#
+# V connectu bylo "ip","internet"
+# The actual chat script:
+exec chat                                               \
+TIMEOUT         22                              \
+ECHO            ON                              \
+ABORT           '\nBUSY\r'                      \
+ABORT           '\nERROR\r'                     \
+ABORT           '\nNO ANSWER\r'                 \
+ABORT           '\nNO CARRIER\r'                \
+ABORT           '\nNO DIALTONE\r'               \
+ABORT           '\nRINGING\r\n\r\nRINGING\r'    \
+SAY             "Press CTRL-C to close the connection at any stage!"    \
+SAY             "\ndefining PDP context...\n"   \
+""              "\d" \
+""              "atz" \
+OK              "ate1" \
+OK              'at+cgdcont=1,"ip","internet","0.0.0.0",0,0' \
+TIMEOUT         22      \
+OK              ATDT*99***1#    \
+TIMEOUT         22              \
+SAY             "\nwaiting for connect...\n"    \
+CONNECT         ""                              \
+SAY             "\nConnected." \
+SAY             "\nIf the following ppp negotiations fail,\n"   \
+SAY             "try restarting the phone.\n"
 
-# The location of the ppp daemon itself (shouldn't need to be changed)
-PPPD=/usr/sbin/pppd
-
-# The default provider to connect to
-$PPPD call gprs
-
-# Additional connections, which would just use settings from
-# /etc/ppp/options.<tty>
-#$PPPD ttyS0
-#$PPPD ttyS1
-#$PPPD ttyS2
-#$PPPD ttyS3
-</pre>
-
-
-Finally, you need to add the /etc/init.d/ppp script to the init process by creating symbolic links from the appropriate directories.  I chose the following:
-
-<pre>
-/etc/rc0.d/K25ppp
-/etc/rc1.d/K45ppp
-/etc/rc2.d/S45ppp
-/etc/rc3.d/S45ppp
-/etc/rc4.d/S45ppp
-/etc/rc5.d/S45ppp
-/etc/rc6.d/K25ppp
-</pre>
-
-= Qt Extended =
-If password/username is not mandotory for your provider, input anything e.g. x. Works fine with 4.4.2.
-
-= Sharing the GPRS connection with a computer =
-
-See [[Tethering]]
-
-== See also ==
-* [[pppd]]
-* [[Manually using GSM]]
-* [[Manually using Bluetooth]]
-* [[GPRS FSO]]
-{{Languages|Manually_using_GPRS}}
-
-[[Category:GPRS]]
+You may need to adjust APN name in at+cgdcont line. Then, after initializing GSM, you should be to initialize GPRS by pppd file /etc/ppp/gprs. Good luck!
