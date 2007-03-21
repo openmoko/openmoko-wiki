@@ -143,3 +143,38 @@ Alternative: Once you've got out of the reboot cycle, leave it off until it has 
 
 Do not let battery drain to too low level?
 u-boot update?
+
+=== AC Charger only charges with 100mA ===
+
+please don't use the AC charger, as it will only charge with 100mA,
+which will take at least 12 hours to fill the battery, if the device is
+switched off.
+
+if you keep the device running, it will consume more than 100mA, and
+thus actually run empty - just a bit slower than it would without the
+charger.
+
+With devices up to GTA01Bv3 and the current charger we basically have no
+way of using a non-usb-host for charging without violating the USB spec.
+
+So now we have the choice between USB incompliant 500mA charging (which
+might in some really bad cases cause damage to the 'usb host' it is
+attached to.
+
+Thus, we'd rather done it the safe way:  Only use 500mA after the USB
+host has granted us permission to do so.
+
+I know that it's almost industry practise to violate this part of the
+spec.  However, OpenMoko wants to set a good example and adhere to
+standards :)
+
+==== Solution ====
+
+GTA01Bv4 and the new charger hardware contain circuit changes to address
+this problem in a usb spec compliant way.
+
+==== Workaround ====
+
+you can manually override the charging mode via sysfs or in u-boot, if
+you really want to use the charger for 500mA charging. see the kernel
+and u-boot pages in the wiki.
