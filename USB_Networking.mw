@@ -1,0 +1,34 @@
+= Neo1973 side =
+
+By default Neo1973 has usb0 interface working due to Ethernet gadget (g_ether) compiled into kernel.
+
+= Desktop side =
+
+== Manual method ==
+
+Modprobe usbnet module and configure usb0 interface:
+<pre>
+ifconfig usb0 192.168.0.200 netmask 255.255.255.0
+</pre>
+
+== Automatic method ==
+
+Took from [http://www.hrw.one.pl/2007/03/22/hotpluging-usbnet/ Hotplugging usbnet] post by Marcin 'Hrw' Juszkiewicz.
+
+Edit /etc/network/interfaces file (in Debian or similiar distros):
+<pre>
+allow-hotplug usb0
+iface usb0 inet static
+        address 192.168.0.200
+        netmask 255.255.255.0
+        network 192.168.0.0
+        post-up iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
+        post-up echo 1 > /proc/sys/net/ipv4/ip_forward
+        post-up iptables -P FORWARD ACCEPT
+</pre>
+
+And now when you connect phone (which has 192.168.0.202 IP) it gets connection to world automatically.
+
+= Connecting to phone =
+
+Then <tt>ssh root@192.168.0.202</tt> with empty password to get into phone.
