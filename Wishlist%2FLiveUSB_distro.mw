@@ -36,11 +36,22 @@ The only function used by the host computer is the storage device
 
 ==Transflash partitioning schema example==
 
-* 2 Gb: /dev/sda
-* 700 Mb: /dev/sda1, containing bootable iso
-* 1300 Mb: /dev/sda2= openmoko & bootable os home partition
+* 2 Gb: /dev/sd? (where N is the transflash's number)
+* 700 Mb: /dev/sd?1 : containing bootable iso, FAT16
+* 1300 Mb: /dev/sd?2 : openmoko & bootable os home partition, EXT3?
+* eventually a swap
 
-That way, one can install a new iso when it's released.
+That way, one can install a new iso when it's released. An updater script shall be written.
+
+==Howto==
+
+Summary: When the neo/openmoko device is connected in mass storage mode to a linux host,
+# Partition the transflash into livecd (bootable flag) & home partition
+# Format the created partitions
+# Extract the iso's contents onto the livecd partition
+# Rename isolinux.cfg and edit it syslinux.cfg (see ubuntu tutorial link)
+# Make the partition bootable using syslinux:
+    $ sudo syslinux -f /dev/sd?
 
 ==Links==
 
