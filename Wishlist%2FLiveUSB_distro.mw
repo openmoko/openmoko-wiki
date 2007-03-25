@@ -21,6 +21,31 @@ Testing/further research has to be conducted to determine:
 * if a dedicated partition for each payload is needed (see memtest example...)
 * if multi-boot is possible: grub?
 
+==Linux distro Howto: liveCD 2 liveUSB==
+
+Summary: When the neo/openmoko device is connected in mass storage mode to a linux host,
+# Partition the transflash into livecd (bootable flag) & home partition
+# Format the created partitions
+# Extract the iso's contents onto the livecd partition
+# Rename isolinux.cfg and edit it syslinux.cfg (see ubuntu tutorial link)
+# Make the partition bootable using syslinux:
+    $ sudo syslinux -f /dev/sd?
+
+*[http://www.debuntu.org/how-to-install-ubuntu-linux-on-usb-bar Howto install ubuntu (or any other distro) on usb stick]
+*[http://www.gentoo.org/doc/en/liveusb.xml Gentoo on usb stick]
+*[http://pendrivelinux.com/ Windows & Linux tutorials & resources]:     
+    * Flash installation via Windows: XUbuntu, DSL, Knoppix, Slax, MiniMe
+    * Flash installation via Linux: Ubuntu Edgy, Knoppix, PCLinuxOS
+
+'''Transflash partitioning schema example'''
+
+* 2 Gb: /dev/sd? (where N is the transflash's number)
+* 700 Mb: /dev/sd?1 : containing bootable iso, FAT16
+* 1300 Mb: /dev/sd?2 : openmoko & bootable os home partition, EXT3?
+* + eventually a swap
+
+The limitation of this method is that the booted OS is static (not-self modifiable). There's the option to install linux using the partition, but it's not really mobility-oriented (liveCDs are optimized for maximum autoconfiguration).
+
 ==Alternative methods==
 
 The ideal way of doing it would be to have a bootloader on the usb flash, which would offer booting directly from an iso (stored on the very same device). This way, just download the new iso, and it's updated !
@@ -39,42 +64,6 @@ Hints to explore:
 
 Grub & memdisk can boot floppy images, but (AFAIK) not isos...
 
-* [http://www.knoppix.net/wiki/Cheat_Codes knoppix '''bootfrom''' cheatcode]
-
-    bootfrom=/dev/hda1/KNX.iso 
-
-Bootfrom needs access to a running Knoppix-System '''with the same Kernel as the Bootkernel''', before it is able to mount the partition / ISO-Image.  
-
-* Maybe there's a way to achieve a boot cd iso selecter see ([http://www.linuxquestions.org/questions/showthread.php?t=528840 this post])
-* virtualization-oriented distro... ex [http://unit.aist.go.jp/itri/knoppix/xen/index-en.html Xenoppix]
-
-==Transflash partitioning schema example==
-
-* 2 Gb: /dev/sd? (where N is the transflash's number)
-* 700 Mb: /dev/sd?1 : containing bootable iso, FAT16
-* 1300 Mb: /dev/sd?2 : openmoko & bootable os home partition, EXT3?
-* eventually a swap
-
-That way, one can install a new iso when it's released. An updater script shall be written.
-
-==Linux distro Howto: liveCD extraction and modification==
-
-Summary: When the neo/openmoko device is connected in mass storage mode to a linux host,
-# Partition the transflash into livecd (bootable flag) & home partition
-# Format the created partitions
-# Extract the iso's contents onto the livecd partition
-# Rename isolinux.cfg and edit it syslinux.cfg (see ubuntu tutorial link)
-# Make the partition bootable using syslinux:
-    $ sudo syslinux -f /dev/sd?
-
-*[http://www.debuntu.org/how-to-install-ubuntu-linux-on-usb-bar Howto install ubuntu (or any other distro) on usb stick]
-*[http://www.gentoo.org/doc/en/liveusb.xml Gentoo on usb stick]
-*[http://pendrivelinux.com/ Windows & Linux tutorials & resources]:     
-    * Flash installation via Windows: XUbuntu, DSL, Knoppix, Slax, MiniMe
-    * Flash installation via Linux: Ubuntu Edgy, Knoppix, PCLinuxOS
-
-==Memtest86+==
-
 Grub example (from stock /boot/grub/menu.lst ubuntu install):
 
     title           Ubuntu, memtest86+
@@ -84,6 +73,16 @@ Grub example (from stock /boot/grub/menu.lst ubuntu install):
     boot
 
 Using the memdisk kernel from the syslinux package, you can load disk images and execute them in a non-emulated environment.
+
+
+* [http://www.knoppix.net/wiki/Cheat_Codes knoppix '''bootfrom''' cheatcode]
+
+    bootfrom=/dev/hda1/KNX.iso 
+
+Bootfrom needs access to a running Knoppix-System '''with the same Kernel as the Bootkernel''', before it is able to mount the partition / ISO-Image.  
+
+* Maybe there's a way to achieve a boot cd iso selecter see ([http://www.linuxquestions.org/questions/showthread.php?t=528840 this post])
+* virtualization-oriented distro... ex [http://unit.aist.go.jp/itri/knoppix/xen/index-en.html Xenoppix]
 
 ==Using Qemu to boot Linux from a flash drive within Windows==
 
