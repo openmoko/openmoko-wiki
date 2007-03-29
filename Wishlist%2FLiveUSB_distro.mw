@@ -35,15 +35,16 @@ Testing/further research has to be conducted to determine:
 * if a dedicated partition for each payload is needed (see memtest example...)
 * if multi-boot is possible: grub?
 
-==Linux distro Howto: liveCD 2 liveUSB==
+==Linux distro Howto: liveCD iso to liveUSB conversion==
 
-Summary: When the neo/openmoko device is connected in mass storage mode to a linux host,
-# Partition the transflash into livecd (bootable flag) & home partition
-# Format the created partitions
-# Extract the iso's contents onto the livecd partition
-# Rename isolinux.cfg and edit it syslinux.cfg (see ubuntu tutorial link)
-# Make the partition bootable using syslinux:
-    $ sudo syslinux -f /dev/sd?
+In short
+#Mount USB drive, with e.g. mount /dev/sda1 /flash - can be either FAT16 or FAT32!
+#Mount ISO image, with e.g. mount /tmp/dsl-3.2.iso /tmp/iso -o loop
+#Copy all contents from ISO to USB drive: cp -vr /tmp/iso/* /flash/
+#Rename and move syslinux files to root directory: mv /flash/boot/isolinux/* /flash/
+#Rename isolinux.cfg: mv /flash/isolinux.cfg /flash/syslinux.cfg
+#Unmount USB drive: umount /flash
+#Install syslinux: syslinux /dev/sda1 and eventually set the MBR boot flag for this partition (with fdisk). 
 
 *[http://www.damnsmalllinux.org/wiki/index.php/Installing_to_a_USB_Flash_Drive Installing DSL to USB device - using grub]
 *[http://wiki.debian.org/BootUsb Debian BootUSB - using Lilo]
