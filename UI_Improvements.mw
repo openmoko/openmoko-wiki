@@ -1,0 +1,147 @@
+I know it's not gonna come in the priority list before at least a year
+(or ever), but if we want to add eye candy & (possibly) useability to
+the UI (such as smooth realistic list scrolling, as seen in apple's
+iphone demo on contacts lists), we'll need a physics engine, so that
+moves & animations aren't all linear.
+
+All i found so far is the akamaru lib, needs just GLib:
+
+http://people.freedesktop.org/~krh/akamaru.git/
+
+If you want to take a quick look at the code:
+svn co http://svn.kiba-dock.org/akamaru/ akamaru
+
+It's a verlet integration implementation;  modelization includes
+elasticity, friction, gravity, geometrical objects...
+
+The only (AFAIK) implementation using this model is kiba-dock, a *fun*
+app launcher, but we may find another use to it in the future.
+
+For instance, it may be useful to gesture recognition (i'm not aware
+if existing gesture recognition engines measure speed, acceleration,
+...).
+
+There's an undergoing verlet integration into the e17 project (by rephorm)
+see http://rephorm.com/news/tag/physics , so we may see some UI
+physics integration into e17 someday.
+
+Such early projects mainly show "rope-like" animations, but maybe the
+API wil spare some time for different usages.
+
+Well, that was just a useless thought, but i'd be happy to know if
+other people are wondering about improving the user experience
+regarding physics-model-based UI animation.
+Having a scroll that isn't a 1:1 map to the user's action isn't hard.
+It's just an extra calculation in the scroll code.
+
+I think it's a great idea to have some rate-aiding on scrolling.
+
+The difference with traditional scrolling is that the menu/image has
+to continue moving on it's own even when you don't touch it, with some
+friction (so that the movement stops by itself after a certain time).
+In fact, we have to modelize a "wheel of fortune" (for scrolling), and
+a "floating sphere" for image/webpage navigation.
+
+I took finger-based scrolling as an example, but the same
+can apply to popups (such as calling event), in-gallery (image / mp3)
+finger-based navigation, map (displacement, rotation)/zoomed
+image/zoomed web page navigation, wheel-based menu control ...
+Take a look @ this iphone video:
+http://www.youtube.com/watch?v=nPqqfVLQ_qY
+
+There is:
+- it's as if the entire list is the scrolling bar, but reverted
+(finger down -> scroll up)
+- the list follows the pointer
+- as soon as you stop touching, the list continues to scroll (in
+contrary to standard gtk scrolling bar)
+- the list moves at the speed measured at the end of the "touching"
+- some "friction" lets it slow down
+- when you touch it again, it stops the scrolling
+
+Questions:
+- will the neo/openmoko graphics system be powerful enough for such
+animation? I suspect apple to do opengl acceleration on this device,
+which is waaaaay impossible for us
+- ok, akamaru is overkill. But it allows friction, speed etc...
+The changes to bring to the standard gtk scrolling are:
+- consider the list as scrollable (not just the scroll item)
+- change the scrolling "stop" behaviour (when the user stops touching
+the screen) like this: if (last_cursor_speed > 0),
+continue_scrolling(last_cursor_speed)
+- when touching the moving list again, stop the scrolling immediately
+- addition of friction may be a plus, for a more
+"wheel-of-fortune"-like experience
+
+http://en.wikipedia.org/wiki/Verlet_physics
+
+After reading this i realize that's not what we need, simpler
+equations will suffice completely.
+
+I'm wondering what layer of openmoko has to be hacked, i.e. if working
+at openmoko layer allows enough possibilities for this; if i'm not
+mistaken, this is part of libmokoui, but i'm pretty afraid that
+patching gtk itself woud be needed. Working on the lower level would
+apply changes to every application, not only openmoko's.
+
+One preliminary idea can be to add inertia and friction to the finger
+scrolling wheel; which means, you launch the wheel, and stop it when
+you like. For instance, one complete wheel turn = one element in the
+list further. This is an interesting option, because it only needs
+modification of the wheel's function and graphics effect.
+
+Nevertheless, there are different approaches. Example (it's merely an
+iphone "imitation", so if you have novative ideas, please add your 2
+cents):
+
+**********Scrolling: the "wheel of fortune" effect (i can't find a
+better example than
+http://art.giatkabladze.com/george/images/images/wheel_of_fortune.jpg
+: imagine that every item of a scrollable list isput on the front
+surface; the aim is to reach this
+http://www.youtube.com/watch?v=nPqqfVLQ_qY )
+
+Forget the slider bar for scrolling windows, and let the entire window
+be scrollable by default
+
+* Sliding = Single click + maintained for a minimal distance
+Effect: scroll in an inverted/negated fashion (slide down = scroll up,
+slide up = scroll down)
+
+When finger is released (i.e. touchscreen doesn't detect any press):
+  if (last_speed_seen > value ) then keep this speed and
+acceleration, with friction (so that it slows down)
+  else stop scrolling
+
+Scrolling here is seen as unidimensional, but can apply to
+bidimensional situations (ex: zoomed image) too
+
+* Action = quick double tap
+
+* Details/select = short single tap
+
+* Right click = long tap
+
+* Gestures can be interesting, especially for "jumps" (when the cursor
+jumps from upper left corner to down right)
+
+> Obviously the tools are in the wild to build interfaces that could rival
+> (or better IMO) anything Apple comes up with. We just need to organize
+> this stuff. This would need hardware that can support dynamic
+> interfaces. I can help here, too.
+
+Well, considering recent changes in destkop applications, opengl has a
+definite future. For instance, the expose (be it apple's or beryl's)
+is a very interesting and usable feature. Using compositing allows the
+physics metaphore: the human brain doesn't like "gaps"/jumps (for
+instance while scrolling a text), it needs continuity. When you look
+at apple's iphone prototype, it's not just eye candy, it's maybe the
+most natural/human way of navigating, because it's sufficiently
+realistic for the brain to forget the non-physical nature of what's
+inside.
+
+So, opengl hardware will be needed in a more or less distant hardware,
+for 100% fluid operation.
+
+And, if we really want deep changes, multi touch screen if essential
+too :(  (example: zooming with fingers)...
