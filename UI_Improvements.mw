@@ -1,129 +1,93 @@
 DRAFT (taken from emails), will be reorganized shortly
 
-==News ideas==
+==Introduction==
+
+> Obviously the tools are in the wild to build interfaces that could rival
+> (or better IMO) anything Apple comes up with. We just need to organize
+> this stuff. This would need hardware that can support dynamic
+> interfaces. I can help here, too.
+sean@openmoko.com
+
+==Finding inspiration ...==
+
+===Ergonomy - Human/Machine papers ===
+
+===Seen Live===
+
+*[http://www.youtube.com/watch?v=89sz8ExZndc Multi-Touchscreen experiments video @youtube]
+*[http://www.youtube.com/watch?v=nPqqfVLQ_qY iPhone UI features demo @youtube]
+
+==Our weapons==
+
+===The touchscreen===
+
+Question:
+
+  What exactly does the touchscreen see when  you touch the screen with 2 fingers at the same time,
+  when you move them, when you move only one of the 2, etc. I'm also interested in knowing how precise
+  the touchscreen is (ex: refresh rate, possible pressure indication, ...)?
+
+Answear:
+
+  The output is the center of the bounding box of the touched area.
+  Pressure has little, but not no effect. Almost no effect on a single
+  touch, on a double touch, the relative pressures will have a slight
+  skewing effect towards the harder touch.
+  (from theory).
+  The touch point skips instantly on double touch.
 
 ==Areas of improvement==
 
 * OpenGL for fuild zooming interfaces (2D: the infinite sphere model, 1D: the infinite wheel of fortune/ribbon model, exposé)
 * HandGestures
 * Physics-model based improvements: inertia and friction
-* multi touch screen for natural handgestures http://www.youtube.com/watch?v=89sz8ExZndc
+* multi touch screen for natural handgestures 
 
-==Human/Machine papers, resources==
+===Physics-inspired animation===
 
-==Code/Layers offering place for evolution==
+If we want to add eye candy & useability to the UI (such as smooth realistic list scrolling, as seen in apple's
+iphone demo on contacts lists), we'll need a physics engine, so that moves & animations aren't all linear.
 
-libmokoui
-gtk
+The most used technique for calculating trajectories and systems of related geometrical objects seems to be [http://en.wikipedia.org/wiki/Verlet_integration verlet integration] implementation; it is an alternative to Euler's integration method, using fast approximation. 
 
-==Reusable code==
+We may have no need for such a mathematical method at first, but perhaps there are other use cases. For instance, it may be useful to gesture recognition (i'm not aware if existing gesture recognition engines measure speed, acceleration...).
 
-==eMails ''en vrac'', to reorganize==
+====Libakamaru====
 
-I know it's not gonna come in the priority list before at least a year
-(or ever), but if we want to add eye candy & (possibly) useability to
-the UI (such as smooth realistic list scrolling, as seen in apple's
-iphone demo on contacts lists), we'll need a physics engine, so that
-moves & animations aren't all linear.
-
-All i found so far is the akamaru lib, needs just GLib:
-
-http://people.freedesktop.org/~krh/akamaru.git/
+The [http://people.freedesktop.org/~krh/akamaru.git/ akamaru library] is the code behind [http://www.youtube.com/watch?v=VekgyKQoTeM kiba dock]'s fun and dynamic behaviour. It's dependencies are light (needs just GLib). It takes elasticity, friction, gravity into account.
 
 If you want to take a quick look at the code:
 svn co http://svn.kiba-dock.org/akamaru/ akamaru
 
-It's a verlet integration implementation;  modelization includes
-elasticity, friction, gravity, geometrical objects...
+The only (AFAIK) application using this library is kiba-dock, a *fun* app launcher, but we may find another use to it in the future.
 
-The only (AFAIK) implementation using this model is kiba-dock, a *fun*
-app launcher, but we may find another use to it in the future.
+As suggested on the mailing list, it is mostly overkill for the uses we intend to have, but this library may be optimized already, the API can spare some time for too. Furthermore, ''Qui peut le plus, peut le moins''.
 
-For instance, it may be useful to gesture recognition (i'm not aware
-if existing gesture recognition engines measure speed, acceleration,
-...).
+====Verlet integration implementation from e17====
 
-There's an undergoing verlet integration into the e17 project (by rephorm)
-see http://rephorm.com/news/tag/physics , so we may see some UI
-physics integration into e17 someday.
+There's an undergoing verlet integration implementation into the e17 project (by rephorm) see http://rephorm.com/news/tag/physics , so we may see some UI physics integration into e17 someday.
 
-Such early projects mainly show "rope-like" animations, but maybe the
-API wil spare some time for different usages.
+==Improvement ideas==
 
-Well, that was just a useless thought, but i'd be happy to know if
-other people are wondering about improving the user experience
-regarding physics-model-based UI animation.
-Having a scroll that isn't a 1:1 map to the user's action isn't hard.
-It's just an extra calculation in the scroll code.
+''I think it's a great idea to have some rate-aiding on scrolling.''
 
-I think it's a great idea to have some rate-aiding on scrolling.
+===1D Scrolling: [http://en.wikipedia.org/wiki/Uniform_prism n-sided uniform prism]===
 
-The difference with traditional scrolling is that the menu/image has
-to continue moving on it's own even when you don't touch it, with some
-friction (so that the movement stops by itself after a certain time).
-In fact, we have to modelize a "wheel of fortune" (for scrolling), and
-a "floating sphere" for image/webpage navigation.
+====Description====
 
-I took finger-based scrolling as an example, but the same
-can apply to popups (such as calling event), in-gallery (image / mp3)
-finger-based navigation, map (displacement, rotation)/zoomed
-image/zoomed web page navigation, wheel-based menu control ...
-Take a look @ this iphone video:
-http://www.youtube.com/watch?v=nPqqfVLQ_qY
+Take an item list (ex: adress book), print it on a ribbon of paper, and glue it on a wheel (on the tire). You're looking in the front of it, so when you want to go from the A to Z, you touch the wheel and drag it up. When you let the wheel go, it goes furter, taken by it's inertia. Stop the wheel when you got your contact. Got the idea? That's why we may speak of an "infinite wheel", so that the surface is flat. For our case here, we always want to display square content, so the [http://en.wikipedia.org/wiki/Uniform_prism n-sided uniform prism] analogy is mathematically more exact.
 
-There is:
-- it's as if the entire list is the scrolling bar, but reverted
-(finger down -> scroll up)
-- the list follows the pointer
-- as soon as you stop touching, the list continues to scroll (in
-contrary to standard gtk scrolling bar)
-- the list moves at the speed measured at the end of the "touching"
-- some "friction" lets it slow down
-- when you touch it again, it stops the scrolling
+Why this wheel model? Because if the modelisation is coherent:
+- '''weight''': the more heavy, the fastest it goes = the biggest the item list, the faster it scrolls; that way, you don't have to wait too long for big lists, and you don't miss your item on shorter lists
+- '''friction''': there is friction where the wheel is fixed, so that the wheel doesn't turn infinitely
+- the initial speed and acceleration vector you give it determines it's futher rotation
+- it's "round"/cyclic, so you can browse the list in two directions
+ 
+We can add "parallel wheels", symbolizing different sorting methods. Slide long to the left / right to look at a different wheel = items organization.
 
-Questions:
-- will the neo/openmoko graphics system be powerful enough for such
-animation? I suspect apple to do opengl acceleration on this device,
-which is waaaaay impossible for us
-- ok, akamaru is overkill. But it allows friction, speed etc...
-The changes to bring to the standard gtk scrolling are:
-- consider the list as scrollable (not just the scroll item)
-- change the scrolling "stop" behaviour (when the user stops touching
-the screen) like this: if (last_cursor_speed > 0),
-continue_scrolling(last_cursor_speed)
-- when touching the moving list again, stop the scrolling immediately
-- addition of friction may be a plus, for a more
-"wheel-of-fortune"-like experience
+====Controls====
 
-http://en.wikipedia.org/wiki/Verlet_physics
-
-After reading this i realize that's not what we need, simpler
-equations will suffice completely.
-
-I'm wondering what layer of openmoko has to be hacked, i.e. if working
-at openmoko layer allows enough possibilities for this; if i'm not
-mistaken, this is part of libmokoui, but i'm pretty afraid that
-patching gtk itself woud be needed. Working on the lower level would
-apply changes to every application, not only openmoko's.
-
-One preliminary idea can be to add inertia and friction to the finger
-scrolling wheel; which means, you launch the wheel, and stop it when
-you like. For instance, one complete wheel turn = one element in the
-list further. This is an interesting option, because it only needs
-modification of the wheel's function and graphics effect.
-
-Nevertheless, there are different approaches. Example (it's merely an
-iphone "imitation", so if you have novative ideas, please add your 2
-cents):
-
-*Scrolling: the "wheel of fortune" effect 
-
-Imagine that every item of a scrollable list is on the front surface; the aim is to reach this http://www.youtube.com/watch?v=nPqqfVLQ_qY
-
-Forget the slider bar for scrolling windows, and let the entire window
-be scrollable by default
-
-* Sliding = Single click + maintained for a minimal distance
+* Sliding up/down = Single click + maintained for a minimal distance
 Effect: scroll in an inverted/negated fashion (slide down = scroll up,
 slide up = scroll down)
 
@@ -141,13 +105,62 @@ bidimensional situations (ex: zoomed image) too
 
 * Right click = long tap
 
-* Gestures can be interesting, especially for "jumps" (when the cursor
-jumps from upper left corner to down right)
+* Sliding left/right: switch sorting method
 
-> Obviously the tools are in the wild to build interfaces that could rival
-> (or better IMO) anything Apple comes up with. We just need to organize
-> this stuff. This would need hardware that can support dynamic
-> interfaces. I can help here, too.
+====Parts to "hack"====
+
+''Having a scroll that isn't a 1:1 map to the user's action isn't hard. It's just an extra calculation in the scroll code.''
+
+<---- Where is the scroll code? :)
+
+libmokoui
+gtk
+
+I'm wondering what layer of openmoko has to be hacked, i.e. if working at openmoko layer allows enough possibilities for this; if i'm not mistaken, this is part of libmokoui, but i'm pretty afraid that patching gtk itself woud be needed. Working on the lower level would
+apply changes to every application, not only openmoko's.
+
+TODO:
+- remove the scrolling slider on finger mode
+- make the entire list a "scrolling zone", i.e. an overlay transparent scrolling slider
+- define controls
+
+
+===1D Scrolling: inertia friction integration into openmoko's finger wheel=== 
+
+The same, but for the wheel. It can be very short to do: you don't have 1:1 anymore, but, for example, 1/4 wheel turn = 1 item. It's demultiplicated, but has inertia.
+
+===2D Scrolling: the infinite sphere model / non-infinite polyhedron===
+
+The same model as the infinite wheel can apply to 2D navigation, except that your wheel becomes an infinite "floating sphere" for image/webpage navigation. 
+
+Usages are:
+* zoomed image
+* zoomed internet webpage
+* browsing maps
+
+===n-D navigation: the polyhedra inspiration===
+
+When we want to navigate files, mp3s in an mp3 player, etc... Every control that the application needs is a button. What about looking at the polyhedrons ?
+
+http://en.wikipedia.org/wiki/Polyhedra
+http://en.wikipedia.org/wiki/List_of_uniform_polyhedra
+
+===Advanced/Natural handgesture recognition===
+
+TODO
+
+Gestures can be interesting, especially for "jumps" (when the cursor jumps from upper left corner to down right). Jump is different of sliding, and appears only with touchpads and touchscreeds; it can be detected as different from a button press if done fast enough (so you don't have to "aim" precisely.
+
+The interesting jumps are: 
+
+* left <-> right
+* middle up <-> middle down
+* top left <-> down right
+* down left <-> top right
+
+===OpenGL compositing===
+
+Compositing seems to give zooming interfaces reality (at last!).
 
 Well, considering recent changes in destkop applications, opengl has a
 definite future. For instance, the expose (be it apple's or beryl's)
@@ -164,3 +177,10 @@ for 100% fluid operation.
 
 And, if we really want deep changes, multi touch screen if essential
 too :(  (example: zooming with fingers)...
+
+
+==Open questions==
+
+- will the neo/openmoko graphics system be powerful enough for such uses? I suspect apple to do opengl acceleration on this device,
+which is waaaaay impossible for us for now
+- how does the touchscreen behave? We need a detailed touchscreen wiki information page, with visual traces. How hardware-specific is it?
