@@ -1,323 +1,120 @@
-==Introduction==
+I know it's not gonna come in the priority list before at least a year
+(or ever), but if we want to add eye candy & (possibly) useability to
+the UI (such as smooth realistic list scrolling, as seen in apple's
+iphone demo on contacts lists), we'll need a physics engine, so that
+moves & animations aren't all linear.
 
-  Obviously the tools are in the wild to build interfaces that could rival
-  (or better IMO) anything Apple comes up with. We just need to organize
-  this stuff. This would need hardware that can support dynamic
-  interfaces. I can help here, too.
-  sean@openmoko.com
+All i found so far is the akamaru lib, needs just GLib:
 
-In fact, this place shall be dedicated to human-machine interactions improvements discussion;
-
-Human-machine interaction can be separated into several aspects:
-* the physical contact/input device: the mono-touch touchscreen
-* the graphics: 
-** accelerated rendering can add more consistency to zooming user interfaces, which seem to be quite an interesting concept for embedded scrensize-limited devices
-** adding physics "look and feel" to (ex: menu's) behaviours can add coherence too
-* the input methods
-** the virtual keyboard
-** handgestures
-
-==Finding inspiration ...==
-
-===Seen Live===
-
-'''Multi-touch'''
-*[http://www.youtube.com/watch?v=89sz8ExZndc Multi-Touchscreen experiments video @youtube]
-*[http://www.youtube.com/watch?v=nPqqfVLQ_qY iPhone UI features demo @youtube]
-* Multi-touch on Linux with [http://www.youtube.com/watch?v=olWjnfBoY8E MPX]
-
-'''Zooming user interfaces'''
-*[http://www.zenzui.com/products.html ZenZui], a [http://en.wikipedia.org/wiki/ZUI ZUI (zooming user interface)]
-*[http://labs.live.com/Deepfish/videos.aspx Microsoft Bluefish's ZUI] (new mobile webbrowser)
-*[http://googlesystem.blogspot.com/2007/04/opera-920-more-homepages-at-your.html Opera speed dial]
-
-'''Graphics'''
-*[http://www.rasterman.com/files/eem.avi EEM], Rasterman's EFL libs on handelds proof of concept (doesn't DO anything, just showing off the EFLs on a handeld)
-*[http://www.youtube.com/watch?v=8kLFPfaxQ6U&eurl= Nvidia's cutting-edge techno], an [http://www.khronos.org/openkode/ Openkode] demo
-*[http://files.mdk.am/demos/graff-demo-3.avi Graff]'s inertia scroll list
-
-'''Science fiction'''
-*[http://www.youtube.com/watch?v=G_FS2TiK3AI UPMC Future?]
-
-'''Links:'''
-*[http://elevate.sourceforge.net/links.html elevate project's links] sums up quite greatly the latest innovations in the desktop area
-*[http://nooface.net/ Nooface] is a human-machine news site
-*Asus-Intel's [http://www.hothardware.com/articles/Hands_on_with_the_ASUS_Eee/?page=2 Eee]'s interface
-
-
-
-===n-D navigation: the polyhedra inspiration===
-
-When we want to navigate files, mp3s in an mp3 player, etc... Every control that the application needs is a button. What about looking at the polyhedrons? We could find one for each usage, with as many surrounding subzones that may be used as controls. Ex: you need 5 buttons, let's take a pentagon with 5 surrounding zones all around. That way, it's always optimized...
-
-http://en.wikipedia.org/wiki/Polyhedra
-http://en.wikipedia.org/wiki/List_of_uniform_polyhedra
-
-===Our weapons===
-
-We can't improve the human-machine interface without knowing the strengths / weaknesses of our hardware; some of the weaknesses might turn out as exploitable features, some strengths as limiting constraints.
-
-====The touchscreen====
-
-Question:
-
-  What exactly does the touchscreen see when  you touch the screen with 2 fingers
-  at the same time, when you move them, when you move only one of the 2, etc. I'm 
-  also interested in knowing how precise the touchscreen is (ex: refresh rate, 
-  possible pressure indication, ...)?
-
-Answer:
-
-* The output is the center of the bounding box of the touched area
-* The touch point skips instantly on double touch
-* Pressure has almost no effect on a single touch, but not so on a double touch. The relative pressures will cause a significant skewing effect towards the harder touch. You can easily move the pointer along the line between your two fingers by changing the relative pressure.
-
-Conclusions:
-* we can detect double touch as jumps, and that's all
-* no pressure
-* This could be an interesting input method for games - e.g. holding the Neo in landscape view, letting each thumb rest on a specific input area; probably needs to be checked for usability with a real device
-
-Question:
-
-  What does one see when sliding two fingers in parallel up(L,R)->down(L,R)?
-
-Answer:
-
-* In theory you see a slide along the center line between your two fingers. In practice, you can't keep the pressure equal, so you will see some kind of zig-zag line somewhere between the two pressure points in the direction of your slide.
-
-Question:
-
-  What does one see when narrowing two fingers in slide (=zoom effect on iphone)?
-
-Answer:
-
-* In theory you see the pointer stay at the center of the zoom movement. In practice, you can't keep the pressure equal for both fingers, so the pointer will move towards one of the two pressure points.
-
-====Graphics and computational capabilities====
-
-It would be good to report what performance the current hardware allows:
-* There was no pure X11 benchmarking done (AFAIK) (how many fps at full VGA scrolling, ex: 1024*480 image scrolling?)
-* what about the lcd reactivity? What if we don't see anything but blur while moving items fast?
-
-Please report here your impressions.
-
-==Areas of improvement==
-
-* OpenGL for fluid zooming interfaces (2D: the infinite sphere model, 1D: the infinite wheel of fortune/ribbon model, exposé)
-* HandGestures
-* Physics-model based improvements: inertia and friction
-* multi touch screen for natural handgestures 
-* improved virtual keyboard
-* switching to another GUI toolkit (EFLs)
-
-===Physics-inspired animation a.k.a. "Digital Physics"===
-
-If we want to add eye candy & usability to the UI (such as smooth realistic list scrolling, as seen in apple's
-iphone demo on contacts lists for instance), we'll need a physics engine, so that moves & animations aren't all linear.
-
-The following aticle explains the [http://www.readwriteweb.com/archives/the_physics_of_iphone.php Digital Physics] term from the iPhone example.
-
-The most used technique for calculating trajectories and systems of related geometrical objects seems to be [http://en.wikipedia.org/wiki/Verlet_integration verlet integration] implementation; it is an alternative to Euler's integration method, using fast approximation. 
-
-We may have no need for such a mathematical method at first, but perhaps there are other use cases. For instance, it may be useful to gesture recognition (i'm not aware if existing gesture recognition engines measure speed, acceleration...).
-
-====Open Dynamics Engine====
-
-ODE is an open source, high performance library for simulating rigid body dynamics. It is fully featured, stable, mature and platform independent with an easy to use C/C++ API. It has advanced joint types and integrated collision detection with friction. ODE is useful for simulating vehicles, objects in virtual reality environments and virtual creatures. It is currently used in many computer games, 3D authoring tools and simulation tools.
-
-http://www.ode.org/
-
-====Libakamaru====
-
-The [http://people.freedesktop.org/~krh/akamaru.git/ akamaru library] is the code behind [http://www.youtube.com/watch?v=VekgyKQoTeM kiba dock]'s fun and dynamic behaviour. It's dependencies are light (needs just GLib). It takes elasticity, friction, gravity into account.
+http://people.freedesktop.org/~krh/akamaru.git/
 
 If you want to take a quick look at the code:
 svn co http://svn.kiba-dock.org/akamaru/ akamaru
 
-The only (AFAIK) application using this library is kiba-dock, a *fun* app launcher, but we may find another use to it in the future.
-
-As suggested on the mailing list, it is mostly overkill for the uses we intend to have, but this library may be optimized already, the API can spare some time for too. Furthermore, ''Qui peut le plus, peut le moins''.
-
-====Verlet integration implementation from e17====
-
-There's an undergoing verlet integration implementation into the e17 project (by rephorm) see http://rephorm.com/news/tag/physics , so we may see some UI physics integration into e17 someday.
-
-====Robert Pernner's easy equations====
-
-http://www.robertpenner.com/easing/
-
-See the demo: implements non linear behaviour (actionscript), but may give inspiration
-
-===Extending the touchscreen capabilities and input methods===
-
-* '''Multitouchscreen emulation'''
-
-If we got it right, when touching the screen on a second place, the cursor oscillates between the two points depending on relative pressure distribution. Using averaging algorithms, we may have the opportunity to detect peculiar behaviours.
-
-We need raw data (x,y,t) from the real hardware for the following behaviours:
-* slide two fingers in parallel - vertical up/down (scroll)
-* turn the two fingers around (rotate)
-* slide two fingers towards each other (zoom-)
-* slide two fingers apart (zoom+)
-
-When touching the screen with two fingers at the same time, we necessarily see the two points, or are able to extrapolate the position of the second one. This solution can add feature, but will probably be little erratic...
-
-* '''Touchscreen kernel module hacking'''
-
-We may correct the "half distance" phenomenon on double touch: if double touch is detected, then assimilate the cursor as twice further than the first touch. It would allow finer control, but higher instability.
-
-The double touch detection may be implemented in the driver itself, as well as stabilization.
-
-* '''Other detectable behaviours'''
-
-The warping can be used in the 4 diagonals, plus the up/down/right/left cross:
-
-  ----------------  ----------------  ----------------  ----------------
-  - 1            -  - 1          2 -  - 1            -  -      2       -
-  -              -  -              -  -              -  -              -
-  -              -  -              -  -              -  -              -
-  -              -  -              -  -              -  -              -
-  -              -  -              -  -              -  -              -
-  -              -  -              -  -              -  -              -
-  -             2-  -              -  - 2            -  -      1       -
-  ----------------  ----------------  ----------------  ----------------
-
-It's not double touch, but two sequential presses with a short time in between (~0.5 s)
-
-* '''Clever hacks'''
-
-It's been said that having no multitouch screen allows less freedom for innovation. Maybe we could get something out of our touchscreen drivers.
-
-Why ? Think of apple's scroll up/down feature on macbooks touchpads (which '''aren't multi touch''', it's a [http://iscroll2.sourceforge.net/ clever driver hack, iscroll2]):
-
-  To scroll, just place two fingers on your trackpad instead of one. Both fingers
-  need to be placed next to each other horizontally (not vertically, the trackpad 
-  cannot detect that). Some people get better results with their finger spaced a
-  little bit apart, while others prefer having the fingers right next to each other.
-
-  iScroll2 provides two scrolling modes: Linear and circular scrolling.
-
-  For linear scrolling, move the two fingers up/down or left/right in a straight 
-  line, respectively, to scroll in that direction.
-
-  Circular scrolling works in a way similar to the iPod's scroll wheel: Move the two
-  fingers in a circle to scroll up or down, depending   on whether you move in a 
-  clockwise or counterclockwise direction.
-
-Maybe we can port/adapt/get inspiration from this macintosh driver.
-
-===Improved virtual keyboard===
-
-One nice idea for virtual input is [http://www.micropp.se/openmoko/ finger-splash]
-
-Yet, optimization does not only apply to the plain one-letter-at-a-time input. We need some sort of T9 (dictionary-based input help). When typing a word, the first letter determines the next possible ones. Therefore, we may let disappear the less-probable following letters. Ex: type an L, there's no way an X follows...
-
-Hints: 
-* ZIP's huffmann compression applied to SMSs/mails for detecting the most used characters/words/sentences.
-* html tag-clouds, one-letter tag clouds ; font size proportional to the probability of being used
-
-The most critical point is the initial disposition of the letters, before any letter is typed. We may also want to use horizontal two-parts keyboard (with the neo in hands like a psp..)
-
-The [http://www.strout.net/info/ideas/hexinput.html hexinput] concept is interesting. What about hiding the less probable letters and increasing the remaining ones during typing?
-
-A plain old dialpad like any other phone would be a nice fallback.
-
-===Towards OpenGL compositing===
-
-There are [http://www.hbmobile.org/wiki/index.php?title=GUI_Frameworks lots of possible GUI frameworks] with various software architectures that could be used for Openmoko.
-
-GTA01 hardware uses GTK+/matchbox without hardware acceleration, and it's not enough: this is a first that a mobile Linux device has such a high DPI resolution. OpenGL ES compositing seems to have a bright future on embedded devices, because compositing seems to give natural zooming interfaces reality (at last!).
-
-Considering recent changes in destkop applications, opengl has a definite future. For instance, the expose (be it apple's or beryl's) is a very interesting and usable feature. Using compositing allows the physics metaphore: '''the human brain doesn't like "gaps"/jumps (for instance while scrolling a text), it needs continuity''', which can be provided by opengl. When you look at apple's iphone prototype, it's not just eye candy, it's maybe the most natural/human way of navigating, because it's sufficiently realistic for the brain to forget the non-physical nature of what's inside.
-
-So, opengl hardware will be needed in a more or less distant hardware, for 100% fluid operation. Benchmarking will be needed to compare the different alternatives that are cited further.
-
-====The Enlightenment Foundation Libraries====
-
-EFL's Evas is a powerful and power sparing canvas drawing library. It can be OpenGL accelerated. Python/Ruby bindings are available in the "proto" e17 cvs folder.
-
-''Moved [[E17|here]]''
-
-====Clutter Toolkit====
-
-Clutter, an [http://o-hand.com/ OpenedHand] project, is an open source software library for creating fast, visually rich graphical user interfaces. The most obvious example of potential usage is in media center type applications.
-
-http://clutter-project.org/
-
-Clutter uses OpenGL (and optionally '''OpenGL ES''') for rendering but with an API which hides the underlying GL complexity from the developer. The Clutter API is intended to be easy to use, efficient and flexible.
-
-It does integrate gstreamer (for easy media playback, even camera or mic inputs), allows pango text rendering, cairo graphics rendering. Provided bindings are python, C# and Ruby.
-
-GTK off screen rendering is supposed to be on it's way; once it is here, there will be a possibility of using GTK apps directly within OpenGL apps as textures, which would lead to the possibility of creating a full OpenGL "application manager" (as well as media consuming app) with ZUI features.
-
-Features:
-* Core languages: C, OpenGL
-* Bindings: Python, C#, Ruby
-* Backends: GLX / SDL / EGL
-* Media support: Gstreamer integration, Cairo graphics rendering, Pango fonts rendering
-* Embedding: GTK embedding
-
-Some experimental code in the clutter svn show that embedded devices are one of it's targets:
-* [http://svn.o-hand.com/repos/clutter/trunk/toys/foofone/ Some bulk phone dialing interface]
-* Make sure to check out the [http://www.clutter-project.org/blog/?p=25 Clutter toys videos] to get a feeling of what can be done using clutter
-
-====Graff====
-
-An early demonstration of Graff, which ''is a lighweight high-performance graphics rendering library.''
-http://www.mdk.org.pl/articles/2007/04/23/chapter-1-in-which-we-meet-graff
-
-Be sure to check out this demo (scrolling list with inertia scrolling)
-http://files.mdk.am/demos/graff-demo-3.avi
-
-Of course it will remind you of Apple iPhone's UI. But this one runs in software mode on Nokia N770&800 already. The most notable part of Graff seems to be the inertia and physics integration in general.
-
-====Pigment API====
-
-Fluendo's (the Gstreamer guys) ''[https://core.fluendo.com/pigment/trac Pigment] is a Python library designed to easily build user interfaces with embedded multimedia. Its design allows to use it on several platforms, thanks to a plugin system allowing to choose the underlying graphical API. Pigment is the rendering engine of Elisa, the Fluendo Media Center project.''
-
-Features:
-* Core languages: C OpenGL
-* Bindings: Python
-* Backends: DirectFB OpenGL
-* Media playback integration: using Gstreamer
-
-====Choosing====
-
-Benchmarking will be needed. We have therefore to define a std testing application that would allow to compare alternatives. 
-
-Some Clutter VS Pigment information: http://www.taimila.com/?q=node/14
-
-==Improvement ideas==
-
-Please add here any idea that seems of relevance.
-
-===Kinetic scrolling===
-
-====EDIT: demo now on the neo====
-
-Apparently the topics discussed here have found an echo in moko devs :)
-
-http://dominion.kabel.utwente.nl/koen/cms/kinetic-scrolling-on-the-neo1973
-
-enjoy the video demo; everything seems to be rendered software fine. More details about the implementation to come.
-
-====Description====
-
-Graff's inertia scrolling list example: http://files.mdk.am/demos/graff-demo-3.avi
-
-Because an example is worth 1000s words...
-
-====Controls====
-
-* Sliding up/down = Single click + maintained for a minimal distance
-
-Effect: scroll in an inverted/negated fashion (slide down = scroll up, slide up = scroll down)
+It's a verlet integration implementation;  modelization includes
+elasticity, friction, gravity, geometrical objects...
+
+The only (AFAIK) implementation using this model is kiba-dock, a *fun*
+app launcher, but we may find another use to it in the future.
+
+For instance, it may be useful to gesture recognition (i'm not aware
+if existing gesture recognition engines measure speed, acceleration,
+...).
+
+There's an undergoing verlet integration into the e17 project (by rephorm)
+see http://rephorm.com/news/tag/physics , so we may see some UI
+physics integration into e17 someday.
+
+Such early projects mainly show "rope-like" animations, but maybe the
+API wil spare some time for different usages.
+
+Well, that was just a useless thought, but i'd be happy to know if
+other people are wondering about improving the user experience
+regarding physics-model-based UI animation.
+Having a scroll that isn't a 1:1 map to the user's action isn't hard.
+It's just an extra calculation in the scroll code.
+
+I think it's a great idea to have some rate-aiding on scrolling.
+
+The difference with traditional scrolling is that the menu/image has
+to continue moving on it's own even when you don't touch it, with some
+friction (so that the movement stops by itself after a certain time).
+In fact, we have to modelize a "wheel of fortune" (for scrolling), and
+a "floating sphere" for image/webpage navigation.
+
+I took finger-based scrolling as an example, but the same
+can apply to popups (such as calling event), in-gallery (image / mp3)
+finger-based navigation, map (displacement, rotation)/zoomed
+image/zoomed web page navigation, wheel-based menu control ...
+Take a look @ this iphone video:
+http://www.youtube.com/watch?v=nPqqfVLQ_qY
+
+There is:
+- it's as if the entire list is the scrolling bar, but reverted
+(finger down -> scroll up)
+- the list follows the pointer
+- as soon as you stop touching, the list continues to scroll (in
+contrary to standard gtk scrolling bar)
+- the list moves at the speed measured at the end of the "touching"
+- some "friction" lets it slow down
+- when you touch it again, it stops the scrolling
+
+Questions:
+- will the neo/openmoko graphics system be powerful enough for such
+animation? I suspect apple to do opengl acceleration on this device,
+which is waaaaay impossible for us
+- ok, akamaru is overkill. But it allows friction, speed etc...
+The changes to bring to the standard gtk scrolling are:
+- consider the list as scrollable (not just the scroll item)
+- change the scrolling "stop" behaviour (when the user stops touching
+the screen) like this: if (last_cursor_speed > 0),
+continue_scrolling(last_cursor_speed)
+- when touching the moving list again, stop the scrolling immediately
+- addition of friction may be a plus, for a more
+"wheel-of-fortune"-like experience
+
+http://en.wikipedia.org/wiki/Verlet_physics
+
+After reading this i realize that's not what we need, simpler
+equations will suffice completely.
+
+I'm wondering what layer of openmoko has to be hacked, i.e. if working
+at openmoko layer allows enough possibilities for this; if i'm not
+mistaken, this is part of libmokoui, but i'm pretty afraid that
+patching gtk itself woud be needed. Working on the lower level would
+apply changes to every application, not only openmoko's.
+
+One preliminary idea can be to add inertia and friction to the finger
+scrolling wheel; which means, you launch the wheel, and stop it when
+you like. For instance, one complete wheel turn = one element in the
+list further. This is an interesting option, because it only needs
+modification of the wheel's function and graphics effect.
+
+Nevertheless, there are different approaches. Example (it's merely an
+iphone "imitation", so if you have novative ideas, please add your 2
+cents):
+
+**********Scrolling: the "wheel of fortune" effect (i can't find a
+better example than
+http://art.giatkabladze.com/george/images/images/wheel_of_fortune.jpg
+: imagine that every item of a scrollable list isput on the front
+surface; the aim is to reach this
+http://www.youtube.com/watch?v=nPqqfVLQ_qY )
+
+Forget the slider bar for scrolling windows, and let the entire window
+be scrollable by default
+
+* Sliding = Single click + maintained for a minimal distance
+Effect: scroll in an inverted/negated fashion (slide down = scroll up,
+slide up = scroll down)
 
 When finger is released (i.e. touchscreen doesn't detect any press):
-  if (last_speed_seen > 0 ) then keep this speed and acceleration, with friction
+  if (last_speed_seen > value ) then keep this speed and
+acceleration, with friction (so that it slows down)
   else stop scrolling
 
-Scrolling here is seen as unidimensional, but can apply to bidimensional situations (ex: zoomed image) too
+Scrolling here is seen as unidimensional, but can apply to
+bidimensional situations (ex: zoomed image) too
 
 * Action = quick double tap
 
@@ -325,129 +122,26 @@ Scrolling here is seen as unidimensional, but can apply to bidimensional situati
 
 * Right click = long tap
 
-* Sliding left/right: switch sorting method
+* Gestures can be interesting, especially for "jumps" (when the cursor
+jumps from upper left corner to down right)
 
-====Parts to modify====
+> Obviously the tools are in the wild to build interfaces that could rival
+> (or better IMO) anything Apple comes up with. We just need to organize
+> this stuff. This would need hardware that can support dynamic
+> interfaces. I can help here, too.
 
-''Having a scroll that isn't a 1:1 map to the user's action isn't hard. It's just an extra calculation in the scroll code.''
+Well, considering recent changes in destkop applications, opengl has a
+definite future. For instance, the expose (be it apple's or beryl's)
+is a very interesting and usable feature. Using compositing allows the
+physics metaphore: the human brain doesn't like "gaps"/jumps (for
+instance while scrolling a text), it needs continuity. When you look
+at apple's iphone prototype, it's not just eye candy, it's maybe the
+most natural/human way of navigating, because it's sufficiently
+realistic for the brain to forget the non-physical nature of what's
+inside.
 
-<---- Where is the scroll code? :)
+So, opengl hardware will be needed in a more or less distant hardware,
+for 100% fluid operation.
 
-* libmokoui
-** [[Stylus_Scrolling | Stylus scrolling widget]]
-** [[Finger_Scrolling | Finger scrolling wheel widget]]
-* gtk
-** [http://www.gtk.org/api/2.6/gtk/GtkVScrollbar.html GtkVScrollbar]
-
-The best would be to add the feature for both finger and stylus scrolling.
-
-TODO:
-* make the entire list a "scrolling zone", i.e. an overlay transparent scrolling widget?
-* define controls
-* add the inertia feature
-
-===1D Scrolling: inertia friction integration into openmoko's finger wheel=== 
-
-The same, but for the wheel. It can be very short to do: you don't have 1:1 anymore, but, for example, 1/4 wheel turn = 1 item. It's demultiplicated, but has inertia.
-
-===Left-handed UI Support===
-
-====Description====
-A discussion on the community list identified a desire to have the ability to switch the Openmoko UI into "left-handed" mode.  
-
- The main problem is scrollbars, when they're on the right, dragging  
- the scrollbar left handed results in your hand covering the screen so  
- you can't see what you are doing. So having the option of scrollbars  
- on the left would be useful.
-
- I don't think the whole screen should be mirrored! There are some elements
- that should remain..like the main top bar with the status icons and such.
- Scrollbars are the main thing I can think of right now.
-
-===3D Launcher===
-
-Instead of a traditional filemanager type launcher or a start menu, we could use 3D capabilities and have a cylindrical launcher. Slide your finger left and right to rotate, up and down to move up and down the cylinder. There are arrows top and bottom to indicate you can move in that direction. For when you enter sub folders there will be a button top left/right allowing you to go back up a level.
-
-Mock up of the launcher, the final version would have proper icons and the text would bend around the cylinder.
-
-[[Image:launcher.jpg]]
-
-===Handgesture recognition proposals===
-
-====Using simple, localized warp as modifier key====
-
-As discussed on community list:
-
-  If you hold down one finger and tap the other one, the mouse pops over and back
-  again. If you keep your second finger touching, the cursor follows it. When you
-  release it, cursor goes back to first finger position. This could be a way to
-  set a bounding box or turn on the mode. So the second finger can do something
-  like rotating around the first, or increase or lower the distance to the first.
-
-* the so-called "first touch" can be done on the mokowheel zone itself: put your left thumb on the black area; if you touch the screen with another finger, there is a '''warp'''; the warp is detectable and allows to enter "fake multi-touchscreen mode"
-* afterwards,
-     * slide your right-hand finger down, it scrolls up
-     * slide your right-hand finger up, it scrolls down
-     * slide it left, next page/item
-     * slide it right, previous page/item
-     * do a circle: rotation
-     * narrow towards the black circle: zoom -
-     * go away: zoom +
-* if you had kept your first finger on the black quarter circle, you can continue issuing other gestures
-
-The advantages of using simple origin-driven cursor warping as double touch detection criteria is that:
-* you don't have to use the wheel as button, which would slow things down and generate errors (false button presses)
-* simpler detection algorithms that can pass by the fluctuation due to pressure relative distribution
-* the space taken by the wheel itself is "useless" (i.e. displays no information); using it as modifier allows to keep the screen clean for reading
-* the origin of this zone lets use maximum surface of the screen, allowing more fine controlling
-
-[[Image:Fake_multitouch_rotate_right.png]]
-
-[[Image:Fake_multitouch_scroll_previous.png]]
-
-[[Image:Fake_multitouch_scroll_down.png]]
-
-[[Image:Fake_multitouch_zoom-.png]]
-
-*Pros:
-** who said we need multi-touch hardware?
-** this may be the easiest way (in terms of design/implementation complexity, reliability)
-*Cons: 
-** no matter what we'll invent, we'll need two hands for on-the-move controlling
-** what about left-handed people?
-
-====What is to modify ?====
-
-We need to emulate key presses. We need to work at a layer where we can get raw cursor coordinates. <---- X server layer?
-
-There is a fake keyboard module (for dev purposes) in the main kernel tree, which could be used to simulate keyboard presses (hence keeping keyboard-enabled apps unmodified).
-
-====Full multi-touch emulation====
-
-Doable, but tricky...
-
-==Preparing the multi touch==
-
-One day we might get multitouch devices. Let's get ready.
-
-===MPX===
- 	
-The Multi-Pointer X Server is a modification of the X server to support multiple mice and keyboards in X. It provides users with one cursor per device and one keyboard focus per keyboard. Each cursor can operate independently. MPX is the first multicursor windowing system and allows two-handed interaction with legacy applications, but also the creation of innovative applications and user interfaces. 
-
-[http://wearables.unisa.edu.au/mpx/ The multipoint X server project]
-
-===MacSlow's Lowfat getting multitouched===
-
-http://dlai.jafu.dk/?p=1
-
-If you want details, you can contact [[User:fursund|fursund]]
-
-==Open questions==
-
-* will the neo/openmoko graphics system be powerful enough for such uses? I apple uses an OpenGL ES acceleration on this device (as well as on recent iPods), which is on the way with [[GTA02#.22Phase_2.22_.28GTA02.2C_.22Mass_Market.22.29|GTA02]].
-* how does the touchscreen behave? We need a detailed touchscreen wiki information page, with visual traces. How hardware-specific is it?
-* is multi touch really that awesome? I guess not.
-
-{{Languages|UI Improvements}}
-
-[[Category:User Interfaces| ]]
+And, if we really want deep changes, multi touch screen if essential
+too :(  (example: zooming with fingers)...
