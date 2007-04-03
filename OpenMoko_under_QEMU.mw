@@ -1,24 +1,28 @@
 QEMU can basically be used in three ways to run [[OpenMoko]]. Depending on the purpose that you are going to use the emulator for, you should decide on the target platform.
 
-*PC - OpenMoko can be built to run on regular i386 hardware, 32- or 64-bit and this is probably the fastest way to get OpenMoko running if you want to get an impression of how it looks.  In this scenario QEMU would only serve for isolating your OpenMoko installation from your normal system, or, if you're not on a UNIX system, QEMU will provides a non-intrusive way to get Linux up quickly. More information can be found in the [[FAQ]] and [[Getting Openmoko working on host with Xoo|here]].
+*PC - OpenMoko can be built to run on regular i386 hardware, 32- or 64-bit and this is probably the fastest way to get OpenMoko running if you want to get an impression of how it looks.  In this scenario QEMU would only serve for isolating your OpenMoko installation from your normal system, or, if you're not on a UNIX system, QEMU provides a non-intrusive way to get Linux up quickly. More information can be found in the [[FAQ]] and [[Getting Openmoko working on host with Xoo|here]].
 
 *Integrator/CP - this is the default ARM-based machine that can be QEMU knows about. This target is used with MACHINE="qemuarm" and it is sufficient to run the original OpenMoko rootfs image, although it doesn't emulate any of the [[Neo1973]] hardware except the CPU. Read more in the [[FAQ#Q:_Is_there_an_emulator_available_for_OpenMoko.3F|FAQ]].
 
 *Neo1973 - the QEMU tree available from OpenMoko repositories is also capable of emulating most of the actual [[Neo1973]] hardware, although not all of it at this moment. It is a work-in-progress and when it's more mature it is going to be submitted for merging to the main QEMU development tree.
 
-==Neo1973 emulation==
-This target will (obviously) run original OpenMoko rootfs images, but the it should also be able to run the original u-boot and kernel images, the same ones that a real Neo1973 uses. Among other differences you will notice between this approach and the Integrator/CP target is you also get correct screen resolution, some (fake) battery readings, and other goodness. Currently missing parts of the emulator are: [[GSM]] modem, [[Hardware:AGPS|AGPS]] and [[Bluetooth]], as well as the USB slave functionality - these things will still be worked on, as well as general usability. Even with these things missing, QEMU should provide substantial help in debugging kernel and u-boot issues to developers.
+== Neo1973 emulation ==
+This target will (obviously) run original OpenMoko rootfs images, but then it should also be able to run the original u-boot and kernel images, the same ones that a real Neo1973 uses. Among other differences you will notice between this approach and the Integrator/CP target is you also get correct screen resolution, some (fake) battery readings, and other goodness. Currently missing parts of the emulator are: [[GSM]] modem, [[Hardware:AGPS|AGPS]] and [[Bluetooth]], as well as the USB slave functionality - these things will still be worked on, as well as general usability. Even with these things missing, QEMU should provide substantial help in debugging kernel and u-boot issues to developers.
 
-What QEMU can *not* be used for, and no probably no other emulator can, is speed measures and getting the general feel of OpenMoko performance. Code running in qemu runs with the maximum speed you host computer can provide with an overhead of translating target code to host code, and this overhead is not uniform across different instructions. This means that even if your virtual Neo reports near 100 BogoMIPS (which is the speed of a real Neo), different actions performed in the emulator will not run with the same speed. On most PCs you will notice the virtual Neo running faster than a real one (Audio related operations may be one of the exceptions).
+What QEMU can *not* be used for, and probably no other emulator can, is speed measures and getting the general feel of OpenMoko performance. Code running in qemu runs with the maximum speed your host computer can provide with an overhead of translating target code to host code, and this overhead is not uniform across different instructions. This means that even if your virtual Neo reports near 100 BogoMIPS (which is the speed of a real Neo), different actions performed in the emulator will not run with the same speed. On most PCs you will notice the virtual Neo running faster than a real one (Audio related operations may be one of the exceptions).
 
-==How to get it running==
+== How to get it running ==
 
 To obtain the latest source code for the emulator, you will want to do something like the following:
-<pre>$ svn checkout https://svn.openmoko.org/trunk/src/host/qemu-neo1973
-$ cd qemu-neo1973</pre>
+<pre>
+$ svn checkout https://svn.openmoko.org/trunk/src/host/qemu-neo1973
+$ cd qemu-neo1973
+</pre>
 Now, we're going to configure the and build the emulator:
-<pre>$ ./configure --target-list=arm-softmmu  # GCC 3.x will be required
-$ make</pre>
+<pre>
+$ ./configure --target-list=arm-softmmu  # GCC 3.x will be required
+$ make
+</pre>
 See other available options for the configure script by appending "--help".
 Now you have should have a working emulator under the name "arm-softmmu/qemu-system-arm". To run OpenMoko you will also need to somehow install OpenMoko on your virtual phone, which is totally clean of any software at this moment. There are several block devices to choose from, the best option is probably to do exactly what the Neo1973 manufacturer does before it ships the device to the final user. This process is described in [[Bootloader]], [[Kernel]], [[NAND bad blocks]] and [[Devirginator]] but you don't need to know all the details. Two scripts are provided to generate a firmware for your phone, as realistic as possible. First, run
 <pre>$ openmoko/download.sh</pre>
@@ -27,3 +31,7 @@ which will look up the list of latest available OpenMoko snapshot builds from bu
 which runs the emulator, loads u-boot into it and then uses u-boot's capability to program the Flash memory to install all the necessary parts of the system into the virtual Flash. It will also set up all the bootloading process including a boot menu, splash, u-boot environment and some default kernel parameters. If everything goes OK, the script should print a command which you can use to start using the emulator.
 
 QEMU has *tons* of commandline switches and things that can be configured. You can look them up in [http://www.qemu.org/user-doc.html QEMU user docs]. You will probably want to use the "-snapshot" switch, among other ones.
+
+== Requirements ==
+The QEMU tree has only been tested on GNU/Linux. To get graphical and/or audio output from the emulator you will need SDL installed on your computer. To enable audio, see the available switches to the ./configure script.
+All of the requirements listed in [http://www.qemu.org/user-doc.html QEMU documentation] apply.
