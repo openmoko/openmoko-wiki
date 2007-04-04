@@ -2,7 +2,7 @@ QEMU can basically be used in three ways to run [[OpenMoko]]. Depending on the p
 
 *PC - OpenMoko can be built to run on regular i386 hardware, 32- or 64-bit and this is probably the fastest way to get OpenMoko running if you want to get an impression of how it looks.  In this scenario QEMU would only serve for isolating your OpenMoko installation from your normal system, or, if you're not on a UNIX system, QEMU provides a non-intrusive way to get Linux up quickly. More information can be found in the [[FAQ]] and [[Getting Openmoko working on host with Xoo|here]].
 
-*Integrator/CP - this is the default ARM-based machine that QEMU knows about. This target is used with MACHINE="qemuarm" and it is sufficient to run the original OpenMoko rootfs image, although it doesn't emulate any of the [[Neo1973]] hardware except the CPU. Read more in the [[FAQ#Q:_Is_there_an_emulator_available_for_OpenMoko.3F|FAQ]].
+*Integrator/CP - this is the default ARM-based machine that QEMU knows about. This target is used with MACHINE="qemuarm" and it is sufficient to run the original OpenMoko rootfs image, although it doesn't emulate any of the [[Neo1973 Hardware]] except the CPU. Read more in the [[FAQ#Q:_Is_there_an_emulator_available_for_OpenMoko.3F|FAQ]].
 
 *Neo1973 - the QEMU tree available from OpenMoko repositories is also capable of emulating most of the actual [[Neo1973]] hardware, although not all of it at this moment. It is a work-in-progress and when it's more mature it is going to be submitted for merging to the main QEMU development tree.
 
@@ -10,6 +10,69 @@ QEMU can basically be used in three ways to run [[OpenMoko]]. Depending on the p
 This target will (obviously) run original OpenMoko rootfs images, but then it should also be able to run the original u-boot and kernel images, the same ones that a real Neo1973 uses. Among other differences you will notice between this approach and the Integrator/CP target is you also get correct screen resolution, some (fake) battery readings, and other goodness. Currently missing parts of the emulator are: [[GSM]] modem, [[Hardware:AGPS|AGPS]] and [[Bluetooth]], as well as the USB slave functionality - these things will still be worked on, as well as general usability. Even with these things missing, QEMU should provide substantial help in debugging kernel and u-boot issues to developers.
 
 What QEMU can *not* be used for, and probably no other emulator can, is speed measures and getting the general feel of OpenMoko performance. Code running in qemu runs with the maximum speed your host computer can provide with an overhead of translating target code to host code, and this overhead is not uniform across different instructions. This means that even if your virtual Neo reports near 100 BogoMIPS (which is the speed of a real Neo), different actions performed in the emulator will not run with the same speed. On most PCs you will notice the virtual Neo running faster than a real one (Audio related operations may be one of the exceptions).
+
+=== What hardware is supported ===
+
+Rough status for each of the components that need emulation, following the outline of [[Neo1973 Hardware]] page.
+{|
+! Hardware !! Status !! Usage notes
+|- style="background-color:#eeeedd;"
+! colspan="3"|S3C2410A Processor
+|-
+|ARM920T core || Works || Already in mainline QEMU.
+|-
+|Basic guts || Work || This includes GPIO interface, DMA, Interupt Controller, Timers, NAND controller, MMC/SD host, [[I2C]] and IIS interfaces, Memory & Clock & Power management controllers, RAM.
+|-
+|Serial ports || Work || Use the "-serial" switch (maybe be specified multiple times) to tell QEMU where serial input/output should go to. GSM module will be connected on UART0.
+|-
+|RTC || Works || On QEMU start it will be loaded with current time/date - the Neo1973 [[kernel]] doesn't use it for time source currently.
+|-
+|SPI || Works || The guest kernel can drive it using either the SPI interface or raw GPIO bitbanging.
+|-
+|LCD || Works || The virtual LCD will display as in QEMU window iff "-nographic" is not specified.
+|-
+|ADC || Works || Mouse events in QEMU window generate what would be touchscreen events on a Neo1973 and are passed to the guest OS through the on-chip ADC.
+|-
+|OHCI USB || Works || This part is in mainline QEMU. Use the "-usb" switch to enable the controller and "usb_add" in QEMU monitor to attach new virtual or physical USB devices.
+|-
+|Slave USB
+|style="background-color:#ffcccc;"|To Do
+|Possibly Linux's dummy HCD in conjunction with gadget filesystem API can be make the virtual Neo appear as a real one connected to your computer. Otherwise different host functions (usbtty, usbnet) could be emulated.
+|-
+|Watchdog
+|style="background-color:#ffcccc;"|To Do
+|This is one of the less important on-chip peripherals in S3C2410. It is however used by Linux for rebooting the board.
+|- style="background-color:#eeeedd;"
+! colspan="3"|[[I2C]] bus peripherals
+|-
+|[[PCF50606]]||Works||(Aka PMU) Fakes the battery charge level (set at 88%), POWER button, etc. Also contains and RTC, also unused by Linux.
+|-
+|[[LM4857]]||Works
+|-
+|[[WM8753L]]||Works||The CODEC is also connect to the CPU's IIS port. Basic [[Neo1973 Audio Subsystem|audio functionality] is supported - see QEMU documentation on getting audio input/output from the emulator. Volume control has no effects.
+|- style="background-color:#eeeedd;"
+! colspan="3"|Other peripherals
+|-
+|NAND Flash||Works||However, some pieces are not confirmed to be completely compatible with the real hardware because of lack thereof. Use "-mtdblock flashimagefilenamehere" switch to point QEMU to your flash image. The file should be at least 69206016 bytes big.
+|-
+|JBT6K74-AS(PI)||Works|| (Aka LCM) Wired to the SPI channel 1
+|-
+|Buttons||Work||Space is the AUX button, Enter is the POWER button. Wired to on-chip GPIO and PCF50606.
+|-
+|SD card||Works||This part is already in mainline QEMU. The card works, however the on-chip host controller gave block length errors on heavy I/O despite working as described in specification. I suspect the kernel driver. DMA operation is not tested.
+|-
+|Bluetooth
+|style="background-color:#ffcccc;"|To Do
+|Will require implementing the Delta DBFM chip and connecting it to USB. The ROM will likely be replaced with code to translate communication directly to TCP/UDP networking (like Slirp). A real bluetooth dongle can also be attached to the emulator (see USB documentation in QEMU).
+|-
+|[[GSM]]
+|style="background-color:#ffcccc;"|In Progress
+|A fake modem will be connected to UART0 with as much functionality as possible (basic AT commands understanding, fake GPRS connections and SMS send/receive). This way all parts of the phone subsystem (CALYPSO, TWL3014, TRF6151) will not have to be emulated. There is a possibility to wire a real GSM modem to QEMU's serial port.
+|-
+|[[Hardware:AGPS|AGPS]]
+|style="background-color:#ffcccc;"|To Do
+|There are obvious difficulties emulating the chip, but hopefully it can be made to present the guest OS with some fixed coordinates later when more is known about the chip. Again a real chip could be connected to QEMU's serial port.
+|}
 
 == How to get it running ==
 
