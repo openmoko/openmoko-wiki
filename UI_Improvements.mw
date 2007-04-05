@@ -114,7 +114,7 @@ There's an undergoing verlet integration implementation into the e17 project (by
 
 * '''Multitouchscreen emulation'''
 
-If we got it right, when touching the screen on a second place, the cursor warps to the second place (or, second theory, laptop touchpad-inspired, oscillates between the two points depending on relative pressure distribution), then maybe we can try to see what happens when doing the things the iphone does.
+If we got it right, when touching the screen on a second place, the cursor oscillates between the two points depending on relative pressure distribution. Using averaging algorithms, we may have the opportunity to detect peculiar behaviours.
 
 We need raw data (x,y,t) from the real hardware for the following behaviours:
 * slide two fingers in parallel - vertical up/down (scroll)
@@ -122,19 +122,21 @@ We need raw data (x,y,t) from the real hardware for the following behaviours:
 * slide two fingers towards each other (zoom-)
 * slide two fingers apart (zoom+)
 
+When touching the screen with two fingers at the same time, we necessarily see the two points, or are able to extrapolate the position of the second one. This solution can add feature, but will probably be little erratic...
+
 * '''Other detectable behaviours'''
 
 The warping can be used in the 4 diagonals, plus the up/down/right/left cross:
 
-  ----------------
-  - 1            -
-  -              -
-  -              -
-  -              -
-  -              -
-  -              -
-  -             2-
-  ----------------
+  ----------------  ----------------  ----------------  ----------------
+  - 1            -  - 1          2 -  - 1            -  -      2       -
+  -              -  -              -  -              -  -              -
+  -              -  -              -  -              -  -              -
+  -              -  -              -  -              -  -              -
+  -              -  -              -  -              -  -              -
+  -              -  -              -  -              -  -              -
+  -             2-  -              -  - 2            -  -      1       -
+  ----------------  ----------------  ----------------  ----------------
 
 ===Distant future: OpenGL compositing===
 
