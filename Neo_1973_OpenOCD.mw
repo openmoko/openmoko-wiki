@@ -1,131 +1,140 @@
-== About OpenOCD ==
-
-[http://openocd.berlios.de/ OpenOCD] is a 100% free software On-chip-debugger for commonly-found ARM JTAG probes such as [[wiggler]], chamaeleon, jtag-key and others.
-
-It provides a human-readable telnet interface for manually halting/resuming the target device, reading/writing registers and memory, etc.
-
-In addition, it provides a RDI (remote debugger interface) on a TCP port.  This interface can be used by gdb (the GNU Debugger).
-
-The GTA01 development team uses OpenOCD with a [[wiggler]] compatible probe as their ICE solution.
+The [[:Category:Neo1973 Hardware | Neo1973]] uses an Assisted Global Positioning Ssystem, AGPS, technology. [[Hardware:AGPS | The Hardware:AGPS page]] provides information on GPS in general and the [[OpenMoko]] chip in particular.
 
 
-== Getting OpenOCD ==
+== Q: Has anybody here ever used AGPS? I'd like to hear your experiences. ==
 
-=== Debian Package ===
+Everybody who has used a modern GPS has used AGPS. It is usually called warm-start or hot-start. AGPS is purely a marketing term. To calculate the position a GPS chip needs:
+     * almanac = coarse position of satellites
+     * ephemeris = precise position of satellites
 
-We now have a Debian binary package of OpenOCD, available from http://people.openmoko.org/laforge/dpkg. Installing this package is the preferred method to install OpenOCD on your development machine like
+The almanac is broadcast in a loop of 12.5 minutes and valid for at least six weeks. The ephemeris is broadcast in a loop of 30 seconds and valid for ~2 hours.
 
- dpkg --install openocd_82-1_i386.deb
+Time is mostly irrelevant, as modern chips synchronize within a second with the satellites.
 
-=== Source Code ===
+The receiver chipsets store this data in flash and load it from there onto the chip in order to _assist_ the hot or warm start.
 
-OpenOCD Revision 82 and later have been proven to work with our [[QT2410]] and [[Neo1973]] target board and wiggler as well as Amontect JTAGkey and JTAGkey tiny.  You can e.g. check rev. 130 out of the OpenOCD subversion via
+AGPS now means to load the almanac and the ephemeris from elsewhere, i.e. via a network. For example for free from the american government: http://www.navcen.uscg.gov/gps/precise/default.htm
 
- svn co -r 130 http://svn.berlios.de/svnroot/repos/openocd/trunk
+AGPS is a nice convenience yet the success and proper functioning of TomTom and Navigon PDAs shows that you don't need that at all.
 
-== Configuration ==
+It's worth noting that the GPS on the neo is sensitive enough to pick up GPS signals in buildings.
+If the spot you charge your neo happens to have a GPS signal, downloading the almanac from the satellites while it charges is essentially free, and takes no Internet access at all. Do this daily, and you get most of the benefit of aGPS.
 
-[[User:HaraldWelte]] has provided a [http://people.gta01.hmw-consulting.de/laforge/misc/openocd.cfg openocd.cfg configuration file] for use of OpenOCD with wiggler and the QT2410 target board. 
+== Q: The chip in the [[:Category:Neo1973 Hardware | Neo1973]] is a Global Locate AGPS. Anybody know what type? Hammerhead maybe? ==
+A: It is the hammerhead.
 
-== Using OpenOCD ==
+== Q: I understand the concept of assisted GPS. But does the phone have its own antenna/receiver so that it can work without 'assistance'? ==
 
-We cannot provide a full manual for OpenOCD, but please check 
-[[Bootloader#Using_JTAG_to_boot_from_RAM]] and [[NAND bad blocks#JTAG_.2F_OpenOCD_.2F_u-boot_RAM_based]], as well as the [[Neo1973 OpenOCD#Using OpenOCD telnet interface]] section below.
+A: See above, the important part is the GPS and not the assistance. Antenna is thus compulsory.
 
-== Known Bugs and Troubleshooting ==
+== Q: Has anybody info on the whereabouts of assistance servers, especially in Belgium and Europe? ==
 
-=== CP15 register read/write of ARM920T core not working ===
+A: They can be anywhere on the net. Alternatively a service from the cellphone operators. However, there may be occasions where you want a server 'near' where you are. See the later question on DGPS
 
-This has been reported upstream. Bugfix pending.
+== Q: Using the assistance servers will probably mean that I will have to pay for that service. Any idea of the costs? ==
 
-=== Did you turn it on ? ===
+A: They use the low cost of their chip as selling point. Their website implies that this is a service that comes with the chip. I'd call it not very clever if they are going to charge you - it would change their image from lowcost to money grabber and the reverse engineering of their binary protocol would happen even faster.
 
-An easily made but devastating mistake is to forget to actually activate the CPU. Just connecting power is not enough !
-Press and hold the power button until the boot loader does its count-down, or, in case there is no runnable boot loader,
-the CPU keeps itself busy.
+Last but not least: Global Locate boasts itself to get a first fix in 8 sec without AGPS. The importance of AGPS depends whether the part of their website you are reading is targeted at cell phone operators, or not.
 
-=== number of discovered devices in JTAG chain doesn't match configuration ===
+== Q: Is there any "A-GPS standard" whatsoever? ==
 
-You get something like:
- Error:   jtag.c:1224 jtag_examine_chain(): number of discovered devices in JTAG chain (51) doesn't match configuration (1)
+A: no. It's a broad term for many variants of GPS
+== Q: I have heard elsewhere (Wikipedia) that in A-GPS the computation effort is shared between the device and the A-GPS Server. According to a previous post, the device just downloads the ephemeris table so there isn't any  actual "computation sharing", but rather a download of a pre-computed table download. Correct? ==
 
-This seems like a libftdi initialization bug.  Sometimes the FT2232 doesn't get completely reset into a sane state at startup of OpenOCD.  Please unplug the USB cable from the [[Amontec JTAGkey]] / [[Debug Board]] and re-plug.  It should immediately work the next time.  Bugfix would be appreciated a lot!
+A: Yes, in this case. In others the server may do more work. For the neo, all the position information is computed in the neo.
 
-=== JTAG communication failure ===
+== Q: A-GPS involves additional data traffic and thus (potential) additional costs. Does it use a normal GSM/GPRS IP-based data transfer? does it use some out-of-band GSM/GPRS control messages? or does it get data from broadcasts in the local cell (e.g. GSM cell-broadcast)? ==
 
-Another common error is this one:
- JTAG communication failure, check connection, JTAG interface, target power etc.
+A: GPRS.  so its up to you whether you want that extra traffic (and
+cost, unless you're flat) or not.
+== Q: if the answer to above is GPRS: is it possible to estimate in advance how much additional traffic (in Kbytes/day of full operation)? ==
 
-Also this one is fixed by unplugging and re-plugging USB.
+A: The absolute worst case is 50 bits/s * 12.5 minutes, around 5Kbytes. For the full almanac.
+However, this is certainly not needed per day.
+The errors in orbit prediction, when you have a full almanac are quite small over the short term (a week).
+5K once (or the GPS on for 12.5 minutes) then .5K/day should be quite adequate.
 
-== OpenOCD and [[Debug Board]] ==
+== Q: Are there any known estimations on the overall (A)GPS performance on the Neo (esp. fix time) ==
 
-=== libftdi-0.8 ===
+A: The hammerhead brief information page specifies 1s fix time for a position with 5m error.
 
-If you want to use OpenOCD with our Debug Board v2, and want to use the serial port simultaneously with OpenOCD, you '''need libftdi-0.8 or later'''.  Chances are high that your distribution still ships an earlier version of libftdi, so you might want to download it from http://www.intra2net.com/de/produkte/opensource/ftdi/ and build yourself.
+== Q: Coming to the [[:Category:Neo1973 Hardware | Neo1973]]. In order to save costs, can the "Assisted" function in A-GPS be disabled through software API? ==
 
-=== openocd.cfg ===
+A: yes, it can be disabled through preferences.
 
-This is an openocd.cfg that is known to work with [[Debug Board]], [[Neo1973 Hardware#GTA01Bv3]] and OpenOCD 130:
-<pre>
-telnet_port 4444
-gdb_port 3333
-interface ft2232
-jtag_speed 0
-ft2232_vid_pid 0x1457 0x5118
-ft2232_layout "jtagkey"
-reset_config trst_and_srst
-jtag_device 4 0x1 0xf 0xe
-daemon_startup attach
-target arm920t little reset_run 0 arm920t
-working_area 0 0x200000 0x4000 backup
-run_and_halt_time 0 5000
-</pre>
+== Q: Is it possible to tell whether A-GPS is actually in use or not? ==
 
-=== Using OpenOCD telnet interface ===
+A: yes. either you have enabled it in preferences or nor ;)
 
-The telnet interface can be accessed using
- telnet localhost 4444
+== Q: Is it possible to tell/know which is the A-GPS server currently in use? ==
 
-it provides a plethora of functions for debugging. You might be interested in
-<pre>
-reset
-reset halt
-resume
-poll
-reg
-load_binary
-mdw
-mww
-</pre>
+A: yes.
 
-=== Using OpenOCD and gdb for remote debugging ===
+== Q: Can choosing to use GPS (even with A-GPS disabled) enable others to track me?  Is there a mode where this is not the case? ==
 
-First, you will need a suitable cross-gdb (a gdb that runs on your host architecture, e.g. i386, but works with code for arm).  In OpenEmbedded, you can build such a cross-gcc by using
- bitbake  gdb-cross
+A: The reciever does not emit significant amounts of RF - unless you are literally within centimeters of the device, it's not possible to pick it up. The other alternative would be that the supplied plugin to gpsd is trojaned, and can be asked somehow to report on your position.
+The position is entirely computed in the plugin to gpsd, the GPS hardware cannot know it, it's too dumb.
 
-If you want to debug the kernel, you can then start this gdb with
- $ arm-linux-gdb vmlinux
+== Q: What is DGPS, can DGPS and A-GPS work together? ==
 
-which will give you something like
-<pre>
-GNU gdb 6.6
-Copyright (C) 2006 Free Software Foundation, Inc.
-GDB is free software, covered by the GNU General Public License, and you are
-welcome to change it and/or distribute copies of it under certain conditions.
-Type "show copying" to see the conditions.
-There is absolutely no warranty for GDB.  Type "show warranty" for details.
-This GDB was configured as "--host=i686-linux --target=arm-linux"...
-(gdb) 
-</pre>
+A: [http://www.oc.nps.navy.mil/oc2902w/gps/dgpsnote.html An overview of DGPS] Differential GPS is basically a way of removing systematic per-satellite errors from various causes (satellite clock drift, atmospheric effects) for 'nearby' recievers, given one reciever that knows where it is.
 
-We now need to connect to the OpenOCD daemon, which is done using the '''target remote''' command.  In this particular example, we did already halt the target by issuing '''halt''' on the '''telnet''' command line
+The per-satellite range errors to a satellite are around 2-3 metres typically. These per-satellite errors are similar for users close to each other.
+These corrections are broadcast by radio in much of the USA (which the neo cannot pick up).
 
-<pre>
-(gdb) target remote localhost:3333
-Remote debugging using localhost:3333
-warning: shared library handler failed to enable breakpoint
-0xc0129b8c in memmove () at include/asm/current.h:9
-9       {
-(gdb)
-</pre>
+If you can download error information from a nearby source, then you can obtain positions that are much more accurate than without this information. Perhaps well under 1m radius of error, instead of 2 or 3. In some applications this may be of use.
+
+It may be that the apgsd cannot do this, and it will require reverse engineering.
+
+In any case, this would be another few hundred bytes a minute while this is active. (the  error information rapidly ages).
+
+Any stationary reciever - even a neo on charge, with a good signal, can produce useful error information. If it had a cheap internet connection at the same time, it could be constantly updating a global error model, for use by other neo owners.
+
+
+
+It may be that the apgsd cannot do this, and it will require reverse engineering.
+=== Q: I thought DGPS couldn't be done like this. ===
+See for example http://gpsinformation.net/main/poordgps.htm
+A: This is quite different from simply looking at the relative offset of reference GPS device, and a known point, and then comparing.
+The difference is that the neo can help to derive (in combination with other stationary devices) a real-time model of the different sources of error. See the last comment on the article you refer to - the neo chip produces psuedorange output, it can be corrected in this same manner.
+
+== Q: Is an open-source GPS daemon able to be distributed by FIC? ==
+[http://www.fas.org/spp/starwars/offdocs/itar/p121.htm A web copy of the ITAR - International Traffic in Arms Regulation legislation, currently in force in the US]
+
+While stupid, this defines
+
+----
+... GPS receiving equipment with any of the following characteristics:
+...
+   (2) Designed for producing navigation results above 60,000 feet altitude
+       and at 1,000 knots velocity or greater;
+----
+
+as being a munition.
+This is right after the section prohibiting rockets that can be used to deorbit satellites on a specific target, and just before nuclear weapons design and test equipment.
+
+And just because it's stupid doesn't mean they won't kick the doors in - or prevent it from sale and levy huge fines, after the gleefull lawyers at apple point it out. (you need DOD licenses to import/export)
+
+The plugin for the gpsd daemon presumably implements this limit.
+
+Much established hardware has pretty much confirmed that it's OK to do it this way - as long as it's closed source, you can point at the evil hackers, and say that you never did it.
+
+An open source plugin for gpsd distributed with the neo might raise other issues, namely that at some point in the code, there is a self-documented if(velocity>1000kt) test, which can be trivially commented out.
+(the hardware must be able to do this, the velocity of a satellite towards and away from the user greatly exceeds 1000 knots.)
+
+If I was FIC, I would at the very least want a good legal opinion on if an open source gpsd plugin (perhaps a user contributed one after decoding the binary stream that the hammerhead puts out) can be safely distributed, before doing so.
+
+--[[User:Morricone|Morricone]] 11:15, 16 February 2007 (CET) You forget, that FIC is not located in the USA, so US laws do not apply.
+
+Very true, however, this would mean that it could not be imported into the US.
+Also that anyone from FIC involved in this could not travel to the US without fear of arrest.
+The penalties are really quite high.
+--[[User:Speedevil|Speedevil]] 14:10, 16 February 2007 (CET)
+
+Isn't this resriction implemented in the chipset? wouldn't the chipset itself be illegal in the US without these restrictions?
+--[[User:Kiney|Kiney]] 22:20, 14 March 2007 (CET)
+
+The chipset is too dumb. It does not know the position or the velocity. This is only computed in the host CPU. --[[User:Speedevil|Speedevil]] 06:17, 25 March 2007 (CEST)
+
+[[Category:Neo1973 Hardware]]
