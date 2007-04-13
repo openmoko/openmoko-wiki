@@ -1,4 +1,3 @@
-{{Wishlist}}
 == Overview ==
 The alarm daemon provides an interface for applications to register times at which an application needs to do a specific task.
 
@@ -12,40 +11,15 @@ The alarm daemon provides an interface for applications to register times at whi
 The alarm daemon will probably be part of neod since it will need to set the RTC alarm for the next event. The interface for the applications is exposed via dbus.
 
 == Implementation Recommendations ==
-Maemo is using [https://garage.maemo.org/projects/alarmd/ alarmd] ([http://maemo.org/platform/docs/howtos/howto_alarm_interface_bora.html howto]).  We should see if we can modify their approach to fit our needs. We don't want to have to many different solutions to a similar problem, but rather cooperate.
+We should definitely look at how the maemo project is handling this and if we can modify their approach to fit our needs. We don't want to have to many different solutions to a similar problem, but rather cooperate.
 
 At start neod will have to query the next event in eds (to determine when the next wakeup has to occur). If a new event is added eds will broadcast the change through dbus.
 
-Applications will (de-)register for a specific time at which the alarm daemon (neod) will call the application with a special command line parameter to reflect that the application has been called for an alarm.
+Applications will (de-)register for a specific time at which the alarm daemon (neod) will call the applikation with a special command line parameter to reflect that the application has been called for an alarm.
 
 == Unresolved Issues ==
 * If the device is powering down during the alarm we might miss the RTC alarm. Maybe we should just move the alarm time back a minute if we are powering down and the alarm is near?
 * What do we do if the application is already running?
 
-== Time sources ==
-
-An alarm daemon can not operate without accurate time. We have a number of possible time sources:
-
-=== RTC ===
-
-* view: sudo hwclock
-* set from system time: sudo hwclock --systohc
-* note that ioctl to /dev/rtc can be used to configure wakeup from suspend at a given time (see e.g. fso-frameworkd source code on how this can be done).
-
-=== GPS ===
-
-* view: echo d | netcat -w1 localhost gpsd
-
-=== GSM operator time ===
-
-* It is not known how this can be accessed
-
-=== Other sources ===
-
-* If you never suspend your phone then the system time could be used but this is not very practical.
-* Does the GSM chip have its own clock (it is a full-blown ARM afterall)?
-
 == Questions and Answers ==
 (None)
-
-[[Category:Middleware]]
