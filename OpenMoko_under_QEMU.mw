@@ -100,6 +100,10 @@ which runs the emulator, loads u-boot into it and then uses u-boot's capability 
 
 QEMU has *tons* of commandline switches and things that can be configured. You can look them up in [http://www.qemu.org/user-doc.html QEMU user docs]. You will probably want to use the "-snapshot" switch, among other ones.
 
+=== Pre-built binaries ===
+
+Win32 binaries shipped with firmware can be downloaded from [http://mdk.linux.org.tw/~jserv/openmoko/openmoko-emulator-win32-bin-20070416.zip openmoko-emulator-win32-bin-20070416.zip]. Tested on Ms Windows XP.
+
 == Requirements ==
 The QEMU tree has only been tested on GNU/Linux. To get graphical and/or audio output from the emulator you will need SDL installed on your computer. To enable audio, see the available switches to the ./configure script.
 All of the requirements listed in [http://www.qemu.org/user-doc.html QEMU documentation] apply.
@@ -108,8 +112,3 @@ All of the requirements listed in [http://www.qemu.org/user-doc.html QEMU docume
 QEMU lets you debug operating system kernels and bootloaders like you debug all other programs. To do this you will need a debugger that speaks the GDB remote debugging protocol - [http://sourceware.org/gdb/ GDB] is the obvious choice. Some cross toolchains come with GDB already set up. Otherwise building cross-GDB yourself is quick and easy (compared to building binutils and cross-gcc).
 
 To debug u-boot, load the file "u-boot" into gdb (not "u-boot.bin") that is produced by "make" when building u-boot. To debug a Linux kernel, load the file "vmlinux" from the main source directory into gdb. These files are in ELF format and contain all the symbol information and are not stripped of debugging data until you run "strip" on them, unlike "u-boot.bin" and "Image"/"zImage"/"uImage". Next, tell QEMU to enable the gdbserver by appending the "-s" switch or issuing "gdbserver" in the monitor. Use the command <pre>(gdb) target remote localhost:1234</pre> to make a connection to the emulator. From there you should be able to use all the usual GDB commands, including stepping instructions, setting breakpoints, watchpoints, inspecting stack, variables, registers and more. If gdb is running in the same directory from which it grabbed the ELF executable, the "edit" command should work so you can jump right to the source line which is executing.
-
-== Pre-built binaries ==
-
-Win32 binaries shipped with firmware could be downloaded: [http://mdk.linux.org.tw/~jserv/openmoko/openmoko-emulator-win32-bin-20070416.zip openmoko-emulator-win32-bin-20070416.zip]. Tested on Windows XP. Screenshot:
-[[Image:MokoWin32Emu.jpg|OpenMoko emulator running on Windows XP]]
