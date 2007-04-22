@@ -11,11 +11,11 @@ The alarm daemon provides an interface for applications to register times at whi
 The alarm daemon will probably be part of neod since it will need to set the RTC alarm for the next event. The interface for the applications is exposed via dbus.
 
 == Implementation Recommendations ==
-We should definitely look at how the maemo project is handling this and if we can modify their approach to fit our needs. We don't want to have to many different solutions to a similar problem, but rather cooperate.
+Maemo is using [http://maemo.org/platform/docs/api-bora/alarm-api/alarmd_8c.html alarmd].  We should see if we can modify their approach to fit our needs. We don't want to have to many different solutions to a similar problem, but rather cooperate.
 
 At start neod will have to query the next event in eds (to determine when the next wakeup has to occur). If a new event is added eds will broadcast the change through dbus.
 
-Applications will (de-)register for a specific time at which the alarm daemon (neod) will call the applikation with a special command line parameter to reflect that the application has been called for an alarm.
+Applications will (de-)register for a specific time at which the alarm daemon (neod) will call the application with a special command line parameter to reflect that the application has been called for an alarm.
 
 == Unresolved Issues ==
 * If the device is powering down during the alarm we might miss the RTC alarm. Maybe we should just move the alarm time back a minute if we are powering down and the alarm is near?
