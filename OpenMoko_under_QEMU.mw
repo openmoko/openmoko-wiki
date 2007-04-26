@@ -7,9 +7,10 @@ QEMU can basically be used in three ways to run [[OpenMoko]]. Depending on the p
 *Neo1973 - the QEMU tree available from OpenMoko repositories is also capable of emulating most of the actual [[Neo1973]] hardware, although not all of it at this moment. It is a work-in-progress and when it's more mature it is going to be submitted for merging to the main QEMU development tree.
 
 == Neo1973 emulation ==
+
 This target will (obviously) run original OpenMoko rootfs images, but then it should also be able to run the original u-boot and kernel images, the same ones that a real Neo1973 uses. Among other differences you will notice between this approach and the Integrator/CP target is you also get correct screen resolution, some (fake) battery readings, and other goodness. Currently missing parts of the emulator are: [[GSM]] modem, [[Hardware:AGPS|AGPS]] and [[Bluetooth]], as well as the USB slave functionality - these things will still be worked on, as well as general usability. Even with these things missing, QEMU should provide substantial help in debugging kernel and u-boot issues to developers.
 
-What QEMU can *not* be used for, and probably no other emulator can, is speed measures and getting the general feel of OpenMoko performance. Code running in qemu runs with the maximum speed your host computer can provide with an overhead of translating target code to host code, and this overhead is not uniform across different instructions. This means that even if your virtual Neo reports near 100 BogoMIPS (which is the speed of a real Neo), different actions performed in the emulator will not run with the same speed. On most PCs you will notice the virtual Neo running faster than a real one (Audio related operations may be one of the exceptions).
+What QEMU can '''*not*''' be used for, and probably no other emulator can, is speed measures and getting the general feel of OpenMoko performance. Code running in qemu runs with the maximum speed your host computer can provide with an overhead of translating target code to host code, and this overhead is not uniform across different instructions. This means that even if your virtual Neo reports near 100 BogoMIPS (which is the speed of a real Neo), different actions performed in the emulator will not run with the same speed. On most PCs you will notice the virtual Neo running faster than a real one (Audio related operations may be one of the exceptions).
 
 === What hardware is supported ===
 
@@ -36,7 +37,7 @@ Rough status for each of the components that need emulation, following the outli
 |OHCI USB || Works || This part is in mainline QEMU. Use the "-usb" switch to enable the controller and "usb_add" in QEMU monitor to attach new virtual or physical USB devices.
 |-
 |Slave USB
-|style="background-color:#ffcccc;"|To Do
+|style="background-color:#ffcccc;"|In Progress
 |Possibly Linux's dummy HCD in conjunction with gadget filesystem API can make the virtual Neo appear as a real one connected to your computer. Otherwise different host functions (usbtty, usbnet) could be emulated.
 |-
 |Watchdog
@@ -78,18 +79,18 @@ Rough status for each of the components that need emulation, following the outli
 
 === Using MokoMakefile ===
 
-This is the recommended way since you won't need to deal with the compiling and flashing processes yourself. See [[MokoMakefile#QEMU|MokoMakefile]] for details.
+This is the easiest way since you won't need to deal with the compiling and flashing processes yourself. See [[MokoMakefile#QEMU|MokoMakefile]] for details.
 
-=== Building the environment manually ===
-Qemu building requires to have SDL or Cocoa installed. 
+=== Manual setup ===
+
 To obtain the latest source code for the emulator, you will want to do something like the following:
 <pre>
 $ svn checkout https://svn.openmoko.org/trunk/src/host/qemu-neo1973
 $ cd qemu-neo1973
 </pre>
-Now, we're going to configure and build the emulator:
+Now, we're going to configure and build the emulator (Note [[#Requirements|Requirements]] below):
 <pre>
-$ ./configure --target-list=arm-softmmu --cc=/usr/bin/gcc-3.4 # GCC 3.x will be required
+$ ./configure --target-list=arm-softmmu  # GCC 3.x will be required, see --cc=
 $ make
 </pre>
 See other available options for the configure script by appending "--help".
@@ -99,17 +100,19 @@ which will look up the list of latest available OpenMoko snapshot builds from bu
 <pre>$ openmoko/flash.sh</pre>
 which runs the emulator, loads u-boot into it and then uses u-boot's capability to program the Flash memory to install all the necessary parts of the system into the virtual Flash. It will also set up all the bootloading process including a boot menu, splash, u-boot environment and some default kernel parameters. If everything goes OK, the script should print a command which you can use to start using the emulator.
 
-QEMU has *tons* of commandline switches and things that can be configured. You can look them up in [http://www.qemu.org/user-doc.html QEMU user docs]. You will probably want to use the "-snapshot" switch, among other ones.
+QEMU has '''*tons*''' of commandline switches and things that can be configured. You can look them up in [http://www.qemu.org/user-doc.html QEMU user docs]. You will probably want to use the "-snapshot" switch, among other ones.
 
 === Pre-built binaries ===
 
 Win32 binaries shipped with firmware can be downloaded from [http://mdk.linux.org.tw/~jserv/openmoko/openmoko-emulator-win32-bin-20070416.zip openmoko-emulator-win32-bin-20070416.zip]. Tested on Ms Windows XP.
 
 == Requirements ==
-The QEMU tree has only been tested on GNU/Linux. To get graphical and/or audio output from the emulator you will need SDL installed on your computer. To enable audio, see the available switches to the ./configure script.
-All of the requirements listed in [http://www.qemu.org/user-doc.html QEMU documentation] apply.
+
+This QEMU tree has only been tested on GNU/Linux. To get graphical (not counting VNC) and/or audio output from the emulator you will need either SDL or Cocoa installed on your computer. To enable audio, see the available switches to the ./configure script.
+All of the build-time and run-time requirements listed in [http://www.qemu.org/user-doc.html QEMU documentation] apply.
 
 == QEMU and GNU debugger ==
+
 QEMU lets you debug operating system kernels and bootloaders like you debug all other programs. To do this you will need a debugger that speaks the GDB remote debugging protocol - [http://sourceware.org/gdb/ GDB] is the obvious choice. Some cross toolchains come with GDB already set up. Otherwise building cross-GDB yourself is quick and easy (compared to building binutils and cross-gcc).
 
 To debug u-boot, load the file "u-boot" into gdb (not "u-boot.bin") that is produced by "make" when building u-boot. To debug a Linux kernel, load the file "vmlinux" from the main source directory into gdb. These files are in ELF format and contain all the symbol information and are not stripped of debugging data until you run "strip" on them, unlike "u-boot.bin" and "Image"/"zImage"/"uImage". Next, tell QEMU to enable the gdbserver by appending the "-s" switch or issuing "gdbserver" in the monitor. Use the command <pre>(gdb) target remote localhost:1234</pre> to make a connection to the emulator. From there you should be able to use all the usual GDB commands, including stepping instructions, setting breakpoints, watchpoints, inspecting stack, variables, registers and more. If gdb is running in the same directory from which it grabbed the ELF executable, the "edit" command should work so you can jump right to the source line which is executing.
