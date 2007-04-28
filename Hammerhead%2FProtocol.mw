@@ -13,3 +13,59 @@ read(3, "\xfe\x00\xfd\x80\x16\x19\x0b\x00\x00\xfc", 2048) = 10
 \xfc: packet end
 
 GPS signals at wikipedia seems to be required reading: http://en.wikipedia.org/wiki/GPS_signals
+
+=== Analysis ===
+
+Were there by any chance 8 satellites overhead at the time that log was made?
+
+The protocol appears to be oriented around 32-bit words (the single-byte markers notwithstanding.)  I'm not absolutely certain, but I strongly suspect the byte order is LSB-first.
+
+The 80 80 80 stuff is probably just to force resynchronizing after an error, or wake the device up, or something like that.
+
+Packet format (same format in both directions):
+* The start of a packet is marked by FF or FE.
+** FF in packets that do not carry data, but rather explicitly request a response.  (This isn't used very often.  More often we receive data without explicitly requesting it.)  The response will be an FE-packet with the same length and type as the FF-packet.  The GPS does not send any FF packets, only gltt does.
+** FE in packets that carry data sections.
+* The first word (32 bits) following the start-of-packet marker is the header.
+** The first byte (if it's indeed little-endian, the least significant byte) gives the data length, measured as ''the number of data words minus 1.''  For FE-packets, this is the length of the data section of this packet.  For FF-packets, it's the length of the data section in the expected response.
+** The second byte of the header is always FD.
+** MS nibble of the third byte might be flags for the packet.
+** LS nibble of the third byte might be an identifying number which is echoed in responses to this packet.
+** The fourth byte is the packet type.
+* In FE-packets only, the data section (''n'' 32-bit words) follows.
+* Finally, FC is sent to mark the end of the packet.
+* After the FC in an FF-packet, gltt sends a bunch of zeroes.  In some cases it sends a number of zeroes equal to the number of bytes in the response packet; in some cases it sends more.  I would guess that these have no effect.
+
+For example:
+ ff 04fdc00c fc
+(possibly followed by zeroes), is a request for a packet of type 0C, with length 20d ((4 + 1) * 4), and flags C0.
+
+ fe 04fdc00c 0025102a 45dbdd4e 36030000 4b260000 16010000 fc
+would be an appropriate response.
+
+Packet types:
+  count type
+    263 05 
+    168 9d 
+    128 18 
+    117 00 
+     89 23 
+     86 08 
+     75 10 
+     63 9f 
+     63 0a 
+     52 0b 
+     48 0e 
+     31 9e 
+     16 e0 
+     13 20 
+     12 0c 
+     10 16 
+      8 e2 
+      6 24 
+      4 01 
+      2 06 
+      1 e5 
+      1 13 
+      1 04 
+      1 02
