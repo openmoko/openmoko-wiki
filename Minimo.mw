@@ -1,107 +1,16 @@
-{{Languages|Minimo}}
-{{Application|Minimo}}
-
-[[Image:Minimo-slashdot.jpeg|thumb|minimo in QEMU displaying it.slashdot.org]]
-[[Image:GTA01-minimo.JPG|thumb|minimo on GTA01 displaying www.heise.de]]
-
 = Installing Minimo web browser =
 
-[http://www-archive.mozilla.org/projects/minimo/ Minimo] is a Mozilla based web browser. It features full [http://en.wikipedia.org/wiki/Ajax_%28programming%29 AJAX] support and other goodies. Currently stock Openmoko build doesn't include Minimo.
-== Running on Om2009-beta ==
-Follow the 2008 instructions, with two exceptions:
-# you may not be able to unpack a .bz2 archive on the Freerunner, in which case download and unpack on your computer, and then ssh the files over to the Freerunner
-# If you get a gtk+-fastscaling dependency error, run the following command for installation instead:
-<pre>
-opkg install minimo_0.02\+cvs20070626-r0_armv4t.ipk -force-depends
-</pre>
+[http://www.mozilla.org/projects/minimo/develop.html Minimo] is Mozilla based web browser. It features full AJAX support and other goodies. Currently stock OpenMoko build doesn't include Minimo. Here are instructions how to run minimo in Xephyr PC environment and how to use other third party packages too. 
 
-"gtk+-fastscaling is just gtk+ these days, and you should be able to override it with -force-depends or something like this" [http://lists.openmoko.org/nabble.html#nabble-td2654384]
-== Running on Om2008.8 ==
+== Setup build environment ==
 
-From the Neo, download the minimo package:
+If you have build your OpenMoko using MokoMakefile some of these steps might not be familiar to you.
 
-<pre>
-wget http://www.ginguppin.de/files/minimo.tar.bz2
-</pre>
-
-Unpack it:
-
-<pre>
-tar -xjf minimo.tar.bz2
-</pre>
-
-Then install it:
-
-<pre>
-opkg install minimo_0.02\+cvs20070626-r0_armv4t.ipk
-</pre>
-
-If you get the following error:
-
-* ERROR: Cannot satisfy the following dependencies for minimo:
-*  libfreetype6 (>= 2.3.6) *
-
-First try:
-
-<pre>
-opkg install libfreetype6
-</pre>
-
-If this does not install a libfreetype6 version > 2.3.6, you can download a newer libfreetype6 from the Angstrom repository at this location: http://www.angstrom-distribution.org/repo/?action=details&pnm=libfreetype6
-
-Ex:
-
-<pre>
-wget http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libfreetype6_2.3.6-r0.1_armv4t.ipk
-opkg install libfreetype6_2.3.6-r0.1_armv4t.ipk
-opkg install minimo_0.02\+cvs20070626-r0_armv4t.ipk
-</pre>
-
-Using Minimo with the stock Om2008.8 gets annoying because the keyboard always takes up half the screen.  I recommend reactivating the [[Keyboard_Toggle#Reactivating_the_keyboard_toggle_under_Om2008.8|Keyboard Toggle]] so that you can hide the keyboard while browsing.
-
-I also highly recommend getting [[GPRS]] going so that you can browse on the go!
-
-== Running on Om2008.4 ==
-
-Download the minimo package:
-
-<pre>
-wget http://www.ginguppin.de/files/minimo.tar.bz2
-</pre>
-
-Unpack it:
-
-<pre>
-tar -xjf minimo.tar.bz2
-</pre>
-
-and install:
-
-<pre>
-opkg install minimo_*
-</pre>
-
-If any packages are missing, just install it from repository.
-
-== Running in Xephyr PC environment ==
-
-Here are instructions on how to run minimo in Xephyr PC environment and how to use other third party packages too.
-
-* [http://bec-systems.com/web/content/view/79/9/ Instructions for including new OpenEmbedded packages to your project]
-
-These instructions should be updated to use a custom image rather than DISTRO_EXTRA_RDEPENDS -- see link above.
-
-Alternatively, a binary ipkg was posted here[[http://www.ginguppin.de/files/minimo.tar.bz2]]
-
-=== Setup build environment ===
-
-If you have built your Openmoko using MokoMakefile some of these steps might not be familiar to you.
-
-Assume your Openmoko root is at ~/workspace/moko
+Assume your OpenMoko root is at ~/workspace/moko
 
 First setup build environment variables:
 <pre>
-moo@hacker:~/workspace/moko/build$ . ../setup-env
+moo@hacker:~/workspace/moko/build$ . ../setup-env 
 </pre>
 
 Then checkout minimo from OpenEmbedded repository:
@@ -117,62 +26,5 @@ DISTRO = "openmoko"
 BUILD_ARCH = "i686"
 INHERIT += " devshell"
 SRCDATE_eds-dbus = "now"
-DISTRO_EXTRA_RDEPENDS = "minimo"
+DISTRO_EXTRA_RDEPENDS = "python minimo"
 </pre>
-
-After local.conf has added new packages, one must refresh bitbake tasks.
-
-<pre>
-bitbake task-base -crebuild
-</pre>
-
-Now, you should be able to rebuild root fs using MokoMakefile.
-
-<pre>
-make openmoko-devel-image
-</pre>
-
-=== Tips ===
-
-The default Openmoko distribution lacks ''/etc/resolv.conf'' file which is used to configure system DNS look-up. Without this file, failing  domain name look-up prevents web browsing. The easiest way to fix is to copy the host system resolv.conf to the rootfs.
-
-<pre>
-moo@hacker:~/workspace/moko$ cp /etc/resolv.conf rootfs/etc/resolv.conf
-</pre>
-
-
-If build fails with
-
-<pre>
-/usr/bin/ld: skipping incompatible $OMDIR/local/tmp/staging/arm-angstrom-linux-gnueabi/lib/libIDL-2.a when searching for -lIDL-2
-</pre>
-(here minimo is installed in a [http://wiki.openmoko.org/wiki/Application_Development_Crash_Course#Setting_Up_a_Local_Overlay Local Overlay], so your path will perhaps differ) try installing the libidl-dev package on the buildhost:
-
-<pre>
-sudo aptitude install libidl-dev
-</pre>
-
-Currently, nothing shows up in the Homebase page (under FSO, anyway).  If anyone knows a solution, please update here.  For this reason, there really are no bookmarks to speak of.
-
-=== In chroot'ed environment ===
-
-Following instructions in [[Getting Openmoko working on host with Xephyr]] to get yourself chroot'ed into Openmoko environment.
-
-Start Xephyr. You don't need to start Openmoko session, minimo can run as is.
-
-<pre>
-/ $ minimo
-</pre>
-
-<onlyinclude>
-{{ApplicationBox|
-Name=[[Minimo]]|
-Description=Minimo is a Mozilla based web browser. It features full AJAX support and other goodies. It is listed as an alternative to the standard Webkit based browser.|
-Screenshot=Browser-minimo.png|
-Homepage=http://www.ginguppin.de/files/minimo.tar.bz2|
-TestedOn=Om 2008.8|
-PackageName=minimo
-}}
-</onlyinclude>
-
-[[Category:Internet Applications]]
