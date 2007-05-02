@@ -1,1 +1,55 @@
-#redirect[[Getting Openmoko working on host with Xephyr]]
+The goal of this page is to show you how to run an OpenMoko development image on your host x86 development machine in a chrooted environment.
+
+== Build an image ==
+
+First, you should use [[MokoMakefile|Building OpenMoko using the MokoMakefile]] to build an openmoko-devel-image for your host architecture (x86 in our case). Make sure you put the moko makefile in /home/moko/Makefile .
+
+Prior to that, edit your build/conf/local.conf to make it look like this:
+
+ MACHINE = "qemux86"
+ DISTRO = "openmoko"
+ BUILD_ARCH = "i686"
+ INHERIT += " devshell"
+ SRCDATE_eds-dbus = "now"
+
+Once you have built the image, you can start working toward running the image.
+
+== setup the image filesystem ==
+
+The filesystem of the image can be found at /home/moko/build/tmp/rootfs . It is that image that we want to run in a chrooted environment.
+
+We will copy that that rootfs directory somewhere so that subsquent builds (using the MokoMakefile  for instance) don't overwrite it.
+
+Make sure you have root privileges:
+ su -
+
+Copy the rootf into a directory called MokoBox. From now on, we will call the chrooted environment a MokoBox.
+
+ cp -r /home/moko/build/tmp/rootfs /home/moko/mokobox
+
+make sure /dev and /proc of the host machine are visible from within mokobox
+
+ mount --bind /dev /homo/moko/mokobox/dev
+ mount -t proc none /home/moko/mokobox/proc
+
+start the mokobox
+
+ chroot /homo/moko/mokobox /bin/sh
+
+set environment variables
+
+ DISPLAY=:1
+ LANG=C
+ HOME=/home/root
+ export DISPLAY LANG HOME
+
+In another terminal (not related to mokobox), start Xephyr
+
+ Xephyr :1 -ac
+You should see the window of Xephyr now.
+
+Now, back in the mokobox, start an X Session:
+
+ /etc/X11/Xsession
+
+You should see OpenMoko booting in the Xephyr window.
