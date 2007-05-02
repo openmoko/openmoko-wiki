@@ -121,6 +121,14 @@ Packet types:
 |-
 |}
 
+==== Packet 00 ====
+
+Packet type 00 (with the exception of the very first FE-packet in the log) appears to specify a particular satellite to track.  It also seems that this specifies the "ID" field (LS nibble of the third header byte) that will be used for future packets concerning this satellite.  (Non-satellite-specific packets have ID=0.)
+
+Bits 3-7 of the 11th byte of the packet -- third byte of the third data word -- are the satellite PRN number.  In this log only 8 satellites appear to be tracked (2, 4, 8, 10, 13, 23, 27, 29).  If I'm reading the GPGSV messages correctly, 24 should also be visible, but it doesn't appear gltt even attempts to track it.
+
+As for the rest of the packet... There's a lot that gets repeated, information common to all the satellites, at least initially.  When a batch of 8 of these packets gets sent, usually only the PRN and two other words differ among the 8.  So those two words contain whatever satellite-specific info is needed, it seems.  They both appear to be little-endian integers, one around -10^8 and one around 10^8.
+
 === NMEA ===
 
 It is possible to translate NMEA messages into something readable using script like this:
