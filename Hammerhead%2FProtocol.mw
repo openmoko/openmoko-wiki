@@ -131,22 +131,7 @@ As for the rest of the packet... There's a lot that gets repeated, information c
 
 === NMEA ===
 
-It is possible to translate NMEA messages into something readable using script like this:
-<pre>
-#!/bin/bash
-grep -v gettimeofday | \
-	sed 's/read.3/read(GPS/' | \
-	sed 's/write.3/write(GPS/' | \
-	sed 's/write.5/write(NMEA/' | \
-	sed 's/\\/\\\\/g' | \
-	while read LINE; do
-		if echo $LINE | grep write.NMEA; then
-			echo -e $LINE
-		else
-			echo "$LINE"
-		fi
-	done
-</pre>
+It is possible to translate NMEA messages into something readable using script from http://atrey.karlin.mff.cuni.cz/~pavel/outgoing/hhdecode , and using c decoder http://atrey.karlin.mff.cuni.cz/~pavel/outgoing/hh.c .
 
 NMEA description is available at http://www.gpsinformation.org/dale/nmea.htm .
 
@@ -158,7 +143,7 @@ At this point:
 256 write(NMEA, "$GPGGA,154104.95,4948.950339,N,00957.955979,E,1,06,5.0,220.0,M,-0.581014,M,-0.1900190,*40
 ", 91) = 91
 
-...6 satelitte GPS fix was obtained. (And yes, there's big read few lines before that in the log). As far as I can tell, only 5-6 sattelite were _used_ till the end of log.
+...6 satelitte GPS fix was obtained. (And yes, there's big read few lines before that in the log). 
 
 GSA sentence looks interesting, too. It tells us satellites #02, #04, #08, #10, #13 and #27 were used at this point.
 
