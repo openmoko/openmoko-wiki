@@ -120,7 +120,7 @@ To debug u-boot, load the file "u-boot" into gdb (not "u-boot.bin") that is prod
 
 == Setting up USB connection ==
 
-It is possible (although not very straight forward) to connect the virtual, emulated Neo1973 to the Linux PC on which the emulator is running, and work with it as if a real Neo1973 was plugged into the computer's USB port, but no twiddling with cables is needed. If you're testing your applications on the Neo, it may be worth setting up this kind of connection because it lets you enable normal networking between the PC and the phone and ssh into it (which is much more comfortable than typing commands into the OpenMoko's terminal emulator via on-screen keyboard). Here's what you will need in order to get this working:
+It is possible (although not very straight forward, probably about the complexity of tun-tap networking) to connect the virtual, emulated Neo1973 to the Linux PC on which the emulator is running, and work with it as if a real Neo1973 was plugged into the computer's USB port, but no twiddling with cables is needed. If you're testing your applications on the Neo, it may be worth setting up this kind of connection because it lets you enable normal networking between the PC and the phone and ssh into it (which is much more comfortable than typing commands into the OpenMoko's terminal emulator via on-screen keyboard). Here's what you will need in order to get this working:
 
 A Linux host with a 2.6 series kernel. The following drivers compiled-in or in modules: dummy_hcd, gadgetfs, usbnet, cdc_ether. Note that you need root access to perform most actions described here. Here's how to enable them in menuconfig.
 
@@ -134,19 +134,19 @@ Find and enable '''Device Drivers''' -> '''USB support''' -> '''USB Network Adap
 
 Find and enable '''Device Drivers''' -> '''USB support''' -> '''USB Network Adapters''' -> '''CDC Ethernet support (smart devices such as cable modems)'''
 
-These last two drivers are the same drivers that you need to work with a real Neo over USB network. After you've built the drivers, make sure that the kernel headers copy in /usr/include/linux is up to date. In particular the file /usr/include/linux/usb_gadgetfs.h needs to be present and if your distribution came with headers older than 2.6.18 or so, then you need tell the package manager to update them, or you can do that manually with
+These last two drivers are the same [[Getting Started with your Neo1973#By using Ethernet emulation over a USB cable|drivers that you need to work with a real Neo over USB network]]. After you've built the drivers, make sure that the copy of kernel headers in /usr/include/linux is up to date. In particular the file /usr/include/linux/usb_gadgetfs.h needs to be present and if your distribution came with headers older than 2.6.18 or so, then you need tell the package manager to update them, or you can do that manually with
 <pre> # cp -a /usr/src/linux/include/linux/* /usr/include/linux/</pre>
-(assuming that your kernel sources are in /usr/src/linux). It is important that this is done before building qemu because the build system checks if these headers are functional and in case they aren't found it disables the USB Slave functionality.
+(assuming that your kernel sources are in /usr/src/linux). It is important that this is done before building qemu because the build system checks if these headers are functional and in case they aren't found it will disable the USB Slave functionality.
 
-After building qemu and before running it make sure that the modules are loaded into the kernel. I found it useful to load gadgetfs with the following command:
+After building qemu and before running it, make sure that the modules are loaded into the kernel. I found it useful to load gadgetfs with the following command:
 <pre> # modprobe gadgetfs default_uid=1000  # assuming my User ID is 1000</pre>
 and added the following line to my /etc/fstab:
 <pre>gadget         /dev/gadget    gadgetfs   noauto,user,group         0   0</pre>
 Make sure that the mountpoint /dev/gadget exists:
 <pre> # mkdir -p /dev/gadget</pre>
-After that the rest of actions can be performed from your regular user account. Mounting gadgetfs is done with:
+After that the rest of the procedure can be performed from your regular user account. Mounting gadgetfs is done with:
 <pre> $ mount /dev/gadget</pre>
-The "default_uid" parameter changes the ownership on all files under /dev/gadget to your own and since the files there are created and destroyed dynamically, there's no easy way to have that performed by '''udev'''. Now running qemu as you do usually but appending "-usb -usbgadget" should enable the USB Slave functionality. The qemu monitor commands "info usbslave" and "usb_add gadget" will be useful. The former instruction asks the OS running under the emulator (OpenMoko) to describe its slave operation (that's what '''lsusb''' does after a Neo1973 is connected to a PC). You can see the available USB configurations in this command's output. Since gadgetfs allows only one configuration, we will need to choose the desired configuration - most device have only one such configuration, in which case you can use just "usb_add gadget" to connect to host; CDC ethernet devices however usually include a second configuration for RNDIS networking (i.e. Ms Windows compatibility) and so does OpenMoko when using the g_ether driver. Hence, to get this right, wait for OpenMoko to fully boot up and execute the following in QEMU monitor:
+The "default_uid" parameter changes the ownership on all files under /dev/gadget to your own and since the files there are created and destroyed dynamically, there's no easy way to have that performed by ''udev''. Now running qemu as you usually do but appending "-usb -usbgadget" should enable the USB Slave functionality. The qemu monitor commands "info usbslave" and "usb_add gadget" will be useful. The former instruction asks the OS running under the emulator (OpenMoko) to describe its slave features (that's what ''lsusb'' does after a Neo1973 is connected to a PC). You can see the available USB configurations in this command's output. Since gadgetfs allows only one configuration, we will need to choose the desired configuration - most device have only one such configuration, in which case you can use just "usb_add gadget" to connect to host; CDC ethernet devices however usually include a second configuration for RNDIS networking (i.e. Ms Windows compatibility) and so does OpenMoko when using the g_ether driver. Hence, to get this right, wait for OpenMoko to fully boot up and execute the following in QEMU monitor:
 <pre>
 QEMU 0.9.0 monitor - type 'help' for more information
 (qemu) info usbslave 
@@ -158,7 +158,7 @@ Configuration 1: CDC Ethernet
 (qemu) 
 (qemu) usb_add gadget:1
 </pre>
-The "1" in "usb_add gadget:N" is the number of USB configuration that we want to use. If everything went correctly - you can check that in dmesg - you should now have a new network interface called "usb0" on the PC, through which you can talk to the OpenMoko running in QEMU:
+The "1" in "usb_add gadget:N" is the number of the USB configuration that we want to use. If everything went correctly - you can check that in dmesg - you should now have a new network interface called ''usb0'' on the PC, through which you can talk to the OpenMoko running in QEMU:
 <pre>
  $ dmesg | tail
 <6>gadgetfs: bound to dummy_udc driver
@@ -291,7 +291,7 @@ Device Qualifier (for other device speed):
   bMaxPacketSize0        64
   bNumConfigurations      1
 
- # ifconfig usb0 inet 192.168.0.1 netmask 255.255.255.0
+ # ifconfig usb0 inet 192.168.0.200 netmask 255.255.255.0
  # exit
  $ ssh root@192.168.0.202
 The authenticity of host '192.168.0.202 (192.168.0.202)' can't be established.
