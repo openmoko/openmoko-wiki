@@ -11,7 +11,68 @@ If you have build your OpenMoko using MokoMakefile some of these steps might not
 Assume your OpenMoko root is at ~/workspace/moko
 
 First setup build environment variables:
-<pre>
+<pre>Minimo
+From OpenMoko
+Jump to: navigation, search
+[edit]
+Installing Minimo web browser
+
+Minimo is Mozilla based web browser. It features full AJAX support and other goodies. Currently stock OpenMoko build doesn't include Minimo. Here are instructions how to run minimo in Xephyr PC environment and how to use other third party packages too.
+
+    * Instructions for including new OpenEmbedded packages to your project 
+
+[edit]
+Setup build environment
+
+If you have build your OpenMoko using MokoMakefile some of these steps might not be familiar to you.
+
+Assume your OpenMoko root is at ~/workspace/moko
+
+First setup build environment variables:
+
+moo@hacker:~/workspace/moko/build$ . ../setup-env 
+
+Then checkout minimo from OpenEmbedded repository:
+
+moo@hacker:~/workspace/moko/build$ bitbake minimo
+
+Edit local.conf and add minimo to build dependencies list.
+
+MACHINE = "qemux86"
+DISTRO = "openmoko"
+BUILD_ARCH = "i686"
+INHERIT += " devshell"
+SRCDATE_eds-dbus = "now"
+DISTRO_EXTRA_RDEPENDS = "python minimo"
+
+After local.conf has added new packages, one must refresh bitbake tasks.
+
+bitbake task-base -crebuild
+
+Now, you should be able to rebuild root fs using MokoMakefile.
+
+make openmoko-devel-image
+
+
+The default OpenMoko distribution lacks /etc/resolf.conf file which is used to configure system DNS look-up. Without this file, failing domain name look-up prevents web browsing. The easiest way to fix is to copy the host system resolv.conf to the rootfs.
+
+moo@hacker:~/workspace/moko$ cp /etc/resolv.conf rootfs/etc/resolv.conf
+
+[edit]
+In chroot'ed environment
+
+Following instructions in Getting OpenMoko working on host with Xephyr to get yourself chroot'ed into OpenMoko environment.
+
+Start Xephyr. You don't need to start OpenMoko session, minimo can run as is.
+
+/ $ minimo  
+
+Retrieved from "http://wiki.openmoko.org/wiki/Minimo"
+Views
+
+    * Article
+    * Discussion
+    * Edi
 moo@hacker:~/workspace/moko/build$ . ../setup-env 
 </pre>
 
@@ -28,7 +89,7 @@ DISTRO = "openmoko"
 BUILD_ARCH = "i686"
 INHERIT += " devshell"
 SRCDATE_eds-dbus = "now"
-DISTRO_EXTRA_RDEPENDS = "python minimo"
+DISTRO_EXTRA_RDEPENDS = "minimo"
 </pre>
 
 After local.conf has added new packages, one must refresh bitbake tasks.
