@@ -612,12 +612,51 @@ If it supports DFU, you should see the following snippet towards the end of the 
 
 For information on how to do firmware upgrades, please see [[dfu-util]].
 
+=== Booting files over DFU ===
+
 To load a file at memory address 0x32000000:
 <pre>
 dfu-util -a 0 -D fileToLoad -R
 </pre>
 
-After that, use usbtty to 'bootm 0x32000000' or 'bootelf 0x32000000' if
+After that, send 'bootm 0x32000000' to u-boot or 'bootelf 0x32000000' if
 its an elf file.
+
+Simple python script that can boot an ELF image - avoiding a ACM bug that breaks on large packets.
+
+<pre>
+#!/usr/bin/python
+import sys
+import os
+import time
+
+cmd1 = "neo backlight off\n"
+cmd2 = "bootelf 0x32000000\n"
+
+def output(tty, str):
+    for x in str:
+        tty.write(x)
+        tty.flush()
+
+if len(sys.argv) == 2:
+    print "Loading %s..." % sys.argv[1]
+
+    loadfile = "dfu-util -a 0 -D %s -R" % sys.argv[1]
+
+    os.system(loadfile)
+
+    time.sleep(3)
+
+    tty = open("/dev/ttyACM0", "a")
+
+    output(tty, cmd1)
+    output(tty, cmd2)
+
+    tty.close()
+else:
+    print "Usage: %s elffile" % sys.argv[0]
+    print ""
+    sys.exit(2)
+</pre>
 
 {{Languages|Bootloader}}
