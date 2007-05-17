@@ -8,7 +8,7 @@ QEMU can basically be used in three ways to run [[OpenMoko]]. Depending on the p
 
 == Neo1973 emulation ==
 
-This target will (obviously) run original OpenMoko rootfs images, but then it should also be able to run the original u-boot and kernel images, the same ones that a real Neo1973 uses. Among other differences you will notice between this approach and the Integrator/CP target is you also get correct screen resolution, some (fake) battery readings, and other goodness. Currently missing parts of the emulator are: [[GSM]] modem, [[Hardware:AGPS|AGPS]] and [[Bluetooth]] - these things will still be worked on, as well as general usability. Even with these things missing, QEMU should provide substantial help in debugging kernel and u-boot issues to developers.
+This target will (obviously) run original OpenMoko rootfs images, but then it should also be able to run the original u-boot and kernel images, the same ones that a real Neo1973 uses. Among other differences you will notice between this approach and the Integrator/CP target is you also get correct screen resolution, some (fake) battery readings, and other goodness. Currently missing parts of the emulator are: [[Hardware:AGPS|AGPS]] and [[Bluetooth]] - these things will still be worked on, as well as general usability. Even with these things missing, QEMU should provide substantial help in debugging kernel and u-boot issues to developers.
 
 What QEMU can '''*not*''' be used for, and probably no other emulator can, is speed measures and getting the general feel of OpenMoko performance. Code running in qemu runs with the maximum speed your host computer can provide with an overhead of translating target code to host code, and this overhead is not uniform across different instructions. This means that even if your virtual Neo reports near 100 BogoMIPS (which is the speed of a real Neo), different actions performed in the emulator will not run with the same speed. On most PCs you will notice the virtual Neo running faster than a real one (Audio related operations may be one of the exceptions).
 
@@ -38,35 +38,31 @@ Rough status for each of the components that need emulation, following the outli
 |-
 |Slave USB || Works || Linux's dummy HCD in conjunction with gadget filesystem API is used to make the virtual Neo appear as a real one connected to the host computer. See [[#Setting up USB connection|Setting up USB connection]] below. (Experimental)
 |-
-|Watchdog
-|style="background-color:#ffcccc;"|To Do
-|This is one of the less important on-chip peripherals in S3C2410. It is however used by Linux for rebooting the board.
+|Watchdog || Works || This is one of the less important on-chip peripherals in S3C2410. It is however used by Linux for rebooting the board.
 |- style="background-color:#eeeedd;"
 ! colspan="3"|[[I2C]] bus peripherals
 |-
-|[[PCF50606]]||Works||(Aka PMU) Fakes the battery charge level (set at 88%), POWER button, etc. Also contains and RTC, also unused by Linux.
+|[[PCF50606]] || Works || (Aka PMU) Fakes the battery charge level (set at 88%), POWER button, etc. Also contains and RTC, also unused by Linux.
 |-
-|[[LM4857]]||Works
+|[[LM4857]] || Works
 |-
-|[[WM8753L]]||Works||The CODEC is also connect to the CPU's IIS port. Basic [[Neo1973 Audio Subsystem|audio functionality]] is supported - see QEMU documentation on getting audio input/output from the emulator. Volume control has no effects.
+|[[WM8753L]] || Works || The CODEC is also connect to the CPU's IIS port. Basic [[Neo1973 Audio Subsystem|audio functionality]] is supported - see QEMU documentation on getting audio input/output from the emulator. Volume control has no effects.
 |- style="background-color:#eeeedd;"
 ! colspan="3"|Other peripherals
 |-
-|NAND Flash||Works||However, some pieces are not confirmed to be completely compatible with the real hardware because of lack thereof. Use "-mtdblock flashimagefilenamehere" switch to point QEMU to your flash image. The file should be at least 69206016 bytes big.
+|NAND Flash || Works || However, some pieces are not confirmed to be completely compatible with the real hardware because of lack thereof. Use "-mtdblock flashimagefilenamehere" switch to point QEMU to your flash image. The file should be at least 69206016 bytes big.
 |-
-|JBT6K74-AS(PI)||Works|| (Aka LCM) Wired to the SPI channel 1
+|JBT6K74-AS(PI) || Works || (Aka LCM) Wired to the SPI channel 1
 |-
-|Buttons||Work||Enter is the AUX button, Space is the POWER button. Wired to on-chip GPIO and PCF50606.
+|Buttons || Work || Enter is the AUX button, Space is the POWER button. Wired to on-chip GPIO and PCF50606.
 |-
-|SD card||Works||This part is already in mainline QEMU. Use the "-sd cardimagegoeshere" switch to point QEMU to the card image. The regular QEMU monitor commands for removable media can also be used. The card works, however the on-chip host controller gave block length errors on heavy I/O despite working as described in specification. I suspect the kernel driver. DMA operation is not tested.
+|SD card || Works || This part is already in mainline QEMU. Use the "-sd cardimagegoeshere" switch to point QEMU to the card image. The regular QEMU monitor commands for removable media can also be used. The card works, however the on-chip host controller gave block length errors on heavy I/O despite working as described in specification. I suspect the kernel driver. DMA operation is not tested.
 |-
 |Bluetooth
 |style="background-color:#ffcccc;"|To Do
 |Will require implementing the Delta DBFM chip and connecting it to USB. The ROM will likely be replaced with code to translate communication directly to TCP/UDP networking (like Slirp). A real bluetooth dongle can also be attached to the emulator (see USB documentation in QEMU).
 |-
-|[[GSM]]
-|style="background-color:#ffcccc;"|In Progress
-|A fake modem will be connected to UART0 with as much functionality as possible (basic AT commands understanding, fake GPRS connections and SMS send/receive). This way all parts of the phone subsystem (CALYPSO, TWL3014, TRF6151) will not have to be emulated. There is a possibility to wire a real GSM modem to QEMU's serial port.
+|[[GSM]] || Works || A fake modem is connected to UART0 understanding a (currently quite limited) subset of AT commands. Ultimately it should support as much functionality as possible (basic AT command set, fake GPRS connections, dialing and SMS send/receive). This way all parts of the phone subsystem (CALYPSO, TWL3014, TRF6151) will not have to be emulated. There is a possibility to wire a real GSM modem to QEMU's serial port.
 |-
 |[[Hardware:AGPS|AGPS]]
 |style="background-color:#ffcccc;"|To Do
