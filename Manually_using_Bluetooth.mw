@@ -2,6 +2,27 @@ At the moment, we've just started to introduce Bluetooth into our [[:Category:Ne
 
 We have quite a lot of plans about what exactly Bluetooth should be used for.
 
+== Power it up! ==
+
+Bluetooth is not powered up by default in the current images.
+
+This seems to be historical... the module is built-in now:
+
+ root@fic-gta01:~$ modprobe gta01-pm-bt
+
+Load the usb bluetooth driver:
+
+ root@fic-gta01:~$ modprobe hci_usb
+
+Reset and power up the adapter
+
+ root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-bt.0/reset 
+ root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-bt.0/power_on 
+
+Check to see if the adapter is up and running:
+
+ hciconfig
+
 == Bluetooth Functions ==
 
 === HID (Human Input Device) ===
@@ -35,9 +56,8 @@ On the laptop:
 * Configure IP forwarding and masquerading to your liking
 
 On the phone:
-* Insert the module and power up bluetooth
- root@fic-gta01:~$ modprobe gta01-pm-bt # module may be built-into recent kernels
- root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-bt.0/power_on 
+
+* Power on bluetooth (see above)
 
 * Scan for the laptop
  root@fic-gta01:~$ hcitool scan
