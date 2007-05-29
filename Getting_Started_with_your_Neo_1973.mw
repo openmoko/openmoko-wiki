@@ -87,3 +87,36 @@ Please see [[Debug Board#Usage_Instructions]]
 == Getting access to the bootloader console ==
 
 Please see [[u-boot#Using_usbtty_from_Linux]]
+
+== Useful commands in Linux ==
+
+=== Suspending ===
+
+Writing "mem" into ''/sys/power/state'' tells Linux to suspend - it will enter a low power mode where only the GSM and RAM are powered up and the CPU sleeps.  It will persist in this state until a wake-up event arrives.  Some currently enabled wake-up events are: AUX or POWER key press, USB cable detect.
+
+If you're connected over ssh, sshd will stop responding when the OS suspends, so to avoid locking up your ssh client, use the command
+ # (sleep 1; echo mem > /sys/power/state) & exit
+
+=== Initial backup ===
+
+After getting your new Neo1973 booted for the first time you might want to make a back up of the original flash chip contents on your PC, before you overwrite the flash with a custom image or just update to a newer build.  This is a good idea because there are parts in the root filesystem that can't be distributed over internet so they are only found in the shipped ROM (see the [[GPS]] driver).  One easy way to back up all of the Flash, that doesn't require installing any special software, is with ''netcat'' over the [[USB Networking|USB ethernet]].  The following commands can be used for that.
+{|
+! On the host !! On the target
+|-
+|<pre>
+$ netcat -l -p 20000 > mtdblock0
+$ netcat -l -p 20000 > mtdblock1
+$ netcat -l -p 20000 > mtdblock2
+$ netcat -l -p 20000 > mtdblock3
+$ netcat -l -p 20000 > mtdblock4
+</pre>
+|<pre>
+# cat /dev/mtdblock0 | nc 192.168.0.200 20000
+# cat /dev/mtdblock1 | nc 192.168.0.200 20000
+# cat /dev/mtdblock2 | nc 192.168.0.200 20000
+# cat /dev/mtdblock3 | nc 192.168.0.200 20000
+# cat /dev/mtdblock4 | nc 192.168.0.200 20000
+</pre>
+|}
+
+This stores the five NAND partitions in files named mtdblock*.  Knowing the partition layout (u-boot "mtdparts" command or Linux dmesg) you can restore the whole flash with it.
