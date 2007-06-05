@@ -19,3 +19,58 @@ In real use, in a phone, without a little oven to keep the temperature stable, 3
 * [http://www.analog.com/en/prod/0,2877,ADXL330,00.html Analog Devices  ADXL330]
 
 * [http://www.st.com/stonline/products/literature/ds/12094/lis3lv02dl.pdf ST Inertial Sensor]*
+
+
+Finish and edit in - in case of email client crash 
+> If your tracking movement with 2 3D accelerometers... What would another
+> one provide.
+<snip>
+> I mean  if we know the rest orientation and then suddenly get pointed at
+> something it would seem like the 3d vectors will show a specific values
+> and directions for the 2 ends of the phone depending on the center of
+> the arc or movement that acted on the phone.
+> 
+> I would say that we can get yaw, pitch and roll just fine.. But again, I
+> am no expert.
+>
+You can't get all of these. You certainly cannot do decent inertial navigation.
+
+Actual neo-based conclusions at bottom.
+
+What can be done with absolutely perfect devices?
+
+Imagine two three axis accellerometers rigidly placed on each end of an arrow.
+
+How much information do you get out of these?
+
+A few moments thought should reveal that the orientation of the sensors does not matter. You can resolve the three signals into one vector and magnitude.
+This does not change however the devices are oriented - there is no benefit in for example skewing one 45 degrees.
+
+Considering the case in deep-space - the maths are simpler.
+(not a common use-case, but simpler to analyse)
+Holding the orientation steady, you can do perfect inertial navigation, and determine exactly where you are at all times. (in a flat space-time, but meh)
+
+What happens when we vary the orientation?
+Well - it's obvious that you can subtract any common accelleration that's measured by both sensors - this does not change the orientation.
+
+Remembering that we can skew the sensors against each other, and this has no effect, let's specify that they are oriented with X and Y lined up, and Z pointing in the direction of the arrow.
+This reveals a problem.
+
+Spin the arrow on its axis, and none of the accelererometers measure anything at all - they do not move, so they do not accelerate.
+(you can't get round this by moving them off-axis, as you can draw an imaginary arrow between the two accelerometers which has the same problem)
+
+Spin the arrow around its centre (it must spin around its centre logically if you've subtracted the overall acceleration) you can pick up pitch and yaw.
+
+Now, what if we add gravity in?
+
+With perfect accelerometers again, with Z axes pointing to the arrow tip.
+As long as the between
+
+I suppose I'd better back this up with numbers.
+I'm assuming specs similar to the ADXL330 - simplified a little.
+
+Assumptions:
+The Neo is a rigid object, and the accelerometers are rigidly fixed to it.
+The A/D has no noise.
+The accellerometer is perfect, other than a noise of 300uG/sqrt(Hz), and a temperature sensitivity of +-.1mG/C.
+I'm neglecting cross-axis sensitivity - which will need calibrated out, and non-linearity.
