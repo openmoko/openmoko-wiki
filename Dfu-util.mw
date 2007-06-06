@@ -126,6 +126,17 @@ Once this has finished, the kernel will be available at the default load address
 
 {{note|You cannot transfer more than 2MB of data into RAM using this method}}
 
+== Troubleshooting notes ==
+
+If during flashing of an image using dfu-util you're consistently getting an error -110 message, check that the size of the destination NAND partition is big enough to hold the image.  For example the kernel partition is only 2 MB big by default and a kernel with debugging info compiled-in can often exceed this.  It's possible to change the partition layout to enlarge a given partition and shrink other partitions but you have to remember to reflash all partitions whose start offset has changed afterwards.  To adjust partitions layout use the ''mtdparts'' [[Bootloader|u-boot command]].
+
+If in turn you're facing errors in seemingly random places during the flashing of images, most likely the USB hub or cable through which your Neo1973 is connected, is of too poor quality.  It is recommended that you always connect the phone directly to the host when using dfu-util.
+
+If dfu-util reports a message like the following, before it starts flashing:<pre>
+Resetting USB...
+not at least 2 device changes found ?!?
+Lost device after RESET?</pre> retry the command - it should work on a second run.
+
 == See also ==
 
 [[Flashing openmoko]] to the latest software.
