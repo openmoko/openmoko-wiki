@@ -22,6 +22,18 @@ In real use, in a phone, without a little oven to keep the temperature stable, 3
 
 
 Finish and edit in - in case of email client crash 
+
+
+
+
+
+
+
+
+
+
+
+
 > If your tracking movement with 2 3D accelerometers... What would another
 > one provide.
 <snip>
@@ -64,7 +76,13 @@ Spin the arrow around its centre (it must spin around its centre logically if yo
 Now, what if we add gravity in?
 
 With perfect accelerometers again, with Z axes pointing to the arrow tip.
-As long as the between
+As long as the Z axes does not point in the same direction as gravity + current acceleration, then you can determine roll, pitch, yaw, and XYZ acceleration.
+If the Z axes does point to the acceleration vector, then you lose track of roll.
+In theory - with perfect accelerometers, this does not matter.
+Because you can never line it up perfectly.
+In practice, with real ones, it gets more complex.
+Roll signal/noise will drop as the acceleration vector closes on the Z axes, and be useless once it gets within the noise.
+
 
 I suppose I'd better back this up with numbers.
 I'm assuming specs similar to the ADXL330 - simplified a little.
@@ -74,3 +92,6 @@ The Neo is a rigid object, and the accelerometers are rigidly fixed to it.
 The A/D has no noise.
 The accellerometer is perfect, other than a noise of 300uG/sqrt(Hz), and a temperature sensitivity of +-.1mG/C.
 I'm neglecting cross-axis sensitivity - which will need calibrated out, and non-linearity.
+
+For interactive use.
+High-pass filtering the accelerometer with a bandwidth of 10Hz - you can't filter it much more than that or you lose important 'wobbles', because you need to integrate them to come up with a position - leads to a noise floor of 300uG/sqrt(Hz) *sqrt(10Hz) = 1mG. (RMS)
