@@ -1,1 +1,59 @@
-#redirect [[Hardware:AGPS]]
+The Neo1973 device contains an integrated GPS. The particular device
+is marketed as an AGPS, and there is some [[Hardware:AGPS |
+discussion]] available as to what significance that "A" might have.
+
+As of P1, a binary-only program for talking the the GPS is available
+in /home/root/DM2/gps, (and presumably, the same binary would function
+on a P0 device). There is an ongoing effort to write a Free Software
+program that could be used instead of this binary-only program. See
+[[Hammerhead_protocol]] for details and the latest status.
+
+In the meantime, Pavel Machek
+[http://pavelmachek.livejournal.com/39229.html provides] the
+following script for recording an NMEA stream:
+
+ #!/bin/sh
+ echo 1 > /sys/class/leds/gta01\:vibrator/brightness
+ killall gllin cat
+ sleep 1
+ echo 0 > /sys/class/leds/gta01\:vibrator/brightness
+ mknod /tmp/nmeaNP p
+ cat /tmp/nmeaNP | tee /media/card/gps.nmea >> /tmp/gps.nmea &
+ /home/root/DM2/gps/gllin -low 5
+ strace /home/root/DM2/gps/gllin >> /tmp/gps.strace 2>&1
+
+He also [http://pavelmachek.livejournal.com/39659.html succeeded]
+at getting the Neo1973 to act like a bluetooth GPS with the following
+script:
+
+ #!/bin/sh
+ mknod /dev/rfcomm0 c 216 0
+ echo 1 > /sys/devices/platform/s3c2410-i2c/i2c-0/0-0008/gta01-pm-bt.0/power_on
+ sleep 1
+ hciconfig hci0 up name linuxgps
+ sleep 1
+ sdpd
+ sleep 1
+ sdptool add SP
+ (
+ 	while true; do
+ 	rfcomm listen /dev/rfcomm0 1
+ 	sleep 1
+ 	done
+ ) &
+ (
+ 	while true; do
+ 	tail -f /tmp/gps.nmea > /dev/rfcomm0
+ 	sleep 1
+ 	done
+ ) &
+
+As people develop more sophisticated GPS applications, please note them here.
+
+Here are some ideas for possibilites:
+
+* Cairo-based mapping
+
+* Routing
+
+* Openstreetmap logger, (with voice annotations)
