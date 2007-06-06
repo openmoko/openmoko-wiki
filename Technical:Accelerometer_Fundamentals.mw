@@ -21,19 +21,7 @@ In real use, in a phone, without a little oven to keep the temperature stable, 3
 * [http://www.st.com/stonline/products/literature/ds/12094/lis3lv02dl.pdf ST Inertial Sensor]*
 
 
-Finish and edit in - in case of email client crash 
-
-
-
-
-
-
-
-
-
-
-
-
+Finish and edit in - copy of ML post.
 > If your tracking movement with 2 3D accelerometers... What would another
 > one provide.
 <snip>
@@ -47,7 +35,8 @@ Finish and edit in - in case of email client crash
 >
 You can't get all of these. You certainly cannot do decent inertial navigation.
 
-Actual neo-based conclusions at bottom.
+This discusses the possibilities of two 3-axis accelerometers.
+Actual neo-based conclusions, and what you don't need two for.
 
 What can be done with absolutely perfect devices?
 
@@ -94,4 +83,46 @@ The accellerometer is perfect, other than a noise of 300uG/sqrt(Hz), and a tempe
 I'm neglecting cross-axis sensitivity - which will need calibrated out, and non-linearity.
 
 For interactive use.
-High-pass filtering the accelerometer with a bandwidth of 10Hz - you can't filter it much more than that or you lose important 'wobbles', because you need to integrate them to come up with a position - leads to a noise floor of 300uG/sqrt(Hz) *sqrt(10Hz) = 1mG. (RMS)
+High-pass filtering the accelerometer with a bandwidth of 10Hz - you can't filter it much more than that or you lose important 'wobbles', because you need to integrate them to come up with a position - leads to a noise floor of 300uG/sqrt(Hz) *sqrt(10Hz) = 1mG. (RMS (No, not that RMS))
+
+Neglecting roll for the moment.
+
+1mG is an accelleration of 1cm/s^2.
+
+If the accelerometers are spaced 10cm apart, then the radius between each and the center is 5cm, meaning the circumference of the circle is 30cm.
+Integrating over 1s, noise is around 3cm/s^2.
+
+After 1s, if you happen to hit an average noise peak in each accellerometer at the opposite point - something that'll happen once every 5-10 seconds or so, (absolute peaks are much worse) what happens to the pointing?
+
+Well - the velocity reads out as 6cm/s^2 wrong, which means that the position is now out by 3cm, or 10 degrees.
+
+What does this mean though?
+Well, if we are more or less stationary, we have 'down' very accurately.
+But that's almost all we have.
+
+Without roll, you cannot tell pointing.
+However, in the best case - phone on its back, accelleration vector down, and turning in a vehicle, you may be able to tell sharp turns, not much more.
+
+Because the differential accelerations are so small, and comparable to the noise floor for gentle turning and twisting, there are basically two ways that they can be useful.
+
+When more or less stationary:
+Picking up turning about the gravity axis - if you are looking at the phone with it in front of you at chest level, with accelerometers at top and bottom for example, this will let you pick up sharp rotations of the phone around the vertical axis - keeping the angle the screen keeps with the floor constant. But they have to be sharp. It will probably not be good enough for keeping a map aligned when you turn round in place, for example. It may be adequate for some games, but again, the movements have to be sharp, it will false signal as you decrease the wanted signal.
+
+When in motion:
+It may be adequate to improve positioning of the GPS, when sharply going round corners, or doing high-G aerobatics. It can fill in _short_ - 3-5s gaps in GPS coverage. 
+
+And this is completely neglecting the temperature sensitivity.
+
+What it can't do.
+Inertial navigation over more than several seconds.
+
+What one accelerometer alone can do.
+
+If the orientation of the phone is held constant - for example, clamped into a car holder, then you can make pretty good guesses about the correlation of aceleration and position.
+For example, in normal driving, the ground track of the car is some function of the position of the steering wheel. Any lateral accellerations against the current known course mean that the steering wheel has been applied, and the car is turning at a rate which can be computed by calculating it with the cars known speed.
+Any accellerations in line with the course mean that the car is slowing up or down, and any vertical accelerations mean that the car is going up or down a hill.
+
+Of course - the errors build up, but it's not bad for short periods.
+For example, 1cm/s^2 of error, with a car going in a straight line at 20m/s, takes a bit over a minute to move from a true direction of northeast - say, to a false direction of northnortheast. (the position is off after this period by a hundred metres or two)
+I should add more figures to this, but it's late.
+It's going up on http://wiki.openmoko.org/wiki/Accelerometer_Fundamentals in an unedited form, and I'll add more to it later. If you have any queries about how I've come to any particular conclusion, please put it on the discussion page of that page, and I'll flesh it out.
