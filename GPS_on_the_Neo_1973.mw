@@ -18,15 +18,16 @@ following script for recording an NMEA stream from the binary program:
  sleep 1
  echo 0 > /sys/class/leds/gta01\:vibrator/brightness
  mknod /tmp/nmeaNP p
- cat /tmp/nmeaNP | tee /media/card/gps.nmea >> /tmp/gps.nmea &
+ cat /tmp/nmeaNP >> /tmp/gps.nmea &
  /home/root/DM2/gps/gllin -low 5
- strace /home/root/DM2/gps/gllin >> /tmp/gps.strace 2>&1
+ /home/root/DM2/gps/gllin -periodic 3
 
 He also [http://pavelmachek.livejournal.com/39659.html succeeded]
 at getting the Neo1973 to act like a bluetooth GPS with the following
-script:
+script: (Notice that script has bad problems if you run it more than once. You can get "time traveling GPS" effect, with GPS showing you your past position).
 
  #!/bin/sh
+ killall rfcomm tail
  mknod /dev/rfcomm0 c 216 0
  echo 1 > /sys/devices/platform/s3c2410-i2c/i2c-0/0-0008/gta01-pm-bt.0/power_on
  sleep 1
@@ -36,17 +37,20 @@ script:
  sleep 1
  sdptool add SP
  (
- 	while true; do
- 	rfcomm listen /dev/rfcomm0 1
- 	sleep 1
- 	done
+         while true; do
+         rfcomm listen /dev/rfcomm0 1
+         sleep 1
+         done
  ) &
  (
- 	while true; do
- 	tail -f /tmp/gps.nmea > /dev/rfcomm0
- 	sleep 1
- 	done
+         while true; do
+             tail -f /tmp/gps.nmea > /dev/rfcomm0
+             echo 1 > /sys/class/leds/gta01\:vibrator/brightness
+             sleep 1
+             echo 0 > /sys/class/leds/gta01\:vibrator/brightness
+         done
  ) &
+
 
 As people develop more sophisticated GPS applications, please note them here.
 
