@@ -24,4 +24,92 @@ Our default images all have a getty running on /dev/ttySAC0, please edit /etc/in
 
 === Reducing the loglevel ===
 
-{{note|You don't need this in kernel builds with patchset
+{{note|You don't need this in kernel builds with patchset &ge; 1288}}
+
+To keep the kernel from writing to /dev/ttySAC0, you need to use <code>dmesg -n1</code>.
+
+=== Powering up the GSM Modem ===
+
+* verify there is no getty or any other app running on /dev/ttySAC0 
+ root@fic-gta01:~$ lsof | grep ttySAC0
+* power-up the GSM Modem
+ root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/power_on
+
+=== Connecting to GSM Modem ===
+
+* change permissions on ttySAC0
+ root@fic-gta01:~$ chown uucp.uucp /dev/ttySAC0
+* setup /usr/spool/uucp
+ root@fic-gta01:~$ mkdir /usr/spool
+ root@fic-gta01:~$ mkdir /usr/spool/uucp
+ root@fic-gta01:~$ chown uucp.uucp /usr/spool/uucp
+* enable CTS/RTS flow control
+ root@fic-gta01:~$ stty -F /dev/ttySAC0 crtscts
+* access the GSM Modem UART
+ root@fic-gta01:~$ cu -l /dev/ttySAC0
+ Connected.
+ AT-Command Interpreter Ready
+ OK
+
+''If it will hang on "Connected" message then probably your device has nonworking GSM modem - check [http://bugzilla.openmoko.org/cgi-bin/bugzilla/show_bug.cgi?id=256 Bug #256]''
+
+'''cu seems to have problems with the hardware flow control. The one way I always managed to get GSM working is to start cu first and then on a different console issue the stty command.'''
+--[[User:DanielWillmann|DanielWillmann]] 01:15, 20 March 2007 (CET)
+
+=== Using it manually ===
+==== Registering with the Network ====
+
+* enter the following [[Hardware:AT_Commands]]:
+<pre>
+ATE1
+OK
+AT+CFUN=1
+ERROR
+AT+CPIN="...."
+OK
+AT+COPS
+OK
+</pre>
+
+==== Answering an incoming call ====
+<pre>
+RING
+ATA
+OK
+</pre>
+
+==== Dialling an outgoing call ====
+
+To actually be able to talk you have to configure your audio accordingly
+
+<pre>
+root@fic-gta01:~$ cd /etc/alsa/
+root@fic-gta01:/etc/alsa$ wget http://opensource.wolfsonmicro.com/~gg/gsmheadset.working.state
+root@fic-gta01:/etc/alsa$ alsactl -f /etc/alsa/gsmheadset.working.state restore
+</pre>
+
+Up the "Amp right" volume to hear the speaker on both ears, then dial
+
+<pre>
+ATD012340234;
+</pre>
+
+==== Hanging up ====
+<pre>
+ATH
+OK
+</pre>
+
+=== Using [[gsmd]] ===
+
+You can use the [[gsmd]] and [[libgsmd-util]] programs to have a slightly more high-level interface to the GSM Modem.  It's still console based, though.
+
+For further instructions, see [[gsmd]]
+
+=== Using tui ===
+
+Tui (available from www.sf.net/projects/tui) is able to do all this. It is still text-based, but input-rxvt can take data from touchscreen, so you can actually do the calls using your finger. It also plays wav file on incoming call, so it is theoretically usable. It even does caller id.
+
+=== Manually using GPRS ===
+
+See [[Manually using GPRS]]
