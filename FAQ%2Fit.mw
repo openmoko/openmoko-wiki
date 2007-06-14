@@ -1,0 +1,326 @@
+Domande e Risposte che sembrano non andare da nessuna parte
+
+== Introduzione == 
+
+=== Q: Cos'è OpenMoko e Neo1973? ===
+A: [[OpenMoko]] è una piattaforma software, un tentativo di creare il primo stack software per cellulari totalmente aperti del mondo. Il [[FIC]] [[Neo1973]] è il primo telefono OpenMoko completamente supportato.
+
+=== Q: Dove posso comprare un [[Neo1973]]? ===
+
+A:  'Quando è pronto' per gli sviluppatori, settembre per il mercato di massa - Vedere [[Neo1973]] per le info più aggiornate. [[Neo1973]] sarà diffuso ovunque. Ci sarà anche [http://lists.openmoko.org/pipermail/community/2007-January/001216.html distribuzione nell'UE].
+Per essere informato di quando è disponibile, '''iscriviti''' a [http://lists.openmoko.org/mailman/listinfo/announce la mailing list di annunci].
+
+=== Q: Quanto? === 
+
+A: $350 per il Developer's Kit - Fase 1. Comprende:
+<ul>
+ <li>Il telefono Neo1973</li>
+ <li>Batteria</li>
+ <li>Headset</li>
+ <li>Caricatore</li>
+ <li>Custodia di trasporto</li>
+ <li>Stiletto</li>
+ <li>Cordicella</li>
+ <li>Scheda 512 MB MicroSD</li>
+ <li>Cavo USB per connessione</li>
+ <li>Garanzia e manuale di istruzioni</li>
+</ul>
+
+$75 per il Car Kit. Include:
+<ul>
+ <li>Montaggio sul parabrezza e supporto per il dispositvo</li>
+ <li>Caricatore per auto</li>
+ <li>Antenna esterna</li>
+</ul>
+
+$200 per il Hacker's Lunchbox. Comprende:
+<ul>
+ <li>Sviluppo/[[Board di debug]]</li>
+ <li>Batteria</li>
+ <li>Caricatore per la scheda di sviluppo</li>
+ <li>FPC (per connettersi alla porta jtag)</li>
+ <li>Strap da spalla</li>
+ <li>Cavo debug (USB)</li>
+</ul>
+
+=== Q: Cosa farà? ===
+
+A: Il cellulare Fase 1 presto disponibile è solo per gli sviluppatori. Non è adatto agli utenti finali, avrà delle funzionalità d base come un telefono con touchscreen. Poche altre cose funzioneranno, lo sviluppo del software continuerà fino al rilascio per il mercato globale.
+
+Gli interessati dovrebbero:
+
+* Sapere che ci sarà un dispositivo con una cpu più veloce, sistema gsm etc. 6 mesi dopo
+* Divertirsi ad hackerare i dispositivi.
+* Essere in grado di districarsi nei prototipi software e hardware senza troppa documentazione.
+* Condividere il sogno di un dispositivo libero.
+* Non aspettarsi un dispositivo a livello di consumatore.
+* Avere nuove idee per esplorare l'era dell'informatica mobile
+* Avere 350 dollari.
+
+Idealmente dovrebbero anche:
+
+* Potere trovare bugs e inviare patch.
+* Adorare collaborare con una comunità migliorando il software.
+
+== Software ==
+
+=== Q: Può il software fare/connettersi a... ===
+A: Al momento, la risposta è praticamente sempre no. Il cellulare è al momento una piccola box linux con un touchscreen, un dialer funzionante e qualche applicazione di test.
+La maggior parte non funziona in nessun modo che sarebbe adeguato agli utenti.
+Se vuoi aggiungere una funzione o una richiesta, allora guarda le applicazioni esistenti o aggiungine una, o aggiungi la richiesta alla pagina delle applicazioni.
+
+=== Q: C'è una lista e una descrizione del software OpenMoko? ===
+
+A: Guarda [[OpenMoko]] e [[OpenMokoFramework]]
+
+=== Q: E' completamente libero/open source? ===
+
+A: Il [[Gpsd]] in userspace userà il plugin binario per [[:Category:Neo1973 Hardware#AGPS|Hammerhead AGPS]] e [[:Category:Neo1973 Hardware#GSM.2FGPRS|il modem GSM]] è un sottosistema a parte attaccato a S3C2410 UART1. Altrimenti è completamente libero. Vedi [[MokoMakefile/it|MokoMakefile]] e [[Development resources/it | Risorse di sviluppo]].
+
+=== Q: Come installo e gestisco software su Openmoko? ===
+
+A: ipkg: http://handhelds.org/moin/moin.cgi/Ipkg
+
+=== Q: Posso compilare programmi per il Neo1973? ===
+
+A: Leggi [[Toolchain/it|Toolchain]].
+
+=== Q: C'è un emulatore disponibile per OpenMoko? ===
+
+ *XorA pensa che se la tua prima domanda è "c'è un emulatore"
+  allora non hai mai sviluppato nulla :-)
+
+====QEMU====
+QEMU può ora emulare il Neo1973. Il [[MokoMakefile]] ha il supporto per costruire, flashare e eseguire automaticamente [[OpenMoko under QEMU/it|l'emulatore Neo1973]].
+
+“make qemu” creerà qemu-neo1973, scarica le ultime immagini ufficiali di openmoko, le inserisce in un flash NAND virtuale ed esegue l'emulatore.
+
+====Xoo====
+Un altro è [http://projects.o-hand.com/xoo Xoo]. Koen dice: "Xoo dovrebbe andare bene per la maggior parte delle applicazioni che saranno sviluppate, dato che non hanno bisogno di accedere direttamente al gsm uart. Se sei tosto potresti usare qemu + xoo, ma questo non emulerà comunque tutti i dettagli hardware (ad esempio l'accesso disallineato)".
+
+Aggiornamento: Stefan Schmidt ha ridimensionato il [[Neo1973/it|Neo1973]] Mock-up e ha scritto una piccola descrizione per Xoo. Con parole sue:
+
+Non è affatto realmente usabile, dato che ti serve una risoluzione dello schermo davvero alta per far entrare l'intera immagine sullo schermo. E ovviamente il dpi è sbagliato. Nemmeno i bottoni perchè non riesce a ricordare dove si trovano.
+
+http://www.datenfreihafen.org/~stefan/OpenMoko/neo1973-xoo-device.tar.bz2
+
+Esegui con 'xoo --device /path/to/neo1973.xml'
+
+Alcuni dettagli maggiori [[Getting_Openmoko_working_on_host_with_Xoo/it|qui]].
+
+====Xephyr====
+O usare Xephyr direttamente con programmi compilati localmente (come matchbox da svn + openmoko):
+ Xephyr -screen 480x640 -nolisten tcp -ac :1 &
+ export DISPLAY=:1
+ export LD_LIBRARY_PATH=/usr/local/lib
+ matchbox-window-manager -display $DISPLAY -use_titlebar no \
+  -use_super_modal yes -use_lowlight yes -use_dialog_mode static \
+  -use_cursor yes &
+ matchbox-panel --geometry=480x44 --end-applets=clock &
+ openmoko-footer &
+ openmoko-taskmanager &
+
+=== Q: Dove posso trovare tutorial tipo per un 'Hello, world' su OpenMoko? ===
+
+A: Questo dovrebbe introdurti bene:
+http://www.gtk.org/tutorial/
+
+=== Q: Le applicazioni PalmOS possono essere portate su OpenMoko? ===
+
+A: Fare sì che app normali scritte per l'OS "Garnet" girino su Linux non è poi così difficile. Un emulatore per questo sta per far parte della piattaforma ACCESS di Linux.
+
+Le apps PalmOS generalmente sono molto difficili da 'portare'. Alcuni programmi particolari fatti bene lo possono rendere possibile.
+
+L'ACCESS Linux Platform comprenderà POSE, un emulatore che emulerà un dispositivo palmare su una macchina Linux. Quest'emulatore è in giro da tempo; ci si aspetta che andrà anche su OpenMoko, ma è stata considerata una scorciatoia a breve termine piuttosto che una soluzione duratura.
+
+=== Q: Ha Java? ===
+A: Lo potrà avere, se ci aiutate a farlo funzionare. Alcuni buoni punti per dare un'occhiata possono essere [http://projects.openmoko.org/projects/java-pkg/ projects.openmoko.org] e [https://phoneme.dev.java.net/ PhoneME].
+
+=== Q: Quali sono le parti X11 importanti? ===
+
+A: Leggi il [http://lists.openmoko.org/pipermail/community/2007-January/001353.html xdpyinfo output].
+
+=== Q: OpenMoko gira su un altro hardware? ===
+
+Puoi eseguirlo su un [[How_to_run_OpenMoko_Apps_on_PC/it|PC]]. Si sta lavorando su [http://www.datenfreihafen.org/~stefan/weblog//archives/2007/02/#e2007-02-18T15_27_07.txt OpenEZX e HTC]. Adesso ha il supporto per [http://dominion.kabel.utwente.nl/koen/cms/openmoko-running-on-an-ipaq iPaq hx4700] e [http://hackndev.com/node/701 Palm TX].
+
+=== Q: Quali sono i requisiti hardware per girare OpenMoko? (Andrà su IXI?) ===
+
+=== Q: Invece perchè non sviluppate sulla piattaforma Maemo? ===
+
+Dato che non posso parlare per il team OpenMoko, vale la pena di far presente che maemo è una risoluzione solo fissa. Ovvero, ho sentito, cambierà nel futuro, ma non adesso. Il layout attuale di Maemo è inoltre ottimizzato per grandi schermi, non per quelli molto piccoli. La maggior parte delle apps Maemo di terze parti che esistono dovranno essere modificate per lavorare su dimensioni diverse. Infine, una quantità di componenti software del Nokia 770 e N800 non sono a sorgente aperto. --gopi
+
+In aggiunta, secondo la Nokia, Maemo è progettata per portare l'esperienza di un desktop su un tablet Internet. Molti paradigmi desktop semplicemente non funzionano su un cellulare. Comunque, condividiamo davvero molto della tecnologia di base (gtk, dbus, eds, gconf, per dirne alcuni) con Maemo, quindi in definitiva non è un team per reinventare la ruota.
+
+=== Q: Sarà possibile usare le comuni applicazioni VoIP come Skype sulla piattaforma OpenMoko? ===
+
+A: Forse. Problemi hardware significa che non funzionerà bene sul Neo1973. (la latenza tipica del GPRS è troppo alta). Inoltre, Skype è un'applicazione a sorgente chiuso, che non fornisce binari che sono adatti per OpenMoko. I venditori di Skype ovviamente potrebbero scegliere di fornire binari per i telefoni OpenMoko. Comunque, molti termini di servizio dei provider telefonici precludono l'utilizzo del VoIP sulla linea dei loro servizi GSM.
+
+=== Q: Stessa domanda per applicazioni di Instant Messaging come MSN Messeger ===
+
+A: Molto probabile. MSN anche è closed source ma ci sono molte implementazioni aperte (molte delle quali hanno un'architettura di plugin e supportano anche l'uso di più di un protocollo IM, persino simultaneamente) come ad esempio GAIM (ora Pidgin) per IM. Il GPRS sicuramente comporta una discreta quantità di lag ma non dovrebbe essere un problema per una semplice chat testuale fra due utenti.
+
+== Neo1973 Hardware == 
+
+=== Q: C'è una descrizione dell'hardware [[:Category:Neo1973 Hardware | Neo1973]] ? ===
+
+A: Leggi [[:Category:Neo1973 Hardware | Neo1973 Hardware]] e [[Disassembling Neo1973/it|Disassembling Neo1973]]
+
+=== Q: E le sue dimensioni? ===
+
+A: 120.7 x 62 x 18.5 mm, Enterà tutta in una lattina di coca-cola. (4.75 * 2.4 * 0.72 ")
+
+=== Q: Quanto pesa? ===
+
+A: 185g, (6.5 once).
+
+=== Q: Ha una fotocamera? ===
+
+A: No, vedere [[:Category:Neo1973 Hardware | Neo1973]] per dettagli di cosa include (e [[Wish List - Hardware]] per ciò che si vuole nel futuro.) Vedere anche [[FAQ/it#USB]].
+
+=== Q: Qual'è la logica dietro l'esclusione del WiFi? ===
+
+A: Non era disponibile nessun dispositivo WiFi open source che consumasse poco quando il cellulare fu progettato. Un dispositivo WiFi chiuso sarebbe stato restrittivo per sviluppatori e utenti. Vedi anche [[FAQ/it#USB]].
+
+Vedere anche:
+I [http://lists.openmoko.org/pipermail/community/2006-November/000050.html commenti] di [[Sean Moss-Pultz]]
+
+[[Neo1973|Phase 1+]] potrà includere il WiFi [[WiFi_support_in_OpenMoko/it|se si trova un chipset adatto]].
+
+=== Q: Ha il bluetooth? ===
+
+A: Si!
+
+=== Q: E' venduto con uno stiletto? ===
+
+A: Si, ma non c'è nessun supporto di sostegno sul telefono per questo.
+
+
+=== Q: Dove sono i bottoni? ===
+
+Il bottone di accensione è piccolo e circolare, appena accanto al connettore USB. [[Neo1973 Power button]] il bottone Ausiliario è rettangolare in alto a sinistra del telefono. (su telefoni neri assomiglia ad una porta IRDA). [[Neo1973 AUX button]]
+
+=== Q: Come inserisco testo?? ===
+
+A: Usa l'applicazione di tastiera fornita.
+
+A: Usa la tastiera bluetooth.
+
+A: Per altre tecniche ed idee leggi [[Wishlist:Text_Input]].
+
+=== Q: Posso registrare chiamate e/o eseguire file audio durante le telefonate? ===
+
+A: Si, il percorso audio da GSM verso/dal microfono e le casse è completamente controllabile dall'utente. Ad esempio è possibile registrare le chiamate (entambi gli interlocutori) e implementare un meccanismo di risposta. Anche usando testo->parola dovrebbe essere possibile, oppure modificare la propria voce. Attualmente non c'è nessun software installato per farlo.
+
+=== Q: Quanto dura la batteria? ===
+
+A: Non ci sono state parole per questo per molto tempo, ma leggi [[Neo1973 Power Management#Approximate_power_draw_of_various_subsystems|queste stime]] per una vaga idea. Più dettagli sulla batteria [[Neo1973 Battery/it|qui]].
+
+=== USB ===
+
+==== Q: Cosa posso fare con la porta USB sul Neo1973? ====
+A: Caricare il telefono, comunicare con esso tramite il seriale USB, o la rete USB.
+
+A: Inserire dispositivi esterni, come wifi, fotocamere, o dispositivi di archiviazione di massa.
+
+==== Q: Cosa non posso fare con l'USB? ====
+
+L'USB del neo non ha l'output. Questo significa che non puoi usare dispositivi con bus USB senza una sorta di hub o cavo.
+Questo è dovuto al fatto che aggiungere un erogatore di energia a 5V nel dispositivo avrebbe aggiunto complessità, dimensione e costo.
+
+Molti dispositivi progettati con USB no funzionano senza almeno una quantità indicativa di energia a 5v dal bus USB. Pochi hub USB funzioneranno senza un'energia di 5v dall'host, ma quelli alimentati richiedono semplici modifiche elettroniche per funzionare.
+
+==== Q: Perchè è supportato solo USB1.1? ====
+
+A: Il processore ha USB 1.1 al suo interno. Uno con USB2 al suo interno sarebbe stato più costoso.
+
+==== Q: Il Neo può caricarsi e usare dispositivi su un hub USB contemporaneamente? ====
+
+A: 
+*Quando il Neo è connesso ad una porta su un hub USB, inizierà a ricaricarsi. Se l'hub è alimentato, allora si caricherà velocemente (3 ore), altrimenti intorno alle 12h.
+
+*Se colleghi il Neo alla porta host di un hub USB puoi usare dispositivi su quell'hub ma il Neo non si ricaricherà. (Alcuni/molti hub USB non accettano un host senza energia come valido, a causa del bisogno del cavo sottostante.)
+
+*Questo perchè il socket host sugli hub USB non è alimentato.
+
+Lo sviluppo dei prodotti FIC sta organizzando di fornire qualcosa che risolverà in modo conveniente questo problema.
+
+La porta USB sul Neo non è propriamente una porta host USB supportata, tutte le porte host USB devono fornire 5v - nonostante i dispositivi alimentati o gli hub possono non trarre alcuna corrente da essi, possono rifiutarsi di funzionare. (Il Belink Tetrahub è un esempio di hub che non andrà.)
+
+Una soluzione è un cavo con tre uscite.
+
+Un'uscita si inserisce nel Neo. Un'altra in una porta di un hub alimentato, o il caricatore Neo. Un'uscita si inserisce nella porta host di un hub.
+
+Il caricatore/dispositivo USB ha +5v o 0v connessi in un cavo semplice, collegato alle altre uscite.
+
+Per un cavo più complesso, quando il socket host non è inserito, il cavo agisce come un semplice cavo USB.
+
+==== Q: Quali sono le specifiche delle porte USB sul [[Neo1973/it|Neo1973]]? Come si confronta con USB On-The-Go? ====
+
+A: Il [[Neo1973/it|Neo1973]] avrà un mini-USB-B, e potrà funzionare come host e come dispositivo. NON sarà USB On-The-Go. OTG è una specifica complessa, e comprende molto più di un socket AB, anche componenti elettrici e software che non possono trovarsi sul S3C2410.
+
+Ti servirà un cavo Mini-B verso regular-B (notare che questo non è conforme in realtà allo standard USB: un cavo supportato deve avere un plug A o Mini-A su un'uscita, e B o Mini-B sull'altra).
+
+=== Q: Ci sono dei LEDs sul Neo 1973? ===
+
+A: Il [[Neo1973/it|Neo1973]] v1 non avrà LED a parte la retroillumazione dello schermo.
+
+=== Q: Sarà fornita una porta JTAB? ===
+
+A:  L' "Hacker's Lunchbox" renderà facili questo genere di cose.
+
+E' correntemente presunto che l'Hacker's Lunchbox conterrà la [[Debug Board/it | Debug Board]]. [[Connecting Neo1973 with Debug Board v2/it|Connettere Neo con la Debug Board v2]] spiega come collegarla al telefono.
+
+=== Q: Cosa ci possiamo aspettare dalle versioni future? ===
+
+A: Una CPU più veloce, un GSM (EDGE?) più veloce, forse anche porte USB alimentate, USB2, wifi, e fotocamera. Non sono stati rilasciati dettagli ancora. Più info su aggiornamenti hardware dovrebbero essere disponibili a maggio. Ci sarà anche 5 dispositivi OpenMoko in più - alcuni non telefoni nel senso tradizionale - annunciati dalla FIC a settembre.
+
+==Networking/Connettività==
+
+=== Q: Posso allacciarmi ad una rete Ethernet (wired o meno( tramite un router con Bluetooth attivo? ===
+
+A: Si - guarda [http://gentoo-wiki.com/HOWTO_Configure_a_bluetooth_network_access_point questo howto per come confgurare un computer linux per agire come un router] e [[Bluetooth Support/it | Il supporto Bluetooth]].
+
+=== Q: Quali provider forniscono il GSM richiesto per il Neo1973? ===
+
+A: Leggi [[Neo1973 compatible cellphone providers/it]]
+
+=== Q: OpenMoko funzionerà senza problemi su Mac OS X?? ===
+
+A: Ci sono state discussioni in proposito sulla mailing list. C'è la motivazione, e ci sono sviluppatori interessati. Non essendo un utente Mac OS X, non ne so abbastanza per riassumere la discussione e rispondere alla domanda. Qualcuno può farlo?
+to summarize the discussion to answer this question. Can someone please fill in?
+
+A: Per IP over connettività USB, è pianificato di migliorare/adattare il driver AJZaurusUSB, ammettendo ssh in OpenMoko.
+
+A: Ci si aspetta che l'interoperatività basata su SyncML (Bluetooth/USB) per contatti ed eventi possa essere raggiunta con una patch alle tabelle di configurazione dell'Apple iSync.
+
+A: C'è un'implementazione aperta di Cocoa (GNUstep) che si prefigge di eseguire apps compatibili con MacOS X (sorta di binari universali PPC/x86/ARM) sui dispositivi OpenMoko: mySTEP.
+
+==Misc==
+
+=== Q: Sulle liste di lists.openmoko.org, le repliche devono essere aggiunte sopra o sotto il testo originale? ===
+
+A: Per favore rispondere SOTTO il post.
+
+=== Q: Come faccio a sapere se una domanda o argomento è già stato discussio sulle liste? ===
+
+A: Cercando negli archivi, ad esempio con Google:
+
+ site:openmoko.org text
+
+Ad esempio, per cercare l'accelerometro:
+
+ site:openmoko.org accelerometer
+
+Se vuoi solo leggere le mail "ufficiali" dalla gente di FIC o di OpenMoko:
+ site:openmoko.org text "at fic.com.tw"
+ site:openmoko.org text "at openmoko.org"
+
+Ad esempio per cercare "release date" (data di rilascio) dalla FIC:
+
+ site:openmoko.org "release date" "at fic.com.tw"
+Altrimenti puoi usare
+ [http://www.google.com/coop/cse?cx=017507431580478583395%3Astsl7lhxzbc il motore di ricerca personalizzato OpenMoko] creato usando [http://www.google.com/coop/ Google Co-op].
+
+
+{{Languages|FAQ}}
