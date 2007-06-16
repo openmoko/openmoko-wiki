@@ -131,13 +131,27 @@ Packet types:
 
 === Global packets ===
 
+All packets in this category have the "channel" (or "ID") field set to 0.
+
+==== SEND Packet 04 ====
+
+Flags = 4
+
+In cold2.log this packet comes only once at the start.
+Part of this packet seems to setup the timestamp clock (see packet 16).
+
+Usual layout
+ 92 24 11 02  7b 39 8e 23  00 00 00 00  7b 39 8e 23
+
+Word 2 and 4 (both are 0x238e397b = 596523387) seem to control the timestamp clock. Multipliying this value by say 0.99 makes the timestamp clock run at 0.99 its normal speed. So this value is some sort of "frequency".
+
 ==== RECEIVED Packet 0c ====
 
 Is global -- not about particular sattelite, probably fixed length and rare.
 
 ==== RECEIVED Packet 16 ====
 
-Flags = 8, Channel = 0;
+Flags = 8;
 Comes only after request for it.
 
 The chip seems to have an internal 1ms clock. This returns the counter for this clock.
