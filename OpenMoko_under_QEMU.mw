@@ -59,8 +59,8 @@ Rough status for each of the components that need emulation, following the outli
 |SD card || Works || This part is already in mainline QEMU. Use the "-sd cardimagegoeshere" switch to point QEMU to the card image. The regular QEMU monitor commands for removable media can also be used. The card works, however the on-chip host controller gave block length errors on heavy I/O despite working as described in specification. I suspect the kernel driver. DMA operation is not tested.
 |-
 |Bluetooth
-|style="background-color:#ffcccc;"|In progress
-|Will require implementing the Delta DBFM chip and connecting it to USB. The ROM will likely be replaced with code to translate communication directly to TCP/UDP networking (like Slirp) or a keyboard input as if a BT keyboard was detected in range. A real bluetooth dongle can also be attached to the emulator (see USB documentation in QEMU).
+|style="background-color:#ffffcc;"|Works
+|A generic Bluetooth HCI (just like the BlueCore4 chip) is connected to internal USB hub (just like the Delta DBFM dongle). Currently qemu emulates no other bluetooth devices, so the dongle behaves as if there was no BT-enabled slaves around, being the only device on the piconet, i.e. is not really useful. Likely a Bluetooth keyboard will be emulated. A physical Bluetooth dongle can also be attached to the emulator (see USB documentation in QEMU).
 |-
 |[[GSM]] || Works || A fake modem is connected to UART0 understanding a (currently quite limited) subset of AT commands. Ultimately it should support as much functionality as possible (basic AT command set, fake GPRS connections, dialing and SMS send/receive). This way all parts of the phone subsystem (CALYPSO, TWL3014, TRF6151) will not have to be emulated. There is a possibility to wire a real GSM modem to QEMU's serial port.
 |-
