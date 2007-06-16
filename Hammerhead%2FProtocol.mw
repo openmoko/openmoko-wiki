@@ -8,7 +8,7 @@ http://home.earthlink.net/~cwkelley/documentation.htm is its documentation.
 GP2021 is "dumb" GPS receiver, similar to hammerhead. (But I think it communicates over ISA bus, not over serial). However, its data sheets are freely available. Well, hammerhead marketing tells us that their GPS chip is something special, http://www.gpsworld.com/gpsworld/article/articleDetail.jsp?id=3053 . It seems to differ from "dumb" receivers by doing code phase search in hardware, directly.
 
 
-=== Possible lock scheme that it may use===
+== Possible lock scheme that it may use ==
 
 From reading the published brief information sheets on global locates products, not the patents.
 The global locate chip has massively parallel correlators, and configurable integrators to integrate over a given time.
@@ -29,7 +29,7 @@ I would expect it to do something like - in this case.
 *Output it to NMEA
 ** It seems this takes 22 seconds.
 
-=== Enhancements ===
+== Enhancements ==
 
 To keep to the datasheet of 1s position times, it cannot read the whole navigation message, but significantly under 50 bits of it.
 It must:
@@ -41,7 +41,7 @@ It must:
 **This gives you a psuedorange to the satellite to within several meters. 
 *Compute a position.
 
-=== Analysis ===
+== Analysis ==
 
 Looks like there were 8 satellites overhead at the time that log was made.
 
@@ -129,6 +129,25 @@ Packet types:
 |-
 |}
 
+=== Global packets ===
+
+==== RECEIVED Packet 0c ====
+
+Is global -- not about particular sattelite, probably fixed length and rare.
+
+==== RECEIVED Packet 16 ====
+
+Flags = 8, Channel = 0;
+Comes only after request for it.
+
+The chip seems to have an internal 1ms clock. This returns the counter for this clock.
+
+It seems, that the clock can be widely tuned (probably using divider or so): At least I saw 1000 ticks and 2000 ticks per second.
+
+CMD-04 and CMd-08 seem to be needed to init and start it.
+
+=== Satelite / channel specific packets ===
+
 ==== SEND Packet 00 ====
 
 Packet type 00 (with the exception of the very first FE-packet in the log) appears to specify a particular satellite to track.  It also seems that this specifies the "ID" field (LS nibble of the third header byte) that will be used for future packets concerning this satellite.  (Non-satellite-specific packets have ID=0.)
@@ -153,10 +172,6 @@ It carries variable-length array of  16-bit integers... 6 to 32 entries were see
 
 short packets, 06 has varying length, and both are rare.
 
-==== RECEIVED Packet 0c ====
-
-Is global -- not about particular sattelite, probably fixed length and rare.
-
 ==== RECEIVED Packet 9d ====
 
 Okay, so packets 10, 23 and 9d come in groups, for each sattelite, and they seem to contain enough info to compute position.  (9d seems to come later than the other two, perhaps only after sending a packet 08?)
@@ -175,18 +190,7 @@ Always appears to be 8 bytes.  Satellite-specific.  First 4 bytes are a signed 3
 
 Comes in variants of differing lengths: 20, 36, and 84-byte packets were seen.  Satellite-specific.
 
-==== RECEIVED Packet 16 ====
-
-Flags = 8, Channel = 0;
-Comes only after request for it.
-
-The chip seems to have an internal 1ms clock. This returns the counter for this clock.
-
-It seems, that the clock can be widely tuned (probably using divider or so): At least I saw 1000 ticks and 2000 ticks per second.
-
-CMD-04 and CMd-08 seem to be needed to init and start it.
-
-=== NMEA ===
+== NMEA ==
 
 It is possible to translate NMEA messages into something readable using script from http://atrey.karlin.mff.cuni.cz/~pavel/outgoing/hhdecode , and using c decoder http://atrey.karlin.mff.cuni.cz/~pavel/outgoing/hh.c .
 
