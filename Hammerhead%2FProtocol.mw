@@ -49,6 +49,7 @@ The protocol appears to be oriented around 32-bit words (the single-byte markers
 
 The first stream of 0x80's to the GPS is simply to synch up the UART in the GPS to the correct baudrate.
 
+=== Packet format ===
 Packet format (same format in both directions):
 * The start of a packet is marked by FF or FE.
 ** FF in packets that do not carry data, but rather explicitly request a response.  (This isn't used very often.  More often we receive data without explicitly requesting it.)  The response will be an FE-packet with the same length and type as the FF-packet.  The GPS does not send any FF packets, only gltt does.
@@ -57,8 +58,10 @@ Packet format (same format in both directions):
 ** The first byte (if it's indeed little-endian, the least significant byte) gives the data length, measured as ''the number of data words minus 1.''  For FE-packets, this is the length of the data section of this packet.  For FF-packets, it's the length of the data section in the expected response.
 ** The second byte of the header is always FD.
 ** MS nibble of the third byte might be flags for the packet.
+*** 0x4 set: The words are for increasing register numbers
+*** 0x4 not set: The words are for/from the same register. The register is probably something like a FIFO
 ** LS nibble of the third byte is an identifying number of the channel (1-8), 0 in case this is not channel-specific
-** The fourth byte is the packet type.
+** The fourth byte is the packet type. It seems to be more like a register (start) number.
 * In FE-packets only, the data section (''n'' 32-bit words) follows.
 * Finally, FC is sent to mark the end of the packet.
 * After the FC in an FF-packet, gltt sends a bunch of zeros.  In some cases it sends a number of zeros equal to the number of bytes in the response packet; in some cases it sends more.  I would guess that these have no effect.
@@ -70,6 +73,7 @@ For example:
  fe 04fdc00c 0025102a 45dbdd4e 36030000 4b260000 16010000 fc
 would be an appropriate response.
 
+=== Packet statistics ===
 Packet types:
 
 (Ugh, I do not understand this. Is it SEND or RECEIVED packets? [[User:Pavel|Pavel]] 22:26, 6 May 2007 (CEST))
