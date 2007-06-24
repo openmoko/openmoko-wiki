@@ -5,36 +5,34 @@ The PCF50606 supports a variety of [[Neo1973 Battery]] charging modes, based aro
 USB hubs may only provide up to 100mA per device.
 If more than the available current is drawn from them, they may be reset, or power off.
 This resets all devices connected to the USB bus, possibly causing data loss.
-So, fast charge mode is only enabled after the Neo is told that it is safe to charge at this current. Or optionally if there is no communication from the host for 30 seconds - as may be the case with dumb 'USB chargers'.
+So, fast charge mode is only enabled after the Neo is told that it is safe to charge at this current. 
 
-{{warning|While we have spent a significant amount on various safe-guards such as battery-internal overcurrent/overvoltage protection, manual twisting with low-level charger control aspects is not recommended.  It might render either the [[battery]] or the charging circuit damaged.}}
+An alternative method is used if the proper charger for the Neo is used.
+If the neo measures 48kohm +/- 1% between usb pin 5 and ground, it will detect the dumb charger and use it for fast charging. 
+
+An alternate method - for example sensing if there is no USB communication from the host for 30 seconds - as may be the case with dumb 'USB chargers' - would need to be used to be compatible with the vast majority of already existing hardware. 
+This has a small risk of causing busses it is connected to in suspend mode, when they are not active, to crash, and is not compliant with the specification. 
+
+{{warning|While we have spent a significant amount on various safe-guards such as battery-internal overcurrent/overvoltage protection, manual twisting with low-level charger control aspects is not recommended.  It might damage either the [[battery]] or charging circuit.}}
 
 == Charging Modes ==
 
 === Pre Charge ===
 
-Pre Charge is how the PMU calls the charging mode in which we draw up to 100mA charging current from the USB socket.  This mode is safe to use on any USB socket, since USB per specification always can supply at least 100mA on every downstream facing port.
+The default mode is what the PMU calls 'Pre Charge'. In which we draw up to 100mA charging current from the USB socket.  This mode is safe to use on any USB socket, since the USB  specification mandates that 100mA is always available.
 
-However, 100mA charging at a 1200mAh [[Neo1973 Battery]] means 12hrs charging time, not very practical at all.
+However, 100mA charging at a 1200mAh [[Neo1973 Battery]] means around 12hrs charging time, not very practical at all.
 
 === Fast Charge ===
 
-Fast Charge is how the PMU calls the charging mode in which we draw up to 500mA charging current from the USB socket.  This mode can only be used if the USB stack on the host controller has selected a '''USB Configuration''' in which the device exports the need for 500mA.
+Fast Charge is what the PMU calls the charging mode in which we draw up to 500mA charging current from the USB socket.  This mode can only be used if the USB stack on the host controller has selected a '''USB Configuration''' for the Neo which allows it to draw 500mA.
 
-Thus, by default, if you apply +5V to the USB device socket, we draw only 100mA.  After a host controller has issued SET_CONFIGURATION config request on a configuration with 500mA in the config descriptor, the Neo1973 software ([[kernel]]) enable the fast charging mode.
+By default, if you apply +5V to the USB device socket, we draw only 100mA. 
 
 ==== Fast Charge (CCCV) ====
 
 Fast charging, using first constant current, later constant voltage.  This is what we use for our Li-Ion [[Neo1973 Battery]]
 
 ==== Fast Charge (CVCC) ====
-
-== Dumb chargers ==
-
-The text above suggests that a nonresponsive usb host will cause neo to go into fast charge, but that's not my experience with a P1 and roh on irc explained some different rules. To paraphrase:
-
-If the neo measures 48kohm +/- 1% between usb pin 5 and ground, it will detect the dumb charger and use it for fast charging. This is probably how the auto adapter and the ac adapter are wired.
-
-This is *not* the same way other dumb chargers are detected (eg for razr). In other words, plan to buy an auto adapter that is made for neo.
 
 [[Category:Neo1973 Hardware]]
