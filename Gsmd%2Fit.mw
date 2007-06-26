@@ -1,0 +1,182 @@
+[[gsmd/it|gsmd]] è il demone GSM che gira in background sul telefono GTA01, gestendo la parte realmente 'telefonistica' del cellulare :)
+
+== Utilizzo ==
+
+gmsd è usualmente lanciato come un demone in background, ma può essere eseguito in modalità foreground per debugging.
+
+Le opzioni possono essere passate come:
+<pre>
+> src/gsmd/gsmd --help
+gsmd - (C) 2006 by Harald Welte <laforge@gnumonks.org>
+This program is FREE SOFTWARE under the terms of GNU GPL
+
+Usage:
+        -v      --version       Display program version
+        -d      --daemon        Deamonize
+        -h      --help          Display this help message
+        -p dev  --device dev    Specify serial device to be used
+        -s spd  --speed spd     Specify speed in bps (9600,38400,115200,...)
+        -F      --hwflow        Hardware Flow Control (RTS/CTS)
+        -L      --leak-report   Leak Report of talloc memory allocator
+        -l file --logfile file  Specify a logfile to log to
+</pre>
+
+Se il vostro modem GSM è collegato via ttySACO (come in [[:Category:Neo1973 Hardware | Neo1973]]), potete usare:
+ gsmd -p /dev/ttySAC0 -s 115200 -F
+
+== libgsmd ==
+
+libgsmd è una libreria con API in linguaggio C per applicativi. I programmi che usano questa libreria possono gestire il cellulare, ad esempio realizzare chiamate, ricevere chiamate in arrivo, registrarsi alla rete, etc.
+
+== libgsmd-tool ==
+
+libgsmd-tool è una piccola demo da usare per mostrare l'utilizzo dell'API libgsmd.
+
+== Utilizzo ==
+
+libgsmd-tool ha diverse modalità.
+
+=== Utilizzo della modalità shell ===
+
+Questa modalità fornisce una semplice interfaccia comandi testuale per fare chiamate vocali.
+
+La shell mode si può eseguire con:
+
+ libgsmd-tool -m shell
+
+Può essere usata come nel seguente esempio:
+
+<pre>
+> src/util/libgsmd-tool -m shell
+libgsm-tool - (C) 2006 by Harald Welte
+This program is Free Software and has ABSOLUTELY NO WARRANTY
+
+?
+#       A       Answer incoming call
+        D       Dial outgoing number
+        H       Hangup call
+        O       Power On
+        o       Power Off
+        R       Register Netowrk
+O
+# EVENT: PIN request (type=1) Please enter PIN: 6582
+R
+# EVENT: Netreg searching for network 
+EVENT: Netreg registered (home network) 
+
+D03024033902
+# Dial 03024033902
+EVENT: Call Progress: UNKNOWN
+EVENT: Call Progress: PROCEED
+EVENT: Call Progress: SYNC
+EVENT: Call Progress: ALERT
+H
+# Hangup
+EVENT: Call Progress: DISCONNECT
+EVENT: Call Progress: RELEASE
+
+EVENT: Incoming call type=2!
+EVENT: Incoming call clip=`"03024033902"'
+EVENT: Incoming call type=2!
+A
+# Answer
+RSTR=`OK'
+H
+# Hangup
+RSTR=`OK'
+</pre>
+
+=== Utilizzo dell' atcmd mode ===
+
+La modalità atcmd è una modalità "di passaggio". Passaggio significa che accetta comandi [[GSM 07.07]], li passa al demone del cellulare, e ritorna le risposte. Questa è molto utile per il debugging.
+
+L'atcmd mode si lancia usando
+
+ libgsmd-tool -m atcmd
+
+L'utilizzo è mostrato in quest'esempio:
+
+<pre>
+> src/util/libgsmd-tool -m atcmd
+libgsm-tool - (C) 2006 by Harald Welte
+This program is Free Software and has ABSOLUTELY NO WARRANTY
+
+AT+CPAS
+STR=`AT+CPAS'
+RSTR=`+CPAS: 0'
+AT+COPS=?
+STR=`AT+COPS=?'
+RSTR=`+COPS: (2,"E-Plus","E-Plus","26203"),(3,"o2 - de","o2 - de","26207"),(3,"Vodafone.de","Vodafone","26202"),(3,"T-Mobile D","TMO D","26201")'
+</pre>
+
+== Attualmente mancanti ==
+
+(prego aggiungere elementi alla lista se mancano altre funzioni)
+
+* Funzioni relative al cellulare
+** Modalità aereo / gsmd stop (questo sarà realizzato fuori da gsmd, usando i runlevel o l'upstart)
+** Ottenere produttore/modello/revisione/IMEI
+
+* Funzioni di rete
+** ottenere la lista degli operatori disponibili
+** scegliere l'operatore dalla lista
+** ottenere una lista di nomi di operatore
+** query sulla potenza di campo (piuttosto che semplici eventi)
+
+* Funzioni relative agli SMS
+** inviare SMS
+** ricevere SMS
+** ottenere IMSI
+** accesso agli SMS archiviati sulla SIM
+
+* Funzioni della SIM
+** leggere voci del phonebook
+** scrivere voci sul phonebook
+
+* Funzioni GPRS
+** impostare collegamenti GPRS, usarli tramite un DLC separato di multiplex TS07.10
+
+* infrastruttura interna di gsmd
+** sottoscrizione degli eventi più dettagliata (piuttosto che una sottoscrizione imprevedibile)
+** possibilità di specificare livelli di log dalla riga di comando
+** riapertura del file di log dopo un SIGUSR1 o SIGHUP (logrotate)
+** gestione dei permessi
+** interfaccia d-bus
+
+== Progetti di implementazione ==
+
+== Tracciamento degli stati ==
+
+gsmd ha bisogno di fare un tracciamento appropriato degli stati dell'hardware GSM sottostante. Per molti transizioni di stato riceviamo semplicemente eventi dal modem GSM, ma non abbiamo alcuni comandi di query appropriati. Quindi, presumendo che gsmd sia sempre attivo, le applicazioni possono andare e venire, ma avendo comunque un'idea dello stato corrente del modem, anche se non erano presenti alle iniziali transizioni di stato. 
+
+Inoltre, il tracciamento di gsmd degli stati di permette di condurre una sicura interoperabilità fra diverse applicazioni. Se ad esempio un'applicazione ha appena iniziato una chiamata, gsmd può rilevare un'altra applicazione che ha intenzione di interferire con la prima e negare l'accesso.
+
+=== stati energici ===
+
+* modem completamente spento, non risponde ai comandi AT
+* modem che risponde ai comandi AT, ma senza alimentazione (CFUN=0)
+* modem che risponde ai comandi AT, in una qualche modalità di risparmio energico
+* modem che risponde ai comandi AT, alimentato, completamente operativo (CFUN=1)
+
+=== stato di registrazione della rete ===
+
+* non registrato a nessuna rete, non in corso di registrazione
+* non registrato a nessuna rete, ma cercando di registrarsi
+* registrato alla rete domestica (compreso cellID)
+* registrato ad una rete di roaming (compreso cellID)
+
+=== stato di indicazione di cifratura ===
+
+* indicazioni di cifratura non supportate dal modem
+* indicazioni supportate, ma disattivate nella SIM
+* indicazioni supportate, cifratura attiva
+* indicazioni supportate, cifratura inattiva
+
+=== stati di chiamata ===
+
+* libero
+* occupato
+
+I sorgenti di gsmd si trovano nell' [[OpenMoko svn/it|svn di OpenMoko]] nella directory src/target/gsm.
+
+{{Languages | Gsmd}}
