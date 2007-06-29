@@ -1,26 +1,26 @@
 = Installazione del web browser Minimo =
 
-[http://www.mozilla.org/projects/minimo/develop.html Minimo] è un web browser basato su Mozilla. Ha un supporto integrale al AJAX e possiede altri vantaggi. Attualmente Openmoko non include Minimo. Qui sono riportate le istruzioni per far funzionare Minimo con Xephyr e come usare altri software di terze parti. 
+[http://www.mozilla.org/projects/minimo/develop.html Minimo] è un web browser basato su Mozilla. Ha un supporto integrale al AJAX e possiede altri vantaggi. Attualmente OpenMoko non include Minimo. Qui sono riportate le istruzioni per far funzionare Minimo con Xephyr e come usare altri software di terze parti. 
 
-* [http://bec-systems.com/web/content/view/59/9/ Istruzioni per includere nuovi software OpenEmbedded al tuo progetto]
+* [http://bec-systems.com/web/content/view/59/9/ Instructions for including new OpenEmbedded packages to your project]
 
 == Setup build environment ==
 
-Se hai compilato il tuo Openmoko usando MokoMakefile alcuni di questi steps potrebbero esserti poco familiari.
+If you have build your OpenMoko using MokoMakefile some of these steps might not be familiar to you.
 
-Assumiamo che la tua directory root di Openmoko sia ~/workspace/moko
+Assume your OpenMoko root is at ~/workspace/moko
 
-Prima devi definire le variabili d'ambiente:
+First setup build environment variables:
 <pre>
 moo@hacker:~/workspace/moko/build$ . ../setup-env 
 </pre>
 
-Poi prendi minimo dal repository OpenEmbedded:
+Then checkout minimo from OpenEmbedded repository:
 <pre>
 moo@hacker:~/workspace/moko/build$ bitbake minimo
 </pre>
 
-Edita local.conf e aggiungi Minimo per compilare la lista di dipendenze.
+Edit local.conf and add minimo to build dependencies list.
 
 <pre>
 MACHINE = "qemux86"
@@ -31,20 +31,20 @@ SRCDATE_eds-dbus = "now"
 DISTRO_EXTRA_RDEPENDS = "minimo"
 </pre>
 
-Dopo che a local.conf sono stati aggiunti i nuovi software è necessario aggiornare bitbake tasks.
+After local.conf has added new packages, one must refresh bitbake tasks.
 
 <pre>
 bitbake task-base -crebuild
 </pre>
 
-Adesso puoi ricompilare l'immagine di root usando MokoMakefile.
+Now, you should be able to rebuild root fs using MokoMakefile.
 
 <pre>
 make openmoko-devel-image
 </pre>
 
 
-La distribuzione di default Openmoko manca del file ''/etc/resolv.conf'' che è usato per configurare i DNS. Senza questo file, la non risoluzione degli indirizzi impedisce la navigazione web. La via più facile per sistemare questo problema è quella di copiare il file dalla macchina host all'immagine.
+The default OpenMoko distribution lacks ''/etc/resolv.conf'' file which is used to configure system DNS look-up. Without this file, failing  domain name look-up prevents web browsing. The easiest way to fix is to copy the host system resolv.conf to the rootfs.
 
 <pre>
 moo@hacker:~/workspace/moko$ cp /etc/resolv.conf rootfs/etc/resolv.conf
@@ -52,13 +52,11 @@ moo@hacker:~/workspace/moko$ cp /etc/resolv.conf rootfs/etc/resolv.conf
 
 == In chroot'ed environment ==
 
-Segui le istruzioni in [[Getting Openmoko working on host with Xephyr/it|Far funzionare Openmoko su un host con Xephyr]] per entrare nell'ambiente Openmoko. 
+Following instructions in [[Getting OpenMoko working on host with Xephyr]] to get yourself chroot'ed into OpenMoko environment. 
 
-Fai partire Xephyr. Non hai bisogno di iniziare una sessione Openmoko, minimo può funzionare così com'è. 
+Start Xephyr. You don't need to start OpenMoko session, minimo can run as is. 
 
 <pre>
 / $ minimo  
 </pre>
-{{Languages|Minimo}}
-
-[[Category:Applications/it]]
+{{Languages|Basic_End-user}}
