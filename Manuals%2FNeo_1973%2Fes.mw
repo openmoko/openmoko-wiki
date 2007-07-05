@@ -1,30 +1,24 @@
-{{Languages|Manuals/Neo 1973}}
-
 Guía de primeros pasos para los que han recibido recientemente su primer hardware Neo1973
 
 == Hardware ==
 
-=== Poniendo la batería ===
+=== Colocando la batería ===
 
-Retirar la tapa trasera (ver el primer paso de [[Disassembling Neo1973]]).
+Ver [[Disassembling Neo1973]].
 
 === Encendiendo el teléfono ===
 [[Image:Neo1973_uboot_splash.jpg|200px|thumb|bootloader splash screen]]
-Pulsando el botón de encendido ''power'' (dependiendo de la versión del programa de arranque ([[u-boot]]) tienes que pulsar durante >= 5 segundos) debería activarse el teléfono primeramente con el programa de arranque, después iniciar el núcleo, y después mostrarse con X/Openmoko.
+Pulsando el botón de encendido ''power'' (dependiendo de la versión del programa de arranque ([[u-boot]]) tienes que pulsar durante >= 5 segundos) debería activarse el teléfono primeramente con el programa de arranque, después iniciar el núcleo, y después mostrarse con X/OpenMoko.
 
 Una vez pulsado el botón de encendido ''power'' durante el tiempo necesario, el vibrador se accionará durante un corto espacio de tiempo y la luz del fondo de la pantalla se encenderá. Ya podrá soltar el botón de encendido y ver como arranca el teléfono.
 
 Si la batería no tiene carga suficiente, el teléfono no se encenderá, a no ser que el calbe usb esté conectado.
 
-=== Grabando la memoria Flash del Neo1973 GTA01Bv4 ===
-
-Los dispositivos GTA01Bv4 que se están enviando actualmente no arrancan el sistema. Es necesario grabar la memoria Flash del teléfono con el último núcleo y soportar el sistema de ficheros ("rootfs") antes de que el teléfono consiga iniciarse correctamente.
-
 === Apagando el teléfono ===
 
 ==== Mientras se está arrancando, o si el teléfono se colgó ====
 
-Si presiona el botón de encendido ''power'' durante 9 segundos, el teléfono se apagará. Se dará cuenta porque el luz de fondo se apagará.
+Si presiona el boon de encendido ''power'' durante 9 segundos, el teléfono se apagará. Se dará cuenta porque el luz de fondo se apagará.
 
 ==== Mientras se ejecuta un sistema linux completo en modo usuario ====
 
@@ -44,7 +38,7 @@ Sin embargo, usando la consola ''u-boot'' puede activar manualmente la carga rá
 
 Tan pronto como el teléfono es conectado con el cable USB, se podrá a cargar. Sin embargo, la corriente de carga es de sólo 100mA, demasiado pequeña si quiere operar con el teléfono y cargar al mismo tiempo.
 
-Si su conexión por puerto USB permite 500mA, entonces configurará al Neo1973 para usar el modo de carga de 500mA. Podrá advertir este hecho por la siguiente línea generada en el registro ''log'' del kernel (/var/log/messages) de tu ordenador que el Neo1973 está conectado:
+Si su conexión por puerto USB permite 500mA, entonces configurará al Neo1973 para usar el modo de carga de 500mA. Podrá advertir este hecho por la siguiente línea generada en el registro ''log'' del kernel:
  usb0: full speed config #1: 500 mA, Ethernet Gadget, using CDC Ethernet
 
 === Introducir la tarjeta SIM (opcional) ===
@@ -52,16 +46,6 @@ Si su conexión por puerto USB permite 500mA, entonces configurará al Neo1973 p
 La ranura se encuentra justo debajo de la batería. La capucha donde encaja tiene flechas indicando la manera de empujar para desbloquearla - asegúrese de no abrirla con fuerzar cuando está bloqueada o podría romperse. Inserte la SIM de manera que los bornes hagan contacto y empuje la capucha fírmemente hasta que haga un ''click'', luego bloquéela - en otro caso la tarjeta no será detectada.
 
 Para comprobar si la tarjeta SIM está insertada correctamente desde Linux, puede mirar los registros ''log'' de ''gsmd'' o seguir las instrucciones detalladas en la página [[Manually using GSM]] y el tema del comando ''AT+CIMI''.
-
-===  Usando la tarjeta micro-SD ===
-
-Debería haber recibido una tarjeta de memoria con su teléfono. Podría querer copiar algún fichero mp3 (o mejor todavía, ficheros Ogg Vorbis) en ella para probar la reproducción multimedia.
-
-Abra el compartimento de la tarjeta SIM (véase arriba) y deslize suavemente la capucha micro-SD hacia los contactos de la batería. Levante la capucha hacia arriba e inserte la tarjeta, con los contactos por delante y hacia la cara lejana de la capucha. Gírela, presione y deslize suavemente hacia el lado contrario de los contactos de la batería para dejarla cerrada.
-
-La tarjeta debería estar, de forma automática, disponible bajo /media/card en la próxima vez que arranque. Puede comprobarlo y a la vez probar los controladores de sonido reproduciendo un mp3 desde ella. Ver el [[Neo1973_Audio_Subsystem|subsistema de sonido del Neo1973]].
-
-Un vídeo corto de cómo hacerlo (SIM y tarjeta MicroSD) está disponible en vídeos de Google: http://video.google.de/videoplay?docid=-8343770443102960945 
 
 == Acceso a la línea de comandos en el teléfono ==
 
@@ -106,16 +90,6 @@ Vea [[Debug Board#Usage_Instructions]]
 
 Vea [[u-boot#Using_usbtty_from_Linux]]
 
-== Reproduciendo sonido ==
-
-=== Conectar altavoz interno y micrófono en llamadas de teléfono ===
-
-Si no consigue hacer funcionar el altavoz y micrófono mientras realiza una llamada, entonces necesitará cargar el fichero de configuración para alsa "gsmhandset.state":
-
- alsactl -f /etc/alsa/gsmhandset.state restore
-
-Es probable que necesite cargar otro fichero .state para reproducir mp3 o que un auricular bluetooth pueda ver /etc/alsa/.
-
 == Comandos útiles en linux ==
 
 === Suspendiendo ===
@@ -128,13 +102,11 @@ Si está conectado por ssh, el sshd no responderá cuando el sistema operativo s
 
 === Copia de seguridad inicial ===
 
-Una vez arrancado su nuevo Neo1973 podría querer hacer una copia de seguridad del contenido de la memoria flash original en su PC, antes de sobreescribir la memoria flash con una imagen personalizada o actualizada. 
+After getting your new Neo1973 booted for the first time you might want to make a back up of the original flash chip contents on your PC, before you overwrite the flash with a custom image or just update to a newer build.  This is a good idea because there are parts in the root filesystem that can't be distributed over internet so they are only found in the shipped ROM (see the [[GPS]] driver).  One easy way to back up all of the Flash, that doesn't require installing any special software, is with ''netcat'' over the [[USB Networking|USB ethernet]].  The following commands can be used for that.
 
-{{note|Para desarrolladores de fase 0 únicamente (GTA01Bv4 envíos 0, '''no &gt; 0 '''): Esto es una buena idea porque hay partes en sistema de ficheros raiz que no pueden se distribuidos por internet y sólo se encuentran en la ROM suministrada (ver el controlador [[GPS]]).}}
-
-Una manera sencilla de realizar la copia de seguridad completa de la memoria flash, sin necesidad de instalar ningún software especial, es con ''netcat'' a través de la red [[USB Networking|USB ethernet]]. Los comandos siguientes son para hacerlo:
+Una vez arrancado su nuevo Neo1973 podría querer hacer una copia de seguridad del contenido de la memoria flash original en su PC, antes de sobreescribir la memoria flash con una imagen personalizada o actualizada. Esto es una buena idea porque hay partes en sistema de ficheros raiz que no pueden se distribuidos por internet y sólo se encuentran en la ROM suministrada (ver el controlador [[GPS]]). Una manera sencilla de realizar la copia de seguridad completa de la memoria flash, sin necesidad de instalar ningún software especial, es con ''netcat'' a través de la red [[USB Networking|USB ethernet]]. Los comandos siguientes son para hacerlo:
 {|
-! En el origen !! En el destino
+! On the host !! On the target
 |-
 |<pre>
 $ netcat -l -p 20000 > mtdblock0
@@ -158,4 +130,4 @@ Esto guarda las cinco particiones NAND en ficheros de nombre mtdblock*. Conocien
 
 Probablemente quiere continuar con algo del interesante hardware en este dispositivo. Obviamente, puede explorar las aplicaciones disponibles a través de la interfaz de pantalla táctil. Pero para quienes prefieran hacer más cosas básicas desde una línea de comandos, pueden ir a [[Manually_using_GSM | manually use GSM]] o empezar a jugar con el [[GPS]].
 
-[[Category:Neo1973_Phase_1_related]]
+<span id="bottom">{{Languages|Getting_Started_with_your_Neo1973}}</span>
