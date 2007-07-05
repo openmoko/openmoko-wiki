@@ -1,0 +1,133 @@
+Guía de primeros pasos para los que han recibido recientemente su primer hardware Neo1973
+
+== Hardware ==
+
+=== Colocando la batería ===
+
+Ver [[Disassembling Neo1973]].
+
+=== Encendiendo el teléfono ===
+[[Image:Neo1973_uboot_splash.jpg|200px|thumb|bootloader splash screen]]
+Pulsando el botón de encendido ''power'' (dependiendo de la versión del programa de arranque ([[u-boot]]) tienes que pulsar durante >= 5 segundos) debería activarse el teléfono primeramente con el programa de arranque, después iniciar el núcleo, y después mostrarse con X/OpenMoko.
+
+Una vez pulsado el botón de encendido ''power'' durante el tiempo necesario, el vibrador se accionará durante un corto espacio de tiempo y la luz del fondo de la pantalla se encenderá. Ya podrá soltar el botón de encendido y ver como arranca el teléfono.
+
+Si la batería no tiene carga suficiente, el teléfono no se encenderá, a no ser que el calbe usb esté conectado.
+
+=== Apagando el teléfono ===
+
+==== Mientras se está arrancando, o si el teléfono se colgó ====
+
+Si presiona el boon de encendido ''power'' durante 9 segundos, el teléfono se apagará. Se dará cuenta porque el luz de fondo se apagará.
+
+==== Mientras se ejecuta un sistema linux completo en modo usuario ====
+
+En este modo, una pulsación de 5 segundos en el botón de encendido será suficiente. Después de esto, el proceso ''init'' tendrá el control para una apagado correcto del teléfono, que llevará unos 20 segundos extra. El servidor X se cerrará, debería reaparecer una pantalla parecida a la consola, y finalmente debería apagarse como un PC normal con Linux.
+
+=== Carga de batería ===
+
+El [[Neo1973]] permite dos modos de carga: Un modo de carga de 100mA (llamado percarga) y un 500mA (llamado cargar rápida). La carga se realiza siempre a traves del conector USB. Puede usar un cable USB-A a USB-mini-B para conectar el teléfono a cualquier fuente USB.
+
+==== Mientras está en u-boot ====
+
+Mientras está en modo ''u-boot'', el teléfono solo carga con 100mA por defecto. (Esto podría cambiar en una de las revisiones futuras).
+
+Sin embargo, usando la consola ''u-boot'' puede activar manualmente la carga rápida. Ver [[U-boot#Battery_charger_related]] para más información.
+
+==== Mientras está en Linux ====
+
+Tan pronto como el teléfono es conectado con el cable USB, se podrá a cargar. Sin embargo, la corriente de carga es de sólo 100mA, demasiado pequeña si quiere operar con el teléfono y cargar al mismo tiempo.
+
+Si su conexión por puerto USB permite 500mA, entonces configurará al Neo1973 para usar el modo de carga de 500mA. Podrá advertir este hecho por la siguiente línea generada en el registro ''log'' del kernel:
+ usb0: full speed config #1: 500 mA, Ethernet Gadget, using CDC Ethernet
+
+=== Introducir la tarjeta SIM (opcional) ===
+
+La ranura se encuentra justo debajo de la batería. La capucha donde encaja tiene flechas indicando la manera de empujar para desbloquearla - asegúrese de no abrirla con fuerzar cuando está bloqueada o podría romperse. Inserte la SIM de manera que los bornes hagan contacto y empuje la capucha fírmemente hasta que haga un ''click'', luego bloquéela - en otro caso la tarjeta no será detectada.
+
+Para comprobar si la tarjeta SIM está insertada correctamente desde Linux, puede mirar los registros ''log'' de ''gsmd'' o seguir las instrucciones detalladas en la página [[Manually using GSM]] y el tema del comando ''AT+CIMI''.
+
+== Acceso a la línea de comandos en el teléfono ==
+
+=== Usando el emulador de terminal y el teclado en pantalla ===
+
+Haga ''click'' (usando el puntero) en el icono de flecha arriba-izquierda para mostrar un menú desplegable con "Media", "Configuración", "Utilidades" y "Escritorio". Eliga "Utilidades->Panel->Controlador de entrada", y un icono de teclado aparecerá en la barra superior. Podrá mostrar en pantalla un teclado en cualquier momento seleccionándola.
+
+En nuevas pantallas, el teclado aparece cuando pulsa el cuadro blanco en la barra superior.
+
+Desde el escritorio, elija "Tareas activas->rxvt" para ir a una consola ''root''.
+
+El terminal está en el menú principal en pantallas recientes.
+
+=== Utilizando emulación Ethernet a través de un cable USB ===
+
+El estándar Linux Neo1973 [[kernel]] tiene soporte para el aparato "cdc_ether USB", como por ejemplo un implementación estándar de como emular un dispositivo Ethernet a través de USB.
+
+Así que el kernel está iniciado y ejecutándose, y el teléfono está conectado por USB, podrá acceder a un dispositivo '''usb0''' en el anfitrión.
+
+El teléfono tendrá la dirección IPv4 192.168.0.202/24. Podrá ejecutar `ifconfig` en el terminal del teléfono para comprobar esto (opcional, compruébelo si no funciona con las instrucciones que siguen).
+
+Si conecta un cable USB en un equipo ejecutando Linux, verá el módulo de núcleo "cdc_ether" cargado y aparacerá una interfaz de red usb0.
+
+En el PC anfitrión, debe configurar la interfaz con la dirección 192.168.0.202 usando
+ # ifconfig usb0 192.168.0.200 netmask 255.255.255.0
+
+Después podrá ser capaz de hacer
+ # ping 192.168.0.202
+
+y por último
+ # ssh root@192.168.0.202
+
+Una vez pulse 'enter' (sin clave), debería tener en ese momento una acceso como root.
+
+Ver [[USB_Networking]] para más detalles, donde se incluyen las instrucciones de como configurar ''masquerading'' para que su teléfono puede acceder a internet a través del PC anfitrión.
+
+=== Usando la tarjeta depuradora/serie/JTAG ===
+
+Vea [[Debug Board#Usage_Instructions]]
+
+== Acceso a la consola de arranque ==
+
+Vea [[u-boot#Using_usbtty_from_Linux]]
+
+== Comandos útiles en linux ==
+
+=== Suspendiendo ===
+
+Writing "mem" into ''/sys/power/state'' tells Linux to suspend - it will enter a low power mode where only the GSM and RAM are powered up and the CPU sleeps.  It will persist in this state until a wake-up event arrives.  Some currently enabled wake-up events are: AUX or POWER key press, USB cable detect.
+Escribiendo "mem" en ''/sys/power/state'' le dirá a Linux que se suspenda - entrará en un modo de bajo consumo con solamente GSM y RAM funcionando mientras el microprocesador duerme. Continuará en este estado hasta que suceda un evento que lo active. Algunos eventos de activación son: pulsación de ''AUX'' o ''POWER'', detección de cable USB...
+
+Si está conectado por ssh, el sshd no responderá cuando el sistema operativo se suspende, y para evitar colgar al cliente ssh, use el comando
+ # (sleep 1; echo mem > /sys/power/state) & exit
+
+=== Copia de seguridad inicial ===
+
+After getting your new Neo1973 booted for the first time you might want to make a back up of the original flash chip contents on your PC, before you overwrite the flash with a custom image or just update to a newer build.  This is a good idea because there are parts in the root filesystem that can't be distributed over internet so they are only found in the shipped ROM (see the [[GPS]] driver).  One easy way to back up all of the Flash, that doesn't require installing any special software, is with ''netcat'' over the [[USB Networking|USB ethernet]].  The following commands can be used for that.
+
+Una vez arrancado su nuevo Neo1973 podría querer hacer una copia de seguridad del contenido de la memoria flash original en su PC, antes de sobreescribir la memoria flash con una imagen personalizada o actualizada. Esto es una buena idea porque hay partes en sistema de ficheros raiz que no pueden se distribuidos por internet y sólo se encuentran en la ROM suministrada (ver el controlador [[GPS]]). Una manera sencilla de realizar la copia de seguridad completa de la memoria flash, sin necesidad de instalar ningún software especial, es con ''netcat'' a través de la red [[USB Networking|USB ethernet]]. Los comandos siguientes son para hacerlo:
+{|
+! On the host !! On the target
+|-
+|<pre>
+$ netcat -l -p 20000 > mtdblock0
+$ netcat -l -p 20000 > mtdblock1
+$ netcat -l -p 20000 > mtdblock2
+$ netcat -l -p 20000 > mtdblock3
+$ netcat -l -p 20000 > mtdblock4
+</pre>
+|<pre>
+# cat /dev/mtdblock0 | nc 192.168.0.200 20000
+# cat /dev/mtdblock1 | nc 192.168.0.200 20000
+# cat /dev/mtdblock2 | nc 192.168.0.200 20000
+# cat /dev/mtdblock3 | nc 192.168.0.200 20000
+# cat /dev/mtdblock4 | nc 192.168.0.200 20000
+</pre>
+|}
+
+Esto guarda las cinco particiones NAND en ficheros de nombre mtdblock*. Conociendo la distribución de las particiones (el comando ''u-boot'' "mtdparts" o ''dmesg'' en Linux) podrá restaurar la memoria flash completamente.
+
+=== Dónde continuar ===
+
+Probablemente quiere continuar con algo del interesante hardware en este dispositivo. Obviamente, puede explorar las aplicaciones disponibles a través de la interfaz de pantalla táctil. Pero para quienes prefieran hacer más cosas básicas desde una línea de comandos, pueden ir a [[Manually_using_GSM | manually use GSM]] o empezar a jugar con el [[GPS]].
+
+<span id="bottom">{{Languages|Getting_Started_with_your_Neo1973}}</span>
