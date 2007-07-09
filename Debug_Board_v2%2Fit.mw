@@ -59,7 +59,61 @@ La tua Debug Board contiene una piccola EEPROM seriale che dovrebbe essere stata
 
 Se la scheda possiede l'USB ID 1457:5118, tutto e' corretto.
 
-Solo se la tua scheda possiede l'USB ID 0403:6010, allora dei riprogrammare la scheda!
+Solo se la tua scheda possiede l'USB ID 0403:6010, allora occorre riprogrammare la scheda!
+
+===== Riprogrammarla con Linux =====
+
+{{note|FIC lo ha gia' fatto per te, nel caso in cui ti sia stata ufficialmente fornita la scheda.  In ogni caso, se sei uno dei primi sviluppatori, la configurazione  USB vendorID / productID potrebbero non essere state configurate correttamente.}}
+
+Per effettuare tale operazione, e' possibile usare il programma ftdi_eeprom  scaricabile dal sito 
+http://www.intra2net.com/de/produkte/opensource/ftdi/. Sfortunatamente, l'ultima versione (0.2) sembra non supportare ancora la nostra  FT2232D, pertanto dovrai prima applicare la patch scaricabile dal sito http://people.openmoko.org/laforge/misc/debug_board_v2/ftdi_eeprom/ftdi_eeprom-0.2-moko.patch
+
+Potrebbe inoltre essere necessario applicare la seguente patch alla libreria libftdi:
+http://people.openmoko.org/werner/libftdi-c56-strings-dirty-hack.patch
+(Vedi http://bugzilla.openmoko.org/cgi-bin/bugzilla/show_bug.cgi?id=321 per ulteriori dettagli.)
+
+Inoltre, si avra' bisogno della configurazione  dell'EEPROM:
+http://people.openmoko.org/laforge/misc/debug_board_v2/ftdi_eeprom/neo1973_debug_board_v2.ftdi
+
+Dopo che si e' compilato ftdi_eeprom, e' possibile eseguire
+ ftdi_eeprom --flash-eeprom neo1973_debug_board_v2.ftdi
+
+{{warning|Assicurarsi di non avere altri dispositivi basati sull'FTDI FT232 / FT2232 connessi all'USB mentre si esegue ftdi_eeprom.  Potrebbe essere saggio disconnettere tutti i dispositivi tranne la debug board}}
+
+Si dovrebbe ottenere qualcosa di simile se tutto e' andato a buon fine:
+<pre>
+FTDI eeprom generator v0.2
+(c) Intra2net AG <opensource@intra2net.com>
+FTDI init: 0
+Unable to find FTDI devices under given vendor/product id: 0x1457/0x5118
+Retrying with default FTDI id.
+Used eeprom space: 102 bytes
+FTDI write eeprom: 0
+Writing to file: neo1973_debug_board_v2.eeprom
+FTDI close: 0
+</pre>
+
+Una volta che la procedura di riprogrammazione e' terminata, semplicemente disconnettete e riconnettete la scheda, e dovreste vedere
+<pre>
+$ lsusb -v -d 0x1457:                                                                                                                                                                                               
+Bus 005 Device 009: ID 1457:5118  
+Device Descriptor:
+  bLength                18
+  bDescriptorType         1
+  bcdUSB               2.00
+  bDeviceClass            0 (Defined at Interface level)
+  bDeviceSubClass         0 
+  bDeviceProtocol         0 
+  bMaxPacketSize0         8
+  idVendor           0x1457 
+  idProduct          0x5118 
+  bcdDevice            5.00
+  iManufacturer           1 OpenMoko
+  iProduct                2 Debug Board for Neo1973
+  iSerial                 0 
+  bNumConfigurations      1
+  [...]
+</pre>
 
 [[Category:Neo1973 Hardware Debugging]]
 
