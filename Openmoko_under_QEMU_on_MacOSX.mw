@@ -1,169 +1,81 @@
-= Making developers image =
-Optional: Install python2.5 and py25-psyco from MacPorts then create a symlink from /opt/local/bin/python2.5 to /usr/bin/python
+Warning: this is draft!
+
+I try to put here my notes on setting up OpenMoko environment (Qemu and MokoMakefile) on Mac OS X.
+
+Here goes my mail to openmoko mailing list in which I described common problem while compiling qemu on Mac:
 
 <pre>
-make openmoko-devel-image
+There was some discussion on the lists some time ago and I wanted to
+check if anything has changed.
+
+I've made some quick research on subject of developing OpenMoko apps
+on MacOS X. It appears that we could run MakoMakefile:
+
+http://www.quantum-step.com/download/OpenMoko-Edition/oe
+
+That's great!
+
+I checked if there is any possibility to run QEMU's Neo1973 port on
+Mac but it seems not possible right now. Compiling it as written on
+http://wiki.openmoko.org/wiki/OpenMoko_under_QEMU does not work
+because it requires gcc-3.3 which seems to be broken on MacOS -
+http://lists.macosforge.org/pipermail/macports-users/2007-February/001593.html
+
+Compiling ends up with error: gcc-3.3: installation problem, cannot
+exec `cc1': No such file or directory
+
+Compiling neo1973 qemu with gcc-4.0: ./configure
+--target-list=arm-softmmu --cc=/usr/bin/gcc-4.0 --disable-gcc-check
+
+gives you:
+dyngen.c: In function 'gen_code':
+dyngen.c:1853: error: 'struct relocation_info' has no member named 'r_offset'
+dyngen.c:1854: error: 'struct relocation_info' has no member named 'r_offset'
+dyngen.c:1858: error: 'struct relocation_info' has no member named 'r_offset'
+dyngen.c:1872: error: 'struct relocation_info' has no member named 'r_offset'
+dyngen.c:1915:2: error: #error unsupport object format
+dyngen.c:1849: warning: unused variable 'type'
+make: *** [dyngen] Error 1
+
+But there is project: http://www.kju-app.org/kju/ that manages to
+compile and run (very well) qemu under MacOS X. They are using
+standart XCode Developer Tools so this could mean gcc-4.0.
+
+I would be great if someone with grater knowledge on the subject could
+combine kju and neo1973 emulators to make such emulator possible. What
+do you think?
+
 </pre>
 
-I ended up with: 
+== Experiments ==
+
+Here you may find my experiments while I was trying trying to run openmoko emulator on my Mac.
+
+=== Prequisites ===
+I followed instructions in:
+http://www.openembedded.org/wiki/BuildOnOSX
+
+Get Q[kju]: http://www.kju-app.org/proj/wiki/CompilingQ into /Volumes/OE/Q but do not compile it yet (run only "prepare the sources")
+
+Set up environment as described in MokoMakefile:
 
 <pre>
-ERROR: Error in executing: /Volumes/OE/moko/openembedded/packages/quilt/quilt-native_0.45.bb
-ERROR: Exception:exceptions.UnboundLocalError Message:local variable 'md5data' referenced before assignment
+cd /Volumes/OE
+mkdir moko; cd moko
+wget http://www.rwhitby.net/files/openmoko/Makefile
+
+make setup
+
 </pre>
 
-make a script named md5sum that lives in /bin containing
-<pre>
-#!/bin/sh
-echo `/sbin/md5 $1` | awk {'print $4'}
-</pre>
+=== Patching qemu-neo1973 ===
 
-Then I got
+The main idea is to get patches for gcc-4.x from Q project and apply it to qemu-neo1973 branch. I'm still working on it.
 
-<pre>
-| checking for sed... /usr/bin/sed
-| checking whether /usr/bin/sed understands (foo|bar)... no
-| configure: error:
-| Sorry, you have a version of sed which doesn't understand constructs
-| of the form (foo|bar).  quilt needs it.  If you have access to
-| a version of sed which does understand such constructs, you can supply
-| its path with the '--with-sed=' option.
-</pre>
+=== Building emulator ===
 
-Install GNU sed from MacPorts
+TODO
 
-<pre>
-$ port install gsed
-</pre>
+=== Building environment ===
 
-If you get:
-
-<pre>
-| Making install in tests
-| make[3]: Nothing to be done for `install-exec-am'.
-| make[3]: Nothing to be done for `install-data-am'.
-| cp: illegal option -- t
-| usage: cp [-R [-H | -L | -P]] [-fi | -n] [-pvX] source_file target_file
-|        cp [-R [-H | -L | -P]] [-fi | -n] [-pvX] source_file ... target_directory
-</pre>
-
-Apply this patch:
-<pre>
-### Fix cp command ### 
-perl -pi -e 's,cp -fpPR -t "$to" "$from"/*,cp -fpPR "$from"/* "$to",g'
-</pre>
-
-I then got:
-<pre>
-</pre>
-
-I had to add:
-
-<pre>
-#ifndef HAVE_ENVIRON_DECL
-# ifdef __APPLE__
-# include <crt_externs.h>
-# define environ (*_NSGetEnviron())
-# else
-extern char **environ;
-# endif
-#endif
-</pre>
-
-to the following files build/tmp/work/i386-darwin/gettext-native-0.14.1-r8/gettext-0.14.1/gettext-tools/lib/execute.c , pipe-bidi.c, pipe-in.c, pipe-out.c
-
-Next I had to add information for i386-darwin to openembedded/classes/siteinfo.bbclass, I copied the powerpc-darwin info.
-
-Now you should have:
-
-<pre>
-| libbb.h:53:22: error: features.h: No such file or directory
-</pre>
-
-while compiling ipkg. Run following patches in folder:
-
-<pre>
-cd /Volumes/OE/moko/build/tmp/work/i386-darwin/ipkg-native-0.99.163-r1/ipkg-0.99.163/
-</pre>
-
-apply this patch
-
-<pre>
-  perl -pi -e 's,struct errlist\*,extern struct errlist\*,g' ipkg.h.in
-  perl -pi -e 's,#include "libbb.h",#include "libbb.h"\nstruct errlist\* error_list;,g' libbb/error_msg.c
-
-  ### fix endian.h include in md5.c
-  perl -pi -e 's,#include \<endian.h\>,#ifndef __APPLE__\n# include \<endian.h\>\n#else\n# include \<machine/endian.h\>\n#endif,g' md5.c
-
-  ### fix vfs.h include in ipkg_utils.c
-  perl -pi -e 's,#include \<sys/vfs.h\>,#ifndef __APPLE__\n# include \<sys/vfs.h\>\n#else\n# include \<sys/mount.h\>\n#endif,g' ipkg_utils.c
-
-  ### remove un-needed features.h include from libbb/libbb.h
-  perl -pi -e 's,#include \<features.h\>,#ifndef __APPLE__\n# include \<features.h\>\n#endif,g' libbb/libbb.h
-
-  ### dirname already defined OS X
-  perl -pi -e 's,char \*dirname \(char \*path\);,#ifndef __APPLE__\nchar \*dirname \(char \*path\);\n#endif,g' libbb/libbb.h
-
-  ### Use fink dir for etc
-  perl -pi -e 's,/etc,%p/etc,g' args.h
-
-  ### Add define for strndup
-  perl -pi -e "s,#include \"xsystem.h\",#include \"xsystem.h\"\n\n#ifndef HAVE_STRNDUP\nstatic void\*\nstrndup \(const char \*src\, size_t n\)\n\{\n       size_t i;\n       char \*dst;\n\n       if \(src == NULL\)\n               return NULL;\n\n       dst = \(char*\) malloc \(n + 1\);\n       if \(dst != NULL\) \{\n               for \(i = 0; i \< n \&\& src\[i\]; i++\)\n                       dst\[i\] = src\[i\];\n               dst\[i\] = '\\\0';\n       \}\n\n       return dst;\n\}\n#endif,g" ipkg_conf.c
-</pre>
-
-Now I get:
-
-<pre>
-
-| Extracting /Volumes/OE/moko/build/tmp/work/i386-darwin/ipkg-native-0.99.163-r1/ipkg-0.99.163/libbb/.libs/libbb.a
-| gcc -dynamiclib ${wl}-flat_namespace ${wl}-undefined ${wl}suppress -o .libs/libipkg.0.0.0.dylib  .libs/libipkg_la-args.o .libs/libipkg_la-libipkg.o .libs/libipkg_la-user.o .libs/libipkg_la-ipkg_cmd.o .libs/libipkg_la-ipkg_configure.o .libs/libipkg_la-ipkg_download.o .libs/libipkg_la-ipkg_install.o .libs/libipkg_la-ipkg_upgrade.o .libs/libipkg_la-ipkg_remove.o .libs/libipkg_la-ipkg_conf.o .libs/libipkg_la-ipkg_utils.o .libs/libipkg_la-pkg.o .libs/libipkg_la-pkg_depends.o .libs/libipkg_la-pkg_extract.o .libs/libipkg_la-hash_table.o .libs/libipkg_la-pkg_hash.o .libs/libipkg_la-pkg_parse.o .libs/libipkg_la-pkg_vec.o .libs/libipkg_la-file_util.o .libs/libipkg_la-ipkg_message.o .libs/libipkg_la-md5.o .libs/libipkg_la-sprintf_alloc.o .libs/libipkg_la-str_util.o .libs/libipkg_la-xregex.o .libs/libipkg_la-xsystem.o .libs/libipkg_la-conffile.o .libs/libipkg_la-conffile_list.o .libs/libipkg_la-nv_pair.o .libs/libipkg_la-nv_pair_list.o .libs/libipkg_la-pkg_dest.o .libs/libipkg_la-pkg_dest_list.o .libs/libipkg_la-pkg_src.o .libs/libipkg_la-pkg_src_list.o .libs/libipkg_la-str_list.o .libs/libipkg_la-void_list.o  .libs/libipkg.lax/libbb.a/libbb_la-all_read.o .libs/libipkg.lax/libbb.a/libbb_la-ask_confirmation.o .libs/libipkg.lax/libbb.a/libbb_la-concat_path_file.o .libs/libipkg.lax/libbb.a/libbb_la-copy_file.o .libs/libipkg.lax/libbb.a/libbb_la-copy_file_chunk.o .libs/libipkg.lax/libbb.a/libbb_la-error_msg.o .libs/libipkg.lax/libbb.a/libbb_la-error_msg_and_die.o .libs/libipkg.lax/libbb.a/libbb_la-gz_open.o .libs/libipkg.lax/libbb.a/libbb_la-last_char_is.o .libs/libipkg.lax/libbb.a/libbb_la-make_directory.o .libs/libipkg.lax/libbb.a/libbb_la-messages.o .libs/libipkg.lax/libbb.a/libbb_la-mode_string.o .libs/libipkg.lax/libbb.a/libbb_la-parse_mode.o .libs/libipkg.lax/libbb.a/libbb_la-perror_msg.o .libs/libipkg.lax/libbb.a/libbb_la-perror_msg_and_die.o .libs/libipkg.lax/libbb.a/libbb_la-safe_strncpy.o .libs/libipkg.lax/libbb.a/libbb_la-time_string.o .libs/libipkg.lax/libbb.a/libbb_la-unarchive.o .libs/libipkg.lax/libbb.a/libbb_la-unzip.o .libs/libipkg.lax/libbb.a/libbb_la-verror_msg.o .libs/libipkg.lax/libbb.a/libbb_la-vperror_msg.o .libs/libipkg.lax/libbb.a/libbb_la-wfopen.o .libs/libipkg.lax/libbb.a/libbb_la-xfuncs.o .libs/libipkg.lax/libbb.a/libbb_la-xreadlink.o   -L/Volumes/OE/moko/build/tmp/staging/i386-darwin/lib  -install_name  /Volumes/OE/moko/build/tmp/staging/i386-darwin/lib/libipkg.0.dylib -Wl,-compatibility_version -Wl,1 -Wl,-current_version -Wl,1.0
-| ld: multiple definitions of symbol _error_list
-| .libs/libipkg_la-args.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-libipkg.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-user.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-ipkg_cmd.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-ipkg_configure.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-ipkg_download.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-ipkg_install.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-ipkg_upgrade.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-ipkg_remove.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-ipkg_conf.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-ipkg_utils.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-pkg.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-pkg_depends.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-pkg_extract.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-hash_table.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-pkg_hash.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-pkg_parse.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-pkg_vec.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-file_util.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-ipkg_message.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-sprintf_alloc.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-str_util.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-xregex.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-xsystem.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-conffile.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-conffile_list.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-nv_pair.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-nv_pair_list.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-pkg_dest.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-pkg_dest_list.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-pkg_src.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-pkg_src_list.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-str_list.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg_la-void_list.o definition of _error_list in section (__DATA,__common)
-| .libs/libipkg.lax/libbb.a/libbb_la-error_msg.o definition of _error_list in section (__DATA,__common)
-| /usr/bin/libtool: internal link edit command failed
-| make[3]: *** [libipkg.la] Error 1
-| make[2]: *** [all-recursive] Error 1
-| make[1]: *** [all] Error 2
-| FATAL: oe_runmake failed
-NOTE: Task failed: /Volumes/OE/moko/build/tmp/work/i386-darwin/ipkg-native-0.99.163-r1/temp/log.do_compile.16640
-NOTE: package ipkg-native-0.99.163-r1: task do_compile: failed
-ERROR: TaskFailed event exception, aborting
-NOTE: package ipkg-native-0.99.163: failed
-ERROR: Build of openmoko-devel-image failed
-make: *** [openmoko-devel-image] Error 1
-</pre>
-
-[[Category:Emulation]]
+TODO
