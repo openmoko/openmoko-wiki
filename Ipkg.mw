@@ -1,86 +1,13 @@
-{{Todo|Integrate useful content into [[Opkg]] as a usage section.}}
+The practical way to install software on OpenMoko is with the [http://handhelds.org/moin/moin.cgi/Ipkg Ipkg package manager], possibly via the graphical [[Application Manager]]. Naturally, you need to have obtained an OpenMoko system by other means initially.
 
+In the shell, "ipkg install new-app" will download and install "new-app", "ipkg update" will update the list of available packages, and "ipkg upgrade" will download and install all packages that have a newer version available.
 
-[http://handhelds.org/moin/moin.cgi/Ipkg Ipkg] is a lightweight [[package management]] system.
+Precompiled ipk package files are available at least at:
+ * http://downloads.openmoko.org/tmp/neo1973/ipk/
+ * http://buildhost.openmoko.org/snapshots/2007.04/ipk/
 
 == History ==
 
-Ipkg re-implements for embedded systems the functionality of Debian tools dpkg, apt, and apt-get. For example, it uses much less disk space for the package metadata.
+Ipkg re-implements for embedded systems the Debian tools dpkg, apt, and apt-get. For example, it uses much less disk space for the package metadata.
 
-== Installing Packages to the Memory Card ==
-
-You can use ipkg to install packages to a folder on the memory card.  To do this you'll need the following:
-
-=== Ext2 Formatted Memory Card ===
-
-By default, the memory card comes formated with VFAT (Windows Format).  You need to re-format the card with EXT2.  You will not be able to view the files on the card using a windows system after this.
-
-To check if your card is using vfat or ext, run the 'mount' command, and look for: /dev/mmcblk0p1 on /media/card.
-
-On the NEO, run the following:
-''' This will erase everything on your memory card '''
-<pre>
-umount /media/card
-fdisk /dev/mmcblk0
-t
-83
-w
-mke2fs /dev/mmcblk0
-mount /media/card
-</pre>
-
-=== Entry in opkg.conf File ===
-
-In your /etc/opkg.conf file, after "dest root /" add a new line:
-<pre>dest card /media/card/opkg</pre>
-
-Create /media/card/opkg folder
-<pre>mkdir /media/card/opkg</pre>
-
-=== Installing Packages on the Card ===
-
-When installing a package, use the -d option to have the package installed into the "card" destination:
-<pre>opkg install -d card python-core</pre>
-
-This will put all files (binaries and libraries) on the card, under the folder specified in the ipkg.conf file.
-
-=== Linking/Using Packages on the Card ===
-
-Your system will not be able to see the packages that you just added to your card.  There are two ways to remedy this.
-The better solution is to use ipkg-link from the 'ipkg-utils' package, but 'better' is always subjective - YMMV.
-
-==== 1: Ipkg Utils and ipkg-link ====
-
-Ipkg-utils is a package that provides some additional functionality for ipkg.  A very useful tool is ipkg-link, which creates symbolic links for packages installed in non-root locations (such as a card) back to the root file system.
-
-To make this working with Opkg, you've simply to do:
-<pre>ln -s /etc/opkg.conf /etc/ipkg.conf
-ln -s /media/card/opkg/usr/lib/opkg /media/card/opkg/usr/lib/ipkg</pre>
-
-To get ipkg-utils, run:
-<pre>opkg install ipkg-utils</pre>
-
-To create symbolic links to your root system for a specific package, run: ipkg-link add <package>.  For example, for python-core use:
-<pre>ipkg-link add python-core</pre>
-
-To create symbolic links for all packages installed in a location, run:
-<pre>ipkg-link mount /media/card/ipkg</pre>
-
-The ''ipkg-link remove'' and ''ipkg-link unmount'' commands remove the symlinks for a package or all packages.
-
-There is a list of the options for the ipkg command under "How do I use it?" [http://handhelds.org/moin/moin.cgi/Ipkg here.]
-
-==== 2: Adding the card PATH and LIB directories to your path  ====
-Another way to add bin and lib files to your system is by modifying your environment variables in /etc/profile as follows:
-
-On the line that defines the PATH variable, add:
-<pre>PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin:/media/card/ipkg/usr/bin</pre>
-
-Then, before the 'export' line add:
-<pre>LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/media/card/ipkg/usr/lib</pre>
-
-Then modify the 'export' line and add LD_LIBRARY_PATH to the end.
-
-This will let the system see the binary and library files, but it will not see other resources, such as images, configuration files, desktop files, etc.  For this reason, ipkg-link is preferred.
-
-[[Category:Package management]]
+[[Category:Software]]
