@@ -87,5 +87,71 @@ A questo punto si dovrebbe vedere la fase di boot di OpenMoko nella finestra Xep
 [[Image:Xephyr.png]]
 
 == Uno script di esempio ==
+Lo script seguente imposta automaticamente l'ambiente in chroot.
+
+<pre>
+#!/bin/bash
+#
+# Set-up x86 OpenMoko root jail. This script must be run as root.
+#
+# Root jail is an environment, where the file system root has been
+# changed to the OpenMoko root file system folder. Please don't
+# use the build/rootfs, but make a copy of it, since build/rootfs
+# gets overwritten each time you build openmoko-devel-image
+#
+# You need to set-up another X server (nested preferably) to 
+# act as a OpenMoko screen. Otherwise chrooted applications are executed
+# as is on the host hardware and the kernel.
+#
+# See: 
+#
+# http://wiki.openmoko.org/wiki/Getting_OpenMoko_working_on_host_with_Xephyr
+# 
+#
+# 2007 Mikko Ohtamaa - Red Innovation Ltd.
+# <mikko@redinnovation.com>
+#
+# Do anything you wish with this script
+#
+#
+#
+
+# Setup required environment variables
+
+# Xephyr must listen to this DISPLAY
+DISPLAY=:1
+
+# If we don't have locale, applications refuse to launch
+LANG=C
+
+# We are running as root in our chrooted environment
+
+HOME=/home/root
+export DISPLAY LANG HOME
+
+# Update pango modules
+pango-querymodules > /etc/pango/pango.modules
+
+# Update icon images
+gdk-pixbuf-query-loaders > /etc/gtk-2.0/gdk-pixbuf.loaders
+
+# Mount /dev and /proc file systems
+mount --bind /dev ./dev
+mount -t proc none ./proc
+
+# Remove touch screen calibration start up app
+# It doesn't launch on x86 and prevents X booting
+if [ -e /etc/X11/Xsession.d/30xTs_Calibrate ] ; then
+        rm /etc/X11/Xsession.d/30xTs_Calibrate
+fi
+
+# Use host name server information so that
+# web browsing works
+cp /etc/resolv.conf etc/resolv.conf
+
+# Enter into chroot jail
+chroot . /bin/sh
+
+</pre>
 
 ==  Migliorare il realismo del Display - Estendere Xephyr con Xoo ==
