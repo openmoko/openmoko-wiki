@@ -1,1 +1,71 @@
-#REDIRECT [[Host-based development with Xoo and Xephyr/it]]
+Please see [[Getting OpenMoko working on host with Xephyr]] which might contain more up-to-date information.
+
+== What is Xoo ==
+[http://projects.o-hand.com/xoo/ Xoo] is a GTK2 based graphical wrapper around a ‘Windowed’ X Server.  The X server is typically '''Xnest''', the nested X server, or [http://projects.o-hand.com/xephyr Xephyr].  It is intended for embedded developers that want to simulate a target device (with an '''accurate''' display size, working hardware buttons, etc) on a desktop machine. 
+
+Currently only getting Xoo working with '''Xnest''' is discussed here. Instructions for running Xoo with [http://projects.o-hand.com/xephyr Xephyr] are planned.
+
+''Xoo is not required to simulate OpenMoko hardware - it just improves the presentation''
+
+== Install Xoo on your host ==
+For gentoo users run just
+ # emerge xoo
+Debian/Ubuntu
+ # sudo apt-get install xoo xnest
+For Fedora (package has been submitted to Fedora for approval, see https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=236297):
+ # ftp://ftp.xelerance.com/xoo/
+
+for any other find a way how to do it in your distro.
+
+==  Build an OpenMoko Image (Getting rootfs) ==
+First, you'll need to build an openmoko-devel-image and get rootfs. One good way to get started developing is getting rootfs working on host machine, since most of us don't have real hardware.
+
+You should use [[MokoMakefile|Building OpenMoko using the MokoMakefile]] to build an openmoko-devel-image for your host architecture.
+
+Prior to running make openmoko-devel-image to get rootfs (before step 5) run :
+ # sed -i 's/fic-gta01/x86/' build/conf/local.conf
+then just run make openmoko-devel-image. After a while (half a day) the build should complete.
+
+You might need to add
+ TARGET_FPU = ""
+to your build/conf/local.conf to avoid:
+ NOTE: <type 'exceptions.Exception'>:variable TARGET_FPU references itself! while evaluating:${TARGET_FPU}
+errors.
+=== Build issues ===
+
+[http://bugzilla.openmoko.org/cgi-bin/bugzilla/show_bug.cgi?id=264 Please see this bug tracker issues] if you have problems getting libelf compiled (do_stage fails).
+
+== Setup the Image Filesystem ==
+The filesystem of the image can be found at build/tmp/rootfs . It is that image that we want to run in a chrooted environment.
+
+This image should also be packed/compressed as the file openmoko-devel-image-x86-$(DATE).rootfs.tar.gz in build/tmp/image/ - mine is here [http://www.ms.mff.cuni.cz/~kupem6am/openmoko-devel-image-x86-20070227064250.rootfs.tar.gz].
+
+=== Making X cooperate ===
+* Make sure your iptables do not prevent you from connecting to port 6000(x11) on localhost
+
+* Make sure your X is listening on port 6000(X11) on localhost (netstat is friend)
+
+* Enable conection from localhost
+ # xhost localhost
+
+===  Preparing rootfs ===
+Unpack the rootfs file and copy the contents into a directory called /home/moko/mokobox. This will be our chrooted environment.
+
+make sure /dev of the host machine are visible from within mokobox
+ # sudo mount --bind /dev/ /home/moko/mokobox/dev
+
+Start/Move into the protected mokobox environment
+ # sudo chroot /home/moko/mokobox /bin/sh
+
+==  Starting the nested X server ==
+=== Launch Xoo ===
+In another terminal (not related to mokobox), start Xoo. Download [http://www.datenfreihafen.org/~stefan/OpenMoko/neo1973-xoo-device.tar.bz2] and run for a nice neo 1973 theme.
+ # xoo --device neo1973.xml
+
+=== Start X Client ===
+Now, back in chroo'ted environment, start X client: <br /><br />
+Export display to connect to started xoo
+ # export DISPLAY=localhost:1.0
+Start window manager.
+ # x-window-manager
+By this time you should have Xnest & Xoo running OpenMoko in a window.
