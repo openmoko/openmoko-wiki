@@ -23,7 +23,48 @@ Una volta creata l'immagine, possiamo passare alla sua configurazione.
 
 ==  Configurare il filesystem dell'immagine ==
 
-===  Nell'ambiente chroot ===
+Please see the included help script at the bottom of this article. It should make your life much easier.
+
+The filesystem of the image can be found at /home/moko/build/tmp/rootfs . It is that image that we want to run in a chrooted environment.
+
+We will copy that that rootfs directory somewhere so that subsquent builds (using the MokoMakefile  for instance) don't overwrite it.
+
+Make sure you have root privileges:
+ su -
+
+Copy the rootf into a directory called MokoBox. From now on, we will call the chrooted environment a MokoBox.
+
+ cp -r /home/moko/build/tmp/rootfs /home/moko/mokobox
+
+make sure /dev and /proc of the host machine are visible from within mokobox
+
+ mount --bind /dev /home/moko/mokobox/dev
+ mount -t proc none /home/moko/mokobox/proc
+
+Start/Move into the protected mokobox environment
+
+ chroot /home/moko/mokobox /bin/sh
+
+=== In chroot'ed environment ===
+
+set environment variables
+
+ DISPLAY=:1
+ LANG=C
+ HOME=/home/root
+ export DISPLAY LANG HOME
+
+Create pango.modules file
+
+ pango-querymodules > /etc/pango/pango.modules
+
+Create gdk-pixbuf.loaders file
+
+ gdk-pixbuf-query-loaders > /etc/gtk-2.0/gdk-pixbuf.loaders
+
+Remove touch screen calibrator. Since touch screen hardware is not present, the touch screen calibration prevents X start-up on PC.
+
+ rm /etc/X11/Xsession.d/30xTs_Calibrate
 
 == Avviare il server X annidato ==
 
