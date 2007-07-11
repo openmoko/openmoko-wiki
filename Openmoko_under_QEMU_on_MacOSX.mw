@@ -2,86 +2,53 @@ Warning: this is draft!
 
 I try to put here my notes on setting up OpenMoko environment (Qemu and MokoMakefile) on Mac OS X.
 
-Here goes my mail to openmoko mailing list in which I described common problem while compiling qemu on Mac:
+= Introduction =
+
+Some time ago I ask if anyone has ever set up OpenMoko environment on MacOS X. No one has answered that he did but several people were interested. So I deceided to wrote some directions on how to do that. 
+
+As for now I was not successful but I am still trying ;)
+
+= Setting up environment =
+
+== Prequisites ==
+
+Install fink and darwinports (both have neccesary packages)
+
+Follow instructions on:
+http://www.openembedded.org/wiki/BuildOnOSX
+to set up OE environment.
+
+You can get mentioned packages using darwinports:
 
 <pre>
-There was some discussion on the lists some time ago and I wanted to
-check if anything has changed.
-
-I've made some quick research on subject of developing OpenMoko apps
-on MacOS X. It appears that we could run MakoMakefile:
-
-http://www.quantum-step.com/download/OpenMoko-Edition/oe
-
-That's great!
-
-I checked if there is any possibility to run QEMU's Neo1973 port on
-Mac but it seems not possible right now. Compiling it as written on
-http://wiki.openmoko.org/wiki/OpenMoko_under_QEMU does not work
-because it requires gcc-3.3 which seems to be broken on MacOS -
-http://lists.macosforge.org/pipermail/macports-users/2007-February/001593.html
-
-Compiling ends up with error: gcc-3.3: installation problem, cannot
-exec `cc1': No such file or directory
-
-Compiling neo1973 qemu with gcc-4.0: ./configure
---target-list=arm-softmmu --cc=/usr/bin/gcc-4.0 --disable-gcc-check
-
-gives you:
-dyngen.c: In function 'gen_code':
-dyngen.c:1853: error: 'struct relocation_info' has no member named 'r_offset'
-dyngen.c:1854: error: 'struct relocation_info' has no member named 'r_offset'
-dyngen.c:1858: error: 'struct relocation_info' has no member named 'r_offset'
-dyngen.c:1872: error: 'struct relocation_info' has no member named 'r_offset'
-dyngen.c:1915:2: error: #error unsupport object format
-dyngen.c:1849: warning: unused variable 'type'
-make: *** [dyngen] Error 1
-
-But there is project: http://www.kju-app.org/kju/ that manages to
-compile and run (very well) qemu under MacOS X. They are using
-standart XCode Developer Tools so this could mean gcc-4.0.
-
-I would be great if someone with grater knowledge on the subject could
-combine kju and neo1973 emulators to make such emulator possible. What
-do you think?
-
+sudo port install quilt
+sudo port install py-psyco
+sudo port install cogito
 </pre>
 
-== Experiments ==
-
-Here you may find my experiments while I was trying trying to run openmoko emulator on my Mac.
-
-=== Prequisites ===
-I followed instructions in:
-http://www.openembedded.org/wiki/BuildOnOSX
-
-Get Q[kju]: http://www.kju-app.org/proj/wiki/CompilingQ into /Volumes/OE/Q but do not compile it yet (run only "prepare the sources")
+Then get  Q[kju] project: http://www.kju-app.org/proj/wiki/CompilingQ into /Volumes/OE/Q but do not compile it yet (run only "prepare the sources"). This will be needed for compiling Neo1973 emulator.
 
 Set up environment as described in MokoMakefile:
 
 <pre>
-
-sudo port install quilt
- sudo port install py-psyco
-
 cd /Volumes/OE
 mkdir moko; cd moko
 wget http://www.rwhitby.net/files/openmoko/Makefile
 
 make setup
-
 </pre>
 
-=== Patching qemu-neo1973 ===
-
-The main idea is to get patches for gcc-4.x from Q project and apply it to qemu-neo1973 branch. I'm still working on it.
-
-=== Building emulator ===
-
-TODO
-
-=== Building environment ===
+= Making developers image =
 
 <pre>
 make openmoko-devel-image
 </pre>
+
+
+= Patching qemu-neo1973 =
+
+The main idea is to get patches for gcc-4.x from Q project and apply it to qemu-neo1973 branch. I'm still working on it.
+
+= Building emulator =
+
+TODO
