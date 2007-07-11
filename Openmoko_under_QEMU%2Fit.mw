@@ -23,50 +23,50 @@ Approssimativamente, questa è la situazione di ogni componente che necessita em
 |-
 |ARM920T core || Funziona || Presente in QEMU.
 |-
-|Basic guts || Work || This includes GPIO interface, DMA, Interrupt Controller, Timers, NAND controller, MMC/SD host, [[I2C]] and IIS interfaces, Memory & Clock & Power management controllers, RAM.
+|Basic guts || Funziona || This includes GPIO interface, DMA, Interrupt Controller, Timers, NAND controller, MMC/SD host, [[I2C]] and IIS interfaces, Memory & Clock & Power management controllers, RAM.
 |-
-|Serial ports || Works || Use the "-serial" switch (maybe be specified multiple times) to tell QEMU where serial input/output should go to. GSM module will be connected on UART0.
+|Serial ports || Funziona || Use the "-serial" switch (maybe be specified multiple times) to tell QEMU where serial input/output should go to. GSM module will be connected on UART0.
 |-
-|RTC || Works || On start QEMU will load it with current time/date - the Neo1973 [[kernel]] doesn't use it for time/date source currently.
+|RTC || Funziona || On start QEMU will load it with current time/date - the Neo1973 [[kernel]] doesn't use it for time/date source currently.
 |-
-|SPI || Works || The guest kernel can drive it using either the SPI interface or raw GPIO bitbanging.
+|SPI || Funziona || The guest kernel can drive it using either the SPI interface or raw GPIO bitbanging.
 |-
-|LCD || Works || The virtual LCD will display as in QEMU window iff "-nographic" is not specified.
+|LCD || Funziona || The virtual LCD will display as in QEMU window iff "-nographic" is not specified.
 |-
-|ADC || Works || Mouse events in QEMU window generate what would be touchscreen events on a Neo1973 and are passed to the guest OS through the on-chip ADC.
+|ADC || Funziona || Mouse events in QEMU window generate what would be touchscreen events on a Neo1973 and are passed to the guest OS through the on-chip ADC.
 |-
-|OHCI USB || Works || This part is in mainline QEMU. Use the "-usb" switch to enable the controller and "usb_add" in QEMU monitor to attach new virtual or physical USB devices.
+|OHCI USB || Funziona || This part is in mainline QEMU. Use the "-usb" switch to enable the controller and "usb_add" in QEMU monitor to attach new virtual or physical USB devices.
 |-
-|Slave USB || Works || Linux's dummy HCD in conjunction with gadget filesystem API is used to make the virtual Neo appear as a real one connected to the host computer. See [[#Setting up USB connection|Setting up USB connection]] below. (Experimental)
+|Slave USB || Funziona || Linux's dummy HCD in conjunction with gadget filesystem API is used to make the virtual Neo appear as a real one connected to the host computer. See [[#Setting up USB connection|Setting up USB connection]] below. (Experimental)
 |-
-|Watchdog || Works || This is one of the less important on-chip peripherals in S3C2410. It is however used by Linux for rebooting the board.
+|Watchdog || Funziona || This is one of the less important on-chip peripherals in S3C2410. It is however used by Linux for rebooting the board.
 |- style="background-color:#eeeedd;"
 ! colspan="3"|[[I2C]] bus peripherals
 |-
-|[[PCF50606]] || Works || (Aka PMU) Fakes the battery charge level (set at 88%), POWER button, etc. Also contains and RTC, also unused by Linux.
+|[[PCF50606]] || Funziona || (Aka PMU) Fakes the battery charge level (set at 88%), POWER button, etc. Also contains and RTC, also unused by Linux.
 |-
-|[[LM4857]] || Works
+|[[LM4857]] || Funziona
 |-
-|[[WM8753L]] || Works || The CODEC is also connect to the CPU's IIS port. Basic [[Neo1973 Audio Subsystem|audio functionality]] is supported - see QEMU documentation on getting audio input/output from the emulator. Volume control has no effects.
+|[[WM8753L]] || Funziona || The CODEC is also connect to the CPU's IIS port. Basic [[Neo1973 Audio Subsystem|audio functionality]] is supported - see QEMU documentation on getting audio input/output from the emulator. Volume control has no effects.
 |- style="background-color:#eeeedd;"
 ! colspan="3"|Other peripherals
 |-
-|NAND Flash || Works || However, some pieces are not confirmed to be completely compatible with the real hardware because of lack thereof. Use "-mtdblock flashimagefilenamehere" switch to point QEMU to your flash image. The file should be at least 69206016 bytes big.
+|NAND Flash || Funziona || However, some pieces are not confirmed to be completely compatible with the real hardware because of lack thereof. Use "-mtdblock flashimagefilenamehere" switch to point QEMU to your flash image. The file should be at least 69206016 bytes big.
 |-
-|JBT6K74-AS(PI) || Works || (Aka LCM) Wired to the SPI channel 1
+|JBT6K74-AS(PI) || Funziona || (Aka LCM) Wired to the SPI channel 1
 |-
-|Buttons || Work || Enter is the AUX button, Space is the POWER button. Wired to on-chip GPIO and PCF50606.
+|Buttons || Funziona || Enter is the AUX button, Space is the POWER button. Wired to on-chip GPIO and PCF50606.
 |-
-|SD card || Works || This part is already in mainline QEMU. Use the "-sd cardimagegoeshere" switch to point QEMU to the card image. The regular QEMU monitor commands for removable media can also be used. The card works, however the on-chip host controller gave block length errors on heavy I/O despite working as described in specification. I suspect the kernel driver. DMA operation is not tested.
+|SD card || Funziona || This part is already in mainline QEMU. Use the "-sd cardimagegoeshere" switch to point QEMU to the card image. The regular QEMU monitor commands for removable media can also be used. The card works, however the on-chip host controller gave block length errors on heavy I/O despite working as described in specification. I suspect the kernel driver. DMA operation is not tested.
 |-
 |Bluetooth
-|style="background-color:#ffffcc;"|Works
+|style="background-color:#ffffcc;"|Funziona
 |A generic Bluetooth HCI (just like the BlueCore4 chip) is connected to internal USB hub (just like the Delta DBFM dongle). Currently qemu emulates no other bluetooth devices, so the dongle behaves as if there was no BT-enabled slaves around, being the only device on the piconet, i.e. is not really useful. Likely a Bluetooth keyboard will be emulated. A physical Bluetooth dongle can also be attached to the emulator (see USB documentation in QEMU).
 |-
-|[[GSM]] || Works || A fake modem is connected to UART0 understanding a (currently quite limited) subset of AT commands. Ultimately it should support as much functionality as possible (basic AT command set, fake GPRS connections, dialing and SMS send/receive). This way all parts of the phone subsystem (CALYPSO, TWL3014, TRF6151) will not have to be emulated. There is a possibility to wire a real GSM modem to QEMU's serial port.
+|[[GSM]] || Funziona || A fake modem is connected to UART0 understanding a (currently quite limited) subset of AT commands. Ultimately it should support as much functionality as possible (basic AT command set, fake GPRS connections, dialing and SMS send/receive). This way all parts of the phone subsystem (CALYPSO, TWL3014, TRF6151) will not have to be emulated. There is a possibility to wire a real GSM modem to QEMU's serial port.
 |-
 |[[Hardware:AGPS|AGPS]]
-|style="background-color:#ffcccc;"|To Do
+|style="background-color:#ffcccc;"|Da fare
 |There are obvious difficulties emulating the chip, but hopefully it can be made to present the guest OS with some fixed coordinates later when more is known about the chip. Again a real chip could be connected to QEMU's serial port.
 |}
 
