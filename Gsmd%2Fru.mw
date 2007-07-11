@@ -31,3 +31,81 @@ libgsmd это библиотека, написанная на C, предост
 == libgsmd-tool ==
 
 libgsmd-tool это небольшое тестовое приложение, которое демонстрирует использование libgsmd API.
+
+
+== Использование ==
+
+libgsmd-tool имеет несколько режимов работы.  
+
+=== Использование в режиме shell ===
+
+Режим шелла предоставляет простой командный интерфейс для совершения голосовых вызовов.
+
+Режим шелла может быть включен, используя следующую команду
+
+ libgsmd-tool -m shell
+
+Она может быть использована, как в данном примере:
+
+<pre>
+> src/util/libgsmd-tool -m shell
+libgsm-tool - (C) 2006 by Harald Welte
+This program is Free Software and has ABSOLUTELY NO WARRANTY
+
+?
+#       A       Ответить на входящий вызов
+        D       Совершить исходящий вызов
+        H       Поднять трубку
+        O       Включить
+        o       Выключить
+        R       Зарегистрироваться в сети
+O
+# EVENT: PIN request (type=1) Please enter PIN: 6582
+R
+# EVENT: Netreg searching for network 
+EVENT: Netreg registered (home network) 
+
+D03024033902
+# Dial 03024033902
+EVENT: Call Progress: UNKNOWN
+EVENT: Call Progress: PROCEED
+EVENT: Call Progress: SYNC
+EVENT: Call Progress: ALERT
+H
+# Hangup
+EVENT: Call Progress: DISCONNECT
+EVENT: Call Progress: RELEASE
+
+EVENT: Incoming call type=2!
+EVENT: Incoming call clip=`"03024033902"'
+EVENT: Incoming call type=2!
+A
+# Answer
+RSTR=`OK'
+H
+# Hangup
+RSTR=`OK'
+</pre>
+
+=== Использование режима atcmd ===
+
+Режим пересылки atcmd.  Режим пересылки означает использование команд [[GSM 07.07]], передавая из через демона в телефон, и получая обратно ответ.  Очень полезно при отладке.
+
+Режим atcmd включается командой
+
+ libgsmd-tool -m atcmd
+
+Она может быть использована, как в данном примере:
+
+<pre>
+> src/util/libgsmd-tool -m atcmd
+libgsm-tool - (C) 2006 by Harald Welte
+This program is Free Software and has ABSOLUTELY NO WARRANTY
+
+AT+CPAS
+STR=`AT+CPAS'
+RSTR=`+CPAS: 0'
+AT+COPS=?
+STR=`AT+COPS=?'
+RSTR=`+COPS: (2,"E-Plus","E-Plus","26203"),(3,"o2 - de","o2 - de","26207"),(3,"Vodafone.de","Vodafone","26202"),(3,"T-Mobile D","TMO D","26201")'
+</pre>
