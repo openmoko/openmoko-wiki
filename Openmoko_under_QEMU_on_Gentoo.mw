@@ -1,21 +1,6 @@
-==IMPORTANT==
-As noted in http://docs.openmoko.org/trac/ticket/1093
-
-<strong>
-It is confirmed by upstream: gentoo's 3.4.6 doesn't build qemu on 32-bit x86. A
-gcc developer (Paul Brook) said gentoo's gcc "is broken" and nothing can be done
-outside gentoo.
-</strong>
-
-
-Please use GCC 3.3 instead.
-
-<pre>
-# emerge -va =sys-devel/gcc-3.3.6-r1
-</pre>
 
 == Introduction ==
-This page is aimed at Gentoo users new to the Openmoko project who're trying to get the QEMU emulator up and running and do some development for the project. The basic process to do this is described at [[Openmoko_under_QEMU]] however there are a number of Gentoo specific steps, not all of which are immediately obvious. This page obviously draws heavily from the main [[Openmoko_under_QEMU]] page and you should check that page for most of the details as it is more likely to be updated
+This page is aimed at Gentoo users new to the OpenMoko project who're trying to get the QEMU emulator up and running and do some development for the project. The basic process to do this is described at [[OpenMoko_under_QEMU]] however there are a number of Gentoo specific steps, not all of which are immediately obvious. This page obviously draws heavily from the main [[OpenMoko_under_QEMU]] page and you should check that page for most of the details as it is more likely to be updated
 
 The ultimate aim of this article is to get a good Gentoo process set out which can then be used as the basis for an ebuild. Ideally this would incorporate the Neo1973 qemu files into the normal Gentoo qemu build.
 
@@ -52,8 +37,14 @@ If you don't have an entry in the list for gcc3.4 then you'll have to emerge the
 
 </pre>
 
+Once you've got a valid install of gcc3.4 activate it with the following:
 
-You don't need to use gcc-config to switch the default compiler to gcc-3 - Qemu should find there right version if it's installed.
+<pre>
+# gcc-config x86_64-pc-linux-gnu-3.4.6
+# source /etc/profile
+</pre>
+
+Your system will now be using the gcc 3.4.6 compiler. Its probably best if you don't emerge anything else until you're done compiling qemu and can set it back.
 
 Now continue with the ./configure and make sections from the main article, then reset your system to the previous gcc compiler using the gcc-config command again.
 
@@ -61,8 +52,8 @@ Now continue with the ./configure and make sections from the main article, then 
 # ./configure --target-list=arm-softmmu  # GCC 3.x will be required, see --cc=
 # make
 
+# gcc-config x86_64-pc-linux-gnu-4.1.2
+# source /etc/profile
 </pre>
 
 Once you've completed the rest of the instructions set out in the main article you should have a qemu Neo1973 emulator which you can run with something similar to: arm-softmmu/qemu-system-arm -M neo -m 130 -mtdblock openmoko/openmoko-flash.image -kernel openmoko/openmoko-kernel.bin -usb -show-cursor -snapshot -usbdevice keyboard
-
-[[Category:Emulation]]
