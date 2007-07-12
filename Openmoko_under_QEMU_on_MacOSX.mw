@@ -28,7 +28,8 @@ You can get mentioned packages using darwinports:
 sudo port install quilt
 sudo port install py-psyco
 sudo port install cogito
- sudo port install gawk
+sudo port install gawk
+fink install sed
 </pre>
 
 Then get  Q[kju] project: http://www.kju-app.org/proj/wiki/CompilingQ into /Volumes/OE/Q but do not compile it yet (run only "prepare the sources"). This will be needed for compiling Neo1973 emulator.
@@ -58,7 +59,53 @@ ERROR: Error in executing: /Volumes/OE/moko/openembedded/packages/quilt/quilt-na
 ERROR: Exception:exceptions.UnboundLocalError Message:local variable 'md5data' referenced before assignment
 </pre>
 
-Anyone - any idea how to fix this? My python version is 2.4.3 so it's not the case. I also have quilt installed (by fink or darwinports - I dont remember)
+I found out that I did not have md5sum which is used by bitbake. I found it in testutils packages from fink. Installing it did not help... I got pissed and temporarily changed
+
+vim /Volumes/OE/moko/bitbake/lib/bb/fetch/wget.py +114
+
+so it look like this
+
+<pre>
+#           supposedly complete.. write out md5sum
+            md5data = ""
+            if bb.which(data.getVar('PATH', d), 'md5sum'):
+                try:
+                    md5pipe = os.popen('md5sum ' + dl)
+                    md5data = (md5pipe.readline().split() or [ "" ])[0]
+                    md5pipe.close()
+                except OSError:
+                    md5data = ""
+
+            # verify the md5sum
+            #if not verify_md5sum(wanted_md5sum, md5data):
+            #    raise MD5SumError(uri)
+</pre>
+
+As you can see there I disabled md5sum verification.
+
+If you have error like this
+
+<pre>
+
+| checking for sed... /usr/bin/sed
+| checking whether /usr/bin/sed understands (foo|bar)... no
+| configure: error:
+| Sorry, you have a version of sed which doesn't understand constructs
+| of the form (foo|bar).  quilt needs it.  If you have access to
+| a version of sed which does understand such constructs, you can supply
+| its path with the '--with-sed=' option.
+</pre>
+
+
+Install GNU sed from fink.
+
+Now I have:
+
+<pre>
+| libbb.h:53:22: error: features.h: No such file or directory
+</pre>
+
+while compiling ipkg
 
 = Patching qemu-neo1973 =
 
