@@ -137,19 +137,17 @@ Trova ed abilita '''Device Drivers''' -> '''USB support''' -> '''USB Network Ada
 
 Trova ed abilita '''Device Drivers''' -> '''USB support''' -> '''USB Network Adapters''' -> '''CDC Ethernet support (smart devices such as cable modems)'''
 
-These last two drivers are the same [[Getting Started with your Neo1973#By using Ethernet emulation over a USB cable|drivers that you need to work with a real Neo over USB network]]. After you've built the drivers, make sure that the copy of kernel headers in /usr/include/linux is up to date. In particular the file /usr/include/linux/usb_gadgetfs.h needs to be present and if your distribution came with headers older than 2.6.18 or so, then you need tell the package manager to update them, or you can do that manually with
-<pre> # cp -a /usr/src/linux/include/linux/* /usr/include/linux/</pre>
-(assuming that your kernel sources are in /usr/src/linux). It is important that this is done before building qemu because the build system checks if these headers are functional and in case they aren't found it will disable the USB Slave functionality.
+Gli ultimi due driver sono gli stessi [[Getting Started with your Neo1973/it#By using Ethernet emulation over a USB cable|che servono per usare le reti USB con i Neo reali]]. Una volta ottenuti i drivers, assicurarsi che la copia degli header del kernel sia aggiornata. In particolare il file /usr/include/linux/usb_gadgetfs.h deve essere presente. Se la tua distribuzione fornisce gli headers 2.6.18 o antecedenti, dovrai aggiornarli tramite il gestore dei pacchetti, o manualmente tramite <pre> # cp -a /usr/src/linux/include/linux/* /usr/include/linux/</pre> (assumendo che il kernel si trovi in /usr/src/linux). Questo deve essere fatto prima di compilare qemu perché il sistema verifica la presenza degli headers e se non li trova disabilita la funzione USB Slave.
 
-After building qemu and before running it, make sure that the modules are loaded into the kernel. I found it useful to load gadgetfs with the following command:
-<pre> # modprobe gadgetfs default_uid=1000  # assuming my User ID is 1000</pre>
-and added the following line to my /etc/fstab:
+Dopo la compilazione di qemu e prima di eseguirlo, assicurarsi che i moduli sono caricati nel kernel. Ho trovato utile caricare gadgetfs con il seguente comando:
+<pre> # modprobe gadgetfs default_uid=1000  # assumendo che il mio User ID sia 1000</pre>
+e aggiungendo la seguente linea al file /etc/fstab:
 <pre>gadget         /dev/gadget    gadgetfs   noauto,user,group         0   0</pre>
-Make sure that the mountpoint /dev/gadget exists:
+Assicurarsi dell'esistenza del mountpoint /dev/gadget
 <pre> # mkdir -p /dev/gadget</pre>
-After that the rest of the procedure can be performed from your regular user account. Mounting gadgetfs is done with:
+Fatto questo il resto della procedura può essere eseguito come un utente regolare. gadgetfs viene montato tramite:
 <pre> $ mount /dev/gadget</pre>
-The "default_uid" parameter changes the ownership on all files under /dev/gadget to your own and since the files there are created and destroyed dynamically, there's no easy way to have that performed by ''udev''. Now running qemu as you usually do but appending "-usb -usbgadget" should enable the USB Slave functionality. The qemu monitor commands "info usbslave" and "usb_add gadget" will be useful. The former instruction asks the OS running under the emulator (OpenMoko) to describe its slave features (that's what ''lsusb'' does after a Neo1973 is connected to a PC). You can see the available USB configurations in this command's output. Since gadgetfs allows only one configuration, we will need to choose the desired configuration - most device have only one such configuration, in which case you can use just "usb_add gadget" to connect to host; CDC ethernet devices however usually include a second configuration for RNDIS networking (i.e. Ms Windows compatibility) and so does OpenMoko when using the g_ether driver. Hence, to get this right, wait for OpenMoko to fully boot up and execute the following in QEMU monitor:
+Il parametro "default_uid" fa in modo che tutti i files sotto /dev/gadget diventino di proprietà dell'utente, siccome i files cono creati e cancellati dinamicamente, non è facile ottenerlo tramite ''udev''. Ora possiamo eseguire qemu come al solito, aggiungendo "-usb -usbgadget" dovremmo abilitare la funzionalità USB Slave. Il comando "info usbslave" e "usb_add gadget" nel monitor potrebbero essere utili. L'istruzione precedente chiede al sistema operativo eseguito nell'emulatore (OpenMoko) di descrivere le sue funzionalità (come ''lsusb'' dopo che un Neo1973 viene connesso al PC). Possiamo vedere le configurazioni USB disponibili nell'output di questo comando. Siccome gadgetfs permette una sola configurazione, dovremo scegliere quelle desiderata - la maggior parte dei dispositivi hanno solo una di queste configurazioni, in questo caso possiamo usare semplicemente "usb_add gadget" per connetterlo all'host; i dispositivi CDC ethernet solitamente includono una seconda configurazione per il networking RNDIS (i.e. compatibilità Ms Windows) e così fa anche OpenMoko quando viene usato il dirver g_ether. Quindi, per il corretto funzionamento, aspettare che OpenMoko sia caricato completamente ed eseguire i seguenti comandi nel monitor QEMU:
 <pre>
 QEMU 0.9.0 monitor - type 'help' for more information
 (qemu) info usbslave 
@@ -161,7 +159,7 @@ Configuration 1: CDC Ethernet
 (qemu) 
 (qemu) usb_add gadget:1
 </pre>
-The "1" in "usb_add gadget:N" is the number of the USB configuration that we want to use. If everything went correctly - you can check that in dmesg - you should now have a new network interface called ''usb0'' on the PC, through which you can talk to the OpenMoko running in QEMU:
+Il valore "1" in "usb_add gadget:N" è il numero della configurazione USB che vogliamo usare. Se è tutto corretto - verificare tramite dmesg - dovresti avere un'interfaccia di rete chiamata ''usb0'' nel PC, attraverso cui è possibile comunicare con l'OpenMoko in QEMU:
 <pre>
  $ dmesg | tail
 <6>gadgetfs: bound to dummy_udc driver
