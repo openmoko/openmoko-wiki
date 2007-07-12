@@ -121,21 +121,21 @@ QEMU permette il debugging del kernel del sistema operativo e dei bootloader nel
 
 Per debuggare u-boot, caricare il file "u-boot" in gdb (non "u-boot.bin"), questo file è creato da "make" durante la compilazione di u-boot. Per debuggare un kernel Linux, caricare il file "vmlinuz" dalla directory principale in gdb. Questi files sono nel formato ELF, contengono tutte le informazioni sui simboli e non sono pienamente debuggabili finché non si esegue "strip" su essi, a differenza di "u-boot.bin" e "Image"/"zImage"/"uImage". Successivamente bisogna dire a QEMU di abilitare il gdbserver tramite l'opzione "-s" o tramite "gdbserver" nel monitor. Usare il comando <pre>(gdb) target remote localhost:1234</pre> per connettersi all'emulatore. Ora dovremmo essere in grado di utilizzare i normali comandi gdb, incluse le istruzioni di stepping, breakpoints, watchpoints, visualizzazione dello stack, delle variabili, dei registri e altro. Se gdb viene eseguito nella stessa directory in cui si trova l'eseguibile ELF, il comando "edit" dovrebbe funzionare quindi saremo in grado di modificare il codice in esecuzione.
 
-== Setting up USB connection ==
+== Configurare le connessioni USB ==
 
-It is possible (although not very straight forward, probably about the complexity of tun-tap networking) to connect the virtual, emulated Neo1973 to the Linux PC on which the emulator is running, and work with it as if a real Neo1973 was plugged into the computer's USB port, but no twiddling with cables is needed. If you're testing your applications on the Neo, it may be worth setting up this kind of connection because it lets you enable normal [[USB_Networking|networking between the PC and the phone and ssh into it]] (which is much more comfortable than typing commands into the OpenMoko's terminal emulator via on-screen keyboard). Here's what you will need in order to get this working:
+Connettere il Neo1973 emulato al PC Linux su cui l'emulatore è in esecuzione, è possibile (anche se in modo non prprio diretto, probabilmente a causa della complessità del tun-tap networking) e funziona come se un Neo1973 reale fosse connesso alla porta USB del computer, senza giocare con cavi. Se stai testando la tua applicazione sul Neo, potrebbe valere la pena instaurare questo tipo di connessione perché permette il [[USB_Networking/it|networking tra il PC e ssh installato sul Neo]], che è molto più comodo rispetto all'inserire comandi dal terminale OpenMoko emulato. Di seguito è descritto cosa è necessario fare per ottenere questa configurazione:
 
-A Linux host with a 2.6 series kernel. The following drivers compiled-in or in modules: dummy_hcd, gadgetfs, usbnet, cdc_ether. Note that you need root access to perform most actions described here. Here's how to enable them in menuconfig.
+Un host Linux con un kernel 2.6. I seguenti driver come modulo o inclusi nel kernel: dummy_hcd, gadgetfs, usbnet, cdc_ether. Nota che sono necessari privilegi di root per la maggior parte dei comandi successivi. Per abilitare i driver in "make menuconfig":
 
-Find and enable '''Device Drivers''' -> '''USB support''' -> '''USB Gadget Support''' -> '''Support for USB Gadgets'''
+Trova ed abilita '''Device Drivers''' -> '''USB support''' -> '''USB Gadget Support''' -> '''Support for USB Gadgets'''
 
-Find '''Device Drivers''' -> '''USB support''' -> '''USB Gadget Support''' -> '''USB Peripheral Controller''' and set it to '''Dummy HCD (DEVELOPMENT)'''
+Trova '''Device Drivers''' -> '''USB support''' -> '''USB Gadget Support''' -> '''USB Peripheral Controller''' e impostalo come '''Dummy HCD (DEVELOPMENT)'''
 
-Find and enable '''Device Drivers''' -> '''USB support''' -> '''USB Gadget Support''' -> '''Gadget Filesystem (EXPERIMENTAL)''' (this one is good to have as a module)
+Trova ed abilita '''Device Drivers''' -> '''USB support''' -> '''USB Gadget Support''' -> '''Gadget Filesystem (EXPERIMENTAL)''' (sarebbe meglio averlo come modulo)
 
-Find and enable '''Device Drivers''' -> '''USB support''' -> '''USB Network Adapters''' -> '''Multi-purpose USB Networking Framework'''
+Trova ed abilita '''Device Drivers''' -> '''USB support''' -> '''USB Network Adapters''' -> '''Multi-purpose USB Networking Framework'''
 
-Find and enable '''Device Drivers''' -> '''USB support''' -> '''USB Network Adapters''' -> '''CDC Ethernet support (smart devices such as cable modems)'''
+Trova ed abilita '''Device Drivers''' -> '''USB support''' -> '''USB Network Adapters''' -> '''CDC Ethernet support (smart devices such as cable modems)'''
 
 These last two drivers are the same [[Getting Started with your Neo1973#By using Ethernet emulation over a USB cable|drivers that you need to work with a real Neo over USB network]]. After you've built the drivers, make sure that the copy of kernel headers in /usr/include/linux is up to date. In particular the file /usr/include/linux/usb_gadgetfs.h needs to be present and if your distribution came with headers older than 2.6.18 or so, then you need tell the package manager to update them, or you can do that manually with
 <pre> # cp -a /usr/src/linux/include/linux/* /usr/include/linux/</pre>
