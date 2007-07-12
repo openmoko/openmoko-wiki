@@ -146,6 +146,42 @@ If you want to modify applications instead of the openmoko toolchain, this is wh
 
 Then continue with MokoMakefile usage.
 
+If you want to add an application to your openmoko distribution, do this:
+All file edits should be done using quilt as described above. That way a patch can easily be submitted to the openmoko project.
+First, create a directory that will correspond to your package and edit a '''.bb''' file in there:
+  /usr/src/openmoko# cd openmoko/
+  /usr/src/openmoko/openmoko# quilt new mycoolpackage.patch
+  /usr/src/openmoko/openmoko# mkdir trunk/oe/packages/mycoolpackage
+  /usr/src/openmoko/openmoko# quilt add trunk/oe/packages/mycoolpackage/mycoolpackage_1.bb
+  /usr/src/openmoko/openmoko# quilt edit trunk/oe/packages/mycoolpackage/mycoolpackage_1.bb
+
+The file should have the following content:
+  DESCRIPTION = "This is a cool package"
+  SECTION = "username/mycoolpackage"
+  PV = "1"
+  
+  inherit autotools
+  
+  SRC_URI = "http://www.example.com/download/mycoolpackage-1.tar.gz"
+
+Explanation:
+* DESCRIPTION - Just a short text explaining the package
+* SECTION - I have no clue, but I'll use username/mycoolpackage for now
+* PV - Package Version
+* inherit autotools - The package can be compiled by './configure && make && make install' so we tell MokoMakefile to do it this way.
+* SRC_URI = ... - This is the download location of the package source. It's imperative that the tar.gz contains a directory called '''packagename-packageversion''' (in this case: mycoolpackage-1) so that MokoMakefile can find it automatically or the build will fail.
+
+This is not all. We also need to tell MokoMakfile that it needs to build and include the package in the image. To do this, do
+  /usr/src/openmoko/openmoko# quilt edit trunk/oe/packages/tasks/task-openmoko.bb
+Here, increase the value '''PR''' by one and add '''mycoolpackage \''' (with the backslash!) just before the line reading '''#  update-alternatives \'''.
+
+Now run
+  /usr/src/openmoko/openmoko# quilt refresh
+  /usr/src/openmoko/openmoko# cd ..
+  /usr/src/openmoko# make update all
+
+And if everything's alright you should now have an OpenMoko image to flash to your phone or run in qemu as described above.
+
 ===Testimonials=== 
 MokoMakefile is recommended by 4 out of 4 new developers on #openmoko, with testimonials such as "For some reason last night I couldn't get my manual install of everything to work (bb complained about my bbpath I think) ... but with your makefile, it works great!", and "MokoMakefile rocks!".
 
