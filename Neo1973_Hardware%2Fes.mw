@@ -1,0 +1,245 @@
+[[OpenMoko]] Es un conjuto de aplicaciones (programas) que se encuentran en un nivel superior sobre una determinada plataforma (sin importar cual sea).El [[:Category:Neo1973 Hardware | sistema físico (Hardware)del Neo1973 ]] es la primera plataforma que toma la ventaja de usar la distribución [[OpenMoko| OpenMoko ]]. Puede encontar las epecificaciones del [[:Category:Neo1973 Hardware | Neo1973]] leyendos estas páginas de introducción y las páginas especifícas para el [[:Category:Neo1973 Hardware | Neo1973 ]] descritas en la parte de abajo.
+
+[[Image:Gta01b v3 top.jpg|thumb|400px|Pantalla (parte frontal)]]
+[[Image:Gta01b v3 bottom.jpg|thumb|400px|Componentes (parte trasera)]]
+
+==Experiencias de los usuarios con el hardware de Fase 0==
+[[Wishlist:Neo1973_P0_Review]]
+
+== Dimensiones físicas ==
+* 120,7 x 62 x 18,5 mm (4,75 x 2,44 x 0,728 inch)
+* 184 +/- 5 g (6,5 ounces)
+
+== Componentes principales ==
+=== Procesador ===
+El «cerebro» del sistema (CPU) Neo1973 es un Samsung S3C2410AL-26 (Con una frecuencia máxima de 266 MHz)
+
+* Página del procesador: [http://www.samsung.com/products/semiconductor/MobileSoC/ApplicationProcessor/ARM9Series/S3C2410/S3C2410.htm S3C2410.htm]
+* Manual de usuario: [http://www.samsung.com/Products/Semiconductor/MobileSoC/ApplicationProcessor/ARM9Series/S3C2410/2410UserManual.pdf 2410UserManual.pdf]
+* Archivo BSDL: [http://www.samsung.com/Products/Semiconductor/MobileSoC/ApplicationProcessor/ARM9Series/S3C2410/S3C2410_BGA_BSDLJTAGFILE.bsd S3C2410_BGA_BSDLJTAGFILE.bsd]
+* Descripción de terminales (GPIO Assignments): https://svn.openmoko.org/trunk/doc/hardware/GTA01Bv3/gpio.txt
+
+=== Memoria Flash ===
+64MB Samsung NAND flash (K9F1208U0B) unida al controlador NAND S3C2410.
+
+* Página de la memoria: [http://www.samsung.com/products/semiconductor/NANDFlash/SLC_SmallBlock/512Mbit/K9F1208U0B/K9F1208U0B.htm K9F1208U0B.htm]
+* Hojas de datos: [http://www.samsung.com/Products/Semiconductor/NANDFlash/SLC_SmallBlock/512Mbit/K9F1208U0B/ds_k9f1208x0b_rev03.pdf ds_k9f1208x0b_rev03.pdf]
+* Conectado a: Controlador NAND S3C2410.
+
+Ésta es la única memoria flash del dispositivo.  El procesador S3C2410 se inicia directamente desde la nand usando el [[S3C2410 Steppingstone]].
+
+Sólo usamos programas libres (free software) y sistemas de archivos no propietarios para la flash. Para una descripción más detallada sobre cómo se ha usado, por favor diríjase a:[[NAND bad blocks]]
+
+=== Memoria RAM ===
+128MB SDRAM (2x Samsung K4M511633C) unida al controlador SDRAM S3C2410.
+* Página del producto: [http://www.samsung.com/Products/Semiconductor/MobileSDRAM/MobileSDRSDRAM/512Mbit/K4M511633C/K4M511633C.htm K4M511633C.htm]
+* Hojas de especificaciones: [http://www.samsung.com/Products/Semiconductor/MobileSDRAM/MobileSDRSDRAM/512Mbit/K4M511633C/ds_k4m511633c.pdf ds_k4m511633c.pdf]
+* Conectado a: S3C2410 
+
+===Sistema de comunicación GSM/GPRS ===
+El sistema de comunicación (módem) GSM/GPRS está basado en el sistema Calypso de Texas Instruments.
+
+* Conectado a: S3C2410 UART1 (full-uart, RxD, TxD, CTS, RTS), /dev/ttySAC0 en el espacio de usuario
+* Controlador PM: [https://svn.openmoko.org/trunk/src/target/kernel/patches/gta01-power_control.patch]
+* Jack de antena GSM/GPRS accesible (al retirar la tapa de la batería)
+
+==== Circuito Integrado de Banda Base Digital CALYPSO ====
+Lamentamos no poder suministrar muchos detalles del Chipset GSM debido a exigencias estrictas establecidas en los Acuerdos de Confidencialidad (Non Disclosure Agreement, NDA). No obstante, el acceso a este nivel de información puede ser innecesario, puesto que este circuito integrado se conecta con el S3C2410 por medio de una conexión serie  serie -UART- estándar. Esta interfaz está basada en siguientes normas:   [http://www.3gpp.org/ftp/Specs/archive/07_series/07.05/ GSM 07.05], [http://www.3gpp.org/ftp/Specs/archive/07_series/07.10/ GSM 07.10]
+
+==== Circuito Integrado de Banda Base Analógica TWL3014 ====
+Página del producto: [http://focus.ti.com/general/docs/wtbu/wtbuproductcontent.tsp?templateId=6123&navigationId=12295&contentId=4703 TWL3014]
+
+==== Emisor-receptor RF TRF6151 ====
+Página del producto: [http://focus.ti.com/general/docs/wtbu/wtbuproductcontent.tsp?templateId=6123&navigationId=12296&contentId=4701 TRF6151] <br>
+Soporta cuatro bandas RF<br>
+Soporta GPRS Clases 12/CS4 <br>
+
+=== [[Hardware:AGPS|AGPS]] ===
+Hammerhead PMB 2520 AGPS de Global Locate.
+
+* Página del producto: [http://www.globalocate.com/SEMICONDUCTORS/SEMI_HAMMER_Frameset.htm Hammerhead]
+* Conectado a: S3C2410 UART2 (full-uart, RxD, TxD, CTS, RTS) /dev/ttySAC1 in userspace
+* Controlador: Implemented as plugin for the gpsd daemon ([[gpsd]])
+* Controlador PM: https://svn.openmoko.org/trunk/src/target/kernel/patches/gta01-power_control.patch
+* Conector de antena GPS accesible externamente del tipo MMCX
+
+No habrá un driver funcional hasta al menos mitad de Abril.
+
+=== microSD-Card ===
+El Neo1973 dispone de una microSD, también conocida como ranura Transflash. 
+Deberia también soportar SDHC, pero esta funcion no ha sido verificada. Si funciona, las tarjetas >2G deberian funcionar sin problemas. Como no existen tarjetas microSD sobre 2G por el momento, no ha sido posible realizar las verificaciones.
+
+MicroSD slot is [[Disassembling_Neo1973#Opening_back_cover|under battery]].
+* Connected to: S3C2410 MMC/SD controller
+* Driver: https://svn.openmoko.org/trunk/src/target/kernel/patches/s3c_mci.patch
+* [[Supported microSD cards]]
+* Specifications: [http://www.sdcard.org/confirm/confirm_memorycard.aspx SD Simplified Specification], [http://www.mmca.org/compliance/buy_spec/AN_MMCA050419.pdf MMC (partial)], [http://www.sandisk.com/Assets/File/OEM/Manuals/manual-rs-mmcv1.0.pdf MMC (product manual)]
+
+=== Pantalla de cristal líquido. (LCD)-(LCM) ===
+Tiene un tamaño de 2,8 púlgadas -diagonal- (1,7" x 2,27" - 43mm x 58mm) con un tamaño de 480x640 pixeles. Usa el los módulos TD028TTEC1 y el Toshiba JBT6K74 TFT como controlador de la pantalla (LCD).
+* Página: [http://www.tpo.biz/ENG/business-eng/Activer-Matrix-VGA.htm Activer-Matrix-VGA.htm]
+* Controladores: https://svn.openmoko.org/trunk/src/target/kernel/patches/gta01-jbt6k74.patch
+* Controlador de iluminación (backlight): https://svn.openmoko.org/trunk/src/target/kernel/patches/gta01-backlight.patch
+* En interfaz con: S3C2410 controlador y S3C2410 SPI -Serial perihal intrerface- primer canal
+
+==== Pantalla táctil. (Touch Screen) ====
+* EL integrado:S3C2410 TS.
+* El controlador: https://svn.openmoko.org/trunk/src/target/kernel/patches/s3c2410_touchscreen.patch
+
+====  ====
+
+Aparentemente es similar a: [http://cgi.ebay.com/4in1-PDA-Stylus-LED-Light-Torch-Laser-Pointer-Pen-h7_W0QQitemZ280089656134QQihZ018QQcategoryZ48677QQrdZ1QQcmdZViewItem  ebay]
+
+=== Bluetooth ===
+Delta DFBM-CS320 Class2 Module,  CSR BlueCore4
+
+* Hoja de datos: [http://www.delta.com.tw/product/cp/vco/BT/download/pdf/CS/2.DFBM-CS320.pdf 2.DFBM-CS320.pdf]
+* Hoja de datos de CSR : [http://www.csrsupport.com/download/2302/CS-101564-DSP10%20BlueCore4-ROM%20Product%20Data%20Sheet.pdf CS-101564-DSP10 BlueCore4-ROM Product Data Sheet.pdf]
+* Controlador: Stock Linux Kernel BlueZ
+* En interfaz con: S3C2410 USB Host controller (OHCI)
+* Controlador de energía (PM) : https://svn.openmoko.org/trunk/src/target/kernel/patches/gta01-power_control.patch
+
+=== Vibrador ===
+* Controlador: https://svn.openmoko.org/trunk/src/target/kernel/patches/gta01-vibrator.patch
+* Conectado a: S3C2410 sistema general de entradas y salidas :) (GPIO).
+
+=== Huesped USB  ===
+El controlador USB está incluído en  S3C2410
+* Controlador: Núcleo de linux(Kernel) ohci_hcd
+
+=== USB Device ===
+The USB Device controller is inside the S3C2410 
+* Driver: https://svn.openmoko.org/trunk/src/target/kernel/patches/s3c2410_udc.patch
+* Please see [[USB Product IDs]] on information about which Vendor/Product IDs we use
+* 1200mAh lithium battery charges when connected to powered host.
+* Mini-AB connector similar to [http://www.cypressindustries.com/shoponline/proddetail.asp?prod=CCMUSBAB-32005-700&cat=34 this one].
+
+=== Audio ===
+Puede ver: [[Neo1973 Audio Subsystem]]
+
+==== Protocolo (codec) Wolfson  ====
+There's a WM8753 Wolfson Microelectronics CODEC (This is not a 'smart' codec that can interpret MP3/... it is a simple dumb 'sound card'.
+* Product Homepage: http://www.wolfsonmicro.com/products/WM8753/
+* Data Sheet: [http://www.wolfsonmicro.com/uploads/documents/en/WM8753.pdf WM8753.pdf]
+* Connected to: S3C2410 IIS interface (PCM data), S3C2410 I2C (Control)
+* Driver: https://svn.openmoko.org/trunk/src/target/kernel/patches/asoc.patch
+
+==== Aplificador Estéreo -bifónico-  ====
+There's a National Semiconductor [[LM4857]] Stereo Amplifier at the analog audio output of the WM8753
+
+* Product Homepage: [http://www.national.com/pf/LM/LM4857.html LM4857.html]
+* Data Sheet: [http://www.national.com/ds.cgi/LM/LM4857.pdf LM4857.pdf]
+* Connects to: S3C2410 I2C (Control)
+
+==== Audífonos (auriculares) analógicos ====
+There's a four-ring 2.5mm stereo jack which provides connectivity to old-fashioned wired headsets.
+
+The headsets used by Motorola smartphones (A780,A1200, ...) and the V-360 have a compatible configuration.
+
+==== Bluetooth Headset ====
+This one is wired via PCM bus from the CSR Bluetooth chip to the Wolfson codec.
+
+=== Control de energía ===
+El integrado PCF50606 de Philips es usado para tal fin.
+
+* Hoja de datos: [http://www.nxp.com/acrobat/literature/9397/75009763.pdf PCF50606/605]
+* Manual de usuario: [http://www.rockbox.org/twiki/pub/Main/DataSheets/pcf50606.pdf pcf50606.pdf]
+* Coenctado a: S3C2410 vía I2C, la dirección del cliente es 0x08. 
+* Fuientes del controlador: https://svn.openmoko.org/trunk/src/target/kernel/patches/gta01-pcf50606.patch
+
+=== Pilas (batería o celdas de energía) ===
+La  [[celda de energía Neo1973 ]] es compatible con la betría BL5C de Nokia.
+De acuerdo a [http://lists.openmoko.org/pipermail/community/2007-February/003758.html ver]Lista .
+[http://wiki.openmoko.org/index.php?title=Image:Neo1973-with-BL5C-battery.png Foto] de la pila, dentro del Neo1973.
+
+=== Botones ===
+El Neo1973 posee dos botones:
+# [[Neo1973 Power button|Botón de prendido]]
+# [[Neo1973 AUX button|Botón «auxiliar»]]
+
+== Historia ==
+=== GTA01 ===
+El primer prototipo, el más simple y sin «bluetooth».
+
+==== GTA01v3 ====
+First generation of prototypes that was given to internal OpenMoko software developers.
+
+Unfortunately not useful at all due to non-working touchscreen.
+
+* ATAG_REVISION: 0x0000130
+
+==== GTA01v4 ====
+Second generation of prototypes that was given to Harald + Mickey.
+
+Unfortunately still not useful due to half-working touchscreen.
+
+* ATAG_REVISION: 0x00000140
+
+=== GTA01B ===
+This is the bluetooth-enabled fork of GTA01
+
+==== GTA01Bv2 ====
+This is the first produced version of the bluetooth-enabled version.
+
+* ATAG_REVISION: 0x00000220
+
+==== GTA01Bv3 ====
+This is the second produced version of the bluetooth-enabled version. It contains mainly GPS-related fixes.
+
+* ATAG_REVISION: 0x00000230
+
+This is the version that is shipped in Phase 0
+
+===== GTA01Bv3 Errata =====
+====== PMU unable to resume from suspend ======
+Due to use of wrong GPIO/EINT pin, the PMU cannot wake-up the phone after suspend.  This means, specifically, '''the following events can not bring the phone back from suspend-to-ram''':
+* PMU RTC Alarm
+* Power button press
+* Charger events (charger insertion/removal/error)
+* Low battery
+
+====== Stand-by time extremely low ======
+This is due to a design bug resulting in at least 30mA additional standby current, since we cannot properly switch off the power supply to the S3C2410 PLL's.  There is nothing we can do to change this with post-production fixes.  GTA01Bv4 will address this issue.
+
+====== GSM doesn't resume phone from suspend ======
+The GSM modem currently doesn't signalize a wakeup interrupt to the S3C2410 in case there's some noteworthy event, such as incoming call, loss of network, incoming SMS or the like.
+
+This is a serious issue, but can be fixed with a GSM Modem Firmware update.
+
+====== GSM Sidetone too loud ======
+The local feedback sidetone (see [http://en.wikipedia.org/wiki/Sidetone]) is too loud.  This will be addressed in a GSM firmware update
+
+====== Bad block ======
+Due to an error in the production process, the factory-programmed NAND bad block information has been lost.  This means that some blocks in the flash will wear out rapidly, which might become as bad as rendering the device unusable.
+
+==== GTA01Bv4 ====
+This is the version that will be shipped in Phase 1
+
+===== Vistas =====
+Esta es las vista del impreso GTA01Bv4.
+[[Image:Gta01b_v4_front.png|thumb|400px|Lado de los componentes]]
+[[Image:Gta01b_v4_back.png|thumb|400px|Lado de la pantalla]]
+
+===== Changes from GTA01Bv3 =====
+# Fix all Errata items from GTA01Bv3
+# Add I2C, SPI and one irq and wakeup capable GPIO pin to debug port plus have test pads for all these signals (for soldering wires directly on the pcb)
+# Fix a number of production related details and minor hardware details that are not user-visible
+
+== Distinguishing hardware revisions ==
+=== Inside the [[Bootloader]] ===
+Every hardware revision has its own u-boot image type.  Thus, the bootloader has the revision hard-coded.
+The hardware revision is passed on to the kernel via the ATAG mechanism (ATAG_REVISION)
+
+=== Inside the [[Kernel]] ===
+The kernel receives the ATAG_REVISION during bootup, and saves its contents in the "system_rev" global variable.
+
+=== From Userspace ===
+The kernel exports the system_rev variable in /proc/cpuinfo as "Revision :" line.
+
+== Approval ==
+*[http://www.cetest.nl/ CE] '''(Is this the proper site for CE?)'''
+*[http://www.fcc.gov/ FCC]
+
+{{Languages|Neo1973 Hardware}}
+
+[[Category:Neo1973 Hardware/es]]
