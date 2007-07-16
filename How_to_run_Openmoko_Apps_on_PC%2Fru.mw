@@ -1,16 +1,26 @@
-===Необходимое для сборки===
+[[Image:Screenshot.png|thumb|500px|''Работающая демка OpenMoko Stylus на Ubuntu в сравнении с OpenMoko под qemu'']]
+===Необходимое для сборки/установки===
 
-* Используйте aptitude, apt-get, urpmi, или любой другой чтобы установить необходимое
-* Вам понадобиться
+* Используйте aptitude, apt-get, urpmi или любой другой менеджер пакетов вашего дистрибутива чтобы установить необходимое.
+* Вам понадобятся пакеты:
 ** gtk-dev
 ** pango-dev
 ** atk-dev
-** qmake из Qt4 (libqt4-dev в Debian) - опционально и нужно если только если не используете auto-tools method
+** qmake из Qt4 (libqt4-dev в Debian) - опционально и нужно если только если не используете метод auto-tools.
 
-* в ubuntu: apt-get install libgtk2.0-dev pulls in everything necessary
+* В ubuntu с использованием auto-tools: apt-get install libgtk2.0-dev libecal1.2-dev automake1.10 libxosd-dev
 
 ===Сборка программ===
 ====Сборка с помощью GNU auto-tools====
+
+=====Сборка libgsmd=====
+
+  cd <svn-checkout>/src/target/gsm
+  ./autogen.sh
+  make
+  sudo make install
+
+В результате будет собран и установлен libgsmd, который необходим для следующих шагов.
 
 =====Настраиваем окружение=====
 
@@ -20,7 +30,7 @@
   make
   sudo make install
 
-This will install the libraries in /usr/local/lib. If you prefer a non-system location, edit autogen.sh (and remember that an SVN update may undo that) to  add a "--prefix=MYDIR" option for where you want to put the compiled stuff. You can the run "make install" without sudo. One approach is to put stuff at the source root, by appending the option: "--prefix=$OPENMOKODIR".
+Таким образом производится установка в /usr/local/lib. Если вы предпочитаете несистемное размещение библиотек, отредактируйте autogen.sh (и помните, что обновление из SVN может откатить это), добавив параметр "--prefix=MYDIR" и укажите путь, куда нужно поместить откомпилированные файлы. Вы можете выполнить "make install" без sudo. Единый подход - это разместить откомпилированные файлы в корне исходников, добавив параметр: "--prefix=$OPENMOKODIR".
 
 =====Собираем простые приложения=====
 
@@ -29,14 +39,15 @@ This will install the libraries in /usr/local/lib. If you prefer a non-system lo
   make
   sudo make install
 
-If you used --prefix in the previous step to place the libraries elsewhere, make sure you edit autogen.sh to reflect that. I guess the proper way to do this is to set the PKG_CONFIG_PATH variable. You can of course drop the sudo then.
+Если вы использовали --prefix в предыдущем шаге для размещения библиотек где-то в другом месте, то необходимо отредактировать autogen.sh соответствующим образом.
+Полагаю, что правильный путь - это установить переменную PKG_CONFIG_PATH. В этом случае можно отказатся от sudo.
 
   ...
   export PKG_CONFIG_PATH=$OPENMOKODIR/lib/pkgconfig
   ./configure ...
 
 ====Сборка с помощью QMake (the mickeyl way)====
-{{Note|qmake is Mickey's preferred build tool, it probably doesn't work if you're not him. Please use autotools...}}
+{{Note|qmake это любимая тулза  Mickey, возможно это не работает, если вы не он. Пожалуйта, используйте autotools...}}
 
 =====Собираем всё за раз с помощью Qmake=====
 
@@ -47,27 +58,27 @@ If you used --prefix in the previous step to place the libraries elsewhere, make
 
 Теперь все приложения доступны в ./bin.
 
-===Run the examples===
+=== Запуск примеров ===
 
-====Set your theme to OpenMoko====
+==== Настройте тему для OpenMoko ====
 
-Set the GTK2_RC_FILES variable before running OpenMoko applications:
+Установите переменную GTK2_RC_FILES перед запуском приложений OpenMoko:
 
   export GTK2_RC_FILES=$OPENMOKODIR/artwork/themes/openmoko-standard/gtk-2.0/gtkrc
 
-Or edit $HOME/.gtkrc-2.0 to something like this:
+Или отредактируйте файл $HOME/.gtkrc-2.0, указав что-то вроде этого:
 
   include "<PATH-to-svn-checkout>/src/target/OM-2007/artwork/themes/openmoko-standard/gtk-2.0/gtkrc"
 
-However, this will make all Gtk2 apps run with the OpenMoko theme.
+Однако, это заставит все Gtk2 приложения работать с темой OpenMoko.
 
-==== Naked execution ====
+==== Простой запуск ====
 
   bin/openmoko-stylus-demo
   bin/openmoko-finger-demo
   bin/openmoko-chordmaster
 
-==== Execution within Xoo ====
+==== Запуск внутри Xoo ====
 
-Adjust svn://src/target/OM-2007/devel/scripts/launch-xoo to your needs (you may need to build some dependencies forehand)
-Then set DISPLAY=:1 and run the examples
+Настройте svn://src/target/OM-2007/devel/scripts/launch-xoo как вам нужно (возможно, вам понадобитмя собрать некоторые зависимости заранее)
+Затем задайте DISPLAY=:1 и запускайте приложения
