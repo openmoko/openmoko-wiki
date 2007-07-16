@@ -36,18 +36,25 @@ Add a new chroot configuration:
 
  echo "OpenMoko /var/chroot" | sudo tee -a /etc/dchroot.conf
 
-Edit /etc/fstab and insert:
+Edit /etc/fstab and insert skip this to mount manually:
  /tmp            /var/chroot/tmp         none    bind            0       0 
  proc-chroot     /var/chroot/proc        proc    defaults        0       0 
  devpts-chroot   /var/chroot/dev/pts     devpts  defaults        0       0 
-
-Mount binded directories and copy over you /etc/resolv.conf:
  mount -a
+
+Manual mount:
+ mount -o bind /tmp /var/chroot/tmp
+ mount -t proc proc-chroot /var/chroot/proc
+ mount -t devpts devpts-chroot /var/chroot/dev/pts
+
+Copy over you /etc/resolv.conf:
  cp /etc/resolv.conf /var/chroot/etc/
 
-Start the chroot environment:
- dchroot -d -c OpenMoko    # -d to take the environment variables with you
+As the user who started X11:
+ xhost +                   # assuming you are behind NAT
 
+Start the chroot environment (as root again):
+ dchroot -d -c OpenMoko    # -d to take the environment variables with you
 
 === Starting the Emulation ===
 
