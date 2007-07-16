@@ -16,6 +16,11 @@ Get the Image (about 3.2 GB) from http://b030.tfh-berlin.de/OpenMoko-Dev-x86_200
  wget http://b030.tfh-berlin.de/OpenMoko-Dev-x86_2007-07-16.img.bz2
 
 
+Check the md5sum:
+ md5sum OpenMoko-Dev-x86_2007-07-16.img.bz2
+ # it print "41715e06d7e59a94e4f05cf33ba054b5  OpenMoko-Dev-x86_2007-07-16.img.bz2"
+
+
 You will need to decompress the Image (about 15 Gbyte). An you'll also need the chroot software
 and loop back device support in your kernel.
 
@@ -23,19 +28,20 @@ and loop back device support in your kernel.
 
 To install chroot in GNU/Debian / Ubuntu you can use:
 
+ sudo sh
  apt-get install dchroot
 
 
 ==== To mount and activate the chroot image use ====
 
  mkdir /var/chroot
- mount -o loop image-file.img /var/chroot
+ mount -o loop OpenMoko-Dev-x86_2007-07-16.img /var/chroot
 
 Add a new chroot configuration:
 
- echo "OpenMoko /var/chroot" | sudo tee -a /etc/dchroot.conf
+ echo "OpenMoko /var/chroot" | tee -a /etc/dchroot.conf
 
-Edit /etc/fstab and insert skip this to mount manually:
+Edit /etc/fstab and insert ''skip this to mount manually'':
  /tmp            /var/chroot/tmp         none    bind            0       0 
  proc-chroot     /var/chroot/proc        proc    defaults        0       0 
  devpts-chroot   /var/chroot/dev/pts     devpts  defaults        0       0 
@@ -46,7 +52,7 @@ Manual mount:
  mount -t proc proc-chroot /var/chroot/proc
  mount -t devpts devpts-chroot /var/chroot/dev/pts
 
-Copy over you /etc/resolv.conf:
+Copy your /etc/resolv.conf:
  cp /etc/resolv.conf /var/chroot/etc/
 
 As the user who started X11:
