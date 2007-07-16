@@ -78,31 +78,30 @@ Se ottieni l'errore per tre volte consecutive dopo l'esecuzione di questa sequen
 I work-arounds sui problemi temporanei o isolati andrebbero aggiunti alla [[Talk:MokoMakefile|Discussion page]] associata a questa pagina. Nel momento in cui saranno risolti, verranno rimossi dalla pagina.
 
 ===Tips=== 
-*You can reduce the amount of consumed disk space significantly by adding
+*Puoi ridurre significativamente il consumo di spazio su disco aggiungendo
    INHERIT += "rm_work"
-in your local.conf (e.g. /home/moko/build/conf/local.conf). This will remove the contents of each build/tmp/work/*/<package> directory after the corresponding package builds correctly.
+al file local.conf (e.g. /home/moko/build/conf/local.conf). Questo rimuoverà il contenuto di ogni directory build/tmp/work/*/<package> dopo la compilazione del package corrispondente.
 
-
-*If you an encounter an error with monotone similar to the following:
+*Se si ottiene un errore simile al seguente:
    mtn: misuse: database /home/moko/OE.mtn is laid out according to an old schema
-Then you need to upgrade OE.mtn  Use the following command while in /home/moko:
+Allora c'è bisogno di aggiornate OE.mtn Utilizzare il seguente comando in /home/moko:
    # mtn --db OE.mtn db migrate
 
-*If a certain package does not build due to corrupted download or some such try to remove the sources and rebuild it.
+*Se un determinato package non viene compilato a causa di un download corrotto o per motivi simili, prova a rimuovere i sorgenti e ricompilarlo.
  rm sources/<package>*
  cd build
  . ../setup-env
  bitbake -crebuild <package>
-after that your build might just work again.
+dopo questi comandi la compilazione dovrebbe terminare con successo.
 
-*For people with multiple CPU's (or dual-core ones) this small patch might be useful to build things faster.
-Edit the local.conf and add the following lines:
+*Per chi ha diverse CPU (o diversi core) questa piccola modifica sarà utile per compilare più velocemente.
+Modifica il file local.conf aggiungendo le seguenti righe:
  PARALLEL_MAKE = "-j 4"
  BB_NUMBER_THREADS = "4"
 
-Change the PARALLEL_MAKE and BB_NUMBER_THREADS values to something that suits better if it chokes your machine.
+Cambia i valori PARALLEL_MAKE e BB_NUMBER_THREADS a seconda del numero di CPU della macchina.
 
-*For amd64 host users you need the patch from http://bugs.openembedded.org/show_bug.cgi?id=1765 to build db3-native
+*Per gli host amd64 è necessaria la patch http://bugs.openembedded.org/show_bug.cgi?id=1765 per la compilazione db3-nativa.
 
 ===QEMU===
 The MokoMakefile now has support for automatically building, flashing, and running [[OpenMoko under QEMU|the new Neo1973 emulator]] (which is based on QEMU).
