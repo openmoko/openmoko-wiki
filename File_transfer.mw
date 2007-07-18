@@ -1,77 +1,6 @@
-{{languages}}
-The Openmoko hardware and software offer several ways to transfer files to and from the system.
+The OpenMoko hardware and software offer several ways to transfer files to and from the system.
 
-== SCP ==
-
-Examples use the IP address of the default USB network setup on Om 2008.8. If you use a different connection, for example Wifi, use the Wifi IP address of the phone.
-
-copy a file from Openmoko smartphone to to PC type this on your PC:
-
- scp root@192.168.0.202:/full/path/to/filename .
-
-from phone's /home/root you can use shorter format:
-
- scp root@192.168.0.202:filename .
-
-to copy file to the SD card in phone type this on your PC:
-
- scp filename root@192.168.0.202:/media/card/
-
-to recursively copy a directory to the phone, use -r:
-
- scp -r somedirectory root@192.168.0.202:
-
-For convenience, add this to your <tt>~/.ssh/config</tt>, then you can replace <tt>root@192.168.0.202</tt> with <tt>moko</tt>. This also works for sshfs.
-
- Host moko
- 	HostName 192.168.0.202
- 	User root
-
-== SSHFS ==
-
-You can use sshfs to mount directories on your Openmoko smartphone into directories on your desktop computer. Sshfs uses and fuse, so you need to have access to <tt>/dev/fuse</tt> by adding yourself to the <tt>fuse</tt> group.
-
-* Ensure sshfs is installed.
- $ sudo apt-get install sshfs
-* Ensure the fuse module is loaded. (Should already be running in ubuntu).
- $ lsmod | grep fuse
-* If not just do the following,
- $ sudo modprobe fuse
-* Add user to fuse group replacing username with whichever username you need.
- $ sudo adduser username fuse 
-
-This <tt>Makefile</tt> makes it very easy to mount and umount sshfs.
-
-<pre>
-# Usage: set the three vars here and then type 
-# make moko
-# that will create "moko" in the current dir and mount the specified path
-# You need sshfs installed and your user added to "fuse" group on your PC.
-moko_h=root@192.168.0.202
-moko_p=/
-mokocard_h=$(moko_h)
-mokocard_p=/media/card
-#remote_h=example.org     # host or ip
-# to specify a user, add $USER@ or add appropriate line in ~/.ssh/config
-#remote_p=/path/to/mount  # uses home if left empty
-
-%:
-	mkdir -p $(PWD)/$*
-	sshfs -C -o reconnect -o idmap=user $($*_h):$($*_p) $(PWD)/$* || rmdir $(PWD)/$*
-
-# makes symlinks appear as real files/dirs, can be useful sometimes
-%_:
-	mkdir -p $(PWD)/$*
-	sshfs -C -o reconnect -o idmap=user -o follow_symlinks $($*_h):$($*_p) $(PWD)/$* || rmdir $(PWD)/$*
-
-# "make moko-" unmounts
-%-:
-	-fusermount -u $(PWD)/$*
-	rmdir $(PWD)/$*
-</pre>
-:Originally created by [[User:Zash|Zash]] for convenient web server access.
-
-Type <tt>make moko</tt> to mount and <tt>make moko-</tt> to umount, once you have [[USB_Networking]] set up.
+''WARNING: This information is based on personal account possibly using an old system (uname -a: Linux fic-gta01 2.6.20.7-moko8 #2 PREEMPT Wed May 2 14:45:45 CST 2007 armv4tl unknown)'' --kinscore
 
 == TFTP ==
 client ('tftp')
@@ -79,45 +8,19 @@ client ('tftp')
 server?
 
 == NFS ==
-client (on Neo: 'mount -t nfs ...' or edit /etc/fstab and '/etc/init.d/mountnfs.sh start')
+client ('mount -t nfs ...', '/etc/init.d/mountnfs.sh start')
 
-My Neo didn't have a mount.nfs(4), although it did have nfs in the /proc/filesystems. `opkg list | grep nfs` also had nothing. Here is how I how my NFS:
- Find nfs-common for armel (not just 'arm') here:
-  http://packages.debian.org/sid/armel/nfs-common/download
- Download and install it on the Neo like this:
-  cd /tmp
-  wget ftp://ftp.debian.org/debian/pool/main/n/nfs-utils/nfs-common_1.1.4-1_armel.deb
-  ar -x nfs-common_* data.tar.gz
-  tar -xz -C / -f data.tar.gz
-  rm -f nfs-common_* data.tar.gz
-  cd -
-Now you can mount.nfs4 as normal.
-Note that the above also installs manpages and nonsense. Also, since we didn't use the real APT or dpkg tools (because they're not part of OpenEmbedded), this doesn't authenticate packages.
-
-server: man 5 exportfs
+server?
 
 == HTTP ==
-client (on Neo: 'wget',web browser)
+client ('wget',web browser)
 
 == MicroSD ==
-None to date.
+I didn't get this working --kinscore
 
-== SFTP ==
-SFTP can be an excellent way to transfer files as it is supported by many possible clients on the desktop machine. After USB network is set up, it is possible to try to open sftp connection by entering sftp://192.168.0.202 or sftp://{username}:{password}@192.168.0.202  into the address bar of the browser that supports sftp.
+== common methods not supported ==
+FTP
 
-You can also use the sftp console client under Linux or something like psftp.exe, the sftp client that goes with PuTTY for Windows.
+SFTP
 
-Name and password is the same as for normal logins (root and no password by default).
-
-== FTP ==
-FTP is currently considered insecure. There is no reason to use FTP, SFTP should be used instead.
-
-(But wait, if one's network is just the desktop and the phone, aren't all the encrypted methods a little wasteful?)
-
-== USB Mass Storage ==
-The Freerunner can be configured to appear as a USB mass storage device to the desktop.  see [[Using the Neo as a Mass storage device]].
-
-== Common methods not supported ==
-*Bluetooth (except via other network methods)
-
-[[Category:Middleware]]
+Bluetooth (except via other network methods)
