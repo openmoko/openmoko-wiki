@@ -22,6 +22,41 @@ http://buildhost.openmoko.org/tmp/deploy/images/openmoko-devel-image-fic-gta01-2
 
 Please note that this image may take long to boot the first time, since this boot finishes the installation process.
 
+=== Mounting the JFFS2 image on a loop back (MTD RAM) device ===
+
+As mounting the JFFS2 image from /dev/loop0 device is not supported, use the mtdram device as described in http://www.handhelds.org/hypermail/familiar/62/6232.html
+
+ modprobe mtdcore
+ modprobe jffs2
+ modprobe mtdram total_size=59024  # default is 4 MByte - set to max. available size
+ modprobe mtdchar
+ modprobe mtdblock
+
+Using ''total_size=59024'' will set the filesystem size to the available space on /dev/mtd4 of the GTA1 device. So when you copy the image back it will be about 58 MB. You can set this to smaller values though.
+
+
+Be careful to really use the mtd-ram-disk (maybe there is a real Flash-device somewhere in your development system)
+
+So check for that looking into /proc/mtd:
+ cat /proc/mtd 
+ # dev:    size   erasesize  name
+ # mtd0: 039a4000 00020000 "mtdram test device"
+
+Then write the image to that device and mount it:
+
+ dd if=<rootfs.jffs2> of=/dev/mtd0
+ mount /dev/mtdblock0 <mountpoint>
+
+==== create the new image ====
+To get the changed image back there are two ways. The obvious one is to unmount it and copy the data back from the MTD block device (the image will be 58 MB):
+
+ umount /dev/mtdblock0
+ dd if=/dev/mtdblock0 of=<rootfs.jffs2>
+
+You can also create a new image using the mounted file system and the method described [[Userspace_root_image#Creating_a_root_filesystem_from_scratch | above]] (the image will have the size of its data):
+ 
+ mkfs.jffs2 --pad=0x700000 -o new_rootfs.jffs2 -e 0x4000 -n -d <mountpoint>
+
 == Flashing a root filesystem into NAND ==
 
 See [[U-boot#Writing_rootfs_to_NAND]]
