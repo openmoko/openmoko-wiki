@@ -1,0 +1,134 @@
+Some first steps guide for those who have just received their first Neo1973 hardware
+
+== Matériel ==
+
+=== Insertion de la battere ===
+
+Voir [[Disassembling Neo1973]].
+
+=== Allumage du téléphone ===
+[[Image:Neo1973_uboot_splash.jpg|200px|thumb|bootloader splash screen]]
+Il suffit d'appuyer sur le bouton d'allumage ( ça dépend de la version de votre [[u-boot]], vous pouvez avoir à appuyer pendant 5 secondes ) pour lancer le bootloader, puis le kernel, et profitez de X/OpenMoko !
+
+
+Une fois que vous avez pressé le bouten d'allumage bssez longtemps, le vibreur lance une courte imulsion et le rétro-éclairage s'allume. Vous pouvez maintenant relacher le bouton d'allumage et regarder le téléphone se lancer.
+
+Si la batterie n'est pas assez chargée, le téléphone ne démarrera pas, sauf si le cable USB est branché. 
+
+=== Extinction du téléphone ===
+
+==== While in bootloader mode, or if the phone has crashed ====
+
+If you press the power button for 9 seconds, the phone will switch off.  You can notice this by the backlight going dark.
+
+==== While running a full linux system with userspace ====
+
+In this mode, a power-button press of 5 seconds will be sufficient.  After this, the init process will take care of safely shutting down the phone, which might take up to 20 extra seconds.  The X server should get killed, you should drop back to a (garbled) console, and it should finally switch off - much like a regular Linux PC.
+
+=== Battery charging ===
+
+The [[Neo1973]] supports two charging modes: One 100mA charge mode (called pre-charge) and 500mA (called fast charge).  Charging is always done via the USB socket.  You can use any USB-A to USB-mini-B cable to connect the phone to any USB host.
+
+==== While in u-boot ====
+
+While you are in u-boot mode, the phone only charges with 100mA by default.  (This will change in one of the future revisions).
+
+However, using the u-boot console you can manually enable fast charging. See [[U-boot#Battery_charger_related]] for more information.
+
+==== While in Linux ====
+
+As soon as the phone is connected via USB cable, it will charge.  However, the default charging current is only 100mA, way too little if you want to operate the phone and charge at the same time. 
+
+If your USB upstream port is capable of supplying 500mA, then it will configure the Neo1973 accordingly and use 500mA charging mode.  You can notice this by the following line in the kernel log
+ usb0: full speed config #1: 500 mA, Ethernet Gadget, using CDC Ethernet
+
+=== Inserting the SIM card (optional) ===
+
+The slot is found just under the battery.  The card holder has arrows indicating which way to push it to unlock it - make sure you don't open it with force when it's locked or it may break.  Insert the SIM so that the pads make contact and push the holder firmly until it makes a click, then lock it - otherwise the card will not be detected.
+
+To check if the SIM card is inserted correctly in Linux, you can have a look in gsmd logs or use the instructions detailed in the [[Manually using GSM]] page and issue the ''AT+CIMI'' command.
+
+== Getting shell access on the phone ==
+
+=== By using the terminal emulator and on-screen keyboard ===
+
+"Click" (using a stylus) the top-left arrow icon to get a drop-down menu with "Media", "Settings", "Utilities" and "Desktop".  Choose "Utilities->Panel->Input Manager", and a keyboard icon will appear on the top bar.  You can get an on-screen keyboard at any time by choosing it.
+
+With newer images, the keyboard comes up when you tap the white box in the top bar.
+
+From the desktop, choose "Active tasks->rxvt" to get a root shell.
+
+Terminal is in the top level menu in recent images.
+
+=== By using Ethernet emulation over a USB cable ===
+
+The standard Neo1973 Linux [[kernel]] has support for the "cdc_ether USB gadget", i.e. a standard implementation of how to emulate an Ethernet device over USB.
+
+As soon as the kernel is up and running, and you have the phone connected via USB, you should get a '''usb0''' device on your host.  
+
+The Phone will have the IPv4 address 192.168.0.202/24.  You can run `ifconfig` in the terminal on the phone to verify this (this is optional, just check it if it doesn't work given the instructions below)
+
+If you plug a USB cable into a laptop running Linux, you'll likely see the "cdc_ether" kernel module being loaded and a usb0 network interface appear.  
+
+On the '''host PC''', you should then configure your interface to 192.168.0.200 by using
+ # ifconfig usb0 192.168.0.200 netmask 255.255.255.0
+
+Then you should be able to
+ # ping 192.168.0.202
+
+and last, but not least
+ # ssh root@192.168.0.202
+
+Once you press 'enter' (empty password), you should now have a root login.
+
+See [[USB_Networking]] for more details, including instructions on how to automatically setup masquerading so that your phone can get access to the internet through the host PC.
+
+=== By using the debug board/serial/JTAG ===
+
+Please see [[Debug Board#Usage_Instructions]]
+
+== Getting access to the bootloader console ==
+
+Please see [[u-boot#Using_usbtty_from_Linux]]
+
+== Useful commands in Linux ==
+
+=== Suspending ===
+
+Writing "mem" into ''/sys/power/state'' tells Linux to suspend - it will enter a low power mode where only the GSM and RAM are powered up and the CPU sleeps.  It will persist in this state until a wake-up event arrives.  Some currently enabled wake-up events are: AUX or POWER key press, USB cable detect.
+
+If you're connected over ssh, sshd will stop responding when the OS suspends, so to avoid locking up your ssh client, use the command
+ # (sleep 1; echo mem > /sys/power/state) & exit
+
+=== Initial backup ===
+
+After getting your new Neo1973 booted for the first time you might want to make a back up of the original flash chip contents on your PC, before you overwrite the flash with a custom image or just update to a newer build.  This is a good idea because there are parts in the root filesystem that can't be distributed over internet so they are only found in the shipped ROM (see the [[GPS]] driver).  One easy way to back up all of the Flash, that doesn't require installing any special software, is with ''netcat'' over the [[USB Networking|USB ethernet]].  The following commands can be used for that.
+{|
+! On the host !! On the target
+|-
+|<pre>
+$ netcat -l -p 20000 > mtdblock0
+$ netcat -l -p 20000 > mtdblock1
+$ netcat -l -p 20000 > mtdblock2
+$ netcat -l -p 20000 > mtdblock3
+$ netcat -l -p 20000 > mtdblock4
+</pre>
+|<pre>
+# cat /dev/mtdblock0 | nc 192.168.0.200 20000
+# cat /dev/mtdblock1 | nc 192.168.0.200 20000
+# cat /dev/mtdblock2 | nc 192.168.0.200 20000
+# cat /dev/mtdblock3 | nc 192.168.0.200 20000
+# cat /dev/mtdblock4 | nc 192.168.0.200 20000
+</pre>
+|}
+
+This stores the five NAND partitions in files named mtdblock*.  Knowing the partition layout (u-boot "mtdparts" command or Linux dmesg) you can restore the whole flash with it.
+
+=== Where to from here ===
+
+You'll probably want to play with some of the interesting hardware in this device. Obviously, you can explore the applications available through the touch-screen interface. But for those who prefer doing things more in the raw from a shell prompt, you can [[Manually_using_GSM | manually use GSM]] or you can start playing with the [[GPS]].
+
+<span id="bottom">{{Languages|Getting_Started_with_your_Neo1973}}</span>
+
+[[Category:Documentation]]
+[[Category:Neo1973_Phase_1_related]]
