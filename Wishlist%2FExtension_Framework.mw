@@ -1,6 +1,6 @@
 {{Wishlist}}
 
-The extension framework is an application for handling extensions to the core Openmoko functionality.  It is designed to allow developers to build extensions that can affect the core functionality of the device without requiring extensive knowledge of, or even access to, the code that exists to carry out core functionality.  It also allows for multiple extensions to affect the same core functionality, handling ordering and chaining of the extensions to ensure consistent results.
+The extension framework is an application for handling extensions to the core OpenMoko functionality.  It is designed to allow developers to build extensions that can affect the core functionality of the device without requiring extensive knowledge of, or even access to, the code that exists to carry out core functionality.  It also allows for multiple extensions to affect the same core functionality, handling ordering and chaining of the extensions to ensure consistent results.
 
 The rationale behind such a framework is to allow developers to create piecemeal functionality rather than having to alter or extend a large existing piece of code.  Taking an outgoing call as an example there are a number of things that may be required around it, such as:
 
@@ -17,13 +17,13 @@ The extension framework consists of a number of entities, namely the extension m
 
 === Scope ===
 
-The extension framework is initially aimed at providing a way of extending the core functionality of an Openmoko device, and even more specifically of extending the abilities of the device in the area of making and receiving 'phone calls.  However, there will be nothing in the design that limits it to handling just this area and indeed the design will allow for any type of extension given the correct method calls within the core code.
+The extension framework is initially aimed at providing a way of extending the core functionality of an OpenMoko device, and even more specifically of extending the abilities of the device in the area of making and receiving 'phone calls.  However, there will be nothing in the design that limits it to handling just this area and indeed the design will allow for any type of extension given the correct method calls within the core code.
 
 Note that the extension framework is not designed to manage GUI updating and interaction, although it is possible it could be used for this it is not designed to be a UI event bus and no consideration is given to this type of fucntionality.
 
 === Components ===
 
-The extension framework will consist of three main components which will manage various aspects of managing and using the extensions.  These components may or may not be separate processes, although there is a reliability advantage to having the handler separate from the other components it introduces additional complexity.  The names and functions of the three components are:
+The extension framework will consist of three main components which will manage various aspects of managing and using the extensions.  These components may or may not be separate processes, although there is a reliability advantage to having the handler separate from the other components.  The names and functions of the three components are:
 
 * The extension manager handles registration and activation of extensions as well as providing them a clean interface to store preference and configuration information.
 * The extension handler carries out the work of receiving method calls to the extension manager, passing them to the relevant extensions and providing a final reply back to the calling method.
@@ -33,52 +33,15 @@ A final component of the extension framework will be a C library will provide ex
 
 === Example of a Method Call with the Framework Handler ===
 
-For the following advantage we assume that gsmd is enabled for the extension framework.  A pictorial representation of the method call is shown below.
-
-[[Image:Extensionframework_method.png]]
+For the following advantage we assume that gsmd is enabled for the extension framework.  A pictorial representation of the framework is shown in .
 
 #As gsmd gets ready to make a 'phone call it reaches the stage where it has set up all of its parameters and is about to start the process of making a call.  It is at this point that the method call to the extension framework is made, by calling outgoingcall() with the following parameters:
-#* number: a string that contains the number that gsmd was planning to dial (populated with the number passed in to the function)
-#* sendid: whether or not to send caller ID (as per system or user default)
+#* originalnumber: a string that contains the number that gsmd was planning to dial (populated with the number passed in to the function)
+#* dialnumber: a string that contains the number that gsmd will dial on return (populated with the number passed in to the function)
+#* sendid: whether or not to send caller ID (as per system default)
 # When the extension handler receives this method it carries out a lookup of the extensions that are currently registered and active and puts together a list of which extensions should be contacted in which order.  In this case two extensions are returned as being interested in the information, along with the order in which they should be approached.
-# The first relevant extension is contacted and carries out its work
-# The first relevant extension returns the following values:
-#* number: a string that contains the new number to dial (which may be the same as the input number to dial)
-#* sendid: whether or not to send caller ID
-#* status: a numeric result of the extension's work, which may be one of the following generic types:
-#** Continue: continue with the existing operation
-#** Handoff: the existing operation has been handed off to another application so no further action required
-#** Error: an error has occurred with this item so further processing should be aborted
-#* statusreason: additional text that can be displayed to explain the status result if required
-# The second relevant extension is contacted and carries out its work.  Note that the parameters sent to this module include the updated number and sendid from the first relevant extension
-# The second relevant extension returns the values as per the first extension
-# The extension handler returns the final results in the reply to the calling method.  At this stage gsmd should use the parameters returned rather than those it had prior to the call for the purposes of dialing a number and sending/not sending caller ID.  It should also confirm that it is authorized to continue with the operation, and if not abort appropriately
-
-=== Example of an Extension Registration ===
-
-Extensions must be registered with the extension manager so that the extension handler is aware of them and can incorporate them in to extension requests.  A pictorial representation of the registration process is shown below.
-
-[[Image:Extensionframework_registration.png]]
-
-# An extension sends a registration method to the extension manager.  The method contains the following information:
-#* extension.  This is the full name of the method we wish to extend, for example org.openmoko.extension.Gsmd.OutgoingCall
-#* name.  This is the name of the object that is carrying out the extension, for example net.devzero.SampleExtension
-#* path.  This is the path to the object that is carrying out the extension, for example /net/devzero/SampleExtension
-#* interface.  This is the interface for the object that is carrying out the extension, for example net.devzero.SampleExtension
-#* method.  This is the method on the object that is carrying out the extension, for example GsmdOutgoingCall
-# The extension manager logs the information in a central configuration store where it can be accesed by the extension handler
-# The extension manager returns the call
-
-Once an extension has registered a method then it will be called by the extension handler whenever required.
-
-Unregistering an extension uses exactly the same methodology except that the method is Unregister rather than Register, all parameters stay the same.
-
-=== Use Cases ===
-
-There are a number of [[Wish List]] entries for which the extension framework could be used, these are as follows:
-#[[Wish List#Mask ID based on dialed numbers|Mask outgoing caller ID based in dialed number]]
-#[[Wish List#Use calling cards and similar routing techniques for lower-cost calling|Use calling cards and similar routing techniques for lower-cost calling]]
-#[[Wish List#Outgoing black/white lists|Outgoing black/white lists]]
-#[[Wish List#Time-based blocking/unblocking of calls|Time-based blocking/unblocking of calls]]
-
-[[Category:Software ideas]]
+# The first relevant extension is contacted and carries out its work.
+# The first relevant extension returns the parameters that it could change (dialnumber and sendid) and also two additional parameters: authorized and authreason.  These two parameters allow for any operation to be blocked by a suitable extension if required.  If the extension handler ever sees a return parameter stating that an operation is not authorized then it will immediately send a suitable reply to the calling method informing it of the lack of authorization along with a text string containing a message suitable to be displayed to an end user explaining why it was not authorized.
+# The second relevant extension is contacted and carries out its work.  Note that the parameters sent to this module include the updated dialnumber and sendid from the first relevant extension.
+# The second relevant extension returns the parameters that it could change (dialnumber and sendid) and also the authorization parameters as above.
+# The extension handler returns the final results in the reply to the calling method.  At this stage gsmd should update its parameters and carry on with the process of making the call, possibly with different parameters than when it started.  It should also confirm that it is authorized to continue with the operation, and if not abort appropriately.
