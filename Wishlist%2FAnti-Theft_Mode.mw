@@ -1,117 +1,23 @@
-{{wishlist}}
-''This page presents details for this [https://blueprints.launchpad.net/ubuntu/+spec/anti-theft blueprint].''
-
-Suppose you are in a busy environment and your device is lying around somewhere. You sometimes use it but cannot look after it all the time. A sort of high risk environment for phone theft where you could put it in anti theft mode which is goes into an alarm mode when a custom user selection of the following occurs:
+Suppose you are in a busy environment and your device is lying around somewhere. You sometimes use it but cannot look after it all the time. A sort of high risk environment for phone theft where you could put it in anti theft mode which is enabled when 
 * someone moves it 
-* someone touches the touch screen or presses a button
-* someone removes the USB/charging-plug
+* touches the touch screen
+* removes the USB/charging-plug
 * removal of Bluetooth/WiFi devices in vicinity
-* some special code is received by SMS
-[[Image:Anti-theft.png|Anti-theft state diagram. (Generated with GraphViz, dot file is available on request.)]]
-This alarm mode can be '''switched off''' by:
-* entering a password/pin (custom user selection for prompted or unprompted interface)
-* doing a certain gesture (measured by accelerometers or touch screen)
-* [http://en.wikipedia.org/wiki/Speaker_recognition voice verification] ;-)
-* image recognition
-* remote-reactivating (USB, WiFi, Bluetooth, webservice on the device)
+This mode can be '''switched off by'''
+* entering a password/pin (unprompted?)
+* doing a certain gesture (measured by accelerometers)
+* [http://en.wikipedia.org/wiki/Speaker_recognition voice verficiation] ;-)
+* remote-reactivating (USB, WiFi, Bluetooth)
 * mixture of the above
-From the moment it has been ''moved or touched''':
-* it will display a warning on a red background flashing in black: ''You are committing a crime. Put this phone back, now!'' (or similar). Make sure is it a positive stimulus for the perpetrator.
-* do nothing. It may simulate a fake network error or similar when a number is dialed. It may provide limited functionality so that the device is not thrown away as trash or users data is being accessed or high costs are being generated.
-If it is '''not unlocked''' after predefined number of seconds may:
+From the moment it '''has been moved or touched'''
+* it will display a warning on a red background flashing in black: ''You are committing a crime. Put this phone back, now!'' (or similar)
+* do nothing. It may simulate a fake network error or similar when a number is dialed.
+If it is '''not unlocked may'''
 * set off a loud alarm 
-* start sending messages to a predefined email address with live data like pictures from the camera, audio recordings from the microphone, GPS coordinates, logs of numbers dailed, URLs surfed to and messages send, WiFi network and USB ID's for retracing the location of the device and identifying the perpetrator. (Compress the attachments of the email.)
-* activate self-destruct mechanism
+* start sending messages to a predefined email address with pictures (???), GPS coordinates and network pings (???)
+* activate microphone recording and send compressed audio files to a pre-defined number/e-mail-adress
+* activate self-destruct mechanism ;-)
 
 If the above '''anti-theft measures fail'''
 * a special text message could be sent to the phone which erases all contacts then activates the pin lock for the phone and SIM card.
 * activation of some sort remote control
-
-In addition.
-If you've put it down and forgotten about it, somebody picks it up, it would first ask for the PIN, with a message on-screen that says something like "If you don't know PIN, give 1234".
-
-If user types 1234 then it presents 2 buttons: "Contact owner of phone" and "Use phone" (==I'm stealing this). 
-
-If user selects "Use phone", then it would present factory looking interface with empty of fake address book, etc. and quietly contact owner anyway and tell current coordinates ;-) Also [[Wishlist:Text_Input#Key_logger|logging of text input]] will be activated and emailed to the owner.
-
-The idea is keep the thief using the phone until the police arrive and recover it. 
-If phone notices new SIM, it would go directly to "I'm stolen" mode. Maybe run under Linux-VServer http://www.linux-vserver.org/ in stolen mode.
-
-Perhaps, assuming the phone was locked in such a manner and later found or recovered by police, the phone could be returned to "normal mode" by entering the pin AND being within 100 meters of a "home" location, defined by the GPS when you first set it up. 
-
-With suitable arrangement remote ssh connection to phone should be
-possible which would give nice control over stolen phone.
-
-There could also be a bluetooth headset and/or bluetooth watch.  If it loses contact to phone, phone would complain loudly and if bluetooth gadget is enough smart it could complain too.
-This gadget could warn about low battery too.
-
-==Implementation==
-Peeloo: How about using [http://adeona.cs.washington.edu/ Adeona], an "open source system for tracking the location of your lost or stolen laptop that does not rely on a proprietary, central service." It'll surely need to be cutomized to require as less battery as possible, but the implementation is here, and seems to be pretty well though.
-
-Pander: Good idea! I've noticed that is already being [https://bugs.launchpad.net/ubuntu/+bug/248782 packaged for Ubuntu Linux].
-
-This script, see [http://handheldshell.com/sms-sentry sms-sentry] and [http://handheldshell.com/sms-sentry.sh sms-sentry.sh], can be used for sending SMSaccording to GPS postion.
-
-==Upload protocols==
-Since HTTP is the most commonly available and mostly allowed protocol on the Internet medium, this would be the primary protocol for uploading information via the Internet. For the mobile network medium, [[SMS]] with summarised information in a special encoding would be the protocol for uploading. Both media can be used simultaniously when available.
-
-When not available, information will be stored and transmitted later in the following way. Send package t=now, send package t=0, send package t=now-1, send package t=1, package t=now-2, send package t=2, ... This increases data richness when the device is not continuously connected via that particular medium.
-
-==Example implementation of remotely a activable GPRS backdoor with fso-frameworkd==
-
-When somebody steals your phone, call it from a preconfigured number and it will initiate GPRS connection to do one HTTP request to a preconfigured web site. From the log files of the web site you can see the IP address of the phone and SSH to it to activate GPS.
-
-* ~/bin/remote-wakeup runs remote-wakeup-script when somebody calls the phone from a preconfigured number
-  #!/usr/bin/python
-  import dbus
-  import dbus.mainloop
-  import dbus.mainloop.glib
-  import gobject
-  import subprocess
-  
-  
-  actions = { "PRECONFIGURED_NUMBER" : "remote-wakeup-script" }
-  
-  def onCallStatus( index, status, properties ):
-      if status == "incoming":
-          try:
-               action = actions[properties["peer"]]
-          except KeyError:
-               pass
-          else:
-                obj = bus.get_object( "org.freesmartphone.ogsmd", "/org/freesmartphone/GSM/Device" )
-                callInterface = dbus.Interface( obj, "org.freesmartphone.GSM.Call" )
-                callInterface.Release( index )
-                subprocess.Popen( action, shell=True )
-  
-  dbus.mainloop.glib.DBusGMainLoop( set_as_default=True )
-  mainloop = gobject.MainLoop()
-  bus = dbus.SystemBus()
-  bus.add_signal_receiver( onCallStatus,
-                           "CallStatus",
-                           "org.freesmartphone.GSM.Call",
-                           "org.freesmartphone.ogsmd",
-                           "/org/freesmartphone/GSM/Device" )
-  mainloop.run()
-* ~/bin/remote-wakeup-script does
-  #!/bin/sh
-  (gprs-start; report-ip) &
-* where gprs-start starts a GPRS connection (see [[GPRS_FSO]])
-* and ~/bin/report-ip simply waits until ppp0 has an IP address and then uses wget to do a HTTP request to a preconfigured URL
-
-  #!/bin/bash
-  
-  while true; do
-      ip="$(/sbin/ifconfig ppp0|grep "inet addr:"|cut -d':' -f2|cut -d' ' -f1|head -n1)"
-      if [ "$ip" != "" ]; then
-          wget -O /dev/null "CENSORED_URL"
-          ret=$?
-          if [ $ret -eq 0 ]; then
-              exit
-          fi
-      fi
-      sleep 10
-  done
-
-
-[[Category:Software ideas]]
