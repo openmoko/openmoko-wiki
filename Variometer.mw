@@ -1,21 +1,15 @@
-{{wishlist}}
-[[Category:Hardware_ideas]]
+[[Category:Hardware]]
 
 ===Variometer===
-The variometer signal is simply the derivative of the barometer signal. It gives a much more accurate vertical speed signal than is possible with GPS.This kind of measurement is used by the free flying community (hanggliding, paragliding, ballooning). A device that allows teams of pilots to share position and speed (with accurate vertical speed) data would be lots of fun.
+The variometer signal is simply the derivative of the barometer signal. It gives a much more accurate vertical speed signal than is possible with GPS. It would probably be best to filter and differentiate the analog pressure signal and then digitize. This kind of measurement is used by the flee flying community (hanggliding, paragliding, ballooning). A device that allows teams of pilots to share position and speed (with accurate vertical speed) data would be lots of fun.
 [http://en.wikipedia.org/wiki/Variometer Variometer Reference]
 
 ====Hardware====
-It could be best to filter and differentiate the analog pressure signal and then digitize. Another possibility is to differentiate the height in software. A robust solution is to compute a linear regression of a sliding window of height samples. The height samples can be computed using integer arithmetic by a pressure->altitude lookup table followed by interpolation. Maybe it's even possible to add detail based on the accelerometers.
 
 References to applicable transducers:
-*[http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=MPX4100 Freescale MPX4100 (was Motorola)] - needs 5V power supply, 11 x 11 x 6 mm
-*[http://www.intersema.com/site/technical/ms5540.php Intersema MS5540B Altimeter/Barometer Module], 2.2 - 3.6V, 3-wire serial interface, 6.2 x 6.4 mm
-*[http://www.bosch-sensortec.com/content/language1/html/3477.htm Bosch SMD500 digital pressure sensor: altimeter and barometer], 2.2 - 3.6V, I2C interface, 5 x 5 x 1.5 mm, included temperature sensor
-*[http://www.vti.fi/en/products-solutions/products/pressure-sensors/scp1000-pressure-sensor/ VTI SCP1000 pressure sensor],2.4 - 3.3V, I2C or SPI interface, 6.1 mm dia x 1.7mm, included temperature sensor
+*[http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=MPX4100 Freescale MPX4100 (was Motorola)]
 
-====Hardware solution====
-=====Signal Conditioning=====
+====Signal Conditioning====
 
 The absolute pressure signal needs to be:
 #Differentiated
@@ -23,17 +17,10 @@ The absolute pressure signal needs to be:
 
 *Operational amplifiers in the following configuration:
 
-See the signal conditioning example in this [http://www.freescale.com/files/sensors/doc/app_note/AN1326.pdf Application Note]<br \>
-It might be best to use a single chip solution if we can find the right fit e.g.: [http://www.maxim-ic.com/quick_view2.cfm/qv_pk/4590 Max1464]
-
-The software solution can simply be done in the variometer application with some very simple math.
-
-=====A/D=====
+====A/D====
 We would need two A/D channels:
-#Absolute Pressure - 12 bit minimum (assuming a operating range of 0 - 12000 meter 12 bits would give resolution of 2.9304 m)
-#Differential Pressure - 10 bit minimum (assuming a range of +-20m/s 10 bits would give a resolution of 0.0391 m/s)
-
-[http://www.freescale.com/files/sensors/doc/app_note/AN1100.pdf Extending 8 bit sampling to a usable range for pressure sensing]
+#Absolute Pressure - 12 bit minimum (calc needed)
+#Differential Pressure - 10 bit minimum (calc needed)
 
 ====Driver Code====
 The driver code samples the input channels and converts the input values from pressure to altitude:
@@ -54,13 +41,7 @@ The sample rate should be application adjustable to conserve power.
 
 ====Application code====
 Applications can use the altitude data or combine the data with GPS and accelerometer data.
-Commonly Kalman filter/observer techniques are used to combine data from multiple sensor types into a robust(with respect to sensor noise), high accuracy estimate of position and speed in 3 axis.
-
-'''References:'''
-*[http://www.cs.unc.edu/~welch/kalman/Levy1997/index.html The Kalman Filter: Navigation's Integration Workhorse]
-*[http://www.cs.unc.edu/~welch/kalman/ Kalman Filter Portal from the University of North Carolina at Chapel Hill]
-*[http://en.wikipedia.org/wiki/Kalman_filter Kalman Filter article on Wikipedia]
-
+Commonly Kalman filter/observer techniques are used to combine data from multiple sensor types into a high accuracy low noise estimate of position and speed in 3 axis. (ref needed)
 
 =====Variometer Code=====
 Combine measurements as described above.
@@ -73,20 +54,3 @@ Apply knowledge about the aircraft dynamics to increase accuracy:
 *Display speed data in ergonomic manner.
 *Display speed for pilots in group.
 *Visual and audible guidance to pilot with best climb rate (given reasonable proximity)
-*Possible integration with mapping application
-
-====Server Based Services====
-Auto discovery service
-*Pilots with Openmoko based variometers can choose to publish their status on a central service.
-*Based on location - the system will notify pilots of the presence of others that can participate in group flying.
-
-
-====Freerunner====
-Maybe it is possible to do that on the Freerunner ?
-
-Connection :
-
-*SPI or I2C (or through the debug board connector ?)
-*HID device  (ex: Oak USB Sensor Atmospheric Pressure [toradex.ch])
-
-The page [[I2C_Pressure_Sensor]] describes how to add a pressure sensor connected to the I2C bus.
