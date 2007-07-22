@@ -3,57 +3,5 @@
 
 
 
-===Variometer===
-The variometer signal is simply the derivative of the barometer signal. It gives a much more accurate vertical speed signal than is possible with GPS. It would probably be best to filter and differentiate the analog pressure signal and then digitize. This kind of measurement is used by the flee flying community (hanggliding, paragliding, ballooning). A device that allows teams of pilots to share position and speed (with accurate vertical speed) data would be lots of fun.
-[http://en.wikipedia.org/wiki/Variometer Variometer Reference]
 
-====Hardware====
-
-References to applicable transducers:
-*[http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=MPX4100 Freescale MPX4100 (was Motorola)]
-
-====Signal Conditioning====
-
-The absolute pressure signal needs to be:
-#Differentiated
-#Filtered
-
-*Operational amplifiers in the following configuration:
-
-====A/D====
-We would need two A/D channels:
-#Absolute Pressure - 12 bit minimum (calc needed)
-#Differential Pressure - 10 bit minimum (calc needed)
-
-====Driver Code====
-The driver code samples the input channels and converts the input values from pressure to altitude:
-
-The relationship between static pressure and pressure altitude is defined in terms of the properties of the International Standard Atmosphere. Up to 36,090 ft this can be expressed as:
-
-<math>
-z =\left (1-\left(\frac{P_{ind}}{101.325}\right)^{0.190263} \right ) \times \frac{87.828}{0.00198122}
-</math>
-
-Where:
-
-*z = pressure altitude (meter)
-*<math>P_{ind}</math> = static pressure (kPa)
-
-These values are provided to listeners in multiple applications.
-The sample rate should be application adjustable to conserve power.
-
-====Application code====
-Applications can use the altitude data or combine the data with GPS and accelerometer data.
-Commonly Kalman filter/observer techniques are used to combine data from multiple sensor types into a high accuracy low noise estimate of position and speed in 3 axis. (ref needed)
-
-=====Variometer Code=====
-Combine measurements as described above.
-Apply knowledge about the aircraft dynamics to increase accuracy:
-*Total Energy compensation
-*Relative Netto Compensation - use accelerometer data to sense when glider is turning in a thermal
-
-'''User Interface'''
-
-*Display speed data in ergonomic manner.
-*Display speed for pilots in group.
-*Visual and audible guidance to pilot with best climb rate (given reasonable proximity)
+{{:Variometer}}
