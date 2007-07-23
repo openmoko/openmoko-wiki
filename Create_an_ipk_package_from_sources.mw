@@ -1,162 +1,59 @@
-{{Languages|Create an ipk package from sources}}
 This is a small tutorial to help people that want to write new software for Openmoko, eg. to port existing programs.
 
 ==Theory==
-Openmoko uses [[OpenEmbedded]], a package and root image build system.
+OpenMoko uses OpenEmbedded, a package and root image build system.
 
-OpenEmbedded provides patches and Bitbake Recipes, that are similar to .spec files to build RPM packages. Bitbake is used to process recipes and obtain packages and FS images. For example, bitbake can fetch sources, apply patches, configure, make and install compiled sources. Other steps are user definable, but this is not the scope of this tutorial.
+OpenEmbedded provides patches and Bitbake Recipes, that are similar to .spec files to build RPM packages. Bitbake is used to process recipes and obtain packages and FS images. For example, bitbake can fetch sources, apply pathches, configure, make and install compiled sources. Other steps are user definable, but this is not the scope of this tutorial.
 
 A standard use of bitbake is to download an existing "vanilla" package, ie "gcc" or "binutils" or "linux kernel", apply platform patches (adding bugfixes, porting fixes, drivers, etc...) then compile and package the resulting binaries.
 
-==Software versioning==
-Software versioning and configuration management is a very wide topic, there are tons of different opinions about it, I'll try to be quick.
+==Use case==
+Say you have a working software package, ie a file system directory with sources, Makefile, etc...
+Because they are largely used, I will base my presentation on a project generated using autotools. This implies that the software can be installed somewhere by following the magical steps ./configure && make && make install.
 
+===Software versionning===
 Packages versions are important in a distribution building mechanism, and package versions are a complete part of the full package name. They are obviously used to track important changes made to your package, and isolate each version. Here we must be a little aware of basic version management.
 Current (most advanced) version is named the "trunk". Additions, fixes, etc. are done to the trunk.
 
 Once a certain level of functionality is achieved, a copy of the trunk (a "snapshot") is taken, and named with a version number. As a result, current development continues on the trunk, but users can download well defined "releases", with known bugs and functionnality level. This is called "branching". If version specific bugs are found in version a.b, then we can update this branch independently.
 
-In bitbake, we must specify which release of our software we are going to package. This may not be an habit, especially if you only develop small programs, not maintained by more than one or two person. If your software is named "myprogram" but has no real version number attached, you can just rename your project directory to "myprogram-1.0".
+In bitbake, we must specify which release of our software we are going to package. This may not be an habit, especially if you only develop small programs, not maintained by more than one or two person. If your software is named "myprogram" but has no real version number attached, you can just rename your project to "myprogram-1.0".
 
-This is a good practice; If you are packaging a software, then it will be used by other people, so when you modify it next time, put it in a folder named "myprogram-1.1" :) This brings clarity to users, ease of management to you, and ability to plan future releases to your team.
+This is a good practice, if you are packaging a software, it will be used by other people, so when you modify it next time, put it in a folder named "myprogram-1.1" :)
 
-==Example==
-Say you have a working software package, ie a file system directory with sources, Makefile, etc...
-Because this is a common method, I will base my presentation on a project generated using autotools. This implies that the software can be installed somewhere by following the magical steps ./configure && make && make install.
+===Locating Sources===
+With bitbake, you can build a package from a lot of sources, subversion, a tarball, git, etc.
+The only restriction is that your source directory must be named "PACKAGE_NAME-VERSION", be it in a tarball or in a svn folder.
 
-===Prerequisites===
-You need a configured openmoko development tree. All details are in [[Building Openmoko from scratch]]
-
-You may also do this with [[MokoMakefile]], see instructions at the bottom.
-
-The following commands will give you one, they are copied from the above page. Just copy and paste in a shell.
-
-<pre>
-
-# make sure we have mtn
-set -e
-echo "if script stops immediatly install monotone with either apt-get or yum"
-test_mtn=`miitn --version`
-
-#prepare
-cd $HOME
-mkdir OM
-cd OM
-
-#get openembedded
-wget http://www.openembedded.org/snapshots/OE.mtn.bz2
-bunzip2 OE.mtn.bz2
-mtn --db=OE.mtn pull monotone.openembedded.org org.openembedded.dev
-mtn --db=OE.mtn checkout --branch=org.openembedded.dev -r e2dbb52fe39df7ef786b6068f6178f29508dfded openembedded
-
-#get openmoko
-svn co http://svn.openmoko.org/ openmoko
-
-#create local config
-mkdir -p sources build/conf
-cat <<EOF >build/conf/local.conf
-MACHINE = "fic-gta01"
-DISTRO = "openmoko"
-BUILD_ARCH = "`uname -m`"
-EOF
-
-#fixes (didnt try without them)
-ln -s openmoko/trunk/oe ./oe
-cd sources
-mkdir -p ../build/tmp/stamps/armv4t-linux
-wget http://ftp.mozilla.org/pub/mozilla.org/js/older-packages/js-1.5.tar.gz
-touch ../build/tmp/stamps/armv4t-linux/js-1.5-r0.do_fetch
-wget http://us4.samba.org/samba/ftp/stable/samba-3.0.14a.tar.gz
-touch ../build/tmp/stamps/armv4t-linux/samba-3.0.14a-r15.do_fetch
-perl -pi.orig -e 's/ *$//;s/\r//g' ../openembedded/packages/gcc/gcc-4.1.1/gcc-4.1.1-pr13685-1.patch
-</pre>
-
-Then, you need the environment variables described here: [[Building_Openmoko_from_scratch#Environment_variables]]
-Put the given lines in a script, then go to your build/ dir and source it:
-<pre>
-cat <<EOF >doenv.sh
-#!/bin/sh
-export OMDIR=`pwd`
-export BBPATH=$OMDIR/build:$OMDIR/openmoko/trunk/oe:$OMDIR/openembedded
-EOF
-. ./doenv.sh
-</pre>
-
-After this, your tree will look like that:
-<pre>
-$HOME/OM
- +- build
- |  +- conf
- |  |  +- local.conf
- +- openmoko
- +- openembedded
- +- sources
- +- env.sh
-</pre>
-etc...
-
-
-Follow the link to [[MokoMakefile]] and follow the instructions.
-You're now all set to start building. Remember to run the setup-env command for each time you open a terminal. This sets your environment variables, however it is easier to include them in the rc file of your shell.
-
-===Proposed directory layout for our new packages===
+===Proposed directory layout===
 Bitbake recipes are single files describing how to build a package. I recommend to have a recipe for each package version (myprogram-1.0.bb, myprogram-1.1.bb, etc.) all stored in a directory named "myprogram"
-
-Our personal tree can be everywhere else:
-<pre>
-$HOME
- +- $OMDIR (contains the official openmoko tree)
- |  +- ...
- +- My_personal_Openmoko_Packages
- |  +- packages
- |     +- myhello
- |        +- myhello-1.0.bb
- +- My_Personal_Projects_Folder
-    +- myhello
-       +- myhello-1.0
-          +- configure.ac
-          +- Makefile.am
-          +- ...
-</pre>
-
-To do a simple test, pack your sources in a tar, and put this tar on a web server:
-<pre>
-cd My_personal_Projects_Folder/myhello
-tar cvfz myhello-1.0.tar.gz myhello-1.0/
-</pre>
-This is correct, ie the tarball will have a NAME-VERSION subdirectory, that's what we need.
 
 ===The recipe===
 In the bitbake file, you need to give
-* a description for your package, variable name is DESCRIPTION
-* a package name (PN)
-* a package version (PV)
-* a source URI, I'll give details later
-* a source version, to checkout a particular revision of versionned trees
-* Please see the [http://www.openembedded.org/wiki/StyleGuide Open Embedded StyleGuide] which should answer most if not all questions about .bb file conventions.
+- a description for your package DESCRIPTION
+- a package name PN
+- a package version PV
+- a source URI, I'll give details later
+- a source version, to checkout a particular revision of versionned trees
 
 here's an example:
 
 <pre>#package description
 DESCRIPTION = "An example application for openmoko, depending on a custom source repository"
-SECTION = "squalyl/myhello"
+SECTION="squalyl/myhello"
 
 #this is optional
-LICENSE = "GPLv2"
+LICENSE="GPLv2"
 
-PN = "myhello"
-PV = "1.0"
+PN="myhello"
+PV="1.0"
 
 #use "now" to force svn updates at each build
-#Using now is a very dangerous way to do it. ONLY use this in your
-#personal recipes when you're doing heavy testing, otherwise
-#choose a stable date and stick with it that way when you distribute your recipe
-#you don't have all sorts of versions getting built out in the wild.
-SRCDATE_${PN} = "now"
-SRC_URI = "svn://repo/path/myhello;proto=https;module=${PN}-${PV}"
+SRCDATE_${PN}="now"
+SRC_URI=svn://repo/path/myhello;proto=https;module=${PN}-${PV}
 
 #for a tarball use:
-#SRC_URI = "http://server/path/package/${PN}-${PV}.tar.gz"
+#SRC_URI=http://server/path/package/${PN}-{$PV}.tar.gz
 
 #include standard rules to build a autoconf/automake package
 inherit autotools
@@ -164,189 +61,45 @@ inherit autotools
 
 Expressions starting by ${} are substituted, this allows you to download a tarball named "mypackage-1.0.tar.gz" for example
 
-=== Source URIs ===
-bitbake can get the source code for your project from a variety of locations including tarball, subversion and git.
-
-All of this is explained in the [http://bitbake.berlios.de/manual/ bitbake manual], particulary [http://bitbake.berlios.de/manual/ch03.html#id869590 here].
-
-The package build directory, the one where bitbake will run "configure" et al, will follow the name template: "PACKAGE_NAME-PACKAGE_VERSION", so
-
-* tarballs must extract to a subdirectory with this name
-* svn top directory must have this name
-
-It's very important. I spent 3 days blocking on this!
-
 ===Tell bitbake to build our package===
-The only and one thing to do is edit $OMDIR/build/local.conf to tell bitbake to search our folders for .bb files:
+After this, we have to inform bitbake that we have a file for it.
+I assume a standard Openmoko directory tree with:
 <pre>
-BBFILES+="${HOME}/MypersonalOpenmokoPackages/packages/*/*.bb"
+$OMDIR
+ +- build
+ |  +- conf
+ |  |  +- local.conf
+ |  +- tmp
+ +- openmoko
+ +- openembedded
+ +- sources
 </pre>
-There is no need to change BBPATH or something else, this is only needed to add new configuration files, not recipes.
+etc...
 
-Running
+Our personal tree can be everywhere else:
+<pre>
+$HOME
++- $OMDIR
+|  +- ...
++- MypersonalOpenMokoPackages
+   +- packages
+   |  +- myhello
+   |     +- myhello-1.0.bb
+   +- sources
+      +- myhello
+         +- myhello-1.0
+            +- configure
+            +- Makefile.am
+            +- ...
+</pre>
+The only thing to do is edit $OMDIR/build/local.conf to tell bitbake to search our folders for .bb files:
+<pre>
+BBFILES+="/path/to/your/packages/*/*.bb"
+</pre>
+
+And then, running
 <pre>
 $ cd $OMDIR/build
 $ bitbake mypackage
 </pre>
 will bring all the necessary operations to create a package in $OMDIR/build/tmp/deploy/ipk/armv4t/myhello .....
-
-The following is an example build log:
-<pre>
-OE Build Configuration:
-BB_VERSION     = "1.6.9"
-OE_REVISION    = "<unknown>"
-TARGET_ARCH    = "arm"
-TARGET_OS      = "linux"
-MACHINE        = "fic-gta01"
-DISTRO         = "openmoko"
-DISTRO_VERSION = ".dev-snapshot-20070723"
-TARGET_FPU     = "soft"
-
-NOTE: This BitBake doesn't support revision fetching, falling back to current date
-NOTE: preferred version 2.4 of glibc not available
-NOTE: preferred version 2.4 of glibc-intermediate not available
-NOTE: preferred version 2.4 of glibc not available
-NOTE: package myhello-1.0: started
-NOTE: package myhello-1.0-r0_0_200707231759: task do_fetch: started
-NOTE: Fetch svn://svn.unsads.com/squalyl/om/src/myhello;proto=https;module=myhello-1.0
-A    myhello-1.0/configure.ac
-A    myhello-1.0/include
-A    myhello-1.0/include/config.h.in
-A    myhello-1.0/cleanall.sh
-A    myhello-1.0/AUTHORS
-A    myhello-1.0/bootstrap.sh
-A    myhello-1.0/ChangeLog
-A    myhello-1.0/src
-A    myhello-1.0/src/hello.c
-A    myhello-1.0/Makefile.am
-A    myhello-1.0/NEWS
-A    myhello-1.0/README
-Révision 2116 extraite.
-NOTE: package myhello-1.0-r0_0_200707231759: task do_fetch: completed
-NOTE: package myhello-1.0-r0_0_200707231759: task do_unpack: started
-NOTE: Unpacking /home/squalyl/OM/sources/myhello-1.0_svn.unsads.com_.squalyl.om.src.myhello__now.tar.gz to /home/squalyl/OM/build/tmp/work/armv4t-linux/myhello-1.0-r0_0_200707231759/
-NOTE: package myhello-1.0-r0_0_200707231759: task do_unpack: completed
-NOTE: package myhello-1.0-r0_0_200707231759: task do_patch: started
-NOTE: package myhello-1.0-r0_0_200707231759: task do_patch: completed
-NOTE: package myhello-1.0-r0_0_200707231759: task do_configure: started
-NOTE: package myhello-1.0-r0_0_200707231759: task do_configure: completed
-NOTE: package myhello-1.0-r0_0_200707231759: task do_compile: started
-NOTE: package myhello-1.0-r0_0_200707231759: task do_compile: completed
-NOTE: package myhello-1.0-r0_0_200707231759: task do_install: started
-NOTE: package myhello-1.0-r0_0_200707231759: task do_install: completed
-NOTE: package myhello-1.0-r0_0_200707231759: task do_package: started
-NOTE: package myhello-1.0-r0_0_200707231759: task do_package: completed
-NOTE: package myhello-1.0-r0_0_200707231759: task do_package_write: started
-Packaged contents of myhello-dbg into /home/squalyl/OM/build/tmp/deploy/ipk/armv4t/myhello-dbg_1.0-r0_0_200707231759_armv4t.ipk
-Packaged contents of myhello into /home/squalyl/OM/build/tmp/deploy/ipk/armv4t/myhello_1.0-r0_0_200707231759_armv4t.ipk
-NOTE: Not creating empty archive for myhello-doc-1.0-r0_0_200707231759
-NOTE: Not creating empty archive for myhello-dev-1.0-r0_0_200707231759
-NOTE: Not creating empty archive for myhello-locale-1.0-r0_0_200707231759
-NOTE: package myhello-1.0-r0_0_200707231759: task do_package_write: completed
-NOTE: package myhello-1.0-r0_0_200707231759: task do_populate_staging: started
-NOTE: package myhello-1.0-r0_0_200707231759: task do_populate_staging: completed
-NOTE: package myhello-1.0-r0_0_200707231759: task do_build: started
-NOTE: package myhello-1.0-r0_0_200707231759: task do_build: completed
-NOTE: package myhello-1.0: completed
-NOTE: build 200707231952: completed
-Build statistics:
-  Attempted builds: 1
-</pre>
-
-===Get this package included in the rootfs image===
-
-<blockquote>
-{| border="1" cellspacing="0" cellpadding="5" align="center"
- |*This method is not a standard or normal way to include a package. The proper method follows the improper method.
-|}
-</blockquote>
-bitbake openmoko-devel-image is used to build the entire distribution, but it does not include your new package in the rootfs image.
-
-To do this, use:
-
-<pre>bitbake openmoko-devel-image -crebuild</pre>
-
-This will actually rebuild the rootfs, including your new packages.
-
-<blockquote>
-{| border="1" cellspacing="0" cellpadding="5" align="center"
- |*The suggested method follows below.
-|}
-</blockquote>
-
-To include the package in the image there are two steps.
-
-First: Modify your local.conf. $OMDIR/build/conf/local.conf
-<pre>
-DISTRO_EXTRA_RDEPENDS += "<app name>"
-</pre>
-This adds your application as a dependency for building the distro.
-
-Second: Update the task-base.
-<pre>
-bitbake task-base -crebuild
-</pre>
-When you update the task base it re-builds and ipk file which will: "Merge machine and distro options to create a basic machine task/package" 
-
-You could also add your package by modifying the openmoko/trunk/oe/packages/tasks/task-openmoko.bb and adding your application name with the trailing backslash right before the update-alternatives line.
-<pre>
-  modutils-initscripts \
-  module-init-tools-depmod \
-  udev \
-  rsync \
-  screen \
-  <My application Name> \ 
-#  update-alternatives \
-</pre>
-
-Then to test this out (if you're using the [[MokoMakefile]]) it's pretty simple.
-<pre>
-make openmoko-devel-image
-make build-qemu
-make flash-qemu-local
-</pre>
-And now you're running qemu with that fancy new image you just made!
-
-If you are really lazy this script should do all the above stuff. This is just a small shell hack which uses the power of sed to inject packages into the the final image. Use at your own risk and please don't flame the author =D..
-
-<pre>
-#!/bin/bash
-# Sudharshan "Sup3rkiddo" S
-# inject, script that injects packages into the Openmoko standard, 
-# The sed line does all the stuff, nothing elite...
-# The package is grouped under TASK_OPENMOKO_LINUX..after rsync
-# The bitbake recipes should be present in the proper place. OE docs for info
-
-ARGS=1
-E_BADARGS=65
-
-if [ $# -ne "$ARGS" ]
-then
-    echo "Usage: inject <packagename>"
-    exit $E_BADARGS
-fi
-
-make update
-make setup
-cd openmoko/trunk/oe/packages/tasks
-mv task-openmoko.bb task-openmoko.bb_bakup
-# search for rsync and append the package name after it..[KIDDISH HACK]
-sed '/rsync \\/ a\  '$1' \\' <task-openmoko.bb_bakup >>task-openmoko.bb
-mv task-openmoko.bb_bakup ~/
-cd ../../../
-make clean-package-$1
-#make build-package-$1
-make openmoko-devel-image
-#make build-qemu
-#make flash-qemu-local
-echo "Done injection..muhahah"
-</pre>
-
-== See also ==
-
-* http://blogs.thehumanjourney.net/finds/entry/3
-* http://lists.openmoko.org/nabble.html#nabble-td1084542
-* http://lists.openmoko.org/nabble.html#nabble-f1958
-
-[[Category:Application Developer]]
-'''Bold text'''
