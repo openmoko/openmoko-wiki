@@ -1,0 +1,105 @@
+This is a small tutorial to help people that want to write new software for Openmoko, eg. to port existing programs.
+
+==Theory==
+OpenMoko uses OpenEmbedded, a package and root image build system.
+
+OpenEmbedded provides patches and Bitbake Recipes, that are similar to .spec files to build RPM packages. Bitbake is used to process recipes and obtain packages and FS images. For example, bitbake can fetch sources, apply pathches, configure, make and install compiled sources. Other steps are user definable, but this is not the scope of this tutorial.
+
+A standard use of bitbake is to download an existing "vanilla" package, ie "gcc" or "binutils" or "linux kernel", apply platform patches (adding bugfixes, porting fixes, drivers, etc...) then compile and package the resulting binaries.
+
+==Use case==
+Say you have a working software package, ie a file system directory with sources, Makefile, etc...
+Because they are largely used, I will base my presentation on a project generated using autotools. This implies that the software can be installed somewhere by following the magical steps ./configure && make && make install.
+
+===Software versionning===
+Packages versions are important in a distribution building mechanism, and package versions are a complete part of the full package name. They are obviously used to track important changes made to your package, and isolate each version. Here we must be a little aware of basic version management.
+Current (most advanced) version is named the "trunk". Additions, fixes, etc. are done to the trunk.
+
+Once a certain level of functionality is achieved, a copy of the trunk (a "snapshot") is taken, and named with a version number. As a result, current development continues on the trunk, but users can download well defined "releases", with known bugs and functionnality level. This is called "branching". If version specific bugs are found in version a.b, then we can update this branch independently.
+
+In bitbake, we must specify which release of our software we are going to package. This may not be an habit, especially if you only develop small programs, not maintained by more than one or two person. If your software is named "myprogram" but has no real version number attached, you can just rename your project to "myprogram-1.0".
+
+This is a good practice, if you are packaging a software, it will be used by other people, so when you modify it next time, put it in a folder named "myprogram-1.1" :)
+
+===Locating Sources===
+With bitbake, you can build a package from a lot of sources, subversion, a tarball, git, etc.
+The only restriction is that your source directory must be named "PACKAGE_NAME-VERSION", be it in a tarball or in a svn folder.
+
+===Proposed directory layout===
+Bitbake recipes are single files describing how to build a package. I recommend to have a recipe for each package version (myprogram-1.0.bb, myprogram-1.1.bb, etc.) all stored in a directory named "myprogram"
+
+===The recipe===
+In the bitbake file, you need to give
+- a description for your package DESCRIPTION
+- a package name PN
+- a package version PV
+- a source URI, I'll give details later
+- a source version, to checkout a particular revision of versionned trees
+
+here's an example:
+
+<pre>#package description
+DESCRIPTION = "An example application for openmoko, depending on a custom source repository"
+SECTION="squalyl/myhello"
+
+#this is optional
+LICENSE="GPLv2"
+
+PN="myhello"
+PV="1.0"
+
+#use "now" to force svn updates at each build
+SRCDATE_${PN}="now"
+SRC_URI=svn://repo/path/myhello;proto=https;module=${PN}-${PV}
+
+#for a tarball use:
+#SRC_URI=http://server/path/package/${PN}-{$PV}.tar.gz
+
+#include standard rules to build a autoconf/automake package
+inherit autotools
+</pre>
+
+Expressions starting by ${} are substituted, this allows you to download a tarball named "mypackage-1.0.tar.gz" for example
+
+===Tell bitbake to build our package===
+After this, we have to inform bitbake that we have a file for it.
+I assume a standard Openmoko directory tree with:
+<pre>
+$OMDIR
+ +- build
+ |  +- conf
+ |  |  +- local.conf
+ |  +- tmp
+ +- openmoko
+ +- openembedded
+ +- sources
+</pre>
+etc...
+
+Our personal tree can be everywhere else:
+<pre>
+$HOME
++- $OMDIR
+|  +- ...
++- MypersonalOpenMokoPackages
+   +- packages
+   |  +- myhello
+   |     +- myhello-1.0.bb
+   +- sources
+      +- myhello
+         +- myhello-1.0
+            +- configure
+            +- Makefile.am
+            +- ...
+</pre>
+The only thing to do is edit $OMDIR/build/local.conf to tell bitbake to search our folders for .bb files:
+<pre>
+BBFILES+="/path/to/your/packages/*/*.bb"
+</pre>
+
+And then, running
+<pre>
+$ cd $OMDIR/build
+$ bitbake mypackage
+</pre>
+will bring all the necessary operations to create a package in $OMDIR/build/tmp/deploy/ipk/armv4t/myhello .....
