@@ -96,7 +96,7 @@ which will look up the list of latest available OpenMoko snapshot builds from bu
 <pre>$ openmoko/flash.sh</pre>
 which runs the emulator, loads u-boot into it and then uses u-boot's capability to program the Flash memory to install all the necessary parts of the system into the virtual Flash. It will also set up all the bootloading process including a boot menu (ENTER is [AUX] and SPACE is [POWER]), splash, u-boot environment and some default kernel parameters. If everything goes OK, the script should print a command which you can use to start using the emulator.
 
-QEMU has '''*tons*''' of commandline switches and things that can be configured. You can look them up in [http://www.qemu.org/user-doc.html QEMU user docs]. You will probably want to use the "-snapshot" switch, among other ones. Saving and restoring emulation state at any point (unrelated to "-snapshot") should work as per QEMU user docs too.
+QEMU has '''*tons*''' of commandline switches and things that can be configured. You can look them up in [http://www.qemu.org/user-doc.html QEMU user docs]. You will probably want to use the "-snapshot" switch, among other ones. Saving and restoring emulation state at any point (unrelated to "-snapshot") should work as per QEMU user docs too. In addition the monitor commands "help" and "info" are of great help. The monitor usually sits in second virtual console, thus ctrl-alt-2 and ctrl-alt-1 switch to monitor and back.
 
 === Pre-built binaries ===
 
@@ -106,7 +106,7 @@ Win32 binaries shipped with firmware can be downloaded from [http://mdk.linux.or
 
 This QEMU tree has only been tested on GNU/Linux. To get graphical (not counting VNC) and/or audio output from the emulator you will need either SDL or Cocoa installed on your computer. To enable audio, see the available switches to the ./configure script.
 
-The scripts that sit in openmoko/ require lynx, wget, python and most GNU base utilities installed in standard locations. If you are using the flash.sh script, you will need to install the netpbm package to get the png conversion tools.
+The scripts that sit in openmoko/ require lynx, wget, python, netpbm and most GNU base utilities installed in standard locations. The netpbm package contains tools necessary for bootsplash image conversion.
 
 All of the build-time and run-time requirements listed in [http://www.qemu.org/user-doc.html QEMU documentation] apply. This includes zlib, etc. On distributions that use binary packages, remember that you need the packages ending in '''-dev''' or '''-devel'''.
 
@@ -134,7 +134,7 @@ Find and enable '''Device Drivers''' -> '''USB support''' -> '''USB Network Adap
 
 These last two drivers are the same [[Getting Started with your Neo1973#By using Ethernet emulation over a USB cable|drivers that you need to work with a real Neo over USB network]]. After you've built the drivers, make sure that the copy of kernel headers in /usr/include/linux is up to date. In particular the file /usr/include/linux/usb_gadgetfs.h needs to be present and if your distribution came with headers older than 2.6.18 or so, then you need tell the package manager to update them, or you can do that manually with
 <pre> # cp -a /usr/src/linux/include/linux/* /usr/include/linux/</pre>
-(assuming that your kernel sources are in /usr/src/linux). It is important that this is done before building qemu because the build system checks if these headers are functional and in case they aren't found it will disable the USB Slave functionality.
+(assuming that your kernel sources are in /usr/src/linux). It is important that this is done before building qemu because the build system checks if these headers are functional and in case they aren't found it will disable the USB Slave functionality.  Run "grep CONFIG_GADGETFS config-host.h" in qemu source directory to make sure that the detection succeeded.
 
 After building qemu and before running it, make sure that the modules are loaded into the kernel. I found it useful to load gadgetfs with the following command:
 <pre> # modprobe gadgetfs default_uid=1000  # assuming my User ID is 1000</pre>
@@ -144,7 +144,7 @@ Make sure that the mountpoint /dev/gadget exists:
 <pre> # mkdir -p /dev/gadget</pre>
 After that the rest of the procedure can be performed from your regular user account. Mounting gadgetfs is done with:
 <pre> $ mount /dev/gadget</pre>
-The "default_uid" parameter changes the ownership on all files under /dev/gadget to your own and since the files there are created and destroyed dynamically, there's no easy way to have that performed by ''udev''. Now running qemu as you usually do but appending "-usb -usbgadget" should enable the USB Slave functionality. The qemu monitor commands "info usbslave" and "usb_add gadget" will be useful. The former instruction asks the OS running under the emulator (OpenMoko) to describe its slave features (that's what ''lsusb'' does after a Neo1973 is connected to a PC). You can see the available USB configurations in this command's output. Since gadgetfs allows only one configuration, we will need to choose the desired configuration - most device have only one such configuration, in which case you can use just "usb_add gadget" to connect to host; CDC ethernet devices however usually include a second configuration for RNDIS networking (i.e. Ms Windows compatibility) and so does OpenMoko when using the g_ether driver. Hence, to get this right, wait for OpenMoko to fully boot up and execute the following in QEMU monitor (Ctrl+ALT+2 in emulator window - Ctrl+Alt+1 to change back):
+The "default_uid" parameter changes the ownership on all files under /dev/gadget to your own and since the files there are created and destroyed dynamically, there's no easy way to have that performed by ''udev''. Now running qemu as you usually do but appending "-usb -usbgadget" should enable the USB Slave functionality. The qemu monitor commands "info usbslave" and "usb_add gadget" will be useful. The former instruction asks the OS running under the emulator (OpenMoko) to describe its slave features (that's what ''lsusb'' does after a Neo1973 is connected to a PC). You can see the available USB configurations in this command's output. Since gadgetfs allows only one configuration, we will need to choose the desired configuration - most device have only one such configuration, in which case you can use just "usb_add gadget" to connect to host; CDC ethernet devices however usually include a second configuration for RNDIS networking (i.e. Ms Windows compatibility) and so does OpenMoko when using the g_ether driver. Hence, to get this right, wait for OpenMoko to fully boot up and execute the following in QEMU monitor:
 <pre>
 QEMU 0.9.0 monitor - type 'help' for more information
 (qemu) info usbslave 
@@ -156,8 +156,9 @@ Configuration 1: CDC Ethernet
 (qemu) 
 (qemu) usb_add gadget:1
 </pre>
+If qemu gives "couldn't add device gadget:1", double-check that it was built against gadgetfs - the file config-host.h must contain the line "#define CONFIG_GADGETFS 1".
+
 The "1" in "usb_add gadget:N" is the number of the USB configuration that we want to use. If everything went correctly - you can check that in dmesg - you should now have a new network interface called ''usb0'' on the PC, through which you can talk to the OpenMoko running in QEMU:
-You may get "couldn't add device gadget:1" from QEMU console, which probably the gadgetfs not build against QEMU. Simply check file ${OMDIR}/build/qemu/config-host.h, should contain this line "#define CONFIG_GADGETFS 1"
 <pre>
  $ dmesg | tail
 <6>gadgetfs: bound to dummy_udc driver
