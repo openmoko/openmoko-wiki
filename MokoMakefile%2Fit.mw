@@ -122,23 +122,23 @@ Potrebbe essere utile leggere altro sul funzionamento di [[OpenMoko under QEMU/i
 
 ===Developing with MokoMakefile===
 
-To make in-tree changes and have them built and used by qemu:
+Per compilare ed eseguire su qemu dei sorgenti modificati:
 
   cd /home/moko/openmoko
   quilt new descriptive-patch-name.patch
-  quilt add trunk/src/name-of-file-to-change # do this for every file you are about to modify
+  quilt add trunk/src/name-of-file-to-change # per ogni file che è stato modificato
   ...make the changes...
-  quilt refresh # this creates a file in /home/moko/patches/openmoko-HEAD/ and updates the quilt series file there
+  quilt refresh # questo crea un file in /home/moko/patches/openmoko-HEAD/ e aggiorna i files quilt
 
-Note: Do '''NOT''' use absolute paths as this confuses quilt and will get you a diff of the file against /dev/null!
+Nota: '''NON''' utilizzare percorsi assoluti, quilt potrebbe provare a ottenere un file diff di /dev/null!
 
-To build the changes and have them used by qemu:
+Per compilare le modifiche e utilizzare il risultato con qemu:
 
   make build-qemu
   make flash-qemu-local
   make run-qemu
 
-If you want to modify applications instead of the openmoko toolchain, this is what you have to do (example: openmoko-messages):
+Se le modifiche vengono apportate alle applicazioni e non a OpenMoko, questo è quello che va fatto (esempio: openmoko-messages):
 
   /usr/src/openmoko# . ./setup-env
   /usr/src/openmoko# cd openmoko/
@@ -151,18 +151,18 @@ If you want to modify applications instead of the openmoko toolchain, this is wh
   cd -
   /usr/src/openmoko/openmoko# bitbake openmoko-messages
 
-Then continue with MokoMakefile usage.
+Poi continuare con MokoMakefile.
 
-If you want to add an application to your openmoko distribution, do this:
-All file edits should be done using quilt as described above. That way a patch can easily be submitted to the openmoko project.
-First, create a directory that will correspond to your package and edit a '''.bb''' file in there:
+Se vuoi aggiungere una applicazione alla tua distribuzione OpenMoko:
+Tutte le modifiche ai files dovrebbero essere fatte utilizzando quilt, come descritto sopra. In questo modo una modifica può essere facilmente inviata a OpenMoko project.
+Prima di tutto, creare una directory che corrisponderà al package e modificare un file '''.bb''':
   /usr/src/openmoko# cd openmoko/
   /usr/src/openmoko/openmoko# quilt new mycoolpackage.patch
   /usr/src/openmoko/openmoko# mkdir trunk/oe/packages/mycoolpackage
   /usr/src/openmoko/openmoko# quilt add trunk/oe/packages/mycoolpackage/mycoolpackage_1.bb
   /usr/src/openmoko/openmoko# quilt edit trunk/oe/packages/mycoolpackage/mycoolpackage_1.bb
 
-The file should have the following content:
+Il file dovrebbe avere il seguente contenuto:
   DESCRIPTION = "This is a cool package"
   SECTION = "username/mycoolpackage"
   PV = "1"
@@ -171,9 +171,9 @@ The file should have the following content:
   
   SRC_URI = "http://www.example.com/download/mycoolpackage-1.tar.gz"
 
-Explanation:
-* DESCRIPTION - Just a short text explaining the package
-* SECTION - I have no clue, but I'll use username/mycoolpackage for now
+Spiegazione:
+* DESCRIPTION - Una corta descrizione del pacchetto
+* SECTION - Non ne ho idea, but I'll use username/mycoolpackage for now
 * PV - Package Version
 * inherit autotools - The package can be compiled by './configure && make && make install' so we tell MokoMakefile to do it this way.
 * SRC_URI = ... - This is the download location of the package source. It's imperative that the tar.gz contains a directory called '''packagename-packageversion''' (in this case: mycoolpackage-1) so that MokoMakefile can find it automatically or the build will fail.
