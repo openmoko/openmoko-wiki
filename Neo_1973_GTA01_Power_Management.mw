@@ -412,14 +412,14 @@ FIXME: no idea what this is for
 
 == Approximate power draw of various subsystems ==
 
-The battery has a total of 1200mAh, at 3.6V. This is approximately 3500mWh, once power supply losses are taken into account. The figues below are estimates from datasheets.
+In P0 and P1 phones, the battery has a total of 1200mAh, at 3.6V. This is approximately 3500mWh, once power supply losses are taken into account. The figues below are estimates from datasheets.
 
 These do not take into account the severe hardware bugs of phase 0 hardware, which severely affect power use.
 
 * LCD 
-**  200mW with backlight at full brightness
-**  40mW with backlight at 10%
-***  Based on similar 2.8" LCDs.
+**  500mW with backlight at full brightness
+**  50mW with backlight at 10%
+***  Based on rough measurements of P0 hardware.
 * CPU
 **  320mW @ 200MHz
 **  450mW @ 266MHz
@@ -432,23 +432,25 @@ These do not take into account the severe hardware bugs of phase 0 hardware, whi
 **  3.6mW @ Idle, beacon only
 *** Based on the datasheets provided
 * GSM ?
-*** All GSM terminals have a 2W radio trasmitter so I believe Tx burst consumption will be under that while Rx burst and idle values should be in the 30mW range.
+**Idle, but connected to network, probably 30mW (based on similar devices)
+**Active on a call - up to 500mW or so, perhaps considerably less if close to a tower.
+***Based on 2W radio on 1/8th of the time as it is in a full rate codec. 
 * GPS
 ** 45mW
 *** Based on comparison with a broadly similar (though not as fully featured chip [http://www.maxim-ic.com/appnotes.cfm/an_pk/3447 from Maxim]
 
-USB does not work in slow mode, nor does the LCD screen controller. 
-It is not impossible that there may be ways to draw on the screen through the SPI interface, but this has not been confirmed or documented. 
-As bluetooth is connected via an internal USB connector, this will not work either.
+USB does not work in slow mode, nor does the LCD screen controller. However, the CPU can be slowed down to 60Mhz or so and they will still work.
+
+As bluetooth is connected via an internal USB connector, this will not work in the slowest mode.
 
 This would imply that with the CPU constantly on in low power mode, GPS and GSM blipping on and off, and display off, the worst case power consumption is probably around 70mW, leading to a battery life of 2 days.
 If the CPU is turned off, battery life rises significantly.
 
-With everything on, playing video with sound, for example should get well over 4 hours.
+With everything on, playing video with sound, for example should get well over 3 hours. (500mW LCD + 320mW CPU + 200mW audio + 50mW GPS.  4.5Wh at 1.1W draw) 
 
 Both voltage and clock speed to the CPU core can be altered.
 Exactly how this will work with the hardware is yet to be determined.
-It is possible that it may be capable of playing MP3s with the CPU clock at 60Mhz. This would considerably extend battery life.
+It is possible that it may be capable of playing MP3s with the CPU clock at 60Mhz. This would considerably extend battery to well over 10 hours. Optimistically >24 hours of mp3.
 
 == Measured power draw on phase 0 neo1973 ==
 
