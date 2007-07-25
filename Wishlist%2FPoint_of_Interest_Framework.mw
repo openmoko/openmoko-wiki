@@ -1,0 +1,47 @@
+{{Wishlist}}
+
+== Point of Interest Framework ==
+
+This feature may serve as framework for [[Wishlist:context_based_to-do_list]] and [[Wishlist:Location_based_reminders]]. The idea is to notify the user of certain events based on their location, direction, or or any event a daemon is able to trigger.
+
+[[Wishlist:Tagging|Tagging]] may be used  to filter or control a called application.
+
+It should be tightly connected to [[Wishlist:ANARM]] and [[Wishlist:Profiles]]
+
+
+== Use Cases ==
+
+It combines the use case of [[Wishlist:context_based_to-do_list]] and [[Wishlist:Location_based_reminders]]
+
+* Let any application or daemon start another application by simple rules defined in a GUI 
+* A daemon checks for location POIs and call the events (aka. starts applications or do dbus calls) that are tied to the tags of that POI
+* A daemon checks for the GSM cell id you are in and activates an certain user profile
+* A daemon checks for near Bluetooth devices and call an event if a device matches
+* ...checks for your WiFi SID and do the VPN connect to your home network
+* Cron starts an alarm and therefore the associated events at a specific time
+* A simple script polls a log file, finds some uncommon connection attempt on your log file an give you a notice
+
+
+== Design Ideas ==
+* It should be a GUI based application and a daemon
+* It should be a bidirectional daemon, allowing a applications to drag out a list of POI objects tagged for itself and being called by an application with event 'bar' and parameters 'foo' or tags 'foo-bar'
+* This application itself should to two sided
+** one side a few standard input daemons or triggers like GPS, time or 'just a few tags' with a specific dialogue for each type.
+** The other side is the event what would be called like ''calendar events='tag a' '' or ''show notification'' with specific dialogs for each know event type and a command line incl. parameter expansion. For powerusesr there should be the possibility to do a D-Bus call as well.
+* each input can be connected to each event just by dragging them onto
+** these connection should be 'or' by default and group able by an extra dialogue. So powerusers can specify like ''(Input A and Input B) or Input C'' or even full boolean trees. The application may aggregate triggers or several seconds to accomplish that.
+* once configured it may run as permanent daemon and awaits incoming triggers 
+* new event types should be easy to implement by an XML configuration file, so the user just installs a package and that drops the appropriate config file for that daemon.
+* new inputs/triggers should by configurable by XML too
+* import / export of selected connection between triggers and events
+
+== Design Issues ==
+
+* How to hide the complexity of this system for Joe Doe? - Different levels of complexity? perhaps from Noob to Pro? See [[Wishlist:Profiles]] for more details 
+* How to handle multiple times the same event? Like staying at a certain GPS location should the event triggered more then once?
+* There should be an import for several GPS based POI[http://en.wikipedia.org/wiki/Point_of_interest] formats
+
+== Existing Technologies ==
+* GPS devices checking for POIs and show them on map or warns the user [http://en.wikipedia.org/wiki/Point_of_interest]
+* inetd does that for network traffic on specific TCP or UPD ports
+* D-Bus[http://en.wikipedia.org/wiki/DBus] or DCOP[http://en.wikipedia.org/wiki/DCOP] does a lot of this but doesn't offer a GUI
