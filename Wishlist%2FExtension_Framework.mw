@@ -38,12 +38,15 @@ For the following advantage we assume that gsmd is enabled for the extension fra
 [[Image:Extensionframework_method.png]]
 
 #As gsmd gets ready to make a 'phone call it reaches the stage where it has set up all of its parameters and is about to start the process of making a call.  It is at this point that the method call to the extension framework is made, by calling outgoingcall() with the following parameters:
-#* originalnumber: a string that contains the number that gsmd was planning to dial (populated with the number passed in to the function)
-#* dialnumber: a string that contains the number that gsmd will dial on return (populated with the number passed in to the function)
-#* sendid: whether or not to send caller ID (as per system default)
+#* number: a string that contains the number that gsmd was planning to dial (populated with the number passed in to the function)
+#* sendid: whether or not to send caller ID (as per system or user default)
 # When the extension handler receives this method it carries out a lookup of the extensions that are currently registered and active and puts together a list of which extensions should be contacted in which order.  In this case two extensions are returned as being interested in the information, along with the order in which they should be approached.
-# The first relevant extension is contacted and carries out its work.
-# The first relevant extension returns the parameters that it could change (dialnumber and sendid) and also two additional parameters: authorized and authreason.  These two parameters allow for any operation to be blocked by a suitable extension if required.  If the extension handler ever sees a return parameter stating that an operation is not authorized then it will immediately send a suitable reply to the calling method informing it of the lack of authorization along with a text string containing a message suitable to be displayed to an end user explaining why it was not authorized.
-# The second relevant extension is contacted and carries out its work.  Note that the parameters sent to this module include the updated dialnumber and sendid from the first relevant extension.
-# The second relevant extension returns the parameters that it could change (dialnumber and sendid) and also the authorization parameters as above.
-# The extension handler returns the final results in the reply to the calling method.  At this stage gsmd should update its parameters and carry on with the process of making the call, possibly with different parameters than when it started.  It should also confirm that it is authorized to continue with the operation, and if not abort appropriately.
+# The first relevant extension is contacted and carries out its work
+# The first relevant extension returns the following values:
+#* number: a string that contains the new number to dial (which may be the same as the input number to dial)
+#* sendid: whether or not to send caller ID
+#* authorized: if the action of making the call is authorized
+#* authreason: if the action of making the call is not authorized then a reason why not
+# The second relevant extension is contacted and carries out its work.  Note that the parameters sent to this module include the updated number and sendid from the first relevant extension
+# The second relevant extension returns the values as per the first extension
+# The extension handler returns the final results in the reply to the calling method.  At this stage gsmd should use the parameters returned rather than those it had prior to the call for the purposes of dialing a number and sending/not sending caller ID.  It should also confirm that it is authorized to continue with the operation, and if not abort appropriately
