@@ -126,13 +126,15 @@ You're also invited to read more about how to run [[OpenMoko under QEMU]] in the
 
 ===Developing with MokoMakefile===
 
+For the following explanations $OMDIR is the directory where there Makefile puts all the stuff.
+
 To make in-tree changes and have them built and used by qemu:
 
-  cd ~/openmoko/openmoko
+  cd $OMDIR/openmoko
   quilt new descriptive-patch-name.patch
   quilt add trunk/src/name-of-file-to-change # do this for every file you are about to modify
   ...make the changes...
-  quilt refresh # this creates a file in ~/openmoko/patches/openmoko-HEAD/ and updates the quilt series file there
+  quilt refresh # this creates a file in $OMDIR/patches/openmoko-HEAD/ and updates the quilt series file there
 
 Note: Do '''NOT''' use absolute paths as this confuses quilt and will get you a diff of the file against /dev/null!
 
@@ -144,27 +146,25 @@ To build the changes and have them used by qemu:
 
 If you want to modify applications instead of the openmoko toolchain, this is what you have to do (example: openmoko-messages):
 
-  /usr/src/openmoko# . ./setup-env
-  /usr/src/openmoko# cd build
-  /usr/src/openmoko/openmoko# bitbake -c unpack openmoko-messages
-  /usr/src/openmoko/openmoko# cd \
-  ../build/tmp/work/armv4t-linux/openmoko-messages-0.0.1+svnnow-r2_2276/openmoko-messages/
-  /usr/src/openmoko/build/tmp/work/armv4t-linux/openmoko-messages-0.0.1+svnnow-r2_2276/openmoko-messages# \
+  cd $OMDIR
+  . ./setup-env
+  cd build
+  bitbake -c unpack openmoko-messages
+  cd ../build/tmp/work/armv4t-linux/openmoko-messages-0.0.1+svnnow-r2_2276/openmoko-messages/
   ...make the changes...
-  /usr/src/openmoko/build/tmp/work/armv4t-linux/openmoko-messages-0.0.1+svnnow-r2_2276/openmoko-messages# \
   cd -
-  /usr/src/openmoko/openmoko# bitbake openmoko-messages
+  bitbake openmoko-messages
 
 Then continue with MokoMakefile usage.
 
 If you want to add an application to your openmoko distribution, do this:
 All file edits should be done using quilt as described above. That way a patch can easily be submitted to the openmoko project.
 First, create a directory that will correspond to your package and edit a '''.bb''' file in there:
-  /usr/src/openmoko# cd openmoko/
-  /usr/src/openmoko/openmoko# quilt new mycoolpackage.patch
-  /usr/src/openmoko/openmoko# mkdir trunk/oe/packages/mycoolpackage
-  /usr/src/openmoko/openmoko# quilt add trunk/oe/packages/mycoolpackage/mycoolpackage_1.bb
-  /usr/src/openmoko/openmoko# quilt edit trunk/oe/packages/mycoolpackage/mycoolpackage_1.bb
+  cd $OMDIR/openmoko/
+  quilt new mycoolpackage.patch
+  mkdir trunk/oe/packages/mycoolpackage
+  quilt add trunk/oe/packages/mycoolpackage/mycoolpackage_1.bb
+  quilt edit trunk/oe/packages/mycoolpackage/mycoolpackage_1.bb
 
 The file should have the following content:
   DESCRIPTION = "This is a cool package"
@@ -183,13 +183,13 @@ Explanation:
 * SRC_URI = ... - This is the download location of the package source. It's imperative that the tar.gz contains a directory called '''packagename-packageversion''' (in this case: mycoolpackage-1) so that MokoMakefile can find it automatically or the build will fail.
 
 This is not all. We also need to tell MokoMakfile that it needs to build and include the package in the image. To do this, do
-  /usr/src/openmoko/openmoko# quilt edit trunk/oe/packages/tasks/task-openmoko.bb
+  $OMDIR/openmoko# quilt edit trunk/oe/packages/tasks/task-openmoko.bb
 Here, increase the value '''PR''' by one and add '''mycoolpackage \''' (with the backslash!) just before the line reading '''#  update-alternatives \'''.
 
 Now run
-  /usr/src/openmoko/openmoko# quilt refresh
-  /usr/src/openmoko/openmoko# cd ..
-  /usr/src/openmoko# make update all
+  quilt refresh
+  cd ..
+  make update all
 
 And if everything's alright you should now have an OpenMoko image to flash to your phone or run in qemu as described above.
 
