@@ -73,3 +73,18 @@ Anytime the modem has pending data on the MODEM-UART channel, it
 # once all data is transmitted, return to idle state.  When next data item is to be transmitted, start again from '1'
 
 === Software implementation ===
+
+{note|This is the plan, it has not been fully implemented yet}
+
+# a firmware post may-16-2007 needs to be present in the gsm modem. This is true for all phones bought during phase 1 in the online shop.  However, I currently don't really know what firmware version was present in the GTA01Bv4 that we sent to phase 0.
+# the suspend code probably still needs to correctly configure the RTS/CTS lines (i.e. put them in GPIO mode, and set them to their desired "don't send any more characters" level)
+
+So in this case, any data from the GSM modem will wake up the cpu for
+processing of that data.  The GSM modem has some internal buffer (I
+don't know how big right now) that should be sufficient for buffering
+the data until the CPU is alive.
+
+This also means that gsmd will eventually have to re-program the GSM
+modem to make sure only relevant unsolicited response codes are sent
+during suspend.  You usually don't want a signal level change to cause
+a CPU wake up, only things like incoming message / call.
