@@ -1,0 +1,46 @@
+This page is about the Neo1973 GTA01 (and GTA02) GSM Modem, based on the Ti Calypso chipset.
+
+== GSM Modem OpenMoko commands ==
+
+The Ti calypso GSM Modem firmware has been extended by OpenMoko specific AT         commands.  This page doucments those commands.
+
+FIXME!
+
+== Wakeup of CPU from GSM Modem ==
+
+=== Problem description ===
+
+For power management reasons, it is absolutely neccessary that only the minimal     required parts of the device are powered at any given time.  If you carry your
+Neo in your pocket, then all it should do is stay online with the GSM network, 
+and notify you in case there's an incoming call/sms (like other phones).
+
+During that time, the Neo1973 Application Processor (s3c24xx) is suspended,
+i.e. not powered at all.  The SDRAM is in self-refresh mode.
+
+In this suspend mode (which Samsung calls by the funny name of POWER_OFF), the
+processor is not able to receive any data from the GSM Modem.  Nor is it able
+to detect incoming characters and wake up the CPU.  The only wake up sources
+are a certain set of external interrupts (EINT).
+
+Thus, the GSM Modem GPIO line IO1 was connected with the Samsung EINT1, and
+the GSM Modem firmware contains some special logic to generate an interrupt
+(and thus wake-up event) to the CPU.
+
+=== Logic for problem solution ===
+
+Preconditions
+# The default state of GSM Modem output IO1 is logical LOW.  
+
+Anytime the modem has pending data on the MODEM-UART channel, it
+# checks if CTS_MODEM permits sending of data
+## if CTS_MODEM permits sending of UART data, go to '4.2'
+# [implicit: CTS_MODEM does not permit sending of UART data]
+## set IO1 line to logical HIGH level
+## buffer modem data [until buffer is full, after which data gets discarded]
+# wait until CTS_MODEM permits sending of UART data   
+# as soon as CTS_MODEM permits sending of UART data,
+## set IO1 back to logical LOW level
+## start sending of UART data
+# once all data is transmitted, return to idle state.  When next data item is to be transmitted, start again from '1'
+
+=== Software implementation ===
