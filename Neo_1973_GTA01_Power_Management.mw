@@ -1,56 +1,30 @@
-{{InProgress}}
-
-Power management is of utmost concern to any mobile device.  Battery power is quite limited, so we need to make sure we try our best to conserve it.  The [[Neo1973 Power Management |Neo1973 Power Management page]] tries to describe the various power management features of the [[:Category:Neo1973 Hardware | Neo1973 Hardware]], their states, transitions, etc.  First, we start by describing the power states of the individual hardware components.  Then we look at it from a System Integration point of view.
+Power management is of utmost concern to any mobile device.  Battery power is quite limited, so we need to make sure we try our best to conserve it.  This page tries to describe the various power management features of the [[:Category:Neo1973 Hardware | Neo1973 Hardware]], their states, transitions, etc.  First, we start by describing the power states of the individual hardware components.  Then we look at it from a System Integration point of view.
 
 
 == S3C2410 SoC ==
 
 The [[Neo1973 Power Management#S3C2410 SoC | S3C2410 SoC section]] is an overview of the S3C2410 power states or modes and their capabilities. The S3C2410 has the following modes:
 
-* [[Neo1973 Power Management#Normal Mode | Normal Mode]]
-* [[Neo1973 Power Management#Idle Mode | Idle Mode]]
-* [[Neo1973 Power Management#Slow Mode | Slow Mode]]
-* [[Neo1973 Power Management#Power_off Mode | Power_off Mode]]
 
-=== Normal Mode ===
-
-This is the most power-consuming mode.  Regular operation at full clock speed (266MHz).
-The typical power consumption is 335mW in this mode.
-
-We can dynamically reduce the CPU core clock speed to lower frequencies, if required.
-
-=== Idle Mode ===
-
-In this mode, FCLK to the CPU core is switched off.  This reduces the power consumption to about half the typical 'Normal mode' consumption: 177mW
-
-==== Wake-up sources ====
-
-any interrupt.
-
-=== Slow Mode ===
-
-In slow mode, FCLK is tied to the external crystal, i.e. 12MHz in our case.  The CPU core, SDRAM and bus clocks are also running at 12MHz.
-
-This reduces the power consumption to typically 33mW.
-
-==== Wake-up sources ====
-
-none, we can just use our slowly running code to switch back to Normal mode, if it's required.
-
-=== Power_off Mode ===
-
-In Power_off mode, only the SDRAM is held in refresh, and the SoC-internal wake-up logic and  RTC is powered.  This means that the overall power consumption of the CPU goes down to max. 100uA, which translates to 200uW at 2.0V core voltage.
-
-==== Wake-up sources ====
-
-The number of wake-up sources is more restricted in this mode:
-
-* EINT[0...15]
-* RTC Alarm Interrupt
-* nBATT_FAULT pin
+{| border="3"
+|+ Power states for the [[Neo1973 Power Management#S3C2410 SoC | S3C2410 SoC(CPU)]]
+! Mode || Frequency || Power consumption || Wakeup sources||Note
+|-
+! Normal Mode 
+| 50-266Mhz || (50-335mW depending on speed) || Awake
+|-
+! Idle Mode
+|50-266Mhz||50-170mW depending on speed || Any interrupt || FCLK disconnected
+|-
+! Slow Mode
+| 12Mhz||33mW || Awake, can vary clock speed as desired on interrupts. || CPU clock (FCLK), SDRAM, bus clocks set by 12Mhz crystal. 
+|-
+! Power_off Mode
+| off|| .2mW (@2V) || EINT[0...15], RTC Alarm Interrupt, nBATT_FAULT pin|| SDRAM self-refresh, RTC powered.
+|}
 
 ==== System design considerations ====
-
+{{fixme}}
 In order to fully support Power_off mode, we need to
 * Be able to switch off VDDi/VDDiarm/VDDi_MPLL/VDDi_UPLL separately from VDDalive, using a switch based on the PWREN signal
 
@@ -461,3 +435,4 @@ I played with old ampermeter, old nokia 3110 (as a powersupply) and phase0 neo19
 [[Category:Documentation]]
 [[Category:Neo1973 Hardware]]
 [[Category:Neo1973 Phase 1 related]]
+[[Category:InProgress]]
