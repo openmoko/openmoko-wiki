@@ -23,7 +23,7 @@ Note that the extension framework is not designed to manage GUI updating and int
 
 === Components ===
 
-The extension framework will consist of three main components which will manage various aspects of managing and using the extensions.  These components may or may not be separate processes, although there is a reliability advantage to having the handler separate from the other components.  The names and functions of the three components are:
+The extension framework will consist of three main components which will manage various aspects of managing and using the extensions.  These components may or may not be separate processes, although there is a reliability advantage to having the handler separate from the other components it introduces additional complexity.  The names and functions of the three components are:
 
 * The extension manager handles registration and activation of extensions as well as providing them a clean interface to store preference and configuration information.
 * The extension handler carries out the work of receiving method calls to the extension manager, passing them to the relevant extensions and providing a final reply back to the calling method.
@@ -33,7 +33,7 @@ A final component of the extension framework will be a C library will provide ex
 
 === Example of a Method Call with the Framework Handler ===
 
-For the following advantage we assume that gsmd is enabled for the extension framework.  A pictorial representation of the framework is shown below.
+For the following advantage we assume that gsmd is enabled for the extension framework.  A pictorial representation of the method call is shown below.
 
 [[Image:Extensionframework_method.png]]
 
@@ -50,6 +50,25 @@ For the following advantage we assume that gsmd is enabled for the extension fra
 # The second relevant extension is contacted and carries out its work.  Note that the parameters sent to this module include the updated number and sendid from the first relevant extension
 # The second relevant extension returns the values as per the first extension
 # The extension handler returns the final results in the reply to the calling method.  At this stage gsmd should use the parameters returned rather than those it had prior to the call for the purposes of dialing a number and sending/not sending caller ID.  It should also confirm that it is authorized to continue with the operation, and if not abort appropriately
+
+=== Example of an Extension Registration ===
+
+Extensions must be registered with the extension manager so that the extension handler is aware of them and can incorporate them in to extension requests.  A pictorial representation of the registration process is shown below.
+
+[[Image:Extensionframework_registration.png]]
+
+# An extension sends a registration method to the extension manager.  The method contains the following information:
+#* extension.  This is the full name of the method we wish to extend, for example org.openmoko.ExtensionHandler.Gsmd.OutgoingCall
+#* name.  This is the name of the object that is carrying out the extension, for example net.devzero.SampleExtension
+#* path.  This is the path to the object that is carrying out the extension, for example /net/devzero/SampleExtension
+#* interface.  This is the interface for the object that is carrying out the extension, for example net.devzero.SampleExtension
+#* method.  This is the method on the object that is carrying out the extension, for example GsmdOutgoingCall
+# The extension manager logs the information in a central configuration store where it can be accesed by the extension handler
+# The extension manager returns the call
+
+Once an extension has registered a method then it will be called by the extension handler whenever required.
+
+Unregistering an extension uses exactly the same methodology except that the method is Unregister rather than Register, all parameters stay the same.
 
 === Use Cases ===
 
