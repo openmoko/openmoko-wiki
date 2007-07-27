@@ -1,23 +1,23 @@
 The integrators are perhaps the key to the hammerhead chip.
-{{note|I'm unhappy with the term '''input bit''' but can't think of another logical term. The other terms are standard}}
-The GPS signal comprises several levels.
-First there is the carrier, at 1.2Ghz(?) which is multiplied by the 1024 element long '''spreading code''' - the PRN, which varies per satellite, at a '''chip rate''' of 1.024Mhz, leading to a '''input bit rate''' of 1Khz.
 
-Then the navigation messages are modulated onto these '''input bits''' at a rate of 50Hz, so a '''navigation bit''' comprises 20 '''input bits'''.
+The GPS signal comprises several levels.
+First there is the carrier, at 1.2Ghz(?) which is multiplied by the 1024 element long '''spreading code''' - the PRN, which varies per satellite, at a '''chip rate''' of 1.024Mhz, leading to a '''symbol rate''' of 1Khz.
+
+Then the navigation messages are modulated onto these '''symbols''' at a rate of 50Hz, so a '''navigation bit''' comprises 20 '''symbol'''.
 
 There must be several integrators to track the GPS signal, while meeting the observed packet transfer statistics.
 
-As there are no periodic transfers at 1Khz from each satellite, or even 50Hz, it must somehow store the navigation message bits and send them on when requested.
+As there are no periodic transfers at 1kbit/sec from each satellite, or even 50bit/sec, it must somehow store the navigation message bits and send them on in a batch when requested.
 
 Exactly how 'cooked' this is is an interesting question.
 
 There must fundamentally be several layers.
 
-First there are massively parallel correlators, which read the relative timing between a local clock and the begining of each '''input bit''' by correlating the incoming signal from each satelite,  with a locally generated copy of the PRN.
+First there are massively parallel correlators, which read the relative timing between a local clock and the begining of each '''symbol''' by correlating the incoming signal from each satelite,  with a locally generated copy of the PRN.
 
 This must output into 2048 bins. (1024 with an I and Q - 0 and 90 degree shifted output each)
 
-The '''input bit rate''' from the output of the correlators at 1ms is not however the data bits as desired for the lower levels - each '''navigation bit''' is 20 '''input bits'.
+The '''symbol''' from the output of the correlators at 1ms is not however the data bits as desired for the lower levels - each '''navigation bit''' is 20 '''symbols'''.
 
 There must be some way of synchronising the alignment  (perhaps in software, perhaps in hardware) of the '''navigation bits''' with the bit-edges of the '''input bits'''.
 
@@ -30,7 +30,7 @@ There is however another complication.
 
 Simply looking at the peak of maximum energy of the '''spreading code''' correlator will get you a psuedorange accurate to around a microsecond, or 300m.
 
-In order to get 1m of error due to this source, the I and Q measurement in the '''spreading code''' correlator would have to be measured to a little worse than a degree.
+In order to get 1m of psuedorange error due to this source, the I and Q measurement in the '''spreading code''' correlator would have to be measured to a little worse than a degree.
 
 This is probably not possible.
 
