@@ -1,52 +1,12 @@
 The integrators are perhaps the key to the hammerhead chip.
 
 The GPS signal comprises several levels.
-First there is the carrier, at 1.2Ghz(?) which is multiplied by the 1023 element long '''Symbol''' - the PRN, which varies per satellite, at a '''chip rate''' of 1.023Mhz, leading to a '''Symbol rate''' of 1Khz.
+First there is the carrier, which is multiplied by the 1024 element long '''spreading code''', at a '''chip rate''' of 1.024Mhz, leading to a '''input bit rate''' of 1Khz.
 
-Then the navigation messages are modulated onto these '''Symbols''' at a rate of 50Hz, so a '''navigation bit''' spans 20 '''Symbols'''.
+Then the navigation messages are modulated onto these '''input bits''' at a rate of 50Hz, so a '''navigation bit''' comprises 20 '''input bits'''.
 
 There must be several integrators to track the GPS signal, while meeting the observed packet transfer statistics.
 
-As there are no periodic transfers at 1KHz/sec from each satellite, or even 50Hz/sec, it must somehow acquire, store the navigation message bits and send them on in a batch when requested.
+As there are no periodic transfers at 1Khz from each satellite, or even 50Hz, it must somehow store the navigation message bits and send them on when requested.
 
 Exactly how 'cooked' this is is an interesting question.
-
-There must fundamentally be several layers.
-
-First there are massively parallel correlators, which read the relative timing between a local clock and the beginning of each '''symbol''' by correlating the incoming signal from each satellite,  with a locally generated copy of the PRN.
-
-This must output into 2048 bins. (1024 with an I and Q - 0 and 90 degree shifted output each)
-
-The '''symbol''' from the output of the correlators at 1ms is not however the data bits as desired for the lower levels - each '''navigation bit''' is 20 '''symbols'''.
-
-There must be some way of synchronising the alignment  (perhaps in software, perhaps in hardware) of the '''navigation bits''' with the bit-edges of the '''input bits'''.
-
-This is considerably simpler than the first correlator problem, but there still could be several ways it is done.
-
-This integrator allows the '''navigation bits''' to be assembled automatically into segments of '''navigation messages'''.
-These must then be downloaded in some form by the software.
-
-There is however another complication.
-
-Simply looking at the peak of maximum energy of the '''spreading code''' correlator will get you a psuedorange accurate to around a microsecond, or 300m.
-
-In order to get 1m of pseudorange error due to this source, the I and Q measurement in the '''spreading code''' correlator would have to be measured to a little worse than a degree.
-
-This is probably not possible.
-
-One method of solving this would be to have several bins in the correlator not correlating between an integer position in the '''spreading code''' and the incoming signal, but at very small offsets - +5 and -5 degrees, for example, which will help when the   hammerhead is adjusted to exactly the right doppler to track the satellite, and the phase is trimmed so that it's aligned as closely as possible.
-
-On reflection, is this required. 
-Perhaps long enough integration and accurate tracking can produce an accurate enough signal without this.
-Another question is do the +-5 degree correlators - if present - get any meaningful signal.
-
-
-
-===Glossary===
-*PRN - the psuedo-random '''Spreading Code''' signal that is different per satellite, that is used to decode the GPS signal. This is 1023 chips long in the case of GPS.
-*Chip - a chip is one bit of a PRN.
-*Symbol - the PRN - either transmitted inverted, or non-inverted, 20 times in a row, to form a '''navigation bit''' at a rate of 1Khz.
-*Navigation Bit - This is part of a navigation message - the constant datastream the satellites broadcast, giving time, orbital information, and other data.
-
-[[Category:GPS]]
-[[Category:Chip]]
