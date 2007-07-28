@@ -248,6 +248,10 @@ Build statistics:
 
 ===Get this package included in the rootfs image===
 
+<blockquote>
+This method is not a standard or normal way to include a package.
+The proper method follows the improper method.
+</blockquote>
 bitbake openmoko-devel-image is used to build the entire distribution, but it does not include your new package in the rootfs image.
 
 To do this, use:
@@ -255,6 +259,44 @@ To do this, use:
 <pre>bitbake openmoko-devel-image -crebuild</pre>
 
 This will actually rebuild the rootfs, including your new packages.
+
+<blockquote>
+The suggested method follows below.
+</blockquote>
+
+To include the package in the image there are two steps.
+
+First: Modify your local.conf. $OMDIR/build/conf/local.conf
+<pre>
+DISTRO_EXTRA_RDEPENDS += "<app name>"
+</pre>
+This adds your application as a dependency for building the distro.
+
+Second: Update the task-base.
+<pre>
+bitbake task-base -crebuild
+</pre>
+When you update the task base it re-builds and ipk file which will: "Merge machine and distro options to create a basic machine task/package" 
+
+You could also add your package by modifying the openmoko/trunk/oe/packages/tasks/task-openmoko.bb and adding your application name with the trailing backslash right before the update-alternatives line.
+<pre>
+  modutils-initscripts \
+  module-init-tools-depmod \
+  udev \
+  rsync \
+  screen \
+  <My application Name> \ 
+#  update-alternatives \
+</pre>
+
+Then to test this out (if you're using the [[MokoMakeFile]]) it's pretty simple.
+<pre>
+make openmoko-devel-image
+make build-qemu
+make flash-qemu-local
+</pre>
+And now you're running qemu with that fancy new image you just made!
+
 
 [[Category:Applications]]
 [[Category:Platform]]
