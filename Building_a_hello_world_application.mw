@@ -21,6 +21,66 @@ Assuming you have followed [[OpenMoko_under_QEMU#Setting_up_USB_connection|Setti
  scp hello root@192.168.0.202:/tmp/
  ssh root@192.168.0.202 /tmp/hello
 This sequence of commands ought to give you a nice ''Hello World'', btw. the default root password is blank, just press return.
+
+=== GDK the Wrong / Easy Way ===
+Building a GDK application the wrong way is slightly more complex, but is still fun to try.  It requires using pkg-config to specify including and linking with the ARM header files and libraries.
+
+Given the following program as main.c:
+
+ #include <gtk/gtk.h>
+ 
+ gchar *hello = "Howdy";
+ gchar *world = "World";
+ GtkWidget *label;
+ gchar *labeltext;
+ 
+ void buttoncb(GtkWidget *widget, gpointer data)
+ {
+ if (labeltext == hello)
+    {
+    labeltext = world;
+    gtk_label_set_text(GTK_LABEL(label), labeltext);
+    }
+ else if (labeltext == world)
+    gtk_main_quit();
+ }
+ 
+ int main(int argc, char *argv[])
+ {
+ GtkWidget *window;
+ GtkWidget *button;
+ 
+ gtk_init(&argc, &argv);
+ window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+ button = gtk_button_new();
+ labeltext = hello;
+ label = gtk_label_new(labeltext);
+ gtk_container_add(GTK_CONTAINER(button), label);
+ g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(buttoncb), NULL);
+ gtk_container_add(GTK_CONTAINER(window), button);
+ gtk_widget_show_all(window);
+ gtk_main();
+ 
+ return 0;
+ }
+
+You must first point pkg-config to the proper directory:
+
+ export PKG_CONFIG_PATH=/home/username/moko/build/tmp/staging/arm-linux/lib/pkgconfig
+
+And set up an environment variable to make things easier:
+
+ export OM=/home/username/moko
+
+The compile/link line is rather long - you will only want to do this once before you decide to create a shell script or make file:
+
+ $OM/build/tmp/cross/arm-linux/bin/gcc -L$OM/build/tmp/staging/arm-linux/lib
+   -Wl,-rpath-link,$OM/build/tmp/staging/arm-linux/lib -Wl,-O1 -g -o hw main.c
+   `$OM/build/tmp/staging/i686-linux/bin/pkg-config --cflags --libs openmoko-libs
+   gtk+-2.0`
+
+Then copy and run as in the original hello world command line program above.
+
 ===== Why was it the ''wrong'' way? =====
 OpenMoko uses [[http://www.openembedded.org/ OpenEmbedded]] and they use bitbake when building stuff, but at least you now know that you can cross compile for OpenMoko.
 
