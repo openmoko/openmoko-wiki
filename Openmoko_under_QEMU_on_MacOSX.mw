@@ -200,6 +200,41 @@ The main idea is to get patches for gcc-4.x from Q project and apply it to qemu-
 
 TODO
 
+= Building dfu-util =
+
+First install libusb: sudo port install libusb
+
+Get dfu-util: svn co http://svn.openmoko.org/trunk/src/host/dfu-util/
+
+run ./autogen.sh
+
+Then, for some reason, my libusb lib was not detected. I needed to set my paths by hand:
+
+comment out line 18 and 19 in configure ac:
+
+#PKG_CHECK_MODULES(USB, libusb >= 0.1.4,,
+#                 AC_MSG_ERROR([*** Required libusb >= 0.1.4 not installed ***]))
+
+and add libusb libs manually to line 20, so it looks like:
+
+LIBS="$LIBS -L/opt/local/lib -lusb -Wl,-framework -Wl,IOKit -Wl,-framework -Wl,CoreFoundation -Wl,-prebind -I/opt/local/include"
+
+run ./configure
+
+goto src and:
+
+comment out  dfu static because this is not supported on Mac:
+
+dfu_util_static_LDFLAGS = #-static
+
+add lib by hand:
+
+DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir) -I/opt/local/include -L/opt/local/lib -lusb -Wl,-framework -Wl,IOKit -Wl,-framework -Wl,CoreFoundation -Wl,-prebind -I/opt/local/include
+
+(I know that this is totaly unpure, dirty hack, yet it works).
+
+Run make in src dir. You should have library - I don't know if this works because I do not have phone yet. Can anyone confirm?
+
 [[Category:Developer software]]
 [[Category:Guides]]
 [[Category:InProgress]]
