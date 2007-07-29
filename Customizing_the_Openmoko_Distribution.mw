@@ -10,3 +10,32 @@ This part of the tutorial is going to be pretty basic. I absolutely love [[MokoM
 To get your environment setup please get it setup according to [[MokoMakefile]] however if you do have the build environment setup manually and you're sure you know what you're doing then feel free to go forward with this.
 
 == Setting Up a Local Overlay ==
+If you're at the point for setting up a local overlay this means a couple things. First: You've had a brilliant idea for an application that you just need to have on the OpenMoko platform. Second: You realize that this killer app of yours needs to be done properly and you're not going to do anything silly like include it in the actual tree for the OpenMoko distro because it would probably end up just getting overwritten eventually, or you just realize taht it's bad practice!
+
+
+To create a local overlay:
+
+* Create a "local" directory and its subdirectories
+
+ mkdir local local/conf local/classes local/packages
+
+* Copy <code>site.conf</code> from the openmoko tree to <code>local/conf</code>
+
+ cp oe/conf/site.conf local/conf/site.conf
+
+* Edit the site.conf you copied to add the new tree as a source for bitbake recipes.
+
+Change the current <code>BBFILES</code> to look like this:
+ BBFILES := "${OMDIR}/openembedded/packages/*/*.bb ${OMDIR}/oe/packages/*/*.bb ${OMDIR}/local/packages/*/*.bb"
+Change your <code>BBFILE_COLLECTIONS</code> line to look like this:
+ BBFILE_COLLECTIONS = "upstream local overlay"
+Add this line:
+ BBFILE_PATTERN_overlay = "^${OMDIR}/local/"
+Add this line:
+ BBFILE_PRIORITY_overlay = "20"
+
+The <code>BBFILE_PRIORITY</code> should be greater than all the other <code>BBFILE_PRIORITY</code> variables on the same file.
+
+* Change your <code>BBPATH</code> environment variable to add the new tree ''before'' the two others for [[MokoMakefile]], the variable is on the <code>setup-env</code> file.
+
+ export BBPATH="${OMDIR}/build:${OMDIR}/local:${OMDIR}/oe:${OMDIR}/openembedded"
