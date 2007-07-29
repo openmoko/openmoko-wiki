@@ -93,3 +93,53 @@ $HOME
 
 That should be your structure, if it's not you should go and fix it up.
 === Filling the Files ===
+
+So you've got your sample files all laid out now it's time to make them actually do something.
+
+myhelloworld.c
+<pre>
+#include <stdio.h>
+
+int main(int argc, char** argv)
+{
+        printf("Hello world!\n");
+        return 0;
+}
+</pre>
+
+README.txt
+<pre>
+This is a command line application. It prints a simple Hello World! To stdout.
+</pre>
+
+myhelloworld.bb
+<pre>
+DESCRIPTION = "A killer hello world applicaiton"
+AUTHOR = "Bryce Leo"
+HOMEPAGE = ""
+SECTION = "console/applications"
+PRIORITY = "optional"
+LICENSE = "MIT"
+#DEPENDS = ""
+#RDEPENDS = ""
+#RRECOMMENDS = ""
+#RCONFLICTS = ""
+#SRCDATE = "20070729"
+#PV = "0.1"
+#PR = "r0"
+SRC_URI = "file://myhelloworld.c \
+          file://README.txt "
+
+S = "${WORKDIR}/myhelloworld/"
+
+do_compile() {
+        ${CC} ${CFLAGS} ${LDFLAGS} ${WORKDIR}/myhelloworld.c -o myhelloworld
+}
+
+do_install() {
+        install -m 0755 -d ${D}${bindir} ${D}${docdir}/myhelloworld
+        install -m 0755 ${S}/myhelloworld ${D}${bindir}
+        install -m 0644 ${WORKDIR}/README.txt ${D}${docdir}/myhelloworld
+}
+
+</pre>
