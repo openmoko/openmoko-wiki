@@ -1,21 +1,24 @@
-Il '''devirginator''' un è un programma utilizzato in combinazione con [[dfu-util]], [[OpenOCD]] e [[Debug Board]] per ri-programmare da zero il telefono alle impostazioni di fabbrica.
+Il '''devirginator''' un è un programma utilizzato in combinazione con [[dfu-util]], [[OpenOCD]] e [[Debug Board]] per reporogrammare alle impostazioni di fabbrica il telefono from scratch.
+
 
 == Codice sorgente ==
 
-Il codice sorgente di devirginator è disponibile qui: http://svn.openmoko.org/trunk/src/host/devirginator/
+Il codice sorgente di devirginator è disponibile qui http://svn.openmoko.org/trunk/src/host/devirginator/
+
 
 == Documentazione ==
 
-{{note|Questa deriva da http://svn.openmoko.org/trunk/src/host/devirginator/README rev. 1215 e potrebbe essere obsoleta}}
+{{nota|Questa deriva da http://svn.openmoko.org/trunk/src/host/devirginator/README rev. 1215 e potrebbe essere obsoleta}}
 
 === Iniziare ===
 
 Per iniziare,
  % cp config.example config
-e apportare le modifiche necessarie. In particolare, configurare SNAPSHOT.
+e fai le modifiche necessarie. In particulare, devi configurare SNAPSHOT.
 Quindi
  % make
-Questo richiede Netpbm e transfig. Infine assicurarsi che openocd sia attivo, accendere il dispositivo, diventare root ed eseguire
+Questo richiede Netpbm e transfig. Infine assicurati che openocd sia attivo,
+accendi il dispositivo, diventa root, ed esegui
  # ./devirginate
 
 
@@ -23,18 +26,20 @@ Questo richiede Netpbm e transfig. Infine assicurarsi che openocd sia attivo, ac
 
 Il dispositivo deve essere connesso con:
 
-* JTAG, con un'interfaccia supportata da OpenOCD (necessaria per tutti gli stages)
-* USB, connesso al computer su cui è in funzione "devirginate" (richiesto solo per lo stage 2 e successivi)
+* JTAG, con un'interfaccia supportatata da OpenOCD (necessaria per tutti gli stages)
+* USB, connesso alla su cui è in funzione "devirginate" (richiesto solo per lo stage 2 e successivi)
 
-Inoltre, se una è connessa al dispositivo una console virtuale, l'avanzamento dell'installazione può essere monitorato.
+Inoltre, se una serial console è connessa al dispositivo, la progressione
+dell'installazione può essere monitorata.
 
-Sono necessari i seguenti programmi:
+Sono bnecessari i seguenti programmi:
 
 ==== dfu-util ====
 
-* dfu-util deve essere accessibile dalla macchina su cui è attivo "devirginate". Se dfu-util non è nel PATH, selezionare un path specifico in "config".
+* dfu-util deve essere accessibile dalla macchina su chui è attivo "devirginate". Se dfu-util non è nel PATH, puoi selezionare un path specifico in "config".
 
-Per generare dfu-util, eseguire:
+  
+Per fara il build di dfu-util, esegui:
  cd $OMDIR/openmoko/trunk/src/host/dfu-util
  ./autogen.sh
  ./configure
@@ -42,13 +47,16 @@ Per generare dfu-util, eseguire:
 
 ==== OpenOCD ====
 
-OpenOCD SVN revision 130 con libftdi 0.8 funziona. Altre combinazioni possono anche funzionare. È richiesta la seguente patch:
+OpenOCD SVN revision 130 con libftdi 0.8 funziona. Altre
+combinazioni possono anche funzionarec. E' richiesto il seguente patch:
 
 http://svn.openmoko.org/developers/werner/openocd-wait-patiently.patch
 
-Per le istruzioni di generazione, consultare http://svn.openmoko.org/developers/werner/notes/openocd
+Per el istruzioni per il build, vedi http://svn.openmoko.org/developers/werner/notes/openocd
 
-  Se si usa la build di OpenOCD creata da Openmoko (revisione SVN 1180 o successiva), la patch è già applicata.
+  Se stai usando la build di OpenOCD fatta dalla OpenMoko
+  distribution (SVN revision 1180 o successiva), il patch è già
+  applicato.
 
 ==== telnet ====
 
@@ -57,74 +65,107 @@ Oltre a tutto ciò, "devirginate" necessita di telnet.
 
 ==== netpbm, transfig, wget, perl ====
 
-"setup.sh" può essere eseguito da un'altra macchina con in condivisione la stessa gerarchia del file system. Necessita di Netpbm, transfig, wget, e Perl.
+"setup.sh" può essere eseguito da un'altra macchian che ha in share la stessa gerarchia del
+file system. Necessita di Netpbm, transfig, wget, e Perl.
+
 
 === Setup ===
 
-Innanzitutto devirginator deve essere configurato. Questo comprende:
+Innazitutto devirginator necessita di essere configurato. Questo include
 
 * scaricare i binari per u-boot, kernel, etc.
 * generare/convertire diversi files usando il processo di setup
 
-Per il momento la configurazione deve essere fatta all'interno della directory contente tutti i file di devirginator. I file generati durante la configurazione sono posizionati nella directory tmp/. I file in tmp/ sono utilizzati anche durante l'uso di devirginator.
+At the moment, the setup must be done in the directory containing all
+files belonging to the devirginator. The files generated during setup
+are stored in the directory tmp/. The files in tmp/ are also used
+during devirgination.
 
-Per iniziare, copiare config.example in "config" e applicare le modifiche necessarie. Quasi tutte le configurazioni necessarie sono già applicate, ma potrebbe essere utile configurare SNAPSHOT con il codice data dello snapshot desiderato.
+First, copy config.example to "config" and make the necessary changes.
+Almost all settings have reasonable defaults, but the least thing you
+will have to do is set SNAPSHOT to the date code of the snapshot you
+desire.
 
-Quindi, eseguire ./setup.sh o semplicemente make .
+Next, run either  ./setup.sh  or just  make .
 
-setup.sh ora scaricherà i file mancanti ed eseguirà le varie conversioni. Se appare qualche errore durante questo processo, per esempio a causa della mancanza di strumenti o di un errore di configurazione, setup.sh si fermerà con un errore. È possibile quindi correggere l'errore e riprovare. I file già scaricati in tmp/ verranno saltati durante il nuvo tentativo (setup.sh lo farà lo stesso se i file avranno subito dei cambiamenti).
+setup.sh will now download any missing files, and perform the various
+conversions. If any error occur during this, e.g., because of missing
+tools or a configuration error, setup.sh will stop with an error. You
+then have to correct the problem and retry. Files already downloaded
+to tmp/ will be skipped in the retry (setup.sh will still probe if
+they have changed).
 
-setup.sh inoltre controlla se gli eseguibili sono disponibili durante l'uso di devirginator e segnalerà se manca qualcosa. In generale, è possibile eseguire setup.sh su una macchina diversa rispetto "devirginate", in questo caso questi avvisi saranno ignorati.
+setup.sh also checks if executables used during devirgination are
+available and prints a warning if it finds anything missing. In general,
+one can run setup.sh on a different machine than "devirginate", in
+which case these warnings can be ignored.
 
 
-=== File ===
+=== Files ===
 
-==== Script ====
-* crc32.pl - Permette la funzione crc32 che comanda la IEEE CRC-32. Questo script è usato da altri script Perl, con "do".
+
+==== Scripts ====
+* crc32.pl -Provides the function crc32, which computes the IEEE CRC-32. This script is used by other Perl scripts, with "do".
 
 * envedit.pl
 * openocdcmd.pl
 * scriptify.pl
 * setup.sh
 
-==== Configurazione utente ====
+==== User configuration ====
 
-===== File di configurazione statici =====
+===== Static configuration files =====
 
-I file seguenti contengono script e altre informazioni di configurazione "statici" che sono usati nel processo di devirgination. Normalmente basta modificare questi file per cambiare le funzioni del processo di configurazione.
+The following files contain scripts and other "static" configuration
+information that is used in the devirgination process. In general,
+it is only necessary to edit these files when changing functionality
+of the setup process.
 
-Ognuno di questi file è convertito in qualche maniera da setup.sh. Qui sotto dopo la freccia sono indicati i rispettivi file risultanti.
+Each of these files is converted in some way by setup.sh. Below, we
+indicate the name of the respective resulting file after the arrow.
 
 * openocd.in -> tmp/script.ocd
 
-Comandi da eseguire da OpenOCD durante lo stage 0. Per eseguire l'espansione di una variabile, ogni riga di questo file è processata dalla shell con "echo $line". A causa di questo deve essere evitato l'uso di metacaratteri nella shell.
+Commands to execute by OpenOCD in phase 0. To perform variable
+expansion, each line of this file is processed by the shell with
+eval "echo $line". Due to this, shell meta-characters should be
+avoided.
 
-Cambiando qualche indirizzo in openocd.in, è necessario effettuare l'aggiornamento di u-boot.in.
+If changing any addresses in openocd.in, you also need to update
+u-boot.in.
 
 *  u-boot.in -> tmp/u-boot.out
 
-Comandi da eseguire in u-boot durante lo stage 0. Questo file è convertito in un'immagine interpretabile da u-boot e quindi eseguita dalla memoria con il comando di u-boot "autoscr".
+Commands to execute in u-boot during stage 0. This file is converted
+to an image understood by u-boot, and then executed from memory with
+u-boot's "autoscr" command.
 
 * environment.in -> tmp/environment
 
-Configurazioni per l'ambiente u-boot. Notare che i cambiamenti in questo file sono fatti al di sopra dell'ambiente interim prodotto nello stage 0. In particolare, la variabile "mtdparts" è mantenuta da questo stage.
+Environment settings for the regular u-boot environment. Note that
+the changes in this file are made on top of the interim environment
+produced in stage 0. In particular, the "mtdparts" variable is
+retained from that stage.
 
-Le righe lunghe possono essere divise nell'ambiente semplicemente tramite rientro della continuazione. Notare che la nuova riga e il rientro sono sostituiti da uno spazio. Esempio,
+Long lines can be split in environment.in by simply indenting the
+continuation. Note that the newline and the indentation are replaced
+with one space. E.g.,
 <pre>
-foo=qualche
-    cosa
+foo=some
+    thing
 </pre>
-rendi  foo=qualche cosa
+would yield  foo=some thing
 
 * smiley.fig -> tmp/smiley.gz
-Lo splash screen dello stage 0, un faccia sorridente su sfondo verde.
+The stage 0 splash screen, a smiling face on a green background.
+
 
 ==== Download cache ====
 
 
 * tmp/System_boot.png -> tmp/splash.gz
-Questa è una copia del logo Openmoko, che verrà convertito in
-un'immagine gzip-ed raw framebuffer.
+This is a copy of the OpenMoko logo, which then gets converted to a
+gzip-ed raw framebuffer image.
 
 * tmp/openmoko-devel-image-*.rootfs.jffs2
 * tmp/lowlevel_foo-*.bin
@@ -137,9 +178,10 @@ un'immagine gzip-ed raw framebuffer.
 * tmp/preboot_override.noscrub
 * tmp/preboot_override.scrub
 
-==== Script ====
 
-I primi messaggi saranno qualcosa di simile a questo:
+==== Scripts ====
+
+The first few messages should look like this:
 <pre>
 Open On-Chip Debugger
 > script /home/moko/om/trunk/src/host/devirginator/tmp/script.ocd
@@ -151,89 +193,91 @@ target halted in ARM state due to debug request, current mode: Supervisor
 cpsr: 0x400000d3 pc: 0x00000000
 [...]
 </pre>
-E' importante "pc: 0x00000000". Se il numero è differente, ad esempio
-qualcosa del tipo "pc: 0xffffffed", il dispositivo probabilmente non
-è acceso. In questo caso puoi provare a farlo ripartire, o se openocd
-è bloccato,
 
-* chiudi openocd
-* togli e reinserisci il connettore USB nel JTAGkey o nel debug v2 board
-* apri openocd
+The "pc: 0x00000000" is important. If the number is different, e.g.,
+something like "pc: 0xffffffed", the device is probably not turned
+on. In this case, you can try to restart, or, if openocd is stuck,
 
-=== Stage ===
+* kill openocd
+* pull and then replace the USB plug of the JTAGkey or debug v2 board
+* start openocd
 
-Il processo di setup è diviso in tre stage (oltre ad uno speciale stage
-zero, vedi più avnti). Ogni stage lascia il dispositivo in uno stato
-stabile. Un processo di installazione può includere uttti o solo alcuni
-degli stage. Ogni stage richiede il completamento di tutti i precedenti.
 
-* Stage 1: cancella tutti i precedenti contenuti NAND, installa u-boot, e rende il dispositivo pronto a ricevere ulteriori updates da DFU.
-* Stage 2: installa Linux ed il file sistem root.
-* Stage 3: Da definire.
+=== Stages ===
 
-Nota che probabilmente dovrai avere privilegi per alcune delle operazioni USB che
-sono eseguite da "devirginate". Per questo motivo esegui tutto come "root".
+The setup process is divided into three stages (plus a special zero
+stage, see below). Each stage leaves the device in a stable state.
+An installation run can include all or only some stages. Each stage
+requires successful completion of all previous ones.
 
-Per effettuare tutti gli stage, esegui
+* Stage 1: erases all previous NAND content, installs u-boot, and makes the device ready to receive further updates by DFU.
+* Stage 2: installs Linux and the root file system.
+* Stage 3: To be defined.
+
+Note that you most likely require privileges for some of the USB
+operations "devirginate" performs. Therefore, do all this as "root".
+
+To perform all stages, run
  # ./devirginate
-dalla directory trunk/src/host/devirginator/
+from the trunk/src/host/devirginator/ directory.
 
-Per eseguire solo singoli stage, specifica il numero dello stage, con il prefisso "-",
-ad esempio,
+To run only individual stages, specify the stage numbers, each prefixed
+by "-", e.g.,
  # ./devirginate -1
 
 
 ==== Stage 0 ====
 
-Se la tabella dei bad block NAND è invalida, può essere cancellata all'inzio
-dello stage 1. Questo è chiamato "stage 0".
+If the NAND bad block table is invalid, it can be erased at the beginning
+of stage 1. We call this "stage 0".
 
-Non è un'opzione ideale, perchè se l'ultimo blocco NAND è corrotto,
-queste informazioni andranno perse.
-Di default, lo stage 0 non viene eseguito.
+In general, this is not a desirable option, because if the last NAND blocks
+are defective, this information will be lost, and unreliable operation may
+result. By default, stage 0 is not performed.
 
 ==== Stage 1 ====
 
-Subito dopo l'accensione, lo schermo si accenderà mostrando cose a caso.
-Questo indica che il processo di setup è iniziato. Nota che il contenuto
-dello schermo può cambiare ("decay") durante il processo.
-Ma questo è normale.
+Immediately after starting, the screen lights up, showing random junk.
+This is an indication that the setup process has started. Note that the
+screen content may change ("decay") during all this. This is normal.
 
-Dopo 10-30 secondi, lo schermo diventerà nero. Questo indica che ora
-u-boot sta venendo eseguito nel dispositivo.
+After 10-30 seconds, the screen will go dark. This indicates that we
+now a have u-boot running on the device.
 
-Dopo 60-90 secondi, lo schermo si accenderà di nuovo e mostrerà una
-faccia sorridente su uno sfondo verde. Questo indica che il primo stage
-è stato completato. La faccia sorridente apparirà ogni volta che
-attiverai il dispositivo.
+About 60-90 seconds later, the screen will light up again and show a
+smiling face on a green background. This indicates that the first stage
+has completed. The smiling face will appear each time you activate the
+device.
 
-Il dispositivo ora contiene:
-* una bad block table (BBT)
-* u-boot, con capacità DFU
-* un set base di variabili d'ambiente u-boot
-* lo splash screen interim
+The device now contains:
+* a bad block table (BBT)
+* u-boot, with DFU capability
+* a basic set of u-boot environment variables
+* the interim splash screen
 
-Ciò che ancora manca è:
-* il kernel Linux
-* il file system root
-* l'ambiente finale
-* lo splash screen finale
+What is still missing:
+* the Linux kernel
+* the root file system
+* the final environment
+* the final splash screen
+
 
 ==== Stage 2 ====
 
-Per iniziare lo stage 2, attiva il dispositivo. Vedrai lo smiley dello
-stage 1.
+To begin phase 2, activate the device. The stage 1 smiley will show.
 
-La fase 2 può durare alcuni minuti. Il progresso della proedura di
-download è indicata dal simbolo hash (#) nel terminale dove è in
-funzione "devirginate".
+Phase 2 can take several minutes. Progress of the download procedure
+is indicated by hash signs (#) printed on the terminal where
+"devirginate" runs.
 
-Alla fine della fase 2, il dispositivo farà un reset, mostrando un
-parziale splash screen OpeMoko, quindi farà reset di nuovo, mostrando
-il corretto splash screen ed infine ci sarà il boot di Linux.
+At the end of phase 2, the device resets, displays a partial OpenMoko
+splash screen, then resets again, displays the correct splash screen
+and finally boots Linux.
+
 
 ==== Stage 3 ====
-Da definirsi.
-{{Languages|Devirginator}}
 
-[[Category:System Developers/it]]
+TBD.
+
+[[Category:Developer software]]
+[[Category:Guides]]
