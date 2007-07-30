@@ -158,4 +158,38 @@ Build statistics:
 
 Now that no errors were thrown we are happily done!
 
-== Adding Your App to the Image ==
+== Adding Your Application to the Image ==
+
+So you've had an idea, you've setup the build environment, you've setup your local overlway, you've laid out your application tree, you've put code into those fantastic files of yours and now it compiles.There's only one thing left to do. Add that application to your image.
+
+=== Modifying Your local.conf ===
+Now, go into your build config directory <code>${OMDIR}/build/conf/</code> and now you'll be editing <code>local.conf</code>
+Add this line to you <code>local.conf</code>
+  DISTRO_EXTRA_RDEPENDS += "myhelloworld"
+With this line you can also include other applications from the OE tree. For instance my <code>local.conf</code> looks like this.
+<pre>
+MACHINE = "fic-gta01"
+DISTRO = "openmoko"
+BUILD_ARCH = "i686"
+SRCDATE_eds-dbus = "now"
+DISTRO_EXTRA_RDEPENDS += "lua dillo myhelloworld"
+</pre>
+
+Now that you've fixed your <code>local.conf</code> it's time to go through all the necessary tasks to add and re-build you image and have your sweet package included.
+
+=== Building ===
+Now come the easy part thanks to [[MokoMakefile]]. 
+
+  make rebuild-package-task-base
+  make openmoko-devel-image
+  make build-qemu
+  make flash-qemu-local
+
+Now all you have to do is run qemu.
+  make run-qemu
+
+From here after you calibrate your stylus, you click onthe Menu in the top right, click down to terminal, then just run your program.
+<pre>
+root@fic-gta02:/$ myhelloworld
+Ello Poppet!
+</pre>
