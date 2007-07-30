@@ -48,7 +48,7 @@ The [[Neo1973 Power Management#S3C2410 SoC | S3C2410 SoC section]] is an overvie
 
 
 {| border="3"
-|+ Power states for the [[Neo1973 Power Management#S3C2410 SoC | S3C2410 SoC(CPU)]]
+|+ Power states for the [[Neo1973 Power Management#S3C2410 SoC | S3C2410 SoC(CPU)]] including approx memory bus current
 ! Mode || Frequency || Power consumption || Wakeup sources||Note
 |-
 ! Normal Mode 
@@ -58,24 +58,27 @@ The [[Neo1973 Power Management#S3C2410 SoC | S3C2410 SoC section]] is an overvie
 |50-266Mhz||50-170mW depending on speed || Any interrupt || FCLK disconnected
 |-
 ! Slow Mode
-| 12Mhz||33mW || Awake, can vary clock speed as desired on interrupts. || CPU clock (FCLK), SDRAM, bus clocks set by 12Mhz crystal. 
+| 12Mhz||40mW || Awake, can vary clock speed as desired on interrupts. || CPU clock (FCLK), SDRAM, bus clocks set by 12Mhz crystal. 
 |-
 ! Power_off Mode
 | off|| .2mW (@2V) || GSM, buttons, touchscreen, charger/USB connect, low battery|| EINT[0...15], RTC Alarm Interrupt, nBATT_FAULT pin. SDRAM self-refresh, RTC powered.
 |-
 !Peripheral||Power||Note||constraints
 |-
-!USB
-|?mW||The USB host driver||FCLK>?
+!USB-H
+|0.4mA||The USB host driver||FCLK>?
+|-
+!USB-D
+|2.9mA||The USB device driver||FCLK>?
 |-
 !LCD driver
-|?mW||LCD driver||FCLK>?
+|5.8mA||LCD driver||FCLK>?
 |-
 !PLL
 |?mW||Phase locked loop, needed if not in slow mode.
 |-
 !Serial
-|?mW||2 integrated serial ports
+|3.6mA||2 integrated serial ports
 |}
 
 ==== System design considerations ====
