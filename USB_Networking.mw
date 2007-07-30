@@ -6,10 +6,18 @@ By default Neo1973 has usb0 interface working due to Ethernet gadget (g_ether) c
 
 == Manual method ==
 
-Modprobe usbnet module and configure usb0 interface:
+Modprobe usbnet module and configure usb0 interface (as root):
 <pre>
 ifconfig usb0 192.168.0.200 netmask 255.255.255.0
 </pre>
+If your eth0 interface is also in the same 'range' (e.g. 192.168.0.105) then you can do the following:
+
+1. ping the Neo with
+ # ping -I usb0 192.168.0.202
+2. add a route to your Neo:
+ # /sbin/route add -net 192.168.0.202 netmask 255.255.255.255 dev usb0
+3 log in to the Neo
+ # ssh root@192.168.0.202
 
 == Automatic method ==
 
