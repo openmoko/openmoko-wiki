@@ -3,24 +3,21 @@ You will most likely need kernel version 2.6.20 or higher
 
 This procedure works on Debian GNU/Linux as well.
 
-== Ubuntu Feisty 7.0.4 ==
+== Debian GNU/Linux and Ubuntu Feisty 7.0.4 ==
 To prepare your environment run the following:
  sudo apt-get install linux-source linux-headers-`uname -r`
 
+Create and enter working dir (e.g. ~/gadgetfs)
+ mkdir $WD
+ cd $WD
+
 Uncompress /usr/src/linux-source-2.6.##.tar.gz (or .bz2)
- cd /usr/src/
-sudo tar -xvf /usr/src/linux-source-2.6.##.tar.gz
+ tar xf /usr/src/linux-source-2.6.##.tar.gz
 
-link it to /usr/src/linux
- sudo ln -s /usr/src/linux-source-2.6.## /usr/src/linux
-
-ensure /lib/modules/`uname -r`/build exists, 
- ls /lib/modules/`uname -r`/build
-
-then run the following:
+Then run the following:
  mkdir usb_module_dir
  cd usb_module_dir
- cp -r /usr/src/linux/drivers/usb/* .
+ cp -r /usr/src/linux-source-2.6.##/drivers/usb/* .
  cd gadget
  echo "KDIR := /lib/modules/`uname -r`/build" >> Makefile
  echo "PWD := `pwd`" >> Makefile
@@ -29,16 +26,9 @@ then run the following:
  echo -e "\t\$(MAKE) -C \$(KDIR) SUBDIRS=\$(PWD) modules" >> Makefile
  make
 
-Once the kernel modules ( dummy_hcd.ko and gadgetfs.ko ) are built, you must remove (or move) the gadgetfs and net2280 as follows:
- sudo mv /lib/modules/`uname -r`/kernel/drivers/usb/gadget/net2280.ko ./original_net2280.ko
- sudo mv /lib/modules/`uname -r`/kernel/drivers/usb/gadget/gadget.ko ./original_gadgetfs.ko
-
-and replace them with the new modules:
- sudo cp dummy_hcd.ko /lib/modules/`uname -r`/kernel/drivers/usb/gadget/
- sudo cp gadgetfs.ko /lib/modules/`uname -r`/kernel/drivers/usb/gadget/
- sudo depmod
-
-The net2280 module provides conflicting symbols and causes interference with the dummy_hcd module.
+If everything went fine you will find ''dummy_hcd.ko'' and ''gadgetfs.o'' along with other files in the current directory. Load the modules whenever you need them by issuing
+ sudo insmod ./dummcy_hcd.ko
+ sudo insmod ./gadgetfs.ko
 
 [[Category:Categories]]
 [[Category:Guides]]
