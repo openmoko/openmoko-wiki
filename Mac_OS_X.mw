@@ -1,412 +1,53 @@
-Being primarily a Linux based project, the host platform of choice is Linux. However, it is entirely possible to work with Openmoko and Neo handsets using MacOS X, as you'll soon see.
+Welcome to the OpenMoko page devoted to MacOS X users!
 
-There are actually two ways of working with Openmoko and MacOS X. One is simply to run a virtual machine in which case you would then follow the instructions for Linux.
+Here you can find notes of using Neo1973 (and maybe other OM devices) with Mac.
 
-On the other hand, if you wish to use MacOS X directly, please continue:
+= Connecting to your device =
 
-= Flashing to your device =
-To operate the Phase 1 devices (Neo 1973), you need to flash a root file system first.
+== USB ==
 
-== Graphical Flashing with Openmoko Flasher ==
-Here are detailed Mac OS X instructions:
-# download Version 1.5 or later of Openmoko Flasher from http://www.handheld-linux.com/wiki.php?page=Openmoko%20Flasher
-# select the repository
-# press the Refresh button (which loads the list of packages on the server)
-# select and load the rootfs (takes some minutes for approx. 40 MByte)
-# Now, on your Openmoko, hold the AUX button while pressing the Power button for 5 seconds
-# the BOOT menu should appear
-# connect the USB cable
-# Press the Flash button
-# the BOOT menu screen on the OM should show an indication that it has been switched to DFU mode
-# (if it fails, unplug the Openmoko shortly and replug and try again (experience shows that it is needed up to three times)
-# if it successfully flashed, you should be able to boot the Openmoko and continue configuring AJZaurusUSB
+You can telnet, SSH, SMB or do whatever you want if you install software that enables you to set up TCP/IP network over your USB connection. The only driver I know is http://www.dsitri.de/wiki.php?page=AJZaurusUSB Download it and install according to manual foung inside of the package. 
 
-A Universal Binary version of dfu-utils tool (and libusb) is included in the Openmoko Flasher application bundle. You can access it as ''Openmoko Flasher.app/Contents/MacOS/dfu-util''.
+You should have new ethernet interface in your System Prefereces. Set up network manually for that interface and then set up your network manualy on the Neo1973. You should be able to connect to your Neo!
 
-To flash from Terminal (which is sometimes required), see the directions below or in [[Flashing_the_Neo_FreeRunner|Flashing the Neo]]
-
-===GTA02===
-To flash the kernel:
- Openmoko\ Flasher.app/Contents/MacOS/dfu-util -d [[USB Product IDs|0x1d50:0x5119]] -a kernel -R -D uImage
-To flash the root filesystem:
- Openmoko\ Flasher.app/Contents/MacOS/dfu-util -d [[USB Product IDs|0x1d50:0x5119]] -a rootfs -R -D rootfs_filename.jffs2
-To flash the boot loader to NAND
- Openmoko\ Flasher.app/Contents/MacOS/dfu-util -d [[USB Product IDs|0x1d50:0x5119]] -a u-boot -R -D uboot.bin
-
-===GTA01===
-To flash the kernel:
- Openmoko\ Flasher.app/Contents/MacOS/dfu-util -d [[USB Product IDs|0x1457:0x5119]] -a kernel -R -D uImage
-To flash the root filesystem:
- Openmoko\ Flasher.app/Contents/MacOS/dfu-util -d [[USB Product IDs|0x1457:0x5119]] -a rootfs -R -D rootfs_filename.jffs2
-To flash the boot loader to NAND
- Openmoko\ Flasher.app/Contents/MacOS/dfu-util -d [[USB Product IDs|0x1457:0x5119]] -a u-boot -R -D uboot.bin
-
-When flashing succeeds (in any of the above cases) the following should be shown:
- status(0) = No error condition is present
- Done!
-
-{{Note|If you get an error: ''Cannot set alternate interface: usb_set_altinterface: could not set alternate interface''. You have to unplug and replug it again. '''Make sure it stays in the Boot menu during that!''' After you have replugged your openmoko you should see ''DFU: Switching to DFU Mode'' on the openmoko screen. Now you can execute the command again and this time it should work.
-
-If somebody has a solution for this problem please contact me. - [[User: Anakron|Anakron]]}}
-
-== Beginners Guide to Flashing Interfaces to the Neo Freerunner ==
-In this guide I will be going over the steps to flash an interface onto the Freerunner. 
-
-# Download the openmoko flasher from http://www.handheld-linux.com/wiki.php?page=Openmoko%20Flasher . With this you will be able to flash the desired software to your device.
-# You must find the repository for the specific interface you are going to flash. The Qtopia repository is located at  http://other.lastnetwork.net/OpenMoko/ . The OM2008.9 repository is located at  http://downloads.openmoko.org/distro/releases/Om2008.9/ . And the Android repository is located at http://people.openmoko.org/sean_mcneil/ . 
-# Now open the openmoko flasher and enter the URL for the repository of the desired interface. Next to where you entered the URL, you must click the drop down menu and choose Root File System. At the bottom of the flasher program click refresh. The Root File system file show appear. Once it appears, click Load and it will be loaded into the openmoko flasher.
-# Now, with your Freerunner unplugged hold the AUX button while holding the power button (for about 5 seconds) until the BOOT menu appears. Now connect the Freerunner to your computer and click Flash. You may have to disconnect and reconnect the phone a few times until to goes into DFU mode. Once it is in DFU mode, flashing will work. 
-# Once the flashing is successful, the Freerunner will shut down. Now press the power button while holding the AUX button for 7-10 seconds until the NAND BOOT menu appears. From here, select Boot and you phone should boot to the new interface. (The AUX/Power button combination puts the phone into the NOR BOOT menu, which must be used for flashing. The Power/AUX button combination puts the phone into the NAND BOOT menu, which is usually used for booting after a flash. After the phone is booted once from the NAND menu, it can be booted normally in the future.) 
-
-Most of the time, only the rootfs has to be flashed in order for the interface to work, but sometimes the kernel has to be flashed along with the rootfs. In this case, before you flash the rootfs you should select kernel in the drop down menu on the openmoko flasher and follow the same directions.
-
-== Compiling dfu-util ==
-Alternatively, you can compile dfu-util manually as described at [[User:SNMoore]] but you need libusb (e.g. through MacPorts).
-
-= Connecting a Mac and an Openmoko device =
-
-== USB Serial ==
-
-It is possible to access the [[U-Boot]] [[bootloader]] serial console from a Mac.  You can use the Terminal application on Mac OS X, or <tt>minicom</tt> from [http://finkproject.org/ Fink] or [http://www.macports.org/ MacPorts] (formerly Darwin Ports.)
-
-The USB driver creates cu and tty character devices, for example
- $ ls -la /dev/tty.usb*
- crw-rw-rw-   1 root  wheel   10,  18 Aug 23 14:10 /dev/tty.usbmodem00000001
- $ ls -la /dev/cu.usb*
- crw-rw-rw-   1 root  wheel   10,  19 Aug 23 14:10 /dev/cu.usbmodem00000001
-
-=== USB Serial with screen ===
-{{Main|GNU screen}}
-The <code>GNU screen</code> program is included with Mac OS X, and can be used from the terminal command line to connect to the serial console. To do this, simply get to a shell prompt in the terminal and invoke <code>screen</code> as follows:
-<pre>
-% screen /dev/tty.usbmodem0000001
-</pre>
-
-You should find yourself at the U-boot serial console prompt.   To get out, type <code>control+a</code> followed by <code>control+backslash</code>.
-
-=== USB Serial with minicom ===
-:''Possible Mac OS X .pkg download: [http://turin.nss.udel.edu/programming/ Dr. Jeffrey T. Frey: Minicom download and info; at the bottom]''
-:''PL2303 USB serial driver (untested): [http://sourceforge.net/projects/osx-pl2303/ PL2303 USB to Serial Driver for Mac OS X]''
-The <tt>minicom</tt> program from the [http://www.macports.org/ MacPorts] collection can be used to access the USB serial port <tt>/dev/cu.usbmodem0000001</tt> (numbering may vary.)
-
-First install the program (assuming you already have MacPorts installed):
-
- sudo port install minicom
-
-Then launch it in configuration mode (the -s flag):
-
- sudo minicom -s
-
-Under "Serial Port Setup", set the Device to "/dev/cu.usbmodem0000001" and set Bps to "115200 8N1". Under "Modem and Dialing", enter empty strings for "Init string", "Reset string", and "Hang-up string". Save the setup as default ("dfl") then Exit. 
-
-You should now be able to access the U-Boot console. You should exit from Minicom before disconnecting the smartphone, or else you will get an error about unplugging a USB device while it is in use.
-
-=== USB Serial with Terminal ===
-
-The built in Mac Terminal application <tt>Terminal.app</tt> can be used to access the USB serial port <tt>/dev/tty.usbmodem0000001</tt> (numbering may vary.)
-
-An easy way to do this is to configure the terminal with Script Editor, as described in the short article, [http://www.macosxhints.com/article.php?story=20061109133825654 ''Use '(GNU) screen' as a serial terminal emulator''](macosxhints.com).  Then,
-
-# Press and hold {{aux}} and then press and hold {{power}} for 5 seconds
-# Press {{aux}} to select <tt>Set console to USB</tt> in the U-Boot menu, and {{power}} to execute it
-# Start the serial terminal application.  You should see a U-Boot command line prompt, such as
- In:    usbtty
- Out:   usbtty
- Err:   usbtty
- DEVICE_CONFIGURED: 1
- Enabling automatic fast charge
- GTA01Bv4 #
-When you boot Linux on the smartphone, or if the smartphone powers down, Mac OS X will show a USB Device Unplug Notice, "The USB device has been unplugged while an application was still active. This can result in loss of data." This error is probably harmless.
-
-== USB Networking ==
-
-There are several drivers you can use to talk to the RNDIS/Ethernet Gadget that the Linux kernel presents when connected as a USB client.
-
-=== AJZaurusUSB driver ===
-
-You can use the open source driver from [http://projects.goldelico.com/p/AJZaurusUSB]. It was originally developed for handheld devices like iPAQ, Sharp Zaurus and Motorola A760, but works for Openmoko as well. Download and install according to the manual found inside the package. The code is GPL'd (source available) and runs on both Intel and PPC Macs with 10.4 to 10.6.
-
-After rebooting or loading the kernel extension by hand, you should have a new Ethernet interface in your System Preferences/Network.
-
-<b>Note</b>: This driver does not have the same problem as the Apple driver does, where it constantly adds to the list of interfaces each time you reboot the Openmoko, because the driver provides a constant Ethernet address independently what the Openmoko says. Only flashing a new kernel version might force you to update.
-
-=== Apple CDC Ethernet driver 10.4.10 ===
-MacOS X 10.4.10 and later includes a driver for RNDIS/Ethernet Gadget devices. Launch System Preferences -> Network and you should see "new interface detected enXX". 
-
-<b>Issue</b>: Each time you reboot the Neo, the interface will get a different Ethernet address. This in turn makes Mac OS X create a new configuration record. After a while you'll end up with a load of unusable enXX devices - if you don't periodically clean them out. Open System Preferences and go to Network -> Show(Network Port Configurations) -> Select an enXX -> Delete.
-
-<b>Note</b>: this is not a problem to blame Mac OS X for, because it tries to simplify network configuration based on the assumption of <b>stable</b> Ethernet addresses.
-
-=== Apple CDC Ethernet driver 10.5.x ===
-
-<b>Issue</b>:10.5 (Leopard) doesn't show a new ethernet interface for a Neo1973 running 2007.11. You'll only get the serial port, which is detected as a modem. The Ethernet device will show up in ifconfig though.  If it doesn't, try the other driver below.
-
-It turns out that the AppleUSBCDC driver prefers to use the CDC-ACM interface of USB networking devices instead of CDC-ECM with the exception of a broadcom network card. You can download a patched AppleUSBCDC driver that will recognize the usb id/vendor pair of g_ether and force it to use CDC-ECM. You can obtain the OS X 10.5.X patched driver from: http://bugcommunity.com/downloads/usbcdc-g_ether.zip. [Do not work? Openmoko 2009 16-june-2009 showed up as a modem (MacOS X.5.7) with this driver (ndis/ethernet) [[User:Glenn|Glenn]] 10:54, 16 June 2009 (UTC)] Source code: http://bugcommunity.com/downloads/files/AppleUSBCDCDriver-g_ether.326.4.1.zip
-
-The issue of multiple network interfaces showing up whenever the Neo is rebooted/power-cycled is due to the g_ether driver randomly setting the host and device mac addresses. This problem is remedied by passing the same host and device mac addresses during the modprobe of g_ether. [Not needed with MacOS X.5.7 and Openmoko 2009 16-june-2009. Simply reboot the Mac (again) and Openmoko appear again without changing network settings --[[User:Glenn|Glenn]] 08:30, 17 June 2009 (UTC)]
-
-For example:
-
- modprobe g_ether host_addr=46:0d:9e:67:69:eb dev_addr=46:0d:9e:67:69:ec
-
-=== Network Settings ===
-Open System Preferences and go to Network and you should see "new interface detected enXX".  In the Show list box select the new interface - Ethernet Adapter enXX.
-
-Use this configuration on the new interface with SHR-CORE images after 110822:
-<pre>
-IP-V4: manual
-IP-Addr:  192.168.7.2 (you can use anything in 192.168.7.* but OM is configured by default to use 192.168.7.2 as the external gateway)
-Subnet:   255.255.255.0 (should be the default - see tip below if have issue with these settings)
-Router:   192.168.7.1 (not actually needed, OS X can figure this out for itself, unless you have other conflicting configurations)
-</pre>
-
-Use this configuration on the new interface with SHR images before 110822:
-<pre>
-IP-V4: manual
-IP-Addr:  192.168.0.200 (you can use anything in 192.168.0.* but OM is configured by default to use 192.168.0.200 as the external gateway)
-Subnet:   255.255.255.0 (should be the default - see tip below if have issue with these settings)
-Router:   192.168.0.202 (not actually needed, OS X can figure this out for itself, unless you have other conflicting configurations)
-</pre>
-
-<b>Tip</b>: If your Internet connection is also in the range 192.168.0.x then instead you might want/need to use:
-<pre>
-Subnet:   255.255.255.248
-</pre>
-However if you are running Leopard it may not let you set the subnet claiming that the IP 192.168.0.200 is an invalid address for that subnet.  To get round this run the following from the OSX terminal (replacing en11 as appropriate):
-<pre>
-sudo ifconfig en11 192.168.0.200 netmask 255.255.255.248
-</pre>
-
-=== Testing Your Connection ===
-You should be able to connect to your Openmoko! Try using Terminal (Applications->Utilities->Terminal) to ping the Neo at 192.168.0.202 and the roundtrip time should be between 1 and 2 ms.
- ping 192.168.7.2   # SHR-CORE images after 110822
- ping 192.168.0.202 # SHR images before 110822
-
-Then log into your Openmoko using ssh:
- ssh root@192.168.7.2   # SHR-CORE images after 110822
- ssh root@192.168.0.202 # SHR images before 110822
-The default password is blank (depending on the distribution you have on the Openmoko).
-
-You can also [[scp]] files back and forth or share displays with X11.  Additional software and configuration could allow telnet, SMB, or many other possibilities using the TCP/IP network over your USB connection.
-
-Try pinging your Mac PC from the Openmoko
- ping 192.168.7.1   # SHR-CORE images after 110822
- ping 192.168.0.200 # SHR images before 110822
-
-Try pinging the outside world (a Google IP address)
- ping 74.125.19.147
-If that works then your Mac is routing the neo globally--if not see [[MacOS_X#Enabling_the_Mac_as_an_Internet_Router | Sharing Internet Connection with Mac]].
-
-Lastly, verify that DNS is correctly configured between the Openmoko & Network:
- ping www.google.com
-If that doesn't work then see [[USB_Networking#Configure_Default_Neo_DNS | Configuring Default Neo DNS]] to try and resolve the issue.
-
-Congratulations!!! The Neo is networked together with the Mac and sharing the Mac's interweb connection.
-
-== Bluetooth Networking ==
-{{InProgress}}
-
-This approach is based on: 
-*[[Bluetooth_Support#Networking]]
-*http://www.macosxhints.com/article.php?story=20051220221237711
-
-Unfortunately we can't use the pand (PAN daemon for BNEP) or dund (Dial Up Networking daemon for LAP) since neither service is available for the Mac.
-
-So, we configure a RFCOMM connection and a PPP gateway on the Mac. Finally, we connect the OM as a ppp client to the Mac.
-
-The reversed direction (OM as the Access Point and the Mac as the client) is described shortly in [[Manually_using_Bluetooth#PPP_Networking]]
-
-=== Making the Mac a PPP over Bluetooth Access Point ===
-
-In the Bluetooth System Preferences (10.4.11)
-* go to the Sharing pane
-* add a new service "BluetoothAccessPoint" of type RS-232
-* Enable that it is shown in the network preferences pane
-* Apply
-
-In the Network System Preferences
-* activate the new network configuration (BluetoothAccessPoint)
-* go tot the Modem tab and change the modem to "Null Modem 115200"
-* Apply
-
-In a Terminal, enter the following:
- $ sudo /usr/sbin/pppd /dev/tty.BluetoothAccessPoint 115200 noauth local passive proxyarp asyncmap 0 silent persist :172.16.140.14
-
-Here you see the 172.16.140.14 address, which makes it possible not to use natd, since it's in the same network as the Mac is. So the firewall knows where to sent it to -- no routing problems etc. Pick any free address in your private range. For instance, if you are using the following ... firewall: 192.168.1.1, Mac: 192.168.1.2, you can enter 192.168.1.3, assuming it's not used elsewhere on your network.
-
-If you want to be sure you did it right, open the system.log file on the Mac (tail -f /var/log/system.log), and you should see something like this:
- Jun 25 10:33:57 hostname pppd[679]:  pppd 2.4.2 (Apple version 229) started by username, uid 0
- Jun 25 10:33:57 hostname pppd[679]:  Connect: ppp0 <--> /dev/tty.BluetoothAccessPoint
-
-In Terminal, write
- sudo sysctl -w net.inet.ip.forwarding=1
-which should give the following feedback:
- net.inet.ip.forwarding: 0 -> 1
-
-In Terminal, write
- sudo ifconfig ppp0 up.
-
-=== Connecting the Openmoko as a Client to the Mac ===
-
-On the Openmoko do the following
-
-* Power on bluetooth
-
- root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-bt.0/power_on
-
-* Scan for the Mac
- root@fic-gta01:~$ hcitool scan
- Scanning ...
-         00:0E:6D:C0:0l:6A       Sho
-         00:20:E0:5A:FE:C8       MacBook
-
-* start the PPP client
-
- pppd 115000 192.168.1.202:192.168.1.200 local defaultroute pty 'rfcomm connect 0 00:16:CB:2F:A0:46 1'
-
-* Enjoy
-
-== WiFi Networking ==
-{{InProgress}}
+== Bluetooth ==
 
 To Be Done.
 
-== Neo1973 as a Bluetooth GPRS modem ==
-{{InProgress}}
+== WiFi ==
 
 To Be Done.
 
-= Enabling the Mac as an Internet Router =
+= Synchronizing =
 
-Here is described how to enable your Mac to serve as a Internet Router for your Openmoko device.
+This is not done yet. Possible solutions are SyncML or http://www.dsitri.de/wiki.php?page=ZMacSync
 
-Note: you have to open all services you want to use from the Openmoko in the Mac Firewall.
+= Sharing connection =
 
-== USB connection ==
+== Mac as a server ==
 
-In the Sharing System Preferences
-* click the Internet tab
-* Check all the ethernet (en) interfaces you want to enable Internet access for (i.e. the USB connection)
+Here is described how to enable your Mac to serve as a internet router for your OpenMoko device.
 
-SSH into your Neo and create /etc/resolv.conf, specify your Internet router IP address as the name server. You can simply copy the /etc/resolv.conf from your Mac.
- scp /etc/resolv.conf root@192.168.0.202:/etc/resolv.conf
+=== Bluetooth ===
 
- Example:
- nameserver 192.168.1.200    # replace by your real nameserver address
+This could help: http://www.macosxhints.com/article.php?story=20051220221237711
 
-Make sure your Neo routing table has entries so that all internet traffic is sent to your Mac (which will forward it to the outside world)
+=== USB ===
 
- root@fic-gta01:~$ route
- Kernel IP routing table
- Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
- 192.168.0.0     *               255.255.255.0   U     0      0        0 usb0
- default         192.168.0.200   0.0.0.0         UG    0      0        0 usb0
+If you install AJZaurusUSB driver you should be able to set up your Mac as a router (not tested).
 
-Don't forget to enable your USB interface for Internet Sharing!
-
-== Bluetooth connection ==
-{{InProgress}}
-
-= Accessing data and services on your device =
-
-== ssh ==
-
-After making the USB connection work, start ssh:
-
- ssh -l root 192.168.0.202
-
-If you don't have installed the key, it will ask for a "yes" on the first connection. The root password is blank unless you change it.
-
- MacBook-hns:~ hns$ ssh -l root 192.168.0.202
- root@192.168.0.202's password: 
- root@fic-gta01:~$ hostname
- fic-gta01
- root@fic-gta01:~$
-
-NOTE: the ssh daemon (dropbear 0.49) on the Openmoko appears to have a bug when sending the exit status back to the client. From time to time you receive an exit status of 255.
-
-== SMB ==
-{{InProgress}}
+== Neo1973 as a server ==
 
 To Be Done.
 
-== X11 ==
-Launch Apple X11.
- xhost +192.168.0.202.
-On the Neo:
- export DISPLAY=192.168.0.200:0.0
+= Developing software =
 
-== Synchronizing ==
-{{InProgress}}
+== Using virtualization software==
 
-This is not done yet. Possible solutions are SyncML or ZMacSync http://www.dsitri.de/wiki.php?page=ZMacSync
-
-ZMacSync does not yet synchronize but allows more easy access to the Openmoko through Terminal/ssh.
-
-
-= Developing Openmoko software on a Mac =
-
-== Using virtualization software and MokoMakefile/OpenEmbedded ==
-
-You can use VirtualBox, Parallels or VMWare to install your favourite Linux distribution and then develop just as on Linux.
+You can use Paralels or VMWare to install your favourite Linux distribution and then develop just as on Linux.
 
 There are some drawback since AFAIK dfu-util may not work correctly in such environments.
 
-=== Parallels ===
-
-Don't bother with Parallels Desktop for Mac (<=3), the current USB support is terrible and USB storage keys don't even work so there was no way I would try dfu-util. USB keys work under VMWare Fusion for Mac though I have yet to try dfu-util in an VM under VMWare Fusion as there is Openmoko Flasher for Mac. -- [[User: Eric|Eric]]
-
-=== VMware Fusion ===
-
-There is currently no vmplayer for OS X. But the Qtopia image (see [[Developing_with_C++_and_Qt#Use_pre-built_SDK]]) will work with VMware fusion. The script will search for vmplayer and complain. Just answer <tt>YES</tt> when asked if you have the vmplayer installed (I know, it's a lie, but...), and the script will run through. Afterwards open the directory where the files were installed and click on <tt>Qtopia.vmx</tt>.
-
-In VMware Fusion USB Networking is working properly, just plug in the device and connect it to your virtual machine.
-
-Unfortunately dfu-util is currently not working. In fact if you get dfu-util working via unplug/replug method on Mac OS X it works inside VMware too.
-
-=== VirtualBox ===
-
-dfu-util is not working, has some problems with getting exclusive access to the USB device.
-
 == Natively ==
-{{InProgress}}
 
-There are some efforts to get through process of compiling OE and Openmoko under mac: [[Openmoko_under_QEMU_on_MacOSX]]
-
-== GNUstep/mySTEP SDK ==
-
-There is a [[QuantumSTEP]]/mySTEP project to port GNUstep to the Openmoko/Neo: [http://www.quantum-step.com/wiki.php?page=Openmoko-Edition More Info]
-An SDK for Xcode/Interface Builder is also available: [http://www.versiontracker.com/dyn/moreinfo/macosx/20581 Entry at Version Tracker] [http://www.quantum-step.com/wiki.php?page=SDK More Info]
-
-== Tools for Developers ==
-
-Some tools that run on MacOS X
-
-=== mkfs.jffs2 ===
-[http://www.quantum-step.com/download/Openmoko-Edition/mkfs.jffs2.tgz mkfs.jffs2] - make JFFS2 (root) file system (Universal Binary). Package includes sources and Xcode 2.4 project file to rebuild on MacOS X 10.4.11. NOT TESTED DEEPLY.
-
- mkfs.jffs2 --pad=0x700000 -o rootfs.jffs2 -e 0x4000 -n -d/tmp/jffsroot/
-
-=== Crosscompiler Toolchain ===
-
-[http://www.quantum-step.com/wiki.php?page=Compiler gcc 2.95.3] - OABI cross compiler toolchain (C, C++, Obj-C) with Linux headers (PPC and Intel Macs)
-
-If someone has a newer one that works, please provide as an installable OSX Package.
-
-
-Will the ones from MacPorts work? [http://www.macports.org/ports.php?by=name&substr=gnueabi] I'm still trying to get QEMU to work and haven't had a chance to test it yet.
-
-= Other Resources =
-
-== Search Software Repositories ==
-
-[http://www.versiontracker.com/php/qs.php?action=search&str=openmoko&srchArea=macosx Keyword Openmoko] at VersionTracker
-
-== Discussion Fora ==
-
-[http://www.oesf.org/forums/index.php?showforum=63 Mac Issues Forum] at Open Embedded Software Foundation (was Zaurus User Group)
-
-[[Category:Flashing Openmoko]]
-[[Category:Host OSes]]
-
-[http://www.mac-how.net/ Mac How] for discussion questions about Mac
+There are some efforts to get through process of compiling OE and OpenMoko under mac: OpenMoko_under_QEMU_on_MacOSX
