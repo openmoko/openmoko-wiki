@@ -198,11 +198,85 @@ Now come the easy part thanks to [[MokoMakefile]].
 Now all you have to do is run qemu.
   make run-qemu
 
-From here after you calibrate your stylus, you click onthe Menu in the top right, click down to terminal, then just run your program.
+From here after you calibrate your stylus, you click on the Menu in the top right, click down to terminal, then just run your program.
 <pre>
 root@fic-gta02:/$ myhelloworld
 Ello Poppet!
 </pre>
+
+==Adding Python scripts as applications==
+This is for adding python scripts/packages to the image for your own use.
+===First steps===
+First, you need to modify the <code>local.conf</code> file as described above. You need to modify 
+  DISTRO_EXTRA_RDEPENDS += "myhelloworld"
+to
+  DISTRO_EXTRA_RDEPENDS += "myhelloworld python"
+
+This is because python is not included by default in the openmoko image. Or you can use <code>python-gtk</code> if you wish.
+
+Next, you need to perform these actions from the <code>$OMDIR/local</code> directory.
+
+  mkdir packages/pyhelloworld packages/pyhelloworld/files
+
+  touch packages/pyhelloworld/files/pyhello packages/pyhelloworld/README.txt
+
+  touch packages/pyhelloworld/pyhelloworld.bb
+
+===Filling in the files===
+Now, edit <code>packages/pyhelloworld/files/pyhello</code> to contain:
+<pre>  
+#!/usr/bin/python
+
+print "hello world!"
+print "shutting down now. Farewell oh cruel, cruel world!"
+</pre>
+  
+Next up, is editing <code>packages/pyhelloworld/files/README.txt</code> to say:
+
+  This is the most awesome helloworld application ever. Know why? It has SNAKES!
+
+Kidding aside, next is the all important <code> packages/pyhelloworld/pyhelloworld.bb:
+<pre>
+DESCRIPTION = "A pythonic hello world applicaiton"
+AUTHOR = "Tyler Laing"
+HOMEPAGE = ""
+SECTION = "console/applications"
+PRIORITY = "optional"
+LICENSE = "MIT"
+#DEPENDS = ""
+#RDEPENDS = ""
+#RRECOMMENDS = ""
+#RCONFLICTS = ""
+#SRCDATE = "20070729"
+#PV = "0.1"
+#PR = "r0"
+SRC_URI = "file://pyhello \
+          file://README.txt "
+
+S = "${WORKDIR}/pyhelloworld/"
+
+
+do_install() {
+        install -m 0755 -d ${D}${bindir} ${D}${docdir}/pyhelloworld
+        install -m 0755 ${WORKDIR}/pyhello ${D}${bindir}
+        install -m 0644 ${WORKDIR}/README.txt ${D}${docdir}/pyhelloworld
+}
+
+</pre>
+
+I'll explain each of the parts right here, for future reference.
+
+====Meanings of variables in .bb files====
+
+  $WORKDIR = $OMDIR/local/packages/<application directory>
+  $bindir  = $OMDIR/build/tmp/work/armv4t-linux/<application directory>/image/usr/bin
+  $docir   = $OMDIR/build/tmp/work/armv4t-linux/<application directory>/image/usr/share/doc
+  $D       = $OMDIR/build/
+
+====Final steps====
+Complete the last steps as per the above instructions, from the point of altering <code>DISTRO_EXTRA_RDEPENDS</code>.
+
+And your done!
 
 [[Category:Applications]]
 [[Category:OpenMoko]]
