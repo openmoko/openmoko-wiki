@@ -137,28 +137,44 @@ This is a description of the system-level power management.
 
 In order to do system-level power managment, we need to introduce state definitions with their according state names.  The state names are prefixed by SYS_POWER_.
 
-==== SYS_POWER_NO ====
+{|border="1"
+|+System power managment states. Name prefixed with SYS_POWER_
+!Name||Note||PCF50606||S3C2410||JBT6K74||GSM||GPS||Bluetooth||Backlight
+|-
+|NO||No main battery or USB charger. Backup battery operational||Save||Off||PMU off||Off - no Vbatt||PMU off||PMU off||off
+|-
+|OFF||"Switched Off" - no functionality||Standby||PMU off||Off by MODEM_ON to LOW||PMU off||PMU off||PMU off||off
+|-
+|ON||Normal active state||Active||On||On by MODEM_ON to HIGH||Optional||Optional||On||On, PWM'd brightness
+|-
+|SCRSAVE||Screen Saver||Active||SLOW, IDLE||On by MODEM_ON to HIGH||Optional||Optional||SLEEP||Off
+|-
+|SLEEP||Suspend-RAM (in pocket waiting for a call)||Active||Power_Off||Off by MODEM_ON to LOW||Optional||PMU off||Deep Standby||Off
+|}
 
-In this state, there is no main battery and no USB charger voltage applied. However, the backup battery is supposed to be operational.
 
-* PCF50606: SAVE
-* S3C2410: unpowered
-* JBT6K74: unpowered by PMU
-* GSM: unpovered because no Vbatt
-* GPS: unpowered by PMU
-* Bluetooth: unpowered by PMU
+==== SYS_POWER_SLEEP ====
+
+This is the power saving mode, if user doesn't interact with LCM within SLEEP_TIMEOUT after SYS_POWER_ON_SCRSAVE was entered, default 30sec.
+
+* PCF50606: ACTIVE
+* S3C2410: Power_off (this is the suspend-to-RAM state)
+* GSM: Powered up by driving MODEM_ON to HIGH
+* GPS: TBD
+* Bluetooth: Powered down by PMU
+* JBT6K74: Deep Standby
 * Backlight: powered off
 
-==== SYS_POWER_OFF ====
+==== SYS_POWER_ON_SCRSAVE ====
 
-This is the regular, "switched off" state of the device.  The device does not provide any functionality.
+This is the screen saver mode, if user doesn't interact with LCM for some time (SCRSAVE_TIMEOUT), default 30sec.
 
-* PCF50606: STANDBY
-* S3C2410: unpowered by PMU
-* GSM: Powered down by driving MODEM_ON to LOW
-* GPS: unpowered by PMU
-* JBT6K74: unpowered by PMU
-* Bluetooth: unpowered by PMU
+* PCF50606: ACTIVE
+* S3C2410: SLOW or IDLE
+* GSM: Powered up by driving MODEM_ON to HIGH
+* GPS: Depending usage / configuration
+* Bluetooth : Depending usage / configuration
+* JBT6K74: SLEEP
 * Backlight: powered off
 
 ==== SYS_POWER_ON_FULL ====
@@ -173,28 +189,29 @@ This is the regular, "fully switched on" state of the device, during user intera
 * JBT6K74: NORMAL
 * Backlight: on (brightness according to PWM)
 
-==== SYS_POWER_ON_SCRSAVE ====
+==== SYS_POWER_NO ====
 
-This is the screen saver mode, if user doesn't interact with LCM for some time (SCRSAVE_TIMEOUT), default 30sec.
+In this state, there is no main battery and no USB charger voltage applied. However, the backup battery is supposed to be operational.
 
-* PCF50606: ACTIVE
-* S3C2410: SLOW or IDLE
-* GSM: Powered up by driving MODEM_ON to HIGH
-* GPS: Depending usage / configuration
-* Bluetooth : Depending usage / configuration
-* JBT6K74: SLEEP
+* PCF50606: SAVE
+* S3C2410: unpowered
+* JBT6K74: unpowered by PMU
+* GSM: unpovered because no Vbatt
+* GPS: unpowered by PMU
+* Bluetooth: unpowered by PMU
 * Backlight: powered off
 
-==== SYS_POWER_SLEEP ====
 
-This is the power saving mode, if user doesn't interact with LCM within SLEEP_TIMEOUT after SYS_POWER_ON_SCRSAVE was entered, default 30sec.
+==== SYS_POWER_OFF ====
 
-* PCF50606: ACTIVE
-* S3C2410: Power_off (this is the suspend-to-RAM state)
-* GSM: Powered up by driving MODEM_ON to HIGH
-* GPS: TBD
-* Bluetooth: Powered down by PMU
-* JBT6K74: Deep Standby
+This is the regular, "switched off" state of the device.  The device does not provide any functionality.
+
+* PCF50606: STANDBY
+* S3C2410: unpowered by PMU
+* GSM: Powered down by driving MODEM_ON to LOW
+* GPS: unpowered by PMU
+* JBT6K74: unpowered by PMU
+* Bluetooth: unpowered by PMU
 * Backlight: powered off
 
 === Wake-up reasons ===
