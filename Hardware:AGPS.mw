@@ -1,84 +1,40 @@
-The [[:Category:Neo1973 Hardware | Neo1973]] uses an Assisted Global Positioning System, AGPS, technology. [[Hardware:AGPS | The Hardware:AGPS page]] provides information on GPS in general and the [[OpenMoko]] chip in particular.
+[[GPS]] is a satellite based positioning system. '''Assisted GPS''', or '''A-GPS''' was introduced to enhance performance.
 
-AGPS chip in the Neo1973 is called Hammerhead, and it is the same chip used in TomTom one devices, which incidentally run Linux, too. See [[Hammerhead/Protocol]].
+Conventional GPS had difficulty providing reliable positions in environments surrounded by tall buildings - the so-called 'urban canyon', as well as indoors and under heavy tree cover.
 
-== Q: Has anybody here ever used AGPS? I'd like to hear your experiences. ==
+Under these conditions, the GPS signal is often of very poor quality, making it hard for receivers to obtain a position. In addition, when first turned on in these conditions, a non-'''A-GPS''' may not be able to download the orbital information from the GPS satellites, rendering it unable to function until it has a clear signal for around one minute.
 
-Everybody who has used a modern GPS has used AGPS. It is usually called warm-start or hot-start. AGPS is purely a marketing term. To calculate the position a GPS chip needs:
+An '''A-GPS''' receiver can address these problems in several ways, using an ''Assistance Server'':
+*The Assistance Server has a good satellite signal, and lots of computation power, so it can compare fragmentary signals relayed to it by cell phones, with the satellite signal it receives directly, and then inform the cell phone or emergency services of the cell phone's position.
+*It can supply orbital data for the GPS satellites to the cell phone, enabling the cell phone to lock to the satellites when it otherwise could not, and autonomously calculate its position.
+*It can have better knowledge of ionospheric conditions and other errors affecting the GPS signal than the cell phone alone, enabling more precise calculation of position.
+
+
+The AGPS chip in the Neo1973 is called Hammerhead, and it is the same chip used in TomTom one devices, which incidentally run Linux, too. See [[Hammerhead/Protocol]].
+
+Everybody who has used a modern GPS has used AGPS. It is usually called warm-start or hot-start. 
+
+AGPS is purely a marketing term. 
+To calculate the position a GPS chip needs:
 * ''almanac'' = coarse position of satellites
 * ''ephemeris'' = precise position of satellites
 
 The almanac is broadcast in a loop of 12.5 minutes and valid for at least six weeks. The ephemeris is broadcast in a loop of 30 seconds and valid for ~2 hours.
 
-Time is mostly irrelevant, as modern chips synchronize within a second with the satellites.
+Receiver chipsets store this data in flash and load it from there onto the chip in order to _assist_ the hot or warm start.
 
-The receiver chipsets store this data in flash and load it from there onto the chip in order to _assist_ the hot or warm start.
+One form of AGPS is simply to get this data from elsewhere. Over the internet, or through a dedicated connection, to avoid the 30s or more downloading it from the satellites would take.
 
-AGPS now means to load the almanac and the ephemeris from elsewhere, i.e. via a network. For example for free from the American government: http://www.navcen.uscg.gov/gps/precise/default.htm
+The supplied binary driver software for the Hammerhead in the Neo1973 does not support publically available sources of assistance data. An open-source driver, in companion with [[Server:AGPS an open-source AGPS server]] may do any of the solutions mentioned at the beginning.
 
-AGPS is a nice convenience yet the success and proper functioning of TomTom and Navigon PDAs shows that you don't need that at all.
+The amount of data needed is small - 0.5K/day or so.
 
-It's worth noting that the GPS on the neo is sensitive enough to pick up GPS signals in buildings.
-If the spot you charge your neo happens to have a GPS signal, downloading the almanac from the satellites while it charges is essentially free, and takes no Internet access at all. Do this daily, and you get most of the benefit of aGPS.
+If the spot you charge your neo happens to have a GPS signal, downloading the almanac from the satellites while it charges is essentially free, and takes no Internet access at all. Do this daily, and you get most of the benefit of AGPS.
 
-== Q: The chip in the Neo1973 is a Global Locate AGPS. Anybody know what type? Hammerhead maybe? ==
-A: It is the Hammerhead.
-
-== Q: I understand the concept of assisted GPS. But does the phone have its own antenna/receiver so that it can work without 'assistance'? ==
-
-A: See above, the important part is the GPS and not the assistance. Antenna is thus compulsory.
-
-== Q: Has anybody got any info on the whereabouts of assistance servers, especially in Belgium and Europe? ==
-
-A: They can be anywhere on the net. Alternatively a service from the cellphone operators. However, there may be occasions where you want a server 'near' where you are. See the later question on DGPS.
-
-== Q: Using the assistance servers will probably mean that I will have to pay for that service. Any idea of the costs? ==
-
-There are no servers operated by Global Locate to do this.
-There are sources online that allow free download of assistance data.
-Closer to mass-market launch time, FIC might choose to launch such a server - or it could be a community effort.
-It is a very small amount of data, costs if any will be very small. ($1/year perhaps).
-You generally do not need AGPS.
-
-== Q: Is there any "A-GPS standard" whatsoever? ==
-
-A: No. It's a broad term for many variants of GPS.
-
-== Q: I have heard elsewhere (Wikipedia) that in A-GPS the computation effort is shared between the device and the A-GPS Server. According to a previous post, the device just downloads the ephemeris table so there isn't any  actual "computation sharing", but rather a download of a pre-computed table download. Correct? ==
-
-A: Yes, in this case. In others the server may do more work. For the neo, all the position information is computed in the neo.
-
-== Q: A-GPS involves additional data traffic and thus (potential) additional costs. Does it use a normal GSM/GPRS IP-based data transfer? does it use some out-of-band GSM/GPRS control messages? or does it get data from broadcasts in the local cell (e.g. GSM cell-broadcast)? ==
-
-A: GPRS.  so its up to you whether you want that extra traffic (and cost, unless you're flat) or not.
-
-== Q: if the answer to above is GPRS: is it possible to estimate in advance how much additional traffic (in Kbytes/day of full operation)? ==
-
-A: The absolute worst case is 50 bits/s * 12.5 minutes = around 5Kbytes for the full almanac.
-However, this is certainly not needed every day.
-The errors in orbit prediction when you have a full almanac are quite small over the short term (a week).
-5K once (or the GPS on for 12.5 minutes) then .5K/day should be quite adequate.
 
 == Q: Are there any known estimations on the overall (A)GPS performance on the Neo (esp. fix time) ==
 
 A: The Hammerhead brief information page specifies 1s fix time for a position with 5m error.
-
-== Q: Coming to the Neo1973. In order to save costs, can the "Assisted" function in A-GPS be disabled through software API? ==
-
-A: Yes, it can be disabled through preferences.
-
-== Q: Is it possible to tell whether A-GPS is actually in use or not? ==
-
-A: Yes - either you have enabled it in preferences, or you haven't ;)
-
-== Q: Is it possible to tell/know which is the A-GPS server currently in use? ==
-
-A: yes.
-
-== Q: Can choosing to use GPS (even with A-GPS disabled) enable others to track me?  Is there a mode where this is not the case? ==
-
-A: The receiver does not emit significant amounts of RF - unless you are literally within centimeters of the device, it's not possible to pick it up. The other alternative would be that the supplied plugin to gpsd is trojaned, and can be asked somehow to report on your position.
-The position is entirely computed in the plugin to gpsd, the GPS hardware cannot know it, it's too dumb.
 
 == Q: What is DGPS, can DGPS and A-GPS work together? ==
 
