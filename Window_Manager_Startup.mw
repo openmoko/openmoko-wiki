@@ -1,0 +1,279 @@
+== Overview ==
+Describes the scripts and programs used to bring up the Window Manager.  The series of events that occur when the window manager starts follows the order of the table of contents.
+
+== X Server Init Script ==
+A standard init script:
+<pre>
+/etc/init.d/xserver-nodm
+</pre>
+
+To start the X Server:
+<pre>
+/etc/init.d/xserver-nodm start
+</pre>
+ 
+To stop the X Server
+<pre>
+/etc/init.d/xserver-nodm stop
+</pre>
+
+Using the stop parameter currently causes an error.  ps is being called with an invalid parameter.  ([http://bugzilla.openmoko.org/cgi-bin/bugzilla/show_bug.cgi?id=605 Bug #605])
+
+When using the start parameter, it eventually calls Xserver.
+
+== X Server Environment Setup ==
+A script at:
+<pre>
+/etc/X11/Xserver
+</pre>
+
+Called as:
+<pre>
+/etc/X11/Xserver &
+</pre>
+
+Configures system and sets up environment variables.  Especially important are the environment variables XSERVER, DISPLAY, and ARGS.  It finished by calling and transferring control to xinit.
+
+== X Window System Initializer ==
+A script at:
+<pre>
+/usr/bin/xinit
+</pre>
+
+Called as:
+<pre>
+xinit /etc/X11/Xsession -- /usr/bin/Xfbdev :0 -br -pn -fp \
+  built-ins,/usr/share/fonts/ttf,/usr/share/fonts/truetype \
+  -screen 480x640x16
+</pre>
+ 
+Executes Linux framebuffer generic X server ([http://www.xfree86.org/current/Xfbdev.1.html Xfbdev]) and the scripts in  /etc/X11/Xsession.d.  The scripts are described in the next section of subtopics.
+
+=== Screen Calibration ===
+A script at:
+<pre>
+/etc/X11/Xsession.d/30xTs_Calibrate
+</pre>
+
+Checks to see if the pointer is calibrated (existence of /etc/pointercal).  If not, then executes xtscal to calibrate it:
+<pre>
+/usr/bin/xtscal
+</pre>
+
+What program(s) eventually open and use the data in /etc/pointercal?
+
+=== 45gtkstylus ===
+A script at:
+<pre>
+/etc/X11/Xsession.d/45gtkstylus
+</pre>
+
+This script sets the GTK_MODULES environment variable to point to a libgtksylus.so shared object with:
+<pre>
+GTK_MODULES=libgtkstylus.so
+</pre>
+It makes no attempt to append this shared object to the end of an already existing GTK_MODULES environment variable.  Is this correct?
+
+(Please elaborate about the purpose of this shared object)
+
+=== 46gtkinput ===
+A script at:
+<pre>
+/etc/X11/Xsession.d/46gtkinput
+</pre>
+
+This script appends a libgtkinput.so shared object to the end of the GTK_MODULES environment variable.  This seems to be more correct that the above (and indeed, if this was not appended, you would lose the previous value).
+
+It accomplishes this task with:
+<pre>
+GTK_MODULES=${GTK_MODULES}:libgtkinput.so
+</pre>
+
+(Please elaborate about the purpose of this shared object)
+
+=== 60xXDefaults ===
+A script at:
+<pre>
+/etc/X11/Xsession.d/60xXDefaults
+</pre>
+
+=== Gnome Configuration Server ===
+A script at:
+<pre>
+/etc/X11/Xsession.d/69gconfd-dbus
+</pre>
+
+This script executes:
+<pre>
+/usr/libexec/gconfd-2 &
+</pre>
+
+More information about gconfd can be found in the [http://developer.gnome.org/feature/archive/gconf/impl.html GConf Implementation Overview].
+
+=== 70settings-daemon ===
+A script at:
+<pre>
+/etc/X11/Xsession.d/70settings-daemon
+</pre>
+
+This script executes:
+<pre>
+/usr/bin/settings-daemon &
+</pre>
+
+What is this?  It seems to be some sort of daemon that is used to access GConf.  Is this really gnome-settings-daemon?
+
+=== Window Manager Startup ===
+A script at:
+<pre>
+/etc/X11/Xsession.d/90xXWindowManager
+</pre>
+
+Calls the window manager with:
+<pre>
+exec /usr/bin/x-window-manager
+</pre>
+
+== X Window Manager ==
+A soft link at:
+<pre>
+/usr/bin/x-window-manager
+</pre>
+
+This soft link points to:
+<pre>
+/usr/bin/matchbox-session
+</pre>
+
+This script simply adds a level indirection so one can easily change the window manager being used.
+
+== Matchbox Session ==
+A script at:
+<pre>
+/usr/bin/matchbox-session
+</pre>
+
+Test for the existence of:
+<pre>
+/etc/matchbox/session
+</pre>
+In the case of OpenMoko, this test is positive and session is exec'ed.
+
+Taking a quick look at the script shows that one can override the use of /etc/matchbox/session with their own $HOME/.matchbox/session if they wish to experiment without touching the rest of the system.
+
+== Matchbox Window Manager Setup ==
+A script at:
+<pre>
+/etc/matchbox/session
+</pre>
+
+This is where the key ingredients of the Matchbox Window Manager are mixed together and executed.  Because these elements are key to the user interface, this script is described in detail here.
+
+It is interesting that after the setting of GTK_MODULES in the X Window System Initializer phase (scripts in /etc/X11/Xsession.d) that it is all overwritten by a single statement here:
+ export GTK_MODULES=libgtkstylus.so
+This loses an old value for GTK_MODULES that also contained libgtkinput.so.  Perhaps this was something that was overlooked?
+
+=== Matchbox Panel ===
+A binary at:
+<pre>
+/usr/bin/matchbox-panel-2
+</pre>
+
+Called as:
+<pre>
+matchbox-panel-2 --start-applets=openmoko-panel-mainmenu,systray,startup \
+  --end-applets=openmoko-panel-battery,openmoko-panel-gsm,\
+  openmoko-panel-gps,openmoko-panel-usb,openmoko-panel-bt,\
+  openmoko-panel-clock &
+</pre>
+
+The Matchbox Panel dynamically links in a series of shared objects that are called applets.  If any of these shared objects has a problem that causes abnormal termination, the whole Matchbox Panel goes down.  Many users have already observed this when using the openmoko-panel-gsm applet.  Turning it off and on repeatedly will eventually cause the code in the shared object to crash, bringing down the whole Matchbox Panel.
+
+The best methods for bring the Matchbox Panel back up (besides rebooting) are to run the Matchbox Panel from the command line, as above) or to restart the X Server:
+<pre>
+/etc/init.d/xserver-nodm restart
+</pre>
+Note that with the above, the X Server will fail to stop because of the bug described with the script above.
+
+Because the Matchbox Panel seems to be essential to normal operation of the phone, execution of the panel should be wrapped in a loop to restart it in the event of a failure.  Take into account this program runs in the background and it may not be wise to keep restarting it in tight loop, using up CPU, etc.
+
+=== Matchbox Input Manager ===
+A binary at:
+<pre>
+/usr/bin/mbinputmgr
+</pre>
+
+Called as:
+<pre>
+mbinputmgr &
+</pre>
+
+This program is described as "A tray application for managing software input methods".  It seems to be the white Matchbox Panel applet that brings up the software keyboard.  This needs to be verified.
+
+=== ALSA Control ===
+A binary at:
+<pre>
+/usr/sbin/alsactl
+</pre>
+
+Called as:
+<pre>
+alsactl restore 0 -f /etc/alsa/stereoout.state
+</pre>
+
+Initializes the audio system state.  More information for ALSA can be found on the [http://www.alsa-project.org/ ALSA] Project home page.
+
+=== OpenMoko Footer ===
+A binary at:
+<pre>
+/usr/bin/openmoko-footer
+</pre>
+
+Called as:
+<pre>
+openmoko-footer &
+</pre>
+
+More about [[Footer]].
+
+=== OpenMoko Today ===
+A binary at:
+<pre>
+/usr/bin/openmoko-today
+</pre>
+ 
+Called as:
+<pre>
+openmoko-today --desktop &
+</pre>
+
+More about [[Today]].
+
+=== OpenMoko Dialer ===
+A binary at:
+<pre>
+/usr/bin/openmoko-dialer
+</pre>
+
+Called as:
+<pre>
+openmoko-dialer &
+</pre>
+
+More about [[Dialer]].
+
+== Matchbox Window Manager ==
+An binary at:
+<pre>
+/usr/bin/matchbox-window-manager
+</pre>
+
+Called as:
+<pre>
+matchbox-window-manager -use_titlebar no -use_cursor no
+</pre>
+
+The [http://matchbox-project.org/ Matchbox Window Manager] home page.
+
+== Final ==
+At this point, the user interface is up and ready for service.
