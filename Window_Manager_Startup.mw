@@ -1,4 +1,5 @@
-Describes the scripts and programs used to bring up the X Windows Server and the Matchbox Window Manager.  The series of events that occur when the window manager starts follows the order of the table of contents.
+== Overview ==
+Describes the scripts and programs used to bring up the Window Manager.  The series of events that occur when the window manager starts follows the order of the table of contents.
 
 == X Server Init Script ==
 A standard init script:
@@ -31,7 +32,7 @@ Called as:
 /etc/X11/Xserver &
 </pre>
 
-Configures system and sets up environment variables.  Especially important are the environment variables XSERVER, DISPLAY, and ARGS.  It finishes by calling and transferring control to xinit.
+Configures system and sets up environment variables.  Especially important are the environment variables XSERVER, DISPLAY, and ARGS.  It finished by calling and transferring control to xinit.
 
 == X Window System Initializer ==
 A script at:
@@ -73,8 +74,7 @@ GTK_MODULES=libgtkstylus.so
 </pre>
 It makes no attempt to append this shared object to the end of an already existing GTK_MODULES environment variable.  Is this correct?
 
-This module provides a possibility to send a right click to applications by holding the stylus down for a while.
-This method works only in GTK applications.
+(Please elaborate about the purpose of this shared object)
 
 === 46gtkinput ===
 A script at:
@@ -82,7 +82,7 @@ A script at:
 /etc/X11/Xsession.d/46gtkinput
 </pre>
 
-This script appends a libgtkinput.so shared object to the end of the GTK_MODULES environment variable.  This seems to be more correct than the above (and indeed, if this was not appended, you would lose the previous value).
+This script appends a libgtkinput.so shared object to the end of the GTK_MODULES environment variable.  This seems to be more correct that the above (and indeed, if this was not appended, you would lose the previous value).
 
 It accomplishes this task with:
 <pre>
@@ -91,18 +91,11 @@ GTK_MODULES=${GTK_MODULES}:libgtkinput.so
 
 (Please elaborate about the purpose of this shared object)
 
-=== X Server Resource Database Load ===
+=== 60xXDefaults ===
 A script at:
 <pre>
 /etc/X11/Xsession.d/60xXDefaults
 </pre>
-
-Loads the X server preferences from $HOME/.Xdefaults if it exists.  The command is:
-<pre>
-xdb -merge -nocpp < $HOME/.Xdefaults
-</pre>
-
-There is currently not an .Xdefaults file in the Openmoko image, therefore this script does nothing.
 
 === Gnome Configuration Server ===
 A script at:
@@ -117,7 +110,7 @@ This script executes:
 
 More information about gconfd can be found in the [http://developer.gnome.org/feature/archive/gconf/impl.html GConf Implementation Overview].
 
-=== Settings Daemon ===
+=== 70settings-daemon ===
 A script at:
 <pre>
 /etc/X11/Xsession.d/70settings-daemon
@@ -128,7 +121,7 @@ This script executes:
 /usr/bin/settings-daemon &
 </pre>
 
-The current description in the Openmoko repository says that the "settings-daemon provides a bridge between gconf and xsettings".
+What is this?  It seems to be some sort of daemon that is used to access GConf.  Is this really gnome-settings-daemon?
 
 === Window Manager Startup ===
 A script at:
@@ -164,7 +157,7 @@ Test for the existence of:
 <pre>
 /etc/matchbox/session
 </pre>
-In the case of Openmoko, this test is positive and session is exec'ed.
+In the case of OpenMoko, this test is positive and session is exec'ed.
 
 Taking a quick look at the script shows that one can override the use of /etc/matchbox/session with their own $HOME/.matchbox/session if they wish to experiment without touching the rest of the system.
 
@@ -180,7 +173,7 @@ It is interesting that after the setting of GTK_MODULES in the X Window System I
  export GTK_MODULES=libgtkstylus.so
 This loses an old value for GTK_MODULES that also contained libgtkinput.so.  Perhaps this was something that was overlooked?
 
-=== Matchbox Top Panel ===
+=== Matchbox Panel ===
 A binary at:
 <pre>
 /usr/bin/matchbox-panel-2
@@ -194,15 +187,15 @@ matchbox-panel-2 --start-applets=openmoko-panel-mainmenu,systray,startup \
   openmoko-panel-clock &
 </pre>
 
-The Matchbox [[ Top Panel ]] dynamically links in a series of shared objects that are called applets.  If any of these shared objects has a problem that causes abnormal termination, the whole Top Panel goes down.  Many users have already observed this when using the [[ GSM & GPRS Connection Status ]] (openmoko-panel-gsm) applet.  Turning it off and on repeatedly will eventually cause the code in the shared object to crash, bringing down the whole Top Panel.
+The Matchbox Panel dynamically links in a series of shared objects that are called applets.  If any of these shared objects has a problem that causes abnormal termination, the whole Matchbox Panel goes down.  Many users have already observed this when using the openmoko-panel-gsm applet.  Turning it off and on repeatedly will eventually cause the code in the shared object to crash, bringing down the whole Matchbox Panel.
 
-The best methods for bring the Top Panel back up (besides rebooting) are to run the Top Panel from the command line, as above) or to restart the X Server:
+The best methods for bring the Matchbox Panel back up (besides rebooting) are to run the Matchbox Panel from the command line, as above) or to restart the X Server:
 <pre>
 /etc/init.d/xserver-nodm restart
 </pre>
 Note that with the above, the X Server will fail to stop because of the bug described with the script above.
 
-Because the Top Panel seems to be essential to normal operation of the phone, execution of the panel should be wrapped in a loop to restart it in the event of a failure.  Take into account this program runs in the background and it may not be wise to keep restarting it in tight loop, using up CPU, etc.
+Because the Matchbox Panel seems to be essential to normal operation of the phone, execution of the panel should be wrapped in a loop to restart it in the event of a failure.  Take into account this program runs in the background and it may not be wise to keep restarting it in tight loop, using up CPU, etc.
 
 === Matchbox Input Manager ===
 A binary at:
@@ -230,7 +223,7 @@ alsactl restore 0 -f /etc/alsa/stereoout.state
 
 Initializes the audio system state.  More information for ALSA can be found on the [http://www.alsa-project.org/ ALSA] Project home page.
 
-=== Openmoko Footer ===
+=== OpenMoko Footer ===
 A binary at:
 <pre>
 /usr/bin/openmoko-footer
@@ -243,7 +236,7 @@ openmoko-footer &
 
 More about [[Footer]].
 
-=== Openmoko Today ===
+=== OpenMoko Today ===
 A binary at:
 <pre>
 /usr/bin/openmoko-today
@@ -256,7 +249,7 @@ openmoko-today --desktop &
 
 More about [[Today]].
 
-=== Openmoko Dialer ===
+=== OpenMoko Dialer ===
 A binary at:
 <pre>
 /usr/bin/openmoko-dialer
@@ -284,5 +277,3 @@ The [http://matchbox-project.org/ Matchbox Window Manager] home page.
 
 == Final ==
 At this point, the user interface is up and ready for service.
-
-[[Category:Middleware]]
