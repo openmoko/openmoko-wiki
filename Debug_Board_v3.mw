@@ -1,25 +1,12 @@
-{{Languages|Debug Board v3}}
+The [[Debug Board | Debug Board page]] provides information on the architecture of the third version of the [[Debug Board | Neo1973 debug board]].
 
-{{Dboard}}
+[[Image:Debugboard v2 diagram.png|left|500px|Architecture Diagram]]
 
-[[Image:Neo1973 debugboard v3 top.jpg|thumb|Debug Board v3, PCB photograph]]
+[[Image:Neo1973 debugboard v3 top annotated.jpg|left|500px|Annotated PCB Photograph]]
 
-The Debug Board v3 is the most recent version of the Debug Board for [[Neo 1973]] and [[Neo FreeRunner]]. It is sold seperately from the phones.
-
-You need the debug board to have a serial console and for JTAG.
-The debug board lets you:
-
-* access the serial console, to get kernel debug messages the moment the respective events occur (or to get the kernel's  last words when it crashes hard)
-
-* use JTAG to halt the processor anytime and analyze the system state (this can also be used with the gdb debugger)
-
-* enable write access to the [[NOR Flash|NOR]]
-
-Serial console and JTAG are very useful (actually, indispensable) for kernel debugging.
+{note|This board is in prototype stage now, '''it is not shipping yet'''}
 
 == Overview ==
-
-[[Image:Debugboard v2 diagram.png|right|500px|Architecture Diagram]]
 
 The [[Debug Board | debug board]] provides these key components.
 
@@ -27,13 +14,9 @@ The [[Debug Board | debug board]] provides these key components.
 * [[Debug Board#JTAG using FT2232 | JTAG using FT2232]]
 * [[Debug Board#Serial Port | Serial Port]]
 
-=== Schematics ===
-
-The Schematics of this board can be found at http://people.openmoko.org/joerg/schematics/debug_board/OpenMoKo_Debug_Board_V3_MP.pdf
-
 === USB Hub ===
 
-This bus-powered hub
+This bus-powered hub 
 * attaches to the laptop using its upstream port
 * attaches to the FT2232D for JTAG and serial console on downstream port 1
 * attaches to a free USB-A connector using downstream port 2
@@ -41,32 +24,31 @@ This bus-powered hub
 
 Using the hub, you can have access to the phone, JTAG and serial simultaneously, through a single USB cable.
 
-You can charge the phone (100mA slow charge) using that downstream port.
+You can actually even charge the phone (100mA slow charge) using that downstream port.
 
-For the USB hub function, we use the TUSB2046B chip.
+For the ISB hub function, we use the TUSB2046B chip.
 
 === JTAG using FT2232 ===
 
-Basically, we integrate a USB-JTAG adaptor similar to the [Amontec JTAGkey-tiny].  The actual reference design that we used (Thanks to Joern!) was found at http://www.oocdlink.com.
+Basically, we integrate a USB-JTAG adaptor similar to the [Amontec JTAGkey-tiny].  The actual reference design that we used (Thanks to Joern!) can be found at http://www.oocdlink.com
 
 This provides us full JTAG debugging, at about 150times the speed of the [[wiggler]]
 
 The actual JTAG port is connected with
 * the phone (via debug flex cable)
 * A separate 20-pin header using standard ARM-JTAG pinout
-** Allows users to use this device as JTAG adaptor for other arm-based devices
+** this allows the user to use this device as JTAG adaptor even for other arm-based devices
 
 === Serial Port ===
 
 Instead of replicating a true RS232 port, we wanted to use a USB serial converter chip,
-such as the FT232 or the PL2303.
+such as the FT232 or the PL2303.   
 
 As it turns out, we can even use the second port of the FT2232 simultaneously with the JTAG.  So no extra FT232 or PL2303 is required.
 
 ==== Tri-State Serial Port ====
 
-On GTA01 the CPU UART serial port needed a multiplexer formed by a tri-state driver, since it was both connected to the GSM modem AND to the debug board.  We drive the GTA01-tri-state driver mux by an inverted GSM_EN signal (pin 7 on FPC connector).
-For GTA02 the console serial port isn't multiplexed and connects directly to CPU UART.
+The serial port needs a tri-state driver, since it is both connected to the GSM modem AND to the debug board.  We drive the tri-state driver by an inverted GSM_EN signal (pin 7 on FPC connector).
 
 == Usage Instructions ==
 
@@ -84,7 +66,7 @@ Only if your board shows up as USB ID 0403:6010, then you will need to flash the
 
 {{note|FIC has done that for you, in case you have officially been supplied with the board.  However, if you are one of the early adopters, the configuration and USB vendorID / productID might have not yet been set correctly.}}
 
-In order to do so, you can use the ftdi_eeprom program from
+In order to do so, you can use the ftdi_eeprom program from 
 http://www.intra2net.com/de/produkte/opensource/ftdi/. Unfortunately, the latest version (0.2) doesn't yet contain support for our FT2232D, so you need the patch from http://people.openmoko.org/laforge/misc/debug_board_v2/ftdi_eeprom/ftdi_eeprom-0.2-moko.patch
 
 You may also need to apply the following patch to libftdi:
@@ -95,7 +77,7 @@ Furthermore, you will need the EEPROM config:
 http://people.openmoko.org/laforge/misc/debug_board_v2/ftdi_eeprom/neo1973_debug_board_v2.ftdi
 
 Once you have compiled ftdi_eeprom, you can run
-ftdi_eeprom --flash-eeprom neo1973_debug_board_v2.ftdi
+ ftdi_eeprom --flash-eeprom neo1973_debug_board_v2.ftdi
 
 {{warning|Make sure you don't have any other FTDI FT232 / FT2232 based devices attached to the USB while running ftdi_eeprom.  It might be wise to disconnect everything but the debug board}}
 
@@ -114,31 +96,31 @@ FTDI close: 0
 
 Once the flashing has finished, just disconnect and reconnect, and you should see
 <pre>
-$ lsusb -v -d 0x1457:
-Bus 005 Device 009: ID 1457:5118
+$ lsusb -v -d 0x1457:                                                                                                                                                                                               
+Bus 005 Device 009: ID 1457:5118  
 Device Descriptor:
-bLength                18
-bDescriptorType         1
-bcdUSB               2.00
-bDeviceClass            0 (Defined at Interface level)
-bDeviceSubClass         0
-bDeviceProtocol         0
-bMaxPacketSize0         8
-idVendor           0x1457
-idProduct          0x5118
-bcdDevice            5.00
-iManufacturer           1 Openmoko
-iProduct                2 Debug Board for Neo1973
-iSerial                 0
-bNumConfigurations      1
-[...]
+  bLength                18
+  bDescriptorType         1
+  bcdUSB               2.00
+  bDeviceClass            0 (Defined at Interface level)
+  bDeviceSubClass         0 
+  bDeviceProtocol         0 
+  bMaxPacketSize0         8
+  idVendor           0x1457 
+  idProduct          0x5118 
+  bcdDevice            5.00
+  iManufacturer           1 OpenMoko
+  iProduct                2 Debug Board for Neo1973
+  iSerial                 0 
+  bNumConfigurations      1
+  [...]
 </pre>
 
 ===== Flashing with Windows =====
 {{note|FIC has done that for you, in case you have officially been supplied with the board.  However, if you are one of the early adopters, the configuration and USB vendorID / productID might have not yet been set correctly.}}
 
 In order to do so, you can use the FTDI Mprog program from http://www.ftdichip.com/Resources/Utilities/MProg3.0_Setup.exe
-
+ 
 You will need
 * The EEPROM Template http://people.openmoko.org/laforge/misc/debug_board_v2/mprog_template/neo1973_debugboard_v2.ept
 
@@ -152,9 +134,8 @@ Furthermore, you will need to do the following:
 
 ====== ftdi_sio module option ======
 
-rmmod ftdi_sio
-
-modprobe ftdi_sio vendor=0x1457 product=0x5118
+ rmmod ftdi_sio
+ modprobe ftdi_sio vendor=0x1457 product=0x5118
 
 or the equivalent in your modules.conf
 
@@ -162,21 +143,13 @@ or the equivalent in your modules.conf
 
 Please install the rules from http://people.openmoko.org/laforge/misc/debug_board_v2/udev_rules/
 
-{{note|Some distros no longer name their USB subsystem '''usb_device''', but uses simply '''usb''' instead (e.g. Ubuntu 8.x). If so, you should change the line with SUBSYSTEM accordingly, otherwise the device will not be recognized by the udev rule.}}
-
 ===== Windows =====
 
 Please use the driver from http://people.openmoko.org/laforge/misc/debug_board_v2/windows_drivers/
 
 === Hardware connection ===
 
-* [[Connecting Neo1973 with Debug Board v2]] (shows how to connect the FPC)
-
-The recommended connection sequence given in [[Debug Board v2#Hardware connection]] may not work for debug board v3 and the FreeRunner. It seems impossible to turn on the FreeRunner after plugging the FreeRunner USB cable into the PC, but before plugging the debug board USB cable into the PC. After the debug board is powered by the PC, the FreeRunner should start.
-
-=== Suggestions ===
-
-* [[User:Cfriedt]] 20081021 The Debug Board v3 uses 3.3V signalling levels on J1 (the 20-pin ARM JTAG port). Many other ARM devices use 1.8V signalling. For the next Dboard hardware revision, I would suggest using the same level-shifter as the FlySwatter. The FlySwatter uses two SN74AVC4T245 ([http://elinux.org/upload/4/46/Flyswatter-schematic.pdf ref]) buffers to provide a signalling range of 1.2V to 3.6V ([http://elinux.org/Flyswatter ref]).
+* [[Connecting Neo1973 with Debug Board v2]]
 
 === Actually using it ===
 
@@ -184,8 +157,7 @@ The recommended connection sequence given in [[Debug Board v2#Hardware connectio
 
 ===== Serial Port =====
 
-The Linux kernel of your host system will create a virtual serial device called '''/dev/ttyUSBx''' where 'x' is a sequentially assigned number.  If you don't have any other USB serial converters attached to your machine, the device name will be '''/dev/ttyUSB1'''
-(baud rate 115200 8N1).
+The Linux kernel of your host system will create a virtual serial device called '''/dev/ttyUSBx''' where 'x' is a sequentially assigned number.  If you don't have any other USB serial converters attached to your machine, the device name will be '''/dev/ttyUSB0'''.
 
 You can use your favourite terminal emualtor (minicom, cu, zc, ...) just like for any other/real serial port. You may use gdb as well (eg. target remote /dev/ttya).
 
@@ -224,8 +196,6 @@ Version 1 was never shipped to phase-0 or phaes-1, and not sold to anyone.
 ** the device can be fully usb powered by the laptop
 
 <span id="bottom"></span>
+{{Languages|Debug_Board}}
 
-[[Category:Debug Board]]
-[[Category:Neo1973 Hardware]]
 [[Category:Neo1973 Hardware Debugging]]
-[[Category:Neo FreeRunner Hardware]]
