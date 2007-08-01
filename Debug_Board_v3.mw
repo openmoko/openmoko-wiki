@@ -1,0 +1,201 @@
+The [[Debug Board | Debug Board page]] provides information on the architecture of the third version of the [[Debug Board | Neo1973 debug board]].
+
+[[Image:Debugboard v2 diagram.png|left|500px|Architecture Diagram]]
+
+[[Image:Neo1973 debugboard v3 top annotated.jpg|left|500px|Annotated PCB Photograph]]
+
+{note|This board is in prototype stage now, '''it is not shipping yet'''}
+
+== Overview ==
+
+The [[Debug Board | debug board]] provides these key components.
+
+* [[Debug Board#USB Hub | USB Hub]]
+* [[Debug Board#JTAG using FT2232 | JTAG using FT2232]]
+* [[Debug Board#Serial Port | Serial Port]]
+
+=== USB Hub ===
+
+This bus-powered hub 
+* attaches to the laptop using its upstream port
+* attaches to the FT2232D for JTAG and serial console on downstream port 1
+* attaches to a free USB-A connector using downstream port 2
+* attaches to the phone using downstream port 3
+
+Using the hub, you can have access to the phone, JTAG and serial simultaneously, through a single USB cable.
+
+You can actually even charge the phone (100mA slow charge) using that downstream port.
+
+For the ISB hub function, we use the TUSB2046B chip.
+
+=== JTAG using FT2232 ===
+
+Basically, we integrate a USB-JTAG adaptor similar to the [Amontec JTAGkey-tiny].  The actual reference design that we used (Thanks to Joern!) can be found at http://www.oocdlink.com
+
+This provides us full JTAG debugging, at about 150times the speed of the [[wiggler]]
+
+The actual JTAG port is connected with
+* the phone (via debug flex cable)
+* A separate 20-pin header using standard ARM-JTAG pinout
+** this allows the user to use this device as JTAG adaptor even for other arm-based devices
+
+=== Serial Port ===
+
+Instead of replicating a true RS232 port, we wanted to use a USB serial converter chip,
+such as the FT232 or the PL2303.   
+
+As it turns out, we can even use the second port of the FT2232 simultaneously with the JTAG.  So no extra FT232 or PL2303 is required.
+
+==== Tri-State Serial Port ====
+
+The serial port needs a tri-state driver, since it is both connected to the GSM modem AND to the debug board.  We drive the tri-state driver by an inverted GSM_EN signal (pin 7 on FPC connector).
+
+== Usage Instructions ==
+
+=== Preconditions ===
+
+==== FT2232D EEPROM ====
+
+Your Debug Board contains a small serial EEPROM which should be flashed correctly during production.  However, some boards have received incorrect/incomplete programming during production and thus you should verify this.
+
+If the board shows up as USB ID 1457:5118, then everything is correct.
+
+Only if your board shows up as USB ID 0403:6010, then you will need to flash the board!
+
+===== Flashing with Linux =====
+
+{{note|FIC has done that for you, in case you have officially been supplied with the board.  However, if you are one of the early adopters, the configuration and USB vendorID / productID might have not yet been set correctly.}}
+
+In order to do so, you can use the ftdi_eeprom program from 
+http://www.intra2net.com/de/produkte/opensource/ftdi/. Unfortunately, the latest version (0.2) doesn't yet contain support for our FT2232D, so you need the patch from http://people.openmoko.org/laforge/misc/debug_board_v2/ftdi_eeprom/ftdi_eeprom-0.2-moko.patch
+
+You may also need to apply the following patch to libftdi:
+http://people.openmoko.org/werner/libftdi-c56-strings-dirty-hack.patch
+(See http://bugzilla.openmoko.org/cgi-bin/bugzilla/show_bug.cgi?id=321 for additional details.)
+
+Furthermore, you will need the EEPROM config:
+http://people.openmoko.org/laforge/misc/debug_board_v2/ftdi_eeprom/neo1973_debug_board_v2.ftdi
+
+Once you have compiled ftdi_eeprom, you can run
+ ftdi_eeprom --flash-eeprom neo1973_debug_board_v2.ftdi
+
+{{warning|Make sure you don't have any other FTDI FT232 / FT2232 based devices attached to the USB while running ftdi_eeprom.  It might be wise to disconnect everything but the debug board}}
+
+You should get something like the following printout if everything was successful:
+<pre>
+FTDI eeprom generator v0.2
+(c) Intra2net AG <opensource@intra2net.com>
+FTDI init: 0
+Unable to find FTDI devices under given vendor/product id: 0x1457/0x5118
+Retrying with default FTDI id.
+Used eeprom space: 102 bytes
+FTDI write eeprom: 0
+Writing to file: neo1973_debug_board_v2.eeprom
+FTDI close: 0
+</pre>
+
+Once the flashing has finished, just disconnect and reconnect, and you should see
+<pre>
+$ lsusb -v -d 0x1457:                                                                                                                                                                                               
+Bus 005 Device 009: ID 1457:5118  
+Device Descriptor:
+  bLength                18
+  bDescriptorType         1
+  bcdUSB               2.00
+  bDeviceClass            0 (Defined at Interface level)
+  bDeviceSubClass         0 
+  bDeviceProtocol         0 
+  bMaxPacketSize0         8
+  idVendor           0x1457 
+  idProduct          0x5118 
+  bcdDevice            5.00
+  iManufacturer           1 OpenMoko
+  iProduct                2 Debug Board for Neo1973
+  iSerial                 0 
+  bNumConfigurations      1
+  [...]
+</pre>
+
+===== Flashing with Windows =====
+{{note|FIC has done that for you, in case you have officially been supplied with the board.  However, if you are one of the early adopters, the configuration and USB vendorID / productID might have not yet been set correctly.}}
+
+In order to do so, you can use the FTDI Mprog program from http://www.ftdichip.com/Resources/Utilities/MProg3.0_Setup.exe
+ 
+You will need
+* The EEPROM Template http://people.openmoko.org/laforge/misc/debug_board_v2/mprog_template/neo1973_debugboard_v2.ept
+
+==== Drivers ====
+
+===== Linux =====
+
+Please make sure you have libftdi-0.8 or later.  Earlier versions are known to cause problems
+
+Furthermore, you will need to do the following:
+
+====== ftdi_sio module option ======
+
+ rmmod ftdi_sio
+ modprobe ftdi_sio vendor=0x1457 product=0x5118
+
+or the equivalent in your modules.conf
+
+====== udev rule ======
+
+Please install the rules from http://people.openmoko.org/laforge/misc/debug_board_v2/udev_rules/
+
+===== Windows =====
+
+Please use the driver from http://people.openmoko.org/laforge/misc/debug_board_v2/windows_drivers/
+
+=== Hardware connection ===
+
+* [[Connecting Neo1973 with Debug Board v2]]
+
+=== Actually using it ===
+
+==== On Linux ====
+
+===== Serial Port =====
+
+The Linux kernel of your host system will create a virtual serial device called '''/dev/ttyUSBx''' where 'x' is a sequentially assigned number.  If you don't have any other USB serial converters attached to your machine, the device name will be '''/dev/ttyUSB0'''.
+
+You can use your favourite terminal emualtor (minicom, cu, zc, ...) just like for any other/real serial port. You may use gdb as well (eg. target remote /dev/ttya).
+
+===== JTAG =====
+
+Once you have installed libftdi >= 0.8 and configured [[OpenOCD]] with the correct openocd.cfg from [[OpenOCD#openocd.cfg]], it should work just fine.
+
+Please see [[OpenOCD#OpenOCD_and_Debug_Board]] for some more information.
+
+== History ==
+
+We previously had [[Neo1973 Debug Board v1]] (inherited from some weird engineers who must have seen Brazil too often).
+Version 1 was never shipped to phase-0 or phaes-1, and not sold to anyone.
+
+=== Changes from v2 to v3 ===
+
+* drastically reduce the effective load capacitance on the upstream USB port
+* use a load-limiting 3V LDO to further ensure USB spec electrical compliance
+* add a new 10pin header [footprint] to make the I2C/SPI/IRQ pins of the GTA01/GTA02 debug connector accessible
+* rotate the 20pin ARM-JTAG connector to be able to use standard 90degree-angled sockets
+* give LED's and connectors proper names on the silk
+* add openmoko logo to the bottom silk screen
+
+
+=== Changes from v1 to v2 ===
+
+* get rid of ethernet
+** we don't need it, and
+** we especially don't want a 40pin parallel 66MHz bus going between two pcb's
+* get rid of 7-segment LED displays
+** not really needed.  We have a serial port
+** could be replaced by one or two GPIO LED's
+* get rid of built-in [[wiggler]]
+** nobody has a parallel port on the laptop these days
+* get rid of li-ion battery (including charger)
+** the device can be fully usb powered by the laptop
+
+<span id="bottom"></span>
+{{Languages|Debug_Board}}
+
+[[Category:Neo1973 Hardware Debugging]]
