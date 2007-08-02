@@ -40,4 +40,19 @@ You may get something like this while the bitbake recipes are parsed:
 
 That is an issue in a bitbake file. One should not use the short-name for sourceforge (sf.net) when certificates are only for exact host names. Accept the certificate and everything is fine for now.
 
+=== Flashing with MokoMakefile ===
+Since MokoMakefile has not been adjusted to use the new build layout you cannot use it. As a quick hack to make flashing local built image possible again try this:
+
+Find the following lines in the MokoMakefile:
+
+ flash-qemu-local: stamps/qemu stamps/openmoko-devel-image
+       ( cd build/qemu && openmoko/flash.sh ../tmp/deploy/images )
+
+And replace them with:
+
+ flash-qemu-local: stamps/qemu
+        ( cd build/qemu && openmoko/flash.sh <MY_NEW_BUILD_DIR>/tmp/deploy/images )
+
+Where you should replace <MY_NEW_BUILD_DIR> with the full path to your build directory (the one where ''conf/local.conf'' lives in). (This has not been tried yet since my image is still building.) Running the image should work, too. :)
+
 [[Category:OpenMoko2007.2| ]]
