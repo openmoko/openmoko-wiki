@@ -40,6 +40,33 @@ You may get something like this while the bitbake recipes are parsed:
 
 That is an issue in a bitbake file. One should not use the short-name for sourceforge (sf.net) when certificates are only for exact host names. Accept the certificate and everything is fine for now.
 
+Another problem that will most likely arise is that patching ''libgsmd'' will fail. You will get an error message that (besides other stuff) contains these lines:
+
+ .
+ .
+ .
+ Applying patch extreplychars.patch
+ patching file src/gsmd/atcmd.c
+ Hunk #1 succeeded at 202 (offset -6 lines).
+ Hunk #2 FAILED at 249.
+ 1 out of 2 hunks FAILED -- rejects in file src/gsmd/atcmd.c
+ can't find file to patch at input line 27
+ Perhaps you used the wrong -p or --strip option?
+ The text leading up to this was:
+ --------------------------
+ |Index: gsm/src/gsmd/vendor_qc.c
+ |===================================================================
+ |--- gsm.orig/src/gsmd/vendor_qc.c      2007-06-03 10:46:19.000000000 +0200
+ |+++ gsm/src/gsmd/vendor_qc.c   2007-06-03 11:45:58.000000000 +0200
+ --------------------------
+ .
+ .
+ .
+
+I got the built to continue by removing all the patches. For this open ''packages/gsm/libgsmd_svn.bb'' and change remove all parts of the SRC_URI variable where it says ''patch=1''. Someone with deeper knowledge on gsmd should decide whether those patches are still needed (and especially on the Neo). Since I want to run the image in the emulator only a fully working gsmd is not that important to me.
+
+I expect that the metadata for gsmd will be updated soon to fix the build issues. You should revert your local changes then (''mtn revert  packages/gsm/libgsmd_svn.bb'').
+
 === Flashing with MokoMakefile ===
 Since MokoMakefile has not been adjusted to use the new build layout you cannot use it. As a quick hack to make flashing local built image possible again try this:
 
