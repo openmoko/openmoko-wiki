@@ -9,7 +9,7 @@ An official announcement is expected soon.
 == How to build ==
 '''Please note that this is no official guide on how to build OM-2007.2. I am just making my first steps getting this to compile and think it would be a [http://en.wikipedia.org/wiki/Proprietary_software waste of time] of I keep problems I found for my own. Additionally it would be good if the new distro gets more exposure and testing so less things will break after the official announcement.'''
 
-Follow the [http://www.openembedded.org/wiki/GettingStarted getting started] steps of OpenEmbedded. Use Bitbake from the ''stable'' branch from SVN (not the 1.8.6 release - does not work!) and the ''org.openembedded.dev'' branch of OE.
+Follow the [http://www.openembedded.org/wiki/GettingStarted getting started] steps of OpenEmbedded. Use Bitbake 1.8.6 not a SVN version from the stable branch (otherwise you will get problems with checking out repositories) and the ''org.openembedded.dev'' branch of OE.
 
 Put the following in your local.conf
 
@@ -41,34 +41,6 @@ You may get something like this while the bitbake recipes are parsed:
    - Fingerprint: f2:6c:fe:bb:82:92:30:09:72:dd:1c:b3:e7:56:69:c7:7a:df:67:3e
 
 That is an issue in a bitbake file. One should not use the short-name for sourceforge (sf.net) when certificates are only for exact host names. Accept the certificate and everything is fine for now.
-
-==== libgsmd FTBFS ====
-Another problem that will most likely arise is that patching ''libgsmd'' will fail. You will get an error message that (besides other stuff) contains these lines:
-
- .
- .
- .
- Applying patch extreplychars.patch
- patching file src/gsmd/atcmd.c
- Hunk #1 succeeded at 202 (offset -6 lines).
- Hunk #2 FAILED at 249.
- 1 out of 2 hunks FAILED -- rejects in file src/gsmd/atcmd.c
- can't find file to patch at input line 27
- Perhaps you used the wrong -p or --strip option?
- The text leading up to this was:
- --------------------------
- |Index: gsm/src/gsmd/vendor_qc.c
- |===================================================================
- |--- gsm.orig/src/gsmd/vendor_qc.c      2007-06-03 10:46:19.000000000 +0200
- |+++ gsm/src/gsmd/vendor_qc.c   2007-06-03 11:45:58.000000000 +0200
- --------------------------
- .
- .
- .
-
-I got the built to continue by removing all the patches. For this open ''packages/gsm/libgsmd_svn.bb'' and remove all parts of the SRC_URI variable where it says ''patch=1''. Someone with deeper knowledge on gsmd should decide whether those patches are still needed (and especially on the Neo). Since I want to run the image in the emulator only a fully working gsmd is not that important to me.
-
-I expect that the metadata for gsmd will be updated soon to fix the build issues. You should revert your local changes then (''mtn revert  packages/gsm/libgsmd_svn.bb'').
 
 ==== openmoko-libs FTBFS ====
 Some applications have not been fully modified to build with the new libraries of OpenMoko and still need the old-style ''openmoko-libs'' package. ''libmokogsm'' which is needed for ''openmoko-libs'' then fails to build. As a workaround you can remove the not yet ported applications that need ''openmoko-libs'' making it unneccessary itself. To do this edit ''packages/tasks/openmoko-taks.bb'' and find the following lines:
