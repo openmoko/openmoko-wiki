@@ -28,6 +28,8 @@ Run ''bitbake <package name>'' (e.g. openmoko-devel-image).
 Hopefully the MokoMakeFile is soon upgraded to be used for OM-2007.2. Since OpenMoko is not using the overlay any more that makefile should be simpler then. :-)
 
 === Build issues ===
+
+==== Wrong certificate ====
 You may get something like this while the bitbake recipes are parsed:
 
  Error validating server certificate for 'https://libw100.svn.sf.net:443':
@@ -40,6 +42,7 @@ You may get something like this while the bitbake recipes are parsed:
 
 That is an issue in a bitbake file. One should not use the short-name for sourceforge (sf.net) when certificates are only for exact host names. Accept the certificate and everything is fine for now.
 
+==== libgsmd FTBFS ====
 Another problem that will most likely arise is that patching ''libgsmd'' will fail. You will get an error message that (besides other stuff) contains these lines:
 
  .
@@ -66,6 +69,26 @@ Another problem that will most likely arise is that patching ''libgsmd'' will fa
 I got the built to continue by removing all the patches. For this open ''packages/gsm/libgsmd_svn.bb'' and remove all parts of the SRC_URI variable where it says ''patch=1''. Someone with deeper knowledge on gsmd should decide whether those patches are still needed (and especially on the Neo). Since I want to run the image in the emulator only a fully working gsmd is not that important to me.
 
 I expect that the metadata for gsmd will be updated soon to fix the build issues. You should revert your local changes then (''mtn revert  packages/gsm/libgsmd_svn.bb'').
+
+==== openmoko-libs FTBFS ====
+Some applications have not been fully modified to build with the new libraries of OpenMoko and still need the old-style ''openmoko-libs'' package. ''libmokogsm'' which is needed for ''openmoko-libs'' then fails. As a workaround you can remove the not yet ported applications that need ''openmoko-libs'' making it unneccessary itself. To do this edit ''packages/tasks/openmoko-taks.bb'' and find the following lines:
+
+ .
+ .
+ .
+  openmoko-terminal \
+  matchbox-panel-2 \
+  matchbox-panel-2-applets \
+  matchbox-applet-inputmanager \
+ #  openmoko-appmanager \
+  matchbox-keyboard \
+  matchbox-stroke \
+  openmoko-keyboard \
+ .
+ .
+ .
+
+Now put a dash (''#'') before ''openmoko-terminal'' and ''openmoko-keyboard''. You can verify that ''openmoko-libs'' is not needed any more by issuing ''bitbake -g openmoko-devel-image'' (= creates a dependency graph). Thre should be no mentioning of ''openmoko-libs'' in the file ''task-depends.dot''.
 
 === Flashing with MokoMakefile ===
 Since MokoMakefile has not been adjusted to use the new build layout you cannot use it. As a quick hack to make flashing local built image possible again try this:
