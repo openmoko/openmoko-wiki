@@ -23,7 +23,8 @@ If your eth0 interface is also in the same 'range' (e.g. 192.168.0.105) then you
 
 Took from [http://www.hrw.one.pl/2007/03/22/hotpluging-usbnet/ Hotplugging usbnet] post by Marcin 'Hrw' Juszkiewicz.
 
-Edit /etc/network/interfaces file (in Debian or similiar distros):
+'''For Debian or similar distros:'''
+Edit /etc/network/interfaces file ():
 <pre>
 allow-hotplug usb0
 iface usb0 inet static
@@ -34,6 +35,28 @@ iface usb0 inet static
         post-up echo 1 > /proc/sys/net/ipv4/ip_forward
         post-up iptables -P FORWARD ACCEPT
 </pre>
+
+
+'''For Red Hat or similar distros'''
+Edit /etc/sysconfig/network-scripts/net.hotplug:
+
+After this statement:
+<pre>
+    case $INTERFACE in
+	# interfaces that are registered after being "up" (?)
+</pre>
+
+Add the following:
+<pre>
+	usb0)
+		ifconfig usb0 192.168.0.200 netmask 255.255.255.0
+		route add 192.168.0.202 usb0
+		iptables -I INPUT 1 -s 192.168.0.202 -j ACCEPT
+		iptables -I OUTPUT 1 -s 192.168.0.200 -j ACCEPT
+		exit 0
+	;;
+</pre>
+
 
 And now when you connect phone (which has 192.168.0.202 IP) it gets connection to world automatically.
 
