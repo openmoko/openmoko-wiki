@@ -1,0 +1,353 @@
+== Informazioni generali ==
+
+Il kernel del GTA01 è basato sul kernel Linux 2.6.21.3 (come da [http://www.kernel.org/ kernel.org]).
+
+Le ''patch'' aggiunte riguardano:
+* S3C2410 USB Device Controller
+** recuperata dal progetto "iPaq H1940 Linux")
+* S3C2410 SD Card Controller
+** driver recuperato dak [http://www.tomtom.com/gpl.php TomTom GO kernel]
+* [[QT2410]] machine support
+** pezzi di codice per mettere insieme tutte le aggiunte
+* S3C2410 touch screen driver
+** anche questo recuperato dal progetto "iPaq H1940 Linux"
+* GTA01 machine support
+** configurazione e codice specifico per tenere insieme tutti i pezzi
+* [[GSM Communication Infrastructure]]
+** la parte del kernel relativa alle ''line discipline'' TS07.10 e GPRS
+
+== Il ''patchset'' del kernel ==
+
+L'insieme di tutte le patch sopra citate, da aggiungere al kernel Linux sopra indicato, è reperibile all'indirizzo https://svn.openmoko.org/trunk/src/target/kernel/patches/ Si tratta di un cosiddetto ''[http://savannah.nongnu.org/projects/quilt quilt] patchset''. Una volta prelevato, si può applicare ad un kernel Linux piazzandolo nella sua directory "patches" (sotto la directory "linux-2.6.''x''") ed eseguendo "quilt push -a".
+
+Pre esempio, dopo aver decompresso il kernel "linux-2.6.21.1.tar.gz", si possono eseguire questi comandi:
+    cd linux-2.6.21.1
+    svn co https://svn.openmoko.org/trunk/src/target/kernel/patches
+    quilt push -a
+(nota: questo è solo un esempio; la versione del kernel Linux da utilizzare potrebbe essere più recente, come indicato nella sezione precedene di questa stessa pagina).
+
+== Configurazione del kernel Linux ==
+
+L'ultima versione del file di configurazione del kernel può essere recuperata da https://svn.openmoko.org/trunk/oe/packages/linux/linux-gta01/ (basta copiare tale file di configurazione nella directory "linux-2.6.''x''" e rinominarlo ".config").
+
+== Compilazione del kernel ==
+
+La compilazione del kernel si esegue normalmente col "make"; attualmente serve solo il target "vmlinux", non è necessaria la "zImage".
+
+== Kernel precompilati pronti per l'uso ==
+
+Dei kernel già compilati per il boot, chiamati ''uImage*'', sono disponibili qui:
+* http://buildhost.openmoko.org/tmp/deploy/images/
+
+In tal caso occorre prelevare anche i moduli utilizzati dal kernel (disponibili da quella stessa pagina col nome di ''modules*'' con lo stesso numero di versione), da mettere poi nella rootfs (attenzione: non tutti i moduli in questione potrebbero essere veramente indispensabili nell'installazione).
+
+In alternativa si può prelevare il pacchetto completo del kernel (comprensivo dei moduli), installabile con ipkg, da qui:
+* http://buildhost.openmoko.org/tmp/deploy/ipk/fic-gta01/
+
+=== Moduli per il Neo1973 GTA01 ===
+
+Sul Neo1973 GTA01 sono necessari almeno questi moduli:
+* snd-soc-neo1973-wm8753 snd-soc-s3c24xx-i2s snd-soc-s3c24xx snd-soc-wm8753
+* ohci-hcd
+* bluetooth hci-usb
+* fat vfat msdos nsl-base nls_iso8859_1 nls_cp437
+
+È necessario che tali moduli siano presenti nella root image (cfr. bug 580).
+
+Probabilmente sarà sufficiente indicare la lista di almeno questi moduli in un file sotto "/etc/modutils/" per poi eseguire "update-modules" per farli funzionare correttamente:
+* hci_usb
+* s3cmci
+* snd-soc-neo1973-wm8753
+
+== Creazione di un kernel pronto per il boot ==
+u-boot necessita di tutti i file (kernel, initrd, ...) nel formato uImage, che in fin dei conti contiene solo alcune informazioni addizionali all'inizio (controllo CRC, versione, etc). Vedere [[u-boot]] per i dettagli.
+
+== Parametri di boot del kernel ==
+
+Dato che il [[QT2410]] può essere utilizzato con differenti schermi LCD (liquid crystal modules: LCM), per il caricamento del kernel è disponibile un parametro "tft" specificabile al boot:
+* col boot senza parametro "tft=" si assume per default uno schermo TFT 240x320
+* col parametro "tft=b" ('b' sta per "big"), vengono selezionati i timing per lo schermo Sharp 8" 640x480
+* col parametro "tft=p" ('p' sta per "production"), vengono selezionati i timing per lo schermo TFT 2.8" 480x640.
+
+== Sottosistemi del kernel ==
+
+In questa sezione ci sono alcune note sui sottosistemi specifici del GTA01, e sui relativi driver.
+
+=== GSM ===
+
+==== Power Management ====
+
+Il driver '''gta01_pm_gsm''' implementa le procedure di risparmio energetico della sezione GSM (pertanto, se compilato come modulo ''gta01_pm_gsm.ko'', va caricato prima dell'utilizzo).
+
+Tale driver esporta questa interfaccia basata sul sysfs:
+<pre>
+root@fic-gta01:/$ ls -l /sys/bus/platform/devices/gta01-pm-gsm.0/
+-rw-r--r--    1 root     root         4096 Feb  1 09:58 download
+-rw-r--r--    1 root     root         4096 Feb  1 09:58 power_on
+-rw-r--r--    1 root     root         4096 Feb  1 09:58 reset
+</pre>
+
+===== Accensione =====
+<pre>
+root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/power_on 
+gta01-pm-gsm gta01-pm-gsm.0: powering up GSM, thus disconnecting serial console
+</pre>
+
+===== Spegnimento =====
+<pre>
+root@fic-gta01:~$ echo "0" > /sys/bus/platform/devices/gta01-pm-gsm.0/power_on 
+gta01-pm-gsm gta01-pm-gsm.0: powered down GSM, thus enabling serial console
+</pre>
+
+===== Reset =====
+<pre>
+root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/reset 
+root@fic-gta01:~$ echo "0" > /sys/bus/platform/devices/gta01-pm-gsm.0/reset 
+</pre>
+
+===== Attivazione del modo GSM baseband download =====
+<pre>
+root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/download
+</pre>
+
+===== Disattivazione del GSM baseband download =====
+<pre>
+root@fic-gta01:~$ echo "0" > /sys/bus/platform/devices/gta01-pm-gsm.0/download
+</pre>
+
+=== GPS ===
+
+==== Risparmio energetico ====
+
+Il modulo ''gta01_pm_gps'' del kernel pure offre un'interfaccia basata sul sysfs:
+<pre>
+root@fic-gta01:~$ ls -l /sys/bus/platform/devices/gta01-pm-gps.0/     
+-rw-r--r--    1 root     root         4096 Feb  1 09:14 power_avdd_3v
+-rw-r--r--    1 root     root         4096 Feb  1 09:14 power_lp_io_3v3
+-rw-r--r--    1 root     root         4096 Feb  1 09:14 power_pll_core_2v5
+-rw-r--r--    1 root     root            0 Feb  1 09:14 power_sequence
+-rw-r--r--    1 root     root         4096 Feb  1 09:14 power_vtxco_2v8
+-rw-r--r--    1 root     root         4096 Feb  1 09:14 pwron
+-rw-r--r--    1 root     root         4096 Feb  1 09:14 reset
+</pre>
+
+I vari power_avdd_3v, power_lp_io_3v3, power_pll_core_2v5, power_vtxco_2v8, pwron e reset rappresentano lo stato dei segnali omonimi.
+
+Il file <b>power_sequence</b> implementa invece l'accensione o spegnimento secondo quanto prescritto dal datasheet del GlobalLocate.
+
+===== Accensione =====
+ root@fic-gta01:~$ echo "power_up" > /sys/bus/platform/devices/gta01-pm-gps.0/power_sequence 
+
+===== Spegnimento =====
+ root@fic-gta01:~$ echo "power_down" > /sys/bus/platform/devices/gta01-pm-gps.0/power_sequence
+
+=== Driver Asound ===
+
+==== Requisiti di livello più alto ====
+
+Nonostante il sistema audio del GTA01 sia alquanto complesso, i requisiti di livello più alto per il suo driver sono abbastanza semplici. Le caratteristiche indispensabili sono:
+
+* chiamate vocali
+** connettere il segnale del microfono al modem GSM
+** connettere l'audio del modem GSM con l'altoparlante integrato
+** configurare il mixer del microfono secondo le esigenze del momento
+** configurare il volume dell'audio ricevuto dal microfono prima di passarlo al line-out
+** configurare il volume audio del microfono prima di passarlo all'altoparlante integrato
+* registrazione delle chiamate vocali
+** l'utente può registrare le conversazioni sulla memoria interna, in formato OGG (questo dettaglio non è importante per il driver)
+** l'utente potrebbe scegliere di registrare solo l'audio ricevuto, solo l'audio inviato, o entrambi
+** per entrambi, sarà necessario miscelare le due sorgenti audio (microfono e line-in) prima di registrare: è possibile?
+* supporto per "voice call playback"
+** l'utente deve poter "suonare" dei file audio durante una conversazione (questo significa che l'output PCM deve essere miscelato con l'input del microfono prima di essere passato al line-out e al modem GSM)
+* media playback
+** un software audio player deve poter suonare file audio (mp3/ogg/flac/...) sia sugli altoparlanti integrati che sulle cuffie
+* switch presenza cuffie
+** questo è connesso ad una GPIO del S3C2410. Come integrarlo bene col driver audio? Andrebbe utilizzato al pari di qualsiasi altra apparecchiatura simile (come per esempio i computer laptop: la presenza delle cuffie disabilita automaticamente gli altoparlanti integrati).
+
+Per maggiori dettagli, vedere [[Neo1973 Audio Subsystem]]
+
+=== Bluetooth ===
+
+Viene utilizzata l'implementazione ''bluez'' presente nei kernel Linux.
+
+==== Risparmio energetico ====
+
+Il sistema bluetooth ha tre prerequisiti:
+* BT_EN (abilitazione bluetooth) deve essere attivo
+* il rispettivo regolatore di tensione correttamente inizializzato
+* il driver ohci-hcd (supporto USB) già caricato
+
+Il driver ''gta01_pm_bt'' è controllabile via sysfs:
+<pre>
+root@fic-gta01:/$ ls -l /sys/bus/platform/devices/gta01-pm-bt.0
+-rw-r--r--    1 root     root         4096 Feb  1 09:52 power_on
+-rw-r--r--    1 root     root         4096 Feb  1 09:52 reset
+</pre>
+
+===== Accensione =====
+
+<pre>
+root@fic-gta01:/$ echo "1" > /sys/bus/platform/devices/gta01-pm-bt.0/power_on
+usb 1-1: new full speed USB device using s3c2410-ohci and address 4
+usb 1-1: configuration #1 chosen from 1 choice
+</pre>
+
+===== Spegnimento =====
+<pre>
+root@fic-gta01:/$ echo "0" > /sys/bus/platform/devices/gta01-pm-bt.0/power_on 
+usb 1-1: USB disconnect, address 3
+</pre>
+
+===== Attivazione procedura di reset (attivo basso) =====
+<pre>
+root@fic-gta01:/$ echo "0" >  /sys/bus/platform/devices/gta01-pm-bt.0/reset 
+root@fic-gta01:/$ usb 1-1: USB disconnect, address 2
+</pre>
+
+===== Disattivazione del reset (low-active) =====
+<pre>
+root@fic-gta01:/$ echo "1" >  /sys/bus/platform/devices/gta01-pm-bt.0/reset 
+s3c2410-ohci s3c2410-ohci: wakeup
+usb 1-1: new full speed USB device using s3c2410-ohci and address 3
+usb 1-1: configuration #1 chosen from 1 choice
+</pre>
+
+==== Inizializzazione ====
+
+Esempio:
+<pre>
+root@fic-gta01:~$ hciconfig hci0 up
+root@fic-gta01:~$ hcitool  scan
+Scanning ...
+        00:14:9A:77:A2:02       A780
+root@fic-gta01:~$ hcitool inq 00:14:9A:77:A2:02 
+Inquiring ...
+        00:14:9A:77:A2:02       clock offset: 0x55df    class: 0x502204
+root@fic-gta01:~$ hcitool cc 00:14:9A:77:A2:02 
+root@fic-gta01:~$ hcitool con                 
+Connections:
+        < ACL 00:14:9A:77:A2:02 handle 42 state 1 lm MASTER 
+root@fic-gta01:~$ hcitool info 00:14:9A:77:A2:02
+Requesting information ...
+        BD Address:  00:14:9A:77:A2:02
+        Device Name: A780
+        LMP Version: 1.1 (0x1) LMP Subversion: 0x700
+        Manufacturer: Broadcom Corporation (15)
+        Features: 0xff 0xff 0x0d 0x00 0x00 0x00 0x00 0x00
+                <3-slot packets> <5-slot packets> <encryption> <slot offset> 
+                <timing accuracy> <role switch> <hold mode> <sniff mode> 
+                <park state> <RSSI> <channel quality> <SCO link> <HV2 packets> 
+                <HV3 packets> <u-law log> <A-law log> <CVSD> <power control> 
+                <transparent SCO> 
+</pre>
+
+=== Bottone AUX ===
+
+Il bottone AUX (precedentemente indicato come bottone "9-1-1") è supportato dal driver della tastiera (''gta01kbd'') nel kernel (drivers/input/keyboard/gta01kbd.c).  
+
+Tale bottone è associato a eventi "KEY_PHONE" (tasto premuto/rilasciato).
+
+=== Power Management Unit (PMU) ===
+
+La PMU (Unità di gestione energia) è supportata dal driver "pcf50606" del kernel (drivers/i2c/chips/pcf50606.c).
+
+Questo driver fornisce numerose interfacce nell'user-space per le varie funzionalità della PMU.
+
+==== Bottone di accensione e inserimento del caricabatteria ====
+
+La PMU crea un device di input che supporta questi tre "tasti":
+* KEY_POWER: bottone di accensione del GTA01
+* KEY_POWER2: inserimento/rimozione del caricabatteria da porta USB
+* KEY_BATTERY: inserimento/rimozione del caricabatteria in modalità normale
+
+==== RTC ====
+
+L'orologio interno (real-time-clock), comprese le funzionalità di sveglia, è implementato con l'interfaccia standard RTC (/dev/rtc).
+
+==== Watchdog ====
+
+Il watchdog integrato nella PMU è implementato con il character-device apposito del kernel.
+
+==== Regolatori di tensione ====
+
+I regolatori di tensione sono accessibili in user-space attraverso il sysfs (un po' come i noti lm_sensors); i valori possono essere oltre che letti, perfino scritti; il formato è in ASCII, e il valore indica i millivolt.
+
+<pre>
+root@fic-gta01:/sys/devices/platform/s3c2410-i2c/i2c-0/0-0008$ ls -l /sys/bus/i2c/devices/0-0008/voltage_*
+-rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_d1reg
+-rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_d2reg
+-rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_d3reg
+-rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_dcd
+-rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_dcde
+-rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_dcud
+-rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_lpreg
+-rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_ioreg
+root@fic-gta01:/sys/devices/platform/s3c2410-i2c/i2c-0/0-0008$ cat voltage_dcd
+1300
+</pre>
+
+==== Tensione della batteria ====
+
+Il voltaggio della batteria (in millivolt) può essere letto sempre attraverso il sysfs:
+
+<pre>
+root@fic-gta01:~$ cat /sys/bus/i2c/devices/0-0008/battvolt 
+3767
+</pre>
+
+==== Corrente di carica della batteria ====
+
+L'intensità della corrente nella carica della batteria (espressa in milliampére) può essere letta da sysfs:
+
+<pre>
+root@fic-gta01:~$ cat /sys/bus/i2c/devices/0-0008/chgcur 
+0
+</pre>
+
+==== Temperatura della batteria ====
+
+La temperatura della batteria (in gradi centigradi) può essere letta via sysfs:
+
+<pre>
+root@fic-gta01:~$ cat /sys/bus/i2c/devices/0-0008/battemp
+25
+</pre>
+
+== Kernel (DA COMPLETARE) ==
+
+=== Varie ===
+* accelerare il boot del kernel
+** ridurre/eliminare il delay calibration
+** l'inizializzazione del framebuffer dura secoli
+
+===  TS07.10 multiplex ===
+
+=== PCF50606 ===
+* correggere i problemi di conversione nell'impostare data/ora della sveglia
+* controllare la tabella di conversione delle temperature
+* implementare 'sveglia persistente' (cfr. mail da mickey)
+
+=== Retroilluminazione ===
+* più in là, implementare lo smooth fade-in/fade-out
+
+=== Vibrazione ===
+* implementarla come un driver dei LED
+* provarla
+* più avanti: implementare PWM
+
+=== Device driver USB ===
+* provare il passaggio tra USB-host e USB-device
+
+=== Power Management ===
+* provare e verificare:
+** IRQ dalla sezione GSM
+** IRQ dalla PMU (inserimento/eliminazione del caricabatterie, o simili)
+** inserimento/eliminazione del jack delle cuffie
+
+=== Mailing-list ===
+
+Lo sviluppo del Kernel è discusso nella mailing-list ''openmoko-kernel@lists.openmoko.org''
+
+{{Languages|Kernel}}
+
+[[Category:Software]]
