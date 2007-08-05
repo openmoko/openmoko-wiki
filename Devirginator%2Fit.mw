@@ -1,24 +1,21 @@
-Il '''devirginator''' un è un programma utilizzato in combinazione con [[dfu-util]], [[OpenOCD]] e [[Debug Board]] per reporogrammare alle impostazioni di fabbrica il telefono from scratch.
-
+Il '''devirginator''' un è un programma utilizzato in combinazione con [[dfu-util]], [[OpenOCD]] e [[Debug Board]] per ri-programmare da zero il telefono alle impostazioni di fabbrica.
 
 == Codice sorgente ==
 
-Il codice sorgente di devirginator è disponibile qui http://svn.openmoko.org/trunk/src/host/devirginator/
-
+Il codice sorgente di devirginator è disponibile qui: http://svn.openmoko.org/trunk/src/host/devirginator/
 
 == Documentazione ==
 
-{{nota|Questa deriva da http://svn.openmoko.org/trunk/src/host/devirginator/README rev. 1215 e potrebbe essere obsoleta}}
+{{note|Questa deriva da http://svn.openmoko.org/trunk/src/host/devirginator/README rev. 1215 e potrebbe essere obsoleta}}
 
 === Iniziare ===
 
 Per iniziare,
  % cp config.example config
-e fai le modifiche necessarie. In particulare, devi configurare SNAPSHOT.
+e apportare le modifiche necessarie. In particolare, configurare SNAPSHOT.
 Quindi
  % make
-Questo richiede Netpbm e transfig. Infine assicurati che openocd sia attivo,
-accendi il dispositivo, diventa root, ed esegui
+Questo richiede Netpbm e transfig. Infine assicurarsi che openocd sia attivo, accendere il dispositivo, diventare root ed eseguire
  # ./devirginate
 
 
@@ -26,20 +23,18 @@ accendi il dispositivo, diventa root, ed esegui
 
 Il dispositivo deve essere connesso con:
 
-* JTAG, con un'interfaccia supportatata da OpenOCD (necessaria per tutti gli stages)
-* USB, connesso alla su cui è in funzione "devirginate" (richiesto solo per lo stage 2 e successivi)
+* JTAG, con un'interfaccia supportata da OpenOCD (necessaria per tutti gli stages)
+* USB, connesso al computer su cui è in funzione "devirginate" (richiesto solo per lo stage 2 e successivi)
 
-Inoltre, se una serial console è connessa al dispositivo, la progressione
-dell'installazione può essere monitorata.
+Inoltre, se una è connessa al dispositivo una console virtuale, l'avanzamento dell'installazione può essere monitorato.
 
 Sono necessari i seguenti programmi:
 
 ==== dfu-util ====
 
-* dfu-util deve essere accessibile dalla macchina su chui è attivo "devirginate". Se dfu-util non è nel PATH, puoi selezionare un path specifico in "config".
+* dfu-util deve essere accessibile dalla macchina su cui è attivo "devirginate". Se dfu-util non è nel PATH, selezionare un path specifico in "config".
 
-  
-Per fara il build di dfu-util, esegui:
+Per generare dfu-util, eseguire:
  cd $OMDIR/openmoko/trunk/src/host/dfu-util
  ./autogen.sh
  ./configure
@@ -47,16 +42,13 @@ Per fara il build di dfu-util, esegui:
 
 ==== OpenOCD ====
 
-OpenOCD SVN revision 130 con libftdi 0.8 funziona. Altre
-combinazioni possono anche funzionarec. E' richiesto il seguente patch:
+OpenOCD SVN revision 130 con libftdi 0.8 funziona. Altre combinazioni possono anche funzionare. È richiesta la seguente patch:
 
 http://svn.openmoko.org/developers/werner/openocd-wait-patiently.patch
 
-Per le istruzioni per il build, vedi http://svn.openmoko.org/developers/werner/notes/openocd
+Per le istruzioni di generazione, consultare http://svn.openmoko.org/developers/werner/notes/openocd
 
-  Se stai usando la build di OpenOCD fatta dalla OpenMoko
-  distribution (SVN revision 1180 o successiva), il patch è già
-  applicato.
+  Se si usa la build di OpenOCD creata da OpenMoko (revisione SVN 1180 o successiva), la patch è già applicata.
 
 ==== telnet ====
 
@@ -65,44 +57,30 @@ Oltre a tutto ciò, "devirginate" necessita di telnet.
 
 ==== netpbm, transfig, wget, perl ====
 
-"setup.sh" può essere eseguito da un'altra macchian che ha in share la stessa gerarchia del
-file system. Necessita di Netpbm, transfig, wget, e Perl.
+"setup.sh" può essere eseguito da un'altra macchina con in condivisione la stessa gerarchia del file system. Necessita di Netpbm, transfig, wget, e Perl.
 
 === Setup ===
 
-Innazitutto devirginator necessita di essere configurato. Questo include
+Innanzitutto devirginator deve essere configurato. Questo comprende:
 
 * scaricare i binari per u-boot, kernel, etc.
 * generare/convertire diversi files usando il processo di setup
 
-Per il momento il setup deve essere fatto nella directory contente tutti i
-files riferiti a devirginator. I files generati durante il setup
-sono posizionati nella directory tmp/. I files in tmp/ sono inoltre usati
-durante l'uso di devirginator.
+Per il momento la configurazione deve essere fatta all'interno della directory contente tutti i file di devirginator. I file generati durante la configurazione sono posizionati nella directory tmp/. I file in tmp/ sono utilizzati anche durante l'uso di devirginator.
 
-Per iniziare, copia config.example su "config" e applica le modifiche necessarie.
-Quasi tutte le configurazioni necessarie sono di defaults, ma una cosa che potresti
-voler fare è configurare SNAPSHOT con il date code dello the snapshot che desideri.
+Per iniziare, copiare config.example in "config" e applicare le modifiche necessarie. Quasi tutte le configurazioni necessarie sono già applicate, ma potrebbe essere utile configurare SNAPSHOT con il codice data dello snapshot desiderato.
 
-Poi esegui  ./setup.sh o semplicemente make .
+Quindi, eseguire ./setup.sh o semplicemente make .
 
-setup.sh ora scaricherà ogni file perduto ed eseguirà le varie
-conversioni. Se apapre qualche errore durante questo processo, ad esempio a causa della
-mancanza di strumenti o di un errore di configurazione, setup.sh si fermerà con un errore.
-Potrai quindi correggere l'errore e riprovare. I files già scaricati in tmp/ verranno
-saltati quando riprovi (setup.sh lo farà lo stessose i files avranno subito dei
-cambiamenti).
+setup.sh ora scaricherà i file mancanti ed eseguirà le varie conversioni. Se appare qualche errore durante questo processo, per esempio a causa della mancanza di strumenti o di un errore di configurazione, setup.sh si fermerà con un errore. È possibile quindi correggere l'errore e riprovare. I file già scaricati in tmp/ verranno saltati durante il nuvo tentativo (setup.sh lo farà lo stesso se i file avranno subito dei cambiamenti).
 
-setup.sh inoltre controlla se gli esguibili sono disponibili durante l'uso di devirgination
-e segnalerà se manca qualcosa. In generale, si può eseguire setup.sh su una macchina diversa che "devirginate", in
-questo caso questi avvisi saranno ignorati.
+setup.sh inoltre controlla se gli eseguibili sono disponibili durante l'uso di devirginator e segnalerà se manca qualcosa. In generale, è possibile eseguire setup.sh su una macchina diversa rispetto "devirginate", in questo caso questi avvisi saranno ignorati.
 
 
-=== Files ===
-
+=== File ===
 
 ==== Script ====
-* crc32.pl -Permette la funzione crc32 che comanda la IEEE CRC-32. Questo script è usato da altri script Perl, con "do".
+* crc32.pl - Permette la funzione crc32 che comanda la IEEE CRC-32. Questo script è usato da altri script Perl, con "do".
 
 * envedit.pl
 * openocdcmd.pl
@@ -111,42 +89,27 @@ questo caso questi avvisi saranno ignorati.
 
 ==== Configurazione utente ====
 
-===== File di configiurazione statici =====
+===== File di configurazione statici =====
 
-I file seguenti contengono script ed altra informazioni di configurazione
-"statici" che sono usati nel processo di devirgination. Normalmente basta
-editare questi file per cambiare le funzioni del processo di setup.
+I file seguenti contengono script e altre informazioni di configurazione "statici" che sono usati nel processo di devirgination. Normalmente basta modificare questi file per cambiare le funzioni del processo di configurazione.
 
-Ognuno di questi file è convertito in qualche maniera da setup.sh.
-Qui sotto dopo la freccia sono indicati i rispettivi file risultanti.
+Ognuno di questi file è convertito in qualche maniera da setup.sh. Qui sotto dopo la freccia sono indicati i rispettivi file risultanti.
 
 * openocd.in -> tmp/script.ocd
 
-Comandi da eseguire da OpenOCD nella fase 0. Per eseguire una variable
-expansion, ogni linea di questo file è processata dalla shell con 
-"echo $line". A causa di ciò deve essere evitato l'uso di meta
-caratteri nella shell.
+Comandi da eseguire da OpenOCD durante lo stage 0. Per eseguire l'espansione di una variabile, ogni riga di questo file è processata dalla shell con "echo $line". A causa di questo deve essere evitato l'uso di metacaratteri nella shell.
 
-Se cambi qualche addresses in openocd.in, devi anche effettuare
-l'aggiornamento di u-boot.in.
+Cambiando qualche indirizzo in openocd.in, è necessario effettuare l'aggiornamento di u-boot.in.
 
 *  u-boot.in -> tmp/u-boot.out
 
-Comandi da eseguire in u-boot durante lo stage 0. Questo file è convertito
-in un'immagine interpretabile da u-boot e quindi eseguita dalla memoria con
-il comando di u-boot "autoscr".
+Comandi da eseguire in u-boot durante lo stage 0. Questo file è convertito in un'immagine interpretabile da u-boot e quindi eseguita dalla memoria con il comando di u-boot "autoscr".
 
 * environment.in -> tmp/environment
 
-Configurazioni per l'ambiente u-boot. Nota che i cambiamenti in questo
-file sono fatti al di sopra dell'ambiente interim prodotto nello
-stage 0. In particulare, la variabile "mtdparts" è mantenuta da questo
-stage.
+Configurazioni per l'ambiente u-boot. Notare che i cambiamenti in questo file sono fatti al di sopra dell'ambiente interim prodotto nello stage 0. In particolare, la variabile "mtdparts" è mantenuta da questo stage.
 
-Le linee lunge possono essere divise nell'ambiente semplicemnte ytamite
-indentazione della continuazione.
-Nota che la nuova linea e l'indentazione sono sostituite da uno spazio.
-Esempio,
+Le righe lunghe possono essere divise nell'ambiente semplicemente tramite rientro della continuazione. Notare che la nuova riga e il rientro sono sostituiti da uno spazio. Esempio,
 <pre>
 foo=qualche
     cosa
