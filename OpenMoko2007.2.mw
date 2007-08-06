@@ -87,4 +87,30 @@ to
 
 Now it will work correctly again.
 
+== How to build using nslu2-linux MasterMakefile (Ubuntu 7.04) ==
+[disclaimer]
+
+'''Check that your /bin/sh (ls -l /bin/sh) is not linked to dash rather than bash.''' Using dash will cause you pain. This is true for a standard install of Ubuntu 7.04 (at least when installing from Live CD). If your /bin/sh points to /bin/dash, correct it with (as root):
+ ln -sf /bin/bash /bin/sh
+
+Note: on  http://www.openembedded.org/wiki/OEandYourDistro are better instructions for Ubuntu to make sh be bash.
+
+Ubuntu 7.04 comes with monotone 0.31. You could just go with that and do a mtn db migrate but this takes hours so the easier way would be to downgrade to monotone 0.28.
+ sudo apt-get remove monotone
+ wget http://monotone.ca/downloads/0.28/monotone_0.28-dapper0.1_i386.deb
+ sudo dpkg -i monotone_0.28-dapper0.1_i386.deb
+ echo monotone "hold" | dpkg --set-selections
+
+Create your $OMDIR directory (note that you can change ~/OM-2007.2 to any directory you like): 
+ mkdir ~/OM-2007.2 ; cd  ~/OM-2007.2
+
+Grab the nslu2-linux MasterMakefile:
+ wget http://www.nslu2-linux.org/Makefile
+
+This will make sure you'll have all the required packages:
+ make setup-host-ubuntu && sudo apt-get install diffstat python-psyco
+
+Go build ;)
+ make openmoko-image
+
 [[Category:OpenMoko2007.2| ]]
