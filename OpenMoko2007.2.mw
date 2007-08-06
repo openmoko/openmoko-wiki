@@ -95,22 +95,6 @@ Now it will work correctly again.
 
 Note: on  http://www.openembedded.org/wiki/OEandYourDistro are better instructions for Ubuntu to make sh be bash.
 
-Ubuntu 7.04 comes with monotone 0.31. You could just go with that and do a mtn db migrate but this takes hours so the easier way would be to downgrade to monotone 0.28.
- sudo apt-get remove monotone
- wget http://monotone.ca/downloads/0.28/monotone_0.28-dapper0.1_i386.deb
- sudo dpkg -i monotone_0.28-dapper0.1_i386.deb
- echo monotone "hold" | dpkg --set-selections
-
-Another possible solution for this is to download a suitable mtn db from http://www.openembedded.org/snapshots/ and use this.
- cd ~/OM-2007.2
- mkdir monotone
- cd monotone
- wget http://www.openembedded.org/snapshots/OE-this-is-for-mtn-<your mtn version>.mtn.bz2
- bunzip2 OE-this-is-for-mtn-<your mtn version>.mtn.bz2
- mv OE-this-is-for-mtn-<your mtn version>.mtn nslu2-linux.mtn
- cd ~/OM-2007.2
- make openmoko-image
-
 Create your $OMDIR directory (note that you can change ~/OM-2007.2 to any directory you like): 
  mkdir ~/OM-2007.2 ; cd  ~/OM-2007.2
 
@@ -119,6 +103,17 @@ Grab the nslu2-linux [http://www.nslu2-linux.org/wiki/Development/MasterMakefile
 
 This will make sure you'll have all the required packages:
  make setup-host-ubuntu && sudo apt-get install diffstat python-psyco
+
+Ubuntu 7.04 comes with monotone 0.31. You could just go with that and do a mtn db migrate but this takes hours so the easier way would be to downgrade to monotone 0.28.
+ sudo apt-get remove monotone
+ wget http://monotone.ca/downloads/0.28/monotone_0.28-dapper0.1_i386.deb
+ sudo dpkg -i monotone_0.28-dapper0.1_i386.deb
+ echo monotone "hold" | dpkg --set-selections
+
+Another possible solution for this is to download a suitable mtn db from http://www.openembedded.org/snapshots/ and use this.
+ mkdir -p monotone
+ wget http://www.openembedded.org/snapshots/OE-this-is-for-mtn-<your mtn version>.mtn.bz2 -O monotone/nslu2-linux.mtn.bz2
+ bunzip2 monotone/nslu2-linux.mtn.bz2
 
 Go build ;)
  make openmoko-image
