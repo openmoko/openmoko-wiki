@@ -384,6 +384,14 @@ It is possible that it may be capable of playing MP3s with the CPU clock at 60Mh
 
 I played with old ampermeter, old nokia 3110 (as a powersupply) and phase0 neo1973 a bit. It appears to eat 1.02 mW while powered off, 1.02W while booted (backlight on), ~0.51W while sleeping (with backlight on) and 1.4W while loading applications.
 
+== Logging battery parameters to troubleshoot charging ==
+
+Some neos have managed to discharge their battery down to empty while off, plugged in, and supposedly charging from a 500ma-capable usb device.  In order to help figure out how the state of charge changes while charging, running of battery, sleeping on battery, and sleeping while connected to usb, download two scripts in http://wile.org/stuff/power.tar  Put the powerwatch script in /usr/local/bin/ and the powerlog script in /etc/init.d, then ln -s /etc/rc5.d/S15powerlog ../init.d/powerlog so that it starts up with the neo.
+
+The script logs the time, battery voltage, charging current, battery temperature, charging mode, bluetooth-on status, gps-on status, gsm-on status, and backlight brightness numbers.  The [[Kernel#Battery_charging_current|kernel page]] claims the charging current is in ma, but that does not appear to be the case for all builds? eg 2.6.21.6-moko10.  The battery temperature does not always appear to be in degrees C, either.
+
+After a few runs we can calibrate volts-to-remaining power, and then estimate off or sleep current draw and charging rate by observing the power drop [or rise] vs time between successive os boots.
+
 [[Category:Documentation]]
 [[Category:Neo1973 Phase 0 related]]
 [[Category:Neo1973 Phase 1 related]]
