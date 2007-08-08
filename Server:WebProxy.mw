@@ -1,0 +1,30 @@
+{{wishlist}}
+This is a brief page describing a web proxy optimised for use on devices with a reasonable amount of persistant storage, and very limited bandwidth.
+
+Once, each page linked to a subpage of contents, which remained static, and could be easily refreshed if it changed based on dates in the HTTP headers.
+
+Now, this is the case in the minority of popular sites.
+Most sites now have a substantial fraction of pages with some non-static contents.
+
+As an example of this, for example consider http://www.ebay.com/index.html.
+
+Over a 15 minute period, the size was constant at around 66K, and it was different most times it was loaded.
+
+Simply compressing this page using advanced compression techniques provides a useful compression - taking the page to 15K.
+
+A very simple test, using diff and gzip however, revealed that the variation between pages is quite small.
+
+This means that if the user clicks 'reload', if the proxy simply compresses the page, the user needs to download 15K.
+
+If, however, the user-agent and the proxy act in concert, this can be reduced to under 0.5K. (split on "<", count the compressed differences).
+
+This is done by the user-agent caching the pages it downloads, then informing the proxy of which version of the page it has.
+
+The proxy then simply sends the compressed differences between the  previous and current version.
+
+Other optimisations:
+* Comparing pages, and ensuring that  any page has in fact changed before downloading, as many servers misreport pages changed when they have not.
+* Convert all jpegs to progressive, and initially only download the first 'scan' of the image, which is 1/8th the size or so. Allow the user to download the remainder of the file for full resolution by clicking on it.
+
+
+[[Category:Server]]
