@@ -1,12 +1,9 @@
 {{wishlist}}
-
-* This is an outline of a proxy to reduces data transfer - for use on devices with a reasonable amount of persistant storage, and very limited bandwidth.
-**  Some aspects could later be included in browsers or webservers.
+This is a brief page describing a web proxy optimised for use on devices with a reasonable amount of persistant storage, and very limited bandwidth.
 
 Once, each page linked to a subpage of contents, which remained static, and could be easily refreshed if it changed based on dates in the HTTP headers.
 
 Now, this is the case in the minority of popular sites.
-
 Most sites now have a substantial fraction of pages with some non-static contents.
 
 As an example of this, for example consider http://www.ebay.com/index.html.
@@ -14,8 +11,6 @@ As an example of this, for example consider http://www.ebay.com/index.html.
 Over a 15 minute period, the size was constant at around 66K, and it was different most times it was loaded.
 
 Simply compressing this page using advanced compression techniques provides a useful compression - taking the page to 15K.
-
-(Zipproxy, is an example of software implementing this type of compression.)
 
 A very simple test, using diff and gzip however, revealed that the variation between pages is quite small.
 
@@ -25,36 +20,11 @@ If, however, the user-agent and the proxy act in concert, this can be reduced to
 
 This is done by the user-agent caching the pages it downloads, then informing the proxy of which version of the page it has.
 
-The proxy then simply sends the compressed differences between the previous and current version.
+The proxy then simply sends the compressed differences between the  previous and current version.
 
-Other optimisations.
-
+Other optimisations:
 * Comparing pages, and ensuring that  any page has in fact changed before downloading, as many servers misreport pages changed when they have not.
-
 * Convert all jpegs to progressive, and initially only download the first 'scan' of the image, which is 1/8th the size or so. Allow the user to download the remainder of the file for full resolution by clicking on it.
 
-* If the proxy knows the exact state of the clients cache - for example if it's the only proxy the client uses - it does not need to negotiate it with the client, it can simply send only the compressed differences.
 
-* If the user visits a new page on a site - the proxy can compare the hashes of parts of the newly downloaded page, with others the client has cached, and instead of sending the whole file, send only the (compressed) differences.
-
-** For example - ebay - auction pages share a large amount of common text - all the in-page javascript, footers, headers, and navigation bar.
-
-* The proxy can automatically download and include required elements if the user wishes them - for example automatically including images and javascript, without another round-trip to the server.
-
-* Converting images to lower resolution forms. For example - convert all jpegs to progressive jpeg, and serve up only the first 1/8th of a file.
-
-
-
-
-==Related software==
-* rproxy - rsync for wepbages. Failed due potential patent problems. http://ozlabs.org/~rusty/rproxy.html
-
-* Zipproxy - http://ziproxy.sourceforgehttp://ziproxy.sourceforge.net/.net/ is a related application, but does not implement the core of this proposal, which is compressing webpages based on the known contents of the users cache.
-
-=Q&A=
-
-* How does this differ from rproxy? (http://ozlabs.org/~rusty/rproxy.html)
-** It differs primarily in that it does not require webservers to support anything. Only that a user desiring to run it has somewhere to put their personal proxy.
-** It also differs in that it has perfect knowledge of the state of the cache on the mobile device.
-** It differs significantly from rsync/rproxy, as the core of those programs - negotiating file differences over a remote link - is not done.
-** it does not require any negotiation over the (potentially very slow) link, and also enables the proxy to potentially send other changed pages that are referred in the changes.
+[[Category:Server]]
