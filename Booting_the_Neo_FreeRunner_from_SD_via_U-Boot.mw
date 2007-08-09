@@ -1,39 +1,54 @@
 Here are the steps described to boot your system from an SD card.
 
-=== Step 1: build your kernel ===
-Get a fresh 2.6.20.2 kernel and apply the patches from the OpenMoko projekt.
- alphaone@elara openmoko $ wget http://www.kernel.org/pub/linux/kernel/v2.6/linux-2.6.20.2.tar.bz2
- alphaone@elara openmoko $ tar -xjf linux-2.6.20.2.tar.bz2
- alphaone@elara openmoko $ cd linux-2.6.20.2
- alphaone@elara linux-2.6.20.2 $ svn co http://svn.openmoko.org/trunk/src/target/kernel/patches
- alphaone@elara linux-2.6.20.2 $ quilt -a push
+=== Step 1: Build your kernel ===
 
-Now download the defconfig from http://svn.openmoko.org/trunk/oe/packages/linux/linux-gta01/defconfig-2.6.20.2-fic-gta01 and tweak the kernel in any way you want (be sure to build MMC/SD card support into the kernel). When done build the kernel and follow the steps in [[Bootloader#Creating_bootable_images]].
+Kernel building is supposed to be done through OpenEmbedded. If you use the MokoMakefile open up $OMDIR/openmoko/trunk/oe/packages/linux/linux-gta01/defconfig-2.6.21.6-fic-gta01. If you are building OM-2007.2 open $OEDIR/packages/linux/linux-gta01/defconfig-2.6.21.5-fic-gta01. (''Note that the kernel version may change in future versions.'')
 
-=== Step 2: populate SD card ===
+Now find the line saying:
 
-Format partition 1 as ext3 (ext2 will not boot).
-Mount your SD card somewhere and put your image on it
+ CONFIG_MMC_S3C=m
+ 
+and change it to:
 
- elara openmoko # mount /dev/mmcblk0p1 /mnt/moko
- elara openmoko # tar -C /mnt/moko/ -xvzf openmoko-devel-image-fic-gta01-20070313022035.rootfs.tar.gz
+ CONFIG_MMC_S3C=y
+
+Thats it. Now rebuild the kernel.
+
+=== Step 2: Populate SD card ===
+
+Format partition 1 as ext3 (ext2 will not boot). Mount your SD card somewhere and put your image on it:
+
+ mount /dev/sda1 /mnt/moko
+ tar -C /mnt/moko/ -xvzf openmoko-devel-image-fic-gta01-20070313022035.rootfs.tar.gz
 
 Now we also want the kernel on there
 
- elara openmoko # cp uImage /mnt/moko/boot/
+ cp uImage /mnt/moko/boot/
 
-(If you are lazy, you can probably get some binaries from http://buildhost.openmoko.org/tmp/deploy/images/ )
+If you are building OM-2007.2 you need to add "tar" to the image types in your ''local.conf'':
+
+ IMAGE_FSTYPES = "jffs2 tar"
+
+After building a new image by issuing ''bitbake openmoko-devel-image'' there will be a ''OpenMoko-....tar'' in the deploy directory. Copy it on the SD card by doing
+
+ mount /dev/sda1 /mnt/moko
+ tar -C /mnt/moko/ -xvf openmoko-devel-image-fic-gta01-20070313022035.rootfs.tar
+
+In OM-2007.2 the last built kernel gets a special soft-link. Therefore you can copy it by doing:
+ cp uImage-fic-gta01-latest.bin /mnt/moko/boot/uImage
 
 === Step 3: Add uboot boot entry ===
-Start uboot in bootmenu mode and add the following entry via serial console: (See  [[Bootloader]] section on how to access an bootloader)
 
- GTA01Bv3 # setenv menu_4 Boot from SD: setenv bootargs root=/dev/mmcblk0p1 rootdelay=5 console=ttySAC0,115200 console=tty0 loglevel=8 \${mtdparts}\; mmcinit\; ext2load mmc 0 0x32000000 /boot/\${sd_image_name}\; bootm 0x32000000
- GTA01Bv3 # setenv sd_image_name uImage
- GTA01Bv3 # saveenv
+On my Phase-1 Neo the boot menu entry existed already. If yours is missing it follow those instructions: Start uboot in bootmenu mode (= hold AUX while powering on) and add the following entry via serial console: (See  [[Bootloader]] section on how to access an bootloader).
+
+ GTA01Bv4 # setenv menu_4 Boot from SD: setenv bootargs root=/dev/mmcblk0p1 rootdelay=5 console=ttySAC0,115200 console=tty0 loglevel=8 \${mtdparts}\; mmcinit\; ext2load mmc 0 0x32000000 /boot/\${sd_image_name}\; bootm 0x32000000
+ GTA01Bv4 # setenv sd_image_name uImage
+ GTA01Bv4 # saveenv
 
 You can now easily boot a different kernel by changing the variable sd_image_name to the new name.
 
 === Step 4: Boot into the new system ===
+
 Power off your device, insert the SD card and boot into the boot menu. You should have an entry called "Boot from SD" which does exactly that. :-)
 
 [[Category:Software]]
