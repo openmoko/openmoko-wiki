@@ -14,17 +14,30 @@ A typing error in the splashimage environment variable resulted in the splash im
 
 So the problem was that although the device could now boot there was no way to flash it with dfu.
 
+=== The Solution ===
+
+The solution was to try and prevent the splashimage environment variable from being looked at, thus preventing the write to the wrong area of memory.
+
+==== Attempt 1 ====
+
+The idea was to dump mtdblock1 to a file, scp the file to a PC, hex edit it scp the file back to the phone and then dd the result into the mtdblock.
+
+On the Neo
+
+ dd if=/dev/mtdblock1 of=mtdblock1.bin
+
+Rebooting was required because of the i/o errors. The i/o error problem has been reported as bug  [http://bugzilla.openmoko.org/cgi-bin/bugzilla/show_bug.cgi?id=567 567]
+
+
 == Discoveries ==
 
-1. You can use dd to extract and overwrite your mtd partitions. This works particularly well for u-boot-env and splash providing the source device has a similar partition layout. Doing this on the u-boot partition was '''not''' tested.
+1. You can use dd to extract and overwrite your mtd partitions. This works particularly well for u-boot-env and splash providing the source device has a similar partition layout. Doing this on the u-boot partition was '''not''' tested. However, after you have used dd on the mtdblock devices as either the if= or of= you get i/o errors with even basic commands. The only way to get round this is to 'reboot' by removing the battery.
 
 
 2. Hex editing the extracted mtd partition (u-boot-env) and trying to dd that works but the results are not what is expected. It appears that if one of the boot env parameters is missing, in this case splashimage, the u-boot-env parameters are all treated as if they were blank and the device uses default settings.
 
 
 3. QEMU is very useful for testing out your theories before actually doing them on a real device. Most of the things we tried were tried on qemu first. Sadly QEMU's sd card emulation appears to be broken.
-
-
 
 == Useful information ==
 
