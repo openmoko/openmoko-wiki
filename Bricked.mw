@@ -1,82 +1,20 @@
-== What is/is not a 'bricked' Neo? ==
-
-"Bricked", by analogy with "as useful as a brick", means that the phone's state (as stored in flash memory) has gotten sufficiently messed up that you cannot get it operational via normal means, no matter how clever. The usual (but not the only) cause, as in the story below, is errors in re-flashing the device. The normal way to "un-brick" a phone requires use of a [[Debug_Board]].
-
-Note that being "bricked" must be distinguished from having a deeply-discharged battery. If you phone was working fine last Friday and won't boot up at all this Monday morning, it is more likely suffering the "really-dead-battery"; recovery from this is described on the [[Neo FreeRunner Hardware Issues#Can't boot with discharged or missing battery|Neo FreeRunner Hardware Issues]].
-
-== Notes on a 'bricked' Neo ==
+=== Notes on a 'bricked' Neo ===
 
 I've just spent a very long time, with the help of a few people on irc (who I now owe drinks to), trying to recover my Neo. This page is the result and is supposed to act as a collection of information to help owners with bricked or semi-bricked devices.
 
-== The Problem defined ==
 
-A typing error in the splashimage environment variable resulted in the splash image being read into the memory starting at 0x200000 rather than 0x32000000. The change was written, with the error being unnoticed, using saveenv. As a result it was not possible to connect the device to usb until it had booted fully. Any attempt to either start with usb plugged in or plugging it in at the u-boot prompt resulted in a locked up device. Looking at dmesg on the host the following errors were reported
-
- usb 3-1: new full speed USB device using uhci_hcd and address 21
- usb 3-1: device not accepting address 21, error -110
-
-(the address number will change).
-
-So the problem was that although the device could now boot there was no way to flash it with dfu.
-
-=== The Solution ===
-
-The solution was to try and prevent the splashimage environment variable from being looked at, thus preventing the write to the wrong area of memory.
-
-==== Attempt 1 ====
-
-The idea was to dump mtdblock1 to a file, scp the file to a PC, hex edit it scp the file back to the phone and then dd the result into the mtdblock.
-
-On the Neo
-
- dd if=/dev/mtdblock1 of=mtdblock1.bin
-
-Rebooting was required because of the i/o errors. The i/o error problem has been reported as bug  [http://bugzilla.openmoko.org/cgi-bin/bugzilla/show_bug.cgi?id=567 567]
-
-Once the Neo had rebooted the file was copied to a PC using scp. The first attempt to hex edit was made, the idea was to change 1 byte of the word '''splashimage''' so that it would, hopefully, be ignored by the bootloader. The resulting file was scp'd back to the Neo and written to flash
-
- dd if=new_mtdblock1 of=/dev/mtdblock1
-
-again once this was done a 'reboot' was performed.
-
-==== Result 1 ====
-
-When the device booted there was a small tux image in the top left hand corner of the screen and a u-boot version string displayed over some of it. The device would not continue to boot.
-
-Powered off the Neo, powered on with AUX+POWER go give a reduced boot menu. 
-
- Boot
- Factory reset
-
-
-Selecting Boot resulted in a familiar 'bad magic number' error. However, selecting Factory reset resulted in the device booting. This time DFU was operational, but /dev/ttyACM0 was not available so there was no way to change the environment variable for splashimage.
-
-
-'''[[User:CesarB|Cesar Barros]] points out that'''
-
-''The reason editing the environment by hand does not work well is not the missing variable, but that the CRC doesn't match anymore, which makes it ignore the whole environment''
-
-which makes perfect sense.
-
-==== Attempt 2 ====
-
-This idea involved taking the mtdblock1 from a working Neo and dd'ing it to the failed Neo's flash. '''WARNING!!! Never flash an u-boot-env (mtdblock1) that does not come from your own Neo. It contains a partition table and bad block table that's unique for each Neo.'''
-
-==== Result 2 ====
-
-The process was similar to attempt one, although no hex edit took place. The result was that the Neo booted perfectly, although without a splash screen. As the next stage for this the mtdblock3 was dumped from the working Neo and dd'd into mtdblock3 of the Neo with no splash screen. 
-
-The final result was a perfectly fine Neo with a splash screen, working boot menu and dfu capabilities.
 
 == Discoveries ==
 
-1. You can use dd to extract and overwrite your mtd partitions. This works particularly well for u-boot-env and splash providing the source device has a similar partition layout. Doing this on the u-boot partition was '''not''' tested. However, after you have used dd on the mtdblock devices as either the if= or of= you get i/o errors with even basic commands. The only way to get round this is to 'reboot' by removing the battery.
+1. You can use dd to extract and overwrite your mtd partitions. This works particularly well for u-boot-env and splash providing the source device has a similar partition layout. Doing this on the u-boot partition was '''not''' tested.
 
 
-2. Hex editing the extracted mtd partition (u-boot-env) and trying to dd that works but the results are not what is expected. It appears that if one of the boot env parameters is missing, in this case splashimage, the u-boot-env parameters are all treated as if they were blank and the device uses default settings. This is because the CRC no longer matches.
+2. Hex editing the extracted mtd partition (u-boot-env) and trying to dd that works but the results are not what is expected. It appears that if one of the boot env parameters is missing, in this case splashimage, the u-boot-env parameters are all treated as if they were blank and the device uses default settings.
 
 
 3. QEMU is very useful for testing out your theories before actually doing them on a real device. Most of the things we tried were tried on qemu first. Sadly QEMU's sd card emulation appears to be broken.
+
+
 
 == Useful information ==
 
@@ -89,17 +27,3 @@ On your Neo:
  mtd2: 00200000 00004000 "kernel"
  mtd3: 000a0000 00004000 "splash"
  mtd4: 03d1c000 00004000 "rootfs
-
-Or:
-
- cat /proc/mtd
- dev:    size   erasesize  name
- mtd0: 00200000 00010000 "physmap-flash.0"
- mtd1: 00040000 00020000 "u-boot"
- mtd2: 00040000 00020000 "u-boot_env"
- mtd3: 00800000 00020000 "kernel"
- mtd4: 000a0000 00020000 "splash"
- mtd5: 00040000 00020000 "factory"
- mtd6: 0f6a0000 00020000 "rootfs"
-
-[[Category:Hardware]]
