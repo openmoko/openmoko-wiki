@@ -3,6 +3,16 @@
 I've just spent a very long time, with the help of a few people on irc (who I now owe drinks to), trying to recover my Neo. This page is the result and is supposed to act as a collection of information to help owners with bricked or semi-bricked devices.
 
 
+== The Problem defined ==
+
+A typing error in the splashimage environment variable resulted in the splash image being read into the memory starting at 0x200000 rather than 0x32000000. The change was written, with the error being unnoticed, using saveenv. As a result it was not possible to connect the device to usb until it had booted fully. Any attempt to either start with usb plugged in or plugging it in at the u-boot prompt resulted in a locked up device. Looking at dmesg on the host the following errors were reported
+
+ usb 3-1: new full speed USB device using uhci_hcd and address 21
+ usb 3-1: device not accepting address 21, error -110
+
+(the address number will change).
+
+So the problem was that although the device could now boot there was no way to flash it with dfu.
 
 == Discoveries ==
 
