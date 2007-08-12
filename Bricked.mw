@@ -1,0 +1,29 @@
+=== Notes on a 'bricked' Neo ===
+
+I've just spent a very long time, with the help of a few people on irc (who I now owe drinks to), trying to recover my Neo. This page is the result and is supposed to act as a collection of information to help owners with bricked or semi-bricked devices.
+
+
+
+== Discoveries ==
+
+1. You can use dd to extract and overwrite your mtd partitions. This works particularly well for u-boot-env and splash providing the source device has a similar partition layout. Doing this on the u-boot partition was '''not''' tested.
+
+
+2. Hex editing the extracted mtd partition (u-boot-env) and trying to dd that works but the results are not what is expected. It appears that if one of the boot env parameters is missing, in this case splashimage, the u-boot-env parameters are all treated as if they were blank and the device uses default settings.
+
+
+3. QEMU is very useful for testing out your theories before actually doing them on a real device. Most of the things we tried were tried on qemu first. Sadly QEMU's sd card emulation appears to be broken.
+
+
+
+== Useful information ==
+
+On your Neo:
+
+ cat /proc/mtd
+ dev:    size   erasesize  name
+ mtd0: 00040000 00004000 "u-boot"
+ mtd1: 00004000 00004000 "u-boot_env"
+ mtd2: 00200000 00004000 "kernel"
+ mtd3: 000a0000 00004000 "splash"
+ mtd4: 03d1c000 00004000 "rootfs
