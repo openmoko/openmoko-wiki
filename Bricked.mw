@@ -28,6 +28,35 @@ On the Neo
 
 Rebooting was required because of the i/o errors. The i/o error problem has been reported as bug  [http://bugzilla.openmoko.org/cgi-bin/bugzilla/show_bug.cgi?id=567 567]
 
+Once the Neo had rebooted the file was copied to a PC using scp. The first attempt to hex edit was made, the idea was to change 1 byte of the word splashimage so that it would, hopefully, be ignored by the bootloader. The resulting file was scp'd back to the Neo and written to flash
+
+ dd if=new_mtdblock1 of=/dev/mtdblock1
+
+again once this was done a 'reboot' was performed. 
+
+
+==== Result 1 ====
+
+When the device booted there was a small tux image in the top left hand corner of the screen and a u-boot version string displayed over some of it. The device would not continue to boot.
+
+Powered off the Neo, powered on with AUX+POWER go give a reduced boot menu. 
+
+ Boot
+ Factory reset
+
+
+Selecting Boot resulted in a familiar 'bad magic number' error. However, selecting Factory reset resulted in th device booting. This time DFU was operational, but /dev/ttyACM0 was not available so there was no way to change the environment variable for splashimage.
+
+
+==== Attempt 2 ====
+
+This idea involved taking the mtdblock1 from a working Neo and dd'ing it to the failed Neo's flash.
+
+==== Result 2 ====
+
+The process was similar to attempt one, although no hex edit took place. The result was that the Neo booted perfectly, although without a splash screen. As the next stage for this the mtdblock3 was dumped from the working Neo and dd'd into mtdblock3 of the Neo with no splash screen. 
+
+The final result was a perfectly fine Neo with a splash screen and working boot menu and dfu capabilities.
 
 == Discoveries ==
 
