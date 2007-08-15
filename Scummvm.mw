@@ -1,102 +1,10 @@
-= ScummVM =
+= ScummVM = 
 
 ScummVM is a program which allows you to run certain classic graphical point-and-click adventure games, provided you already have their data files. The clever part about this: ScummVM just replaces the executables shipped with the game, allowing you to play them on systems for which they were never designed!
 
-You can obtain it either by using [[Mokomakefile]] via
+JadeFalcon (irc nick) has provided a fixed bitbake recipe for users of OM2007.1. You can download the [http://buildhost.automated.it/scummvm/  recipe] and [http://buildhost.automated.it/scummvm/ pre-built ipk] files for use on your Neo 1973. 
 
-# make build-package-scummvm
-
-or using a binary, like so:
-
- opkg install http://www.angstrom-distribution.org/feeds/2007/ipk/glibc/armv4t/base/libmad0_0.15.1b-r0_armv4t.ipk \
- http://www.angstrom-distribution.org/feeds/2007/ipk/glibc/armv4t/base/libmpeg2-0_0.4.0b-r4_armv4t.ipk \
- http://downloads.tuxfamily.org/3v1deb/openmoko/scummvm_0.12.0_armv4t.ipk
-
-In SHR it is only necessary to do
-
- opkg install http://downloads.tuxfamily.org/3v1deb/openmoko/scummvm_0.12.0_armv4t.ipk 
+The games are copyrighted so you'll only be able to play those you own. 
 
 
-[[Image:MonkeyIsland.png|Monky Island]]
-
-The games are copyrighted and the copyright holder has not given you a license to redistribute them so you'll only be able to play those you own. You can also download some free games from [http://www.scummvm.org/downloads.php#extras scummvm.org] and from the [http://www.the-underdogs.info Home of the Underdogs].
-
-When starting ScummVM use the command
-
-# openmoko-scummvm
-
-This will map '''AUX''' button to the '''F5''' key, which is used to access the ScummVM menu. You should also find an entry on the main menu under ''Games''.
-
-'''Note:''' On the Neo Freerunner the wrong keycode (not '''AUX''') is mapped to '''F5'''. Here is a corrected version of the file ''/usr/bin/openmoko-scummvm'' (it is ''/usr/bin/scummvm'' for me on OM2008.12) - '''This manual edit is no longer necessary (09-2009)''':
-
-<pre>#!/bin/sh
-
-# Save current AUX Key mapping
-SAVE_KEY="$(xmodmap -pke | grep 'keycode 177')"
-
-# Map AUX Key to F5
-xmodmap -e "keycode 177 = F5"
-
-# Turn LCD feft
-xrandr -o left
-
-# Start the scummvm in fullscreen mode
-scummvm --fullscreen --themepath=/usr/share/scummvm/
-
-# Turn LCD normal
-xrandr -o normal
-
-# Restore the AUX Key mapping
-xmodmap -e "$SAVE_KEY"</pre>
-
-'''Note:''' It would be great if it where possible to get audio through the headphones and speaker muted.
-
-More information on ScummVM can be found on the [http://www.scummvm.org/ official] site
-
-=== Problems with mouse cursor ===
-
-If the mouse cursor is shifted from where you click, just move your finer on touchscreen until you catch the cursor in corner. Now it will work correctly.
-
-=== Monkey Island 2 ===
-
-To be able to play Monkey Island 2 you need to pass ScummVM a parameter:<br>
-root@fic-gta01:/$ DISPLAY=:0 openmoko-scummvm --boot-param=10001 monkey2
-
-For easy access from the menu you can create a menu entry by creating the file /usr/share/applications/monkeyisland2.desktop with the following content:
-
-<pre>[Desktop Entry]
-Encoding=UTF-8
-Name=LeChuck's Revenge
-Comment=Monkey Island 2: LeChuck's Revenge
-Exec=openmoko-scummvm --boot-param=10001 monkey2
-Icon=monkeyisland2.png
-Terminal=false
-Type=Application
-Categories=Games;
-StartupNotify=false</pre>
-
-'''No Desktop Icon Method'''
-
-Making a change to your scummvmrc does not clutter up your desktop with another icon and keeps the interface consistent.  Add the following to your scummvmrc (default location of ~/.scummvmrc) at the top global section add:
-
-copy_protection=0
-
-And after adding the Monkey Island 2 via the Scummvm GUI add the following below the [monkey2] section:
-
-boot_param=10001
-
-Then you can launch Monkey Island 2 from the menu like any other game without the annoying copy protection screens.
-
-<onlyinclude>
-{{ApplicationBox|
-Name=[[Scummvm]]|
-Description=ScummVM is a program which allows you to run certain classic graphical point-and-click adventure games, provided you already have their data files. The clever part about this: ScummVM just replaces the executables shipped with the game, allowing you to play them on systems for which they were never designed!|
-Screenshot=MonkeyIsland.png|
-Homepage=http://www.scummvm.org|
-TestedOn=|
-PackageName=
-}}
-</onlyinclude>
-'''Source Code released : http://www.scummvm.org/downloads.php#source'''
-
-[[Category:Gaming]]
+More information on ScummVM can be had from the [http://www.scummvm.org/ official] site
