@@ -124,6 +124,32 @@ Thanks to rmoravcik in #openmoko (patch was taken from http://pastebin.ca/654717
     gint focus_width, focus_pad;
     GtkAllocation child;
 
+
+==== Building glibc fails with a segfault in QEMU ====
+
+If your build aborts and you see something like this:
+
+ NOTE: package glibc-2.5: started
+ NOTE: package glibc-2.5-r6: task do_package: started
+ NOTE: preparing tree for binary locale generation
+ NOTE: generating locale en_US (UTF-8)
+ qemu: uncaught target signal 11 (Segmentation fault) - exiting
+ 
+ ...
+ 
+ NOTE: Tasks Summary: Attempted 271 tasks of which 0 didn't need to be rerun and 1 failed.
+ ERROR: '/home/moko/oe/org.openembedded.dev/packages/glibc/glibc_2.5.bb' failed
+
+Try editing your local.conf file.  Change:
+
+ ENABLE_BINARY_LOCALE_GENERATION = "1"
+
+to
+
+ ENABLE_BINARY_LOCALE_GENERATION = "0"
+
+and restart the build.  This may have some effect on internationalization, but at least the build will continue.  Thanks to rwhitby for the tip.
+
 === Flashing with MokoMakefile ===
 Since MokoMakefile has not been adjusted to use the new build layout you cannot use it. As a quick hack to make flashing local built image possible again try this:
 
