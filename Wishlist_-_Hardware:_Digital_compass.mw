@@ -1,0 +1,51 @@
+{{Hardware Wishlist}}
+
+A magnetometer or electronic compass measures the magnetic field. This could be used to orient maps to the terrain and to add an inertial rotation data to the accelerometer data. And of course as stand alone compass.
+
+The idea is to add a 2 axis or 3 axis magnetometer/compass, this can be an extra sensor, but it also makes sense to replace one of the two planned accelerometers with a compass if the space couldn't be found.
+
+==Uses==
+*Stand alone compass, i.e. useful when GPS perception is low.
+*Orient maps to the terrain, see [[Wishlist:Auto Align Map]]
+*Show correct direction of GPS coordinates even if the device is rotated or not moving (when moving the direction could be obtained from the GPS movement).
+*Inertial addition to the accelerometers, for this one see below for more information.
+
+==Hardware parts==
+*[http://www.ssec.honeywell.com/magnetic/hmc6352.html Honeywell's HMC6352 2-Axis Digital Integrated Compass], 6.5 x 6.5 x 1.5 mm, [[I2C]] interface, 2 axis magnetic sensor, maximum speed 20 Hz
+*[http://www.akm.com/datasheets/ak8973_E-01.pdf AKM 3-Axis Electronic Compass], 4 x 4 x 0.7 mm, I2C interface, 3 axis magnetic sensor, also includes temperature sensor, maximum speed 10-80 Hz? (100 ms per measurement is possible (and draws 0.8 mA), one measurement takes 12.56 ms, so less isn't possible)
+
+A 3 axis magnetic sensor has advantages, the rotation data is also available when holding the device vertical, and the rotation data is 2D instead of just 1D (the third axis can be gotten from the accelerometer). Honneywell's sensor is a bit more integrated, it is able to calculate the heading itself and has a built in calibration mode. With the AKM this must be done in software, which shouldn't be a problem, and leaves space for improvements.
+
+==Inertial rotation in combination with accelerometer(s)==
+A digital compass makes a nice addition to the accelerometer, since the absolute rotation can then be measured in 3D. 
+
+===One accelerometer===
+With one 3 axis accelerometer (the Wiimote has only one too) you have three inputs. There are 6 degrees of freedom, so it's underdetermined. If you make some assumptions you can sense the following:
+*When not moving the acceleration is equal to the direction of the up vector, so that can be measured directly. This is for example the case when using the device as steering wheel.
+*When not rotating, accelerations in all directions can be sensed, however some rotation is unavoidable, so you can not really rely on this situation.
+*When rotating around some point, you can calculate the way you're moving if you know what speed you're moving. This is done with the centrifugal force formula g = v<sup>2</sup>/r. The speed can be calculated if the starting state was stationary and some assumptions on the path are made.
+*More interesting than exact movements are maybe gestures like little jerks
+
+===Second accelerometer===
+A second accelerometer adds three inputs, but the overlap is very big, so it's still underdetermined. The following detectable movements are added:
+*Better detection of fast rotations, especially around the Z axis (if the device isn't held vertically with the sensors above each other)
+*Fast movements including a rotation are a bit more determined, for example when holding the device like a baseball bat or golf stick the radius can be calculated. Note that it's not likely to make movements like that with a phone, you probably want to see the screen. Also note that the radius isn't that important most of the time.
+
+For developers it is probably easier to have one sensor at the centre of the device, less hassle, and current Wiimote developers could use the same techniques as with the Wiimote. But of course there are uses for a second accelerometer.
+
+===Compass===
+A compass adds also three inputs (or two if it's a 2 axis model), but this input only gives a direction, the length of the vector isn't very useful for most purposes. This direction does however give you the information to detect the following:
+*Absolute rotation around Z axis, making possible:
+**Map orientation.
+**Shooting/pointing games with real 360 degree vision.
+**Star catalogue, hold your phone as a window to the sky and see the names of constellations and planets. This could of course also be done for mountaintops and other landmarks.
+**Virtual sundial.
+*Rotation speed around the Z axis, at every possible way you can hold your phone, only not at 2500 Hz accelerometer rate.
+
+==Notes==
+*The compass sensor isn't nearly as fast as an accelerometer, but it doesn't need to be, since it is absolute, a relative sensor has to be sampled much faster to get good results. It would be nice if it's at least about 25 Hz, so the motion is fluid.
+*The compass sensor should possibly not be placed very close near antennae, although I don't really know.
+
+
+[[Category:Hardware]]
+[[Category:Accelerometer]]
