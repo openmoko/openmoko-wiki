@@ -41,6 +41,13 @@ iface usb0 inet static
         post-up iptables -P FORWARD ACCEPT
 </pre>
 
+Ubuntu feisty appears to have a bug where ifdown is not run when the interface is unplugged, meaning this only works once
+after the system is booted.
+One can patch /etc/udev/rules.d/85-ifupdown.rules, adding a last line:
+<pre>
+SUBSYSTEM=="net", ACTION=="remove",             RUN+="/sbin/start-stop-daemon --start --background --pidfile /var/run/network/bogus --startas /sbin/ifdown -- --allow auto $env{INTERFACE}"
+</pre>
+and remove the similar remove like earlier.
 
 '''For Red Hat or similar distros'''
 Edit /etc/sysconfig/network-scripts/net.hotplug:
