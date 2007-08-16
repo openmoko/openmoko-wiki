@@ -61,6 +61,49 @@ Tested on:
 
 We want to be able to use the Neo1973 as a HID device, being able to use it as controller for presentations.
 
+=== RFCOMM ===
+
+Here's how to connect to an external Bluetooth GPS and read NMEA data (Tested with a Holux GPSSlim236).
+
+First, switch on the GPS and identify the BT address:
+
+  hcitool scan
+
+Then, edit /etc/bluetooth/rfcomm, which by default has all settings commented out, to something like this:
+
+  rfcomm0 {
+        # Automatically bind the device at startup
+        bind no;
+        # Bluetooth address of the device
+        device 00:11:22:33:44:55;
+        # RFCOMM channel for the connection (check your GPS docs for details)
+        channel 1;
+        # Description of the connection
+        comment "Bluetooth GPS";
+  }
+
+Restart the BT services:
+
+  root@neo:~$ /etc/init.d/bluetooth stop
+  root@neo:~$ /etc/init.d/bluetooth start
+
+You should now be able to bind the GPS to /dev/rfcomm0, like this:
+
+  root@neo:~$ rfcomm bind 0
+
+Confirm the connect:
+
+  root@neo:~$ rfcomm
+  rfcomm0: 00:11:22:33:44:55 channel 1 clean 
+
+... and watch the NMEA strings coming from your GPS:
+
+  root@neo:~$ cat /dev/rfcomm0 
+  $GPGGA,111748.000,5907.6964,N,01121.1787,E,1,06,1.2,57.7,M,40.1,M,,0000*6F
+  $GPRMC,111748.000,A,5907.6964,N,01121.1787,E,0.00,94.94,160807,,,A*50
+  $GPVTG,94.94,T,,M,0.00,N,0.0,K,A*3D
+
+If you have nothing better to do, you can now pinpoint my office :-). 
 === OBEX ===
 
 === Networking ===
