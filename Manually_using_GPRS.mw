@@ -1,18 +1,23 @@
-You need to have GSM parts already initialized, with modem logged in to the network, for this to work. It is best to test it by doing test call.
+You need to have GSM parts already initialized, with modem logged in to the network, for this to work. It is best to test it by doing test call. The GPRS connection is made using the PPP protocol to a server identified by an "APN" at the network operator.
 
-You'll need /etc/ppp/chap-secrets: (I used tabs in this file, I hope that does not matter). 
-Or /etc/ppp/pap-secret if you need PAP.
+Depending on the APN, you may need password authentication using CHAP or PAP. You can add the following default line for "password-less" connections:
+<pre>
+# client        server  secret                  IP addresses
+*               *       ""                      *
+</pre>
+
+For CHAP, lines in /etc/ppp/chap-secrets are used. For PAP, the lines are in /etc/ppp/pap-secrets. The client should match the "user" option in pppd the config file (below). You can use * to mean any here, but the option user "" doesn't mean empty!
+
+For example:
 <pre>
 # Secrets for authentication using CHAP
 # client        server  secret                  IP addresses
-  "gprs"        *       "gprs"                  *
-
-## opt in for eplus
-#  "eplus"       *       "gprs"                 *  
+*               *       ""                      *
+"gprs"          *       "gprs"                  *
+"eplus"         *       "gprs"                  *  
 </pre>
 
-
-You'll need /etc/ppp/gprs:
+You'll need /etc/ppp/peers/gprs:
 <pre>
 # File:
 # gprs
@@ -39,14 +44,14 @@ crtscts  # serial cable
 nodetach
 
 # Connect script
-connect /etc/ppp/gprs-connect-chat
+connect /etc/ppp/peers/gprs-connect-chat
 
 # IP addresses:
 # - accept peers idea of our local address and set address peer as 10.0.0.1
 # (any address would do, since IPCP gives 0.0.0.0 to it)
 # - if you use the 10. network at home or something and pppd rejects it,
 # change the address to something else
-:160.218.160.218
+:10.0.0.1
 
 # pppd must not propose any IP address to the peer!
 noipdefault
@@ -54,29 +59,30 @@ noipdefault
 # Accept peers idea of our local address
 ipcp-accept-local
 
-# Ignore carrier detect signal from the modem
-local
-
 # No ppp compression
 novj
 novjccomp
 
 # Disconnect script
-disconnect /etc/ppp/gprs-disconnect-chat
+disconnect /etc/ppp/peers/gprs-disconnect-chat
 
 # Add default route
 defaultroute
 
-#a neco pro udrzeni linky
+# very long timeouts (unwise?)
 lcp-echo-interval 300
 lcp-echo-failure 40000
 
+# don't require the other end to authenticate to us
+noauth
+
+# username to use for authentication, should match "client" in /etc/ppp/{chap,pap}-secrets
 user "gprs"    ## opt out for eplus/pap
-#name "eplus"  ## opt in for eplus/pap
-#noauth        ## opt in for eplus/pap
-#auth login +chap -pap
+#user "eplus"  ## opt in for eplus/pap
 </pre>
-And you'll need /etc/ppp/gprs-connect-chat, probably needs "x" bit.
+
+And you'll need /etc/ppp/peers/gprs-connect-chat (needs "chmod +x"):
+
 <pre>
 #!/bin/sh
 #
@@ -130,11 +136,35 @@ SAY             "\nConnected." \
 SAY             "\nIf the following ppp negotiations fail,\n"   \
 SAY             "try restarting the phone.\n"
 </pre>
-You will need to adjust APN name in at+cgdcont line. Then, after initializing GSM, you should be to initialize GPRS by pppd file /etc/ppp/gprs. Good luck!
+
+You will need to adjust the APN name "internet" in at+cgdcont line to match what your network operator provides. 
+
+
+Also good to have is /etc/ppp/peers/gprs-connect-chat (needs "chmod +x"):
+
+<pre>
+#!/bin/sh
+
+exec /usr/sbin/chat -V -s -S    \
+ABORT           "BUSY"          \
+ABORT           "ERROR"         \
+ABORT           "NO DIALTONE"   \
+SAY             "\nSending break to the modem\n"        \
+""              "\K"            \
+""              "\K"            \
+""              "\K"            \
+""              "+++ATH"        \
+""              "+++ATH"        \
+""              "+++ATH"        \
+"NO CARRIER"    ""              \
+SAY             "\nPDP context detached\n"
+</pre>
+
+Then, after initializing GSM, you should be able to initialize GPRS by pppd call gprs. Good luck!
 
 To dial in - and get verbose output - use pppd
 <pre>
-pppd debug file /etc/ppp/gprs
+pppd debug call gprs
 </pre>
 
 
@@ -154,6 +184,10 @@ Some APN names for reference:
 | USA || T-mobile || "VPN" internet plan || internet3.voicestream.com ||
 |- 
 | USA || Cingular (AT&T) || Less than full internet || wap.cingular ||
+|-
+| Finland || Sonera   || Behind NAT || internet ||
+|-
+| Finland || Sonera   || Public IP  || prointernet ||
 |-
 | Germany || T-Mobile ||  || internet.t-mobile ||
 |-
