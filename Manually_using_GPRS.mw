@@ -23,28 +23,32 @@ You'll need /etc/ppp/peers/gprs:
 # gprs
 #
 # Description:
-# This file holds the serial cable and IrDA pppd options for GPRS phones
+# This file holds the pppd options for GPRS
 
-# To give some debug info
+# To give some debug info (could be provided on command line too)
 # debug
 
-# Serial device to which terminal is connected;
+# To keep pppd output on the terminal (could be provided on command line too)
+nodetach
+
+# Serial device to which the GPRS modem is connected
 /dev/ttySAC0
-holdoff 3
 
 # Serial port line speed
 115200
 
-# Hardware flow control needs to be used with serial cable.
-# With IrDA it should be disabled with nocrtscts option.
-crtscts  # serial cable
-#nocrtscts # IrDA
+# use hardware flow control
+crtscts
+#nocrtscts
 
-# To keep pppd on the terminal
-nodetach
+# time between retries
+holdoff 3
 
 # Connect script
 connect /etc/ppp/peers/gprs-connect-chat
+
+# Disconnect script
+disconnect /etc/ppp/peers/gprs-disconnect-chat
 
 # IP addresses:
 # - accept peers idea of our local address and set address peer as 10.0.0.1
@@ -63,11 +67,11 @@ ipcp-accept-local
 novj
 novjccomp
 
-# Disconnect script
-disconnect /etc/ppp/peers/gprs-disconnect-chat
-
 # Add default route
 defaultroute
+
+# Replace any other default route for the time of the connection:
+replacedefaultroute
 
 # very long timeouts (unwise?)
 lcp-echo-interval 300
@@ -108,9 +112,6 @@ And you'll need /etc/ppp/peers/gprs-connect-chat (needs "chmod +x"):
 # 'Call' CID=1 (activate PDP context one, perform GPRS attach):
 # ATD*99***1#
 #
-# was "internet.open.s"
-#
-# V connectu bylo "ip","internet"
 # The actual chat script:
 exec chat                                               \
 TIMEOUT         22                              \
@@ -140,7 +141,7 @@ SAY             "try restarting the phone.\n"
 You will need to adjust the APN name "internet" in at+cgdcont line to match what your network operator provides. 
 
 
-Also good to have is /etc/ppp/peers/gprs-connect-chat (needs "chmod +x"):
+Also good to have is /etc/ppp/peers/gprs-disconnect-chat (needs "chmod +x"):
 
 <pre>
 #!/bin/sh
