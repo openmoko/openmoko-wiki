@@ -45,8 +45,11 @@ For the following advantage we assume that gsmd is enabled for the extension fra
 # The first relevant extension returns the following values:
 #* number: a string that contains the new number to dial (which may be the same as the input number to dial)
 #* sendid: whether or not to send caller ID
-#* authorized: if the action of making the call is authorized
-#* authreason: if the action of making the call is not authorized then a reason why not
+#* status: a numeric result of the extension's work, which may be one of the following generic types:
+#** Continue: continue with the existing operation
+#** Handoff: the existing operation has been handed off to another application so no further action required
+#** Error: an error has occurred with this item so further processing should be aborted
+#* statusreason: additional text that can be displayed to explain the status result if required
 # The second relevant extension is contacted and carries out its work.  Note that the parameters sent to this module include the updated number and sendid from the first relevant extension
 # The second relevant extension returns the values as per the first extension
 # The extension handler returns the final results in the reply to the calling method.  At this stage gsmd should use the parameters returned rather than those it had prior to the call for the purposes of dialing a number and sending/not sending caller ID.  It should also confirm that it is authorized to continue with the operation, and if not abort appropriately
@@ -58,7 +61,7 @@ Extensions must be registered with the extension manager so that the extension h
 [[Image:Extensionframework_registration.png]]
 
 # An extension sends a registration method to the extension manager.  The method contains the following information:
-#* extension.  This is the full name of the method we wish to extend, for example org.openmoko.ExtensionHandler.Gsmd.OutgoingCall
+#* extension.  This is the full name of the method we wish to extend, for example org.openmoko.extension.Gsmd.OutgoingCall
 #* name.  This is the name of the object that is carrying out the extension, for example net.devzero.SampleExtension
 #* path.  This is the path to the object that is carrying out the extension, for example /net/devzero/SampleExtension
 #* interface.  This is the interface for the object that is carrying out the extension, for example net.devzero.SampleExtension
