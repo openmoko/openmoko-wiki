@@ -1,211 +1,25 @@
 {{InProgress}}
-[[Image:SettingsGUI-0.8-screen.png|thumb|SettingsGUI - Screen Settings]]
-[[Image:SettingsGUI-0.8-audio.png|thumb|SettingsGUI - Audio Settings]]
-[[Image:SettingsGUI-0.8-gsm.png|thumb|SettingsGUI - GSM Settings]]
-[[Image:SettingsGUI-0.8-gprs.png|thumb|SettingsGUI - GPRS Settings]]
-[[Image:SettingsGUI-0.8-bluetooth.png|thumb|SettingsGUI - Blueooth Settings]]
-
-
-
+[[Image:SettingsGUI-Backlight.png|thumb|SettingsGUI Backlight Settings]]
 == Overview ==
-Until Openmoko releases an official GUI-Tool to change settings, SettingsGUI allows you to set various settings of the Openmoko smartphones.
+Until OpenMoko releases an official GUI-Tool to change settings, SettingsGUI allows you to set various settings of the gta01.
 
-This program is written in [[Python]] using pygtk. It can be used only if those are present in your environment (see [[SettingsGUI#Environment]]).
+This programm is written in Python using pygtk python-dbus. It can be used only if those are present in your environment.
 
 == Current Features ==
 
 * Screen (Backlight enable/disable, Backlight brightness, Screen Orientation)
-* Audio (profile selection, volume, mute, save to profile)
-* [[GSM]] (restart [[gsmd]], signal strength, provider, status)
-* [[GPRS]] (load and save settings from and to /etc/ppp/peers/, connect, set APN, User, Password, Number)
-* [[Bluetooth]] (enable/disable, set-up/monitor PAN connections, scan for peers)
 
 == Planned Features ==
 
-* GSM (Provider selection)
-* [[Bluetooth]] (signal strength)
-* GPRS (display transfer rate, activate GPRS router)
-* [[Battery]] (show capacity, voltage, charger-status)
-
-== Comment on GSM Support ==
-
-* As there are no gsmd python bindings available at the time, SettingGUI uses python-subprocess and threads to communicate to the commandline of [[Gsmd#libgsmd-tool | libgsmd-tool]] for the time being.
-
-* To prevent interference with the GSM modem you have to expicitly power-up and register the modem by toggeling the "GSM State" checkboxes.
-
-* If you manually register to the gsm network (by toggeling the "Register" checkbox) SettingsGUI will sometimes not notice when the connection is established. Just toggle the init checkbox after about 3 seconds. (this seems to be due to a bug in gsmd...)
-
-{{note|From Version 0.7 the atcmd mode of libgsmd-tool is used. To use it revision 2957 (2007-09-12) or later of gsmd is needed. If you have an older version of gsmd - or an older Openmoko image - use the upgrade function of [[ipkg]], install a newer jffs2 image or use version 0.6 of SettingsGUI.}}
-
-* When the GPRS connection is still active ([[pppd]] running on the system) you should close the connection as gsmd can't start up while pppd is using the modem connection - chose "Yes" in the dialog:
-
-[[Image:SettingsGUI-0.7-close gprs.png|170px]]
-
-== Comment on GPRS Support ==
-
-If you have problems connecting check:
-
-* If the modem is initialized and registered to a network (Start gsmd and register) 
-* If your login data (mostly APN and User are okay)
-
-* When the gsmd still running you should close the connection as gsmd will interfere with pppd - chose "Yes" in the dialog:
-
-[[Image:SettingsGUI-0.7-terminate-gsmd.png|150px]]
-
-The connection will be terminated when you quit the application.
-However saved peer configurations can be called independently using:
-
- pppd debug call gprs # where gprs is the peer
-
-
-Default configuration files are defined in GlobalConfiguration.py. The peer configuration, a connect- and disconnect chat script are written to /etc/ppp/peers/ on first startup if you don't already have a peer in /etc/ppp/peers/. When the connect button is pressed SettingsGUI will create latest_* files in /etc/ppp/peers/ and start the pppd with this latest_* peer.
-
-
-SettingsGUI also brings a default Nameserver in case you don't have a valid /etc/resolve.conf. The IP is from the OpenDNS Project and will only work if your GPRS provider allows DNS access to this server.
-
-
-If you have to change anything else than APN, user, password or dial in number for your provider please leave a note at the Discussion Page.
-
-
-For details and background information on GPRS see [[Manually using GPRS]].
-
-
-== Comment on Bluetooth Support ==
-
-With SettingsGUI you can only connect using PAN. Due to display real estate problems Version 0.8 does not support HID pairing yet.
-
-The IP address for your PAN connection will be generated from a configurable mask (see GlobalConfiguration.py) and the last byte of the Bluetooth Address (think of MAC address). Default IP is 10.0.0.x.
-
-For details and background information on Bluetooth see [[Manually using Bluetooth]].
-
+* Audio (volume, speaker-selection)
+* GSM (Provider selection, enable/disable gsm-reciver, signal strenght)
+* Bluetooth (device scanning, connection, signal strength)
+* GPRS (select APN, display transfer rate)
+* Battery (show capacity, voltage, charger-status)
 
 == Download ==
-=== Releases ===
-{|border=1
-! Version 
-! Download
-! Release Focus
-! Release Date
-|-
-| 0.8 ('''current''')
-| [http://mput.de/~kristian/.openmoko/settingsgui-0.8.tar.bz2 settingsgui-0.8.tar.bz2] 
-| bluetooth settings, reorganized package structure ("settingsgui" python package included, startscript is named "settings" now)
-| 2008-03-16
-|-
-| 0.7b
-| [http://mput.de/~kristian/.openmoko/settingsgui-0.7b.tar.bz2 settingsgui-0.7b.tar.bz2] 
-| bugfix on GSM page, bug prevented detection of gsmd connection (emerged with libgsmd-tool update)
-| 2007-10-02
-|-
-| 0.7
-| [http://mput.de/~kristian/.openmoko/settingsgui-0.7.tar.bz2 settingsgui-0.7.tar.bz2] 
-| cleanups, using AT mode, distutils, ATDT -> ATD
-| 2007-09-21
-|-
-| 0.6
-| [http://mput.de/~kristian/.openmoko/SettingsGUI-0.6.tar.gz SettingsGUI-0.6.tar.gz]
-| audio settings (mute, save), gprs settings (all new)
-| 2007-09-06
-|-
-| older
-| [http://mput.de/~kristian/.openmoko/ Directory listing]
-|}
-=== SVN ===
-Access the current SVN version at: http://neo1973-germany.de/svn/SettingsGUI/
-=== Packages ===
-The Package is now buildable by bitbake. Download the latest .ipk from: http://downloads.openmoko.org/repository/
 
-Thanks to [[User:Alessandro | Alessandro]] there still is the inofficial .ipk and a .bb file. Have a look at his user site.
+[http://mput.de/~kristian/.openmoko/SettingsGUI-0.1.tar.gz SettingsGUI-0.1.tar.gz]
 
-== Environment ==
-
-:''For more, see [[Python]].''
-
-The following archives will have to be installed (source packages: python python-pygtk python-pycairo python-pygobject):
-
-*  python-core
-*  python-misc
-*  python-lang
-*  python-pygtk
-*  python-subprocess
-*  python-threading (should be a dependency of python-subprocess - todo: fix)
-*  python-pygobject (should be a dependency of python-pygtk - todo: fix)
-
-If you want to test this and do not have a build environment, you can 'ipkg install' the python components from the ScaredyCat [[Users Repositories]].
-
-{{note|These packages take up a considerable amout of space (about 10 MByte), make sure that you have enough free space or install the packages to the media card as explained in [[package management]].}}
-
-== Installation / Execution ==
-
-=== FSO and ASU Users ===
-
-Use the latest Version from SVN for now.
- svn co http://neo1973-germany.de/svn/SettingsGUI/trunk SettingsGUI-svn
-
-The following addidional packages have to be installed:
- opkg install alsa-utils-amixer
- opkg install bluez-utils
- # opkg install gsmd
- # opkg install gsmd-tools
-         
-==== GPRS / GSM Panel ====
-'''You may not want to use those with FSO/ASU! - It WILL break the phone applications (no calls / sms)!'''
-
-SettingsGUI is not yet supporting the new framework-stack, so you'll have to use gsmd for GSM/GPRS. Therefore you would have to install the packages and stop the gsmget daemon already running. Once you've installed gsmd it may start on every system boot, which may then prevent any other GSM daemon from starting. This may break your phone applications until you fix the problem again.
-
-===== Get GPRS working anyway =====
-1) Stop gsmget
- killall gsmget
-
-2) Connect to your mobile carrier using the GSM Panel
-
-3) Connect to GPRS (answer "yes" when asked to kill the GSM daemon)
-
-=== From package ===
-* add Alessandros repository as a [[ipkg]] source
-
-vi /etc/ipkg/alessandro.conf
-
-* insert
-
-src/gz aiurlano-armv4t http://aiurlano.netsons.org/Openmoko/ipk/armv4t
-src/gz aiurlano-all http://aiurlano.netsons.org/Openmoko/ipk/all
-
-* update your db
-
-opkg update
-
-* install latest settingsgui
-
-opkg install settingsgui
-
-=== From source ===
-* download file to Neo (e.g. using wget)
-* Uncompress tar.bz2 file (e.g. e.g. tar -xjvf file.tar.bz2)
-* install:
- cd settingsgui-x.x
- mv settingsgui  settingsgui.py
- mkdir settingsgui 
- mv * settingsgui
- mv settingsgui/settingsgui.py ./
-
-* run:
- export DISPLAY=:0.0
- python settingsgui.py &
-
-=== Comment on Installation ===
-
-From Version 0.7 Python distutils is used. So you could also use the setup.py script to install the package:
- python settingsgui-x.x/setup.py install
-
-For Version 0.8beta (I didn't test for 0.7), don't change any names, just unpack and then:
- cd settingsgui-x.x
- python setup.py install
-
-But to do this you'll also have to install the packages:
- python-compile python-devel python-stringold python-distutils
-
-==References==
-* [http://www.mput.de/projects/code/settingsgui/ Project Homepage]
-
-[[Category:Settings Applications]]
+[[Category:Applications]]
+[[Category:In_progress]]
