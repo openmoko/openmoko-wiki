@@ -1,0 +1,126 @@
+= Resumen =
+
+OpenMoko es una plataforma diseñada para dispositivos con pantallas
+pequeñas. Esto hace que los paradigmas usuales de ventanas y menús no
+sean aplicables por la limitación de espacio. Diferentes factores de
+forma hacen que las pantallas de estos dispositivos tengan diferentes
+orientaciones y diferentes proporciones. La plataforma OpenMoko
+intenta diligenciar algunas de esta diferencias proveyendo un marco de
+trabajo (N.T.: framework) en que los desarrolladores de aplicaciones
+no necesiten preocuparse por el aspecto final de sus aplicaciones.
+
+== Vista global ==
+
+Las aplicaciones OpenMoko está diseñadas como un número de "páginas",
+las cuales tienen una número relaciones entre ellas. Cada página
+contiene una tarea, como seleccionar un contacto o ver un calendario.
+
+=== Capa de abstracción ===
+
+Las páginas que no son afectadas por los cambios en otras páginas son
+conocidas como páginas primarias. Estas trabajan independientemente de
+cualquier otra página. Las páginas que son afectada por los cambios en
+una página primaria se conocen como páginas secundarias. Por ejemplo,
+en la aplicación de contactos, la página primaria es la lista de
+contactos. La página secundaria es la que muestra la información de un
+contacto seleccionado.
+
+Cada página tiene una etiqueta, un icono y un contenido asociada con
+ella. Esto es usado para identificar y mostrar la página cuando es
+necesario.
+
+Las relaciones entra páginas son descritas en un modelo creado cuando
+la aplicación inicia. La aplicación entonces instancia un objeto que
+con sus actos ve y controla el modelo (N.T.: Modelo vista
+controlador). Esto es lo convenido para crear la capa de aplicación.
+
+== La capa Neo1973 ==
+
+Por su factor de forma del Neo está restringido a una pantalla muy
+pequeña. Para acomodar en esta todas la páginas son mostradas en
+pantalla completa y el área de botones debe ser lo más grande
+posible. Los bordes y el espacio entre los widgets deben ser lo mínimo
+para asegurar un buen uso del espacio disponible en la pantalla.
+
+[[Image:contacts-main-guidelines.png]]
+
+* '''1) [[GUI_Style_Guidelines/es#Barra_de_tareas | Barra de tareas]]''' -- Acciones adicionales relacionadas con la actual página.
+* '''2) [[GUI_Style_Guidelines/es#Filtro/Búsqueda | Filtro/Búsqueda]]''' -- Opciones de filtro de la actual página.
+* '''3) [[GUI_Style_Guidelines/es#P.C3.A1ginas | Navegación entre páginas]]''' -- Método de cambiar entre página.
+* '''4) Título''' -- El título de la ventana no es parte de la aplicación en si misma. Esta es puesto a nombre de la aplicación automáticamente. 
+
+=== Páginas ===
+
+El cambio entre páginas es llevado a cabo por una serie de lengüetas
+colocados horizontalmente a través de la parte inferior de la
+pantalla. Cada lengüeta contiene un icono que simboliza el propósito
+de la página que está asociada con él.
+
+=== Barra de tareas ===
+
+La barra de tareas aparece el la parte superior de la pantalla, con
+cada botón de herramienta expandido para llenar el espacio
+disponible. Esto asegura el máximo de área. No se deben poner más de
+cuatro botones en la barra de tareas.
+
+=== Filtro/Búsqueda ===
+La barra de filtro/búsqueda es un componente opcional, compuesto de
+tres widgets. Un botón que cambia el estado entre filtro (combo box) y
+búsqueda (entry box). Escribir en la búsqueda hace que se filtre los
+datos cada vez que se oprime una tecla.
+
+== Consideraciones de entrada ==
+
+=== Teclado ===
+
+Para dispositivos que requieren teclados en pantalla éste será
+mostrado como un widget en el momento que una entrada de teclado es
+enfocada.
+
+=== Pantalla sensible ===
+
+La pantalla sensible solo podrá ser usado con un simple click y con
+arrastrar. Oprimir y retener activa el tercer botón de ratón (el
+click derecho). La acción de doble click es fuertemente
+desalentadora.
+
+== Líneas guía para aplicaciones generales ==
+
+=== Persistencia de datos ===
+
+Todas las aplicaciones que manipulen datos deben seguir el modelo
+"instant apply", esto es, que el usuario no debe guardar
+explícitamente los datos.
+
+=== Estado persistente ===
+
+Las aplicaciones deben grabar su estado entre sesiones.  Esto debe
+incluir los detalles de la vista actual o datos sin grabar.
+
+== Usando GTK+ y libmokoui ==
+
+GTK+ es una librería C que usa GObject para orientación pseudo
+objetos. Esto permite que sea muy portable y flexible.
+
+=== Líneas guía generales ===
+
+OpenMoko usa el estándar c99 para C.
+
+Los espacios tamaños y tipos de letras de los widgets '''no deben'''
+estar codificados en las aplicaciones OpenMoko. Éste es es un marco de
+trabajo para dispositivos con pantallas pequeñas, esto incluye
+cualquiera más pequeño que QVGA (320x240) hasta 800x600. Por esto,para
+que las aplicaciones funcionen en estas diferentes resoluciones, los
+programas no debe codificar nada especifico de la apariencia de los
+widgets.
+
+=== Líneas guías de programación ===
+
+Muchos de los elementos de pantalla como botones y cajas de entrada
+(entry boxes) son subclases de la clase base GtkWidget. Por esta razón,
+todas las funciones constructoras deben retornar GtkWidget en vez de la
+clase especifica que se esta creando.
+
+
+{{Languages|GUI_Style_Guidelines}}
+[[Category:User Interfaces]]
