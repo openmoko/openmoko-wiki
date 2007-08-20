@@ -1,0 +1,312 @@
+= MokoMakefile =
+
+MokoMakefile es una forma totalmente automatizada de construir un
+entorno de desarrollo OpenMoko. Es una herramienta invaluable para que
+los nuevos desarrolladores puedan tener un entorno de desarrollo que
+está configurado de la misma forma que el de otros
+desarrolladores. Este brinda repetibilidad para construir un entorno de
+creación y mantenimiento que con OpenEmbedded brinda la fuerza
+principal para la construcción de distribuciones de software embebido.
+
+Note que MokoMakefile *no* reemplaza a bitbake, svn, monotone,
+OpenEmbedded, gmake, o cualquier otro. Este es un integrador que hace
+más fácil configurar y mantener un entorno de desarrollo que cumple
+totalmente con las instrucciones publicadas por OpenMoko. Note que
+necesita alrededor de 12 GB en disco duro para que MokoMakefile
+funcione bien. Por favor mire que la RAM más el espacio de swap sea
+más grande de 512 MB (alrededor de 1 GB?)
+
+MokoMakefile es desarrollado por [[User:RodWhitby|Rod Whitby]] - este
+no es un producto oficial de OpenMoko (pero yo esto feliz por ello y
+lo uso internamente). Si hay una discrepancia entre
+[[Building_OpenMoko_from_scratch|official OpenMoko build
+instructions]] y la operación de MokoMakefile, entonces debe
+considerar que las instrucciones oficiales son las correctas.
+
+El MokoMakefile es capaz de construir las imágenes OM-2007.1 ó
+OM-2007.2. El núcleo del equipo de desarrollo selecciona cuál está por
+omisión. pero puede seleccionar uno o el otro al principio del archivo
+Makefile.
+
+=== Instalación ===
+
+Ha aquí los pasos para usarlo:
+
+1 - Verifique que su máquina de desarrollo esté de acuerdo con
+ http://www.openembedded.org/wiki/OEandYourDistro
+
+2 - Cree un directorio $OMDIR (note que usted tiene que cambiarlo por
+ejemplo a el directorio que quiera)
+
+ mkdir ~/moko ; cd ~/moko
+
+3 - Descargar MokoMakefile:
+   wget http://www.rwhitby.net/files/openmoko/Makefile
+
+Si esto no funciona, intente
+
+   wget http://svn.nslu2-linux.org/svnroot/mokomakefile/trunk/Makefile
+
+   Nota: Si quiere compilar el entorno 2007.2 en vez de la versión
+   antigua edite al principio de el archivo Makefile. Cambie las
+   líneas al principio para que se vean de la siguiente forma:
+             #OPENMOKO_GENERATION = 2007.1
+             OPENMOKO_GENERATION = 2007.2
+         En kubunto y Debian Etch tiene que hacer apt-get install help2man   
+
+4 - Configurar el entorno:
+   make setup
+
+5 - Iniciar la construcción. Antes de iniciar este proceso lento, mire
+en la sección de Tips acerca de como hacer que el Make funcione con
+multinúcleo. La forma de hacer esto es modificar el archivo
+build/conf/local.conf para el entorno (emulación/chroot) de su
+máquina:
+   make openmoko-devel-image
+
+Esto construirá la estructura de directorio que está descrita en
+[[Building OpenMoko from scratch], descargará todo el software
+requerido (desde los sitios correctos con las versiones correctas) y
+comenzará a construir una imagen inmediatamente.
+
+Una vez que tenga todo esto puede escoger entre continuar usando
+MokoMakefile para iniciar subsecuentes desarrollos, o usted podrá ir a
+cada directorio y correr bitbake manualmente. La elección es suya.
+
+=== Actualizando el entorno ===
+
+Para mantener fácilmente su entorno de desarrollo están disponibles
+los siguientes comandos.
+
+1 - Para actualizar el MokoMakefile a la última versión:
+   make update-makefile
+
+2 - Para estar seguro de que los últimos cambios se han efectuado a la
+estructura del directorio:
+   make setup
+
+3 - Para actualizar del repositorio de OpenMoko y de los parches de
+MokoMakefile a la última versión:
+   make update
+
+Una forma rápida de reconstruir una nueva imagen con las últimas
+actualizaciones:
+   make update-makefile && make update setup openmoko-devel-image
+
+=== Reportando problemas ===
+
+Primero esté seguro que el problema es reproducible después de correr
+
+ make update-makefile && make update && make setup
+
+entonces corra
+
+ make clean-package-<foo>
+
+(tiene que reemplazar <foo> con el nombre del paquete que está fallando)
+
+entonces corra
+
+ make all
+
+Si usted obtiene errores después de correr tres veces esta secuencia
+de comandos (incluyendo los pasos de update y setup) tres veces,
+entonces sientase libre de reportarlo a rwhitby en #openmoko en
+[http://wiki.openmoko.org/wiki/Development_resources#IRC IRC].
+
+=== Work-arounds ===
+
+Work-arounds for temporary or isolated problems should be added to the
+[[Talk:MokoMakefile|Discussion page]] which is associated with this
+page.  As they are fixed, they will be removed from that page.
+
+=== Tips ===
+
+* Usted puede reducir significativamente el espacio utilizado en el disco adicionando
+   INHERIT += "rm_work" 
+
+en su local.conf (Ejemplo, ~/moko/build/conf/local.conf). Esto remueve los contenidos
+de cada directorio build/tmp/work/*/<package> después la construcción
+correcta del paquete.
+
+* Si usted se le presenta un error con monotone similar al siguiente:
+   mtn: misuse: database /home/''username''/moko/OE.mtn is laid out according to an old schema
+Entonces necesita actualizar OE.mtn. Use el siguiente comando en ~/moko:
+   # mtn --db OE.mtn db migrate
+
+* Si un paquete no compila porque la descarga esta corrupta o por
+cualquier otra cosa intente remover las fuentes y reconstruyalo.
+ rm sources/<package>*
+ cd build
+ . ../setup-env
+ bitbake -crebuild <package>
+después de esto volverá a funcionar.
+
+* Para los que tienen múltiples CPUs (o doble núcleo) este pequeño
+parche puede hacer que la construcción se más rápida. Edite local.conf y adiciona las siguientes líneas:
+ PARALLEL_MAKE = "-j 4"
+ BB_NUMBER_THREADS = "4"
+
+Cambie los valores de PARALLEL_MAKE y BB_NUMBER_THREADS a lo que sea
+más adecuado a su máquina.
+
+* Para los que tienen AMD 64 necesitan el parche
+http://bugs.openembedded.org/show_bug.cgi?id=1765 para construir
+db2-native.
+
+=== QEMU ===
+
+MokoMakefile soporta ahora la construcción, flashing y ejecución de
+[[OpenMoko under QEMU|the new Neo1973 emulator]] (esto basado en QEMU)
+
+Dependencias:
+
+*gcc 3.4 ó 3.3 ('apt-get install gcc-3.4' en Ubuntu 7.04)
+*lynx ('apt-get install lynx' en Ubuntu 7.04)
+*netpbm ('apt-get install netpbm' en Ubuntu 7.04)
+*sdl-devel ('apt-get install libsdl1.2-dev en Ubuntu .704')
+*mkdosfs ('apt-get install dosfstools' en Debian 4.0)
+
+'''make qemu''' construye un qemu-neo1973, descarga las
+últimas imagenes oficiales de OpenMoko, pone las imagenes en la NAND
+flash virtual, crea una SD Card virtual en blanco y corre el emulador
+(sin embargo, usted necesita instalar el makefile mencionado antes).
+
+Otros comandos son '''make download-images''' (para
+descargar las últimas imágenes oficiales), '''make
+flash-qemu-official''' (para poner las imagenes oficiales en la
+memoria flash) y '''make flash-qemu-local''' (para poner
+las imagenes locales en la memoria flash), esto debe ir seguido de
+''''make run-qemu''' o '''make
+run-qemu-snapshot''' para correr el emulador con las imagenes
+más recientes en la memoria flash. También puede usar ''''make
+qemu-copy-package-''foo''''' para copiar el archivo
+<code>.ipk</code> del paquete '''foo''' a la memoria SD virtual y
+después ''''ipkg install /media/mmcblk0/''file''''' en el
+Neo1973 emulado para instalar el paquete.
+
+Usted está invitado a leer más sobre el tema en [[OpenMoko under QEMU]], un artículo dedicado a eso.
+
+=== Desarrollo con MokoMakefile ===
+
+{{note|Si usa MokoMakefile con la versión OM2007.2 debe reemplazar las
+referencias a $OMDIR/openmoko con $OMDIR/openembedded. Además las
+referencias a tmp/work/armv4t-linux se reemplazan con
+tmp/work/fic-gta01-angstrom-linux-gnueabi}}
+
+Para las siguientes explicaciones $OMDIR es el directorio donde el
+Makefile pone todo.
+
+Para hacer cambios en el árbol de directorio, construir y usar con qemu:
+
+  cd $OMDIR/openmoko
+  quilt new descriptive-patch-name.patch
+  quilt add trunk/src/name-of-file-to-change # haga esto por cada archivo que quiera modificar
+  ...make the changes...
+  quilt refresh # esto crea un archivo en $OMDIR/patches/openmoko-HEAD/ y actualiza las serie de archivos quilt
+
+
+Nota: No '''USE''' las rutas absolutas, esto confunde a quilt y hará
+que que los diff de los archivos se vayan al /dev/null!
+
+Para construir los cambios y que puedan ser usados por qemu:
+
+  make build-qemu
+  make flash-qemu-local
+  make run-qemu
+
+Si quiere modificar aplicaciones en lugar del openmoko toolchain (por
+ejemplo, openmoko-messages), hay que hacer
+
+  cd $OMDIR/build
+  . ../setup-env
+  bitbake -c unpack openmoko-messages
+  cd ../build/tmp/work/armv4t-linux/openmoko-messages-0.0.1+svnnow-r2_2276/openmoko-messages/
+  ...make the changes...
+  cd -
+  bitbake openmoko-messages
+
+Y entonces continuar con el uso de MokoMakefile.
+
+Si quiere adicionar una aplicación a la distribución OpenMoko, haga lo
+siguiente: Todos los archivos que edite tiene que hacerse con quilt
+como es descrito abajo. De esta forma las ruta puede ser enviada
+fácilmente al proyecto OpenMoko.
+
+Primero, cree un directorio que corresponda con su paquete y edite los
+archivos '''.bb''' así:
+
+  cd $OMDIR/openmoko/
+  quilt new mycoolpackage.patch
+  mkdir trunk/oe/packages/mycoolpackage
+  quilt add trunk/oe/packages/mycoolpackage/mycoolpackage_1.bb
+  quilt edit trunk/oe/packages/mycoolpackage/mycoolpackage_1.bb
+
+El archivo debe tener el siguiente contenido:
+
+  DESCRIPTION = "This is a cool package"
+  SECTION = "username/mycoolpackage"
+  PV = "1"
+  
+  inherit autotools
+  
+  SRC_URI = "http://www.example.com/download/mycoolpackage-1.tar.gz"
+
+Explicación:
+
+* DESCRIPTION - Un breve texto describiendo el paquete
+
+* SECTION - En este momento no tiene uso, pero use por ahora username/mycoolpackage.
+
+* PV- Versión del paquete
+
+* inherit autotools - El paquete puede ser compilador con ' ./configure
+&& make && make install'
+
+* SRC_UTI = ... - Esta es la localización desde donde descargar el
+paquete. Es imperativo que el paquete tar.gz tenga un directorio
+llamado '''packagename-packageversion''' (en este caso:
+mycoolpackage-1) porque el MokoMakefile lo buscará automáticamente y
+si no está fallará.
+
+Esto no es todo. Ahora necesita llamar el MokoMakefile para que
+construya e incluya el paquete en la imagen. Para esto haga
+
+  $OMDIR/openmoko# quilt edit trunk/oe/packages/tasks/task-openmoko.bb
+
+Aquí incremento el valor de '''PR''' en uno y adicione
+'''mycoolpackage \''' (con el backslash!) exactamente después de la
+línea que dice '''# update-alternatives \'''.
+
+Ahora corra
+
+  quilt refresh
+  cd ..
+  make update all
+
+Y si todo está bien ahora pase la imagen OpenMoko a su teléfono o
+corra el qemu como se describió antes.
+
+=== La aplicación Hola Mundo ===
+
+Esta esta en
+[http://wiki.openmoko.org/wiki/Building_a_hello_world_application Hello World!] acompañada de un tutorial.
+
+=== Testimonios ===
+
+MokoMakefile es remendado por 4 de cuatro desarrolladores en #openmoko, con testimonios como "Por alguna razón la última noche no
+ge podido hacer que la instalación a mano funcione (pienso que por
+algo del bbpath) ... pero con MokoMakefile este trabaja bien!!!",
+"MokoMakefile es el poder", y "Wow this build system is nice - it just
+seems more polished than my gumstix toolchain buildroot system"
+
+Project page:
+
+Página del proyecto:
+
+http://mokomakefile.projects.openmoko.org/
+
+{{Languages|MokoMakefile}}
+
+[[Category:Developer]]
+[[Category:Guides]]
