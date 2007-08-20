@@ -1,19 +1,13 @@
-The [[Neo1973 Battery]] charging logic is embedded into our [[:Category:Neo1973 Hardware#Power_Management|PCF50606 PMU]] (Power Management Unit).
+The [[Neo1973 Battery]] charging logic is embedded into our [[Neo1973 GTA01 Power Management|PCF50606 Power Management]] Unit (PMU).
 
 The PCF50606 supports a variety of [[Neo1973 Battery]] charging modes, based around the hardware limitations of USB.
 
-USB hubs may only provide up to 100mA per device.
+Some USB hubs only provide up to 100mA per device.
 If more than the available current is drawn from them, they may be reset, or power off.
 This resets all devices connected to the USB bus, possibly causing data loss.
 So, fast charge mode is only enabled after the Neo is told that it is safe to charge at this current. 
 
-An alternative method is used if the proper charger for the Neo is used.
-If the neo measures 48kohm +/- 1% between usb pin 5 and ground, it will detect the dumb charger and use it for fast charging. 
-
-An alternate method - for example sensing if there is no USB communication from the host for 30 seconds - as may be the case with dumb 'USB chargers' - would need to be used to be compatible with the vast majority of already existing hardware. 
-This has a small risk of causing busses it is connected to in suspend mode, when they are not active, to crash, and is not compliant with the specification. 
-
-:The USB spec requires the host to reply in a much shorter time than 30 seconds. Waiting that long is overkill and would be very annoying if you were trying to charge with something like a [http://www.21st-century-goods.com/page/21st/PROD/AHPG crank charger].
+An alternative method is used when connected to a more USB-compliant dumb charger for the is used.  If the Neo measures 48&nbsp;&Omega; +/- 1% between usb pin 5 and ground, it will detect the dumb charger and use it for fast charging. 
 
 {{warning|While we have spent a significant amount on various safe-guards such as battery-internal overcurrent/overvoltage protection, manual twisting with low-level charger control aspects is not recommended.  It might damage either the [[battery]] or charging circuit.}}
 
@@ -67,3 +61,12 @@ The procedure to follow is:
 # '''If you have a USB host, plug it into a port capable of sourcing 500mA and load the appropriate drivers, so the neo can negotiate to draw 500mA.
 
 *If you have a dumb charger, see the [[Bootloader]] page for how to add a u-boot menu entry to turn on fast-charging.
+
+==Proposals for alternative charging schemes==
+
+An alternate method - for example sensing if there is no USB communication from the host for 30 seconds - as may be the case with dumb 'USB chargers' - would need to be used to be compatible with the vast majority of already existing hardware. 
+This has a small risk of causing buses it is connected to in suspend mode, when they are not active, to crash, and is not compliant with the specification. 
+
+:The USB spec requires the host to reply in a much shorter time than 30 seconds. Waiting that long is overkill and would be very annoying if you were trying to charge with something like a [http://www.21st-century-goods.com/page/21st/PROD/AHPG crank charger].
+
+[[Category:Neo1973 Hardware]]
