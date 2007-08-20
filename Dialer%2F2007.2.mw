@@ -1,1 +1,136 @@
-(Coming Soon)
+== Overview ==
+This article defines the Dialer Application, an application designed for the OpenMoko platform. The Dialer Application handles all call related interactions.
+
+== Use Cases ==
+Here are some possible use cases:
+
+* I want to be able to dial a number
+* I want to be able to quickly redial a number
+* I want to be able to adjust the volume of both the speaker and microphone while in call
+
+== Core Functionality ==
+
+(Italics = Done, Bold = In progress)
+
+* ''Input a number and commence an outgoing call''
+* ''Receive an incoming call''
+* ''Log incoming and outgoing calls ''
+* ''View call history and dial a number from the list''
+
+* ''Match an incoming call with the contact list, and update the UI to show the contact picture and number detail''
+* ''Match an outgoing call with the contact list, and update the UI to show the contact picture and number detail''
+* '''Auto-complete known numbers when using the keypad to dial, using the contact list'''
+
+* '''Notify the user of incoming calls through the speaker and vibration alert'''
+* ''Activate dialer window on incoming call''
+
+* ''Provide a D-Bus backend which enable other applications to find out dialer status, and manipulate the dialer''
+
+* ''Automatically power-on the gsm chip and register to a network on launch''
+* '''Prompt the user to input a PIN if requested by the sim card'''
+* '''Find out gsmd status on launch, and start if necessary'''
+
+== Layout Components ==
+
+=== Application Area ===
+==== Dial Mode ====
+
+[[Image:dialer-keypad-arrows.png]]
+
+
+* '''1) Title''' -- Window title, which is automatically set.
+* '''2) Keypad''' -- Standard dialing keypad. A long press on the '*' key is '+'. A long press on the '0' key is 'P'. And a long press on the '9' key is 'W'.
+* '''3) Talking Page''' -- Goes to the [[Dialer/02#Talking | Talking]] page. This is only available during a call, when dialling a number, or when there is an incoming call.
+* '''4) Keypad Page''' -- Goes to the keypad page, during a call, this will be used for DTMF.
+* '''5) History Page''' -- Goes to the [[Dialer/02#History_Mode | History]] page.
+* '''6) Dial''' -- Dials the entered number string. When empty this dials the last entry.
+* '''7) Delete''' -- Deletes the last entered digit. A long press deletes the entire string.
+* '''8) Phone Number''' -- Phone number is displayed. Larger font is used for first line. After reaching end of first line the entire font size should decrease to allow for two full lines.
+
+{{note|If a PIN is required to access the SIM card, the "Dialer" (8) display will change to enter a PIN. "History" (4) will gray-out and "Dial" (3) will change to "OK."}}
+
+==== Incoming Call Mode ====
+
+[[Image:dialer-incoming-arrows.png]]
+
+* '''1) Answer''' -- Answer the incoming call.
+* '''2) Call Text/Icon''' -- Text & icon representing call type.
+* '''3) Incoming Page''' -- The incoming mode is part of the 'talking' page, and is automatically created and switched to when there is an incoming call.
+* '''4) Keypad Page''' -- Goes to the keypad page, during a call, this will be used for DTMF.
+* '''5) History Page''' -- Goes to the [[Dialer/02#History_Mode | History]] page.
+* '''6) Caller ID Title''' -- If contact is stored in the handset, the name will be displayed (''Steve'' in this case). Otherwise display ''Unknown''. Below displays the phone number. If the contact has an associated icon, it will also be displayed, otherwise the stock 'person' icon will be used. It also displays call talk time.
+* '''7) Reject''' -- Rejects call. Returns to last application.
+
+==== In Call Mode ====
+[[ Image:dialer-talking-arrows.png ]]
+
+* '''1) Hang-up''' -- Disconnects the current phone call. Returns to [[Dialer#Dial_Mode | Dial Mode]].
+* '''2) Call Text/Icon''' -- Text & icon representing call type.
+* '''3) Volume Adjustment''' -- A slider to adjust the volume.
+* '''4) Talking Page''' -- The incoming mode is part of the 'talking' page, and is automatically created and switched to when there is an incoming call.
+* '''5) DTMF Page''' -- Changes to [[Dialer/02#Dial_Mode | Dial Mode]] for DTMF support.
+* '''6) History Page''' -- Goes to the [[Dialer/02#History_Mode | History]] page.
+* '''7) Caller ID Title''' -- If contact is stored in the handset, the name will be displayed (''Steve'' in this case). Otherwise display ''Unknown''. Below displays the phone number. If the contact has an associated icon, it will also be displayed, otherwise the stock 'person' icon will be used. It also displays the length of the call.
+* '''8) Speaker Phone''' -- Toggles the speaker phone.
+
+==== Outgoing Call Mode ====
+
+[[Image:dialer-outgoing-arrows.png ]]
+
+
+* '''1) Cancel''' -- Cancels the current phone call. Returns to [[Dialer#Dial_Mode | Dial Mode]].
+* '''2) Call Text/Icon''' -- Text & icon representing call type.
+* '''3) Incoming Page''' -- The incoming mode is part of the 'talking' page, and is automatically created and switched to when there is an incoming call.
+* '''4) Keypad Page''' -- Goes to the keypad page.
+* '''5) History Page''' -- Goes to the [[Dialer/02#History_Mode | History]] page.
+* '''6) Caller ID Title''' -- If contact is stored in the handset, the name will be displayed (''Steve'' in this case). Otherwise display ''Unknown''. Below displays the phone number. If the contact has an associated icon, it will also be displayed, otherwise the stock 'person' icon will be used. It also displays call talk time.
+* '''7) Speaker Phone''' -- Toggles the speaker phone.
+
+==== Call History Mode ====
+
+[[Image:dialer-history-arrows.png]]
+
+* '''1) Dial''' -- Dials the selected number.
+* '''2) Filter Menu''' -- Filter the type of call to view.
+* '''3) Dial Page''' -- Changes to [[Dialer/02#Dial_Mode | Dial Mode]].
+* '''4) History Page''' -- The current page.
+* '''5) History List''' -- The list of calls, reacts to the filter menu.
+* '''6) SMS''' -- Send a message to this number. This will open the [[Messages]] application with a new (SMS) message. 
+* '''7) Delete''' -- Removes this number from the call history list.
+
+== Communicating with the Dialer ==
+
+The Dialer application has a D-Bus back-end which allows other applications to manipulate the Dialer, and to receive notifications when the Dialer's status changes.
+
+=== Use Cases ===
+
+Here are some use cases:
+
+* Initiate call from another application e.g. the Contacts application.
+* Media Player application wants to pause the currently playing media when a call is received, and resume playback when the call ends.
+* An application wants to query the status of the Dialer before playing a sound e.g. when an SMS is received.
+* The Today application wants to present the user with a list of missed calls.
+
+=== D-Bus Interface ===
+
+The Dialer's D-Bus name, object and interface are "org.openmoko.Dialer", "/org/openmoko/Dialer", "org.openmoko.Dialer", respectively. The Dialer is available on the Session Bus, and is implemented as a service (therefore applications do not need to check that the Dialer is running before caling methods or connecting to signals).
+
+These are the methods which are implemented by the dialer (including arguments):
+
+* '''ShowDialer''' -- ''args in: None, args out: None.'' Presents the user with the main page of the Dialer.
+* '''ShowMissedCalls''' -- ''args in: None, args out: None.'' Presents the user with the Missed Calls page.
+* '''GetStatus''' -- ''args in: None, args out: int status.'' Returns the current status of the dialer.
+* '''Dial''' -- ''args in: string number, args out: None.'' Presents the user with the dialer, and dials the number.
+
+These are the signals which an application can listen to:
+
+* '''IncomingCall''' -- ''args: string number.'' Emitted when there is an incoming call, including the incoming call number (if available).
+* '''OutgoingCall''' -- ''args: string number.'' Emitted when the user dials a number.
+* '''Talking''' -- ''args: None'' Emitted when a call commences.
+* '''HungUp''' -- ''args: None'' Emitted when a call is cancelled or hung up.
+* '''Rejected''' -- ''args: None'' Emitted when an incoming call is rejected.
+
+
+[[Category:Applications]]
+[[Category:Finger based]]
+[[Category:Implemented]]
