@@ -28,7 +28,23 @@ The dfu-utils tool is included in the OpenMoko Flasher application; you can acce
 
 = Connecting to your device =
 
-== USB ==
+== USB Serial ==
+
+It is possible to access the [[Bootloader]] serial console from a Mac. The USB serial device should show up as "/dev/cu.usbmodem00000001". The "minicom" program from the Darwin Ports collection can be used to access this device. 
+
+First install the program (assuming you already have Darwin Ports installed):
+
+ sudo port install minicom
+
+Then launch it in configuration mode (the -s flag):
+
+ sudo minicom -s
+
+Under "Serial Port Setup", set the Device to "/dev/cu.usbmodem00000001" and set Bps to "115200 8N1". Under "Modem and Dialing", enter empty strings for "Init string", "Reset string", and "Hang-up string". Save the setup as default ("dfl") then Exit. 
+
+You should now be able to access the bootloader console. You should exit from Minicom before disconnecting the Neo1973, or else you will get an error about unplugging a USB device while it is in use. 
+
+== USB Networking ==
 
 You can telnet, SSH, SMB or do whatever you want if you install software that enables you to set up TCP/IP network over your USB connection.
 
