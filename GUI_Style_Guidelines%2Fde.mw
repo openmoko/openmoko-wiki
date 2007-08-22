@@ -1,0 +1,73 @@
+==Abstraktes==
+
+OpenMoko ist eine Platform für Geräte mit kleinen Bildschirmen. Somit werden viele gebräuchliche Desktop-Elemente wie Fenster und Menüs schlecht nutzbar. Für Unterschiede in der Display-Produktion (z.B. Aspect Ratio) versucht OpenMoko ein Framework bereit zu stellen, so dass Applikationsentwickler sich nicht mit schlussendlichen Layout auseinander setzen müssen.
+
+==Top Level Overview==
+
+OpenMoko-Applikationen werden als mehrere Seiten dargestellt, welche unterschiedliche Beziehungen untereinander haben. Jede Seite ist ein Task, wie das Auswählen eines Kontakts oder das durchsuchen des Kalenders.
+
+==Layout Abstraction==
+
+Seiten welche von Änderungen anderer Seiten nicht betroffen sind werden Primary Pages genannt. Sie arbeiten Unabhängig von anderen Seiten. Seiten welche von Änderungen einer Primary Page betroffen sind werden als Secondary Pages bezeichnet. Z.B. in [[Contacts]] (Adressbuch), in der Primary Page ist die Liste aller Kontakte, in der Secondary Page werden Information zum in der Primary Page ausgewählten Kontakt angezeigt.
+
+Jede Seite hat ein Label, Icon und Inhalt was mit der Seite assoziiert wird. So können Seiten identifiziert und wenn nötig angezeigt werden.
+
+Die Beziehungen zwischen Seiten werden in einem Modell Beschrieben wenn die Applikation gestartet ist. Die Applikation instantiiert dann ein weiteres Objekt welches die Ansicht und Steuerung des Modells übernimmt. Das Objekt initiiert das Layout der Applikation.
+
+==Neo1973 Layout==
+
+On this form factor, the layout is portrait and constrained by a very small screen size. To accommodate this, all pages are full screen and the target area for buttons must be as large as possible. Borders and spacing between widgets is kept to a minimum to ensure best use of available screen estate.
+
+
+[[Image:contacts-main-guidelines.png]]
+
+* '''1) [[GUI_Style_Guidelines#Toolbars | Toolbar]]''' -- Additional actions related to the current page.
+* '''2) [[GUI_Style_Guidelines#Filter/Search | Filter/Search]]''' -- Filtering  options for the current page.
+* '''3) [[GUI_Style_Guidelines#Pages | Pages Navigation]]''' -- Method to switch between pages.
+* '''4) Title''' -- The window title is not part of the application itself. It is embedded into the main panel and is automatically set to the current applications name. It also serves as a quick way to navigate between open applications.
+
+==Pages==
+
+Das Wechseln zwischen Seiten erfolgt über Tabs welche sich unten horizontal anordnen. Der einzelne Tab zeigt ein Icon welches an den Inhalt der Seite erinnert.
+
+==Toolbars==
+
+Toolbars werden am oberen Bildschirmrand angezeigt, mit möglichst grossen Tool-Button. Es sollten nicht mehr als vier Buttons in einer Toolbar sein.
+
+==Filter/Search==
+
+Die Filter-Such-Bar ist eine optionale Komponente, erstellt aus drei Widgets. Ein 'Toggle'-Button wechselt zwischen Filter (Combo Box) und Suche (Entry Box). Wird in die Suchbox geschrieben werden die Ergebnisse fortlaufend aktualisiert.
+
+==Input Considerations==
+
+==Keyboard==
+
+Bei Geräten welche eine Bildschirm-Tastatur benötigen wird diese automatisch angezeigt wenn ein Widget den Fokus auf einem Eingabefeld hat.
+
+==Touch Screen==
+
+The touch screen should be used for single click (tap) and drag options only. A tap and hold will activate button three on the mouse ("right" click). The "double click" action is strongly 
+
+==General Application Guidelines==
+
+==Data Persistence==
+
+All applications that manipulate data should aim to follow the "instant apply" model so that there is no need for the user to explicitly save any data entered.
+
+==State Persistence==
+
+Applications should save their state if possible between sessions. This might include current view details or "unsaved" data.
+[edit]
+Using GTK+ and libmokoui
+
+GTK+ is a C library that uses GObject for pseudo object orientation. This allows it to be very portable and flexible.
+
+==General Guidelines==
+
+OpenMoko code mostly uses the c99 standard for C.
+
+Spacing,widgets sizes and fonts must not be hard coded into OpenMoko applications. OpenMoko is a framework for small screen devices, which may include anything as small as QVGA (320x240) to 800x600. Therefore, for applications to work on these different resolutions, programs must not hard code anything to do with the specific appearance of widgets.
+
+==Programming Guidelines==
+
+Most on screen elements such as buttons and entry boxes are sub classed from the GtkWidget base class. The normal practice is to cast up from this class. For this reason, all the creator functions return GtkWidget rather than the class of which they are creating.
