@@ -1,26 +1,35 @@
-== FAQ ==
-=== What is 2007.2? ===
-
-As of 2007-07-26 the development of the next version of the OpenMoko distribution has begun. 
+'''OM 2007.2''' is the second version of the OpenMoko distribution.  Development began on 2007-07-26.
 
 Goals of the new version are an improved set of PIM applications, improved theming that fixes a lot of the usability problems of the 1st generation design, more formalized UI guidelines and a number of changes in the build system. The latter should introduce more recent software by staying closer in sync with upstream org.openembedded.dev.
 
-An official announcement is expected soon (Aug 19).
+An official announcement was made by Sean Moss-Pulz on August 21:
+* http://lists.openmoko.org/pipermail/announce/2007-August/000018.html
 
 (Initially this was named OM-2008 in SVN but renamed shortly after that.)
 
-=== What are differences between 2007.1 and 2007.2? ===
+==FAQ==
 
+=== Q: What are differences between 2007.1 and 2007.2? ===
 
-=== Where to get snapshot images? ===
+* UI redesigned for small and recessed screen
+* Simplified visuals for performance
+* Simplified UI
+* More interactions including finger scrolling
+* [[Today|openmoko-today]] rewritten; supports AUX and POWER buttons for navigation
+* Updated upstream packages
 
-[[OpenMoko2007.2#Pre-built_snapshot_images|Unofficial images]]
+=== Q: Where to get snapshot images? ===
 
-=== Where are official releases? ===
+* [[OpenMoko2007.2#Pre-built_snapshot_images|Unofficial images]] listed at the bottom of this article
+
+* Official snapshots and ipkg repository:
+** http://buildhost.openmoko.org/snapshots/2007.08/
+
+=== Q: Where are official releases? ===
 
 No official releases yet, just official snapshots. The first release is targetted for October, 2007.
 
-=== My mrxvt (terminal) fonts are huge. ===
+=== Q: My mrxvt (terminal) fonts are huge. ===
 
 Edit src/feature.h to set MIN_XFT_FONT_SIZE to lower value:
  #define MIN_XFT_FONT_SIZE           (2)
@@ -30,7 +39,9 @@ End edit /etc/mrxvt/mrxvt.conf
  Mrxvt.xftSize: 4
  Mrxvt.xftHint: 1
 
-== How to build ==
+==Building 2007.2==
+
+=== How to build ===
 
 The MokoMakefile is now able to build OM-2007.2 images.  If you use this new version of the MokoMakefile, you can ignore everything below and just continue building OM-2007.2 in the same way that you previously built images (i.e. according to http://wiki.openmoko.org/wiki/MokoMakefile).  Make sure you set the generation correctly at the top of the file.
 
@@ -176,32 +187,8 @@ Go to your build/tmp/work/i686-linux/libxml2-native-2.6.29-r1/libxml2-2.6.29/inc
 
 On my system the libxml2-native-2.6.29-r1 directory is in a directory named i686-linux, yours may be different. I believe this patch to be a workaround to make libxml2-native build. I am not yet sure what the consequences of enabling XML catalogue support are.
 
-=== Flashing with MokoMakefile ===
-Since MokoMakefile has not been adjusted to use the new build layout you cannot use it. As a quick hack to make flashing local built image possible again try this:
 
-Find the following lines in the MokoMakefile:
-
- flash-qemu-local: stamps/qemu stamps/openmoko-devel-image
-       ( cd build/qemu && openmoko/flash.sh ../tmp/deploy/images )
-
-And replace them with:
-
- flash-qemu-local: stamps/qemu
-        ( cd build/qemu && openmoko/flash.sh <MY_NEW_BUILD_DIR>/tmp/deploy/glibc/images/fic-gta01 )
-
-Where you should replace <MY_NEW_BUILD_DIR> with the full path to your build directory (the one where ''conf/local.conf'' lives in). Running the image should work, too. :-)
-
-With this changes kernel and uboot image are picked up correctly. However the name of the root filesystem image has changed in OM-2007.2 and the current scripts will not pick it up any more. Just edit ''$OM_DIR/build/qemu/openmoko/env'' and change the line saying:
-
- rootfs_wildcard="openmoko-*.rootfs.jffs2"
-
-to
-
- rootfs_wildcard="OpenMoko-*.rootfs.jffs2"
-
-Now it will work correctly again.
-
-== How to build using nslu2-linux MasterMakefile (Ubuntu 7.04) ==
+=== How to build using nslu2-linux MasterMakefile (Ubuntu 7.04) ===
 
 '''Note that the normal [[MokoMakefile]] can build OM-2007.2 now, so there is no need to use the procedure below.  The nslu2-linux master makefile is designed for building various OE distributions, and is likely to produce something different from the standard OpenMoko images.
 '''
@@ -270,11 +257,39 @@ Then you need to upgrade nslu2-linux.mtn Use the following command:
 
   # mtn --db monotone/nslu2-linux.mtn db migrate
 
+== Flashing with MokoMakefile ==
+Since MokoMakefile has not been adjusted to use the new build layout you cannot use it. As a quick hack to make flashing local built image possible again try this:
+
+Find the following lines in the MokoMakefile:
+
+ flash-qemu-local: stamps/qemu stamps/openmoko-devel-image
+       ( cd build/qemu && openmoko/flash.sh ../tmp/deploy/images )
+
+And replace them with:
+
+ flash-qemu-local: stamps/qemu
+        ( cd build/qemu && openmoko/flash.sh <MY_NEW_BUILD_DIR>/tmp/deploy/glibc/images/fic-gta01 )
+
+Where you should replace <MY_NEW_BUILD_DIR> with the full path to your build directory (the one where ''conf/local.conf'' lives in). Running the image should work, too. :-)
+
+With this changes kernel and uboot image are picked up correctly. However the name of the root filesystem image has changed in OM-2007.2 and the current scripts will not pick it up any more. Just edit ''$OM_DIR/build/qemu/openmoko/env'' and change the line saying:
+
+ rootfs_wildcard="openmoko-*.rootfs.jffs2"
+
+to
+
+ rootfs_wildcard="OpenMoko-*.rootfs.jffs2"
+
+Now it will work correctly again.
+
+
 == Pre-built snapshot images ==
-http://ipkg.nslu2-linux.org/feeds/openmoko/images/
+* http://ipkg.nslu2-linux.org/feeds/openmoko/images/
 
-http://buildhost.openmoko.org/OM2007.2/snapshots/2007.08/ (Confirmed working)
+* http://buildhost.openmoko.org/OM2007.2/snapshots/2007.08/ (Confirmed working)
 
-http://buildhost.openmoko.org/OM2007.2/tmp/deploy/glibc/images/fic-gta01/
+* http://buildhost.openmoko.org/OM2007.2/tmp/deploy/glibc/images/fic-gta01/
+
+* http://buildhost.openmoko.org/snapshots/2007.08/ (Official snapshots and ipkg repository)
 
 [[Category:OpenMoko2007.2| ]]
