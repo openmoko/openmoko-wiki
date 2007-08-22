@@ -30,5 +30,33 @@ If everything went fine you will find ''dummy_hcd.ko'' and ''gadgetfs.o'' along 
  sudo insmod ./dummy_hcd.ko
  sudo insmod ./gadgetfs.ko default_uid=`id -u`
 
+== Debian/Ubuntu - full kernel recompilation using make-kpkg ==
+
+Gain root priviledges
+  sudo su -
+
+Prepare your environment by installing some packages:
+  apt-get install kernel-package linux-source libncurses5-dev
+
+Optionally, edit '''/etc/kernel-pkg.conf''' and fill in ''email'' and ''maintener'' fields.
+
+Untar the kernel sources, and enter them
+  tar -C /usr/src -xjf /usr/src/linux-source-2.6.##.tar.bz2
+  cd /usr/src/linux-source.2.6.##
+
+Prepare your kernel tree: copy the current kernel configuration and start kernel configuration
+  cp /boot/config-`uname -r` .config
+  make menuconfig
+
+Find and enable all the necessary modules by following [[OpenMoko_under_QEMU#Setting_up_USB_connection|these instructions]].
+
+It's now time to compile your kernel. Type:
+  make-kpkg -us -uc kernel_image kernel_headers
+
+If all goes well, install your freshly created kernel:
+  dpkg -i /usr/src/linux-{image,headers}-2.6.XX.XXXXXXXXXXXXXX.deb
+
+Update the boot loader configuration if necessary, and reboot using the created kernel.
+
 [[Category:Categories]]
 [[Category:Guides]]
