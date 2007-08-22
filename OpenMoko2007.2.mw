@@ -293,3 +293,44 @@ Now it will work correctly again.
 * http://buildhost.openmoko.org/snapshots/2007.08/ (Official snapshots and ipkg repository)
 
 [[Category:OpenMoko2007.2| ]]
+
+
+== Updating your image ==
+
+Now that you have a functional 2007.2 image on your Neo, you will want to keep it updated.  Fortunately, ipkg is already set up to pull updated packages from the openmoko buildhost.
+
+On the phone, in the terminal (or via ssh), if you have a live internet connection and DNS resolution set up in /etc/resolv.conf:
+
+ ipkg update && ipkg upgrade
+
+will bring your installed packages up to the most recent versions.
+
+If you are also building your own images and packages, you can also run a simple httpd on your build host and serve your own ipkg files to the Neo.
+
+On the build host, for example:
+
+ thttpd -d <path_to_moko/tmp/deploy/glibc/ipk> -p 8080
+
+will serve your packages on port 8080.
+
+Then, on the neo, make a new file at /etc/ipkg/local-feed.conf with these contents:
+
+ src/gz local-all http://192.168.0.200:8080/all
+ src/gz local-armv4t http://192.168.0.200:8080/armv4t
+ src/gz local-fic-gta01 http://192.168.0.200:8080/fic-gta01
+
+and ipkg on the Neo (update-upgrade) will pick up files from your local build host's repository (assuming its IP address is 192.168.0.200, as is default in the [[USB Networking]] setup) in addition to the openmoko buildhost.
+
+Also if you are building your own packages or packages from the OE database that aren't part of OpenMoko by default, you can install those packages as follows.
+
+On the build host:
+
+ bitbake <name_of_package>
+ bitbake -c rebuild openmoko-devel-image
+
+Then on the Neo:
+
+ ipkg update
+ ipkg install <name_of_package>
+
+(NB: The local package repository is rebuilt as a consequence of the "rebuild openmoko-devel-image" operation, which also makes another rootfs image.  There's probably a way to rebuild the repository without rebuilding the image but I don't know what it is -- please feel free to update.)
