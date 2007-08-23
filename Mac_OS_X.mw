@@ -30,9 +30,19 @@ The dfu-utils tool is included in the OpenMoko Flasher application; you can acce
 
 == USB Serial ==
 
-It is possible to access the [[Bootloader]] serial console from a Mac. The USB serial device should show up as "/dev/cu.usbmodem00000001". The "minicom" program from the Darwin Ports collection can be used to access this device. 
+It is possible to access the U-Boot [[Bootloader]] serial console from a Mac.  You can use the Terminal application on Mac OS X, or <tt>minicom</tt> from [http://finkproject.org/ Fink] or [http://www.macports.org/ MacPorts] (formerly Darwin Ports.)
 
-First install the program (assuming you already have Darwin Ports installed):
+The USB driver creates cu and tty character devices, for example
+ $ ls -la /dev/tty.usb*
+ crw-rw-rw-   1 root  wheel   10,  18 Aug 23 14:10 /dev/tty.usbmodem00000001
+ $ ls -la /dev/cu.usb*
+ crw-rw-rw-   1 root  wheel   10,  19 Aug 23 14:10 /dev/cu.usbmodem00000001
+
+=== USB Serial with minicom ===
+
+The <tt>minicom</tt> program from the [http://www.macports.org/ MacPorts] collection can be used to access the USB serial port <tt>/dev/cu.usbmodem00000001</tt> (numbering may vary.)
+
+First install the program (assuming you already have MacPorts installed):
 
  sudo port install minicom
 
@@ -42,7 +52,25 @@ Then launch it in configuration mode (the -s flag):
 
 Under "Serial Port Setup", set the Device to "/dev/cu.usbmodem00000001" and set Bps to "115200 8N1". Under "Modem and Dialing", enter empty strings for "Init string", "Reset string", and "Hang-up string". Save the setup as default ("dfl") then Exit. 
 
-You should now be able to access the bootloader console. You should exit from Minicom before disconnecting the Neo1973, or else you will get an error about unplugging a USB device while it is in use. 
+You should now be able to access the bootloader console. You should exit from Minicom before disconnecting the smartphone, or else you will get an error about unplugging a USB device while it is in use.
+
+=== USB Serial with Terminal ===
+
+The built in Mac Terminal application <tt>Terminal.app</tt> can be used to access the USB serial port <tt>/dev/tty.usbmodem00000001</tt> (numbering may vary.)
+
+An easy way to do this is to configure the terminal with Script Editor, as described in the short article, [http://www.macosxhints.com/article.php?story=20061109133825654 ''Use 'screen' as a serial terminal emulator''](macosxhints.com).  Then,
+
+# Press and hold {{aux}} and then press and hold {{power}} for 5 seconds
+# Press {{aux}} to select <tt>Set console to USB<tt> in the U-Boot menu, and {{power}} to execute it
+# Start the serial terminal application.  You should see a U-Boot command line prompt, such as
+ In:    usbtty
+ Out:   usbtty
+ Err:   usbtty
+ DEVICE_CONFIGURED: 1
+ Enabling automatic fast charge
+ GTA01Bv4 #
+
+When you boot Linux on the smartphone, or if the smartphone powers down, you will get a USB Device Unplug Notice, "The USB device has been unplugged while an application was still active. This can result in loss of data." This error is probably harmless.
 
 == USB Networking ==
 
