@@ -1,6 +1,6 @@
-[Image:GTA01-U-Boot.JPG|thumb|300px|u-boot on Neo1973 console]] [[Image:Neo1973 uboot splash closeup.jpg|thumb|300px|u-boot boot splash on Neo1973]]
+[[Image:GTA01-U-Boot.JPG|thumb|300px|u-boot on Neo1973 console]] [[Image:Neo1973 uboot splash closeup.jpg|thumb|300px|u-boot boot splash on Neo1973]]
 
-== Phase0 Quick Start ==
+== Фаза 0. Быстрый старт ==
 * Make sure that your phone has had the battery and USB cable removed for at least 30 seconds.
 * Connect the Neo (ie not Debug Board) to a Linux host with the USB cable.
 * Hold in the AUX button on power-up to access the boot menu.
@@ -10,7 +10,7 @@
 * You're now at the bootloader prompt.
 * Set the bootdelay uboot environment variable to -1 if you want it to always halt at the bootloader on power-up.
 
-== General ==
+== Общие сведения ==
 
 The GTA01 uses the [http://u-boot.sourceforge.net/ u-boot] bootloader.
 
@@ -31,17 +31,17 @@ However, u-boot still doesn't support many of the features that GTA01 needs, suc
 
 [[User:HaraldWelte]] is working on those issues, and in fact most of them have already been implemented.
 
-== Bootloader source code ==
+== Исходный код загрузчика ==
 
 The current bootloader patches can be found at http://svn.openmoko.org/trunk/src/target/u-boot/patches/. 
 
 Untar the sources, apply the patch.  run "make gta01bv3_config" (or gta01bv2_config, or whatever hardware revision you have), run "make".  You will get a resulting "u-boot.bin" image, which you can directly flash (either using existing bootloader or [[sjf2410-linux]]) into NAND.
 
-== Bootloader binary ==
+== Программный код загрузчика ==
 
 The latest bootloader binary builds can be found at http://buildhost.openmoko.org/tmp/deploy/images/ .  It should be written to the NAND flash address 0x00000000 (size 0x30000)
 
-== Bootloader development ==
+== Разработка загрузчика ==
 
 === QT2410 ===
 If you want to do bootloader development on the QT2410, it's easier to work with a bootloader image that can be downloaded via USB into RAM instead of flashing.
@@ -56,7 +56,7 @@ Doing bootloader development on the GTA01 is a bit more tricky.  first, we don't
 
 The main problem is:  The [[S3C2410 Steppingstone]] unconditionally copies the first 4k of flash into its internal SRAM.   That SRAM segment stays unconditionally mapped at physical address zero. How do we get around this
 
-==== Using JTAG to boot from RAM ====
+==== Использование JTAG для загрузки из оперативной памяти ====
 
 So how can we boot from RAM? We use JTAG / OpenOCD to
 
@@ -117,7 +117,7 @@ Hit any key to stop autoboot:  0
 GTA01Bv2 # 
 </pre>
 
-== Creating bootable images ==
+== Создание загрузочных образов ==
 
 u-boot needs bootable images (such as kernels, but also initrd and others) in form of a so-called ''uImage''.  In order to create a ''uImage'' from e.g. a ''vmlinux'' kernel image, you can proceed as follows:
 
@@ -127,20 +127,20 @@ gzip -9 linux.bin
 u-boot/tools/mkimage -A arm -O linux -T kernel -C gzip -a 30008000 -e 30008000 -n "Kernel Image QT2410" -d linux.bin.gz uImage
 </pre>
 
-== Boot menu ==
+== Меню загрузки ==
 [[Image:Neo1973 uboot menu.jpg|thumb|400px|u-boot boot menu on Neo1973]]
 
 As of the Phase-0 release, our u-boot version now features an on-screen boot menu.
 
-=== Accessing the boot menu ===
+=== Получение доступа к меню ===
 
 You can access the boot menu by pressing and holding the [[Neo1973 AUX Button]] together with the power button while switching the phone on.
 
-=== Using the boot menu ===
+=== Использование ===
 
 By pressing the [[Neo1973 AUX Button]] you can cycle through the menu items.  Use the ''POWER'' button to select one item.
 
-=== Adding items to the boot menu ===
+=== Добавление пунктов в меню ===
 
 You can add items to the boot menu by setting environment variables. The canonical form is ''menu_<number> <Title>: U-Boot-Commands''
 
@@ -148,9 +148,9 @@ For example the following command will add a boot menu entry that switches to au
   setenv menu_6 Autofast-Charge and Backlight Off: neo1973 charger autofast\; neo1973 backlight off
   saveenv
 
-== Bootloader prompt ==
+== Информация загрузчика ==
 
-=== Accessing the bootloader prompt ===
+=== Получение загрузочной информации ===
 The bootloader prompt is available either on the serial console (via [[Debug Board]]), or as virtual USB Serial device (USB CDC_ACM).
 Whether the serial port or usb is used depends on the u-boot environment variables '''stdin''', '''stdout''' and '''stderr'''.
 
@@ -158,7 +158,7 @@ Whether or not you use usbtty, the first couple of messages will always be displ
 
 The bootloader is currently configured to wait for three seconds.  If a key press on the '''stdin''' is received within those three seconds, auto-boot is aborted.
 
-==== Using usbtty from Linux ====
+==== Использование usbtty ====
 
 Just by connecting the phone in u-boot mode to your Linux pc should make it detect a [[CDC ACM]] device, and you should get a new tty device called /dev/ttyACM0. If not, enable the CONFIG_USB_ACM (Device Drivers -> USB support -> USB Modem (CDC ACM) support). (Instructions for MacOS users are [[MacOS_X#USB_Serial|here]])
 
@@ -288,7 +288,7 @@ GTA01Bv2 # setenv stdout usbtty
 GTA01Bv2 # setenv stdin usbtty
 </pre>
 
-==== Typical u-boot prompt ====
+==== Пример сообщений u-boot  ====
 
 <pre>
 U-Boot 1.2.0-moko1 (Feb 16 2007 - 00:36:13)
@@ -305,9 +305,9 @@ Hit any key to stop autoboot:  0
 GTA01Bv3 #
 </pre>
 
-=== Commands on the bootloader prompt ===
+=== Команды загрузчика ===
 
-==== Auto-boot ====
+==== Автозагрузка ====
 
 Auto-boot executes the command[s] specified in the ''bootcmd'' environment variable. The default configuration is:
 <pre>
@@ -317,7 +317,7 @@ bootcmd=setenv bootargs ${bootargs_base} ${mtdparts}; nand read.e 0x32000000 ker
 
 This basically tells us that it will load the content of the NAND partition '''kernel''' to memory address 0x32000000 and then try to boot it.  
 
-==== Environment ====
+==== Среда окружения ====
 
 u-boot is configured to manage a non-volatile environment that is stored in NAND flash.  You can use the commands to read/alter/store the environment in the following example:
 <pre>
@@ -400,7 +400,7 @@ nand markbad off - mark bad block at offset (UNSAFE)
 nand biterr off - make a bit error at offset (UNSAFE)
 </pre>
 
-===== Loading Kernel from NAND =====
+===== Загрузка ядра из NAND =====
 
 <pre>
 GTA01Bv3 # nand read 0x32000000 kernel
@@ -419,7 +419,7 @@ GTA01Bv3 # bootm 0x32000000
 Starting kernel ...
 </pre>
 
-===== Writing new bootloader to NAND =====
+===== Запись новго загрузчика в NAND =====
 
 The following set of commands loads the file u-boot.bin from ext2/mmc and flashes it into the
 bootloader flash partition:
@@ -430,7 +430,7 @@ GTA01Bv3 # nand erase u-boot
 GTA01Bv3 # nand write.e 0x32000000 u-boot ${filesize}
 </pre>
 
-===== Writing kernel to NAND =====
+===== Запись ядра в NAND =====
 
 The following set of commands loads the file uImage from ext2/mmc and flashes it into the
 kernel flash partition:
@@ -441,7 +441,7 @@ GTA01Bv3 # nand erase kernel
 GTA01Bv3 # nand write.e 0x32000000 kernel ${filesize}
 </pre>
 
-===== Writing rootfs to NAND =====
+===== Запись системного образа в NAND =====
 
 The following set of commands loads the file rootfs.jffs2 from ext2/mmc and flashes it into the
 rootfs flash partition:
@@ -454,7 +454,7 @@ GTA01Bv3 # nand write.e 0x32000000 rootfs ${filesize}
 
 Please note that this will only work with root file system sizes that are smaller than the amount of memory above 0x32000000, which in the case of 64MB SDRAM is something like 32MB.
 
-==== Neo1973 related commands ====
+==== Специфичные команды Neo1973 ====
 
 Our version of u-boot supports a couple of Neo1973 specific commands:
 <pre>
@@ -474,7 +474,7 @@ neo1973 udc pullup (on|off) - switch pull-up on or off
 What's the udc?
 
 
-===== Timeouts =====
+===== Задержки =====
 
 The boot menu timeout can be changed using
 <pre>
@@ -486,18 +486,18 @@ Also, by changing bootdelay you can have more time to take control of u-boot:
 setenv bootdelay=[seconds]
 </pre>
 
-===== Power-off =====
+===== Выключение питания =====
 
 Using
  neo1973 power-off
 
 you can switch the device off from the bootloader prompt.
 
-===== Battery charger related =====
+===== Заряд батареи =====
 
 For a detailed description of the charger basics, see [[Neo1973 Battery Charger]].
 
-====== Inquiring the charger state ======
+====== Получение состояния батареи ======
 
 You can get the current charger status by issuing
  neo1973 charger status
@@ -514,7 +514,7 @@ The following modes are possible:
 You can disable battery charging (until the next reboot) by issuing
  neo1973 charger off
 
-====== Forcing fast charge ======
+====== Быстрая зарядка ======
 
 Using
  neo1973 charger fast
@@ -532,7 +532,7 @@ and
  neo1973 charger !autofast
 respectively.
 
-===== Backlight =====
+===== Подсветка =====
 
 You can switch the backlight on and off by using
  neo1973 backlight on
@@ -540,7 +540,7 @@ and
  neo1973 backlight off
 respectively.
 
-===== Vibrator =====
+===== Вибро =====
 
 You can switch the vibrator on and off by using
  neo1973 vibrator on
@@ -548,7 +548,7 @@ and
  neo1973 vibrator off
 respectively.
 
-==== S3C2410 specific commands ====
+==== Специфичные команды S3C2410 ====
 
 <pre>
 GTA01Bv2 # help s3c2410
@@ -567,7 +567,7 @@ GTA01Bv2 # s3c2410 speed get
 FCLK = 101 MHz, HCLK = 50 MHz, PCLK = 50 MHz
 </pre>
 
-===== 266MHz clock =====
+===== Установка системного таймера на 266 МГц  =====
 
 You can re-configure the [[S3C2410]] PLL to generate a 266 MHz core cpu clock (rather than the 200MHz default) by using
  GTA01Bv2 # s3c2410 speed set 266 
@@ -577,7 +577,7 @@ respectively.
 
 {{warning|The old hardware (Phase 0 - GTA01Bv3) only runs stable at 266MHz if you do not attach anything (esp. the FPC / [[Debug Board]] to the Debug Port}}
 
-==== TFTP on QT2410 ====
+==== TFTP на QT2410 ====
 
 The QT2410 cs8900a Ethernet can be used to download images via network.
 
@@ -592,7 +592,7 @@ serverip=192.168.100.1
 </pre>
 
 
-===== TFTP kernel download =====
+===== Загрузка ядра по TFTP =====
 
 <pre>
 QT2410 # tftpboot 0x32000000
@@ -614,7 +614,7 @@ you can then commence booting via
 QT2410# bootm 0x32000000
 </pre>
 
-== Device Firmware Upgrade ==
+== Обноврение программного обеспечения устройства ==
 
 Our version of u-boot also implements [[USB DFU]]. This can be useful to
 load files and kernel for quick testing.
@@ -639,7 +639,7 @@ If it supports DFU, you should see the following snippet towards the end of the 
 
 For information on how to do firmware upgrades, please see [[dfu-util]].
 
-=== Booting files over DFU ===
+=== Загрузка через DFU ===
 
 To load a file at memory address 0x32000000:
 <pre>
@@ -686,9 +686,9 @@ else:
     sys.exit(2)
 </pre>
 
-== Troubleshooting ==
+== Типовые проблемы ==
 
-=== USB connectivity problems ===
+=== Проблемы соединения по USB ===
 
 I once got errors like this (in dmesg or /var/log/messages) on the host side while connecting the neo in u-boot:
 
