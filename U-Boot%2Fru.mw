@@ -1,69 +1,66 @@
-{{Languages|U-Boot}}
-[[Image:GTA01-U-Boot.JPG|thumb|300px| Консоль загрузчика Neo1973]] [[Image:Neo1973 uboot splash closeup.jpg|thumb|300px|Заставка загрузчика Neo1973]]
+[Image:GTA01-U-Boot.JPG|thumb|300px|u-boot on Neo1973 console]] [[Image:Neo1973 uboot splash closeup.jpg|thumb|300px|u-boot boot splash on Neo1973]]
 
-Загрузчик, используемый в смартфоне, называется '''U-Boot'''. Он обеспечивает начальную функциональность Openmoko во время загрузки: [[USB DFU]] для [[Flashing the Neo 1973|прошивки внутреннего ПО]] телефона, начальная заставка, загрузочное меню, консоль для [[bootloader commands|введения команд загрузчику]], конфигурировавшие [[bootloader environment|среды загрузчика]] и собственно загрузка [[kernel|ядра]].
+== Phase0 Quick Start ==
+* Make sure that your phone has had the battery and USB cable removed for at least 30 seconds.
+* Connect the Neo (ie not Debug Board) to a Linux host with the USB cable.
+* Hold in the AUX button on power-up to access the boot menu.
+* Set the console to USB.
+* Connect to /dev/ttyACM0 with a terminal program on the Linux host (you might need to chown uucp.uucp /dev/ttyACM0 )
+* Note that the cdc_acm /dev/ttyACM0 access disappears as soon as the Neo boots, and is replaced by the cdc_ether usb0 network access.
+* You're now at the bootloader prompt.
+* Set the bootdelay uboot environment variable to -1 if you want it to always halt at the bootloader on power-up.
 
-Для использования доступно [[bootloader versions|несколько версий]] загрузчика u-boot.
+== General ==
 
-== Фаза 0. Быстрый старт ==
-* Убедитесь, что не забыли вставить батарейку, а USB-кабель не был ни к чему подключен в течение последних 30 секунд.
-* Присоедините Neo (не [[Debug board]]!) USB-кабелем к машине с Linux-ом.
-* Удерживайте AUX во время загрузки для получения доступа к меню.
-* Переключите консоль на USB.
-* Подключитесь к /dev/ttyACM0 терминальной программой на Linux-машине (возможно, потребуется сделать chown uucp.uucp /dev/ttyACM0 )
-* Учтите, что доступ к /dev/ttyACM0 исчезнет во время загрузки, и в дальнейшем необходимо использовать сетевое устройство usb0.
-* Вы увидите строку приглашения к загрузке.
-* Установите задержку загрузчика переменных среды uboot в -1, если необходимо, чтобы меню появлялось при каждой загрузке.
+The GTA01 uses the [http://u-boot.sourceforge.net/ u-boot] bootloader.
 
-== Общие сведения ==
-
-Модель [[GTA01]] использует загрузчик [http://u-boot.sourceforge.net/ u-boot], дополнительную информацию о котором можно найти по следующим адресам:
+More information on u-boot can be found at 
 * http://www.denx.de/wiki/DULG
 * http://www.gumstix.org/tikiwiki/tiki-index.php?page=U-Boot
 * http://linuxdevices.com/articles/AT5085702347.html
 
-Дополнительно к оригинальному u-boot в GTA01 реализованы следующие возможности:
-* Загрузка устройства с флеши NAND с использованием [[S3C2410 Steppingstone]].
-* Поддержка S3C2410 NAND.
-* Загрузка ПО через контроллер S3C2410 USB device controller.
-* Отображение при загрузке логотипа или состояния процесса загрузки через S3C2410 framebuffer.
+Additions to the vanilla u-boot already implemented include: 
+* Support for boot from NAND flash using [[S3C2410 Steppingstone]]
+* Support for S3C2410 NAND flash
+* Support for downloading programs via S3C2410 USB Device Controller
+* Support to display bootup logo / status on S3C2410 Framebuffer
 
-u-boot, однако, не поддерживает множество вещей, нужных для GTA01, например:
-* Чтение ядра и образа initrd с карт памяти SD/Transflash.
-* Загрузка ПО с вышеупомянутого контроллера S3C2410 USB device controller.
+However, u-boot still doesn't support many of the features that GTA01 needs, such as
+* Support for reading kernel/initrd from SD/Transflash
+* Support for downloading programs via S3C2410 USB Device Controller
 
-[[User:HaraldWelte]] сейчас работает над этими проблемами, и, скорее всего, большинство из них уже имеет какое-то решение.
+[[User:HaraldWelte]] is working on those issues, and in fact most of them have already been implemented.
 
-== Исходный код загрузчика ==
+== Bootloader source code ==
 
-Патчи к загрузчику u-boot, созданные в рамках проекта Openmoko, можно найти тут: http://svn.openmoko.org/trunk/src/target/u-boot/patches/.
+The current bootloader patches can be found at http://svn.openmoko.org/trunk/src/target/u-boot/patches/. 
 
-Извлеките исходники из архива и запустите сначала "make gta01bv3_config" (или "gta01bv2_config", или с любой другой имеющейся конфигурацией), затем "make". В результате должен появиться файл образа u-boot.bin, который необходимо записать в NAND-флеш устройства, используя либо существующий загрузчик, либо [[sjf2410-linux]].
+Untar the sources, apply the patch.  run "make gta01bv3_config" (or gta01bv2_config, or whatever hardware revision you have), run "make".  You will get a resulting "u-boot.bin" image, which you can directly flash (either using existing bootloader or [[sjf2410-linux]]) into NAND.
 
-== Программный код загрузчика ==
+== Bootloader binary ==
 
-Последние версии собранных образов загрузчика можно найти по адресу http://downloads.openmoko.org/daily/ ; записывать в NAND их надо по смещению 0x00000000 (размер 0x30000).
+The latest bootloader binary builds can be found at http://buildhost.openmoko.org/tmp/deploy/images/ .  It should be written to the NAND flash address 0x00000000 (size 0x30000)
 
-== Разработка загрузчика ==
+== Bootloader development ==
 
 === QT2410 ===
-Если вы хотите заняться разработкой загрузчика на [[QT2410]], легче будет не прошивать его во флеш-память, а работать с его образом, закаченным через USB в оперативную память.
+If you want to do bootloader development on the QT2410, it's easier to work with a bootloader image that can be downloaded via USB into RAM instead of flashing.
 
-Для этого надо отредактировать файл u-boot/include/configs/qt2410.h: изменить 32-ю строку с "if 0" на "if 1", и пересобрать образ: "make".
+To do so, you need to edit the u-boot/include/configs/qt2410.h file, and change the "if 0" in Line 32 into a "if 1", then recompile with "make".
 
-Получившийся образ "u-boot.bin" ''НЕ ПРЕДНАЗНАЧЕН'' для записи в NAND-флеш и может быть исполнен только в памяти, например с помощью [[s3c2410_boot_usb]].
+The resulting "u-boot.bin" is _NOT SUITABLE_ for NAND flash, but only for direct execution from within ram, e.g. by using the [[s3c2410_boot_usb]] program.
 
 === GTA01 ===
 
-Ситуация с работой с загрузчиком на самом устройстве GTA01 немного сложнее: во-первых у нас нет здесь NOR-флеши, во-вторых не существует возможности загрузиться ни с чего, кроме NAND. Следовательно, нет в нашем распоряжении и USB-загрузчика, как на QT2410.
+Doing bootloader development on the GTA01 is a bit more tricky.  first, we don't have any NOR flash.  Second, there is no other way to boot _but_ from NAND.  Therefore, we also don't have a USB downloader like the QT2410.
 
-Проблема заключается в том, что [[S3C2410 Steppingstone]] безусловно копирует первые 4 Кб с флеши в свою внутреннюю память, SRAM. Этот сегмент SRAM-памяти так же безусловно связывается с физическим адресом 0. Как это обойти?
+The main problem is:  The [[S3C2410 Steppingstone]] unconditionally copies the first 4k of flash into its internal SRAM.   That SRAM segment stays unconditionally mapped at physical address zero. How do we get around this
 
-==== Использование JTAG для загрузки из оперативной памяти ====
+==== Using JTAG to boot from RAM ====
 
-Так как же загрузиться из памяти? Используем JTAG / [[OpenOCD]] для:
+So how can we boot from RAM? We use JTAG / OpenOCD to
 
-* сброса и останова CPU на PC=0
+* reset and halt the cpu at PC=0
 <pre>
 > reset halt
 target halted in ARM state due to debug request, current mode: Supervisor
@@ -71,19 +68,19 @@ cpsr: 0x400000d3 pc: 0x00000000
 MMU: disabled, D-Cache: disabled, I-Cache: disabled
 </pre>
 
-* загрузки небольшого кода для низкоуровневой инициализации тайминга SDRAM (переписывание первых 4 Кб SRAM у [[S3C2410 Steppingstone|Steppingstone]])
+* download a small piece of code for low-level SDRAM timing initialization (overwrite 4k SRAM of steppingstone)
 <pre>
-> load_binary /space/misc/gta01/u-boot.git/foo.bin 0
+> load_binary /space/misc/gta01/u-boot.git/foo.bin 0            
 downloaded 332 byte in 0s 21899us
 </pre>
 
-* установки точки останова по адресу 0x33f80000 (это означает, что код из предыдущего пункта завершил исполнение)
+* assert a break point at address 0x33f80000 (which indicates that the low-level code has finished)
 <pre>
 > bp 0x33f80000 4 hw
 breakpoint added at address 0x33f80000
 </pre>
 
-* запуска кода до этой точки
+* run the code up to the break point
 <pre>
 > resume
 Target 0 resumed
@@ -93,19 +90,19 @@ cpsr: 0x600000d3 pc: 0x33f80000
 MMU: disabled, D-Cache: disabled, I-Cache: enabled
 </pre>
 
-* загрузки образа u-boot в память по адресу 0x33f80000
+* download the u-boot RAM image to 0x33f80000
 <pre>
 > load_binary /space/misc/gta01/u-boot.git/u-boot.bin 0x33f80000
 downloaded 135692 byte in 6s 567264us
 </pre>
 
-* продолжения исполнения кода
+* resume processing
 <pre>
 > resume
 Target 0 resumed
 </pre>
 
-В этот момент подсветка экрана зажигается и мы видим примерно такое сообщение на серийной консоли:
+At this point, the display backlight gets bright and we see the following familiar prompt on the serial console:
 <pre>
 U-Boot 1.1.6 (Jan 13 2007 - 23:44:23)
 
@@ -116,13 +113,13 @@ NAND:  64 MiB
 In:    serial
 Out:   serial
 Err:   serial
-Hit any key to stop autoboot:  0
-GTA01Bv2 #
+Hit any key to stop autoboot:  0 
+GTA01Bv2 # 
 </pre>
 
-== Создание загрузочных образов ==
+== Creating bootable images ==
 
-Для нормальной работы u-boot требуется загрузочные образы (такие как ядро, но также initrd и др.) в форме так называемых ''uImage''. Чтобы создать этот формат из, например, образа ядра ''vmlinux'', надо сделать следующее:
+u-boot needs bootable images (such as kernels, but also initrd and others) in form of a so-called ''uImage''.  In order to create a ''uImage'' from e.g. a ''vmlinux'' kernel image, you can proceed as follows:
 
 <pre>
 objcopy -O binary -R .note -R .comment -S vmlinux linux.bin
@@ -130,171 +127,168 @@ gzip -9 linux.bin
 u-boot/tools/mkimage -A arm -O linux -T kernel -C gzip -a 30008000 -e 30008000 -n "Kernel Image QT2410" -d linux.bin.gz uImage
 </pre>
 
-== Меню загрузки ==
-[[Image:Neo1973 uboot menu.jpg|thumb|400px|Загрузочное меню u-boot на экране Neo1973]]
+== Boot menu ==
+[[Image:Neo1973 uboot menu.jpg|thumb|400px|u-boot boot menu on Neo1973]]
 
-На момент выпуска [[Neo 1973 Phase 0|Phase-0]] наша версия u-boot имеет возможность выводить на экран загрузочное меню.
+As of the Phase-0 release, our u-boot version now features an on-screen boot menu.
 
-=== Получение доступа к меню ===
+=== Accessing the boot menu ===
 
-Чтобы войти в меню, надо перед включением аппарата нажать и удерживать кнопку AUX button, а затем нажать кнопку включения питания.
+You can access the boot menu by pressing and holding the [[Neo1973 AUX Button]] together with the power button while switching the phone on.
 
-=== Использование ===
+=== Using the boot menu ===
 
-Последовательными нажатиями кнопки AUX button можно ходить по пунктам меню. Для выбора нужного пункта необходимо нажать кнопку POWER.
+By pressing the [[Neo1973 AUX Button]] you can cycle through the menu items.  Use the ''POWER'' button to select one item.
 
-=== Добавление пунктов в меню ===
+=== Adding items to the boot menu ===
 
-Для добавления новых пунктов к существующему меню нужно установить соответствующие переменные среды. Общепринятый синтаксис таков: ''menu_<номер> <Название>: Команда-U-Boot''
+You can add items to the boot menu by setting environment variables. The canonical form is ''menu_<number> <Title>: U-Boot-Commands''
 
-Например, следующая команда добавит пункт загрузочного меню, который будет переключать телефон в режим быстрой зарядки (autofast charging) и выключать подсветку экрана:
-<pre>
-setenv menu_6 Autofast-Charge and Backlight Off: neo1973 charger autofast\; neo1973 backlight off
-saveenv
-</pre>
+For example the following command will add a boot menu entry that switches to autofast charging and turns off the backlight:
+  setenv menu_6 Autofast-Charge and Backlight Off: neo1973 charger autofast\; neo1973 backlight off
+  saveenv
 
-== Информация загрузчика ==
+== Bootloader prompt ==
 
-=== Получение загрузочной информации ===
-Строка приглашения загрузчика доступна либо через серийную консоль (см. [[Debug Board]]), либо как виртуальное серийное устройство USB (USB CDC_ACM); способ соединения зависит от значений переменных окружения '''stdin''', '''stdout''' и '''stderr'''.
+=== Accessing the bootloader prompt ===
+The bootloader prompt is available either on the serial console (via [[Debug Board]]), or as virtual USB Serial device (USB CDC_ACM).
+Whether the serial port or usb is used depends on the u-boot environment variables '''stdin''', '''stdout''' and '''stderr'''.
 
-Независимо от того, используете ли вы usbtty или нет, первые несколько сообщений будут выведены в поток серийной консоли.
+Whether or not you use usbtty, the first couple of messages will always be displayed on the serial console.
 
-Загрузчик по умолчанию настроен на 3-секундное ожидание. Если в течение этого времени на '''stdin''' будет получено нажатие какой-либо клавиши, загрузка прерывается.
+The bootloader is currently configured to wait for three seconds.  If a key press on the '''stdin''' is received within those three seconds, auto-boot is aborted.
 
-==== Использование usbtty ====
+==== Using usbtty from Linux ====
 
-Простое подключение телефона в режиме u-boot к компьютеру с Linux должно привести к обнаружению устройства [[CDC ACM]] и появлению нового tty-устройства /dev/ttyACM0. Если этого не случилось, включите опцию ядра CONFIG_USB_ACM (Device Drivers -> USB support -> USB Modem (CDC ACM) support). (Инструкции для пользователей MacOS [[MacOS_X#USB_Serial|тут]].)
+Just by connecting the phone in u-boot mode to your Linux pc should make it detect a [[CDC ACM]] device, and you should get a new tty device called /dev/ttyACM0. If not, enable the CONFIG_USB_ACM (Device Drivers -> USB support -> USB Modem (CDC ACM) support). (Instructions for MacOS users are [[MacOS_X#USB_Serial|here]])
 
-Затем просто воспользуйтесь любым эмулятором терминала на выбор (minicom, cu, zc, screen ...), подключившись к вышеупомянутому /dev/ttyACM0. Для примера рассмотрим вариант с cu. Если у вас он не установлен (а в Debian он находится в пакете taylor-uucp), выполните обычную команду "apt-get install cu".
+Use your favourite terminal emulator (minicom, cu, zc, screen ...) to access it like any other serial port. If you don't have a favorite, try just: (cu is in the taylor-uucp package, use "apt-get install cu" if it is not yet installed)
+ cu -l /dev/ttyACM0
 
-cu -l /dev/ttyACM0
+You might need to 
+ chown uucp.uucp /dev/ttyACM0
 
-Вам возможно понадобится
+to get the necessary right (even as root).
 
-chown uucp.uucp /dev/ttyACM0
+First, you should try to check whether the USB device shows up in 'lsusb' while you're running in u-boot mode:
 
-для установки соответствующих прав, даже если вы root.
+ # lsusb -d 1457:5119
+ Bus 005 Device 079: ID 1457:5119  
 
-Для начала проверьте, есть ли в списке USB-устройств ваш телефон (команда "lsusb"). Напоминаем, что устройство должно находиться в режиме u-boot.
-
-# lsusb -d 1457:5119
-Bus 005 Device 079: ID 1457:5119
-
-Затем посмотрите набор возможных конфигурационных опций устройства:
+Second, lets see some more details about the available endpoints and configurations:
 
 <pre>
 # lsusb -v -d 1457:5119
-Bus 005 Device 079: ID 1457:5119
+Bus 005 Device 079: ID 1457:5119  
 Device Descriptor:
-bLength                18
-bDescriptorType         1
-bcdUSB               1.10
-bDeviceClass            2 Communications
-bDeviceSubClass         0
-bDeviceProtocol         0
-bMaxPacketSize0        16
-idVendor           0x1457
-idProduct          0x5119
-bcdDevice            0.00
-iManufacturer           1 Openmoko, Inc
-iProduct                2 Neo1973 Bootloader U-Boot 1.2.0-g6c7cac8c-dirty-moko3
-iSerial                 3 0000000
-bNumConfigurations      1
-Configuration Descriptor:
-bLength                 9
-bDescriptorType         2
-wTotalLength           85
-bNumInterfaces          3
-bConfigurationValue     1
-iConfiguration          4 TTY via USB
-bmAttributes         0xc0
-Self Powered
-MaxPower                0mA
-Interface Descriptor:
-bLength                 9
-bDescriptorType         4
-bInterfaceNumber        0
-bAlternateSetting       0
-bNumEndpoints           1
-bInterfaceClass         2 Communications
-bInterfaceSubClass      2 Abstract (modem)
-bInterfaceProtocol      1 AT-commands (v.25ter)
-iInterface              6 Control Interface
-CDC Header:
-bcdCDC               0.6e
-CDC Call Management:
-bmCapabilities       0x00
-bDataInterface          1
-CDC ACM:
-bmCapabilities       0x00
-CDC Union:
-bMasterInterface        0
-bSlaveInterface         1
-Endpoint Descriptor:
-bLength                 7
-bDescriptorType         5
-bEndpointAddress     0x81  EP 1 IN
-bmAttributes            3
-Transfer Type            Interrupt
-Synch Type               None
-Usage Type               Data
-wMaxPacketSize     0x0010  1x 16 bytes
-bInterval             255
-Interface Descriptor:
-bLength                 9
-bDescriptorType         4
-bInterfaceNumber        1
-bAlternateSetting       0
-bNumEndpoints           2
-bInterfaceClass        10 CDC Data
-bInterfaceSubClass      0 Unused
-bInterfaceProtocol      0
-iInterface              5 Bulk Data Interface
-Endpoint Descriptor:
-bLength                 7
-bDescriptorType         5
-bEndpointAddress     0x02  EP 2 OUT
-bmAttributes            2
-Transfer Type            Bulk
-Synch Type               None
-Usage Type               Data
-wMaxPacketSize     0x0010  1x 16 bytes
-bInterval             255
-Endpoint Descriptor:
-bLength                 7
-bDescriptorType         5
-bEndpointAddress     0x83  EP 3 IN
-bmAttributes            2
-Transfer Type            Bulk
-Synch Type               None
-Usage Type               Data
-wMaxPacketSize     0x0010  1x 16 bytes
-bInterval             255
-Interface Descriptor:
-bLength                 9
-bDescriptorType         4
-bInterfaceNumber        2
-bAlternateSetting       0
-bNumEndpoints           0
-bInterfaceClass       254 Application Specific Interface
-bInterfaceSubClass      1 Device Firmware Update
-bInterfaceProtocol      1
-iInterface              7 USB Device Firmware Upgrade
+  bLength                18
+  bDescriptorType         1
+  bcdUSB               1.10
+  bDeviceClass            2 Communications
+  bDeviceSubClass         0 
+  bDeviceProtocol         0 
+  bMaxPacketSize0        16
+  idVendor           0x1457 
+  idProduct          0x5119 
+  bcdDevice            0.00
+  iManufacturer           1 OpenMoko, Inc
+  iProduct                2 Neo1973 Bootloader U-Boot 1.2.0-g6c7cac8c-dirty-moko3
+  iSerial                 3 0000000
+  bNumConfigurations      1
+  Configuration Descriptor:
+    bLength                 9
+    bDescriptorType         2
+    wTotalLength           85
+    bNumInterfaces          3
+    bConfigurationValue     1
+    iConfiguration          4 TTY via USB
+    bmAttributes         0xc0
+      Self Powered
+    MaxPower                0mA
+    Interface Descriptor:
+      bLength                 9
+      bDescriptorType         4
+      bInterfaceNumber        0
+      bAlternateSetting       0
+      bNumEndpoints           1
+      bInterfaceClass         2 Communications
+      bInterfaceSubClass      2 Abstract (modem)
+      bInterfaceProtocol      1 AT-commands (v.25ter)
+      iInterface              6 Control Interface
+      CDC Header:
+        bcdCDC               0.6e
+      CDC Call Management:
+        bmCapabilities       0x00
+        bDataInterface          1
+      CDC ACM:
+        bmCapabilities       0x00
+      CDC Union:
+        bMasterInterface        0
+        bSlaveInterface         1 
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x81  EP 1 IN
+        bmAttributes            3
+          Transfer Type            Interrupt
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0010  1x 16 bytes
+        bInterval             255
+    Interface Descriptor:
+      bLength                 9
+      bDescriptorType         4
+      bInterfaceNumber        1
+      bAlternateSetting       0
+      bNumEndpoints           2
+      bInterfaceClass        10 CDC Data
+      bInterfaceSubClass      0 Unused
+      bInterfaceProtocol      0 
+      iInterface              5 Bulk Data Interface
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x02  EP 2 OUT
+        bmAttributes            2
+          Transfer Type            Bulk
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0010  1x 16 bytes
+        bInterval             255
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x83  EP 3 IN
+        bmAttributes            2
+          Transfer Type            Bulk
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0010  1x 16 bytes
+        bInterval             255
+    Interface Descriptor:
+      bLength                 9
+      bDescriptorType         4
+      bInterfaceNumber        2
+      bAlternateSetting       0
+      bNumEndpoints           0
+      bInterfaceClass       254 Application Specific Interface
+      bInterfaceSubClass      1 Device Firmware Update
+      bInterfaceProtocol      1 
+      iInterface              7 USB Device Firmware Upgrade
 Device Status:     0x0001
-Self Powered
+  Self Powered
 </pre>
 
-После этого вы можете запускать свою терминальную программу.
+Next, you can access it using your favourite terminal program.
 
-Наконец, если переменные среды установлены неверно, используйте соединённую с телефоном консоль (серийную или USB) для выполнения следующих команд:
+Then, if the environment is not set correctly, you will need to use the current console (e.g. serial console) to set
 <pre>
 GTA01Bv2 # setenv stderr usbtty
 GTA01Bv2 # setenv stdout usbtty
 GTA01Bv2 # setenv stdin usbtty
 </pre>
 
-==== Пример сообщений u-boot  ====
+==== Typical u-boot prompt ====
 
 <pre>
 U-Boot 1.2.0-moko1 (Feb 16 2007 - 00:36:13)
@@ -307,25 +301,25 @@ USB:   S3C2410 USB Deviced
 In:    serial
 Out:   serial
 Err:   serial
-Hit any key to stop autoboot:  0
+Hit any key to stop autoboot:  0 
 GTA01Bv3 #
 </pre>
 
-=== Команды загрузчика ===
+=== Commands on the bootloader prompt ===
 
-==== Автозагрузка ====
+==== Auto-boot ====
 
-Автозагрузка по ходу своей работы исполняет команды, указанные в переменной окружения ''bootcmd''. Вот конфигурация по умолчанию:
+Auto-boot executes the command[s] specified in the ''bootcmd'' environment variable. The default configuration is:
 <pre>
 GTA01Bv3 # printenv
 bootcmd=setenv bootargs ${bootargs_base} ${mtdparts}; nand read.e 0x32000000 kernel; bootm 0x32000000
 </pre>
 
-Коротко говоря, тут сказано, что будет производиться загрузка содержимого с раздела NAND '''kernel''' в память по адресу 0x32000000, а затем этому коду будет передано исполнение.
+This basically tells us that it will load the content of the NAND partition '''kernel''' to memory address 0x32000000 and then try to boot it.  
 
-==== Среда окружения ====
+==== Environment ====
 
-Работа u-boot ориентирована на конфигурацию, постоянно хранимую в NAND-флеши. Для чтения, изменения и сохранения этих параметров используйте следующие команды:
+u-boot is configured to manage a non-volatile environment that is stored in NAND flash.  You can use the commands to read/alter/store the environment in the following example:
 <pre>
 GTA01Bv2 # printenv
 baudrate=115200
@@ -352,10 +346,10 @@ bootdelay=10
 GTA01Bv3 # saveenv
 Saving Environment to NAND...
 Erasing Nand...Writing to Nand... done
-GTA01Bv3 #
+GTA01Bv3 # 
 </pre>
 
-Обратите внимание: при установке нескольких команд в одну переменную, например bootcmd (см. подраздел "Автозагрузка" выше), символы ";" должны быть экранированы обратной косой чертой:
+Note: When setting multiple commands, e.g. for bootcmd, you need to escape the ';', for instance
 
 <pre>
 GTA01Bv3 # setenv bootcmd mmcinit\; ext2load mmc 0 0x32000000 uImage\; bootm 0x32000000
@@ -363,7 +357,7 @@ GTA01Bv3 # setenv bootcmd mmcinit\; ext2load mmc 0 0x32000000 uImage\; bootm 0x3
 
 ==== MMC/SD ====
 
-Для инициализации (форматирования) карт MMC/SD используйте команду ''mmcinit''.
+in order to initialize a MMC/SD card, you have to use the ``mmcinit'' command.
 <pre>
 GTA01Bv3 # mmcinit
 trying to detect SD Card...
@@ -379,13 +373,13 @@ size = 4208984064
 GTA01Bv3 #
 </pre>
 
-После этого на карте можно прочитать файловую систему ext2:
+afterwards, you can read ext2 filesystems like:
 <pre>
 GTA01Bv3 # ext2ls mmc 0
 <DIR>       1024 .
 <DIR>       1024 ..
 <DIR>      12288 lost+found
-1544788 uImage
+         1544788 uImage
 </pre>
 
 ==== NAND ====
@@ -396,9 +390,9 @@ nand info                  - show available NAND devices
 nand device [dev]     - show or set current device
 nand read[.jffs2]     - addr off size
 nand write[.jffs2]    - addr off size - read/write `size' bytes starting
-at offset `off' to/from memory address `addr'
+    at offset `off' to/from memory address `addr'
 nand erase [clean] [off size] - erase `size' bytes from
-offset `off' (entire device if not specified)
+    offset `off' (entire device if not specified)
 nand bad - show bad blocks
 nand dump[.oob] off - dump page
 nand scrub - really clean NAND erasing bad blocks (UNSAFE)
@@ -406,7 +400,7 @@ nand markbad off - mark bad block at offset (UNSAFE)
 nand biterr off - make a bit error at offset (UNSAFE)
 </pre>
 
-===== Загрузка ядра из NAND =====
+===== Loading Kernel from NAND =====
 
 <pre>
 GTA01Bv3 # nand read 0x32000000 kernel
@@ -414,20 +408,21 @@ GTA01Bv3 # nand read 0x32000000 kernel
 NAND read: device 0 offset 212992, size 2097152 ...  2097152 bytes read: OK
 GTA01Bv3 # bootm 0x32000000
 ## Booting image at 32000000 ...
-Image Name:   Openmoko Kernel Image Neo1973
-Created:      2007-02-15  23:54:18 UTC
-Image Type:   ARM Linux Kernel Image (gzip compressed)
-Data Size:    1546258 Bytes =  1.5 MB
-Load Address: 30008000
-Entry Point:  30008000
-Verifying Checksum ... OK
-Uncompressing Kernel Image ... OK
+   Image Name:   OpenMoko Kernel Image Neo1973
+   Created:      2007-02-15  23:54:18 UTC
+   Image Type:   ARM Linux Kernel Image (gzip compressed)
+   Data Size:    1546258 Bytes =  1.5 MB
+   Load Address: 30008000
+   Entry Point:  30008000
+   Verifying Checksum ... OK
+   Uncompressing Kernel Image ... OK
 Starting kernel ...
 </pre>
 
-===== Запись нового загрузчика в NAND =====
+===== Writing new bootloader to NAND =====
 
-Следующие команды загружают файл u-boot.bin с карты MMC и записывают его во флеш-раздел загрузчика:
+The following set of commands loads the file u-boot.bin from ext2/mmc and flashes it into the
+bootloader flash partition:
 
 <pre>
 GTA01Bv3 # ext2load mmc 0 0x32000000 u-boot.bin
@@ -435,9 +430,10 @@ GTA01Bv3 # nand erase u-boot
 GTA01Bv3 # nand write.e 0x32000000 u-boot ${filesize}
 </pre>
 
-===== Запись ядра в NAND =====
+===== Writing kernel to NAND =====
 
-Следующие команды загружают файл uImage с карты MMC и записывают его во флеш-раздел загрузчика:
+The following set of commands loads the file uImage from ext2/mmc and flashes it into the
+kernel flash partition:
 
 <pre>
 GTA01Bv3 # ext2load mmc 0 0x32000000 uImage
@@ -445,9 +441,10 @@ GTA01Bv3 # nand erase kernel
 GTA01Bv3 # nand write.e 0x32000000 kernel ${filesize}
 </pre>
 
-===== Запись системного образа в NAND =====
+===== Writing rootfs to NAND =====
 
-Следующие команды загружают файл rootfs.jffs2 с карты MMC и записывают его в корневой (rootfs) флеш-раздел загрузчика:
+The following set of commands loads the file rootfs.jffs2 from ext2/mmc and flashes it into the
+rootfs flash partition:
 
 <pre>
 GTA01Bv3 # ext2load mmc 0 0x32000000 rootfs.jffs2
@@ -455,14 +452,14 @@ GTA01Bv3 # nand erase rootfs
 GTA01Bv3 # nand write.e 0x32000000 rootfs ${filesize}
 </pre>
 
-Заметьте, что это работает только для файловых систем размером меньше, чем свободная память выше адреса 0x32000000, что в случае общей памяти в 64Мб равняется 32Мб.
+Please note that this will only work with root file system sizes that are smaller than the amount of memory above 0x32000000, which in the case of 64MB SDRAM is something like 32MB.
 
-==== Специфичные команды Neo1973 ====
+==== Neo1973 related commands ====
 
-Наша версия u-boot поддерживает несколько специфичных для Neo1973 команд:
+Our version of u-boot supports a couple of Neo1973 specific commands:
 <pre>
-GGTA01Bv4 # help neo1973
-neo1973 neo1973 info - display phone information
+GTA01Bv2 # help neo1973
+neo1973 neo1973 info - display phone informantion
 neo1973 power-off - switch off the phone
 neo1973 charger status - display charger status
 neo1973 charger autofast - enable automatic fast (500mA) charging
@@ -470,87 +467,88 @@ neo1973 charger !autofast - disable automatic fast (500mA) charging
 neo1973 charger fast - enable fast (500mA) charging
 neo1973 charger off - disable charging
 neo1973 backlight (on|off) - switch backlight on or off
-neo1973 led num (on|off) - switch LED number 'num' on or off
 neo1973 vibrator (on|off) - switch vibrator on or off
-neo1973 gsm (on|off|version) - switch GSM Modem on/off or print firmware version
-neo1973 gps (on|off) - switch GPS system on or off
-neo1973 udc pullup (on|off) - switch USB device controller pull-up on or off
-
+neo1973 udc pullup (on|off) - switch pull-up on or off
 </pre>
 
-===== Задержки =====
+What's the udc?
 
-Время задержки загрузочного меню может быть изменено так:
+
+===== Timeouts =====
+
+The boot menu timeout can be changed using
 <pre>
 setenv boot_menu_timeout=[seconds?]
 </pre>
 
-Также, изменив задержку самой загрузки, можно получить больше времени для манипуляций с u-boot:
+Also, by changing bootdelay you can have more time to take control of u-boot:
 <pre>
 setenv bootdelay=[seconds]
 </pre>
 
-===== Выключение питания =====
+===== Power-off =====
 
-Исполнив
-neo1973 power-off
+Using
+ neo1973 power-off
 
-вы сможете выключить устройство прямо из строки приглашения загрузчика.
+you can switch the device off from the bootloader prompt.
 
-===== Заряд батареи =====
+===== Battery charger related =====
 
-За детальной информацией об основах зарядки телефона обратитесь к [[Neo1973 Battery Charger|соответствующей странице]].
+For a detailed description of the charger basics, see [[Neo1973 Battery Charger]].
 
-====== Получение состояния батареи ======
+====== Inquiring the charger state ======
 
-Следующая команда покажет сам состояние зарядки устройства:
-neo1973 charger status
+You can get the current charger status by issuing
+ neo1973 charger status
 
-Возможны следующие состояния:
+The following modes are possible:
 
-* idle - в данный момент не заряжается
+* idle - no charging
 * trickle - FIXME
-* pre - Медленная зарядка на скорости 100мА/ч., штатный режим.
-* fast_cccv - Быстрая зарядка, 500мА/ч., используя Constant-Current и Constant Voltage (Li-Ion), также известный как режим ''fast_cccv''.
+* pre - Slow (100mA) charging, works in hardware.
+* fast_cccv - Fast (500mA) charging, using Constant-Current followed by Constant Voltage (Li-Ion)
 
-====== Запрещение загрузки батареи ======
+====== Disabling battery charging ======
 
-Можно запретить зарядку батареи до следующей перезагрузки:
-neo1973 charger off
+You can disable battery charging (until the next reboot) by issuing
+ neo1973 charger off
 
-====== Быстрая зарядка ======
+====== Forcing fast charge ======
 
-Исполнив
-neo1973 charger fast
-вы заставите устройство управления питанием (Power management unit, PMU) осуществить зарядку на повышенной скорости в 500мА/ч. Операция автоматически прекратится в случае перегрева аккумулятора или по возникновении другой нештатной ситуации.
+Using
+ neo1973 charger fast
+you can force the PMU to try to do a fast (500mA) charge of the battery. It will abort if the battery is in over temperature or some other error condition occurs.
 
-====== Разрешение / Запрещение автоматической быстрой зарядки ======
+====== Enabling / Disabling automatic fast charge ======
 
-Функция быстрой зарядки "Autofast" -- штатное свойство блока [[PCF50606|PCF50606 PMU]]. Это значит, что режим ''fast_cccv'' будет активизирован автоматически, если к телефону будет подсоединено зарядное устройство с соответствующими выходными характеристиками по вольтажу и аккумулятор в данный момент не перегрет.
+Autofast is a feature of the PCF50606 PMU.  It means that the fast_cccv mode will be automatically selected if a charger with suitable voltage is plugged in, and the battery not in over temperature condition.
 
-{{warning|Такая зарядка потенциально опасна! Включайте её принудительно только в том случае, когда '''вы уверены''', что от подключённого USB-шнура действительно можно получить не менее 500мА, например, когда зарядник подключён к мощному домашнему питанию, или к имеющему самостоятельное питание USB-хабу, или к компьютеру. Некоторые хабы и ноутбуки, однако, дают на выходе USB только 100мА и поэтому быструю зарядку не поддерживают.}}
+{{warning|This is potentially dangerous.  Only enable autofast if you ARE SURE that you can draw 500mA from the USB connector.  This is the case with a wall outlet charger, or if you are attached to a self-powered hub or a desktop PC root hub.  Bus powered hubs and some laptops only provide 100mA on their USB ports and can thus not support fast charging}}
 
-Включать/выключать autofast можно командами
-neo1973 charger autofast
-и
-neo1973 charger !autofast
-соответственно.
+You can enable or disable autofast by 
+ neo1973 charger autofast
+and
+ neo1973 charger !autofast
+respectively.
 
-===== Подсветка =====
+===== Backlight =====
 
-Подсветка экрана включается и выключается:
-neo1973 backlight on
-и
-neo1973 backlight off
+You can switch the backlight on and off by using
+ neo1973 backlight on
+and
+ neo1973 backlight off
+respectively.
 
-===== Вибро =====
+===== Vibrator =====
 
-Встроенный в корпус вибратор включается и выключается:
-neo1973 vibrator on
-и
-neo1973 vibrator off
+You can switch the vibrator on and off by using
+ neo1973 vibrator on
+and 
+ neo1973 vibrator off
+respectively.
 
-==== Специфичные команды S3C2410 ====
+==== S3C2410 specific commands ====
 
 <pre>
 GTA01Bv2 # help s3c2410
@@ -569,21 +567,21 @@ GTA01Bv2 # s3c2410 speed get
 FCLK = 101 MHz, HCLK = 50 MHz, PCLK = 50 MHz
 </pre>
 
-===== Установка системного таймера на 266 МГц  =====
+===== 266MHz clock =====
 
-Вы можете перенастроить блок PLL у [[S3C2410]] на генерацию частоты процессора в 266МГц (вместо 200МГц) с помощью команд
-GTA01Bv2 # s3c2410 speed set 266
-и
-GTA01Bv2 # s3c2410 speed set 202
-соответственно.
+You can re-configure the [[S3C2410]] PLL to generate a 266 MHz core cpu clock (rather than the 200MHz default) by using
+ GTA01Bv2 # s3c2410 speed set 266 
+and
+ GTA01Bv2 # s3c2410 speed set 202
+respectively.
 
-{{warning|Старое оборудование ([[GTA01 revisions|Phase 0 - GTA01Bv3]]) стабильно работает на частоте 266МГц только если к аппарату не подключены никакие внешние устройства, особенно [[Debug Board|отладочная панель]] через коннектор FPC}}
+{{warning|The old hardware (Phase 0 - GTA01Bv3) only runs stable at 266MHz if you do not attach anything (esp. the FPC / [[Debug Board]] to the Debug Port}}
 
-==== TFTP на QT2410 ====
+==== TFTP on QT2410 ====
 
-Сетевой интерфейс cs8900a устройства [[QT2410]] может быть использован для получения загрузочных образов по сети.
+The QT2410 cs8900a Ethernet can be used to download images via network.
 
-Для начала установите правильные значения переменных окружения ''ipaddr'', ''serverip'', ''ethaddr'' и ''netmaskk'':
+First, you have to make sure that ''ipaddr'', ''serverip'', ''ethaddr' and ''netmaskk'' are set correctly in the environment:
 
 <pre>
 QT2410 # printenv
@@ -594,7 +592,7 @@ serverip=192.168.100.1
 </pre>
 
 
-===== Загрузка ядра по TFTP =====
+===== TFTP kernel download =====
 
 <pre>
 QT2410 # tftpboot 0x32000000
@@ -603,53 +601,55 @@ TFTP from server 192.168.100.1; our IP address is 192.168.100.100
 Filename 'C0A86464.img'.
 Load address: 0x32000000
 Loading: #################################################################
-#################################################################
-#################################################################
-#################################################################
-##########################################
+         #################################################################
+         #################################################################
+         #################################################################
+         ##########################################
 done
 Bytes transferred = 1544788 (179254 hex)
 </pre>
 
-Далее вы можете осуществить загрузку полученного образа:
+you can then commence booting via
 <pre>
 QT2410# bootm 0x32000000
 </pre>
 
-== Обновление программного обеспечения устройства ==
+== Device Firmware Upgrade ==
 
-Наша версия u-boot имеет также реализацию [[USB DFU]]. Это, в частности, может быть полезно для загрузки файлов и образов ядер для проведения быстрого тестирования.
+Our version of u-boot also implements [[USB DFU]]. This can be useful to
+load files and kernel for quick testing.
 
-Чтобы понять, поддерживает ли ваш u-boot эту функцию, посмотрите на вывод
-$ lsusb -v -d 1457:5119
-в то время как телефон находится в режиме u-boot.
+To find out whether your version of u-boot supports this, use the output of
+ $ lsusb -v -d 1457:5119
+while the phone is in u-boot mode.
 
-Если DFU поддерживается, вы увидите следующий блок текста ближе к концу вывода команды:
+If it supports DFU, you should see the following snippet towards the end of the output:
 <pre>
-Interface Descriptor:
-bLength                 9
-bDescriptorType         4
-bInterfaceNumber        2
-bAlternateSetting       0
-bNumEndpoints           0
-bInterfaceClass       254 Application Specific Interface
-bInterfaceSubClass      1 Device Firmware Update
-bInterfaceProtocol      1
-iInterface              0
+    Interface Descriptor:
+      bLength                 9
+      bDescriptorType         4
+      bInterfaceNumber        2
+      bAlternateSetting       0
+      bNumEndpoints           0
+      bInterfaceClass       254 Application Specific Interface
+      bInterfaceSubClass      1 Device Firmware Update
+      bInterfaceProtocol      1 
+      iInterface              0 
 </pre>
 
-Далее читайте страницу [[dfu-util]], где описан процесс обновления версий ПО телефона.
+For information on how to do firmware upgrades, please see [[dfu-util]].
 
-=== Загрузка через DFU ===
+=== Booting files over DFU ===
 
-Для загрузки файла в память по адресу 0x32000000:
+To load a file at memory address 0x32000000:
 <pre>
 dfu-util -a 0 -D fileToLoad -R
 </pre>
 
-После этого отправьте u-boot команду 'bootm 0x32000000', или 'bootelf 0x32000000', если это файл формата [http://ru.wikipedia.org/wiki/Executable_and_Linkable_Format ELF].
+After that, send 'bootm 0x32000000' to u-boot or 'bootelf 0x32000000' if
+its an elf file.
 
-Вот простой скрипт на Python, который загружает образ ELF, избегая при этом ошибки в [[The USB Control Device Class Abstract Control Model - CDC ACM|ACM]], приводящей к сбою при передаче больших пакетов.
+Simple python script that can boot an ELF image - avoiding a ACM bug that breaks on large packets.
 
 <pre>
 #!/usr/bin/python
@@ -661,42 +661,45 @@ cmd1 = "neo backlight off\n"
 cmd2 = "bootelf 0x32000000\n"
 
 def output(tty, str):
-for x in str:
-tty.write(x)
-tty.flush()
+    for x in str:
+        tty.write(x)
+        tty.flush()
 
 if len(sys.argv) == 2:
-print "Loading %s..." % sys.argv[1]
+    print "Loading %s..." % sys.argv[1]
 
-loadfile = "dfu-util -a 0 -D %s -R" % sys.argv[1]
+    loadfile = "dfu-util -a 0 -D %s -R" % sys.argv[1]
 
-os.system(loadfile)
+    os.system(loadfile)
 
-time.sleep(3)
+    time.sleep(3)
 
-tty = open("/dev/ttyACM0", "a")
+    tty = open("/dev/ttyACM0", "a")
 
-output(tty, cmd1)
-output(tty, cmd2)
+    output(tty, cmd1)
+    output(tty, cmd2)
 
-tty.close()
+    tty.close()
 else:
-print "Usage: %s elffile" % sys.argv[0]
-print ""
-sys.exit(2)
+    print "Usage: %s elffile" % sys.argv[0]
+    print ""
+    sys.exit(2)
 </pre>
 
-== Типовые проблемы ==
+== Troubleshooting ==
 
-=== Проблемы соединения по USB ===
+=== USB connectivity problems ===
 
-Однажды на компьютере, к которому был подключён Neo, во время соединения с использованием u-boot я стал получать следующие ошибки (в dmesg или /var/log/messages):
+I once got errors like this (in dmesg or /var/log/messages) on the host side while connecting the neo in u-boot:
 
-usb 2-1: device descriptor read/64, error -110
-usb usb2: Controller not stopped yet!
+ usb 2-1: device descriptor read/64, error -110
+ usb usb2: Controller not stopped yet!
 
-У себя я решил эту проблему, выполнив на компьютере следующие команды -- выгрузил и заново загрузил в ядро модуль uhci_hcd. Обратите внимание, что если у вас клавиатура или мышь USB, выполнение этих команд может обернуться очевидными неприятностями. У меня были только устройства PS/2, так что я не проверял...
+The problem disappeared at least for me by the command below on the host side. Please note that if you have usb keyboard or mouse then the command might cause trouble.. I only have PS/2 so I couldn't test it.
 
-rmmod uhci_hcd ; modprobe uhci_hcd
+ rmmod uhci_hcd ; modprobe uhci_hcd
 
-[[Category:System Developers/ru]]
+{{Languages|Bootloader}}
+
+[[Category:Software]]
+[[Category:Guides]]
