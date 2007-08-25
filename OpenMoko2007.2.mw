@@ -255,30 +255,7 @@ Then you need to upgrade nslu2-linux.mtn Use the following command:
 
   # mtn --db monotone/nslu2-linux.mtn db migrate
 
-== Flashing with MokoMakefile ==
-Since MokoMakefile has not been adjusted to use the new build layout you cannot use it. As a quick hack to make flashing local built image possible again try this:
 
-Find the following lines in the MokoMakefile:
-
- flash-qemu-local: stamps/qemu stamps/openmoko-devel-image
-       ( cd build/qemu && openmoko/flash.sh ../tmp/deploy/images )
-
-And replace them with:
-
- flash-qemu-local: stamps/qemu
-        ( cd build/qemu && openmoko/flash.sh <MY_NEW_BUILD_DIR>/tmp/deploy/glibc/images/fic-gta01 )
-
-Where you should replace <MY_NEW_BUILD_DIR> with the full path to your build directory (the one where ''conf/local.conf'' lives in). Running the image should work, too. :-)
-
-With this changes kernel and uboot image are picked up correctly. However the name of the root filesystem image has changed in OM-2007.2 and the current scripts will not pick it up any more. Just edit ''$OM_DIR/build/qemu/openmoko/env'' and change the line saying:
-
- rootfs_wildcard="openmoko-*.rootfs.jffs2"
-
-to
-
- rootfs_wildcard="OpenMoko-*.rootfs.jffs2"
-
-Now it will work correctly again.
 
 == Pre-built snapshot images ==
 * http://ipkg.nslu2-linux.org/feeds/openmoko/images/
