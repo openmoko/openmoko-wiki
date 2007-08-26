@@ -122,6 +122,7 @@ then all you need to do is type
 You might want to use keys to bypass the login prompt too.
 
 ===SSH Keys===
+====From host to phone====
 
 To generate ssh keys for use as a login mechanism type
 
@@ -146,6 +147,27 @@ to
  DROPBEAR_EXTRA_ARGS="-s"
 
 You will need to restart dropbear for this to take effect.
+
+====From phone to host====
+Generate the key
+
+  dropbearkey -t rsa -f id_rsa
+
+The output will look something like this:
+
+  Will output 1024 bit rsa secret key to 'id_rsa'
+  Generating key, this may take a while...
+  Public key portion is:
+  ssh-rsa AAAAB3Nza[...]
+  Fingerprint: md5 ca:e8:f0:b7:f6:7b:c2:b6:b9:71:e4:45:86:a9:ff:b8
+
+Copy and paste the one line (in this example, starting with 'ssh-rsa' onto the end of the host's authorized_keys file (often in ~/.ssh/).
+
+From the phone, ssh with -i:
+
+  ssh -i id_rsa user@host
+
+This works for me.  I ripped off these instructions from: [[http://forum.openwrt.org/viewtopic.php?pid=53705]]
 
 ===GUI on desktop through SSH===
 
