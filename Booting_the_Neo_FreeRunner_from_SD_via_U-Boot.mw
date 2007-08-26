@@ -1,6 +1,6 @@
 Here are the steps described to boot your system from an SD card.
 
-=== Step 1: Build your kernel ===
+=== Step 1: Change your kernel settings ===
 
 Kernel building is supposed to be done through OpenEmbedded. If you use the MokoMakefile open up $OMDIR/openmoko/trunk/oe/packages/linux/linux-gta01/defconfig-2.6.21.6-fic-gta01. If you are building OM-2007.2 open $OEDIR/packages/linux/linux-gta01/defconfig-2.6.21.5-fic-gta01. (''Note that the kernel version may change in future versions.'')
 
@@ -20,29 +20,27 @@ and change it to:
 
  CONFIG_EXT2_FS=y
 
-Thats it. Now rebuild the kernel.
+If you're using MokoMakfile, you can clean out your last kernel build (forcing a new build) by running:
 
-=== Step 2: Populate SD card ===
+ make clean-package-linux-gta01
 
-Format partition 1 as ext3 (or better ext2 if enabled, see above). Mount your SD card somewhere and put your image on it:
 
- mount /dev/sda1 /mnt/moko
- tar -C /mnt/moko/ -xvzf openmoko-devel-image-fic-gta01-20070313022035.rootfs.tar.gz
-
-Now we also want the kernel on there
-
- cp uImage /mnt/moko/boot/
+=== Step 2: Building a tarfile distribution ===
 
 If you are building OM-2007.2 you need to add "tar" to the image types in your ''local.conf'':
 
  IMAGE_FSTYPES = "jffs2 tar"
 
-After building a new image by issuing ''bitbake openmoko-devel-image'' there will be a ''OpenMoko-....tar'' in the deploy directory. Copy it on the SD card by doing
+After building a new image by issuing ''bitbake openmoko-devel-image'' (or ''make openmoko-devel-image'' if you are using MokoMakefile) there will be a ''OpenMoko-....tar'' in the deploy directory. 
+
+=== Step 3: Populate SD card ===
+
+Format partition 1 as ext3 (or better ext2 if enabled, see above). Mount your SD card somewhere and put your image on it:
 
  mount /dev/sda1 /mnt/moko
- tar -C /mnt/moko/ -xvf openmoko-devel-image-fic-gta01-20070313022035.rootfs.tar
+ tar -C /mnt/moko/ -xvzf openmoko-devel-image-fic-gta01-20070313022035.rootfs.tar
 
-In OM-2007.2 the last built kernel gets a special soft-link. Therefore you can copy it by doing:
+Now we also want the kernel on there. In OM-2007.2 the last built kernel gets a special soft-link. Therefore you can copy it by doing:
  cp uImage-fic-gta01-latest.bin /mnt/moko/boot/uImage
 
 === Step 3: Add uboot boot entry ===
@@ -58,6 +56,23 @@ You can now easily boot a different kernel by changing the variable sd_image_nam
 === Step 4: Boot into the new system ===
 
 Power off your device, insert the SD card and boot into the boot menu. You should have an entry called "Boot from SD" which does exactly that. :-)
+
+== Installing without removing your SD card ==
+
+Being the lazy person that I am, at one point I tried copying an image over to the micro SD card while still in my phone. This didn't work so well, primarily due to [http://bugzilla.openmoko.org/cgi-bin/bugzilla/show_bug.cgi?id=677 bug 677]. 
+
+Once that bug has been resolved, the process becomes relatively simple:
+
+* Boot to your internal flash partition (not the SD card...)
+* Plug in your USB and set up [USB Networking].
+* Clean off your currently installed microSD card:
+ ssh root@192.168.0.200 "rm -rf /media/card/*"
+ cat openmoko-devel-image-fic-gta01-20070313022035.rootfs.tar | ssh root@192.168.0.200 tar -C /media/card -xv
+ scp uImage-fic-gta01-latest.bin root@192.168.0.200:/mnt/moko/boot/uImage
+
+Again, this all works well in theory but fails miserably in practice due to [http://bugzilla.openmoko.org/cgi-bin/bugzilla/show_bug.cgi?id=677 bug 677]. 
+
+Note that, despite problems <b>writing</b> to SD through the OpenMoko OS, running from SD seems to work remarkably well.
 
 [[Category:Software]]
 [[Category:Guides]]
