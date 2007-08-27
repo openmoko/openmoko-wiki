@@ -114,9 +114,12 @@ If you have nothing better to do, you can now pinpoint my office :-).
 
 === Networking ===
 
+=== Bluetooth networking with a Linux system ===
+
 Bluetooth should behave just like our usbnet and provide full TCP/IP access to the phone.  BNEP has to be used.
 
-On the laptop:
+On the laptop
+
 * Start bluetooth
  elara /home/alphaone # /etc/init.d/bluetooth start
 
@@ -127,9 +130,10 @@ On the laptop:
  elara /home/alphaone # ip a add 10.0.0.1/24 dev bnep0
  elara /home/alphaone # ip l set bnep0 up
 
-* Configure IP forwarding and masquerading to your liking
+* Configure IP forwarding and masquerading to your liking (see [[USB_Networking]])
 
-On the phone:
+
+On the Neo
 
 * Power on bluetooth (see above)
 
@@ -142,22 +146,52 @@ On the phone:
 * Connect to the laptop pand
  root@fic-gta01:~$ pand -c 00:20:E0:5A:FE:C8
 
-while this should work, I needed this command to get a PAN to a SE K610i up and running:
- pand -r PANU -d NAP -A -E -S -c <bt_address_of_K610i> -e bnep0
-
-if you want to see if pand is doing fine, start it with '-n' to see status messages.
-
 * Configure your IP address
  ip a add 10.0.0.2/24 dev bnep0
  ip r add default via 10.0.0.1
 
 * Enjoy
- root@fic-gta01:~$ wget http://www-public.tu-bs.de:8080/~y0019680/tmp/thereisnophone.mp3 
- Connecting to www-public.tu-bs.de[134.169.9.108]:8080
- thereisnophone.mp3   100****************************************************|   266 KB 00:00:00 ETA
- root@fic-gta01:~$ madplay thereisnophone.mp3 
- MPEG Audio Decoder 0.15.2 (beta) - Copyright (C) 2000-2004 Robert Leslie et al.
- 630 frames decoded (0:00:22.6), -0.9 dB peak amplitude, 0 clipped samples
+
+
+=== Bluetooth networking with a Windows XP system ===
+
+This was tested with a Windows XP SP2 on a IBM Thinkpad T41 with the Widcomm BT stack
+
+* start bluetooth on Windows XP
+
+* enable "Network Access" in the Bluetooth configuration
+
+* scan for the Neo and pair with the Neo (right click, select pair)
+
+
+On the Neo
+
+* Power on bluetooth (see above)
+
+* Scan for the laptop
+ root@fic-gta01:~$ hcitool scan
+ Scanning ...
+         <laptop_bt_address>     Thinkpad
+         ...
+
+
+* Connect to the laptop pand
+ pand -c <laptop_bt_address> -r PANU -d NAP -e bnep0 -A -E -S
+(add '-n' to see the pand status messages until you get it right)
+
+For some reason, I was not able to initiate PAN connections from the Neo, I event got 'Permission denied (13)' when I had explicitly allowed the Neo to connect (right click on Neo icon, set properties, on Authorization tab). But initiating 'PAN User' from Windows worked when executing on Neo:
+ pand -l -r PANU -d NAP -e bnep0 -A -E -S
+(add '-n' to see the pand status messages until you get it right)
+
+
+* Configure your IP address. It should work like when connecting to Linux:
+ ip a add 10.0.0.2/24 dev bnep0
+ ip r add default via 10.0.0.1
+If this does not work, the IP stacks may have auto-assigned network addresses to themselves. You can look this up with 'ifconfig' on the Neo and with 'ipconfig' on Windows.
+
+
+* You should now be able to ssh/putty from Windows to your Neo. Enjoy!
+By setting up the Windows Bluetooth connection properly, it should also be possible to share the Internet Connection of the Windows box with the Neo.
 
 === PPP Networking ===
 
