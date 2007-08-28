@@ -248,12 +248,61 @@ Bluez has an audio daemon for headset audio that should work to set up the contr
 
 If the codec audio management is worked out, then all we need are hooks to make the kind of dbus api calls that are in the python examples at http://wiki.bluez.org/wiki/HOWTO/AudioDevices (need to ipkg install python-dbus and python-xml). The play method *does* need to be called; it's automatic only when using an alsa plugin which is not how it works on neo.
 
+=== Bluetooth networking with a Linux system - More secure way ===
+
+''Check this, probabily needs some corrections''
+
+Bluetooth should behave just like our usbnet and provide full TCP/IP access to the phone.  BNEP has to be used.
+
+On the laptop
+
+* check these options in /etc/bluetooth/hcid.conf
+ security auto;
+ passkey "your pin";
+ lm master;
+
+* Start bluetooth
+ # /etc/init.d/bluetooth start
+
+* Start pand as server
+  pand --listen --role NAP --encrypt
+
+* Add in /etc/network/interfaces (see [[USB_Networking]])
+ auto bnep0
+ iface bnep0 inet static
+ address 192.168.1.1
+ netmask 255.255.255.0
+ network 192.168.1.0
+        post-up iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.1.0/24
+        post-up echo 1 > /proc/sys/net/ipv4/ip_forward
+        post-up iptables -P FORWARD ACCEPT
+
+On the Neo
+
+* Power on bluetooth (see above)
+
+* Scan for the laptop
+ root@fic-gta01:~$ hcitool scan
+ Scanning ...
+         00:20:E0:5A:FE:C8       laptop
+
+* Set pin
+ root@fic-gta01:~$ passkey-agent 'your pin' 00:20:E0:5A:FE:C8 &
+
+* Connect to the laptop pand
+ root@fic-gta01:~$ pand -c 00:20:E0:5A:FE:C8
+
+* Configure your IP address
+ root@fic-gta01:~$ ifconfig bnep0 192.168.1.2
+ root@fic-gta01:~$ route add default gateway 192.168.1.1
+
+* Enjoy
+
+
 == Further reading ==
 
 http://www.holtmann.org/papers/bluetooth/ols2006_slides.pdf
 http://wiki.bluez.org/wiki/Audio#org.bluez.Audio
-
-
 
 [[Category:Neo1973 Hardware]]
 [[Bluetooth]]
