@@ -5,3 +5,15 @@ Is a raw framebuffer bitmap that is gzipped.
 Here is a basic description: http://svn.openmoko.org/trunk/src/host/splash/README
 
 Use [[dfu-util]] to send to the OpenMoko.
+
+
+
+
+NOTE... the README states you must issue two U-Boot commands to enable the flashed splash image to appear on the screen at boot:
+
+    ''setenv splashimage nand read.e 0x32000000 splash 0x5000\; unzip 0x32000000 0x33d00000 0x96000''
+    ''saveenv''
+
+This is already a part of the U-Boot image received in the phone... however, if you make changes to your splash image, you may need to change the splashimage variable to compensate!
+
+0x5000 is the (maximum) size of the compressed file -- the splash.gz that gets created. If you've made changes to your image you may have increased the compressed size; if it exceeds 0x5000 (20480) bytes, the entire image will not load unless you increase this value in your splashimage U-Boot environment variable.
