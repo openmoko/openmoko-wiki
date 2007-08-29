@@ -67,6 +67,78 @@ Changing a package's recipe is a bit more complex. You have to copy over (or sym
 
 You can add a new package (or a recipe for a new version of a package) to the overlay tree simply by creating it on the overlay tree.
 
+=== Creating your own images ===
+
+To create you own images we'll use the base openmoko .bb files and modify them so suit. Where you see 'scaredycat' replace this with something yo identify your images.
+
+
+edit local/packages/images/scaredycat-openmoko-devel-image.bb and paste this:
+
+<pre>
+require scaredycat-openmoko-image.bb
+ 
+export PACKAGE_INSTALL += "\
+  task-openmoko-debug \
+"
+</pre>
+
+
+then edit local/packages/images/scaredycat-openmoko-image.bb
+
+<pre>
+#------------------------------------------------------
+# OpenMoko Image Recipe
+#------------------------------------------------------
+
+export IMAGE_BASENAME = "${PN}"
+export IMAGE_LINGUAS = ""
+
+export PACKAGE_INSTALL = "\
+  ${MACHINE_TASK_PROVIDER} \
+  task-openmoko-linux \
+  task-openmoko-net \
+  task-openmoko-ui \
+  task-openmoko-base \
+  task-openmoko-phone \
+  task-openmoko-games \
+  task-openmoko-pim \
+  task-openmoko-scaredycat \
+  "
+
+DEPENDS = "\
+  ${MACHINE_TASK_PROVIDER} \
+  task-openmoko \
+"
+
+RDEPENDS = "${PACKAGE_INSTALL}"
+
+inherit image
+
+LICENSE = MIT
+
+ROOTFS_POSTPROCESS_COMMAND += 'date "+%m%d%H%M%Y" >${IMAGE_ROOTFS}/etc/timestamp'
+
+</pre>
+
+
+edit packages/tasks/task-openmoko-scaredycat.bb - this is where we put the things we want to include in our image, above and behond the standard image.
+
+<pre>
+DESCRIPTION = "OpenMoko: Scaredycat Additions"
+SECTION = "openmoko/base"
+LICENSE = "original"
+PR = "r2"
+
+inherit task
+
+RDEPENDS_task-openmoko-scaredycat = "\
+  scummvm \
+"
+
+</pre>
+
+
+
 == Your First Application ==
 
 I know that I said I'd have a GDK application in here, however, I'd really like to get this whole course done first and have you guys starting to code instead of just looking at what I've written!
