@@ -87,15 +87,6 @@ user "gprs"    ## opt out for eplus/pap
 #user "eplus"  ## opt in for eplus/pap
 </pre>
 
-If you want on-demand connect and idle time hangup, insert the following after "holdoff 3"
-<pre>
-# Connect only if needed
-demand     
-                                             
-# Disconnect if idle 
-idle 20
-</pre>
-
 And you'll need /etc/ppp/peers/gprs-connect-chat (needs "chmod +x"):
 
 <pre>
@@ -210,6 +201,44 @@ Some APN names for reference:
 | UK || T-Mobile|| || general.t-mobile.uk ||
 |-
 |}
+
+
+== Automatically using GPRS ==
+
+Create this file as /etc/ppp/ppp_on_boot and chmod +x.  The /etc/init.d/ppp script will call it to set up the daemon.
+<pre>
+###!/bin/sh
+#
+#   Rename this file to ppp_on_boot and pppd will be fired up as
+#   soon as the system comes up, connecting to `provider'.
+#
+#   If you also make this file executable, and replace the first line
+#   with just "#!/bin/sh", the commands below will be executed instead.
+#
+
+# The location of the ppp daemon itself (shouldn't need to be changed)
+PPPD=/usr/sbin/pppd
+
+# The default provider to connect to
+$PPPD file /etc/ppp/gprs
+
+# Additional connections, which would just use settings from
+# /etc/ppp/options.<tty>
+#$PPPD ttyS0
+#$PPPD ttyS1
+#$PPPD ttyS2
+#$PPPD ttyS3
+</pre>
+
+In the 'gprs' file above, insert the following after "holdoff 3":
+<pre>
+# Connect only if needed
+demand     
+                                             
+# Disconnect if idle 
+idle 20
+</pre>
+
 
 [[Category:Documentation]]
 [[Category:Developer software]]
