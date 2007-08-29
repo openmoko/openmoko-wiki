@@ -238,7 +238,47 @@ To connect from a MacOS 10.3 client:
 
 === A2DP ===
 
-The A2DP codec, SBC, runs pretty well now in 32-bit fixed-point math. It's been successfully tested on a faster ARM but not yet on neo. There is test code in the bluetooth-alsa.sf.net plugz module for using alsa plugins to send A2DP audio out and it's starting to be reimplemented "properly" in the bluez core.
+It's now possible (if a little hackish) to stream mp3 to a bluetooth headset.
+
+Add a couple of ipkg repositories:
+
+ echo "src/gz python http://www.angstrom-distribution.org/unstable/feed/armv4t/python/" >> /etc/ipkg/angstrom-python.conf 
+ echo "src/gz base http://www.angstrom-distribution.org/unstable/feed/armv4t/base/" >> /etc/ipkg/angstrom-base.conf
+ ipkg update ; ipkg install python-dbus bluez-utils bluez-utils-alsa
+
+Create /etc/asound.conf:
+
+ pcm.!default {
+  type bluetooth
+ }
+ ctl.!default {
+  type bluetooth
+ }
+ pcm.bluetooth {
+  type bluetooth
+ }
+ ctl.bluetooth {
+  type bluetooth
+ }
+
+Run the passkey agent (see above in this page)
+
+Fill in your bluetooth headset address below and execute the python script (with your headset on)
+
+ #!/usr/bin/python
+ import dbus
+ bus = dbus.SystemBus()
+ manager = dbus.Interface(bus.get_object('org.bluez', '/org/bluez'), 'org.bluez.Manager')
+ conn = manager.ActivateService('audio')
+ audio = dbus.Interface(bus.get_object(conn, '/org/bluez/audio'), 'org.bluez.audio.Manager')
+ path = audio.CreateDevice('00:0D:3C:44:33:22')
+ audio.ChangeDefaultDevice(path)
+ sink = dbus.Interface(bus.get_object(conn, path), 'org.bluez.audio.Sink')
+ sink.Connect()
+
+FINALLY: play a song
+
+ madplay /media/card/song.mp3 --output=wave:- | aplay
 
 === Headset Audio ===
 
