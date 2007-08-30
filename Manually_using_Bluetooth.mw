@@ -284,9 +284,27 @@ FINALLY: play a song
 
 Bluez has an audio daemon for headset audio that should work to set up the control connection to the headset. It will need hooks in the openmoko gui.
 
-[[Neo1973_Audio_Subsystem]] has more detail about what magic needs to happen with the Wolfson codec so system audio can be switched to use the bluetooth audio channel and later back to the speaker/earpiece/wired headset. There seems to be a proposal for audio scenario management there but no detail about whether that is how things are done currently. How should audio management work when eg plugging in/unplugging the wired headset?
+[[Neo1973_Audio_Subsystem]] has more detail about alsa settings and a proposal for audio scenario management.
 
-If the codec audio management is worked out, then all we need are hooks to make the kind of dbus api calls that are in the python examples at http://wiki.bluez.org/wiki/HOWTO/AudioDevices. The play method *does* need to be called; it's automatic only when using an alsa plugin which is not how it works on neo.
+Follow the instructions in the a2dp section to install software and run the pin agent.
+
+Put the headset in pairing mode. Replace the bluetooth address below with your headset's and run the python script:
+
+ #!/usr/bin/python
+ import dbus
+ bus = dbus.SystemBus()
+ manager = dbus.Interface(bus.get_object('org.bluez', '/org/bluez'), 'org.bluez.Manager')
+ conn = manager.ActivateService('audio')
+ audio = dbus.Interface(bus.get_object(conn, '/org/bluez/audio'), 'org.bluez.audio.Manager'
+ path = audio.CreateHeadset('00:0B:2E:39:33:22')
+ audio.ChangeDefaultHeadset(path)
+ headset = dbus.Interface (bus.get_object(conn, path), 'org.bluez.audio.Headset')
+ headset.Connect()
+ headset.Play()
+
+Now place a call and try to route it to bluetooth (after it's in progress):
+
+ alsactl -f /etc/gsmbluetooth.state restore
 
 === Bluetooth networking with a Linux system - More secure way ===
 
