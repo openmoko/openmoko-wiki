@@ -49,20 +49,41 @@ iface usb0 inet static
         post-up iptables -P FORWARD ACCEPT
 </pre>
 
-'''For Ubuntu Feisty "allow-hotplug" doesn't work. Use:'''
+'''For Ubuntu Feisty:'''
+Edit /etc/network/interfaces file ():
 <pre>
 auto usb0
+iface usb0 inet static
+        address 192.168.0.200
+        netmask 255.255.255.0
+        network 192.168.0.0
+        up iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24 &
+        up echo 1 > /proc/sys/net/ipv4/ip_forward &
+        up iptables -P FORWARD ACCEPT &
+        down iptables -D POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24 &
 </pre>
 
 If you are doing the echo 1 > /proc/... command manually, sudo may not be enough, then you will have to execute it from a sudo bash.
 
 Ubuntu feisty appears to have a bug where ifdown is not run when the interface is unplugged, meaning this only works once
 after the system is booted.
-One can patch /etc/udev/rules.d/85-ifupdown.rules, adding a last line:
+One can patch /etc/udev/rules.d/85-ifupdown.rules, editing the a last lines to read the file:
 <pre>
-SUBSYSTEM=="net", ACTION=="remove",             RUN+="/sbin/start-stop-daemon --start --background --pidfile /var/run/network/bogus --startas /sbin/ifdown -- --allow auto $env{INTERFACE}"
+SUBSYSTEM=="net", DRIVERS=="?*", GOTO="net_start"
+GOTO="net_end"
+
+LABEL="net_start"
+
+# Bring devices up and down only if they're marked auto.
+# Use start-stop-daemon so we don't wait on dhcp
+ACTION=="add",          RUN+="/sbin/start-stop-daemon --start --background --pidfile /var/run/network/bogus --startas /sbin/ifup -- --allow auto $env{INTERFACE}"
+
+LABEL="net_end"
+
+ACTION=="remove",       RUN+="/sbin/start-stop-daemon --start --background --pidfile /var/run/network/bogus --startas /sbin/ifdown -- --allow auto $env{INTERFACE}"
 </pre>
-and remove the similar remove like earlier.
+
+the bug is that the LABEL="net_end" is at the wrong position
 
 '''For Red Hat or similar distros'''
 Edit /etc/sysconfig/network-scripts/net.hotplug:
