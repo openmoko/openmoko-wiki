@@ -1,174 +1,32 @@
-{{Languages|Automatic emulation in Ubuntu}}
-[[Image:Qemu-ubuntu1.png|thumb|emulation of Openmoko running on Ubuntu]]
+You have to known that there is a great tool to get it running on a linux system,namely the [[MokoMakefile]]. This is a sort of wrapper round several instructions, so it is easy to set up and maintain a development environment. If you build the whole [[MokoMakefile]], you will need approximately 12GB, a swap+ram memory of about 1GB and minimum 5 hours time. But we will only build it for Qemu (the emulator that I will use) and that needs (on my system) only 890mb and a 15 min of your time. Enought blabla.
 
-This is a tutorial for getting an emulation environment on an Ubuntu system.
+To get it running, you will have to tweak your ubuntu a little bit (This will not damage other programs, everything will work as before). For more information see http://www.openembedded.org/wiki/OEandYourDistro
 
-== Installation ==
+    sudo dpkg-reconfigure dash
 
-You have to know that there is a great tool to get it running on a linux system, namely the [[MokoMakefile]]. This is a sort of wrapper round several instructions, so it is easy to set up and maintain a development environment. If you build the whole [[MokoMakefile]], you will need approximately 12GB, a swap+ram memory of about 1GB and minimum 5 hours time. But we will only build it for Qemu (the emulator that I will use) and that needs (on my system) only 890mb and a 15 min of your time.
+and select NO if it ask to install dash as /bin/sh.
+Install the needed stuff:
 
-To get it running, you will have to tweak your ubuntu a little bit (This will not damage other programs, everything will work as before).
-* Configure your sources (System -> Administration -> Software Sources) to include:
-** Canonical-supported Open Source software (main)
-** Community-maintained Open Source software (universe)
-* Open your terminal (Applications -> Accessories -> Terminal).
-* Enter following command and select NO when it asks to install dash as /bin/sh (You will have to enter your password)
- sudo dpkg-reconfigure dash
-* Install the needed programs on Hardy Heron 8.04 (You will have to enter your password):
- sudo apt-get install monotone git-core git-svn git-email \
- git-cvs git-arch gitk python-dev ccache m4 sed bison make cvs gawk \
- libc6-dev g++ subversion sharutils docbook openjade quilt libmpfr-dev \
- libpcre3-dev texinfo texi2html libboost-date-time-dev libboost-filesystem-dev \
- libboost-regex-dev libboost-test-dev libboost-dev zlib1g-dev build-essential \
- dh-make debhelper devscripts gcc-3.4 lynx netpbm libsdl1.2-dev dosfstools \
- help2man python-psyco lynx
+    sudo apt-get install monotone git-core cogito python-dev ccache m4 sed bison make cvs gawk libc6-dev g++ subversion sharutils docbook openjade quilt libmpfr-dev libpcre3-dev texinfo texi2html libboost-date-time-dev libboost-filesystem-dev libboost-regex-dev libboost-test-dev libboost-dev zlib1g-dev build-essential dh-make debhelper devscripts gcc-3.4 lynx netpbm libsdl1.2-dev dosfstools
 
-* Looks like for 8.10 libgnutls-dev also needs to be added, when you see vnc compile errors. sudo apt-get install libgnutls-dev
+Voila your system is ready to get the install the openmoko.
+First we will create a directory and download the MokoMakefile in it:
 
-* For older versions (git-svn git-email git-cvs git-arch gitk are replaced by cogito)
- sudo apt-get install monotone git-core cogito python-dev ccache m4 sed bison \
- make cvs gawk libc6-dev g++ subversion sharutils docbook openjade quilt \
- libmpfr-dev libpcre3-dev texinfo texi2html libboost-date-time-dev \
- libboost-filesystem-dev libboost-regex-dev libboost-test-dev libboost-dev \
- zlib1g-dev build-essential dh-make debhelper devscripts gcc-3.4 netpbm \
- libsdl1.2-dev dosfstools help2man python-psyco lynx
+    mkdir openmoko
+    cd openmoko
+    wget http://www.rwhitby.net/files/openmoko/Makefile
+
+Now we will tell to build it for using it with Qemu:
+
+    make qemu
+
+This will download the necessarily files of the lastest release and build them following the MokoMakefile. After that it will start into the emulator for the first time. Voila your have now successfully installed openmoko onto your ubuntu system. If you want to start it, you will have to go into the folder and run the following command:
+
+    cd openmoko
+    make run-qemu
 
 
-Voila your system is ready to get the install Openmoko.
+If you run openmoko, the bootloader will load, there you can choose different options. For select an option you have to press enter (=aux) and to execute it, hit space (=power). Thus if the bootloader shows, you just have to hit the space bar and the phone software will load.
 
-Now we will install Openmoko in a directory by downloading the MokoMakefile in it and build it.
-* Create a directory and go into the directory:
- mkdir openmoko
- cd openmoko
-* Get the MokoMakefile (Currently down due to fires in California. Use the link below instead):
- wget http://www.rwhitby.net/files/openmoko/Makefile
-
-If that doesn't work, try
-
- wget http://svn.projects.openmoko.org/svnroot/mokomakefile/trunk/Makefile
-
-* Make the MokoMakefile and tell it, you want to install it for qemu:
- make qemu
-
-This will download the necessary files of the latest release and build them following the MokoMakefile. After that it will start into the emulator for the first time. Voila you have now successfully installed openmoko onto your ubuntu system.
-
-===Creating a menu item for Openmoko (optional)===
-
-You can create a menu item for starting Openmoko by doing the following:
-
-*Open the terminal (Applications->Accessories->Terminal)
-
-*Go to the openmoko directory:
-
- cd ~/openmoko
-
-*open the file moko.sh with '''gedit''':
-
- gedit moko.sh
-
-*insert the following text into the file:
-
- #!/bin/bash
- cd ~/openmoko
- make run-qemu
-
-*Press "save" and close gedit
-
-*then run the following commands:
- chmod +x moko.sh
- alacarte
-
-*and add a menu item with these values:
-**Name: Openmoko
-**Command: ~/openmoko/moko.sh
-
-**If you want to you can add an appropriate icon by clicking on the image on the top left. You can download some useful images here:
-***[http://wiki.openmoko.org/wiki/Artwork Artwork in the Openmoko wiki]
-***[http://openclipart.org/media/tags/openmoko Openmoko at the Open Clip Art Library]
-
-==Help with running Openmoko in Qemu==
-
-If you have created a menu item you can start Openmoko through the applications menu of Ubuntu. If you have not, you can start it by:
-
-* Open your terminal (Applications->Accessories->Terminal).
-* Go to the directory:
- cd openmoko
-* starting with the MokoMakefile
- make run-qemu
-
-The first screen of Openmoko will show a nice picture of the Openmoko logo which will be followed
-almost immediately by the BOOT MENU, this is done by the bootloader.
-
-In the BOOT MENU you can choose different options. To select an option you have to press enter (=aux) and to execute it, hit space (=power). The default selection will boot Openmoko.
-Thus if the BOOT MENU shows, you just have to hit the space bar and the phone software will load.
-
-While booting Openmoko the progress will be shown in text mode. Depending on your computer's performance it might take a while (some minutes even) to complete the boot. When complete you will see the graphical interface as will be shown on the phone itself (but slightly larger due to  the larger pixelsize of your screen).
-
-A few pointers on using Openmoko:
-* You can select the icon that looks like "+" for a list of applications you can run.
-* You can select the icon that looks like "three gears" for a list of applications that are running now. Here you can also terminate unwanted applications when you are unable to do so from within the application itself.
-* You can select the icon that looks like a "house" to get back to the first home screen.
-* The statusbar at the top is always shown and by clicking on the top-left corner you can switch to another application that is already running. The "Home" application is always running and clicking on it will bring you back to the home screen.
-
-See [[Qemu]] for more advanced information on running Openmoko in Qemu.
-
-==Installing ipk packages==
-First you need a xxx.ipk package, see [[toolchain]] on how to compile an application for the ARM CPU and create the package.
-
-Note that if at this point you have the Openmoko Qemu running, it is probably wise to terminate it first.
-Then you can install the xxx.ipk package for access by the Qemu emulator with:
-
- cd openmoko
- mkdir -p build/tmp/deploy/glibc/ipk/a
- cp xxx.ipk build/tmp/deploy/glibc/ipk/a/xxx_a.ipk
- make qemu-copy-package-xxx
-
-''Note: for some reason qemu-copy-package-xxx looks for above source file.
-Maybe this part can be improved, or a different command can overcome the problem of creating this directory.''
-
-When above make command was succesful the next time you start Openmoko Qemu,
-you still need to make the installed application available in the application list.
-For this you can select from within Openmoko the terminal application
-(Select icon that looks like "+" for the list of available applicaitons, select "Applications" and select the "Terminal").
-In this terminal double-click, so you can type in the commands:
- opkg install /media/mmcblk0/xxx_a.ipk
- exit
-After the "exit" command you should return to the Task list, in which the newly
-added application should be listed under a name which was choosen when building the ipk package.
-
-== Updating Openmoko==
-* Open your terminal (Applications->Accessories->Terminal).
-* Go to the directory:
- cd openmoko
-* Update with the MokoMakefile
- make qemu
-
-== Configurations/OS ==
-
-=== OS X/Kubuntu ===
-
-I'm running the Neo-Qemu in the Qtopia-Image in VMWare Fusion on a MacBook Pro (2x2.6GHz, 4GB), so it's an emulator in an emulator. Speed is acceptable. Be sure to look at the end of this page for the right filesystem image to flash. A main point in compiling Neo-Qemu is the gcc 3.x. For some reason it did not install on my Mac, but I think I can live with the emu-in-emu solution for a while.
-
---[[User:Cweise|moerkby]] 11:00, 9 October 2008 (UTC)
-
-
-=== Ubuntu Karmic (9.10) with gcc 4.4.1 ===
-Thanks for this page, I could bring up qemu on Ubuntu. I had to do the following changes however:
-* Apply the qemu-cvs.patch from http://bugs.gentoo.org/show_bug.cgi?id=160627 on qemu-neo1973 dir (in openmoko/trunk/src/host)
-* Remove the check for GCC 3.x in the moko makefile (i.e, add --disable-gcc-check as suggested)
-* The values of wildcards in openmoko/trunk/src/host/qemu-neo1973/openmoko/env didn't work for me, I changed the following variables:
-<pre>
-##; kernel_wildcard="testing-om-gta01-*.uImage.bin"
-##; rootfs_wildcard="testing-om-gta01-*.rootfs.jffs2"
-##; uboot_wildcard="gta01bv4-u-boot.bin"
-
-kernel_wildcard="uImage-2.6.24+git20080424-r0-om-gta01.bin"
-rootfs_wildcard="Openmoko-scaredycat-openmoko-devel-image-glibc-ipk-P1-Snapshot-20080710-om-gta01.rootfs.jffs2"
-uboot_wildcard="u-boot-gta01bv3-1.3.1+svnr4297+gitb29661fc1151077776454288051bc9a488351ce8-r3.bin"
-</pre>
-
-I got the values by manually browsing the site: http://buildhost.automated.it/OM2007.2 and choosing the seemingly recent ones..
- 
---[[User:Karthickgururaj|Karthickgururaj]] 13:55, 15 January 2010 (UTC)
-
-[[Category:Emulation]]
+So far the tutorial for getting openmoko on an ubuntu system,
+If you have any problems, just leave a comment. I will try to fix it.
