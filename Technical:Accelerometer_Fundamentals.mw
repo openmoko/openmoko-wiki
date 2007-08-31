@@ -28,7 +28,7 @@ This means that if you drop an object from some height (assuming a vacuum), afte
 
 ==What two three axis accelerometers can do==
 
-==What can be done with absolutely perfect devices?==
+===What can be done with absolutely perfect devices?===
 
 Imagine two three axis accellerometers rigidly placed on each end of an arrow.
 
@@ -36,11 +36,10 @@ How much information do you get out of these?
 
 A few moments thought should reveal that the orientation of the sensors does not matter. You can resolve the three signals into one direction and size.
 This does not change however the devices are oriented - there is no benefit in for example skewing one 45 degrees.
-===In Space!===
+====Neglecting gravity====
 Considering the case in deep-space - the maths are simpler.
 
-(not a common use-case, but simpler to analyse)
-Holding the orientation steady, you can do perfect inertial navigation, and determine exactly where you are at all times. (in a flat space-time, but meh)
+Holding the orientation steady, you can do perfect inertial navigation, and determine exactly where you are at all times.
 
 *What happens when we vary the orientation?
 **You can subtract any common accelleration that's measured by both sensors - this does not change the orientation.
@@ -52,7 +51,7 @@ Holding the orientation steady, you can do perfect inertial navigation, and dete
 
 *Spin the arrow around its centre (it must spin around its centre logically if you've subtracted the overall acceleration) you can pick up pitch and yaw.
 
-===With Gravity===
+====With Gravity====
 Now, what if we add gravity in?
 
 With perfect accelerometers again, with Z axes pointing to the arrow tip.
@@ -65,6 +64,7 @@ With perfect accelerometers again, with Z axes pointing to the arrow tip.
 
 ===Numbers===
 I'm assuming specs similar to the ADXL330 - simplified a little.
+(The acceleometer mentioned on the mailing list as being included in GTA02 is significantly worse than this - some 20 times more noise)
 
 Assumptions:
 *The Neo is a rigid object, and the accelerometers are rigidly fixed to it.
@@ -75,7 +75,7 @@ Assumptions:
 ***I'm neglecting cross-axis sensitivity - which will need calibrated out, and non-linearity.
 
 For interactive use.
-High-pass filtering the accelerometer with a bandwidth of 10Hz - you can't filter it much more than that or you lose important 'wobbles', because you need to integrate them to come up with a position - leads to a noise floor of 300uG/sqrt(Hz) *sqrt(10Hz) = 1mG. (RMS (No, not that RMS))
+High-pass filtering the accelerometer with a bandwidth of 10Hz - you can't filter it much more than that or you lose important 'wobbles', because you need to integrate them to come up with a position - leads to a noise floor of 300uG/sqrt(Hz) *sqrt(10Hz) = 1mG. (RMS)
 
 Neglecting roll for the moment.
 
@@ -88,7 +88,7 @@ After 1s, if you happen to hit an average noise peak in each accelerometer at th
 
 Well - the velocity reads out as 6cm/s^2 wrong, which means that the position is now out by 3cm, or 10 degrees.
 
-===Results===
+==Results==
 What does this mean though?
 Because the differential accelerations are so small, and comparable to the noise floor for gentle turning and twisting, there are basically two ways that they can be useful.
 
@@ -112,10 +112,10 @@ In any condition:
 
 And this is completely neglecting the temperature sensitivity.
 
-===What it can't do.===
+==What it can't do.==
 Inertial navigation or rotation over more than several seconds. For big movements the GPS could be used, for smaller movements in the Z direction (> 25 cm) a pressure sensor could be added, see [[Wish List - Hardware - Atmospheric]], and for inertial rotation a magnetometer (digital compass) can be used, see [[Wishlist - Hardware: Digital compass]].
 
-===References===
+=References=
 * [http://www.freescale.com/webapp/sps/site/overview.jsp?nodeId=0112690EFA4082&tid=tshbMERC Freescale products]
 * [http://www.freescale.com/files/sensors/doc/app_note/AN3107.pdf Measuring Tilt with low-g accelerometers (Freescale doc)]*
 
