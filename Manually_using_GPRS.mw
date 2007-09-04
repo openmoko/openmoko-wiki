@@ -1,4 +1,8 @@
-You need to have [[GSM]] parts already initialized, with modem logged in to the network, for this to work. It is best to test it by doing test call. The GPRS connection is made using the PPP protocol to a server identified by an "APN" at the network operator.
+You need to have [[GSM]] parts already initialized, with modem logged in to the network, for this to work. It is best to test it by doing test call. The GPRS connection is made using the PPP protocol to a server identified by an "APN" at the network operator. 
+
+The program that implements PPP on Linux is pppd, which we need to configure and run to get a connection. When that is working, we can configure pppd to wait until it's needed before it connects, and to disconnect if the connection becomes idle. Further, we can start pppd in the background during the boot process.
+
+== Configuring pppd for manual connections ==
 
 Depending on the APN, you may need password authentication using CHAP or PAP. You can add the following default line for "password-less" connections:
 <pre>
@@ -163,6 +167,9 @@ SAY             "\nSending break to the modem\n"        \
 SAY             "\nPDP context detached\n"
 </pre>
 
+
+=== Starting pppd ===
+
 Then, after initializing GSM, you should be able to initialize GPRS by `pppd call gprs`. Good luck!
 
 To dial in - and get verbose output on the terminal - use pppd
@@ -171,7 +178,7 @@ pppd debug nodetach call gprs
 </pre>
 
 
-Some APN names for reference:
+=== Some APN names for reference ===
 
 {| border="1"
 ! Country
@@ -203,13 +210,40 @@ Some APN names for reference:
 |}
 
 
-== Automatically using GPRS ==
+== Starting pppd automatically ==
 
 Once you have finished debugging your gprs-connect-chat and gprs options files, you may wish to automatically connect whenever needed and hang up when finished.  Make sure you understand the impact of this change to your carrier plan billing.  This is not recommended unless you have a large-use or unlimited data plan.  These scripts do NOT prompt you before connecting.
 
-Create this file as /etc/ppp/ppp_on_boot and chmod +x.  The /etc/init.d/ppp script will call it to set up the daemon.
+=== On-demand connection settings ===
+
+Additional settings are needed if you want the actual connection to be up only while there is traffic. In the 'gprs' file above, insert the following, making sure 'nodetach' is commented out.  If 'nodetach' is on, the boot process will stop when it starts pppd.
+
 <pre>
-###!/bin/sh
+
+# Wait until needed before connecting
+demand
+
+# Disconnect if idle for given amount of seconds
+idle 20
+
+</pre>
+
+=== Start on boot (method 1) ===
+
+Add the following definition to /etc/network/interfaces:
+<pre>
+auto ppp0
+iface ppp0 inet ppp
+        provider gprs
+</pre>
+
+That should be it. Now you can use 'ifup ppp0' and 'ifdown ppp0' manually too.
+
+=== Start on boot (method 2) ===
+
+Create the following file as /etc/ppp/ppp_on_boot (needs chmod +x).  The /etc/init.d/ppp script will call it to set up the daemon.
+<pre>
+#!/bin/sh
 #
 #   Rename this file to ppp_on_boot and pppd will be fired up as
 #   soon as the system comes up, connecting to `provider'.
@@ -232,16 +266,6 @@ $PPPD call gprs
 #$PPPD ttyS3
 </pre>
 
-In the 'gprs' file above, insert the following, making sure 'nodetach' is commented out.  If 'nodetach' is on, the boot process will stop when it starts pppd.
-
-<pre>
-
-# Connect only if needed
-demand
-
-# Disconnect if idle 
-idle 20
-</pre>
 
 Finally, you need to add the /etc/init.d/ppp script to the init process by creating symbolic links from the appropriate directories.  I chose the following:
 
@@ -254,6 +278,10 @@ Finally, you need to add the /etc/init.d/ppp script to the init process by creat
 /etc/rc5.d/S45ppp
 /etc/rc6.d/K25ppp
 </pre>
+
+== See also ==
+* [[Manually using GSM]]
+* [[Manually using Bluetooth]]
 
 [[Category:Documentation]]
 [[Category:Developer software]]
