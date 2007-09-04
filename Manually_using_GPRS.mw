@@ -25,11 +25,11 @@ You'll need /etc/ppp/peers/gprs:
 # Description:
 # This file holds the pppd options for GPRS
 
-# To give some debug info (could be provided on command line too)
+# To give some debug info (can be provided on command line too)
 #debug
 
-# To keep pppd output on the terminal (could be provided on command line too)
-nodetach
+# To keep pppd output on the terminal (can be provided on command line too)
+#nodetach
 
 # Serial device to which the GPRS modem is connected
 /dev/ttySAC0 # Raw serial on Neo1973
@@ -163,11 +163,11 @@ SAY             "\nSending break to the modem\n"        \
 SAY             "\nPDP context detached\n"
 </pre>
 
-Then, after initializing GSM, you should be able to initialize GPRS by pppd call gprs. Good luck!
+Then, after initializing GSM, you should be able to initialize GPRS by `pppd call gprs`. Good luck!
 
-To dial in - and get verbose output - use pppd
+To dial in - and get verbose output on the terminal - use pppd
 <pre>
-pppd debug call gprs
+pppd debug nodetach call gprs
 </pre>
 
 
@@ -222,7 +222,7 @@ Create this file as /etc/ppp/ppp_on_boot and chmod +x.  The /etc/init.d/ppp scri
 PPPD=/usr/sbin/pppd
 
 # The default provider to connect to
-$PPPD file /etc/ppp/gprs
+$PPPD call gprs
 
 # Additional connections, which would just use settings from
 # /etc/ppp/options.<tty>
@@ -232,15 +232,13 @@ $PPPD file /etc/ppp/gprs
 #$PPPD ttyS3
 </pre>
 
-In the 'gprs' file above, insert the following, making sure to comment out nodetach.  If 'nodetach' is on, the boot process will stop when it starts pppd.
+In the 'gprs' file above, insert the following, making sure 'nodetach' is commented out.  If 'nodetach' is on, the boot process will stop when it starts pppd.
 
 <pre>
-# To keep pppd output on the terminal (could be provided on command line too)
-# nodetach
 
 # Connect only if needed
-demand     
-                                             
+demand
+
 # Disconnect if idle 
 idle 20
 </pre>
@@ -256,8 +254,6 @@ Finally, you need to add the /etc/init.d/ppp script to the init process by creat
 /etc/rc5.d/S45ppp
 /etc/rc6.d/K25ppp
 </pre>
-
-Remember to chmod 777 each of the links.
 
 [[Category:Documentation]]
 [[Category:Developer software]]
