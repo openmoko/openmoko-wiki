@@ -1,7 +1,10 @@
 {{InProgress}}
 [[Image:Screen-0_4.png|thumb|SettingsGUI - Screen Settings]]
-[[Image:Audio-0_4.png|thumb|SettingsGUI - Audio Settings]]
-[[Image:SettingsGUI-GSM-0 5.png|thumb|SettingsGUI - GSM Settings]]
+[[Image:SettingsGUI-0.6-audio.png|thumb|SettingsGUI - Audio Settings]]
+[[Image:SettingsGUI-0.6-gsm.png|thumb|SettingsGUI - GSM Settings]]
+[[Image:SettingsGUI-0.6-gprs.png|thumb|SettingsGUI - GPRS Settings]]
+
+
 
 == Overview ==
 Until OpenMoko releases an official GUI-Tool to change settings, SettingsGUI allows you to set various settings of the gta01.
@@ -13,23 +16,55 @@ This programm is written in Python using pygtk. It can be used only if those are
 == Current Features ==
 
 * Screen (Backlight enable/disable, Backlight brightness, Screen Orientation)
-* Audio (profile selection, volume)
-* GSM (Restart gsmd, signal strength, provider, status)
+* Audio (profile selection, volume, mute, save to profile)
+* GSM (restart gsmd, signal strength, provider, status)
+* GPRS (load and save settings from and to /etc/ppp/peers/, connect, set APN, User, Password, Number)
 
 == Planned Features ==
 
 * GSM (Provider selection)
 * Bluetooth (device scanning, connection, signal strength)
-* GPRS (select APN, display transfer rate)
+* GPRS (display transfer rate)
 * Battery (show capacity, voltage, charger-status)
 
-== Comment on GSM-Support ==
+== Comment on GSM Support ==
 
 * As there are no gsmd python bindings available at the time, SettingGUI uses python-subprocess and threads to communicate to the commandline of [[Gsmd#libgsmd-tool | libgsmd-tool]] for the time being.
 
+== Comment on GPRS Support ==
+
+This is still experimental. 
+
+If you have problems connecting check:
+
+* If the modem is initialized and registered to a network ("Reconnect to gsmd") 
+* If your login data (mostly APN and User are okay)
+* For the current (2007-09-06) version of gsmd it sometimes helps to kill the gsmd (to prevent interference)
+** There is a button to do so in the gsm settings ("Terminate gsmd")
+** Keep in mind that you can't check the connection state after that 
+** The gsmd start up script currently could freeze the device ("Restart gsmd")
+
+
+The connection will be terminated when you quit the application.
+However saved peer configurations can be called independently using:
+
+ pppd debug call gprs # where gprs is the peer
+
+
+Default configuration files are defined in GlobalConfiguration.py. The peer configuration, a connect- and disconnect chat script are written to /etc/ppp/peers/ on first startup if you don't already have a peer in /etc/ppp/peers/. When the connect button is pressed SettingsGUI will create latest_* files in /etc/ppp/peers/ and start the pppd with this latest_* peer.
+
+
+SettingsGUI also brings a default Nameserver in case you don't have a valid /etc/resolve.conf. The IP is from the OpenDNS Project and will only work if your GPRS provider allows DNS access to this server.
+
+
+If you have to change anything else than APN, user, password or dial in number for your provider please leave a note at the Discussion Page.
+
+
+For details and background information on GPRS see [[Manually using GPRS]].
+
 == Download ==
 
-[http://mput.de/~kristian/.openmoko/SettingsGUI-0.5.tar.gz SettingsGUI-0.5.tar.gz]
+[http://mput.de/~kristian/.openmoko/SettingsGUI-0.6.tar.gz SettingsGUI-0.6.tar.gz]
 
 Thanks to [[User:Alessandro | Alessandro]] there also is an .ipk and a .bb file. Have a look at his user site.
 
