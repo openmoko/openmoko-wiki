@@ -99,11 +99,12 @@ Voir [[u-boot#Using_usbtty_from_Linux]]
 Si vous êtes connecté sur une session ssh, sshd arrêtera de répondre pendant que l'OS est en veille, donc afin d'éviter de bloquer votre client ssh, utiliser cette commande
  # (sleep 1; echo mem > /sys/power/state) & exit
 
-=== Initial backup ===
+=== Initial backup (Sauvegarde préliminaire) ===
 
-After getting your new Neo1973 booted for the first time you might want to make a back up of the original flash chip contents on your PC, before you overwrite the flash with a custom image or just update to a newer build.  This is a good idea because there are parts in the root filesystem that can't be distributed over internet so they are only found in the shipped ROM (see the [[GPS]] driver).  One easy way to back up all of the Flash, that doesn't require installing any special software, is with ''netcat'' over the [[USB Networking|USB ethernet]].  The following commands can be used for that.
+Après avoir démarré votre nouveau Neo1973 pour la première fois vous pourriez avoir envie de réaliser une sauvegarde sur votre PC du contenu original de la carte flash, avant de réécrire par dessus avec votre image disque ou simplement y mettre une mise-à-jour. C'est une bonne idée car certaines parties dans le système-de-fichier racine ne peuvent être distribuées sur internet et se trouve uniquement dans le contenu de la ROM original (voir le driver [[GPS]]). Une manière facile de sauvegarder toute la Flash, et qui ne nécessite pas d'installation de programme spécial, est d'utiliser ''netcat'' sur [[USB Networking|Ethernet USB]]. Les commandes ci-dessous peuvent être utilisées pour faire cette sauvegarde: 
+
 {|
-! On the host !! On the target
+! Sur l'hôte !! Sur la cible
 |-
 |<pre>
 $ netcat -l -p 20000 > mtdblock0
@@ -121,7 +122,7 @@ $ netcat -l -p 20000 > mtdblock4
 </pre>
 |}
 
-This stores the five NAND partitions in files named mtdblock*.  Knowing the partition layout (u-boot "mtdparts" command or Linux dmesg) you can restore the whole flash with it.
+Ceci stocke les cinq partitions NAND dans un fichier nommé mtdblock*. En connaissant les caractéristiques des partitions (grâce à la commande u-boot "mtdparts" ou à la commande Linux "dmesg") vous pouvez restaurer l'entièreté de la Flash.
 
 === Where to from here ===
 
