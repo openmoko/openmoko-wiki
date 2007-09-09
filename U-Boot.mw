@@ -60,7 +60,7 @@ The main problem is:  The [[S3C2410 Steppingstone]] unconditionally copies the f
 
 So how can we boot from RAM? We use JTAG / OpenOCD to
 
-* reset and halt the cpu at PC=0
+* Reset and halt the cpu at PC=0
 <pre>
 > reset halt
 target halted in ARM state due to debug request, current mode: Supervisor
@@ -68,19 +68,19 @@ cpsr: 0x400000d3 pc: 0x00000000
 MMU: disabled, D-Cache: disabled, I-Cache: disabled
 </pre>
 
-* download a small piece of code for low-level SDRAM timing initialization (overwrite 4k SRAM of steppingstone)
+* Download a small piece of code for low-level SDRAM timing initialization (overwrite 4k SRAM of steppingstone)
 <pre>
 > load_binary /space/misc/gta01/u-boot.git/foo.bin 0            
 downloaded 332 byte in 0s 21899us
 </pre>
 
-* assert a break point at address 0x33f80000 (which indicates that the low-level code has finished)
+* Assert a break point at address 0x33f80000 (which indicates that the low-level code has finished)
 <pre>
 > bp 0x33f80000 4 hw
 breakpoint added at address 0x33f80000
 </pre>
 
-* run the code up to the break point
+* Run the code up to the break point
 <pre>
 > resume
 Target 0 resumed
@@ -90,13 +90,13 @@ cpsr: 0x600000d3 pc: 0x33f80000
 MMU: disabled, D-Cache: disabled, I-Cache: enabled
 </pre>
 
-* download the u-boot RAM image to 0x33f80000
+* Download the u-boot RAM image to 0x33f80000
 <pre>
 > load_binary /space/misc/gta01/u-boot.git/u-boot.bin 0x33f80000
 downloaded 135692 byte in 6s 567264us
 </pre>
 
-* resume processing
+* Resume processing
 <pre>
 > resume
 Target 0 resumed
