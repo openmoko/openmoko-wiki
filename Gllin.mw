@@ -1,0 +1,67 @@
+gllin is an userpsace driver for a hammerhead chip. It was distributed on phase1 openmokos.
+
+Unfortunately, it is an OABI binary, and not even static one, so lots of stuff is needed for it to work. For security reasons, and for compatibility with EABI userland, it is probably best to run it in chroot.
+
+Your chroot will need to contain following files:
+
+./dev
+./dev/zero
+./dev/ttySAC1
+./etc
+./etc/hosts
+./etc/nsswitch.conf
+./etc/host.conf
+./lib
+./lib/libm.so.6
+./lib/libpthread-2.5.so
+./lib/libnss_files.so.2
+./lib/libnss_compat-2.5.so
+./lib/libnss_mdns6_minimal.so.2
+./lib/libanl-2.5.so
+./lib/libgcc_s.so.1
+./lib/libutil-2.5.so
+./lib/libmemusage.so
+./lib/libm-2.5.so
+./lib/libc-2.5.so
+./lib/libnss_mdns_minimal.so.2
+./lib/libBrokenLocale.so.1
+./lib/libnss_mdns4_minimal.so.2
+./lib/libpthread.so.0
+./lib/librt-2.5.so
+./lib/libdl-2.5.so
+./lib/libutil.so.1
+./lib/libthread_db-1.0.so
+./lib/libcrypt-2.5.so
+./lib/libnss_compat.so.2
+./lib/libnss_mdns4.so.2
+./lib/libnss_mdns6.so.2
+./lib/ld-2.5.so
+./lib/libcidn.so.1
+./lib/libthread_db.so.1
+./lib/libnss_files-2.5.so
+./lib/libanl.so.1
+./lib/libcrypt.so.1
+./lib/libnss_dns-2.5.so
+./lib/ld-linux.so.2
+./lib/libnss_mdns.so.2
+./lib/libdl.so.2
+./lib/libnss_dns.so.2
+./lib/libc.so.6
+./lib/librt.so.1
+./lib/libcidn-2.5.so
+./lib/libBrokenLocale-2.5.so
+./log
+./tmp
+./tmp/nmeaNP
+./usr
+./usr/lib
+./usr/lib/libstdc++.so.6
+./usr/lib/libstdc++.so.6.0.8
+./gllin
+./sys
+
+...and you"ll want to mount /sys there. Then, to get gps to work, do:
+
+root@fic-gta01:/chroot$ cat /chroot/tmp/nmeaNP &
+root@fic-gta01:/chroot$ chroot /chroot/ gllin -low 1
+root@fic-gta01:/chroot$ chroot /chroot/ gllin -periodic 1
