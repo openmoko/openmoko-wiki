@@ -1,315 +1,67 @@
-'''Gllin''' is an userspace driver for a hammerhead [[GPS]] chip. It was distributed on phase1 openmokos.
+gllin is an userpsace driver for a hammerhead chip. It was distributed on phase1 openmokos.
 
-Thanks to a tremendous amount of hard work by many people, we have ready
-a release of gllin, the GPS driver. Here is how you can get it:
+Unfortunately, it is an OABI binary, and not even static one, so lots of stuff is needed for it to work. For security reasons, and for compatibility with EABI userland, it is probably best to run it in chroot.
 
-http://3rdparty.downloads.openmoko.org/gllin/
+Your chroot will need to contain following files:
 
-The similar instructions are described in more details at [[getting GPS console output with gllin]]. The downloaded .ipk package can be installed and works not just on Openmoko but also on Qtopia.
+./dev
+./dev/zero
+./dev/ttySAC1
+./etc
+./etc/hosts
+./etc/nsswitch.conf
+./etc/host.conf
+./lib
+./lib/libm.so.6
+./lib/libpthread-2.5.so
+./lib/libnss_files.so.2
+./lib/libnss_compat-2.5.so
+./lib/libnss_mdns6_minimal.so.2
+./lib/libanl-2.5.so
+./lib/libgcc_s.so.1
+./lib/libutil-2.5.so
+./lib/libmemusage.so
+./lib/libm-2.5.so
+./lib/libc-2.5.so
+./lib/libnss_mdns_minimal.so.2
+./lib/libBrokenLocale.so.1
+./lib/libnss_mdns4_minimal.so.2
+./lib/libpthread.so.0
+./lib/librt-2.5.so
+./lib/libdl-2.5.so
+./lib/libutil.so.1
+./lib/libthread_db-1.0.so
+./lib/libcrypt-2.5.so
+./lib/libnss_compat.so.2
+./lib/libnss_mdns4.so.2
+./lib/libnss_mdns6.so.2
+./lib/ld-2.5.so
+./lib/libcidn.so.1
+./lib/libthread_db.so.1
+./lib/libnss_files-2.5.so
+./lib/libanl.so.1
+./lib/libcrypt.so.1
+./lib/libnss_dns-2.5.so
+./lib/ld-linux.so.2
+./lib/libnss_mdns.so.2
+./lib/libdl.so.2
+./lib/libnss_dns.so.2
+./lib/libc.so.6
+./lib/librt.so.1
+./lib/libcidn-2.5.so
+./lib/libBrokenLocale-2.5.so
+./log
+./tmp
+./tmp/nmeaNP
+./usr
+./usr/lib
+./usr/lib/libstdc++.so.6
+./usr/lib/libstdc++.so.6.0.8
+./gllin
+./sys
 
+...and you"ll want to mount /sys there. Then, to get gps to work, do:
 
-== gllin options ==
-
-The /home/root/gllin/gllin file installed by the new (legitimate!) .ipk package is really just a shell script.  You can modify the options passed to gllin.real by editing that script.  Here are the options:
-<pre>
-Usage:
-
--help                    Help
--board <type>            Defines board type    Ex: '-board matchbox'
-                         supported: matchbox, trident
--com <com port>          GPS com port;         Ex: '-com com6'
--baud <baud rate>        Set baud rate;        Ex: '-baud 115200'
--rft <RF type>           Set RF type;          Ex: '-rft RF_LN22OUT'
--freq <freq plan> | ?    set frequency plan for GPS or show the list of all available plans
-                         Ex: '-freq FRQ_PLAN_OCXO_10000'
-                         Ex: '-freq ?' -- Show all available plans
--g <URL>                 SUPL Server URL or IP address;
-                         Ex: '-g 216.15.9.46'
--p <port>                SUPL Server port number;
-                         Ex: '-p 9118'
--udp <port>              Local UDP port to send NMEA to.
-                         '-udp 6000'      [default]
--gsm_cell <cell ID>      set GSM Cell ID information
-                         cell ID has the following format: '<MCC>.<MNC>.<LAC>.<CI>'
-                         Where:
-                               MCC - Mobile Country Code
-                               MNC - Mobile Network Code
-                               LAC - Location Area Code
-                               CI  - Cell Identification
-                         Ex: '-gsm_cell 310.170.367.25732'
--set_assisted_off        disable SET assisted capability
--set_based_off           disable SET based capability
--msisdn <MSISDN>         set value for MSISDN (international phone number) as SET id
-                         Ex: '-msisdn 14081234567'
--nai <nai>               specify Network Access Identifier as SET id
-                         Ex: '-nai 12345@mywebsite.com'
--periodic <s>            make periodic request every s second (-1 to 64)
-                         -1  single shot: perform one fix, then quit
-                          0       native: perform fixes as fast as possible
-                         <s>       timed: report a position every <s> seconds
-                                          where <s> is 1 to 64
--recover                 recover GLLIN after signaled exit
--low [<count>]           low level test.  Default <count> is 1
--low_debug               Low level debug ON
-+low_debug               Low level debug OFF
--train <count>           Send train data <count> times
-+pty | -pty              Enable or disable NMEA output to pty "/tmp/nmeaPTY"
-                         Default is off [-pty]
-+np | -np                Enable or disable NMEA output to named pipe "/tmp/nmeaNP"
-                         Default is on [-np]
-+nmea | -nmea            Enable or disable NMEA output to log file
-                         Default is off [-nmea]
-+daemon | -daemon        Become a daemon (or not)
-                         Default is -daemon
--a2 | -a3 | -a0          Select a GTA01 board revision.  Default is a3
--batch <st> <n> <fix>    perform batch test of <n> starts of type <st>
-                         <st> is hot, warm, cold, or SNR.
-                         Each start has <fix> fixes.
--i                       start GLLIN command line
-+pnd                     optimize for PND
--pnd                     look for low signal strength signals
-+sim                     using simulator so don't use almanac
--sim                     not using simulator
-SNR                      manufacturing SNR test mode
-hot                      hot start [default]
-warm                     warm start
-cold                     cold start
--v[n]                    Report GLLIN version string.
-                         n is 1234 to report selected versions.
- version 1.1.7
-</pre>
-
-== Using gpsd with gllin ==
-
-ipkg install gpsd
-
-edit /etc/default/gpsd and set the GPS_DEV to /tmp/nmeaNP start gpsd before gllin.
-
-== Some notes: ==
-
-The listed defaults don't seem to be correct.  By default it DOES generate NMEA data in log files.  These log files are on your flash (/home/root/gllin/log/*) and are written to once every second.  Ridiculous!
-
-To stop this, add the option "-nmea" to the second of the two gllin.real commands in the startup script.
-
-But note further that the startup script also spawns a command to 'cat' the output of the /tmp/nmeaNP named pipe to a gzipped file in /home/root.  If you want this to stop, you can do one of two things:
-
-  * cat to /dev/null instead of | gzip >> file
-
-  * add "-np" to the second gllin.real command
-
-You can't just take the 'cat' command out of the script, because with the named pipe activated, gllin will QUIT if it doesn't see anybody taking the output from the pipe.  To keep it going, either open that pipe or turn it off.
-
-You can use this [http://obri.sygroup.ch/gllin gllin initscript] to start and stop gllin.
-
-Another option:
- #!/bin/sh
- echo "Starting gllin..."
- 
- killall cat
- killall gllin.real
- 
- mknod /tmp/nmeaNP p
- cat /tmp/nmeaNP > /dev/null &
- cd /home/root/gllin
- lib/ld-linux.so.2 --library-path /home/root/gllin/lib:/home/root/gllin/usr/lib /home/root/gllin/gllin.real -low 5
- lib/ld-linux.so.2 --library-path /home/root/gllin/lib:/home/root/gllin/usr/lib /home/root/gllin/gllin.real -periodic 1 -nmea
-
-== More Initscripts ==
-
-The gllin package doesn't come with a very good set of initscripts, and gpsd is flexible enough to use gllin or some other source of GPS coordinates.
-
-For gpsd and gllin to run together well, upon boot, the following scripts have worked well for me:
-
-/etc/init.d/gpsd:
-<pre>
-#!/bin/sh
-#
-# gpsd	This shell script starts and stops gpsd.
-#
-# chkconfig: 345 90 40
-# description: Gpsd manages access to a serial- or USB-connected GPS
-# processname: gpsd
-
-# Source function library.
-#. /etc/rc.d/init.d/functions
-
-RETVAL=0
-prog="gpsd"
-
-test -f /etc/default/${prog} && . /etc/default/${prog}
-
-start() {
-	# Start daemons.
-	echo -n "Starting ${prog}: "
-	# We don't use the daemon function here because of a known bug
-	# in initlog -- it spuriously returns a nonzero status when 
-	# starting daemons that fork themselves.  See
-	# http://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=130629
-	# for discussion.  Fortunately:
-	#
-	# 1. gpsd startup can't fail, or at least not in the absence of
-	# much larger resource-exhaustion problems that would be very obvious.
-	#
-	# 2. We don't need all the logging crud that daemon/initlog sets
-	# up -- gpsd does its own syslog calls.
-	#
-	
-	if [ -e "${GPS_DEV}" ]
-	then
-	    ${prog} -n ${GPSD_OPTS} ${GPS_DEV}
-	    RETVAL=$?
-	    echo "success"
-	else
-	    # User needs to symlink ${GPS_DEV} to the right thing
-	    # Do it automatically if the name contains "NP"
-	    if echo ${GPS_DEV} | grep -q NP
-	    then
-	        mknod ${GPS_DEV} p
-	        ${prog} -n ${GPSD_OPTS} ${GPS_DEV}
-	        RETVAL=$?
-	        echo "success"
-	    else
-	        RETVAL=$?
-	        echo "No ${GPS_DEV} GPS device, aborting gpsd startup. Check /etc/default/${prog}"
-	    fi
-	fi
-	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/gpsd
-	return $RETVAL
-}
-
-stop() {
-	# Stop daemons.
-	echo -n "Shutting down ${prog}: "
-        killall ${prog}
-	RETVAL=$?
-	echo
-	if [ $RETVAL -eq 0 ]
-	then
-	    test -e /var/lock/subsys/gpsd && rm -f /var/lock/subsys/gpsd;
-	fi
-	return $RETVAL
-}
-
-# See how we were called.
-case "$1" in
-  start)
-	start
-	;;
-  stop)
-	stop
-	;;
-  restart|reload)
-	stop
-	start
-	RETVAL=$?
-	;;
-  condrestart)
-	if [ -f /var/lock/subsys/gpsd ]; then
-	    stop
-	    start
-	    RETVAL=$?
-	fi
-	;;
-  status)
-#	status gpsd
-#	RETVAL=$?
-	;;
-  *)
-	echo "Usage: $0 {start|stop|restart|condrestart|status}"
-	exit 1
-esac
-
-exit $RETVAL
-</pre>
-
-/etc/init.d/gllin:
-<pre>
-#!/bin/sh
-#
-# This shell script starts and stops gllin.
-#
-
-RETVAL=0
-prog="gllin"
-GLLIN_PATH=/home/root/gllin
-
-test -f /etc/default/${prog} && . /etc/default/${prog}
-
-start() {
-	# Make fifo if it doesn't already exist
-	if [ ! -p /tmp/nmeaNP ]
-	then
-	  mknod /tmp/nmeaNP p
-	fi
-
-	# Check for gpsd ready (max 5 seconds)
-	echo -n "Waiting for gpsd . . . "
-	sleep 1
-	if [ ! "$(pidof gpsd)" ]
-	then
-	  sleep 4
-	  if [ ! "$(pidof gpsd)" ]
-	  then
-	    RETVAL=1
-	    echo "failure."
-	    return $RETVAL
-	  fi
-	fi
-	
-	# Start daemons.
-	echo -n "starting ${prog}: "
-	cd $GLLIN_PATH
-	sleep 1
-	if [ -e $GLLIN_PATH/${prog}.real ]
-	then
-	  $GLLIN_PATH/lib/ld-linux.so.2 --library-path $GLLIN_PATH/lib $GLLIN_PATH/${prog}.real -low 5 > /dev/null
-	  $GLLIN_PATH/lib/ld-linux.so.2 --library-path $GLLIN_PATH/lib $GLLIN_PATH/${prog}.real -periodic 1 +daemon
-	else
-	  $GLLIN_PATH/lib/ld-linux.so.2 --library-path $GLLIN_PATH/lib $GLLIN_PATH/${prog} -low 5 > /dev/null
-	  $GLLIN_PATH/lib/ld-linux.so.2 --library-path $GLLIN_PATH/lib $GLLIN_PATH/${prog} -periodic 1 +daemon
-	fi
-	echo "success."
-	RETVAL=$?
-	echo
-	return $RETVAL
-}
-
-stop() {
-	# Stop daemons.
-	echo -n "Shutting down ${prog}: "
-	pkill ld-linux.so.2	
-    	RETVAL=$?
-	echo "success."
-	return $RETVAL
-}
-
-# See how we were called.
-case "$1" in
-  start)
-	start
-	;;
-  stop)
-	stop
-	;;
-  restart|reload)
-	stop
-	start
-	RETVAL=$?
-	;;
-  status)
-#	RETVAL=$?
-	;;
-  *)
-	echo "Usage: $0 {start|stop|restart|condrestart|status}"
-	exit 1
-esac
-
-exit $RETVAL
-</pre>
-
-These scripts allow you (or init, if you have them numbered in rcX.d appropriately) to start gpsd *before* gllin.  This way, gpsd starts listening on /tmp/nmeaNP immediately, and gllin doesn't need to send output to /dev/null in order to stay alive.
-
-This version of the gpsd script will create the named pipe (if the device name includes "NP" in the filename) if it doesn't exist.
-
-[[Category:GPS Applications]]
-[[Category:GPS]]
+root@fic-gta01:/chroot$ cat /chroot/tmp/nmeaNP &
+root@fic-gta01:/chroot$ chroot /chroot/ gllin -low 1
+root@fic-gta01:/chroot$ chroot /chroot/ gllin -periodic 1
