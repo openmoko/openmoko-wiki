@@ -21,19 +21,24 @@ How to connect to Windows XP via Bluetooth is described here: [[Manually_using_B
 You should now be able to connect to your Neo1973 on 192.168.0.202 via ssh (e.g. putty)
 
 
-=== Setting up routing ===
+=== Connection to the Internet ===
 
 If you want to connect to the internet from your Neo via Windows XP, e.g. for doing ipkg update/upgrade, you need to set up IP forwarding and routing properly.
 
+==== Option 1, using Windows ICS ====
+
 An easy way to do this is to use Windows Internet Connection Sharing.
 
-To do this, you need to create a network bridge which contains the usb connection to the neo.
+To do this, you need to create a network bridge which contains the usb connection to the Neo.
 
-Then you tell windows to share the WAN connection with the new bridge.
+Then you tell Windows to share the WAN connection (i.e. the network interface which connects your Windows system to the internet) with the new bridge.
 
 Then you manually set the IP address of the bridge to 192.168.0.200
 
-After you have done all this, the Neo will be able to route through the windows machine out to the internet. DNS queries will also be proxied by the windows machine.
+After you have done all this, the Neo will be able to route through the Windows machine out to the internet. DNS queries will also be proxied by the Windows machine. Of course, /etc/resolv.conf on the Neo needs to be set to your local DNS or a free DNS.
+
+
+==== Option 2, using IP Forwarding and extra routing ====
 
 An alternative way is to do it manually:
 
@@ -43,7 +48,7 @@ and set
  REG_DWORD: "IPEnableRouter" to "1"
 Be aware that IP Forwarding can be a security risk.
 
-If there is a router between your Windows XP system and the internet, you also need to tell the router how to get back to your Neo, so you need to set a route on it for 192.168.0.0/255.255.255.0 to your Windows XP LAN interface IP address. Windows will then forward the packets to the Neo.
+Then, if there is a router between your Windows XP system and the internet, you also need to tell the router how to get back to your Neo, so you need to set a route on it for 192.168.0.0/255.255.255.0 to your Windows XP LAN interface IP address. Windows will then forward the packets to the Neo.
 
 === Further references ===
 * http://www.microsoft.com/whdc/device/network/NDIS/rndis.mspx
