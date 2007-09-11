@@ -1,0 +1,98 @@
+This page explains how you can manually re-flash the [[bootloader]] into your Neo1973.  It is basically the manual task of what the [[Devirginator]] tries to do automatically (but not always works).
+
+== Prerequirements ==
+
+* Neo1973 device (any device will work)
+* [[Debug Board]] or other device supported by openocd
+* lowlevel_foo.bin for your board (e.g. from buildhost)
+* u-boot.bin for your board (e.g. from buildhost)
+* [[OpenOCD]]
+* a host PC system (running Linux is strongly recommended, while other OS's might work, too)
+
+== Steps that you do ==
+
+=== Connections ===
+
+
+# Connect the debug board upstream USB port to your PC
+# Connect the FPC to your debug board
+# Connect the FPC to your Neo1973
+# Put a charged battery into your Neo1973
+# Push the power button of your Neo1973 to swithc it on
+
+=== Starting software ===
+
+# Start OpenOCD (see detailed instructions on [[OpenOCD]] page)
+# telnet to port 4444
+
+=== Copy u-boot into RAM and start it ===
+
+So how can we boot from RAM? We use JTAG / OpenOCD to
+
+* Reset and halt the cpu at PC=0
+<pre>
+> reset halt
+target halted in ARM state due to debug request, current mode: Supervisor
+cpsr: 0x400000d3 pc: 0x00000000
+MMU: disabled, D-Cache: disabled, I-Cache: disabled
+</pre>
+
+* Download a small piece of code for low-level SDRAM timing initialization (overwrite 4k SRAM of steppingstone)
+<pre>
+> load_binary /space/misc/gta01/u-boot.git/board/neo1973/gta01/lowlevel_foo.bin 0            
+downloaded 332 byte in 0s 21899us
+</pre>
+
+* Assert a break point at address 0x33f80000 (which indicates that the low-level code has finished)
+<pre>
+> bp 0x33f80000 4 hw
+breakpoint added at address 0x33f80000
+</pre>
+
+* Run the code up to the break point
+<pre>
+> resume
+Target 0 resumed
+> Target 0 halted
+target halted in ARM state due to breakpoint, current mode: Supervisor
+cpsr: 0x600000d3 pc: 0x33f80000
+MMU: disabled, D-Cache: disabled, I-Cache: enabled
+</pre>
+
+* Download the u-boot RAM image to 0x33f80000
+<pre>
+> load_binary /space/misc/gta01/u-boot.git/u-boot.bin 0x33f80000
+downloaded 135692 byte in 6s 567264us
+</pre>
+
+* Resume processing
+<pre>
+> resume
+Target 0 resumed
+</pre>
+
+At this point, the display backlight gets bright and we see the following familiar prompt on the serial console:
+<pre>
+U-Boot 1.1.6 (Jan 13 2007 - 23:44:23)
+
+DRAM:  128 MB
+NAND:  64 MiB
+*** Warning - bad CRC or NAND, using default environment
+
+In:    serial
+Out:   serial
+Err:   serial
+Hit any key to stop autoboot:  0 
+GTA01Bv2 # 
+</pre>
+
+=== copying u-boot into RAM ===
+
+Now you have the full u-boot running from RAM, you can use all its drivers and have various options to transfer data into the Neo, such as a new u-boot image for NAND.  You can use 
+* DFU / dfu-utils directly into the partitions such as u-boot, kernel, rootfs
+* alternative
+*** halt the system from JTAG, and copy data into RAM
+*** copy data from microSD using mmcinit/ext2load
+** then resume into u-boot and use 'nand write.e'
+
+FIXME: I'll finish after lunch
