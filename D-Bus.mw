@@ -1,9 +1,55 @@
-D-Bus is a message bus system, a simple way for applications to talk to one another.
+OpenMoko uses '''D-Bus''', a message bus system which provides a simple way for applications to talk to one another and to be available as services in the system. If the application providing the service is not running when a message is sent, the application will be started.
 
-In OpenMoko we will use it for IPC.
+There are two separate busses: a system bus for root which runs whenever the phone is on, and a session bus which is started for the user when X starts.
 
-See [http://www.freedesktop.org/wiki/Software/dbus dbus homepage]
+== Session bus services ==
 
-Also see [[Dbus device API]]
+These can at least be defined in /usr/share/dbus-1.0/services/ and /usr/share/dbus-1/services/
 
+* org.openmoko.Dialer
+* org.gnome.evolution.dataserver.AddressBook
+* org.gnome.evolution.dataserver.Calendar
+* org.gnome.GConf
+* ...
+
+== System bus services ==
+
+There is information about these in /etc/dbus-1/system.d/
+
+* org.freedesktop.Avahi
+* org.bluez.*
+* ...
+
+== Accessing the services ==
+
+=== Command line ===
+
+For simple uses, there's a command dbus-send. 
+
+For example, to dial a number:
+ dbus-send --print-reply --dest="org.openmoko.Dialer" /org/openmoko/Dialer org.openmoko.Dialer.Dial string:12345
+
+=== Python ===
+
+To use D-Bus in [[Python]], the package python-dbus needs to be compiled and installed.
+
+To dial a number:
+<pre>
+#!/usr/bin/env python
+import dbus
+bus = dbus.SessionBus()
+proxy = bus.get_object("org.openmoko.Dialer", "/org/openmoko/Dialer")
+interface = dbus.Interface(object, "org.openmoko.Dialer")
+interface.Dial("12345")
+# or this: proxy.Dial("12345", dbus_interface="org.openmoko.Dialer")
+</pre>
+
+== See also ==
+
+* [[Dbus device API]]
+
+== External links ==
+
+* [http://www.freedesktop.org/wiki/Software/dbus dbus homepage]
+* [http://dbus.freedesktop.org/doc/dbus-python/doc/tutorial.html dbus-python tutorial]
 [[Category:Software]]
