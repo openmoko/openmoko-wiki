@@ -1,234 +1,24 @@
-{{Languages|USB host}}
-The mini-USB port on both the Neo 1973 and the Neo FreeRunner supports both USB host and USB device. This opens up a range of possibilities, such as adding USB cameras and USB input devices.
+== The Neo1973 as a USB host ==
+The Neo1973's mini-usb port can be configured to act as a usb host instead of a usb device. This opens up a range of possibilities, such as usb cameras and usb input devices.
 
-=== Using USB host mode ===
-==== Selecting USB host modes ====
-'''Please take into account that due to kernel changes sysfs paths can change, if you can't find a particular node, just use the &ldquo;find&rdquo; command'''
+In order to get this working, you need the proper patch (more on that in a few days), and a special cable.
 
-By default, the mini-USB port is in device mode. To tell the Neo that it is logically a host¹:
+=== Three-Headed Cable ===
+At the moment, you'll have to manufacture this one yourself. You need to make a cable with three ends:
 
- # echo host > [[GTA02 sysfs|/sys]]/devices/platform/s3c2410-ohci/usb_mode
+* A mini-usb type B cable for the Neo itself
+* A cable of whatever type to go to your usb device.
+* A cable going to a +5V voltage source with enough power for your device and to charge the Neo. This could be a wall charger or even another usb plug.
 
-Independent of the logical mode of the USB port, the Neo FreeRunner can provide 5 volt USB power to an attached USB device. To enable this (not available on Neo 1973):
+You just connect the Data+ and Data- wires of the Neo and the device, and connect all of the ground wires together and all of the +5V wires together. This powers the Neo and the device, while letting the neo talk to the device. 
 
- # echo 1 > /sys/devices/platform/neo1973-pm-host.0/hostmode
 
-Please note, on my fairly new kernel (andy-tracking commit de8460932576502fb6bf61968a37c4d2aed2d6e2), this node is in /sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/neo1973-pm-host.0/hostmode . And from 901d73fe51f33032b34b2ae5612eb863ec90532a Wed Apr 8 commit, usb_mode node is at /sys/devices/platform/s3c-ohci/usb_mode .
+=== Console ===
+Although you could use a USB keyboard, you may want to have a console while you're doing all of this. You'll probably want to use bluetooth inconjunction with pand to set up bluetooth networking.
 
-Note: You may want to run <code>ifconfig usb0 down</code> prior to switching to USB host mode, as the Neo's USB networking may not like having its USB port disappear. You'll probably want to ssh into your Neo over WiFi or Bluetooth before starting all of this, alternatively use an on screen keyboard.
-
-Note that in full USB host mode the FreeRunner will power the external device. To avoid draining the battery use a powered USB hub, then on the FreeRunner enable logical host mode:
-
- # echo host > /sys/devices/platform/s3c2410-ohci/usb_mode
-
-but NOT electrical host mode
-
- # echo 0 > /sys/devices/platform/neo1973-pm-host.0/hostmode
-
-Note that powered USB hubs do not send power upstream, that is, into the host. If you wish to power or charge the FreeRunner, you will need a [[Specialized USB cables|special USB cable]].
-
-¹)Debian note: You'll need the ohci-hcd module:
-modprobe ohci-hcd
-
-* NOTE: with [FSO] based distributions one should use the [[Dbus device API|dbus APIs]] and not the method stated above.
-
-===== Qtmoko v36 (*) =====
-As of Qtmoko v36 (kernel 2.6.34-qtmoko):
-
-'''To turn on power mode:'''
-
-  #echo 1 > /sys/devices/platform/s3c2440-i2c/i2c-0/0-0073/pcf50633-gpio.0/reg-fixed-voltage.2/gta02-pm-usbhost.0/power_on
-
-'''To switch to usb host mode:'''
-
-  #echo host > /sys/devices/platform/s3c2410-ohci/usb_mode
-
-'''To turn off power mode:'''
-
-  #echo 0 > /sys/devices/platform/s3c2440-i2c/i2c-0/0-0073/pcf50633-gpio.0/reg-fixed-voltage.2/gta02-pm-usbhost.0/power_on
-
-'''To switch to usb device mode:'''
-
-  #echo device > /sys/devices/platform/s3c2410-ohci/usb_mode
-
-(*)source: [http://permalink.gmane.org/gmane.comp.handhelds.openmoko.community/58783]
-
-==== Returning to USB device mode ====
-After doing whatever is needed to safely remove your device and unplugging it you can remove the provision of 5 volt power and return to device mode.
-
- echo 0 > /sys/devices/platform/neo1973-pm-host.0/hostmode<BR>
- echo device > /sys/devices/platform/s3c2410-ohci/usb_mode
-
-You can now safely restart USB networking
-
- ifconfig usb0 up
-
-==== USB-Mode-Script====
-This simple script switches between USB-Modes:
-
- #!/bin/sh
- grep -q 'host' /sys/devices/platform/s3c2410-ohci/usb_mode
- if [ $? -eq 0 ]
- then
- echo 0 > /sys/devices/platform/neo1973-pm-host.0/hostmode
- echo device > /sys/devices/platform/s3c2410-ohci/usb_mode
- ifconfig usb0 up
- echo USB-Port is in device-mode now.
- else
- ifconfig usb0 down
- echo host > /sys/devices/platform/s3c2410-ohci/usb_mode
- echo 1 > /sys/devices/platform/neo1973-pm-host.0/hostmode
- lsusb
- echo USB-Port is in host-mode now.
- fi
-
-See this [https://docs.openmoko.org/trac/ticket/2166 bug] for a justification for adding the lsusb hack.
-
-==== USB-Mode-Script (2.6.28+ kernels) ====
-The paths change slightly since 2.6.28:
-
- #!/bin/sh
- grep -q 'host' /sys/devices/platform/s3c2410-ohci/usb_mode
- if [ $? -eq 0 ]
- then
- echo 0 > '''/sys/class/i2c-adapter/i2c-0/0-0073'''/neo1973-pm-host.0/hostmode 
- echo device > /sys/devices/platform/s3c2410-ohci/usb_mode
- ifconfig usb0 up
- echo USB-Port is in device-mode now.
- else
- ifconfig usb0 down
- echo host > /sys/devices/platform/s3c2410-ohci/usb_mode
- echo 1 > '''/sys/class/i2c-adapter/i2c-0/0-0073'''/neo1973-pm-host.0/hostmode
- lsusb
- echo USB-Port is in host-mode now.
- fi
-
-Note: For me (2.6.29-rc3), it is /sys/devices/platform/s3c-ohci/usb_mode ...
-
-==== USB-Mode-Script (universal for all kernels) ====
- #!/bin/sh
- 
- USB_MODE=/sys/devices/platform/s3c-ohci/usb_mode
- if [ ! -f ${USB_MODE} ] ; then
-   USB_MODE=/sys/devices/platform/s3c2410-ohci/usb_mode
- fi
- if [ ! -f ${USB_MODE} ] ; then
-   echo "Cannot find usb_mode sysfs node"; exit 2
- fi
- 
- POWER=/sys/devices/platform/neo1973-pm-host.0/hostmode
- if [ ! -f ${POWER} ] ; then
-   POWER=/sys/devices/platform/s3c2440-i2c/i2c-0/0-0073/pcf50633-gpio/reg-fixed-voltage.2/gta02-pm-usbhost.0/power_on
- fi
- if [ ! -f ${POWER} ] ; then
-   POWER=/sys/devices/platform/s3c2440-i2c/i2c-0/0-0073/pcf50633-gpio.0/reg-fixed-voltage.2/gta02-pm-usbhost.0/power_on
- fi
- if [ ! -f ${POWER} ] ; then
-   POWER=/sys/class/i2c-adapter/i2c-0/0-0073/neo1973-pm-host.0/hostmode
- fi
- if [ ! -f ${POWER} ] ; then
-   echo "Cannot find power hostmode sysfs node"; exit 3
- fi
- 
- echo "USB_MODE = ${USB_MODE}"
- echo "POWER = ${POWER}"
- 
- grep -q 'host' ${USB_MODE}
- if [ $? -eq 0 ]; then
-   echo 0 > ${POWER}
-   echo device > ${USB_MODE}
-   ifconfig usb0 up
-   echo USB-Port is in device-mode now.
- else
-   ifconfig usb0 down
-   echo host > ${USB_MODE}
-   echo 1 > ${POWER}
-   lsusb
-   echo USB-Port is in host-mode now.
- fi
-
-==== Using a GUI ====
-* Using the packaged push button derived from the script above: [http://blogs.thehumanjourney.net/finds/resource/usbmode-button_0.3_armv4t.ipk Download]
-* [[User:Techiem2|Mark D. Montgomery II]]'s [http://techiem2.net/index.php?/archives/10-Freerunner-USB-Mode-Control-Program.html application] controls all the various modes through a GUI
-* Thomas Vesely's [http://projects.openmoko.org/projects/usbchmod/ project]
-* Using the gtk+ gui [[Framework-settings]]
-* Using [http://projects.openmoko.org/projects/panel-plugin openmoko-panel-plugin]
-
-=== Providing power to connected USB devices while in host mode ===
-
-Normally, USB host ports provide power to any connected USB device.
-
-Available power in host mode is the full maximum of 500mA according to USB-specifications on the Neo FreeRunner, and no power is available in host mode on the Neo 1973. If your USB device respects USB-standards and consumes not more than 500mA, you may connect it directly to your Neo FreeRunner.
-
-To provide power to USB devices attached to your Neo 1973, or to provide power to your Neo FreeRunner while USB-device connected, you can provide power by using a (modified [for powering FreeRunner]) powered USB hub (see below), or by manually injecting power into the attached USB device (and Neo FreeRunner) via one of the [[specialized_USB_cables]].
-
-=== Powered USB hubs known to work with the Neo ===
-
-(please add any known to work)
-
-* SIGMA Hub 300 (brandless cheap hub from Czech Makro markets) - can also charge FR, comes with 3.7A adapter
-
-=== Providing power to run and charge the Neo while in host mode ===
-
-A slightly separate issue is power to run and charge the Neo (both types) itself. When the USB port is in device mode, the Neo FreeRunner/1973 can be powered and recharged via the USB port, but when in standard host mode, the Neo FreeRunner is set to provide power and does not charge. Fortunately, control of the direction of power (in or out) is independent of the personality of the USB port (host or device):
-
-To recap, the direction of power can be controlled:
-
-Set to 0 (default), no power is provided at the USB port, charging is enabled, and host 15K pulldowns are removed from D+ and D-:
-
-echo 0 > /sys/devices/platform/neo1973-pm-host.0/hostmode
-
-Set to 1, provides up to 500mA USB power at the USB port (FreeRunner only), disables charging from USB, and applies 15K pulldowns to USB D+ and D-:
-
-echo 1 > /sys/devices/platform/neo1973-pm-host.0/hostmode
-
-Next, power must somehow be injected. An unmodified powered USB hub only provides power to the connected devices, but not to the connected host, so the only solution here is to modify a USB-hub¹) or to create a custom cable which will inject power into the host. See [[specialized_USB_cables]] for some examples.
-
-(However, as there is a wide range[http://permalink.gmane.org/gmane.comp.handhelds.openmoko.hardware/415]
-of USB hubs out there, one might find power (on a powered USB hub)
-is available already on the hub's mini USB 5 pin socket already, so not need a specialized cable after all!
-Check with a test meter.)
-
-Finally, there is the question of charge rate. The charging logic in the Neo will only charge at 100mA by default. Charging at 500mA will take place only if the charging device responds appropriatly to USB negotiation to increase power consumption. Charging at 1000mA will only take place if the Neo detects the appropriate resistor on the ID pins.
-
-You can manually set the charge rate. See [[Forcing_fast_charge_mode]]
-
-¹) often it's sufficient to short a diode in USB-hub to feed power to the host-connector too.
-# Edit 05 Oct. 2008 : Not being able to find any diode on my ([[User:Henrikz|Henrikz]]) USB Hub (Brand: Equip, Type: 4 port, aluminum) I simply connected +5V (pin 1) from one of the downstream ports to pin 1 of the upstream port.
-# Another successful mod with images of a DLINK hub (including some caveats) can be seen at [[User:Blutsauger]].
+See [[Manually_using_Bluetooth]]
 
 === Power Concerns ===
-You'll need to force the Neo to go into fast charge mode, since it can't do its usual power negotiation over USB.
+You'll need to force the Neo to go into fast charge mode, since it can't do its usual power negotation over USB.
 
- echo -n fast_cccv >  /sys/devices/platform/s3c2410-i2c/i2c-adapter/i2c-0/0-0008/chgmode
-
-(Also this should be done by kernel when seeing 47K at ID-pin)
-
-=== Working Examples ===
-
-==== USB Keyboard ====
-
-[[Image:Usb keyboard-jej.jpg|thumb|left]]This [[Usb_keyboard|usb keyboard]] works directly under shr-testing with no changes except usb host device to host
-<br clear="both" />
-Pictures [http://blogs.thehumanjourney.net/finds/entry/20080716 here]
-
-==== Connecting a USB-Stick ====
-[[Image:connecting-usb-stick-1.jpg|thumb|left]]
-I found this adapter, it has 2 Type A jacks, rather cheap (about 5 &euro;).
-<br clear="both" />
-
-[[Image:connecting-usb-stick-2.jpg|thumb|left]]
-I borrowed the cable from a card reader, it has the same pinout like the cable that comes with the Neo.
-<br clear="both" />
-
-[[Image:connecting-usb-stick-3.jpg|thumb|left]]
-With the above commands I could mount the memory stick.
-<br clear="both" />
-
-[[Image:connecting-usb-stick-4.jpg|thumb|left]]
-<br clear="both" />
-
-[[Category:Neo1973 Hardware]]
-[[Category:Neo FreeRunner Hardware]]
-[[Category:USB]]
-[[Category:Power]]
+<code>echo -n "fast_cccv" >  /sys/devices/platform/s3c2410-i2c/i2c-adapter/i2c-0/0-0008/chgmode</code>
