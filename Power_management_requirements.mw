@@ -1,0 +1,29 @@
+Here are some non-specific requirements for OpenMoko regarding power management of the phone. There are two general classes of requirements:
+
+# The phone should take the necessary actions for the battery to never run too empty. 
+# The phone should save power as much as possible to keep run times as long as possible.
+
+Like so many requirements, we would want more than is possible in theory or than is possible in practise with our resources. Like in all design, trade-offs have to be made between various desirable properties. For details about the hardware and drivers, and what's actually possible, see [[Neo1973 GTA01 Power Management]]. An important part of the implementation regarding management is being able to follow the charge state accurately and to forecast what the state is in say 10 minutes. This is made more difficult by battery aging.
+
+== Battery level maintenance ==
+
+Here the trade-off is between system simplicity and using all the power we get versus being easy to use and tolerant to "user errors". It's actually always possible that we lose all charge due to the small current drawn even while the system is fully off, but we can make this a very special corner-case.
+
+Battery is too empty if:
+# the battery is damaged for being too empty (this is taken care of by the battery itself).
+# we are not able to start uboot to show the user messages about charging and to negotiate the 500 mA fast charge mode when available.
+# we can't shut down the phone cleanly and have enough power left to get back to the boot loader.
+
+We need to have separate checks for these cases:
+# The system is fully operational and we need to shut it down cleanly. ([http://bugzilla.openmoko.org/cgi-bin/bugzilla/show_bug.cgi?id=847 Bug #847: Shutdown if battery level goes too low])
+# The system is in a sleep mode and we need to wake it up so that it can be shut down cleanly.
+# The system is off and we need to stop the user from accidentally booting it if we couldn't shut it down cleanly. ([http://bugzilla.openmoko.org/cgi-bin/bugzilla/show_bug.cgi?id=848 Bug #848: A charger mode for uboot])
+
+== Power saving ==
+
+Here the trade-off is between system simplicity and responsiveness and quality of all features versus longer run-times without the need to charge. Typically the return from a slow-power mode is not instant and the user will have to wait a moment (short or long).
+
+Power saving options we have in general:
+# Keep subsystems powered down when they are not needed. ([http://bugzilla.openmoko.org/cgi-bin/bugzilla/show_bug.cgi?id=842 Bug #842: Whenever possible, Amp Mode should be Off])
+# Use suspend-to-ram sleep when we don't need to control any subsystems with the CPU.
+# Use lower operational modes: dimmer screen, slower CPU frequency.
