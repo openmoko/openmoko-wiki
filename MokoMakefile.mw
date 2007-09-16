@@ -125,36 +125,38 @@ Change the PARALLEL_MAKE and BB_NUMBER_THREADS values to something that suits be
 
 * If you want to rebuild the package indexes (for instance, after compiling a new version of a package) without building <code>openmoko-devel-image</code>, run <code>make build-package-package-index</code>.
 
-===QEMU===
-The MokoMakefile now has support for automatically building, flashing, and running [[OpenMoko under QEMU|the new Neo1973 emulator]] (which is based on QEMU).
+===Build and setup of qemu-neo1973 using the MokoMakefile===
+The MokoMakefile has support for automatically building, flashing, and running [[OpenMoko under QEMU]] using qemu-neo1973, a fork of qemu which adds simulation of almost all [[Neo1973]] devices   in order allow testing OpenMoko images in a virtual environment.
 
-====Install in Ubuntu (7.04)====
-Make sure your build host is set up according to:
-  http://www.openembedded.org/wiki/OEandYourDistro
-make a new directory:
+==== Installation of qemu build requisites ====
+*gcc 3.4 or 3.3
+*lynx
+*netpbm
+*SDL-devel
+*mkdosfs (from dosfstools)
+
+===== Debian 4.0 and Ubuntu 7.04 =====
+  sudo apt-get install gcc-3.4 lynx netpbm libsdl1.2-dev dosfstools
+===== openSUSE =====
+get gcc33 and cpp33 for SUSE Linux [http://download.opensuse.org/repositories/devel:/tools:/gcc/SUSE_Linux_10.1/repodata/ 10.1], openSUSE [http://download.opensuse.org/repositories/devel:/tools:/gcc/openSUSE_10.2/repodata/ 10.2] and openSUSE [http://download.opensuse.org/repositories/devel:/tools:/gcc/openSUSE_Factory/repodata/ Factory]
+and install both rpms at once using:
+ rpm -Uhv cpp33-*.rpm gcc33-*.rpm
+Install the packages lynx, netbpm, SDL-devel and dosfstools e.g. using yast, apt, or smart.
+===== Compilation =====
+In case one of the steps below fails, make sure your build host is set up according to http://www.openembedded.org/wiki/OEandYourDistro
+
+make a new directory and install MokoMakefile in it:
   mkdir openmoko
   cd openmoko
-install the dependencies:
-  sudo apt-get install gcc-3.4 lynx netpbm libsdl1.2-dev dosfstools
-get the openmokofile:
   wget http://www.rwhitby.net/files/openmoko/Makefile
-build it for Qemu:
+Start the build of OpenMoko and qemu-neo1973:
   make qemu
-This will build openmoko for Qemu. Once that is completed, it will automatic run it into the emulator. After you have closed it and want to run openmoko again, you should use the following command:
+Once that is completed, it will boot OpenMoko in qemu-neo1973. To boot openmoko in qemu-neo1973 again, use:
   make run-qemu
 
-remark: If you want to calibrate your screen,
-look at http://onlinedev.blogspot.com/2007/08/calibrating-openmoko-v20072.html
-
-====Others====
-
-Dependencies: 
-
-*gcc 3.4 or 3.3 ('apt-get install gcc-3.4' in Ubuntu 7.04)
-*lynx ('apt-get install lynx' in Ubuntu 7.04)
-*netpbm ('apt-get install netpbm' in Ubuntu 7.04)
-*sdl-devel ('apt-get install libsdl1.2-dev' in Ubuntu .704)
-*mkdosfs ('apt-get install dosfstools' in Debian 4.0)
+If you want to calibrate your screen,
+look at [http://onlinedev.blogspot.com/2007/08/calibrating-openmoko-v20072.html]
+==== Description of the qemu make targets ====
 
 “'''make qemu'''” will build qemu-neo1973, download the latest official OpenMoko images, flash the images into the virtual NAND flash, create an empty virtual SD card, and run the emulator (you still need to install the makefile as mentioned above, however).  If this is all you want to do, then you don't even need monotone installed on the machine, and you don't need to download the OpenEmbedded monotone database.  Just make sure you don't type "make setup" (as that will invoke all the monotone and openembedded stuff).
 
