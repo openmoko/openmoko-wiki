@@ -137,36 +137,32 @@ The MokoMakefile has support for automatically building, flashing, and running [
 
 ===== Debian 4.0 and Ubuntu 7.04 =====
   sudo apt-get install gcc-3.4 lynx netpbm libsdl1.2-dev dosfstools
-===== openSUSE =====
+===== SUSE Linux / openSUSE =====
 get gcc33 and cpp33 for SUSE Linux [http://download.opensuse.org/repositories/devel:/tools:/gcc/SUSE_Linux_10.1/repodata/ 10.1], openSUSE [http://download.opensuse.org/repositories/devel:/tools:/gcc/openSUSE_10.2/repodata/ 10.2] and openSUSE [http://download.opensuse.org/repositories/devel:/tools:/gcc/openSUSE_Factory/repodata/ Factory]
 and install both rpms at once using:
  rpm -Uhv cpp33-*.rpm gcc33-*.rpm
 Install the packages lynx, netbpm, SDL-devel and dosfstools e.g. using yast, apt, or smart.
-===== Compilation =====
-In case one of the steps below fails, make sure your build host is set up according to http://www.openembedded.org/wiki/OEandYourDistro
+===== Compilation and use =====
 
-make a new directory and install MokoMakefile in it:
+Create a new directory and download the Moko Makefile to it:
   mkdir openmoko
   cd openmoko
   wget http://www.rwhitby.net/files/openmoko/Makefile
-Start the build of OpenMoko and qemu-neo1973:
-  make qemu
-Once that is completed, it will boot OpenMoko in qemu-neo1973. To boot openmoko in qemu-neo1973 again, use:
-  make run-qemu
 
-If you want to calibrate your screen,
-look at [http://onlinedev.blogspot.com/2007/08/calibrating-openmoko-v20072.html]
-==== Description of the qemu make targets ====
+“'''make qemu'''” will build qemu-neo1973, download the latest official OpenMoko images, flash the images into the virtual NAND flash, create an empty virtual SD card, and run the emulator (you still need to install the makefile as mentioned above, however).
 
-“'''make qemu'''” will build qemu-neo1973, download the latest official OpenMoko images, flash the images into the virtual NAND flash, create an empty virtual SD card, and run the emulator (you still need to install the makefile as mentioned above, however).  If this is all you want to do, then you don't even need monotone installed on the machine, and you don't need to download the OpenEmbedded monotone database.  Just make sure you don't type "make setup" (as that will invoke all the monotone and openembedded stuff).
+* <code>make run-qemu</code> restarts qemu with the currently flashed OpenMoko images and current virtual SD card.
+* <code>make run-qemu-snapshot</code> does the same but starts qemu with -snapshot which causes to to write to temporary files instead of flash and disk image files. This has the benefit that the virtual neu1973 is not changed, but that also all changes <code>make run-qemu-snapshot</code> in parallel without creating incoherent flash and SD card state as it would occur when one (or even more) instances would update disk or flash images while other instances do not expect this to happen underneath. You can however force the write back by pressing <code>C-a s</code> in the qemu 
+window which may be useful to update the flash and disk images in the last qemu instance which is running to preserve the changes, after all other instances are terminated.
 
 You may also use:
 * <code>make download-images</code> - to download the latest official images
 * <code>make flash-qemu-official</code> - to flash those images
 * <code>make flash-qemu-local</code> - to flash your latest locally built images, which can then be followed by
-* <code>make run-qemu</code> or
-* <code>make run-qemu-snapshot</code> to run the emulator with the most recently flashed images.
 * <code>make qemu-copy-package-''foo''</code> - copies <code>''foo''.ipk</code> to the virtual SD card,  which allows you to use <code>ipkg install /media/mmcblk0/''file''</code> inside the running OpenMoko to install the package.
+
+If you want to calibrate your screen,
+look at [http://onlinedev.blogspot.com/2007/08/calibrating-openmoko-v20072.html]
 
 For detailed information on advanced usage of qemu-neo1973 see also: ''[[OpenMoko under QEMU]]''
 
