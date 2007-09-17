@@ -1,11 +1,27 @@
 ==MokoMakefile==
-MokoMakefile is a fully automated way of setting up an OpenMoko development environment.  It is an invaluable tool for getting new developers up and running with a build environment which is configured the same as all the other existing developers.  It brings the same repeatability to build environment creation and maintenance as that which OpenEmbedded brings to the main task of actually building embedded software distributions.
+MokoMakefile is a simple Makefile which saves lots of work when setting up an OpenMoko build environment.
+By automating the setup process of a new OpenMoko build environment, it provides an environment which is configured the same for all the existing developers and should therefore be preferred over manual procedures or individual setup procedures.
 
-Note that MokoMakefile does *not* replace bitbake, or svn, or monotone, or openembedded, or qmake, or anything else.  It is a wrapper around all that to make it easy to set up and maintain a development environment that fully complies with the setup instructions published by OpenMoko.  Note that you need about 12 GB of available disk space for MokoMakefile to succeed (see below for a tip on how to reduce this to . Please check that your RAM + swap partition space is greater than 512 MB (around 1GB?).  Note that the initial build can take 5 hours (on 2GHz core2duo without multiprocessor optimization) to several days.
+It brings the same repeatability to build environment creation and maintenance as that which the BitBake scripts bring to OpenEmbedded ease and standardize the process of building OpenEmbedded.
+
+Unlike the manual process described at [[Building OpenMoko from scratch]], MokoMakefile does not install anything into your system (it can and should be started as normal user).
+
+MokoMakefile is a wrapper around all that to make it easy to set up and maintain a development environment that fully complies with the setup instructions published by OpenMoko.
 
 MokoMakefile is developed by [[User:RodWhitby|Rod Whitby]] - it is not an official product of OpenMoko (although I would be happy for them to pick it up and use it internally).  If there is any discrepancy between the [[Building_OpenMoko_from_scratch|official OpenMoko build instructions]], and the operation of the MokoMakefile, then you should consider the official instructions to be correct.
 
 The MokoMakefile is able to build either OM-2007.1 or OM-2007.2 images.  The core team chooses the default, but you can select one or the other at the top of the Makefile.
+
+=== Requirements for building OpenMoko ===
+Independent on whether MokoMakefile or a manual process is used to setup an OpenMoko build environment, there are several requirements which must be fullfilled in order for the OpenMoko build to succeed:
+
+* RAM: The build hosts needs to have at least 512MB of RAM, and about the same amount of swap. Some packages built by OpenEmbedded like busybox are built by compiling all source files into one binary which causes gcc to grow belond 300MB of size and no part of this memory may be on swap for the compile to finish in predictable time. For busybox, this can be turned off, but turning this off means that busybox will not as well optimized by gcc.
+
+* Disk space: You need about 12 GB of available disk space for the OpenMoko build to succeed (see below for a tip on how to reduce this).
+
+* Software: gcc, gcc-c++, ncurses-devel, subversion and [http://monotone.ca monotone]
+
+* Time: The initial build takes at least 5 hours (on 2GHz core2duo without multiprocessor optimization) and may take to several days on slower machines.
 
 === Installation ===
 
