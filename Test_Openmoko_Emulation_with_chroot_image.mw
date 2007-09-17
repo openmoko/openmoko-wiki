@@ -41,13 +41,15 @@ Add a new chroot configuration:
 
  echo "OpenMoko /var/chroot" | tee -a /etc/dchroot.conf
 
-Edit /etc/fstab and insert ''skip this to mount manually'':
+Edit /etc/fstab and insert:
  /tmp            /var/chroot/tmp         none    bind            0       0 
  proc-chroot     /var/chroot/proc        proc    defaults        0       0 
  devpts-chroot   /var/chroot/dev/pts     devpts  defaults        0       0 
+
+Tell mount to re-scan fstab and mount the new directories automatically:
  mount -a
 
-Manual mount:
+(optional) Manual mount:  If you do not want the system to mount these directories at boot, they can instead be mounted by hand.  Note that this will need to be repeated each time the system is rebooted:
  mount -o bind /tmp /var/chroot/tmp
  mount -t proc proc-chroot /var/chroot/proc
  mount -t devpts devpts-chroot /var/chroot/dev/pts
