@@ -19,29 +19,40 @@ Independent on whether MokoMakefile or a manual process is used to setup an Open
 
 * Disk space: You need about 12 GB of available disk space for the OpenMoko build to succeed (see below for a tip on how to reduce this).
 
-* Software: gcc, gcc-c++, subversion and [http://monotone.ca monotone] and more (see below for distribution-specific hints)
-
 * Time: The initial build takes at least 5 hours (on 2GHz core2duo without multiprocessor optimization) and may take to several days on slower machines.
 
+===== Required software =====
+The version control system used by OpenEmbedded is [http://monotone.ca monotone], it is not downloaded and installed by MokoMakefile. If your distribution does not provide a package, you can download and install a static binary from http://monotone.ca
+
+Some distribution specific hints on preparing your build host for building OpenEmbedded are on   http://www.openembedded.org/wiki/OEandYourDistro but they may be outdated, incomplete and do not cover everything which OpenMoko needs to build.
+
+A good guide is [[Building OpenMoko from scratch#Build host prerequisites|the section on build host prerequisites]] in [[Building OpenMoko from scratch]]
+
+If you forgot anything which OE needs itself, OE will tell you shortly after you start building, but it does not check build dependices of OpenMoko, so you either have to install them before starting or install them after the build failed. OpenEmbedded will continue where it stopped when you restart the build afterwards.
+
 ==== Package requirements by distribution ====
+Your distribution needs to provide these commands in order for OpenEmbedded to start building:
+ subversion texi2html texinfo help2man
+
+OpenMoko needs the development packages (with header files, development libraries and tools) in order to finish building:
+ ncurses zlib (or libz) OpenSSL GTK++
+
+===== Debian / Ubuntu =====
+  apt-get install help2man
+
 ===== SuSE =====
-* 10.3: <code>gcc-c++ ncurses-devel zlib-devel libopenssl-devel gtk2-devel subversion</code> and [http://download.opensuse.org/repositories/devel:/tools:/scm/SUSE_Factory/repodata/repoview/Development.Tools.group.html monotone]
-* 10.1 and 10.2: same packages as 10.3, but install <code>openssl-devel</code> instead of libopenssl-devel. Use monotone for [http://download.opensuse.org/repositories/devel:/tools:/scm/openSUSE_10.2/repodata/repoview/Development.Tools.group.html 10.2] or [http://download.opensuse.org/repositories/devel:/tools:/scm/SUSE_Linux_10.1/repodata/repoview/Development.Tools.group.html 10.1]
+For building OpenMoko on 10.3, you need
+ gcc-c++ ncurses-devel zlib-devel libopenssl-devel gtk2-devel subversion help2man [http://download.opensuse.org/repositories/devel:/tools:/scm/SUSE_Factory/repodata/repoview/Development.Tools.group.html monotone]
+10.1 and 10.2: same packages as 10.3, but install <code>openssl-devel</code> instead of libopenssl-devel. Use monotone for [http://download.opensuse.org/repositories/devel:/tools:/scm/openSUSE_10.2/repodata/repoview/Development.Tools.group.html 10.2] or [http://download.opensuse.org/repositories/devel:/tools:/scm/SUSE_Linux_10.1/repodata/repoview/Development.Tools.group.html 10.1]
+
+==== For all distributions ====
+As the QEMU-based neo1973 emulator is also built as part of the build process started by MokoMakefile, so you need gcc-3.3 and other packages for building QEMU installed. See [[Using QEMU with MokoMakefile#Build requirements|the build requrents section]] in [[Using QEMU with MokoMakefile]] for information on the required software.
 
 === Building OpenMoko with MokoMakefile ===
 
-1 - Set up your build host is set up according to:
-   http://www.openembedded.org/wiki/OEandYourDistro
-A good guide is also the [[Building OpenMoko from scratch#Build host prerequisites|section on build host prerequisites]] in [[Building OpenMoko from scratch]]
-
-In addition, you'll need help2man, you can install it with your distribution's tools for example:
-  apt-get install help2man
-
-If you forgot anything which OE needs, OE will tell you on first start.
-
-2 - Create your $OMDIR directory (note that you can change ~/moko to any directory you like):
+1 - Create your $OMDIR directory (note that you can change ~/moko to any directory you like):
    mkdir ~/moko ; cd ~/moko
-3 - Grab MokoMakefile:
+2 - Grab MokoMakefile:
    wget http://www.rwhitby.net/files/openmoko/Makefile
 
 If that doesn't work, try 
@@ -56,9 +67,9 @@ If that doesn't work, try
 
 {{note|For building 2007.2, MokoMakefile uses BitBake 1.8.8 which requires python-sqlite2 and sqlite-3.3 or later. Users of SUSE Linux 10.1 can update to [http://download.opensuse.org/pub/opensuse/distribution/10.2/repo/oss/suse/i586/sqlite-3.3.8-14.i586.rpm the version of openSUSE 10.2]}}
 
-4 - Set up the environment:
+3 - Set up the environment:
    make setup
-5 - Start building. Before starting a lengthy make process, check in Tips section about how to make Make multicore aware. You may want to modify the build/conf/local.conf file for your target (emulation/chroot) environment:
+4 - Start building. Before starting a lengthy make process, check in Tips section about how to make Make multicore aware. You may want to modify the build/conf/local.conf file for your target (emulation/chroot) environment:
    make openmoko-devel-image
 
 This will set up the recommended directory structure as described in [[Building OpenMoko from scratch]], will download all the required software (from the right places with the right versions), and will immediately start building an image.
