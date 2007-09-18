@@ -229,11 +229,26 @@ To connect from a MacOS 10.3 client:
 * Click "Connect". If everything worked, you will end up with a 'ppp0' device on your Mac with a local address of 192.168.2.200 and you will be able to access your Neo at 192.168.2.202. 
 
 
-=== A2DP ===
+=== A2DP quickie ===
 
 It's now possible (if a little hackish) to stream mp3 to a bluetooth headset. It's a known problem that the playback rate changes (pitch varies). Timing issues are also likely the reason for gaps in playback.
 
-Install required packages:
+If the bluez packages are recent enough, you can use a shortcut. I'll document it here and leave the longer version below (the long version also demonstrates the API used by the GUI to manage headsets)
+
+Create /etc/asound.conf:
+
+ pcm.!default {
+  type bluetooth
+  device "xx:xx:xx:xx:xx:xx"
+ }
+
+then play a song
+
+ madplay /media/card/song.mp3 --sample-rate=44100 --output=wave:- | aplay
+
+=== A2DP ===
+
+If that doesn't work... the more hackish... install required packages:
 
  echo "src/gz python http://www.angstrom-distribution.org/unstable/feed/armv4t/python/" >> /etc/ipkg/angstrom-python.conf 
  echo "src/gz base http://www.angstrom-distribution.org/unstable/feed/armv4t/base/" >> /etc/ipkg/angstrom-base.conf
