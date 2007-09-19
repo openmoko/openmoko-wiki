@@ -1,4 +1,4 @@
-This describes how to update your openmoko to the latest software. We'll update the kernel, the root filesystem and optionally u-boot.
+This describes how to update your Neo1973 to the latest software. We'll update the kernel, the root filesystem and optionally u-boot.
 
 {{warning|If you're updating u-boot and don't have a [[Debug Board]], you might render your unit unusable if the flashing procedure is interrupted}}
 
@@ -48,10 +48,13 @@ You'll need to boot your openmoko into uboot menu.  To do this:
 
 '''Note:''' If the bootloader remains inactive for about 30 seconds, that is no keypresses or no use of the serial console, the device will automatically power down.
 You can prevent this by just pressing the AUX button every 30 seconds or so or by telling the bootloader to not exhibit this behaviour.
-To do so, please connect to the bootloader via a serial line and enter:
+To do so, please connect to the bootloader:
 
- setenv boot_menu_timeout 65000
- saveenv
+<pre>
+cu -l /dev/ttyACM0
+GTA01Bv4 # setenv boot_menu_timeout 65000
+GTA01Bv4 # saveenv
+</pre>
 
 No further navigation is needed in u-boot - the device will automatically start flashing the images when told to do so by dfu-util below. After flashing all the files, you can choose the "Boot" option to boot the newly flashed stuff.
 
@@ -89,7 +92,7 @@ cu -l /dev/ttyACM0
 GTA01Bv3 # nand erase rootfs
 </pre>
 
-Old versions of u-boot are buggy: You may have to press the AUX button every 25 seconds or so to prevent the phone from going to sleep while being flashed. It also does not erase rootfs before flashing it... to do that, do minicom /dev/ttyACM0, then nand erase clean rootfs . Unfortunately, old versions of u-boot are not really usable, because they fail to enable the high 64MB of RAM, and you get nasty crashes after kernel boots.
+Old versions of u-boot are buggy: You may have to press the AUX button every 25 seconds or so to prevent the phone from going to sleep while being flashed. It also does not erase rootfs before flashing it... to do that, do minicom /dev/ttyACM0, then nand erase clean rootfs.
 
 Good luck!
 
