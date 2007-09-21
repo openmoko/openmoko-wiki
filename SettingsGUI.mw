@@ -1,8 +1,8 @@
 {{InProgress}}
-[[Image:Screen-0_4.png|thumb|SettingsGUI - Screen Settings]]
-[[Image:SettingsGUI-0.6-audio.png|thumb|SettingsGUI - Audio Settings]]
-[[Image:SettingsGUI-0.6-gsm.png|thumb|SettingsGUI - GSM Settings]]
-[[Image:SettingsGUI-0.6-gprs.png|thumb|SettingsGUI - GPRS Settings]]
+[[Image:SettingsGUI-0.7-screen.png|thumb|SettingsGUI - Screen Settings]]
+[[Image:SettingsGUI-0.7-audio.png|thumb|SettingsGUI - Audio Settings]]
+[[Image:SettingsGUI-0.7-gsm.png|thumb|SettingsGUI - GSM Settings]]
+[[Image:SettingsGUI-0.7-gprs.png|thumb|SettingsGUI - GPRS Settings]]
 
 
 
@@ -29,6 +29,16 @@ This program is written in [[Python]] using pygtk. It can be used only if those 
 
 * As there are no gsmd python bindings available at the time, SettingGUI uses python-subprocess and threads to communicate to the commandline of [[Gsmd#libgsmd-tool | libgsmd-tool]] for the time being.
 
+* To prevent interference with the GSM modem you have to expicitly power-up and register the modem by toggeling the "GSM State" checkboxes.
+
+* If you manually register to the gsm network (by toggeling the "Register" checkbox) SettingsGUI will sometimes not notice when the connection is established. Just toggle the init checkbox after about 3 seconds. (this is due to a bug in gsmd...)
+
+{{note|From Version 0.7 the atcmd mode of libgsmd-tool is used. To use it revision 2957 (2007-09-12) or later of gsmd is needed. If you have an older version of gsmd - or an older OpenMoko image use the upgrade function of ipkg, install a newer jffs2 image or use version 0.6 of SettingsGUI.}}
+
+* When the GPRS connection is still active (pppd runnung on the system) you should close the connection as gsmd can't start up while pppd is using the modem connection - chose "Yes":
+
+Image:SettingsGUI-0.7-close gprs.png
+
 == Comment on GPRS Support ==
 
 This is still experimental. 
@@ -40,7 +50,6 @@ If you have problems connecting check:
 * For the current (2007-09-06) version of gsmd it sometimes helps to kill the gsmd (to prevent interference)
 ** There is a button to do so in the gsm settings ("Terminate gsmd")
 ** Keep in mind that you can't check the connection state after that 
-** The gsmd start up script currently could freeze the device ("Restart gsmd")
 
 
 The connection will be terminated when you quit the application.
