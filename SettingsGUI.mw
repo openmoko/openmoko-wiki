@@ -22,7 +22,7 @@ This program is written in [[Python]] using pygtk. It can be used only if those 
 
 * GSM (Provider selection)
 * Bluetooth (device scanning, connection, signal strength)
-* GPRS (display transfer rate)
+* GPRS (display transfer rate, activate GPRS router)
 * Battery (show capacity, voltage, charger-status)
 
 == Comment on GSM Support ==
@@ -31,26 +31,24 @@ This program is written in [[Python]] using pygtk. It can be used only if those 
 
 * To prevent interference with the GSM modem you have to expicitly power-up and register the modem by toggeling the "GSM State" checkboxes.
 
-* If you manually register to the gsm network (by toggeling the "Register" checkbox) SettingsGUI will sometimes not notice when the connection is established. Just toggle the init checkbox after about 3 seconds. (this is due to a bug in gsmd...)
+* If you manually register to the gsm network (by toggeling the "Register" checkbox) SettingsGUI will sometimes not notice when the connection is established. Just toggle the init checkbox after about 3 seconds. (this seems to be due to a bug in gsmd...)
 
-{{note|From Version 0.7 the atcmd mode of libgsmd-tool is used. To use it revision 2957 (2007-09-12) or later of gsmd is needed. If you have an older version of gsmd - or an older OpenMoko image use the upgrade function of ipkg, install a newer jffs2 image or use version 0.6 of SettingsGUI.}}
+{{note|From Version 0.7 the atcmd mode of libgsmd-tool is used. To use it revision 2957 (2007-09-12) or later of gsmd is needed. If you have an older version of gsmd - or an older OpenMoko image - use the upgrade function of ipkg, install a newer jffs2 image or use version 0.6 of SettingsGUI.}}
 
-* When the GPRS connection is still active (pppd runnung on the system) you should close the connection as gsmd can't start up while pppd is using the modem connection - chose "Yes":
+* When the GPRS connection is still active (pppd runnung on the system) you should close the connection as gsmd can't start up while pppd is using the modem connection - chose "Yes" in the dialog:
 
-Image:SettingsGUI-0.7-close gprs.png
+[[Image:SettingsGUI-0.7-close gprs.png|170px]]
 
 == Comment on GPRS Support ==
 
-This is still experimental. 
-
 If you have problems connecting check:
 
-* If the modem is initialized and registered to a network ("Reconnect to gsmd") 
+* If the modem is initialized and registered to a network (Start gsmd and register) 
 * If your login data (mostly APN and User are okay)
-* For the current (2007-09-06) version of gsmd it sometimes helps to kill the gsmd (to prevent interference)
-** There is a button to do so in the gsm settings ("Terminate gsmd")
-** Keep in mind that you can't check the connection state after that 
 
+* When the gsmd still running you should close the connection as gsmd will interfere with pppd - chose "Yes" in the dialog:
+
+[[Image:SettingsGUI-0.7-terminate-gsmd.png|150px]]
 
 The connection will be terminated when you quit the application.
 However saved peer configurations can be called independently using:
@@ -71,9 +69,11 @@ For details and background information on GPRS see [[Manually using GPRS]].
 
 == Download ==
 
+[http://mput.de/~kristian/.openmoko/SettingsGUI-0.7.tar.bz2 SettingsGUI-0.7.tar.bz2]
+
 [http://mput.de/~kristian/.openmoko/SettingsGUI-0.6.tar.gz SettingsGUI-0.6.tar.gz]
 
-[http://b030.tfh-berlin.de/OpenMoko/SettingsGUI-0.6.tar.gz SettingsGUI-0.6.tar.gz] (Mirror)
+[http://b030.tfh-berlin.de/OpenMoko/ Mirror]
 
 
 Thanks to [[User:Alessandro | Alessandro]] there also is an .ipk and a .bb file. Have a look at his user site.
@@ -99,12 +99,25 @@ If you want to test this and do not have a build environment, you can 'ipkg inst
 == Installation / Execution ==
 
 * download file to Neo (e.g. using wget)
-* Uncompress tar.gz file (e.g. e.g. tar -xzvf file.tar.gz)
+* Uncompress tar.bz2 file (e.g. e.g. tar -xjvf file.tar.bz2)
+* install:
+ cd settingsgui-x.x
+ mv settingsgui  settingsgui.py
+ mkdir settingsgui 
+ mv * settingsgui
+ mv settingsgui/settingsgui.py ./
+
 * run:
  export DISPLAY=:0.0
- python SettingsGUI-x.x/SettingsGUI.py &
+ python settingsgui.py &
 
+=== Comment on Installation ===
 
+From Version 0.7 Python distutils is used. So you could also use the setup.py script to install the package:
+ python settingsgui-x.x/setup.py install
+
+But to do this you'll also have to install the packages:
+ python-compile python-devel python-stringold python-distutils
 
 [[Category:Applications]]
 [[Category:In_progress]]
