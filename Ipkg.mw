@@ -11,6 +11,14 @@ In the shell, "ipkg update" will update the list of available packages, "ipkg up
 
 Ipkg re-implements for embedded systems the Debian tools dpkg, apt, and apt-get. For example, it uses much less disk space for the package metadata.
 
+== Ipkg Breaks Kernels ==
+
+Unfortunately, ipkg has a bug; it tries to install kernels (and does actually install the kernel modules), but the kernel is on a separate partition that isn't normally mounted.  So when you do "ipkg upgrade" and kernel packages get installed, your system breaks (the modules no longer match the kernel).  For example, sound no longer worked for me.
+
+To fix this, you have to find a kernel image somewhere else (I don't know how to tell you how to find that -- on IRC, mentax suggested installing http://buildhost.openmoko.org/OM2007.2/tmp/deploy/glibc/images/fic-gta01/uImage-2.6.22.5-moko11+svnr2937-r2-fic-gta01.bin
+(but that advice is probably obsolete by the time you read it.)  Once you have a kernel partition image that matches the modules installed by ipkg, you can install the kernel by powering off the phone and following the advice in [[Flashing_openmoko]].
+
+It seems to me that ipkg should be able to flash the kernel partition -- but nobody's made it do so, yet.
 
 == Installing Packages to the Memory Card ==
 
