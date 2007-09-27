@@ -55,3 +55,21 @@ and qemu will go on with the startup process.
 
 == Next steps ==
 Implement console driver over uart.
+
+== Using a Kernel Testimage ==
+Another method of getting the kernel into the neo is to use an image for the emulated sd card.
+I already have a file called sd.img ( dd'ed from a 32mb usb stick).
+ cp /usr/obj/arm/usr/src/sys/NEO1973/kernel .
+ /usr/obj/arm/usr/src/tmp/usr/bin/objcopy -O binary kernel
+ sudo mdconfig -a -t vnode -f sd.img
+ sudo mount_msdosfs /dev/md0s1 /mnt/tmp
+ sudo cp kernel /mnt/tmp/
+ sudo umount /mnt/tmp
+ sudo mdconfig -d -u 0
+ arm-softmmu/qemu-system-arm -M neo -m 130 -mtdblock openmoko/openmoko-flash.image -kernel openmoko/openmoko-kernel.bin -sd sd.img -usb -show-cursor -serial telnet:localhost:1200,server
+In another terminal:
+ telnet localhost 1200
+ mmcinit
+ fatload mmc 0 0x30008000 kernel
+ go 0x30008000
+And wait for the crash :)
