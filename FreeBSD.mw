@@ -5,15 +5,9 @@ Interested in using FreeBSD on the Neo1973 or as a Host OS? Get in touch with mn
 A FreeBSD port is only ready for kernel developers.
 
 === Required tools ===
-You will need a copy of mkimage from u-boot. To build it fetch a copy of u-boot, cd to the tools directory and build it manually:
- cc -DUSE_HOSTCC -I../include -c ../lib_generic/crc32.c
- cc -DUSE_HOSTCC -I../include -c mkimage.c
- cc -DUSE_HOSTCC -o mkimage mkimage.o crc32.o 
-If config.h is missing you can build one by using
- gmake CC=/usr/bin/true gta01bv3_config
-in the u-boot directory (you must have applied the patches for u-boot from openmoko)
+You will need mkimage from u-boot. It's available in Ports under devel/u-boot.
 
-You will also need a copy of Qemu-neo1973. Hints on building it are avaliable from [[Talk:OpenMoko under QEMU|this page.]]
+You will also need Qemu-neo1973. Hints on building it are avaliable from [[Talk:OpenMoko under QEMU|this page.]]
 
 === Building FreeBSD ===
 You will need to download http://fubar.geek.nz/files/freebsd/neo1973/neo1973-0.20070917.tar.bz2 and extract it over the FreeBSD src tree.
@@ -23,7 +17,7 @@ From the FreeBSD src tree run:
  make buildworld TARGET=arm TARGET_ARCH=arm TARGET_CPUTYPE=arm920t
  make buildkernel TARGET=arm TARGET_ARCH=arm TARGET_CPUTYPE=arm920t KERNCONF=NEO1973
  gzip -9 usr/obj/path/to/kernel
- /path/to/mkimage -A arm -O freebsd -T kernel -C gzip -a 30008000 -e 30008000 -n "Kernel Image QT2410" -d /usr/obj/path/to/kernel.gz /usr/obj/same/path/kernel.boot
+ /path/to/mkimage -A arm -O freebsd -T kernel -C gzip -a 30008000 -e 30008000 -n "Kernel Image" -d /usr/obj/path/to/kernel.gz /usr/obj/same/path/kernel.boot
  </code>
 
 You will now have a copy of FreeBSD that is able to be loaded by u-boot.
@@ -58,3 +52,6 @@ and qemu will go on with the startup process.
 
 == Useful pages ==
 [[GTA02 Openness]]
+
+== Next steps ==
+Implement console driver over uart.
