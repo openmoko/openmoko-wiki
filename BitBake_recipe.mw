@@ -1,0 +1,62 @@
+== Bitbake ==
+BitBake is a build tool for executing tasks and managing metadata.It was inspired by Portage, the package management system used by the Gentoo Linux distribution. BitBake is the basis of the OpenEmbedded project, which is being used to build and maintain OpenMoko. 
+
+For the user guide of Bitbake, please visit the site : [http://bitbake.berlios.de/manual/] 
+
+
+== Bitbake Recipe ==
+The literal meaning of a recipe is that it is a direction to making something. Similarly, a bitbake recipe tells bitbake how to build a particular package X.
+It includes all the package dependencies, sources to fetch the source code from, configuration, compilation, build, install and remove instructions. Apart from this, it also stores the meta data for the package in certain standard variables.  
+
+
+=== Some Standard Variables in a Bitbake recipe ===
+
+1. ''DESCRIPTION = "This application will print hello world on your screen"'' : 
+Gives the description of the application that you are developing
+
+2. ''AUTHOR = "Deepank Gupta"'' : 
+Gives name of the author of the package. Similar variables can be defined such as HOMEPAGE, LICENSE, SECTION etc.
+
+3.'' PN = "Helloworld"'' : 
+This specifies the package name of the package excluding the version number of the package. The version number is specified by '''PV''' and revision number by PR variable. 
+
+4. ''DEPENDS = "X Y Z"'' : 
+With regard to dependencies, it expects the .bb to define a DEPENDS variable, which contains a space seperated list of “package names”. In the above example the package is dependent on X, Y and Z packages. The run-time dependencies of a package are specified by the variable RDEPENDS. 
+
+5. ''PROVIDES += "virtual/package"'' : 
+This specifies the functionality provided by the bitbake recipe. 
+
+6. ''PREFERRED_VERSION_a = "1.1"'' :
+This specifies the preferred version of a package named a. This is used if there are more than 1 versions of a same package such as a-1.1.bb and a-1.2.bb
+
+7. ''SRC_URI = "file://myhelloworld.c"'' : 
+This specifies the source address from where to fetch the source files. It can fetch from local disk using file:// , websites using http:// , cvs and svn using cvs:// and svn:// and others like ftp, git etc.
+
+
+
+=== Some variables specific to Openmoko recipes ===
+ $WORKDIR = $OMDIR/local/packages/<application directory>
+ $bindir  = $OMDIR/build/tmp/work/armv4t-linux/<application directory>/image/usr/bin
+ $docir   = $OMDIR/build/tmp/work/armv4t-linux/<application directory>/image/usr/share/doc
+ $D       = $OMDIR/build/
+
+
+=== Standard tasks in a recipe ===
+1. do_fetch : Fetch the source files from the URI given in the SRC_URI. 
+
+2. do_configure : for doing the configuration
+
+3. do_compile : To compile the program(s) using a compiler specified by CC variable.
+
+4. do_build : To build the package including its build-time dependencies. 
+
+5. do_install : To install the package on the filesystem i.e copy the binaries where required. 
+
+You can define your own tasks (as many as you like) which can also be python functions. 
+eg. 
+
+    do_mytask () {
+            echo "Hello, world!"
+    }
+
+=== A Basic Bitbake Recipe [http://wiki.openmoko.org/wiki/Application_Development_Crash_Course#Filling_the_Files] ===
