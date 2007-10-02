@@ -9,6 +9,21 @@ MokoMakefile è sviluppato da [[User:RodWhitby|Rod Whitby]] - non è un prodotto
 Il MokoMakeFIle è capace di costruire le immagini sia di  OM-2007.1 sia di OM-2007.2. Il core team ha scelto il default, ma è possibile scegliere l'uno o l'altro in cima al MakeFile.
 
 MokoMakeFile costruisce anche l'emulatore del Neo1973 basato su Qemu, come parte del suo processo, ed ha come obiettivi l'installazione delle immagini di OpenMoko e la loro esecuzione. Questi comandi possono essere anche usati senza scaricare e costruire la stessa distribuzione OpenEmbedded OpenMoko. Questa parte è descritta in [[Using_QEMU_with_MokoMakefile/it|Usare QEMU con MokoMakeFile]].
+= Requisiti per costruire OpenMoko =
+Indipendentemente da qualsiasi MokoMakeFile o da qualsiasi processo manuale per mettere a punto l'ambiente OpenMoko, ci sono molti prerequisiti che dovrebbero essere soddisfatti prima di cominciare la costruzione:
+* RAM: la macchina che ospiterà la costruzione (build host) dovrebbe avere almeno 512 Mb di RAM, ed uno stesso ammontare di swap. Alcuni pacchetti costruiti da OpenMoko, come busybox sono costruiti compilando tutti i files sorgente in un solo file binario, e questo causa la crescita del processo di gcc fino a 300 Mb, e nessuna parte della memoria occupata dovrebbe essere in swap perchè il tutto finisca in tempi ragionevoli. Per quanto riguarda busybox, può essere disattivata, ma ciò significherebbe che busybox non sarà ottimizzata per gcc.
+* Spazio su disco: occorrono almeno 12 Gb di spazio disponibile su disco perchè la costruzione di OpenMoko vada a buon fine (vedere sotto un consiglio per ridurre la quantità di spazio richiesto).
+* Tempo: la costruzione iniziale richiede almeno 5 ore (su un Core2Duo 2 GHz senza ottimizzazione per il multiprocessore) ed può richiedere alcuni giorni per le macchine lente.
+
+== Software richiesto ==
+Il sistema di controllo della versione utilizzato da OpenEmbedded è [http://monotone.ca/ monotone], e non è scaricato ed installato dal MokoMakeFile. Se la tua distribuzione non è provvista di tale programma, è possibile scaricarlo ed installarlo come binario statico da [http://monotone.ca].
+
+Alcune distribuzioni che preparano il sistema alla compilazione per OpenEmbedded sono elencate a questo indirizzo [http://www.openembedded.org/wiki/OEandYourDistro], ma potrebbero essere non aggiornate, incomplete e non coprire tutto ciò di cui OpenMoko ha bisogno per essere costruito.
+
+Una buona guida è la [[Building OpenMoko from scratch/it#Build host prerequisites|sezione sui prerequisiti della macchina] per la costruzione di OpenMoko in [[Building OpenMoko from scratch/it|Costruire OpenMoko da zero]].
+
+Se si dimentica qualcosa di cui OE ha bisogno per la sua costruzione, OE la richiederà velocemente durante la costruzione stessa, ma non controlla le dipendenze, motivo per cui si dovrà o installare le dipendenze prima di cominciare il build, oppure installarle dopo il fallimento del build.
+OpenMoko continuerà il build dal punto in cui si era interrotto, quando il build verrà ripreso dopo l'installazione delle dipendenze mancanti.
 
 === Prima di iniziare ===
 '''Controlla che /bin/sh (ls -l /bin/sh) sia linkato a bash.''' L'utilizzo di dash potrebbe causare problemi, soprattutto per le installazioni standard di Ubuntu 7.04 (almeno quando installato da Live CD). Se /bin/sh punta a /bin/dash, correggilo (da root):
