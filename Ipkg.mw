@@ -54,9 +54,32 @@ Create /media/card/ipkg folder
 When installing a package, use the -d option to have in installed on the card:
  ipkg install -d card python-core
 
-This will put all files (binaries and libraries) on the card, under the folder specified in the ipkg.conf file.  Your system will not be able to see these files, and you must add the BIN and LIB folders to your path.
+This will put all files (binaries and libraries) on the card, under the folder specified in the ipkg.conf file.
 
-One way to add bin and lib files to your system is by modifying /etc/profile as follows:
+=== Linking/Using Packages on the Card ===
+
+Your system will not be able to see the packages that you just added to your card.  There are two ways to remedy this.  
+The better solution is to use ipkg-link from the 'ipkg-utils' package, but 'better' is always subjective - YMMV.
+
+==== 1: Ipkg Utils and ipkg-link ====
+
+Ipkg-utils is a package that provides some additional functionality for ipkg.  A very useful tool is ipkg-link, which creates symbolic lynks for packages installed in non-root locations (such as a card) back to the root file system.
+
+To get ipkg-utils, run:
+ ipkg install ipkg-utils
+
+To create symbolic links to your root system for a specific package, run: ipkg-link add <package>.  For example, for python-core use:
+ ipkg-link add python-core
+
+To create symbolic links for all packages installed in a location, run:
+ ipkg-link mount /media/card/ipkg
+
+The ''ipkg-link remove'' and ''ipkg-link unmount'' commands remove the symlinks for a package or all packages.
+
+There is a list of the options for the ipkg command under "How do I use it?" [http://handhelds.org/moin/moin.cgi/Ipkg here.]
+
+==== 2: Adding the card PATH and LIB directories to your path  ====
+Another way to add bin and lib files to your system is by modifying your environment variables in /etc/profile as follows:
 
 On the line that defines the PATH variable, add:
  PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin:/media/card/ipkg/usr/bin
@@ -66,25 +89,7 @@ Then, before the 'export' line add:
 
 Then modify the 'export' line and add LD_LIBRARY_PATH to the end.
 
-This will let the system see the binary and library files, but it will not see other resources, such as images, configuration files, desktop files, etc.  A better solution is to use ipkg-link from the 'ipkg-utils' package.
-
-There is a list of the options for the ipkg command under "How do I use it?" [http://handhelds.org/moin/moin.cgi/Ipkg here.]
-
-=== Ipkg Utils and ipkg-link ===
-
-Ipkg-utils is a package that provides some additional functionality for ipkg.  A very usefull tool is ipkg-link, which creates symbolic lynks for packages installed in non-root locations (such as a card) back to the root file system.
-
-To get ipkg-utils, run:
- ipkg install ipkg-utils
-
-To create symbolic links to your root system for a specific package, run: ipkg-link add <package>.  For example, for python-core use:
- ipkg-link add python-core
-
-To create symbolic liks for all packages installed in a location, run:
- ipkg-link mount /media/card/ipkg
-
-The ''ipkg-link remove'' and ''ipkg-link unmount'' commands remove the symlinks for a package or all packages.
-
+This will let the system see the binary and library files, but it will not see other resources, such as images, configuration files, desktop files, etc.  For this reason, ipkg-link is preferred.
 
 [[Category:OpenMoko]]
 [[Category:Implemented]]
