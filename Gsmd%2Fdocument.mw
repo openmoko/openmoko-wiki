@@ -64,8 +64,22 @@ Once an event comes out from one of the devices, gsmd_select_main will try to ca
      struct llist_head list;
      int fd;                         /* file descriptor */
      unsigned int when;
-     int (*cb)(int fd, unsigned int what, void *data);
+     '''int (*cb)(int fd, unsigned int what, void *data);'''
      void *data;                     /* void * to pass to callback */
+ };
+
+==== gsmd_atcmd ====
+ struct gsmd_atcmd {
+        '''struct llist_head list;'''
+        void *ctx;
+        '''int (*cb)(struct gsmd_atcmd *cmd, void *ctx, char *resp);'''
+        char *resp;
+        int32_t ret;
+        u_int32_t buflen;
+        u_int16_t id;
+        u_int8_t flags;
+        char *cur;
+        char buf[];
  };
 
 === call back functions ===
