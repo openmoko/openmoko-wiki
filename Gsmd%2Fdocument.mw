@@ -10,6 +10,13 @@ http://lh6.google.com/ticktock35/RwDCAWdUPEI/AAAAAAAAAD4/wBrRLv-1oyE/s400/gsmd_o
 GSMD is a event driven daemon. Each event shall has a response. 
 Every event will pass through the '''gsmd_select_main()''' in which finding and executing their correspond call back functions.
 
+The last part of gsmd main function enters a infinite loop, trying to call '''gsmd_select_main'''.
+
+ while(1) {
+          int ret = gsmd_select_main();
+          ...
+  }
+
 === gsmd_select_main() ===
 gsmd_select_main this is core of the call back function scheme. All devices, gsmd monitors, are described as a struct '''gsmd_fd''', and gsmd_select_main will '''select''' them. 
 Once an event comes out from one of the devices, gsmd_select_main will try to call it's '''call back function''' that devices registered.
