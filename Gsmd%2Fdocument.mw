@@ -95,12 +95,20 @@ That means if you redirect the cb to another implementation, the gsmd will behav
  };
 
 === call back functions ===
-Gsmd will open two devices. One is uart to modem and the other is the Unix socket, communicating with libgsmd. 
-
-The default call back function of uart (to modem) is atcmd_select_cb, in which dealing with writing AT command, and reading response or notifications from modem.
+Gsmd will open at least one devices. One is uart to modem and others are the Unix socket, communicating with libgsmd.
  
+'''atcmd_select_cb''' is the default call back function that dealing the uart to the modem. It will handle sending AT command to modem or receive whatever return from modem and send them into parser. 
+
+The default parser call back function of uart (to modem) is ml_parse, in which dealing with reading the response of modem dispatch the correct call back function to handle the response.
+ 
+==== atcmd_select_cb ====
+
+===== atcmd_fill =====
+
+===== atcmd_submit =====
+
 ==== ml_parse ====
-ml_parse is the call back function that handles:
+ml_parse is the parser call back function that handles:
 * Initial GSM Modem
 * handle correspond AT command call back
 * handle notification call back
@@ -116,11 +124,8 @@ When the modem firmware is ready to initial, it will send '''AT-Command Interpre
         }
 What modem write to gsmd will put in "buf". And if the contents of the "buf" is "AT-Command Interpreter ready" the automatic gsmd initialize will start.
 
-==== atcmd_select_cb ====
-
-===== atcmd_fill =====
-
-===== atcmd_submit =====
+===== handle correspond AT command call back =====
+===== handle notification call back =====
 
 == libgsmd ==
 == libgsmd-tool ==
