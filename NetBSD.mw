@@ -1,0 +1,148 @@
+== Running NetBSD in Qemu-neo1973 ==
+A NetBSD port is only ready for kernel developers.
+
+=== Required tools ===
+You will need mkimage from u-boot. It's available in pkgsrc/wip under u-boot.
+
+You will also need Qemu-neo1973. Hints on building it are avaliable from [[Talk:OpenMoko under QEMU|this page.]]
+
+=== Building NetBSD ===
+You will need to 
+ <code>
+ cd /usr/src/sys/arch/evbarm/conf
+ cp SMDK2410 NEO1973
+ cp std.smdk2410 std.neo1973
+ </code>
+
+and apply these patches
+ <code>
+--- NEO1973	2005-07-18 23:14:16.000000000 +0200
++++ NEO1973.new	2007-10-07 16:47:45.000000000 +0200
+@@ -3,7 +3,7 @@
+ #	SMDK2410 -- Samsung's S3C2410 evaluation board.
+ #
+ 
+-include	"arch/evbarm/conf/std.smdk2410"
++include	"arch/evbarm/conf/std.neo1973"
+ 
+ #options 	INCLUDE_CONFIG_FILE	# embed config file in kernel binary
+ 
+ </code>
+
+ <code>
+ --- std.neo1973	2003-07-31 22:11:45.000000000 +0200
++++ std.neo1973.new	2007-10-07 16:47:33.000000000 +0200
+@@ -21,5 +21,6 @@
+ makeoptions	BOARDTYPE="smdk2410"
+ makeoptions	BOARDMKFRAG="${THISARM}/conf/mk.smdk2xx0"
+ makeoptions	KERNEL_BASE_PHYS=0x30200000
++makeoptions	KERNEL_BASE_VIRT=0xc0008000
+ 
+ options 	ARM_INTR_IMPL="<arch/arm/s3c2xx0/s3c2410_intr.h>"
+</code>
+
+From the NetBSD src tree run:
+ <code>
+ cd /usr/src
+ ./build.sh -m evbarm tools
+ ./build.sh -u -m evbarm kernel=NEO1973
+ mkimage -A arm -O netbsd -T kernel -C none -a 30008000 -e 30008110 -n "Kernel Image" -d /usr/obj/sys/arch/evbarm/compile/NEO1973/netbsd  /usr/obj/sys/arch/evbarm/compile/NEO1973/netbsd.boot
+ </code>
+
+You will now have a copy of NetBSD that is able to be loaded by u-boot.
+
+=== Running NetBSD ===
+
+From the qemu directory edit the openmoko/flash.sh and add the line
+ <code>
+ kernel_image="/usr/obj/sys/arch/evbarm/compile/NEO1973/netbsd.boot"
+ </code>
+after the four "most_recent" lines.
+
+Next run
+ <code>
+ ./openmoko/download.sh
+ ./openmoko/flash.sh
+ </code>
+
+This will fetch the required parts and create an image to run. They require you to have bash installed.
+
+Finally run qemu with
+ <code>
+ cd /usr/pkg/emul/neo1973; qemu-system-arm -M neo -m 130 -mtdblock openmoko/openmoko-flash.image -kernel openmoko/openmoko-kernel.bin -usb -show-cursor -serial telnet:localhost:1200,server
+ </code>
+
+And from another xterm
+ <code>
+ telnet localhost 1200
+ </code>
+and qemu will go on with the startup process.
+
+In Qemu running u-boot
+press Enter two times to opt "Set console to serial"
+press Space to select. 
+press Space to select option "Boot"
+
+in telnet to the serial port you'll see:
+ <code>
+host007# telnet localhost 1200
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+
+
+U-Boot 1.2.0-moko9_r0 (Aug 19 2007 - 19:17:12)
+
+DRAM:  128 MB
+NAND:  64 MiB
+Found Environment offset in OOB..
+Video: 640x480x8 31kHz 59Hz
+
+NAND read: device 0 offset 0x25c000, size 0x5000
+
+Reading data from 0x260e00 -- 100% complete.
+ 20480 bytes read: OK
+USB:   S3C2410 USB Deviced
+In:    serial
+Out:   serial
+Err:   serial
+GTA01Bv4 # Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+    The NetBSD Foundation, Inc.  All rights reserved.
+Copyright (c) 1982, 1986, 1989, 1991, 1993
+    The Regents of the University of California.  All rights reserved.
+
+NetBSD 3.1 (NEO1973) #0: Sun Oct  7 17:30:15 CEST 2007
+        noud4@host007.template:/usr/obj/sys/arch/evbarm/compile/NEO1973
+total memory = 32768 KB
+avail memory = 26688 KB
+mainbus0 (root)
+cpu0 at mainbus0: ARM920T rev 0 (ARM9TDMI core)
+cpu0: DC enabled IC enabled WB enabled EABT
+cpu0: 16KB/32B 64-way Instruction cache
+cpu0: 16KB/32B 64-way write-back-locking-A Data cache
+ssio0 at mainbus0: fclk 200 MHz hclk 100 MHz pclk 50 MHz
+ohci0 at ssio0 intr 26
+ohci0: OHCI version 1.0
+usb0 at ohci0: USB revision 1.0
+uhub0 at usb0
+uhub0: Samsung OHCI root hub, class 9/0, rev 1.00/1.00, addr 1
+uhub0: 3 ports with 3 removable, self powered
+sscom0 at ssio0 unit 0: UART0 addr=50000000
+sscom0: console (major=104)
+sscom1 at ssio0 unit 1: UART1 addr=50004000
+ssextio0 at ssio0
+lcd0 at ssio0
+wsdisplay0 at lcd0 kbdmux 1
+wsmux1: connecting to wsdisplay0
+ssspi1 at ssio0 unit 1
+sskbd0 at ssspi1 intr 1
+wskbd0 at sskbd0 mux 1
+wskbd0: connecting to wsdisplay0
+clock: hz=100 stathz = 64 PCLK=50000000 prescaler=2 tc=24414
+ugen0 at uhub0 port 3
+ugen0: Cambridge Silicon Radio Bluetooth USB Adapter, rev 2.00/19.58, addr 2
+boot device: <unknown>
+root device: 
+ </code>
+
+This all thanks to and inspired by the [[FreeBSD]] page
