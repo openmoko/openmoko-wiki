@@ -130,6 +130,42 @@ gsmd_alive_start is a scheme that gsmd detect if the modem is still alive or not
 ===== handle notification call back =====
 
 == libgsmd ==
+'''libgsmd''' is a library with C language API for application programs. Programs using this library can use the phone, e.g. make phone calls, receive incoming calls, register to the network, etc.
+
+===='''libgsmd_sms'''====
+
+'''libgsmd_sms''' is about all related SMS functions. The API is as below:
+
+* '''List Messages''': can list all SMS message by 'stat' value
+ extern int lgsm_sms_list(struct lgsm_handle *lh, enum gsmd_msg_sms_type stat);
+
+* '''Read Message''': It can read one SMS message by 'index' value
+ extern int lgsm_sms_read(struct lgsm_handle *lh, int index);
+
+* '''Delete Message''': can delete one SMS message by 'index' and 'del_flag' values
+ extern int lgsm_sms_delete(struct lgsm_handle *lh, const struct lgsm_sms_delete *sms_del);
+
+* '''Send Message''': can send one SMS message 
+ extern int lgsm_sms_send (struct lgsm_handle *lh, const struct lgsm_sms *sms);
+
+* '''Write Message to Memory''': can write one SMS message to preferred memory
+ extern int lgsm_sms_write (struct lgsm_handle *lh, const struct lgsm_sms_write *sms_write);
+
+* '''Retrieve SMS storage Information''': retrieve all SMS storage information
+ extern int lgsm_sms_get_storage (struct lgsm_handle *lh);
+
+* '''Set preferred SMS storage''': can set SMS preferred storage
+ extern int lgsm_sms_set_storage (struct lgsm_handle *lh, enum ts0705_mem_type mem1, enum ts0705_mem_type mem2, enum ts0705_mem_type mem3);
+
+* '''Retrieve current default service center address'''
+ extern int lgsm_sms_get_smsc(struct lgsm_handle *lh);
+
+* '''Set new default service center address'''
+ extern int lgsm_sms_set_smsc(struct lgsm_handle *lh, const char *number);
+
+* '''Packing of 7-bit characters'''
+ extern int packing_7bit_character(const char *src, struct lgsm_sms *dest);
+
 == libgsmd-tool ==
 [http://wiki.openmoko.org/wiki/Gsmd#libgsmd-tool Please reference to here]
 
