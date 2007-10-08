@@ -7,60 +7,27 @@ You will need mkimage from u-boot. It's available in http://pkgsrc-wip.sourcefor
 You will also need Qemu-neo1973. Hints on building it are avaliable from [[Talk:OpenMoko under QEMU|this page.]]
 
 === Building NetBSD ===
-You will need to 
- <code>
- cd /usr/src/sys/arch/evbarm/conf
- cp SMDK2410 NEO1973
- cp std.smdk2410 std.neo1973
- </code>
+You'll need to add a kernel config file supporting FIC's Neo1973
+to /usr/src/sys/arch/evbarm/conf.
 
-and apply these patches
-<pre>
---- NEO1973	2005-07-18 23:14:16.000000000 +0200
-+++ NEO1973.new	2007-10-07 16:47:45.000000000 +0200
-@@ -3,7 +3,7 @@
- #	SMDK2410 -- Samsung's S3C2410 evaluation board.
- #
- 
--include	"arch/evbarm/conf/std.smdk2410"
-+include	"arch/evbarm/conf/std.neo1973"
- 
- #options 	INCLUDE_CONFIG_FILE	# embed config file in kernel binary
- 
-@@ -185,7 +185,7 @@
- #options 	LCD_DEBUG
- 
- # SPI port
--#ssspi0	at ssio? index 0
-+ssspi0	at ssio? index 0
- ssspi1	at ssio? index 1
- 
- # on-board keyboard controller (Semtech SPICoder-SA01) via SPI1
-@@ -236,6 +236,10 @@
- uhub*	at usb?
- uhub*	at uhub? port ? configuration ? interface ?
- 
-+# USB Bluetooth
-+ubt*    at uhub? port ?
-+bthci*  at ubt?
-+
- # USB HID device
- uhidev*	at uhub? port ? configuration ? interface ?
+Here's such a kernel config file, named NEO1973:
+ <pre>
+#	$NetBSD$
+#
+#	NEO1973 -- FIC's Neo1973 phone.
+#
 
-</pre>
+include "arch/evbarm/conf/SMDK2410"
 
-<pre>
---- std.neo1973	2003-07-31 22:11:45.000000000 +0200
-+++ std.neo1973.new	2007-10-07 16:47:33.000000000 +0200
-@@ -21,5 +21,6 @@
- makeoptions	BOARDTYPE="smdk2410"
- makeoptions	BOARDMKFRAG="${THISARM}/conf/mk.smdk2xx0"
- makeoptions	KERNEL_BASE_PHYS=0x30200000
-+makeoptions	KERNEL_BASE_VIRT=0xc0008000
- 
- options 	ARM_INTR_IMPL="<arch/arm/s3c2xx0/s3c2410_intr.h>"
-</pre>
+options	SDRAM_SIZE=134217728
 
+# SPI port 0
+ssspi0	at ssio? index 0
+
+# USB Bluetooth
+ubt*    at uhub? port ?
+bthci*  at ubt?
+ </pre>
 
 From the NetBSD src tree run:
  <code>
@@ -70,7 +37,7 @@ From the NetBSD src tree run:
  mkimage -A arm -O netbsd -T kernel -C none -a 30008000 -e 30008110 -n "Kernel Image" -d /usr/obj/sys/arch/evbarm/compile/NEO1973/netbsd  /usr/obj/sys/arch/evbarm/compile/NEO1973/netbsd.boot
  </code>
 
-You will now have a copy of NetBSD that is able to be loaded by u-boot.
+You'll now have a copy of the NetBSD kernel, called netbsd.boot, that's able to be loaded by u-boot.
 
 === Running NetBSD ===
 
