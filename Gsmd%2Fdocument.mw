@@ -8,8 +8,7 @@ The diagram is as following.
 http://lh6.google.com/ticktock35/RwDCAWdUPEI/AAAAAAAAAD4/wBrRLv-1oyE/s400/gsmd_overview.jpg
 
 == Gsmd ==
-GSMD is a event driven daemon. Each event shall has a response. 
-Every event will pass through the '''gsmd_select_main()''' in which finding and executing their correspond call back functions.
+GSMD is an event-driven daemon. Each event shall have a response and will pass through the function '''gsmd_select_main()''' in which finding and then executing their correspond callback functions.
 
 The last part of gsmd '''main''' function enters a infinite loop, trying to call '''gsmd_select_main'''.
 
@@ -19,8 +18,8 @@ The last part of gsmd '''main''' function enters a infinite loop, trying to call
   }
 
 === gsmd_select_main() ===
-gsmd_select_main this is core of the call back function scheme. All devices, gsmd monitors and linked in a [http://wiki.kldp.org/wiki.php/LinkedList list], are described as a struct '''gsmd_fd''', and gsmd_select_main will [http://swoolley.org/man.cgi/select select] them. 
-Once an event comes out from one of the devices, gsmd_select_main will try to call it's '''call back function''' that devices registered.
+gsmd_select_main this is core of the callback function scheme. All devices, gsmd monitors and linked in a [http://wiki.kldp.org/wiki.php/LinkedList list], are described as a struct '''gsmd_fd''', and gsmd_select_main will [http://swoolley.org/man.cgi/select select] them. 
+Once an event comes out from one of the devices, gsmd_select_main will try to call it's '''callback function''' that devices registered.
 
  int gsmd_select_main()
  {
@@ -76,9 +75,9 @@ Once an event comes out from one of the devices, gsmd_select_main will try to ca
      void *data;                     /* void * to pass to callback */
  };
 
-When there are anything change in fd, the gsmd_select_main will detect them and try to call it's call back function cb.
+When there are anything change in fd, the gsmd_select_main will detect them and try to call it's callback function cb.
 
-That means if you redirect the cb to another implementation, the gsmd will behave very differently.
+That means if you redirect the callback function cb to another implementation, the gsmd will behave very differently.
 
 ==== gsmd_atcmd ====
  struct gsmd_atcmd {
@@ -94,12 +93,12 @@ That means if you redirect the cb to another implementation, the gsmd will behav
         char buf[];
  };
 
-=== call back functions ===
+=== callback functions ===
 Gsmd opens at least one devices. One is uart to modem and others are the Unix socket, communicating with libgsmd.
  
-'''atcmd_select_cb''' is the default call back function that dealing the uart to the modem. It will handle sending AT command to modem or receive whatever return from modem and send them into parser. 
+'''atcmd_select_cb''' is the default callback function that dealing the UART to the modem. It will handle sending AT commands to GSM modem or receive whatever return from modem and send them into parser. 
 
-The default parser call back function of uart (to modem) is '''ml_parse''', in which dealing with reading the response of modem dispatch the correct call back function to handle the response.
+The default parser callback function of UART (to modem) is '''ml_parse''', in which dealing with reading the response of modem dispatch the correct call back function to handle the response.
  
 ==== atcmd_select_cb ====
 
@@ -108,12 +107,12 @@ The default parser call back function of uart (to modem) is '''ml_parse''', in w
 ===== atcmd_submit =====
 
 ==== ml_parse ====
-ml_parse is the parser call back function that handles:
+ml_parse is the parser callback function that handles:
 * Initial GSM Modem
-* handle correspond AT command call back
-* handle notification call back
+* handle correspond AT command callback
+* handle notification callback
 
-===== initial GSM Modem =====
+===== Initialize GSM Modem =====
 When the modem firmware is ready to initial, it will send '''AT-Command Interpreter ready''' to gsmd. If ml_parse get this string, gsmd will try to initialize the modem.
         if (strlen(buf) == 0 ||
             !strcmp(buf, "'''AT-Command Interpreter ready'''")) {
