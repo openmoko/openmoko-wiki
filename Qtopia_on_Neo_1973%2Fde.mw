@@ -1,126 +1,93 @@
-[http://en.wikipedia.org/wiki/Qtopia Qtopia] ist eine komplette Handy- und PDA-Plattform, die auf vielen Geräten lauffähig ist. Qtopia steht unter einer doppelten Lizenz, unter GPL und einer proprietären, aber seit der Version 3.4.0 ist Qtopia für die Nutzung unter der GPL freigegeben.
-
-{|align=right
-|__TOC__
-|}
-
-
-== Aktueller Status ==
-
-Am 27. November 2007 hat Lorn Potter von [http://trolltech.com Trolltech] das neueste Flash-Image für das FIC Neo1973 mit dem Qtopia 4.3.1 Snapshot (GPL-Version) freigegeben. Es beinhaltet die neue Cruxus Mediaengine, welche schon einige Plugins wie ''libmad'', ''tremor (ogg)'' und ''timidity'' mit Unterstützung der ''.wav'', ''.mp3'' und ''.mid'' Formate beinhaltet.
-
-Am 12.02.2008 erschien ein [http://www.qtopia.net/modules/mydownloads/singlefile.php?lid=48 Update] der Version 4.3.1, welches hauptsächlich Bugs behoben hat. Somit wird jetzt die SIM Karte nach dem ersten Reboot nach dem Flashen korrekt erkannt und die Anwendung "Kontakte" nutzbar.
-
-Für die Installation folgen Sie den Anweisungen im Abschnitt [[#Installation|Installation]].
-
-Für weitere Informationen über diesen Snapshot lesen Sie den Thread zur folgenden [http://lists.openmoko.org/pipermail/community/2007-November/011836.html Ankündigung].
-
-== Suspend Fragen ==
-
-Im Bereich von Akkulaufzeit und Suspend-Modus muss noch einiges verbessert werden. So ist Suspend in Qtopia standardmäßig deaktiviert, denn im Moment kann man keine Anrufe bzw. SMS empfangen, wenn sich der Neo im Suspend-Modus befindet. Zur Zeit beträgt die Akkulaufzeit unter Qtopia (mit standardmäßig deaktiviertem Suspend-Modus) ca. 3-4 Stunden, je nach Umfang der Nutzung.
-
-Die aktuelle Standby-Zeit ist etwa 7 Stunden, wenn das Telefon nicht benutzt wird, also keine Berührungen des Touchscreens und Bluetooth ausgeschaltet.
-
-Beachten Sie, dass es beim [http://wiki.openmoko.org/wiki/Neo1973_Battery_Charger#Neo1973_emergency_charging entladenen] Akku nicht mehr ausreicht, den Neo einfach an den USB-Anschluss anzuschließen. An dieser Stelle hat die Batterie zu wenig Spannung, um den Neo zu starten und den Ladestrom von 500mA zu aktivieren. Der Neo muss für ca. 4 Stunden am USB-Anschluss angeschlossen bleiben. In der Zeit wird der Akku sehr langsam mit einem Ladestrom von 100mA aufgeladen, bis er genug geladen ist, um auf den 500mA Ladestrom-Modus umzuschalten.
-
-Aktueller Status bezüglich des Suspend-Modus: Nach dem Aufwachen aus dem Suspend-Modus ist grundsätzlich möglich, wenn Sie die Zeile ''console=ttySAC0,115200'' aus ''bootargs_base'' entfernen (siehe die [http://blog.rot13.org/2007/09/openmoko_as_a_phone.html Anleitung]), mit dem GSM Modul zu kommunizieren, aber es kann Qtopia nicht aufwachen und somit sind keine eingehende Anrufe oder SMS im Suspend-Modus möglich. Nach dem Drücken auf die AUX Taste solle der Neo aus dem Suspend-Modus aufwachen und Sie über verpasste Anrufe und SMS informieren.
-
-Dieser Bug scheint noch nicht im letzten offiziellen Flash-Image behoben zu sein. [http://llornkcor.com/neo/qtopia-4.3-snapshot-12192309-neo-flash.tgz Hier] ist ein inoffizielles Image von Loren, welches das Problem behebt.
-
-'''Bemerkung:''' Nach dieser Modifikation ist es zwar möglich, nach dem Aufwachen wieder das GSM Modul zu benutzen, allerdings klappt nachher kein weiterer Suspend mehr.
+{{Languages|Qtopia_on_Neo_1973}}
 
 == Installation ==
 
-=== Qtopia Images ===
-Qtopia Images für das Neo1973 und der Kernel können [http://www.qtopia.net/modules/devices/openmoko.php hier] heruntergeladen werden. Zur Zeit enthält das Archiv den Openmoko Kernel 2.6.22 und ein Flash Image der Qtopia Phone-Edition im jffs2 Format, das für das Neo1973 cross-compiliert wurde.
+=== Qtopia image ===
+Get "Qtopia on Neo Flash Image and kernel" [http://www.qtopia.net/modules/devices/openmoko.php from here]. Currently the flash tarball has the 2.6.21 openmoko kernel and a Qtopia phone edition jffs2 flash image cross-compiled for the Neo. 
 
-Neuere inoffizielle Qtopia Images können sie finden in den ScaredyCat [[repositories]].
+Newer unofficial Qtopia images can be found in the ScaredyCat [[repositories]].
 
-Es ist empfehlenswert, zuerst Teile des Flash Speichers zu löschen (wenn Sie keinen Update des u-boot durchgeführt haben. Andernfalls überspringen Sie diesen Schritt). Rufen Sie die u-boot Console [http://wiki.openmoko.org/wiki/Uboot#Accessing_the_bootloader_prompt wie folgt] auf und geben sie folgendes ein:
+It appears you must clear the flash chunks first (if you have not updated your uboot.  If you have, you may skip this step). Get into uboot console [http://wiki.openmoko.org/wiki/Uboot#Accessing_the_bootloader_prompt] and enter 
 
-nand erase kernel
-nand erase rootfs
+ nand erase kernel
+ nand erase rootfs
 
-Der Download und die Nutzung von dfu-utils erfolgt [[Flashing the Neo 1973|wie üblich]]. Die IP Adresse ist die gleiche wie beim OopenMoko Build (192.168.0.202/24).
+Download and use dfu-util as [[Flashing_openmoko|normal]] and the ip address and cidr are the same as the openmoko build (192.168.0.202/24) :D - Simple, Eh?
 
-=== Qtopia UND Openmoko Variante 1 ===
-Warum wählen, wenn man beides haben kann ;-)
+=== Qtopia AND OpenMoko Option 1 ===
+Why choose when you can have both ;)
 
-Hier wird angenommen, dass auf dem Neo 1973 irgendeine aktuelle Version von Openmoko installiert ist. Wenn nicht, dann bitte  [[Flashing the Neo 1973|hier]] einen Blick rein werfen.
+I assume you allready have some recent version of OpenMoko on your Neo1973. If not, have a look [[Flashing_openmoko|here]].
 
-Sichern Sie zuerst alle Daten von der Micro-SD Karte, die nicht gelöscht werden sollen, wärend ein neues Dateisystem auf der SD Karte angelegt wird. Ein neues Dateisystem ist erforderlich, da VFAT keine Links unterstützt. Also nach dem SSH auf Neo:
-umount /dev/mmcblk0p1
-mkfs.ext3 /dev/mmcblk0p1
-mount /dev/mmcblk0p1
+First backup everything on your micro-sd card you don't want to loose as we are going to create a new filesystem on it. This is necessary beacause vfat doesnt support links. Then ssh to your neo and do:
+ umount /dev/mmcblk0p1
+ mkfs.ext3 /dev/mmcblk0p1
+ mount /dev/mmcblk0p1
 
-Auf Ihrem Desktop laden Sie das "Developer root filesystem" von [http://www.qtopia.net/modules/devices/openmoko.php hier]. Entpacken Sie  das Verzeichnis opt/Qtopia und den qpe init Script aus diesem Archiv und kopieren Sie diese auf den Neo. Dies könnte so aussehen:
-tar xzf ficgta01-qtopia-developer-rootfs.tgz opt/Qtopia etc/init.d/qpe
-mv opt/Qtopia etc/init.d/qpe . && rm -r opt etc
-tar czf Qtopia.tar.gz Qtopia qpe
-scp Qtopia.tar.gz root@192.168.0.202:/media/card/
+On your desktop: Get "Developer root filesystem" [http://www.qtopia.net/modules/devices/openmoko.php from here]. Get the opt/Qtopia folder plus the qpe init script out of the archive repack and copy it to your neo. One could do this like this:
+ tar xzf ficgta01-qtopia-developer-rootfs.tgz opt/Qtopia etc/init.d/qpe
+ mv opt/Qtopia etc/init.d/qpe . && rm -r opt etc
+ tar czf Qtopia.tar.gz Qtopia qpe
+ scp Qtopia.tar.gz root@192.168.0.202:/media/card/
 
-Weiter auf dem Neo: entpacken Sie das Archiv, aus welchem Sie gerade das Verzeichnis opt/Qtopia extrahiert haben. Danach verschieben Sie den init Script nach /etc/init.d/:
-cd /media/card
-tar xzf Qtopia.tar.gz
-mkdir -p /opt
-ln -s /media/card/Qtopia /opt/Qtopia
-mv qpe /etc/init.d
+On your neo again: unpack the archive you just copied and link the Qtopia folder to /opt/Qtopia. Then move the init script to /etc/init.d/:
+ cd /media/card
+ tar xzf Qtopia.tar.gz
+ mkdir -p /opt
+ ln -s /media/card/Qtopia /opt/Qtopia
+ mv qpe /etc/init.d
 
-Jetzt beenden sie den XServer und den gsmd und starten Sie Qtopia (dies kann zur selben Zeit erfolgen):
-/etc/init.d/xserver-nodm stop
-/etc/init.d/gsmd stop
-/etc/init.d/qpe start
+Now kill the x server and gsmd and start Qtopia (this can take some time):
+ /etc/init.d/xserver-nodm stop
+ /etc/init.d/gsmd stop
+ /etc/init.d/qpe start
 
-Und weiter? Sie können den letzten Schritt in einem Script zusammenfassen und diesen dann vom Terminal auf dem Neo starten. Allerdings ist es schöner, die Wahl zwischen beiden GUI´s zur init Zeit einzurichten. Für Qtopia wäre eine Anwendung hilfreich, die das Umschalten vereinfachen kann.
+Where from here? You could put the last step in a script and start it from a terminal on your phone. But much nicer would be if you could choose between both interfaces on init time and have some small application in Qtopia/OpenMoko to switch.
 
-=== Qtopia UND Openmoko Variante 2 ===
+=== Qtopia AND OpenMoko Option 2 ===
 
-* formatieren Sie die SD Karte mit dem ext3 Dateisystem und mounten Sie diese (vergleiche oben)
-* entpacken Sie das rootfs von qtopia-4.3.0-preview-neo-flash.tgz in die SD Karte (vergleiche oben)
-* kopieren sie den uImage-2.6.22.5-moko11-r2-fic-gta01.bin Kernel ins Verzeichnis /boot auf der SD Karte und benennen Sie den in uImage um
-* wählen sie 'Boot from SD' im Bootloader Menü aus wie [[Booting_from_SD#Step_3:_Add_uboot_boot_entry|hier]] beschrieben
+* format your SD card with ext3 and mount it (see above)
+* unpack rootfs from qtopia-4.3.0-preview-neo-flash.tgz to SD card (see above)
+* copy the uImage-2.6.22.5-moko11-r2-fic-gta01.bin kernel to the boot/ on SD card and rename it to uImage
+* put a 'Boot from SD' menu item in uboot menu as explained here: [[Booting_from_SD#Step_3:_Add_uboot_boot_entry]]
 
-=== Eigenes Qtopia bauen ===
+=== Build your own ===
+If you want to build qtopia for yourself you can download the [ftp://ftp.trolltech.com/qtopia/tech-preview/ technical preview] or [ftp://ftp.trolltech.com/qtopia/snapshots/ snapshots]
 
-Wenn Sie Qtopia selbst bauen wollen, können Sie folgende [ftp://ftp.trolltech.com/qtopia/tech-preview/ Tech-Previews] oder [ftp://ftp.trolltech.com/qtopia/snapshots/ Schnappschüsse] herunterladen.
+== Tips ==
+Most things seem to work out of the box, however you may need to use the following command to get audio:
+ alsactl -f /etc/alsa/gsmhandset.state restore
+Or put this command in /etc/init.d/qpe line 64
 
-== Tipps ==
-Manche Sachen scheinen sofort zu funktionieren, allerdings muss man folgenden Befehl ausfühern, um Audio zu erhalten:
-alsactl -f /etc/alsa/gsmhandset.state restore
-Oder fügen Sie dieses Kommando in die Datei /etc/init.d/qpe auf der Zeile 64 ein.
+Do not switch themes.  Only the default theme is usable.  For example, once you switch themes, the lock feature continues to work, but only if you unlock using the smallest # keypad in the world.
 
-Wechseln sie die Themen nicht, denn nur die Standardoberfläche scheint zu funktionieren.
+Suspend support is very flaky.  The neo often shuts off from a suspend state.  It will not wake from suspend for an incoming call or text message (someone try setting an alarm and report results here).  To turn suspend off (this will of course use the batteries very quickly), hit the down arrow next to the suspend setting in the power management until it says "Off".
 
-Unterstützung für die Suspend Funktion ist sehr instabil. Neo fährt oft im Suspend Modus herunter. Die Weckfunktion funktioniert nicht wenn ein Anruf oder eine Textnachricht reinkommt. Um den Suspend abzustellen (was natürlich zum sehr schnell verbrauchten Akku führt), müssen Sie die entsprechende Option in beiden Betriebsprofilen (plugged und on battery) auf "Off" stellen.
+When using the virtual keyboard, do a quick flick up or down over the keyboard to access numbers/symbols/capitals.
 
-Beim Nutzen der virtuellen Tastatur leicht und schnell hoch oder runter über der tastatur tippen, um Zahlen/Symbole/Sonderzeichen zu erreichen.
-
-Zusammenfassend ist Qtopia auf dem Neo1973 näher an der Fertigstellung als Openmoko. (im Moment - 14.10.2007) Allerdings, behindern Sound und sperrliche Suspend Unterstützung den Einsatz von Neo als ein nützliches mobiles Gerät im Vergleich zu einem normalen Handy/PDA.
+In summary, Qtopia on the Neo1973 is much closer to being ready than OpenMoko as of this writing.  However, sound and suspend support prevent it from being at all useful as a cell phone (as a landline that doesn't ring but instead vibrates, it works ok).
 
 == Screenshots ==
 
-Hier sind einige Screenshots der auf dem Neo1973 laufenden Qtopia.
+Here are some screenshots of Qtopia runing on a Neo 1973. Personally I find it very impressive...
 
-{|
-|-
-|[[Image:Qtopia001.png|thumb|center|240px]]
-|[[Image:Qtopia002.png|thumb|center|240px]]
-|[[Image:Qtopia003.png|thumb|center|240px]]
-|-
-|[[Image:Qtopia004.png|thumb|center|240px]]
-|[[Image:Qtopia005.png|thumb|center|240px]]
-|[[Image:Qtopia006.png|thumb|center|240px]]
-|}
+[[Image:Qtopia001.png]]
+
+[[Image:Qtopia002.png]]
+
+[[Image:Qtopia003.png]]
+
+[[Image:Qtopia004.png]]
+
+[[Image:Qtopia005.png]]
+
+[[Image:Qtopia006.png]]
 
 == Videos ==
 
-http://www.youtube.com/watch?v=YW5q8SpY7t4
-http://www.youtube.com/watch?v=iOG_mtSEMgs
+ http://www.youtube.com/watch?v=YW5q8SpY7t4
+ http://www.youtube.com/watch?v=iOG_mtSEMgs
 
-Zu den Vollbildvideos, (346 MiB):
+For full size videos, 346 MiB:
 
-http://linuxtracker.org/download.php?id=4613&name=qt_on_neo1973_videos.torrent
-
-{{Languages|Qtopia_on_Neo1973}}
-
-[[Category:Qt/de]]
+ http://linuxtracker.org/download.php?id=4613&name=qt_on_neo1973_videos.torrent
