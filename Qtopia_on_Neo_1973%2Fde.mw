@@ -14,35 +14,35 @@ Es ist empfehlenswert, zuerst Teile des Flash Speichers zu löschen (wenn Sie ke
 
 Der Download und die Nutzung von dfu-utils ist [[Flashing_openmoko|wie üblich]]. die IP Adresse ist die gleiche wie beim OopenMoko Build (192.168.0.202/24).
 
-=== Qtopia AND OpenMoko Option 1 ===
-Why choose when you can have both ;)
+=== Qtopia UND OpenMoko Variante 1 ===
+Warum wählen, wenn man beide haben kann ;-)
 
-I assume you allready have some recent version of OpenMoko on your Neo1973. If not, have a look [[Flashing_openmoko|here]].
+Hier wird angenommen, dass auf dem Neo1973 irgendeine aktuelle Version von OpenMoko installier ist. Wenn Nicht, dann bitte  [[Flashing_openmoko|hier]] einen Blick rein werfen.
 
-First backup everything on your micro-sd card you don't want to loose as we are going to create a new filesystem on it. This is necessary beacause vfat doesnt support links. Then ssh to your neo and do:
+Sichern Sie zuerst alle Daten von der Micro-SD Karte, die nicht gelöscht werden sollen, wärend ein neues Dateisystem auf der SD Karte angelegt wird. Ein neues Dateisystem ist erforderlich, da VFAT keine Links unterstützt. Also nach dem SSH auf Neo:
  umount /dev/mmcblk0p1
  mkfs.ext3 /dev/mmcblk0p1
  mount /dev/mmcblk0p1
 
-On your desktop: Get "Developer root filesystem" [http://www.qtopia.net/modules/devices/openmoko.php from here]. Get the opt/Qtopia folder plus the qpe init script out of the archive repack and copy it to your neo. One could do this like this:
+Auf Ihrem Desktop laden Sie das "Developer root filesystem" von [http://www.qtopia.net/modules/devices/openmoko.php hier]. Entpacken Sie  das Verzeichnis opt/Qtopia und den qpe init Script aus diesem Archiv und kopieren Sie diese auf den Neo. Dies könnte so aussehen:
  tar xzf ficgta01-qtopia-developer-rootfs.tgz opt/Qtopia etc/init.d/qpe
  mv opt/Qtopia etc/init.d/qpe . && rm -r opt etc
  tar czf Qtopia.tar.gz Qtopia qpe
  scp Qtopia.tar.gz root@192.168.0.202:/media/card/
 
-On your neo again: unpack the archive you just copied and link the Qtopia folder to /opt/Qtopia. Then move the init script to /etc/init.d/:
+Weiter auf dem Neo: entpacken Sie das Archiv, aus welchem Sie gerade das Verzeichnis opt/Qtopia extrahiert haben. Danach verschieben Sie den init Script nach /etc/init.d/:
  cd /media/card
  tar xzf Qtopia.tar.gz
  mkdir -p /opt
  ln -s /media/card/Qtopia /opt/Qtopia
  mv qpe /etc/init.d
 
-Now kill the x server and gsmd and start Qtopia (this can take some time):
+Jetzt beenden sie den XServer und den gsmd und starten Sie Qtopia (dies kann zur selben Zeit erfolgen):
  /etc/init.d/xserver-nodm stop
  /etc/init.d/gsmd stop
  /etc/init.d/qpe start
 
-Where from here? You could put the last step in a script and start it from a terminal on your phone. But much nicer would be if you could choose between both interfaces on init time and have some small application in Qtopia/OpenMoko to switch.
+Und weiter? Sie können den letzten Schritt in einem Script zusammenfassen und diesen dann vom Terminal auf dem Neo starten. Allerdings ist es schöner, die Wahl zwischen beiden GUI´s zur init Zeit einzurichten. Für Qtopia wäre eine Anwendung hilfreich, die das Umschalten vereinfachen kann.
 
 === Qtopia AND OpenMoko Option 2 ===
 
