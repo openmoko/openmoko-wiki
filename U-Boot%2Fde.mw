@@ -149,7 +149,7 @@ For example the following command will add a boot menu entry that switches to au
 
 While in this state, your Neo1973 can be charged with a generic USB charger. You also need to set 'setenv boot_menu_timeout 65000' to keep it from powering down, though.
 
-== Bootloader prompt ==
+== Bootlader Kommandozeile ==
 
 === Accessing the bootloader prompt ===
 The bootloader prompt is available either on the serial console (via [[Debug Board]]), or as virtual USB Serial device (USB CDC_ACM).
@@ -159,7 +159,7 @@ Whether or not you use usbtty, the first couple of messages will always be displ
 
 The bootloader is currently configured to wait for three seconds.  If a key press on the '''stdin''' is received within those three seconds, auto-boot is aborted.
 
-==== Using usbtty from Linux ====
+==== Nutzung von usbtty unter Linux ====
 
 Just by connecting the phone in u-boot mode to your Linux pc should make it detect a [[CDC ACM]] device, and you should get a new tty device called /dev/ttyACM0. If not, enable the CONFIG_USB_ACM (Device Drivers -> USB support -> USB Modem (CDC ACM) support). (Instructions for MacOS users are [[MacOS_X#USB_Serial|here]])
 
@@ -289,7 +289,7 @@ GTA01Bv2 # setenv stdout usbtty
 GTA01Bv2 # setenv stdin usbtty
 </pre>
 
-==== Typical u-boot prompt ====
+==== Typischer u-boot Prompt ====
 
 <pre>
 U-Boot 1.2.0-moko1 (Feb 16 2007 - 00:36:13)
@@ -306,7 +306,7 @@ Hit any key to stop autoboot:  0
 GTA01Bv3 #
 </pre>
 
-=== Commands on the bootloader prompt ===
+=== Kommandos auf dem Bootlader Prompt ===
 
 ==== Auto-boot ====
 
@@ -401,7 +401,7 @@ nand markbad off - mark bad block at offset (UNSAFE)
 nand biterr off - make a bit error at offset (UNSAFE)
 </pre>
 
-===== Loading Kernel from NAND =====
+===== Laden des Kernels aus dem NAND =====
 
 <pre>
 GTA01Bv3 # nand read 0x32000000 kernel
@@ -420,7 +420,7 @@ GTA01Bv3 # bootm 0x32000000
 Starting kernel ...
 </pre>
 
-===== Writing new bootloader to NAND =====
+===== Neuen Bootlader ins NAND schreiben =====
 
 The following set of commands loads the file u-boot.bin from ext2/mmc and flashes it into the
 bootloader flash partition:
@@ -431,7 +431,7 @@ GTA01Bv3 # nand erase u-boot
 GTA01Bv3 # nand write.e 0x32000000 u-boot ${filesize}
 </pre>
 
-===== Writing kernel to NAND =====
+===== Neuen Kernel ins NAND schreiben =====
 
 The following set of commands loads the file uImage from ext2/mmc and flashes it into the
 kernel flash partition:
@@ -442,7 +442,7 @@ GTA01Bv3 # nand erase kernel
 GTA01Bv3 # nand write.e 0x32000000 kernel ${filesize}
 </pre>
 
-===== Writing rootfs to NAND =====
+===== Neues Hauptdateisystem (rootfs) ins NAND schreiben =====
 
 The following set of commands loads the file rootfs.jffs2 from ext2/mmc and flashes it into the
 rootfs flash partition:
@@ -455,7 +455,7 @@ GTA01Bv3 # nand write.e 0x32000000 rootfs ${filesize}
 
 Please note that this will only work with root file system sizes that are smaller than the amount of memory above 0x32000000, which in the case of 64MB SDRAM is something like 32MB.
 
-==== Neo1973 related commands ====
+==== Unter Neo1973 verfügbare Kommandos ====
 
 Our version of u-boot supports a couple of Neo1973 specific commands:
 <pre>
@@ -498,7 +498,7 @@ you can switch the device off from the bootloader prompt.
 
 For a detailed description of the charger basics, see [[Neo1973 Battery Charger]].
 
-====== Inquiring the charger state ======
+====== Erkennen des Ladezustandes ======
 
 You can get the current charger status by issuing
  neo1973 charger status
@@ -510,12 +510,12 @@ The following modes are possible:
 * pre - Slow (100mA) charging, works in hardware.
 * fast_cccv - Fast (500mA) charging, using Constant-Current followed by Constant Voltage (Li-Ion)
 
-====== Disabling battery charging ======
+====== Ausschalten des Ladevorganges ======
 
 You can disable battery charging (until the next reboot) by issuing
  neo1973 charger off
 
-====== Forcing fast charge ======
+====== Schnelle Aufladung erzwingen ======
 
 Using
  neo1973 charger fast
@@ -530,7 +530,7 @@ While in this state, your Neo1973 can be charged with a generic USB charger. You
  saveenv
 to keep it from powering down, though.
 
-====== Enabling / Disabling automatic fast charge ======
+====== Einschalten / Ausschalten der automatischen Aufladung ======
 
 Autofast is a feature of the PCF50606 PMU.  It means that the fast_cccv mode will be automatically selected if a charger with suitable voltage is plugged in, and the battery not in over temperature condition.
 
@@ -542,7 +542,7 @@ and
  neo1973 charger !autofast
 respectively.
 
-===== Backlight =====
+===== Hintergrundbeleuchtung =====
 
 You can switch the backlight on and off by using
  neo1973 backlight on
@@ -572,7 +572,7 @@ and
  neo1973 gsm off
 respectively.
 
-====== terminal mode ======
+====== Terminal Modus ======
 
 You can access the GSM modem using openmoko's built-in terminal emulator in u-boot.
 
@@ -605,7 +605,7 @@ GTA01Bv4 #
 {{note|If you're using the ''cu'' terminal emulator on your host PC to access u-boot, you have
 to press '~' twice in order to escape it and make sure it actually gets sent to the Neo!}}
 
-==== S3C2410 specific commands ====
+==== S3C2410 spezifische Kommandos ====
 
 <pre>
 GTA01Bv2 # help s3c2410
@@ -624,7 +624,7 @@ GTA01Bv2 # s3c2410 speed get
 FCLK = 101 MHz, HCLK = 50 MHz, PCLK = 50 MHz
 </pre>
 
-===== 266MHz clock =====
+===== 266MHz Taktfrequenz =====
 
 You can re-configure the [[S3C2410]] PLL to generate a 266 MHz core cpu clock (rather than the 200MHz default) by using
  GTA01Bv2 # s3c2410 speed set 266 
@@ -634,7 +634,7 @@ respectively.
 
 {{warning|The old hardware (Phase 0 - GTA01Bv3) only runs stable at 266MHz if you do not attach anything (esp. the FPC / [[Debug Board]] to the Debug Port}}
 
-==== TFTP on QT2410 ====
+==== TFTP auf QT2410 ====
 
 The QT2410 cs8900a Ethernet can be used to download images via network.
 
@@ -649,7 +649,7 @@ serverip=192.168.100.1
 </pre>
 
 
-===== TFTP kernel download =====
+===== TFTP Kernel Download =====
 
 <pre>
 QT2410 # tftpboot 0x32000000
