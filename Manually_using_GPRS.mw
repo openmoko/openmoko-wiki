@@ -4,7 +4,40 @@ The program that implements PPP on Linux is pppd, which we need to configure and
 
 == Configuring pppd for manual connections ==
 
+You'll need /etc/ppp/peers/gprs:
+<pre>
+/dev/ttySAC0 115200
+connect /etc/ppp/gsm-connect-chat
+crtscts 
+lock
+hide-password
+defaultroute
+usepeerdns
+disconnect /etc/ppp/gsm-disconnect-chat
+holdoff 3
+ipcp-accept-local
+lcp-echo-failure 8
+lcp-echo-interval 3
+noauth
+noipdefault
+novj
+novjccomp
+replacedefaultroute
+persist
+lcp-echo-interval 3
+lcp-echo-failure 12
+</pre>
+
+This options where mentioned before with that strange comment. Mine worked fine for me without those.
+
+<pre>
+# very long timeouts (unwise?)
+lcp-echo-interval 300
+lcp-echo-failure 40000
+</pre>
+
 Depending on the APN, you may need password authentication using CHAP or PAP. You can add the following default line for "password-less" connections:
+
 <pre>
 # client        server  secret                  IP addresses
 *               *       ""                      *
@@ -13,160 +46,74 @@ Depending on the APN, you may need password authentication using CHAP or PAP. Yo
 For CHAP, lines in /etc/ppp/chap-secrets are used. For PAP, the lines are in /etc/ppp/pap-secrets. The client should match the "user" option in pppd the config file (below). You can use * to mean any here, but the option user "" doesn't mean empty!
 
 For example:
+
 <pre>
 # Secrets for authentication using CHAP
 # client        server  secret                  IP addresses
-*               *       ""                      *
-"gprs"          *       "gprs"                  *
-"eplus"         *       "gprs"                  *  
+"user"         *       "password"                  *  
 </pre>
 
-You'll need /etc/ppp/peers/gprs:
+For this you need the following options in /etc/ppp/peers/gprs:
+
 <pre>
-# File:
-# gprs
-#
-# Description:
-# This file holds the pppd options for GPRS
-
-# To give some debug info (can be provided on command line too)
-#debug
-
-# To keep pppd output on the terminal (can be provided on command line too)
-#nodetach
-
-# Serial device to which the GPRS modem is connected
-/dev/ttySAC0 # Raw serial on Neo1973
-#/dev/ircomm0 # IrDA
-#/dev/ttyACM0 # USB serial cable
-
-# Serial port line speed
-115200
-
-# use hardware flow control
-crtscts # serial cables etc.
-#nocrtscts # IrDA
-
-# time between retries
-holdoff 3
-
-# Connect script
-connect /etc/ppp/peers/gprs-connect-chat
-
-# Disconnect script
-disconnect /etc/ppp/peers/gprs-disconnect-chat
-
-# IP addresses:
-# - accept peers idea of our local address and set address peer as 10.0.0.1
-# (any address would do, since IPCP gives 0.0.0.0 to it)
-# - if you use the 10. network at home or something and pppd rejects it,
-# change the address to something else
-:10.0.0.1
-
-# pppd must not propose any IP address to the peer!
-noipdefault
-
-# Accept peers idea of our local address
-ipcp-accept-local
-
-# No ppp compression
-novj
-novjccomp
-
-# Add default route
-defaultroute
-
-# Replace any other default route for the time of the connection:
-replacedefaultroute
-
-# very long timeouts (unwise?)
-lcp-echo-interval 300
-lcp-echo-failure 40000
-
-# don't require the other end to authenticate to us
-noauth
-
 # username to use for authentication, should match "client" in /etc/ppp/{chap,pap}-secrets
-user "gprs"    ## opt out for eplus/pap
-#user "eplus"  ## opt in for eplus/pap
+user "user"
 </pre>
 
-And you'll need /etc/ppp/peers/gprs-connect-chat (needs "chmod +x"):
+And you'll need /etc/ppp/gprs-connect-chat (needs "chmod +x"):
 
 <pre>
-#!/bin/sh
-#
-# File:
-# chat-gprs-connect
-#
-# Description:
-# chat script to open Sonera GPRS service with GPRS phones. If ppp
-# negotiation stalls, try restarting the phone. To try with other GPRS
-# operator setting, change the PDP contex setting. The settings work with
-# all Ericsson models, but Nokia 8310 does not suppor QoS parameters with
-# AT commands, so just delete those lines and it'll work.
-#
-# Set PDP context CID=1, protocol=IP, APN=internet:
-# AT+CGDCONT=1,"IP","internet","",0,0
-#
-# Set CID=1 QoS requirements from the network, not supported by 8310:
-# AT+CGQREQ=1,0,0,0,0,0
-#
-# Set CID=1 minimum acceptable QoS parameters, not supported by 8310:
-# AT+CGQMIN=1,0,0,0,0,0
-#
-# 'Call' CID=1 (activate PDP context one, perform GPRS attach):
-# ATD*99***1#
-#
-# The actual chat script:
-exec chat                                               \
-TIMEOUT         22                              \
-ECHO            ON                              \
-ABORT           '\nBUSY\r'                      \
-ABORT           '\nERROR\r'                     \
-ABORT           '\nNO ANSWER\r'                 \
-ABORT           '\nNO CARRIER\r'                \
-ABORT           '\nNO DIALTONE\r'               \
-ABORT           '\nRINGING\r\n\r\nRINGING\r'    \
-SAY             "Press CTRL-C to close the connection at any stage!"    \
-SAY             "\ndefining PDP context...\n"   \
-""              "\d" \
-""              "atz" \
-OK              "ate1" \
-OK              'at+cgdcont=1,"ip","internet","0.0.0.0",0,0' \
-TIMEOUT         22      \
-OK              ATDT*99***1#    \
-TIMEOUT         22              \
-SAY             "\nwaiting for connect...\n"    \
-CONNECT         ""                              \
-SAY             "\nConnected." \
-SAY             "\nIf the following ppp negotiations fail,\n"   \
-SAY             "try restarting the phone.\n"
+#!/bin/sh -e
+exec chat -v\
+	ABORT BUSY\
+	ABORT DELAYED\
+	ABORT "NO ANSWER"\
+	ABORT "NO DIALTONE"\
+	ABORT VOICE\
+	ABORT ERROR\
+	ABORT RINGING\
+	TIMEOUT 3\
+	"" ATZ\
+	OK-\\k\\k\\k\\d+++ATH-OK ATE1\
+	OK AT+CFUN=0\
+	OK \dAT+CFUN=1\
+	ERROR AT+CPIN\?\
+	"+CPIN: READY-AT+CPIN=\"2222\"-OK" AT\
+	TIMEOUT 60\
+	OK AT+COPS\
+	OK AT+CGDCONT=1,\"IP\",\"internet\"\
+	OK ATD*99#\
+	CONNECT \d\c
 </pre>
 
 You will need to adjust the APN name "internet" in at+cgdcont line to match what your network operator provides. 
 
-
-Also good to have is /etc/ppp/peers/gprs-disconnect-chat (needs "chmod +x"):
+Also good to have is /etc/ppp/gprs-disconnect-chat (needs "chmod +x"):
 
 <pre>
-#!/bin/sh
-
-exec /usr/sbin/chat -V -s -S    \
-ABORT           "BUSY"          \
-ABORT           "ERROR"         \
-ABORT           "NO DIALTONE"   \
-SAY             "\nSending break to the modem\n"        \
-""              "\K"            \
-""              "\K"            \
-""              "\K"            \
-""              "+++ATH"        \
-""              "+++ATH"        \
-""              "+++ATH"        \
-"NO CARRIER"    ""              \
-SAY             "\nPDP context detached\n"
+#!/bin/sh -e
+/usr/sbin/chat -v\
+	ABORT OK\
+	ABORT BUSY\
+	ABORT DELAYED\
+	ABORT "NO ANSWER"\
+	ABORT "NO CARRIER"\
+	ABORT "NO DIALTONE"\
+	ABORT VOICE\
+	ABORT ERROR\
+	ABORT RINGING\
+	TIMEOUT 12\
+	"" \\k\\k\\k\\d+++ATH\
+	"NO CARRIER-AT-OK" ""
 </pre>
 
+You need a proper /etc/resolv.conf:
+
+<pre>
+ln -sf /var/run/resolv.conf /etc
+</pre>
+
+If needed put your nameserver for usb-net into /var/run/resolv.conf, not in /etc.
 
 === Starting pppd ===
 
@@ -177,7 +124,6 @@ To dial in - and get verbose output on the terminal - use pppd
 pppd debug nodetach call gprs
 </pre>
 
-
 === Some APN names for reference ===
 
 {| border="1"
@@ -185,7 +131,7 @@ pppd debug nodetach call gprs
 ! Carrier
 ! Plan
 ! APN
-! AT-CMD
+! user/password if required
 |-
 | USA || T-mobile || Anything less than full internet || wap.voicestream.com ||
 |- 
@@ -205,7 +151,7 @@ pppd debug nodetach call gprs
 |-
 | Germany || T-Mobile ||  || internet.t-mobile ||
 |-
-| Germany || E-Plus || BASE (and others?) || internet.eplus.de || 'AT+CGDCONT=1,"ip","internet.eplus.de"'
+| Germany || E-Plus || BASE (and others?) || internet.eplus.de || eplus gprs
 |-
 | UK || T-Mobile|| || general.t-mobile.uk ||
 |-
