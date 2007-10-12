@@ -656,14 +656,13 @@ QT2410# bootm 0x32000000
 
 == Device Firmware Upgrade ==
 
-Our version of u-boot also implements [[USB DFU]]. This can be useful to
-load files and kernel for quick testing.
+Unsere Version von u-boot implementiert das [[USB DFU]]. Dies kann nützlich sein um schnell Dateien oder Kernel für einen Test zu laden.
 
-To find out whether your version of u-boot supports this, use the output of
+Um herauszufinden, ob Ihre Version von u-boot dies unterstützt, nutzen Sie die Ausgabe von
  $ lsusb -v -d 1457:5119
-while the phone is in u-boot mode.
+solange sich das Telefon im u-boot Mudus befindet.
 
-If it supports DFU, you should see the following snippet towards the end of the output:
+Wenn es DFU unterstützt, sollten Sie folgenden Ausschnitt am Ende der Ausgabe sehen:
 <pre>
     Interface Descriptor:
       bLength                 9
@@ -677,20 +676,18 @@ If it supports DFU, you should see the following snippet towards the end of the 
       iInterface              0 
 </pre>
 
-For information on how to do firmware upgrades, please see [[dfu-util]].
+Um Informationen über Firmware Upgrade zu erhalten, lesen Sie [[dfu-util]].
 
-=== Booting files over DFU ===
+=== Dateien Booten über DFU ===
 
-To load a file at memory address 0x32000000:
+Um eine Datei an die Speicheradresse 0x32000000 zu laden:
 <pre>
 dfu-util -a 0 -D fileToLoad -R
 </pre>
 
-After that, send 'bootm 0x32000000' to u-boot or 'bootelf 0x32000000' if
-its an elf file.
+Danach senden Sie 'bootm 0x32000000' zum u-boot oder 'bootelf 0x32000000' wenn das eine ELF Binärdatei ist.
 
-Simple python script that can boot an ELF image - avoiding a ACM bug that breaks on large packets.
-
+Simples Python Script, das eine ELF Image booten kann, vermeidet den ACM Bug in großen Paketen:
 <pre>
 #!/usr/bin/python
 import sys
