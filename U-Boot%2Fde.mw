@@ -448,7 +448,7 @@ Bitte beachten Sie, dass dies nur mit root-Dateisystem Größen funktioniert, di
 
 ==== Unter Neo1973 verfügbare Kommandos ====
 
-Our version of u-boot supports a couple of Neo1973 specific commands:
+Unsere Version von u-boot unterstützt eine Reihe von Neo1973 spezifischen Befehle:
 <pre>
 GTA01Bv2 # help neo1973
 neo1973 neo1973 info - display phone informantion
@@ -463,39 +463,38 @@ neo1973 vibrator (on|off) - switch vibrator on or off
 neo1973 udc pullup (on|off) - switch pull-up on or off
 </pre>
 
-What's the udc?
+Was ist das udc?
 
 
 ===== Timeouts =====
 
-If the boot loader menu is on the screen, the phone will power off when there hasn't been activity for a while. This is not nice if you are working on the boot loader console, but you can make the time longer:
+Wenn das Bootlader Menü angezeigt wird, wird das Telefon ausgeschaltet, falls eine Weile keine Aktivität erfolgt. Das ist nicht sinnvoll, wenn man an der Bootlader Konsole arbeitet, aber man kann die Wartezeit verlängern:
 <pre>
 setenv boot_menu_timeout [seconds]
 </pre>
 
-After the phone is powered on, there is a short period of time when you can connect to the console and cancel the automatic boot without going to the menu:
+Nachdem das Telefon eingeschaltet ist, gibt es eine kurze Zeit, in der Sie eine Verbindung auf die Konsole herstellen und das automatische Booten abbrechen können, ohne auf das Menü zu zugreifen.
 <pre>
 setenv bootdelay [seconds]
 </pre>
 
-===== Power-off =====
+===== Ausschalten =====
 
-Using
+Nutzen Sie
  neo1973 power-off
 
-you can switch the device off from the bootloader prompt.
+um das Gerät vom Bootlader Prompt heraus auszuschalten
 
-===== Battery charger related =====
+===== Ähnliche Akkuladegeräte =====
 
-For a detailed description of the charger basics, see [[Neo1973 Battery Charger]].
+Für eine detailierte Beschreibung der Ladegerät Spezifikation, lesen Sie [[Neo1973 Battery Charger]].
 
 ====== Erkennen des Ladezustandes ======
 
-You can get the current charger status by issuing
+So können sie den Aktuellen Ladezustand abfragen:
  neo1973 charger status
 
-The following modes are possible:
-
+Folgende Optionen sind möglich:
 * idle - no charging
 * trickle - FIXME
 * pre - Slow (100mA) charging, works in hardware.
@@ -503,72 +502,68 @@ The following modes are possible:
 
 ====== Ausschalten des Ladevorganges ======
 
-You can disable battery charging (until the next reboot) by issuing
+Sie können das Laden der Batterie ausschalten (bis zum nächsten Neustart):
  neo1973 charger off
 
 ====== Schnelle Aufladung erzwingen ======
 
-Using
+Geben Sie ein
  neo1973 charger fast
-you can force the PMU to try to do a fast (500mA) charge of the battery. It will abort if the battery is in over temperature or some other error condition occurs.
+um durch die PMU schnelles Laden (500mA) der Batterie zu erzwingen. Dies wird unterbrochen, falls die Batterie das Temperaturlimit erreicht oder andere Fehler auftreten.
 
-The following commands will add a boot menu entry that switches to fast charging and turns off the backlight:
+Folgende Kommandos erzeugen einen Bootmenü Eintrag, der auf das schnelle Laden umschalten und die Hintergrundbeleuchtung ausschaltet:
   setenv menu_6 Fast-Charge and Backlight Off: neo1973 charger fast\; neo1973 backlight off
   saveenv
 
-While in this state, your Neo1973 can be charged with a generic USB charger. You also need to set 
+In diesem Zustand kann das Neo1973 mit einem normalen USB Ladegerät aufgeladen werden. Sie müssen folgendes setzen
  setenv boot_menu_timeout 65000
  saveenv
-to keep it from powering down, though.
+um es vom Herunterfahren abzuhalten.
 
 ====== Einschalten / Ausschalten der automatischen Aufladung ======
 
-Autofast is a feature of the PCF50606 PMU.  It means that the fast_cccv mode will be automatically selected if a charger with suitable voltage is plugged in, and the battery not in over temperature condition.
+Autofast ist eine Eigenschaft der PCF50606 PMU. Es bedeutet, dass der fast_cccv automatisch aktiviert wird, wenn ein Ladegerät mit geeigneter Spannung angeschlossen wird und die Batterie nicht über dem Temperaturlimit ist.
 
-{{warning|This is potentially dangerous.  Only enable autofast if you ARE SURE that you can draw 500mA from the USB connector.  This is the case with a wall outlet charger, or if you are attached to a self-powered hub or a desktop PC root hub.  Bus powered hubs and some laptops only provide 100mA on their USB ports and can thus not support fast charging}}
+{{Warnung|Dies ist potenziell gefährlich. Nur Autofast aktivieren, wenn Sie SICHER sind, dass die 500mA am USB Anschluss anliegen. Dies ist der Fall mit einem Steckdosen Ladegerät, einem aktiven Hub oder einem Desktop-PC Hub. Bus powered Hubs und einige Laptops liefern nur 100mA auf ihren USB Ports und unterstützen somit kein schnelles Laden.}}
 
+So Können Sie autofast ein- oder ausschalten:
 You can enable or disable autofast by 
  neo1973 charger autofast
-and
+respektiv
  neo1973 charger !autofast
-respectively.
 
 ===== Hintergrundbeleuchtung =====
 
-You can switch the backlight on and off by using
+So können Sie die Hintergrundbeleuchtung ein- oder ausschalten:
  neo1973 backlight on
-and
+respektiv
  neo1973 backlight off
-respectively.
 
 ===== Vibrator =====
 
+So können Sie den Vibrator ein- oder ausschalten:
 You can switch the vibrator on and off by using
  neo1973 vibrator on
-and 
+respektiv
  neo1973 vibrator off
-respectively.
 
 
 ===== GSM =====
 
-Starting with OpenMoko patchset '''SVN revision 2885''', u-boot contains support for powering the GSM modem,
-and even accessing the modem from the console.
+Seit der Patch Serie '''SVN revision 2885''' unterstützt u-boot den Zugriff auf das GSM Modem, und sogar den Zugriff darauf aus der Konsole heraus.
 
 ====== GSM power ======
 
-You can switch the GSM modem on and off by using
+So können sie den GSM ein- oder ausschalten:
  neo1973 gsm on
-and
+respektiv
  neo1973 gsm off
-respectively.
 
 ====== Terminal Modus ======
 
-You can access the GSM modem using openmoko's built-in terminal emulator in u-boot.
+Sie können mit Hilfe eines im u-boot eingebauten Terminal Emulator auf den GSM Modem zugreifen.
 
-The following example demonstrates how:
-
+Folgendes Beispiel demonstriert dies:
 <pre>
 GTA01Bv4 # neo1973 gsm on
 GTA01Bv4 # terminal serial
@@ -593,8 +588,7 @@ GTA01Bv4 # neo1973 gsm off
 GTA01Bv4 #
 </pre>
 
-{{note|If you're using the ''cu'' terminal emulator on your host PC to access u-boot, you have
-to press '~' twice in order to escape it and make sure it actually gets sent to the Neo!}}
+{{Hinweis: Wenn Sie den Terminal Emulator ''cu'' auf Ihrem Host PC für den Zugriff auf u-boot nutzen, dann drücken Sie '~' um sicherzustellen, dass Sie auf dem Neo sind.}}
 
 ==== S3C2410 spezifische Kommandos ====
 
