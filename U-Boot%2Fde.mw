@@ -152,33 +152,30 @@ In diesem Zustand kann das Neo1973 mit einem üblichen USB Ladegerät aufgeladen
 
 == Bootlader Kommandozeile ==
 
-=== Accessing the bootloader prompt ===
-The bootloader prompt is available either on the serial console (via [[Debug Board]]), or as virtual USB Serial device (USB CDC_ACM).
-Whether the serial port or usb is used depends on the u-boot environment variables '''stdin''', '''stdout''' and '''stderr'''.
+=== Zugriff auf den Bootlader Prompt ===
+Der Bootlader Prompt steht entweder auf einer seriellen Konsole (über [[Debug Board]]) oder als virtuelles serielle USB Gerät (USB CDC_ACM) zur Verfügung. Ob serielle Schnittstelle oder USB Port verwendet werden, hängt von den u-boot Umgebungsvariablen '''stdin''', '''stdout''' und '''stderr''' ab.
 
-Whether or not you use usbtty, the first couple of messages will always be displayed on the serial console.
+Ob Sie usbtty nutzen oder nicht, werden die ersten Nachrichten immer auf der seriellen Konsole angezeigt.
 
-The bootloader is currently configured to wait for three seconds.  If a key press on the '''stdin''' is received within those three seconds, auto-boot is aborted.
+Der Bootlader ist so konfiguriert, dass er drei Sekunden wartet. Wenn innerhalb dieser drei Sekunden eine Taste auf '''stdin''' gedrückt wird, wird der automatische Bootvorgang abgebrochen.
 
 ==== Nutzung von usbtty unter Linux ====
 
-Just by connecting the phone in u-boot mode to your Linux pc should make it detect a [[CDC ACM]] device, and you should get a new tty device called /dev/ttyACM0. If not, enable the CONFIG_USB_ACM (Device Drivers -> USB support -> USB Modem (CDC ACM) support). (Instructions for MacOS users are [[MacOS_X#USB_Serial|here]])
+Durch den Anschluss des Neo im u-boot Modus am PC, sollte ein [[CDC ACM]] Gerät erkannt werden und Sie können ihn über /dev/ttyACM0 ansprechen. Wenn nicht, aktivieren Sie die CONFIG_USB_ACM Unterstützung (Device Drivers -> USB support -> USB Modem (CDC ACM) support). Anleitungen für MaxOS X User befinden sich [[MacOS_X#USB_Serial|hier]].
 
-Use your favourite terminal emulator (minicom, cu, zc, screen ...) to access it like any other serial port. If you don't have a favorite, try just: (cu is in the taylor-uucp package, use "apt-get install cu" if it is not yet installed)
+Für den Zugriff verwenden Sie Ihren bevorzugten Terminalemulator (minicom, cu, zc, screen ...) wie auf jede andere serielle Schnittstelle. Wenn Sie keinen Favoriten haben, versuchen Sie es einfach:
  cu -l /dev/ttyACM0
 
-You might need to 
+Vielleicht ist folgendes notwendig:
  chown uucp.uucp /dev/ttyACM0
 
-to get the necessary right (even as root).
+um die erforderlichen Rechte zu erhalten (auch als root).
 
-First, you should try to check whether the USB device shows up in 'lsusb' while you're running in u-boot mode:
-
+Zuerst sollten Sie prüfen, ob das USB Gerät wärend des u-bood Modus in 'lsusb' angezeigt wird:
  # lsusb -d 1457:5119
  Bus 005 Device 079: ID 1457:5119  
 
-Second, lets see some more details about the available endpoints and configurations:
-
+Als zweites können weitere Informationen über das Endgerät und deren Konfiguration angezeigt werden:
 <pre>
 # lsusb -v -d 1457:5119
 Bus 005 Device 079: ID 1457:5119  
@@ -281,9 +278,9 @@ Device Status:     0x0001
   Self Powered
 </pre>
 
-Next, you can access it using your favourite terminal program.
+Als nächstes können Sie es mit einem beliebigen Terminal Programm nutzen.
 
-Then, if the environment is not set correctly, you will need to use the current console (e.g. serial console) to set
+Wenn die Umgebung nicht richtig gesetzt ist, dann müssen Sie die aktuelle Konsole nutzen (z.B. serielle Konsole) um sie zu setzen:
 <pre>
 GTA01Bv2 # setenv stderr usbtty
 GTA01Bv2 # setenv stdout usbtty
