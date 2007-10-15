@@ -115,6 +115,33 @@ ln -sf /var/run/resolv.conf /etc
 
 If needed put your nameserver for usb-net into /var/run/resolv.conf, not in /etc.
 
+=== Required fixes ===
+
+The image does not set a correct resolv.conf. i do so with an 
+
+<pre>
+echo  nameserver 192.168.0.201 > /var/run/resolv.conf
+</pre>
+
+in the right place. because a post-up in /etc/network/interfaces is not supported i do that in /etc/network/if-up/08setupdns
+
+another problem is pppd's 08setupdns which does not properly remove the link when shuting down ppp. my fix is this script:
+
+<pre>
+#!/bin/sh
+ACTUALCONF=/var/run/resolv.conf
+PPPCONF=/var/run/ppp/resolv.conf
+if [ -f $PPPCONF ] ; then
+        if [ -f $ACTUALCONF ] ; then
+                if [ ! -h $ACTUALCONF -o ! "`readlink $ACTUALCONF 2>&1`" = "$PPPCONF" ] ; then
+                        mv $ACTUALCONF $ACTUALCONF.ppporig
+                fi
+        fi
+
+        ln -sf $PPPCONF $ACTUALCONF
+fi
+</pre>
+
 === Starting pppd ===
 
 Then, after initializing GSM, you should be able to initialize GPRS by `pppd call gprs`. Good luck!
