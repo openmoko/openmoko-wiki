@@ -1,5 +1,7 @@
 = Neo1973 side =
 
+== Name resolution ==
+
 By default Neo1973 has usb0 interface working due to Ethernet gadget (g_ether) compiled into kernel.
 
 On the Neo, if you want to reach out to the internets using full qualified hostnames, you need to define your DNS server. Create a file /etc/resolv.conf with at least one line saying
@@ -17,9 +19,17 @@ A better aproach is to symlink
 and fill the file at bootup with a script /etc/network/if-up.d/08setupdns containing:
 
  #!/bin/sh -e
- echo  nameserver 192.168.0.201 > /var/run/resolv.conf
+ echo  nameserver 192.168.0.200 > /var/run/resolv.conf
 
 this way the file is correctly handled from ppp package when dialing into gprs.
+
+== Routing ==
+
+You need a additional route for traffic to the internet. This traffic can be routed through your pc (see below) if the pc is the default route destination. you can achieve this by adding
+
+ gateway 10.10.10.21
+
+to your /etc/network/interfaces in the usb0 section.
 
 = Desktop side =
 
