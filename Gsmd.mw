@@ -1,14 +1,15 @@
-[[gsmd]] is the [[GSM]] daemon running in background of the GTA01 phone, managing the actual 'phone' part of the phone :)
+[[gsmd]] is the [[GSM]] daemon running in background of an OpenMoko phone, managing the traditional 'phone' parts (voice/sms/gprs communication links) of the phone.
 
-If you want to read further detail document and API, you can get from [http://wiki.openmoko.org/wiki/Gsmd/document here].
+Further technical details and API documentation in progress, is available [[Gsmd/document |here]].
 
 == Usage ==
 
-gsmd is usually started as a daemon in background, but can be run in foreground mode for debugging.
+=== On the phone ===
+gsmd is usually started as a background daemon when booting by the /etc/init.d/gsmd script, in this case gsmd outputs debug messages to the file "/tmp/gsm.log" (stdout and stderr is redirected there).
 
-The options can be queried like:
+For debugging purposes gsmd can be run in foreground mode, options can be queried like:
 <pre>
-> src/gsmd/gsmd --help
+> gsmd --help
 gsmd - (C) 2006 by Harald Welte <laforge@gnumonks.org>
 This program is FREE SOFTWARE under the terms of GNU GPL
 
@@ -23,10 +24,12 @@ Usage:
         -l file --logfile file  Specify a logfile to log to
 </pre>
 
-If your GSM modem is attached to ttySAC0 (like in the [[:Category:Neo1973 Hardware | Neo1973]]), you can e.g. use:
- gsmd -p /dev/ttySAC0 -s 115200 -F
+If your GSM modem is attached to ttySAC0 (like in the [[:Category:Neo1973 Hardware | Neo1973]]), invoke it as e.g.:
+ > gsmd -p /dev/ttySAC0 -s 115200 -F
+(baud rate seems to be autodetected by the modem)
 
-gsmd logs debug message at "/tmp/gsm.log"
+=== From host PC===
+With recent [[uboot]] (svn > r2885), the gsm modem can be powered on and connected to uboots serial console from uboot itself. Thus allowing the host PC to interact diretcly with the modem. Some notes about getting gsmd running in this constellation is [[User:Miki/hosted_gsmd|here]].
 
 == libgsmd ==
 
