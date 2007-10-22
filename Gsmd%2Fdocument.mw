@@ -101,7 +101,9 @@ Gsmd opens at least one devices. One is uart to modem and others are the Unix so
 The default parser callback function of UART (to modem) is '''ml_parse''', in which dealing with reading the response from modem and dispatching the correct callback function to handle the response.
  
 ==== atcmd_select_cb ====
+There are two mode of atcmd_select_cb "GSMD_FD_READ" and "GSMD_FD_WRITE".  If there are data come out from uart, atcmd_select_cb will be called in READ mode. It will try to read the data from uart and put them llparser_string.  llparser_string will try to use the actual parser implementation set by gsmd. (default is ml_parser)
 
+If there are atcmds in pending_atcmds queue, the atcmd_select_cb will be called in WRITE mode. It will try to write the atcmd at the head of queue to modem, and move this atcmd handler into busy_atcmds queue.
 ===== atcmd_fill =====
 
 ===== atcmd_submit =====
