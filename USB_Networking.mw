@@ -161,13 +161,24 @@ and my laptop will proxy all dns requests based on it's own /etc/resolv.conf
 
 '''note that we only run the dns proxy on the usb0 interface so that we don't break any other networking'''
 
+=== Proxying with dnrd ===
+
 The script is designed to use [http://dnrd.sourceforge.net/ dnrd] as the dns proxy. The [http://buildhost.automated.it/gta01 script] and a copy of [http://buildhost.automated.it/dnrd-2.20.3.tar.gz dnrd] are available from my site. The script also performs the initial setup of the connection as per the [[USB_Networking#Manual_method]] above.
 
-another easy setup is using a udp forwarder like the one from http://www.tapor.com/udpf/ - is use it with the command
+=== Proxying with a UDP forwarder ===
+Another easy setup is using a udp forwarder like the one from http://www.tapor.com/udpf/ - is use it with the command
 
  udpf-elf\
         -p=53\
         -f=`cat /etc/resolv.conf|awk '$1 == "nameserver"{print $2; exit(0);}'`:53
+
+=== Proxying with iptables ===
+Its is possible to forward DNS requests with iptables using the DNAT target
+
+ iptables -t nat -A PREROUTING -p tcp -s 192.168.0.202 -d 192.168.0.200 --dport domain -j DNAT --to-destination 192.168.0.1
+ iptables -t nat -A PREROUTING -p udp -s 192.168.0.202 -d 192.168.0.200 --dport domain -j DNAT --to-destination 192.168.0.1
+
+where <tt>192.168.0.1</tt> is the IP of your residential gateway (router). This is the easiest method, but its not recommended if you have a direct connection to the Internet as ISP DNS servers can change, and this does no load-balancing.
 
 = Connecting to phone =
 
