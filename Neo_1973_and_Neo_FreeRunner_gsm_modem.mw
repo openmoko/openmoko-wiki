@@ -26,7 +26,9 @@ there are a few of them, but none of them are really required for regular operat
 
 You will also notice that those non-standard commands are prefixed with '''AT%''' rather than '''AT+''' for the standards-compliant commands.
 
-Thus, we welcome our user and developer community to play with those commands and document them here.  Since we never have released any NDA documentation to our community, there is no legal issue.  Note that the syntax and the interpretation of the output of the commands listed here are only educated guesses and should not be relied on.
+Thus, we welcome our user and developer community to play with those commands and document them here.  Since we never have released any NDA documentation to our community, there is no legal issue.
+
+Note that the syntax and the interpretation of the output of the commands listed here are only educated guesses and should not be relied on.  Part of the proprietary command set has identical or similar usage as on other modems in the market, some of which have fully opened specifications and information about these commands can be taken from their datasheets (some known similar modems with open specs: ''BenQ M22A'' and ''M23A'', ''Enfora Enabler-G II/III'' and ''SPT 1834'').
 
 ==== AT%VER ====
 Prints the firmware components version.
@@ -76,6 +78,243 @@ This command is not listed in AT+CLAC output but it is triggered by any input th
  ADC 0 = e19, ADC 1 = 0, ADC 2 = d, ADC 3 = 6ea, ADC 4 = a25, ADC 5 = 9fc, ADC 6 = 96d, ADC 7 = 0, ADC 8 = 6
 
 It would seem there's an ADC (analog-to-digital converter) module in the modem with nine input lines connected to it and the values on these lines are reported by this command in hexadecimal format.  The values change over time.  Inputs 1 and 7 always show zero on my modem, input 1 value changes slightly (+/- 20), while values on inputs 3, 4, 5, 6 and 8 change seemingly randomly in the range 0x000 - 0xfff (it would seem the chip is 12-bit).
+
+==== AT%NRG ====
+The AT%NRG (''Network registration and service selection'') is an expansion of the AT+COPS command.  It allows specifying the service state of the registration.
+
+==== AT%EM ====
+Execution of ''Engineering Mode'' commands.  Allows viewing the information accessible to the modem but not available through standard GSM AT commands set such as detailed information on the current Servicing Cell (the one we're registered with), its neighbouring cells, the GPRS/EDGE availability and SIM card data.
+
+Citing Enfora Inc. Application Note EDG0108TN01:
+''The purpose of Engineering Mode (EM) is to provide means to observe the behavior of the mobile station and the settings of the network as counterpart and therefore defines a lot of possibilities to analyze the network. The EM can be used for observation of a defined data set during functional test and field test.''
+
+''Warning: The display of certain parameters is dependent on the wireless network sending the correct information in the System Information Packets. There is no guaranty that the information is always forwarded from the network. At times data may not be present to display in the Engineering Mode responses.''
+
+Syntax:
+ AT%EM=<mode>,<command>
+Allowed <mode> values:
+* 2 - AT command mode
+* 3 - PCO mode
+I only describe the AT mode commands here.  Commands are in range 1 to 13:
+ AT%EM=2,1  Serving Cell Information
+ AT%EM=2,2  Serving Cell GPRS Information
+ AT%EM=2,3  Neighbour Cell Information
+ AT%EM=2,4  Location and Paging Parameters
+ AT%EM=2,5  PLMN Parameters
+ AT%EM=2,6  Ciphering, Hopping, DTX Parameters
+ AT%EM=2,7  Power Parameters
+ AT%EM=2,8  Identity Parameters
+ AT%EM=2,10 GMM Information
+ AT%EM=2,11 GRLC Information
+ AT%EM=2,12 AMR Configuration Information
+ AT%EM=2,13 PDP Information
+
+===== Servicing Cell Information (2,1) =====
+Response format:
+ %EM: <afrcn>,<c1>,<c2>,<rxlev>,<bsic>,<cell_id>,<dsc>,<txlev>,<tn>,<rlt>,<tav>,<rxlev_f>,<rxlev_s>,<rxqual_f>,<rxqual_s>,<lac>,<cba>,<cbq>,<cell_type_ind>,<vocoder>
+{|
+! Parameter no. !! Name !! Meaning !! Remarks
+|-
+|1  || arfcn || Current Channel Number ||
+|-
+|2  || c1 || Path Loss Criterion C1 ||
+|-
+|3  || c2 || Cell-reselection Criterion C2 ||
+|-
+|4  || rxlev || Received Field Strength || (rxlev/2)+2 gives the AT+CSQ response value
+|-
+|5  || bsic || Base Station ID Code ||
+|-
+|6  || cell_id || Cell Indentifier ||
+|-
+|7  || dsc || Downlink Signaling Counter || current counter value
+|-
+|8  || txlev || Transmit Power Level ||
+|-
+|9  || tn || Timeslot Number ||
+|-
+|10 || rlt || Radio Link Timeout Counter ||
+|-
+|11 || tav || Timing Advance ||
+|-
+|12 || rxlev_f || Received Field Strength full ||
+|-
+|13 || rxlev_s || Received Field Strength sub ||
+|-
+|14 || rxqual_f || Received Quality full ||
+|-
+|15 || rxqual_s || Received Quality sub ||
+|-
+|16 || lac || Location Area Code ||
+|-
+|17 || cba || Cell Bar Access ||
+|-
+|18 || cbq || Cell Bar Qualifier ||
+|-
+|19 || Cell_type_ind || Cell Type Indicator || NA/GSM/GPRS
+|-
+|20 || vocoder || Vocoder || Sig/speech/efr/amr/14.4/9.6/4.8/2.4
+|}
+
+===== Serving Cell GPRS Information (2,2) =====
+Response format:
+ %EM: <nts>,<nmo>,<spgc_ccch_sup>,<priority_access_thr>,<cba>,<rac>,<tav>,<dsc>,<c31>,<c32>,<band_ind>,<pfc_supp_n_w>,<ccn_mode_sts>,<Psi_sts_suppt>,<edge_support>,<epcr_support>,<bep_period>,<bss_paging_coord>
+{|
+! Parameter no. !! Name !! Meaning !! Remarks
+|-
+|1  || nts || PCCCH_TIMESLOT || Number of downlink timeslots
+|-
+|2  || nmo || Network Mode of Operation ||
+|-
+|3  || spgc_ccch_sup || Network Control-spgc_ccch_sup || Network support for split paging
+|-
+|4  || priority_access_thr || Network Control-Priority_Access_Threshold || packet access to the NW according to priority level
+|-
+|5  || cba || Cell Bar Access ||
+|-
+|6  || rac || Routing Area Code ||
+|-
+|7  || tav || Timing Advance ||
+|-
+|8  || dsc || Downlink Signal Counter ||
+|-
+|9  || c31 || Cell-reselect Criterion C31 ||
+|-
+|10 || c32 || Cell-reselect Criterion C32 ||
+|-
+|11 || band_ind || Band Indicator ||
+|-
+|12 || pfc_supp_n_w || PFC Support ||
+|-
+|13 || ccn_mode_sts || CCN Mode ||
+|-
+|14 || Psi_sts_suppt || PSI Support ||
+|-
+|15 || edge_support || EDGE Support ||
+|-
+|16 || epcr_support || EPCR Support ||
+|-
+|17 || bep_period || BEP Period ||
+|-
+|18 || bss_paging_coord || BSS Paging ||
+|}
+
+===== Neighbour Cell Information (2,3) =====
+The first line of response is of the format %EM: <number of cells listed>, where the maximum seems to be 6, one cell for each channel.  The next sixteen lines list the values of each of the parameters for each of the cells.
+{|
+! Parameter no. !! Name !! Meaning !! Remarks
+|-
+|1  || arfcn || BCCH channel ||
+|-
+|2  || c1 || Path Loss Criterion C1 ||
+|-
+|3  || c2 || Cell-reselection Criterion C2 ||
+|-
+|4  || rxlev || Received Field Strength || (rxlev/2)+2 gives the AT+CSQ response value
+|-
+|5  || bsic || Base Station ID Code ||
+|-
+|6  || cell_id || Cell Indentity ||
+|-
+|7  || lac || Location Area Code ||
+|-
+|8  || frame_offset || Frame Offset ||
+|-
+|9  || time_alignmnt || Time Alignment ||
+|-
+|10 || cba || Cell Bar Access ||
+|-
+|11 || cbq || Cell Bar Qualifier ||
+|-
+|12 || cell_type_ind || Cell Type Indicator || NA/GSM/GPRS
+|-
+|13  || rac || Routing Area Code ||
+|-
+|14  || cell_resel_offset || Cell-reselection Offset ||
+|-
+|15 || temp_offset || Temporary Offset ||
+|-
+|16 || rxlev_acc_min || Rxlen access min ||
+|}
+My Neo1973 reports:
+ AT%EM=2,3
+ %EM: 6
+ 763,766,771,778,780,773
+ 20,8,14,18,17,8
+ 20,8,14,18,17,8
+ 73,46,54,51,13,12
+ 6753,10951,3531,0,1933,1924
+ 100,100,300,300,300,100
+ 80229,961995,0,1166923,0,2715553
+ 3504,724,0,3724,4,1112
+ 0,0,0,0,0,0
+ 0,0,0,0,0,0
+ 2,2,2,2,2,2
+ 0,0,0,0,0,0
+ 0,0,0,0,0,0
+ 0,0,0,0,0,0
+ 10,10,10,10,10,10
+ 
+ OK
+
+===== Location and Paging Parameters (2,4) =====
+Response format:
+ %EM: <bs_pa_mfrms>,<t3212>,<mcc[0]><mcc[1]><mcc[2]>,<mnc[0]><mnc[1]><mnc[2]>,<tmsi>
+{|
+! Parameter no. !! Name !! Meaning
+|-
+|1 || bs_pa_mfrms || BS PA MFRMS paging repeat period
+|-
+|2 || t3212 || Periodic location updating interval
+|-
+|3 || mcc || Mobile Country Code
+|-
+|4 || mnc || Mobile Network Code
+|-
+|5 || tmsi || Temporary Mobile Subscriber Identity (in binary)
+|}
+===== PLMN Parameters (2,5) =====
+Response format:
+ %EM: <no_creq_max>,<reest_flag>,<txpwr_max>,<rxlev_min>,<rel_cs>,<sgsnr_rel>,<mscr_rel>,<net_rel>
+{|
+! Parameter no. !! Name !! Meaning
+|-
+|1 || no_creq_max || Max. number or retries for channel requests
+|-
+|2 || reest_flag || Re-establishment Flag
+|-
+|3 || txpwr_max || MS TXPWR MAX CCCH
+|-
+|4 || rxlev_min || Rxlev_access_min
+|-
+|5 || rel_cs || Release Cause (only the last release cause is remembered)
+|-
+|6 || sgsnr_rel || SGSNR Release
+|-
+|7 || mscr_rel || MSCR Release
+|-
+|8 || net_rel || Network Release Info
+|}
+===== Ciphering, Hopping, DTX Parameters (2,6) =====
+{{todo|Fill in}}
+===== Power Parameters (2,7) =====
+{{todo|Fill in}}
+===== Identity Parameters (2,8) =====
+Response format:
+ %EM: <imeisv>
+ <imsi>
+ <tmsi>
+ 
+ OK
+The IMEISV line contains 20 numbers separated by commas, the numbers on positions 5 to 18 are the digints of the [http://en.wikipedia.org/wiki/IMEI IMEI] number as returned by AT+CGSN.  The second line contains another 20 numbers and the numbers on positions 5 to 19 form the digits of your SIM card's [http://en.wikipedia.org/wiki/IMSI IMSI] number, as returned by the AT+CIMI command. The last line contains the [http://en.wikipedia.org/wiki/TMSI Temporary Mobile Subscriber Identity] number in plain format (ten digits).
+===== GMM Information (2,10) =====
+{{todo|Fill in}}
+===== GRLC Information (2,11) =====
+{{todo|Fill in}}
+===== AMR Configuration Information (2,12) =====
+{{todo|Fill in}}
+===== AT%EM=2,13 PDP Information (2,13) =====
+{{todo|Fill in}}
 
 === GSM Modem OpenMoko commands ===
 
