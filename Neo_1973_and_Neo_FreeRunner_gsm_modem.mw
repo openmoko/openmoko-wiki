@@ -26,7 +26,7 @@ there are a few of them, but none of them are really required for regular operat
 
 You will also notice that those non-standard commands are prefixed with '''AT%''' rather than '''AT+''' for the standards-compliant commands.
 
-Thus, we welcome our user and developer community to play with those commands and document them here.  Since we never have released any NDA documentation to our community, there is no legal issue.
+Thus, we welcome our user and developer community to play with those commands and document them here.  Since we never have released any NDA documentation to our community, there is no legal issue.  Note that the syntax and the interpretation of the output of the commands listed here are only educated guesses and should not be relied on.
 
 ==== AT%VER ====
 Prints the firmware components version.
@@ -65,6 +65,17 @@ For a [[Neo1973_Hardware#GTA01Bv4|GTA01Bv4]] phase 1 phone, produced start of se
  %VER: fad a086 ** NONE **      14:08:06 08/06/07
 
 The second column lists firmware component names (e.g. aci = AT Command Interface). The third column is the user name of the engineer who last modified given component. The rightmost column is probably the last time someone worked on it (Please note that the name 'sean' here is not Sean Moss-Pultz :)  while a086 is an anonymous TI engineer's nick, meaning that the component has not been modified at FIC).
+
+==== AT%A ====
+Print values from an ADC.
+
+This command is not listed in AT+CLAC output but it is triggered by any input that starts with AT%A except AT%ALS and AT%ATR, which are other proprietary AT commands.  So for example AT%ABCD,HELLO will also run this commands.  On my Neo modem it prints a line containing nine values of the form ADC <number> = <value>:
+
+ AT%A
+ EXT: I
+ ADC 0 = e19, ADC 1 = 0, ADC 2 = d, ADC 3 = 6ea, ADC 4 = a25, ADC 5 = 9fc, ADC 6 = 96d, ADC 7 = 0, ADC 8 = 6
+
+It would seem there's an ADC (analog-to-digital converter) chip in the modem with nine input lines connected to it and the values on these lines are reported by this command in hexadecimal format.  The values change over time.  Inputs 1 and 7 always show zero on my modem, input 1 value changes slightly (+/- 20), while values on inputs 3, 4, 5, 6 and 8 change seemingly randomly in the range 0x000 - 0xfff (it would seem the chip is 12-bit).
 
 === GSM Modem OpenMoko commands ===
 
@@ -131,7 +142,7 @@ The audio table will be stored in the flash file system within GSM modem, you ca
 
 For now, we only provide one configuration, that is "0". 
 
-If AT@AUL="0" responds ERROR, it means there's no audio table existing and the GSM firmware will use default values.
+If AT@AUL="0" responds with ERROR, it means there's no audio table existing and the GSM firmware will use default values.
 
 == Wakeup of CPU from GSM Modem ==
 
