@@ -1,0 +1,67 @@
+[[OpenMoko]], our distribution, is built using Open Embedded.  Open Embedded will:
+
+* Generate (cross-compile) software packages for multiple embedded targets.
+* Handle different hardware architectures, and support multiple releases across those architectures. 
+
+For more information please see the [http://www.openembedded.org/ Open Embedded] website.
+
+== Master Build Server ==
+
+There is a master build server, it has the hostname buildhost.openmoko.org.  Shell accounts are only available to core developers and the "distribution maintainer", once we have created such a job/task ;)
+
+The idea is that all official images and binary packages (ipk) are built on one machine with a well-defined environment.
+
+== Build Process with OpenEmbedded ==
+
+=== OE upstream snapshot ===
+
+We start from an OpenEmbedded snapshot from the official "upstream" aka "Vanilla" OpenEmbedded project. This snapshot contains the [[BitBake recipe]]s for thousands of packages
+
+=== OpenMoko OE overlay tree ===
+
+In addition to the upstream recipies, we also have a set of our own recipies.  They are available from http://svn.openmoko.org/trunk/oe/ ([http://svnweb.openmoko.org/trunk/oe/ SVNweb]).
+
+The ''overlay'' tree works in the following way: It gives us the ability to add rules below a seperate directory tree.  This means we don't have to edit or add rules to the upstream snapshot, and we always have a clear distinction about what is upstream, and what is our additions to it.
+
+=== Upstream Source tarballs ===
+
+When bitbake builds a particular OE package, it downloads the original source code of the upstream project (e.g. Linux kernel) from the web.
+After downloading it, it applies a series of local patches to it.  Those patches are from either the [[OpenEmbedded#OE_upstream_snapshot]], or from the [[OpenEmbedded#OpenMoko_OE_overlay_tree]].  
+
+The unpatched source tarballs are available from http://buildhost.openmoko.org/sources/
+
+=== Build directory ===
+
+The content of the build directory is available at
+* http://buildhost.openmoko.org/OM2007.1/tmp/ (old OpenMoko tree)
+* http://buildhost.openmoko.org/OM2007.2/tmp/ (new OpenMoko tree)
+
+It contains
+* cache
+** Internal caching data, not for human interpretation
+* cross
+** The cross-compilation toolchain used. You can download this and use it on your local machine.
+* deploy
+** deploy/images
+*** The filesystem, kernel and bootloader images to be flashed into NAND
+** deploy/ipk
+*** the .ipk packages
+* rootfs
+** the extracted root filesystem. Please use the images from deploy/images instead
+* staging
+** no user servicable parts inside
+* stamp
+** internal state data
+* work
+** the actual build trees (including patches source code and binaries) of the individual packages
+
+=== Binary packages ===
+
+The binary packages of intermediate "unofficial" releases are available at 
+* http://buildhost.openmoko.org/OM2007.1/tmp/deploy/ipk (old OpenMoko tree)
+* http://buildhost.openmoko.org/OM2007.2/tmp/deploy/ipk (new OpenMoko tree)
+
+The snapshots (which have recieved some testing) are available at http://buildhost.openmoko.org/snapshots/
+
+{{Languages|OpenEmbedded}}
+[[Category:OpenMoko|OpenMoko]]
