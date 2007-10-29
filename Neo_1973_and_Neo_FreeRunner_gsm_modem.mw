@@ -31,7 +31,7 @@ Thus, we welcome our user and developer community to play with those commands an
 Note that the syntax and the interpretation of the output of the commands listed here are only educated guesses and should not be relied on.  Part of the proprietary command set has identical or similar usage as on other modems in the market, some of which have fully opened specifications and information about these commands can be taken from their datasheets (some known similar modems with open specs: ''BenQ M22A'' and ''M23A'', ''Enfora Enabler-G II/III'' and ''SPT 1834'').
 
 ==== AT%VER ====
-Prints the firmware components version.
+Prints the firmware component versions.
 
 The modem's response looks like this on an un-updated phase-0 [[Neo1973_Hardware#GTA01Bv4|GTA01Bv4]] phone:
 
@@ -80,7 +80,7 @@ This command is not listed in AT+CLAC output but it is triggered by any input th
 It would seem there's an ADC (analog-to-digital converter) module in the modem with nine input lines connected to it and the values on these lines are reported by this command in hexadecimal format.  The values change over time.  Inputs 1 and 7 always show zero on my modem, input 1 value changes slightly (+/- 20), while values on inputs 3, 4, 5, 6 and 8 change seemingly randomly in the range 0x000 - 0xfff (it would seem the chip is 12-bit).
 
 ==== AT%NRG ====
-The AT%NRG (''Network registration and service selection'') is an expansion of the AT+COPS command.  It allows specifying the service state of the registration.
+The AT%NRG (''Network registration and service selection'') is an expansion of the AT+COPS command.  It allows specifying the service state of the registration, in addition to AT+COPS functionality. It doesn't however allow listing all present operators (use AT+COPS for this).
 
 ==== AT%EM ====
 Execution of ''Engineering Mode'' commands.  Allows viewing the information accessible to the modem but not available through standard GSM AT commands set such as detailed information on the current Servicing Cell (the one we're registered with), its neighbouring cells, the GPRS/EDGE availability and SIM card data.
@@ -104,6 +104,7 @@ I only describe the AT mode commands here.  Commands are in range 1 to 13:
  AT%EM=2,6  Ciphering, Hopping, DTX Parameters
  AT%EM=2,7  Power Parameters
  AT%EM=2,8  Identity Parameters
+ AT%EM=2,9  Firmware components versions
  AT%EM=2,10 GMM Information
  AT%EM=2,11 GRLC Information
  AT%EM=2,12 AMR Configuration Information
@@ -202,7 +203,7 @@ Response format:
 ===== Neighbour Cell Information (2,3) =====
 The first line of response is of the format %EM: <number of cells listed>, where the maximum seems to be 6, one cell for each channel.  The next sixteen lines list the values of each of the parameters for each of the cells.
 {|
-! Parameter no. !! Name !! Meaning !! Remarks
+! Parameter no. !! Short name !! Meaning !! Remarks
 |-
 |1  || arfcn || BCCH channel ||
 |-
@@ -298,7 +299,80 @@ Response format:
 ===== Ciphering, Hopping, DTX Parameters (2,6) =====
 {{todo|Fill in}}
 ===== Power Parameters (2,7) =====
-{{todo|Fill in}}
+The output consits of two lines, first line containing 12 comma-separated values and the second line 18 comma-separated values, such as:
+ AT%EM=2,7
+ %EM: 1,1,0,0,0,1,1,0,0,0,1,0
+ 6,0,0,0,0,1,1,1,4,0,0,0,0,1,0,0,0,0
+ 
+ OK
+On the first line (called Classmark 2) we have:
+{|
+! Value no. !! Meaning !! Remarks
+|-
+|1  || Revision Level ||
+|-
+|2  || Controlled Early Classmark Sending || 1 means enabled
+|-
+|3  || A5/1 Encryption algorithm || 0 means available
+|-
+|4  || RF Power capability ||
+|-
+|5  || Pseudo-synchronisation capability || 1 means present
+|-
+|6  || SS Screening Indicator ||
+|-
+|7  || SMS capability ||
+|-
+|8  || Frequency capability ||
+|-
+|9  || Classmark 3 options || 1 means supported
+|
+|10 || CM Service Prompt || 1 means supported
+|-
+|11 || A5/3 Encryption algorithm || 1 means available
+|-
+|12 || A5/2 Encryption algorithm || 1 means available
+|}
+On the second line (called Classmark 3) we have:
+{|
+! Value no. !! Meaning !! Remarks
+|-
+|1  || Multiband support ||
+|-
+|2  || A5/7 Encryption algorithm || 1 means available
+|-
+|3  || A5/6 Encryption algorithm || 1 means available
+|-
+|4  || A5/5 Encryption algorithm || 1 means available
+|-
+|5  || A5/4 Encryption algorithm || 1 means available
+|-
+|6  || Valid Radio capability 2 || ??
+|-
+|7  || Associated Radio capability 2 ||
+|-
+|8  || Valid Radio capability 1 || ??
+|-
+|9  || Associated Radio capability 1 ||
+|-
+|10 || Valid R Support || ??
+|-
+|11 || R Support || R-GSM Class
+|-
+|12 || Valid Multi-slot Class || ??
+|-
+|13 || Multi-slot Class ||
+|-
+|14 || Unicode 2 treatment ||
+|-
+|15 || Extended Measurement capability || 1 means supported
+|-
+|16 || Valid Switch-measure-value || ??
+|-
+|17 || Switch-measure-value ||
+|-
+|18 || Switch-measure-switch-value ||
+|}
 ===== Identity Parameters (2,8) =====
 Response format:
  %EM: <imeisv>
@@ -307,13 +381,26 @@ Response format:
  
  OK
 The IMEISV line contains 20 numbers separated by commas, the numbers on positions 5 to 18 are the digints of the [http://en.wikipedia.org/wiki/IMEI IMEI] number as returned by AT+CGSN.  The second line contains another 20 numbers and the numbers on positions 5 to 19 form the digits of your SIM card's [http://en.wikipedia.org/wiki/IMSI IMSI] number, as returned by the AT+CIMI command. The last line contains the [http://en.wikipedia.org/wiki/TMSI Temporary Mobile Subscriber Identity] number in plain format (ten digits).
+===== Firmware components versions (2,9) =====
+Prints version information for different components of the modem's firmware.  The format and the scope of the information presented is identical to that in [[#AT%VER|AT%VER]] output with the exception that only a subset of all of the components are listed:
+ AT%EM=2,9
+ %VER: alr a086 ** NONE **      10:15:48 28/03/07
+ %VER: dl a086 ** NONE **      10:17:34 28/03/07
+ %VER: rr a086 ** NONE **      10:25:37 28/03/07
+ %VER: mm a086 ** NONE **      10:23:09 28/03/07
+ %VER: cc a086 ** NONE **      10:16:39 28/03/07
+ %VER: ss a086 ** NONE **      10:28:52 28/03/07
+ %VER: sim a086 ** NONE **      10:26:45 28/03/07
+ %VER: sms a086 ** NONE **      10:27:21 28/03/07
+ 
+ OK
 ===== GMM Information (2,10) =====
 {{todo|Fill in}}
 ===== GRLC Information (2,11) =====
 {{todo|Fill in}}
 ===== AMR Configuration Information (2,12) =====
 {{todo|Fill in}}
-===== AT%EM=2,13 PDP Information (2,13) =====
+===== PDP Information (2,13) =====
 {{todo|Fill in}}
 
 === GSM Modem OpenMoko commands ===
