@@ -542,5 +542,74 @@ This also means that gsmd will eventually have to re-program the GSM modem to ma
 
 Upgrading the modem's firmware is technically possible but no proper software is currently legally available to users outside OpenMoko staff.
 
+== Power On, Power Off, and Reset of the GTA01 GSM Modem ==
+
+=== GSM Modem Connections ===
+
+The GTA01 GSM modem communicates via a standard serial port to the host system.  The port operates at 115200 baud, 8 bits, no parity, and requires hardware flow control (RTSCTS) to operate.  Due to the fact that the host CPU has only a pair of serial ports but there are three devices that wish to use them, the GSM modem port is actually shared with the serial console (the third device is the GPS chip, which has exclusive use of the second serial port).
+
+A GPIO (General Purpose IO) pin controls the switching of the serial port between the console and the GSM modem.  Another GPIO is used to turn on the power to the GSM modem.  On older versions of the GTA01 a third GPIO could be used to reset the GSM modem; this signal proved to cause difficulties with the modem, and on all the GTA01 units sold this GPIO line is not connected.  The driver combines the the switching of the serial port to the GSM modem and the power-on signal to the modem into a single operation; the two cannot be controlled independently from user-space (at the time of this writing).
+
+It is important to note that the GPIO controlling the power-on of the GSM modem can only signal to the modem to turn itself on -- turning this GPIO off does not power off the GSM modem.  Instead, the '''AT@POFF''' sequence must be sent to the modem in order to perform a power off.
+
+Further complicating power control of the GTA01 GSM modem is the fact that the modem draws power from the battery/charger side of the power management circuitry -- this means that turning off the power to the host CPU on the GTA01 does not turn off the power to the modem.  In real-world operation, this means that unless the shutdown procedure for the host cpu's operating system issues the '''AT@POFF''' command to power off the GSM modem, the modem will remain turned on, drawing power from the battery even thought the host CPU is completely powered off.
+
+=== The Power-On Sequence ===
+
+The sharing of the serial port between the console and the GSM modem results in the need for a very specific power-on and power-off sequence.  Two major problems exist that must be avoided: infinite echos, and RTSCTS lockup.
+
+==== Avoiding Infinite Echos ====
+
+By default, the serial port is initialized in "echo" mode -- meaning that any characters sent to the serial port from the console will be echoed back to the console.  Upon power-up or reset, the GSM modem also echos back characters it receives.  So unless action is taken to disable the serial port's echo before the GSM modem is powered on, an infinite echo will result.  The modem will print the standard "Interpretor Ready" message, which will be echoed back to it by the serial port driver, the modem will echo that back to the serial port again (adding some error text to the message), the serial port will echo that again, and this continues until buffers in either or both the serial port and the modem fill up, and one of them ceases to transmit.
+
+Once in this situation, it is difficult for software (such as gsmd) to gain synchronization of commands and responses.
+
+The best solution is to avoid the problem to begin with.  Simply ensure that the serial port is set to "no-echo" mode before the GSM modem is enabled and powered up.  This sequence illustrates how this is normally done:
+
+ stty -F /dev/ttySAC0 -echo
+ echo "1" >/sys/bus/platform/devices/gta01-pm-gsm.0/power_on
+
+(Note that the stty command argument syntax is somewhat unusual: "-echo" means "disable echo", while "echo" means "enable echo".)
+
+==== Avoiding RTSCTS Lockup ====
+
+Hardware flow control uses additional signals in addition to the serial data in and out signals on the serial port to control the flow of the data.  Specifically, when hardware flow control is enabled, a given endpoint is expected to assert its RTS (Request To Send) line when it has data to transmit, and not transit that data until it sees a CTS (Clear TO Send) signal from the other end.  In this fashion, buffer overruns and data loss are avoided.
+
+The GSM modem requires that hardware flow control be enabled in order to communicate with the host.  However, the console lacks the RTS and CTS signals and thus is unable to communicate if hardware flow control is enabled.  But what really makes this problem serious is that if hardware flow control is enabled while the serial port is switched to the console, and the (small) transmit buffer for the port fills (such as a kernel log message), the Linux kernel will lock up, and become completely non-responsive.  There is no recovery mechanism for this other than to disconnect the device from its USB port or charger, and remove the battery.
+
+One solution to this is to disable the use of the serial port as a console for the kernel.  However, this is greatly inconvenient - the knowledgeable user with a debug board will usually wish to have a console available, and the novice user will probably wish to avoid changing the u-boot variables in order to disable the console.  So, a better approach is to avoid this situation by taking great care when powering-up, resetting, or powering-down the modem.  The following sequence illustrates how to switch the serial port back to the console mode safely:
+
+ stty -F /dev/ttySAC0 -crtscts
+ echo "0" >/sys/bus/platform/devices/gta01-pm-gsm.0/power_on
+
+=== Resetting the GSM Modem ===
+
+The GSM modem can be effectively reset by changing the state of the Power-On GPIO from off to on -- in other words, just disable the GSM modem and re-enable it.  The safe way to accomplish this is to combine the two sequences above:
+
+ stty -F /dev/ttySAC0 -crtscts
+ echo "0" >/sys/bus/platform/devices/gta01-pm-gsm.0/power_on
+ stty -F /dev/ttySAC0 -echo
+ echo "1" >/sys/bus/platform/devices/gta01-pm-gsm.0/power_on
+
+It should be noted that this reset sequence will also power up the modem if it is not enabled and powered up to begin with.  For this reason, the reset sequence above should be used for both power-up and reset purposes.
+
+=== Powering Off the GSM Modem ===
+
+Powering off the GSM modem on the GTA01 can only be done by issuing the '''AT@POFF''' command to the device.  In order to issue this command, it is usually necessary to return it to a known state.  So the normal mechanism is to issue the reset operation (above), wait for a short period of time (1 second seems to be sufficient), and send the '''AT@POFF''' command.  This should be followed by an additional short delay (to allow the text to be transmitted), and then the serial port can be switched back to the console.  The following script accomplishes this:
+
+ ### Reset the modem to place it in a known state
+ stty -F /dev/ttySAC0 -crtscts
+ echo "0" >/sys/bus/platform/devices/gta01-pm-gsm.0/power_on
+ stty -F /dev/ttySAC0 -echo
+ echo "1" >/sys/bus/platform/devices/gta01-pm-gsm.0/power_on
+ ### Now enable hardware flow control, and transmit the sequence
+ stty -F /dev/ttySAC0 -crtscts
+ sleep 1
+ echo -e "AT@POFF\r" >/dev/ttySAC0
+ sleep 1
+ ### Finally, we disable flow control, and switch back the port
+ stty -F /dev/ttySAC0 -crtscts
+ echo "0" >/sys/bus/platform/devices/gta01-pm-gsm.0/power_on
+
 [[Category:Neo1973 Hardware]]
 [[Category:GSM]]
