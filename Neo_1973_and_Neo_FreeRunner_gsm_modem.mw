@@ -602,11 +602,13 @@ Powering off the GSM modem on the GTA01 can only be done by issuing the '''AT@PO
  echo "0" >/sys/bus/platform/devices/gta01-pm-gsm.0/power_on
  stty -F /dev/ttySAC0 -echo
  echo "1" >/sys/bus/platform/devices/gta01-pm-gsm.0/power_on
+ 
  ### Now enable hardware flow control, and transmit the sequence
- stty -F /dev/ttySAC0 -crtscts
+ stty -F /dev/ttySAC0 crtscts
  sleep 1
  echo -e "AT@POFF\r" >/dev/ttySAC0
  sleep 1
+ 
  ### Finally, we disable flow control, and switch back the port
  stty -F /dev/ttySAC0 -crtscts
  echo "0" >/sys/bus/platform/devices/gta01-pm-gsm.0/power_on
