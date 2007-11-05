@@ -3,3 +3,31 @@
 == Namensauflösung ==
 
 Standardmäßig hat das Neo1973 eine Netzwerkschnittstelle usb0, die mit einem im Kernel einkompilierten (g_ether) Ethernet Dadget arbeitet.
+
+Wenn Sie auf dem Neo voll qualifizierte Hostnamen im Internet erreichen wollen, müssen sie einen DNS-Server definieren. Dazu erstellen Sie die Datei /etc/resolv.conf, die mindestens diese Zeile enthält:
+
+ nameserver xxx.xxx.xxx.xxx
+
+z.B. nameserver 192.168.1.1
+
+Danach können Sie auf dem Neo Ihre OpenMoko 2007.2 Pakete mit "ipkg update && ipkg upgrade" aktualisieren.
+
+Ein besserer Ansatz ist ein symbolischer Link
+
+ ln -s /var/run/resolv.conf /etc/resolv.conf
+
+
+Danach erstellen Sie die datei /etc/network/if-up.d/08setupdns, die folgende Zeilen enthält:
+
+ #!/bin/sh -e
+ echo  nameserver 192.168.0.200 > /var/run/resolv.conf
+
+Auf diese Weise wird diese Datei vom PPP-Paket korrekt behandelt, wenn eine Einwahl per GPRS stattfindet.
+
+
+
+<span id="bottom"></span> 
+{{Languages|USB Networking}}
+
+[[Category:Hardware]]
+[[Category:Implemented]]
