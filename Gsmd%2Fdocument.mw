@@ -116,8 +116,10 @@ If there are atcmds in pending_atcmds queue, the atcmd_select_cb will be called 
 ==== ml_parse ====
 ml_parse is the parser callback function that handles:
 * Initial GSM Modem
-* handle correspond AT command callback
-* handle notification callback
+* Handle an information response ("+whatever: ...")
+* Handle an unsolicited message ("+whateverelse: ... ")
+* Handle a final response ("OK", "+CME ERROR", ...)
+* Handle an intermediate response ("CONNECTED", "BUSY", "NO DIALTONE")
 
 ===== Initialize GSM Modem =====
 When the modem firmware is ready to initial, it will send '''AT-Command Interpreter ready''' to gsmd. If ml_parse get this string, gsmd will try to initialize the modem.
@@ -133,9 +135,6 @@ What modem write to gsmd will put in "buf". And if the contents of the "buf" is 
 gsmd_alive_start is a scheme that gsmd detect if the modem is still alive or not. It will send an "AT" to modem periodically, and check the modem's response.
 
 If modem does not send out "AT-Command Interpreter ready", gsmd will still be initialized by the callback function (firstcmd_atcb) of ATZ.
-
-===== handle correspond AT command call back =====
-===== handle notification call back =====
 
 == libgsmd ==
 '''libgsmd''' is a library with C language API for application programs. Programs using this library can use the phone, e.g. make phone calls, receive incoming calls, register to the network, etc.
