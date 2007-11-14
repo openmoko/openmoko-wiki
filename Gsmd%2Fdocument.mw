@@ -17,6 +17,12 @@ The last part of gsmd '''main''' function enters a infinite loop, trying to call
           ...
   }
 
+== Design Policy ==
+* All command will synchronize wait for a response until timeout.
+* All callback function of command with multiple line responses are re-entry able. 
+* Commands of specify modem will put in vendor plug-in. 
+* Commands or some special scheme for specify platform will put in machine plug-in.
+
 === gsmd_select_main() ===
 gsmd_select_main this is core of the callback function scheme. All devices, gsmd monitors and linked in a [http://wiki.kldp.org/wiki.php/LinkedList list], are described as a struct '''gsmd_fd''', and gsmd_select_main will [http://swoolley.org/man.cgi/select select] them. 
 Once an event comes out from one of the devices, gsmd_select_main will try to call it's '''callback function''' that devices registered.
