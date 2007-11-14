@@ -1,13 +1,15 @@
-=== Splash Screen ===
+There are three splashes as of 13 Nov. 2007.  The U-Boot splash is displayed until the kernel takes over.  Presumably the kernel will eventually display a splash while it boots.  When userspace initializes, psplash displays a splash.  Finally X displays a splash when it starts.
 
-==== Original instructions ====
+== U-boot Splash ==
+
+=== Original instructions ===
 Is a raw framebuffer bitmap that is gzipped.
 
 Here is a basic description: http://svn.openmoko.org/trunk/src/host/splash/README
 
 Use [[dfu-util]] to send to the OpenMoko.
 
-==== Instructions which worked for me ====
+=== Instructions which worked for me ===
 The above instruction did not work, unfortunately, maybe there were for a previous release of u-boot. The following did work for me:
 
 * install the appropriate tools
@@ -21,7 +23,7 @@ The above instruction did not work, unfortunately, maybe there were for a previo
 *** sudo ../bin/dfu-util -a splash -R -D splash.gz
 ** if the size of splash.gz is not exactly 0x5000, please see the next section.
 
-==== Modifying the size of the compressed splash image ====
+=== Modifying the size of the compressed splash image ===
 NOTE... the README states you must issue two U-Boot commands to enable the flashed splash image to appear on the screen at boot:
 
     ''setenv splashimage nand read.e 0x32000000 splash 0x5000\; unzip 0x32000000 0x33d00000 0x96000''
@@ -30,5 +32,20 @@ NOTE... the README states you must issue two U-Boot commands to enable the flash
 This is already a part of the U-Boot image received in the phone... however, if you make changes to your splash image, you may need to change the splashimage variable to compensate!
 
 0x5000 is the (maximum) size of the compressed file -- the splash.gz that gets created. If you've made changes to your image you may have increased the compressed size; if it exceeds 0x5000 (20480) bytes, the entire image will not load unless you increase this value in your splashimage U-Boot environment variable.
+
+== Linux kernel ==
+''To Do''
+
+== psplash ==
+You need to recompile psplash, because the picture is hardcoded.  There is a script in the source for psplash for making a new header file.  On Ubuntu, you need the libgtk2.0-dev package to run the script.
+
+ make-image-header.sh my_image.png HAND
+ mv my_image-img.h psplash-hand-img.h
+
+Then add your custom header to the OpenEmbedded recipe (org.openembedded.dev/packages/psplash/files/openmoko/psplash-hand-img.h), or rebuild psplash by hand.
+
+== X splash ==
+
+The X server accepts a -root-ppm option, which takes a plain old (raw) ppm file.  Replace /usr/share/pixmaps/xsplash-vga.ppm on the phone or org.openembedded.dev/packages/xserver-kdrive-common/xserver-kdrive-common/openmoko/xsplash-vga.ppm in OpenEmbedded.
 
 [[Category:Developer software]]
