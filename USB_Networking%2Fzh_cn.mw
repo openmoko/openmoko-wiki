@@ -1,0 +1,302 @@
+= Neo1973 side =
+
+== Name resolution ==
+
+By default Neo1973 has usb0 interface working due to Ethernet gadget (g_ether) compiled into kernel.
+
+On the Neo, if you want to reach out to the internets using full qualified hostnames, you need to define your DNS server. Create a file /etc/resolv.conf with at least one line saying
+
+ nameserver xxx.xxx.xxx.xxx
+
+e.g. nameserver 192.168.1.1
+
+Then you can also easily update your 2007.2 OpenMoko packages with "ipkg update && ipkg upgrade" on the Neo.
+
+A better approach is to symlink
+
+ ln -s /var/run/resolv.conf /etc/resolv.conf
+
+and fill the file at bootup with a script /etc/network/if-up.d/08setupdns containing:
+
+ #!/bin/sh -e
+ echo  nameserver 192.168.0.200 > /var/run/resolv.conf
+
+this way the file is correctly handled from ppp package when dialing into gprs.
+
+== Routing ==
+
+You need a additional route for traffic to the internet. This traffic can be routed through your pc (see below) if the pc is the default route destination. you can achieve this by adding
+
+ gateway 10.10.10.21
+
+to your /etc/network/interfaces in the usb0 section.
+
+= Desktop side =
+
+== Manual method ==
+
+With the device connected, modprobe usbnet module and configure usb0 interface (as root):
+<pre>
+ifconfig usb0 192.168.0.200 netmask 255.255.255.0
+</pre>
+If your eth0 interface is also in the same 'range' (e.g. 192.168.0.105) then you can do the following:
+
+1. ping the Neo with
+ # ping -I usb0 192.168.0.202
+2. add a route to your Neo:
+ # /sbin/route add -host 192.168.0.202/32 dev usb0
+3 log in to the Neo
+ # ssh root@192.168.0.202
+
+If you don't have the necessary modules to get usb0 going, make sure you have the following kernel options enabled:
+* CONFIG_USB_USBNET
+* CONFIG_USB_NET_CDCETHER
+Both options are available in the Device Drivers -> USB support -> USB Network Adapters. For more info see the [http://www.linux-usb.org/usbnet/ usbnet driver homepage].
+
+== Automatic method ==
+
+Took from [http://blog.haerwu.biz/2007/03/22/hotpluging-usbnet/ Hotplugging usbnet] post by Marcin 'Hrw' Juszkiewicz.
+
+'''For Debian or similar distros:'''
+Edit /etc/network/interfaces file ():
+<pre>
+allow-hotplug usb0
+iface usb0 inet static
+        address 192.168.0.200
+        netmask 255.255.255.0
+        network 192.168.0.0
+        post-up iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
+        post-up echo 1 > /proc/sys/net/ipv4/ip_forward
+        post-up iptables -P FORWARD ACCEPT
+</pre>
+
+'''For Ubuntu (Tested with Feisty and Gutsy):'''
+Edit /etc/network/interfaces file ():
+<pre>
+auto usb0
+iface usb0 inet static
+        address 192.168.0.200
+        netmask 255.255.255.0
+        network 192.168.0.0
+        up iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24 &
+        up echo 1 > /proc/sys/net/ipv4/ip_forward &
+        up iptables -P FORWARD ACCEPT &
+        down iptables -D POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24 &
+</pre>
+
+If you are doing the echo 1 > /proc/... command manually, sudo may not be enough, then you will have to execute it from a sudo bash.
+
+Ubuntu Feisty and Gutsy appear to have a bug where ifdown is not run when the interface is unplugged, meaning this only works once after the system is booted.
+One can patch /etc/udev/rules.d/85-ifupdown.rules, editing the two lines at the end of the file:
+<pre>
+SUBSYSTEM=="net", DRIVERS=="?*", GOTO="net_start"
+GOTO="net_end"
+
+LABEL="net_start"
+
+# Bring devices up and down only if they're marked auto.
+# Use start-stop-daemon so we don't wait on dhcp
+ACTION=="add",          RUN+="/sbin/start-stop-daemon --start --background --pidfile /var/run/network/bogus --startas /sbin/ifup -- --allow auto $env{INTERFACE}"
+
+LABEL="net_end"
+
+ACTION=="remove",       RUN+="/sbin/start-stop-daemon --start --background --pidfile /var/run/network/bogus --startas /sbin/ifdown -- --allow auto $env{INTERFACE}"
+</pre>
+
+the bug is that the LABEL="net_end" is at the wrong position
+
+'''For Red Hat or similar distros'''
+Edit /etc/sysconfig/network-scripts/net.hotplug:
+
+After this statement:
+<pre>
+    case $INTERFACE in
+	# interfaces that are registered after being "up" (?)
+</pre>
+
+Add the following:
+<pre>
+	usb0)
+		ifconfig usb0 192.168.0.200 netmask 255.255.255.0
+		route add 192.168.0.202 usb0
+		iptables -I INPUT 1 -s 192.168.0.202 -j ACCEPT
+		iptables -I OUTPUT 1 -s 192.168.0.200 -j ACCEPT
+                iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
+                echo 1 > /proc/sys/net/ipv4/ip_forward
+		exit 0
+	;;
+</pre>
+
+'''For Gentoo or similar distros:''' 
+
+* Edit /etc/conf.d/net by adding:
+<pre>
+   # Neo1973
+   config_usb0=( "192.168.0.200 netmask 255.255.255.0" )
+   routes_usb0=( "192.168.0.202/32 via 192.168.0.200" )
+</pre>
+* Create a new init script:
+<pre>
+   # cd /etc/init.d
+   # ln -s net.lo net.usb0
+</pre>
+
+* Put iptables into use:
+<pre>
+   # iptables -I INPUT 1 -s 192.168.0.202 -j ACCEPT
+   # iptables -I OUTPUT 1 -s 192.168.0.200 -j ACCEPT
+   # iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
+</pre>
+* Store them
+<pre>
+  # /etc/init.d/iptables save
+</pre>
+* If you want the routing to be switched on by default:
+<pre>
+  # rc-update add iptables default
+</pre> 
+And now when you connect phone (which has 192.168.0.202 IP) it gets connection to world automatically.
+
+'''For MacOS X:'''
+
+there are no files to edit since hotplugging configuration is done automatically by default. Of course, the interface has been initialized once. Install the AJZaurusUSB driver as described on [[MacOS_X]] and then open System Preferences / Networks which will show the new interface. Configure for Manual DHC with Host address 192.168.0.200 and Gateway 192.168.0.202.
+
+= Mobile development  =
+
+== Proxying DNS requests ==
+
+If, like me, you move about quite a lot, connecting to various networks as you go and getting your ip via dhcp, you'll probably be annoyed at having to constantly update your resolv.conf on the Neo 1973.
+
+To get round this, as part of my setup script, I run a proxy dns on the ip address the neo comes in on at the usb0 port. This means that my Neo /etc/resolv.conf only contains:
+
+ nameserver 192.168.0.200 
+
+and my laptop will proxy all dns requests based on it's own /etc/resolv.conf
+
+'''note that we only run the dns proxy on the usb0 interface so that we don't break any other networking'''
+
+=== Proxying with dnrd ===
+
+The script is designed to use [http://dnrd.sourceforge.net/ dnrd] as the dns proxy. The [http://buildhost.automated.it/gta01 script] and a copy of [http://buildhost.automated.it/dnrd-2.20.3.tar.gz dnrd] are available from my site. The script also performs the initial setup of the connection as per the [[USB_Networking#Manual_method]] above.
+
+=== Proxying with a UDP forwarder ===
+Another easy setup is using a udp forwarder like the one from http://www.tapor.com/udpf/ - is use it with the command
+
+ udpf-elf\
+        -p=53\
+        -f=`cat /etc/resolv.conf|awk '$1 == "nameserver"{print $2; exit(0);}'`:53
+
+=== Proxying with iptables ===
+Its is possible to forward DNS requests with iptables using the DNAT target
+
+ iptables -t nat -A PREROUTING -p tcp -s 192.168.0.202 -d 192.168.0.200 --dport domain -j DNAT --to-destination 192.168.0.1
+ iptables -t nat -A PREROUTING -p udp -s 192.168.0.202 -d 192.168.0.200 --dport domain -j DNAT --to-destination 192.168.0.1
+
+where <tt>192.168.0.1</tt> is the IP of your residential gateway (router). This is the easiest method, but its not recommended if you have a direct connection to the Internet as ISP DNS servers can change, and this does no load-balancing.
+
+= Connecting to phone =
+
+Then <tt>ssh root@192.168.0.202</tt> with empty password to get into phone.
+
+NOTE: the ssh daemon (dropbear 0.49) on the OpenMoko appears to have a bug when sending the exit status back to the client. From time to time you receive an exit status of 255.
+
+===SSH Extras===
+
+If you get fed up with typing root@192.168.0.202, on your PC edit /etc/hosts and add an entry for 'phone'
+
+ 192.168.0.202 phone
+
+then edit ~/.ssh/config (or create it) and add
+
+ host phone
+ user root
+
+then all you need to do is type 
+
+ # ssh phone
+
+To avoid ssh added a new line for every ssh host-key to you known_hosts you can add the following to the phone section in ~/.ssh/config
+
+  UserKnownHostsFile /dev/null
+
+You might want to use keys to bypass the login prompt too.
+
+===SSH Keys===
+====From host to phone====
+
+To generate ssh keys for use as a login mechanism type
+
+ ssh-keygen -t rsa
+
+when prompted for a password either hit enter for no password (''not really a good idea'') or enter a password for this key. ssh into the phone and create ~/.ssh
+
+ # mkdir ~/.ssh
+
+then from your PC copy the '''.pub''' file to the phone.
+
+ # scp ~/.ssh/id_rsa.pub phone:.ssh/authorized_keys
+
+You should now be able to ssh directly into the phone.
+
+To disable password logins ('''after setting up key access''') edit /etc/init.d/dropbear and change the following line:
+
+ DROPBEAR_EXTRA_ARGS=
+
+to 
+
+ DROPBEAR_EXTRA_ARGS="-s"
+
+You will need to restart dropbear for this to take effect.
+
+====From phone to host====
+Generate the key
+
+  dropbearkey -t rsa -f id_rsa
+
+The output will look something like this:
+
+  Will output 1024 bit rsa secret key to 'id_rsa'
+  Generating key, this may take a while...
+  Public key portion is:
+  ssh-rsa AAAAB3Nza[...]
+  Fingerprint: md5 ca:e8:f0:b7:f6:7b:c2:b6:b9:71:e4:45:86:a9:ff:b8
+
+Copy and paste the one line (in this example, starting with 'ssh-rsa' onto the end of the host's authorized_keys file (often in ~/.ssh/).
+
+From the phone, ssh with -i:
+
+  ssh -i id_rsa user@host
+
+This works for me.  I ripped off these instructions from: [[http://forum.openwrt.org/viewtopic.php?pid=53705]]
+
+===GUI on desktop through SSH===
+
+If you need to get the GUI on the phone onto the desktop via usb, you can use ssh as follows
+
+  ssh -l root -X -v 192.168.0.202
+
+Login, and run openmoko-finger-demo for example, and it will open up on the desktop. To get landscape view, just resize the GUI window on the desktop.
+
+===Remote apps on neo===
+
+To get desktop apps to show up on your neo, first log in to the phone
+
+  ssh -l root 192.168.0.202
+
+Then once inside, run:
+
+  DISPLAY=:0 xhost +192.168.0.200
+
+After this you can close the ssh session. Back on the desktop computer, run:
+
+  DISPLAY=moko:0 xclock
+
+Note that the xhost command will allow remote applications on 192.168.0.200 to access the X server. It will allow anyone on the desktop machine to access the X server of the neo, including snooping anything you type on it. To disallow remote applications again, run this in the neo:
+
+  DISPLAY=:0 xhost -192.168.0.200
+
+<span id="bottom"></span> 
+{{Languages|USB Networking}}
+
+[[Category:Hardware]]
+[[Category:Implemented]]
