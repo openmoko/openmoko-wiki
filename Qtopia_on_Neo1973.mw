@@ -1,18 +1,15 @@
 {{Languages|Qtopia_on_Neo_1973}}
 
-== Installation ==
+== Flashing Qtopia images into Neo's NAND flash ==
+Generic NAND flashing notice: Flash chunks to be flashed must be erased or cleared first (a write to a NAND flash can only set, but not clear bits), you either need to have a recent uboot (most GTA01v4 owner should have that already), or you have to erase or clean the NAND partition using [[nand erase]].
 
-Generic flashing notice: Flash chunks to be flashed must be erased or cleared first (a write to a NAND flash can only set, but not clear bits), you either need to have a recent uboot (most GTA01v4 owner should have that already), or you have to erase or clean the NAND partition using [[nand erase]].
-
-=== Qtopia images ===
 Get "Qtopia on Neo Flash Image and kernel" [http://www.qtopia.net/modules/devices/openmoko.php from here]. Currently the flash tarball has the 2.6.21 openmoko kernel and a Qtopia phone edition jffs2 flash image cross-compiled for the Neo. 
 
 Newer unofficial Qtopia images can be found in the ScaredyCat [[repositories]], but they may not ask for a PIN, so if your SIM needs a PIN to be accessible, only the 2007-09-18 preview image from qtopia.net will be able to access your SIM. It will however not be stable enough to be useable.
 
-=== Qtopia AND OpenMoko Option 1 ===
-Why choose when you can have both ;)
+== Dual-booting between Qtopia and X ==
 
-If you do not already have a recent version of OpenMoko on your Neo1973, have a look at [[Flashing openmoko]].
+Both examples described here require you to reformat your MicroSD card to ext3, so this is the first step for both:
 
 {{warning|The following step will reformat your MircoSD card with the ext3 filesystem. We need it because we need support for symbolic or/and static links, which other filesystems like FAT do not support directly. After reformatting, no data on the card will be accessible to you anymore, so create good backups of anything which you need before starting!}}
 
@@ -21,27 +18,32 @@ Then ssh to your neo and reformat your MicroSD card with:
  mkfs.ext3 /dev/mmcblk0p1
  mount /dev/mmcblk0p1
 
-On your desktop: Get "Developer root filesystem" [http://www.qtopia.net/modules/devices/openmoko.php from here]. Get the opt/Qtopia folder plus the qpe init script out of the archive repack and copy it to your neo. One could do this like this:
+=== Installing Qtopia into an openmoko rootfs ===
+
+On [http://www.qtopia.net/modules/devices/openmoko.php], click "Developer root filesystem". Then extract opt/Qtopia and the qpe init script and copy both to the mmc card of your neo:
+
  tar xzf ficgta01-qtopia-developer-rootfs.tgz opt/Qtopia etc/init.d/qpe
  mv opt/Qtopia etc/init.d/qpe . && rm -r opt etc
  tar czf Qtopia.tar.gz Qtopia qpe
  scp Qtopia.tar.gz root@192.168.0.202:/media/card/
 
-On your neo again: unpack the archive you just copied and link the Qtopia folder to /opt/Qtopia. Then move the init script to /etc/init.d/:
+Log in to your Neo and unpack the archive and install it:
+
  cd /media/card
  tar xzf Qtopia.tar.gz
  mkdir -p /opt
  ln -s /media/card/Qtopia /opt/Qtopia
  mv qpe /etc/init.d
 
-Now kill the x server and gsmd and start Qtopia (this can take some time):
+Now kill the X server and gsmd and start Qtopia (this can take some time):
+
  /etc/init.d/xserver-nodm stop
  /etc/init.d/gsmd stop
  /etc/init.d/qpe start
 
-Where from here? You could put the last step in a script and start it from a terminal on your phone. But much nicer would be if you could choose between both interfaces on init time and have some small application in Qtopia/OpenMoko to switch.
+Now, in theory, it should be possible to could create a new entry in the [[uboot]] boot menu which adds a new boot argument to the kernel, say "qtopia=1" and you could could write a script which checks that boot parameter by checking if "$qtopia" is set to "1" or by checking /proc/cmdline and then boot Qtopia instead of X.
 
-=== Qtopia AND OpenMoko Option 2 ===
+=== Installing Qtopia on the SD card ===
 
 * format your SD card with ext3 and mount it (see above)
 * unpack rootfs from qtopia-4.3.0-preview-neo-flash.tgz to SD card (see above)
@@ -64,23 +66,21 @@ When using the virtual keyboard, do a quick flick up or down over the keyboard t
 
 In summary, Qtopia on the Neo1973 is much closer to being ready than OpenMoko as of this writing.  However, sound and suspend support prevent it from being at all useful as a cell phone (as a landline that doesn't ring but instead vibrates, it works ok).
 
+The biggest issue for using Qtopia on the Neo1973 is currently PIN entry. On the Greenphone it's done thru the numberic keypad, but the Neo193 has none, so Qtopia has to use some other way of entering the PIN. The 3.4.0-preview flash image uses a tiny graphical keypad where you are able to enter the PIN, but none of the newer images have it and so it's not possible to access SIM cards which need a PIN.
+
 The [http://www.qtopia.net/modules/newbb_plus/viewtopic.php?topic_id=473&forum=4 Qtopia forum area on the FIC GTA01] might be helpful, but it is preferred that you update this section with issues and fixes which you find.
 
 == Screenshots ==
 
-Here are some screenshots of Qtopia runing on a Neo 1973. Personally I find it very impressive...
-
-
-
 {|
 |-
-|[[Image:Qtopia001.png|thumb|center|300px]]
-|[[Image:Qtopia002.png|thumb|center|300px]]
-|[[Image:Qtopia003.png|thumb|center|300px]]
+|[[Image:Qtopia001.png|thumb|center|240px]]
+|[[Image:Qtopia002.png|thumb|center|240px]]
+|[[Image:Qtopia003.png|thumb|center|240px]]
 |-
-|[[Image:Qtopia004.png|thumb|center|300px]]
-|[[Image:Qtopia005.png|thumb|center|300px]]
-|[[Image:Qtopia006.png|thumb|center|300px]]
+|[[Image:Qtopia004.png|thumb|center|240px]]
+|[[Image:Qtopia005.png|thumb|center|240px]]
+|[[Image:Qtopia006.png|thumb|center|240px]]
 |}
 
 == Videos ==
