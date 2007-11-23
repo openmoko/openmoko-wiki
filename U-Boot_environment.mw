@@ -21,7 +21,6 @@ mtddevnum=0
 mtddevname=u-boot
 </pre>
 
-
 == Timeouts ==
 
 If the boot loader menu is on the screen, the phone will power off when there hasn't been activity for a while. This is not nice if you are working on the boot loader console, but you can make the time longer:
@@ -32,4 +31,22 @@ setenv boot_menu_timeout [seconds]
 After the phone is powered on, there is a short period of time when you can connect to the console and cancel the automatic boot without going to the menu:
 <pre>
 setenv bootdelay [seconds]
+</pre>
+
+== Menu ==
+
+You can add items to the boot menu by setting environment variables of the form ''menu_<number>'' to values of the form ''<Title>: U-Boot-Commands''.
+
+For example the following command will add a boot menu entry that switches to autofast charging and turns off the backlight:
+  setenv menu_6 Autofast-Charge and Backlight Off: neo1973 charger autofast\; neo1973 backlight off
+
+While in this state, your Neo1973 can be charged with a generic USB charger. You also need to set boot_menu_timeout to 65000 to keep it from powering down, though.
+
+== Console ==
+
+To get access to the bootloader console over USB, the following settings need to be made:
+<pre>
+GTA01Bv2 # setenv stderr usbtty
+GTA01Bv2 # setenv stdout usbtty
+GTA01Bv2 # setenv stdin usbtty
 </pre>
