@@ -38,7 +38,7 @@ Untar the sources, apply the patch, run "make gta01bv3_config" (or gta01bv2_conf
 
 == Bootloader binary ==
 
-The latest bootloader binary builds can be found at http://buildhost.openmoko.org/snapshots/2007.08/images/.  It should be written to the NAND flash address 0x00000000 (size 0x30000)
+The latest bootloader binary builds can be found at http://buildhost.openmoko.org/snapshots/2007.08/images/.  It should be written to the NAND flash address 0x00000000 (size 0x30000) (the first [[partition]]).
 
 == Bootloader development ==
 
@@ -316,11 +316,11 @@ GTA01Bv3 # printenv
 bootcmd=setenv bootargs ${bootargs_base} ${mtdparts}; nand read.e 0x32000000 kernel; bootm 0x32000000
 </pre>
 
-This basically tells us that it will load the content of the NAND partition '''kernel''' to memory address 0x32000000 and then try to boot it.  
+This basically tells us that it will load the content of the NAND [[partition]] '''kernel''' to memory address 0x32000000 and then try to boot it.  
 
 ==== Environment ====
 
-u-boot is configured to manage a non-volatile environment that is stored in NAND flash.  You can use the commands to read/alter/store the environment in the following example:
+u-boot is configured to manage a non-volatile environment that is stored in the NAND flash [[partition]] named "u-boot_env".  u-boot itself gets the location from OOB. You can use the commands to read/alter/store the environment in the following example:
 <pre>
 GTA01Bv2 # printenv
 baudrate=115200
@@ -423,7 +423,7 @@ Starting kernel ...
 ===== Writing new bootloader to NAND =====
 
 The following set of commands loads the file u-boot.bin from ext2/mmc and flashes it into the
-bootloader flash partition:
+bootloader flash [[partition]]:
 
 <pre>
 GTA01Bv3 # ext2load mmc 0 0x32000000 u-boot.bin
@@ -434,7 +434,7 @@ GTA01Bv3 # nand write.e 0x32000000 u-boot ${filesize}
 ===== Writing kernel to NAND =====
 
 The following set of commands loads the file uImage from ext2/mmc and flashes it into the
-kernel flash partition:
+kernel flash [[partition]]:
 
 <pre>
 GTA01Bv3 # ext2load mmc 0 0x32000000 uImage
@@ -445,7 +445,7 @@ GTA01Bv3 # nand write.e 0x32000000 kernel ${filesize}
 ===== Writing rootfs to NAND =====
 
 The following set of commands loads the file rootfs.jffs2 from ext2/mmc and flashes it into the
-rootfs flash partition:
+rootfs flash [[partition]]:
 
 <pre>
 GTA01Bv3 # ext2load mmc 0 0x32000000 rootfs.jffs2
