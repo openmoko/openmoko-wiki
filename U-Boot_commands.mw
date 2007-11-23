@@ -1,0 +1,359 @@
+Various tasks are performed with bootloader commands. On the [[bootloader]] console, you can list the available commands with "help", and get more information about each command with "help command".
+
+== Auto-boot ==
+
+Auto-boot executes the command[s] specified in the ''bootcmd'' environment variable. The default configuration is:
+<pre>
+GTA01Bv3 # printenv
+bootcmd=setenv bootargs ${bootargs_base} ${mtdparts}; nand read.e 0x32000000 kernel; bootm 0x32000000
+</pre>
+
+This basically tells us that it will load the content of the NAND [[partition]] '''kernel''' to memory address 0x32000000 and then try to boot it.  
+
+== Environment ==
+
+:''See also [[bootloader environment]].''
+
+u-boot is configured to manage a non-volatile environment that is stored in the NAND flash [[partition]] named "u-boot_env".  u-boot itself gets the location from OOB. You have commands to display, alter, and store the environment.
+
+This displays all definitions in the current environment:
+<pre>
+GTA01Bv2 # printenv
+baudrate=115200
+bootargs=rootfstype=jffs2 root=/dev/mtdblock4 console=ttySAC0,115200 console=tty0 loglevel=8 dyntick=enable lpj=252416
+usbtty=cdc_acm
+bootdelay=10
+stdout=serial
+stderr=serial
+stdin=serial
+mtdparts=mtdparts=neo1973-nand:0x00030000(u-boot),0x0000c000(u-boot_env),0x00200000(kernel),0x00130000(splash),0x03c94000(rootfs)
+mtdids=nand0=neo1973-nand
+bootargs_base=rootfstype=jffs2 root=/dev/mtdblock4 console=ttySAC0,115200 console=tty0 loglevel=8 dyntick=enable lpj=252416
+bootcmd=setenv bootargs ${bootargs_base} ${mtdparts}; nand read.e 0x32000000 kernel; bootm 0x32000000
+pcf50606_int1=0x40
+filesize=160C000
+partition=nand0,0
+mtddevnum=0
+mtddevname=u-boot
+Environment size: 670/16380 bytes
+GTA01Bv2 #
+</pre>
+
+The following example shows how to manipulate an individual definition, and store the updated environment in flash:
+<pre>
+GTA01Bv3 # setenv bootdelay 10
+GTA01Bv3 # printenv bootdelay
+bootdelay=10
+GTA01Bv3 # saveenv
+Saving Environment to NAND...
+Erasing Nand...Writing to Nand... done
+GTA01Bv3 # 
+</pre>
+
+Note: When setting multiple commands, e.g. for bootcmd, you need to escape the ';', for instance:
+
+<pre>
+GTA01Bv3 # setenv bootcmd mmcinit\; ext2load mmc 0 0x32000000 uImage\; bootm 0x32000000
+</pre>
+
+== MMC/SD ==
+
+in order to initialize a MMC/SD card, you have to use the ``mmcinit'' command.
+<pre>
+GTA01Bv3 # mmcinit
+trying to detect SD Card...
+MMC found. Card desciption is:
+Manufacturer ID = 58d564
+HW/FW Revision = 3 8
+Product Name = 21DN!@X�
+Serial Number = 445303
+Month = 5
+Year = 2000
+READ_BL_LEN=15, C_SIZE_MULT=7, C_SIZE=3197
+size = 4208984064
+GTA01Bv3 #
+</pre>
+
+afterwards, you can read ext2 filesystems like:
+<pre>
+GTA01Bv3 # ext2ls mmc 0
+<DIR>       1024 .
+<DIR>       1024 ..
+<DIR>      12288 lost+found
+         1544788 uImage
+</pre>
+
+== NAND ==
+
+<pre>
+GTA01Bv3 # help nand
+nand info                  - show available NAND devices
+nand device [dev]     - show or set current device
+nand read[.jffs2]     - addr off size
+nand write[.jffs2]    - addr off size - read/write `size' bytes starting
+    at offset `off' to/from memory address `addr'
+nand erase [clean] [off size] - erase `size' bytes from
+    offset `off' (entire device if not specified)
+nand bad - show bad blocks
+nand dump[.oob] off - dump page
+nand scrub - really clean NAND erasing bad blocks (UNSAFE)
+nand markbad off - mark bad block at offset (UNSAFE)
+nand biterr off - make a bit error at offset (UNSAFE)
+</pre>
+
+=== Loading Kernel from NAND ===
+
+<pre>
+GTA01Bv3 # nand read 0x32000000 kernel
+
+NAND read: device 0 offset 212992, size 2097152 ...  2097152 bytes read: OK
+GTA01Bv3 # bootm 0x32000000
+## Booting image at 32000000 ...
+   Image Name:   OpenMoko Kernel Image Neo1973
+   Created:      2007-02-15  23:54:18 UTC
+   Image Type:   ARM Linux Kernel Image (gzip compressed)
+   Data Size:    1546258 Bytes =  1.5 MB
+   Load Address: 30008000
+   Entry Point:  30008000
+   Verifying Checksum ... OK
+   Uncompressing Kernel Image ... OK
+Starting kernel ...
+</pre>
+
+=== Writing new bootloader to NAND ===
+
+The following set of commands loads the file u-boot.bin from ext2/mmc and flashes it into the
+bootloader flash [[partition]]:
+
+<pre>
+GTA01Bv3 # ext2load mmc 0 0x32000000 u-boot.bin
+GTA01Bv3 # nand erase u-boot
+GTA01Bv3 # nand write.e 0x32000000 u-boot ${filesize}
+</pre>
+
+=== Writing kernel to NAND ===
+
+The following set of commands loads the file uImage from ext2/mmc and flashes it into the
+kernel flash [[partition]]:
+
+<pre>
+GTA01Bv3 # ext2load mmc 0 0x32000000 uImage
+GTA01Bv3 # nand erase kernel
+GTA01Bv3 # nand write.e 0x32000000 kernel ${filesize}
+</pre>
+
+=== Writing rootfs to NAND ===
+
+The following set of commands loads the file rootfs.jffs2 from ext2/mmc and flashes it into the
+rootfs flash [[partition]]:
+
+<pre>
+GTA01Bv3 # ext2load mmc 0 0x32000000 rootfs.jffs2
+GTA01Bv3 # nand erase rootfs
+GTA01Bv3 # nand write.e 0x32000000 rootfs ${filesize}
+</pre>
+
+Please note that this will only work with root file system sizes that are smaller than the amount of memory above 0x32000000, which in the case of 64MB SDRAM is something like 32MB. '''Warning''': you risk bricking your phone if you attempt to read in too large a file as extload appears to write the overflow into dangerous parts of memory address space.
+
+== Neo1973 specific commands ==
+
+Our version of u-boot supports a couple of Neo1973 specific commands:
+<pre>
+GTA01Bv2 # help neo1973
+neo1973 neo1973 info - display phone informantion
+neo1973 power-off - switch off the phone
+neo1973 charger status - display charger status
+neo1973 charger autofast - enable automatic fast (500mA) charging
+neo1973 charger !autofast - disable automatic fast (500mA) charging
+neo1973 charger fast - enable fast (500mA) charging
+neo1973 charger off - disable charging
+neo1973 backlight (on|off) - switch backlight on or off
+neo1973 vibrator (on|off) - switch vibrator on or off
+neo1973 udc pullup (on|off) - switch pull-up on or off
+</pre>
+
+(What's the udc?)
+
+=== Power-off ===
+
+Using
+ neo1973 power-off
+
+you can switch the device off from the bootloader prompt.
+
+=== Battery charger related ===
+
+For a detailed description of the charger basics, see [[Neo1973 Battery Charger]].
+
+==== Inquiring the charger state ====
+
+You can get the current charger status by issuing
+ neo1973 charger status
+
+The following modes are possible:
+
+* idle - no charging
+* trickle - FIXME
+* pre - Slow (100mA) charging, works in hardware.
+* fast_cccv - Fast (500mA) charging, using Constant-Current followed by Constant Voltage (Li-Ion)
+
+==== Disabling battery charging ====
+
+You can disable battery charging (until the next reboot) by issuing
+ neo1973 charger off
+
+==== Forcing fast charge ====
+
+Using
+ neo1973 charger fast
+you can force the PMU to try to do a fast (500mA) charge of the battery. It will abort if the battery is in over temperature or some other error condition occurs.
+
+The following commands will add a boot menu entry that switches to fast charging and turns off the backlight:
+  setenv menu_6 Fast-Charge and Backlight Off: neo1973 charger fast\; neo1973 backlight off
+  saveenv
+
+While in this state, your Neo1973 can be charged with a generic USB charger. You also need to set 
+ setenv boot_menu_timeout 65000
+ saveenv
+to keep it from powering down, though.
+
+==== Enabling / Disabling automatic fast charge ====
+
+Autofast is a feature of the PCF50606 PMU.  It means that the fast_cccv mode will be automatically selected if a charger with suitable voltage is plugged in, and the battery not in over temperature condition.
+
+{{warning|This is potentially dangerous.  Only enable autofast if you ARE SURE that you can draw 500mA from the USB connector.  This is the case with a wall outlet charger, or if you are attached to a self-powered hub or a desktop PC root hub.  Bus powered hubs and some laptops only provide 100mA on their USB ports and can thus not support fast charging}}
+
+You can enable or disable autofast by 
+ neo1973 charger autofast
+and
+ neo1973 charger !autofast
+respectively.
+
+=== Backlight ===
+
+You can switch the backlight on and off by using
+ neo1973 backlight on
+and
+ neo1973 backlight off
+respectively.
+
+=== Vibrator ===
+
+You can switch the vibrator on and off by using
+ neo1973 vibrator on
+and 
+ neo1973 vibrator off
+respectively.
+
+
+=== GSM ===
+
+Starting with OpenMoko patchset '''SVN revision 2885''', u-boot contains support for powering the GSM modem,
+and even accessing the modem from the console.
+
+==== GSM power ====
+
+You can switch the GSM modem on and off by using
+ neo1973 gsm on
+and
+ neo1973 gsm off
+respectively.
+
+==== terminal mode ====
+
+You can access the GSM modem using openmoko's built-in terminal emulator in u-boot.
+
+The following example demonstrates how:
+
+<pre>
+GTA01Bv4 # neo1973 gsm on
+GTA01Bv4 # terminal serial
+switching s3ser0 from console into GSM mode
+Entering terminal mode for port serial
+Use '~.' to leave the terminal and get back to u-boot
+ATE1
+OK
+AT+CGMI?
+ERROR
+AT+CGMI
+FIC
+
+OK
+AT+CGMR
+GTA01Bv4
+
+OK
+~[u-boot]~.
+switched s3ser0 from GSM mode back into console mode
+GTA01Bv4 # neo1973 gsm off
+GTA01Bv4 #
+</pre>
+
+{{note|If you're using the ''cu'' terminal emulator on your host PC to access u-boot, you have
+to press '~' twice in order to escape it and make sure it actually gets sent to the Neo!}}
+
+== S3C2410 specific commands ==
+
+<pre>
+GTA01Bv2 # help s3c2410
+s3c2410 speed get - display current PLL speed config
+s3c2410 speed list - display supporte PLL speed configs
+s3c2410 speed set - set PLL speed
+GTA01Bv2 # s3c2410 speed list
+50 MHz
+101 MHz
+202 MHz
+266 MHz
+GTA01Bv2 # s3c2410 speed get
+FCLK = 202 MHz, HCLK = 101 MHz, PCLK = 50 MHz
+GTA01Bv2 # s3c2410 speed set 101
+GTA01Bv2 # s3c2410 speed get
+FCLK = 101 MHz, HCLK = 50 MHz, PCLK = 50 MHz
+</pre>
+
+=== 266MHz clock ===
+
+You can re-configure the [[S3C2410]] PLL to generate a 266 MHz core cpu clock (rather than the 200MHz default) by using
+ GTA01Bv2 # s3c2410 speed set 266 
+and
+ GTA01Bv2 # s3c2410 speed set 202
+respectively.
+
+{{warning|The old hardware (Phase 0 - GTA01Bv3) only runs stable at 266MHz if you do not attach anything (esp. the FPC / [[Debug Board]] to the Debug Port}}
+
+== TFTP on QT2410 ==
+
+The QT2410 cs8900a Ethernet can be used to download images via network.
+
+First, you have to make sure that ''ipaddr'', ''serverip'', ''ethaddr' and ''netmaskk'' are set correctly in the environment:
+
+<pre>
+QT2410 # printenv
+ethaddr=00:01:02:03:04:05
+netmask=255.255.255.0
+ipaddr=192.168.100.100
+serverip=192.168.100.1
+</pre>
+
+
+=== TFTP kernel download ===
+
+<pre>
+QT2410 # tftpboot 0x32000000
+*** Warning: no boot file name; using 'C0A86464.img'
+TFTP from server 192.168.100.1; our IP address is 192.168.100.100
+Filename 'C0A86464.img'.
+Load address: 0x32000000
+Loading: #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         ##########################################
+done
+Bytes transferred = 1544788 (179254 hex)
+</pre>
+
+you can then commence booting via
+<pre>
+QT2410# bootm 0x32000000
+</pre>
