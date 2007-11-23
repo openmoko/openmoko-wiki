@@ -1,0 +1,35 @@
+The bootloader environment configures the [[bootloader]]. Between reboots, the environment is stored with a checksum in the internal flash [[partition]] called "u-boot_env". On the bootloader console, there are [[bootloader commands#Environment|bootloader commands for environment manipulation]].
+
+== Typical environment ==
+
+<pre>
+baudrate=115200
+bootargs=rootfstype=jffs2 root=/dev/mtdblock4 console=ttySAC0,115200 console=tty0 loglevel=8 dyntick=enable lpj=252416
+usbtty=cdc_acm
+bootdelay=10
+stdout=serial
+stderr=serial
+stdin=serial
+mtdparts=mtdparts=neo1973-nand:0x00030000(u-boot),0x0000c000(u-boot_env),0x00200000(kernel),0x00130000(splash),0x03c94000(rootfs)
+mtdids=nand0=neo1973-nand
+bootargs_base=rootfstype=jffs2 root=/dev/mtdblock4 console=ttySAC0,115200 console=tty0 loglevel=8 dyntick=enable lpj=252416
+bootcmd=setenv bootargs ${bootargs_base} ${mtdparts}; nand read.e 0x32000000 kernel; bootm 0x32000000
+pcf50606_int1=0x40
+filesize=160C000
+partition=nand0,0
+mtddevnum=0
+mtddevname=u-boot
+</pre>
+
+
+== Timeouts ==
+
+If the boot loader menu is on the screen, the phone will power off when there hasn't been activity for a while. This is not nice if you are working on the boot loader console, but you can make the time longer:
+<pre>
+setenv boot_menu_timeout [seconds]
+</pre>
+
+After the phone is powered on, there is a short period of time when you can connect to the console and cancel the automatic boot without going to the menu:
+<pre>
+setenv bootdelay [seconds]
+</pre>
