@@ -1,8 +1,4 @@
-{{Languages|Bootloader environment}}
-
-{{Bootloader}}
-
-The U-Boot environment configures the [[U-Boot]]. Between reboots, the environment is stored with a checksum in the internal flash [[Partitions|partition]] called "u-boot_env". On the U-Boot console, there are [[U-Boot commands#Environment|U-Boot commands for environment manipulation]].
+The bootloader environment configures the [[bootloader]]. Between reboots, the environment is stored with a checksum in the internal flash [[partition]] called "u-boot_env". On the bootloader console, there are [[bootloader commands#Environment|bootloader commands for environment manipulation]].
 
 == Typical environment ==
 
@@ -25,9 +21,10 @@ mtddevnum=0
 mtddevname=u-boot
 </pre>
 
+
 == Timeouts ==
 
-If the U-Boot menu is on the screen, the phone will power off when there hasn't been activity for a while. This is not nice if you are working on the boot loader console, but you can make the time longer:
+If the boot loader menu is on the screen, the phone will power off when there hasn't been activity for a while. This is not nice if you are working on the boot loader console, but you can make the time longer:
 <pre>
 setenv boot_menu_timeout [seconds]
 </pre>
@@ -36,37 +33,3 @@ After the phone is powered on, there is a short period of time when you can conn
 <pre>
 setenv bootdelay [seconds]
 </pre>
-
-== Menu ==
-
-You can add items to the boot menu by setting environment variables of the form ''menu_<number>'' to values of the form ''<Title>: U-Boot-Commands''.
-
-For example the following command will add a boot menu entry that switches to autofast charging and turns off the backlight:
-setenv menu_6 Autofast-Charge and Backlight Off: neo1973 charger autofast\; neo1973 backlight off
-
-While in this state, your Neo1973 can be charged with a generic USB charger. You also need to set boot_menu_timeout to 65000 to keep it from powering down, though.
-
-=== Booting to the menu ===
-To stop in the NAND menu, press and hold the AUX key after pressing the power button at startup. In recent versions of U-Boot (builds from august 5 200?), you can also permanently enter the menu by setting the <tt>stop_in_menu</tt> environment variable to <tt>yes</tt>:
-
-setenv stop_in_menu yes
-saveenv
-
-to restore normal startup, unset this variable or set it to <tt>no</tt>.
-
-== Console ==
-
-To get access to the U-Boot console over USB with e.g., [[NeoCon]], the following settings need to be made:
-<pre>
-GTA01Bv2 # setenv stderr usbtty
-GTA01Bv2 # setenv stdout usbtty
-GTA01Bv2 # setenv stdin usbtty
-</pre>
-
-== See also ==
-
-* http://lists.openmoko.org/pipermail/community/2008-September/029845.html
-* http://markmail.org/message/d2abi2nm5vms3unh
-* http://lists.openmoko.org/pipermail/community/2009-January/038827.html
-
-[[Category:Bootloaders]]
