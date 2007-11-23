@@ -57,8 +57,8 @@ Both options are available in the Device Drivers -> USB support -> USB Network A
 
 Took from [http://blog.haerwu.biz/2007/03/22/hotpluging-usbnet/ Hotplugging usbnet] post by Marcin 'Hrw' Juszkiewicz.
 
-'''For Debian or similar distros:'''
-Edit /etc/network/interfaces file ():
+=== Debian or similar ===
+Edit /etc/network/interfaces:
 <pre>
 allow-hotplug usb0
 iface usb0 inet static
@@ -70,8 +70,8 @@ iface usb0 inet static
         post-up iptables -P FORWARD ACCEPT
 </pre>
 
-'''For Ubuntu (Tested with Feisty and Gutsy):'''
-Edit /etc/network/interfaces file ():
+=== Ubuntu (Tested with Feisty and Gutsy) ===
+Edit /etc/network/interfaces:
 <pre>
 auto usb0
 iface usb0 inet static
@@ -104,9 +104,14 @@ ACTION=="remove",       RUN+="/sbin/start-stop-daemon --start --background --pid
 </pre>
 
 the bug is that the LABEL="net_end" is at the wrong position
-
-'''For Fedora (Tested with FC8):'''
-Create /etc/sysconfig/network-scripts/ifcfg-usb0 file ():
+=== SuSE ===
+/etc/sysconfig/network/ifcfg-usb0
+ # USB configuration for PDAs (openmoko)
+ IPADDR=192.168.0.200
+ NETMASK=255.255.255.0
+ STARTMODE=onboot
+=== Fedora (Tested with FC8) ===
+/etc/sysconfig/network-scripts/ifcfg-usb0
 <pre>
 # USB configuration for PDAs (openmoko)
 # from http://www.handhelds.org/moin/moin.cgi/UsbNet
@@ -117,16 +122,15 @@ NETMASK=255.255.255.0
 ONBOOT=yes
 </pre>
 
-'''For Red Hat or similar distros'''
+=== Red Hat or similar ===
 Edit /etc/sysconfig/network-scripts/net.hotplug:
 
-After this statement:
+After this command
 <pre>
     case $INTERFACE in
 	# interfaces that are registered after being "up" (?)
 </pre>
-
-Add the following:
+add
 <pre>
 	usb0)
 		ifconfig usb0 192.168.0.200 netmask 255.255.255.0
@@ -138,40 +142,24 @@ Add the following:
 		exit 0
 	;;
 </pre>
-
-'''For Gentoo or similar distros:''' 
-
-* Edit /etc/conf.d/net by adding:
-<pre>
-   # Neo1973
-   config_usb0=( "192.168.0.200 netmask 255.255.255.0" )
-   routes_usb0=( "192.168.0.202/32 via 192.168.0.200" )
-</pre>
+=== Gentoo ===
+* Open /etc/conf.d/net and add:
+ # Neo1973
+ config_usb0=( "192.168.0.200 netmask 255.255.255.0" )
+ routes_usb0=( "192.168.0.202/32 via 192.168.0.200" )
 * Create a new init script:
-<pre>
-   # cd /etc/init.d
-   # ln -s net.lo net.usb0
-</pre>
-
+ cd /etc/init.d
+ ln -s net.lo net.usb0
 * Put iptables into use:
-<pre>
-   # iptables -I INPUT 1 -s 192.168.0.202 -j ACCEPT
-   # iptables -I OUTPUT 1 -s 192.168.0.200 -j ACCEPT
-   # iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
-</pre>
+ iptables -I INPUT 1 -s 192.168.0.202 -j ACCEPT
+ iptables -I OUTPUT 1 -s 192.168.0.200 -j ACCEPT
+ iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
 * Store them
-<pre>
-  # /etc/init.d/iptables save
-</pre>
-* If you want the routing to be switched on by default:
-<pre>
-  # rc-update add iptables default
-</pre> 
-And now when you connect phone (which has 192.168.0.202 IP) it gets connection to world automatically.
-
-'''For MacOS X:'''
-
-there are no files to edit since hotplugging configuration is done automatically by default. Of course, the interface has been initialized once. Install the AJZaurusUSB driver as described on [[MacOS_X]] and then open System Preferences / Networks which will show the new interface. Configure for Manual DHC with Host address 192.168.0.200 and Gateway 192.168.0.202.
+ /etc/init.d/iptables save
+* If you want the routing by default:
+ rc-update add iptables default
+=== MacOS X ===
+Install [[MacOS X|AJZaurusUSB]], open System Preferences / Networks and configure the interface for Manual DHCP with Host address 192.168.0.200 and Gateway 192.168.0.202.
 
 = Mobile development  =
 
