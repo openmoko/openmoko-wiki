@@ -99,5 +99,25 @@ script: (Note that this script has bad problems if you run it more than once. Yo
          done
  ) &
 
+== Using UDP ==
+
+gllin sends a udp packet per nmea sentence on port 6000. this is a much cleaner aproach because using files will fill up memory or rootfs (the latter will result in the need for reflashing).
+
+i switch off writing to /tmp/nmeaNP with
+
+ -np
+
+the following python script reads the nmea sentences:
+
+ import socket
+ s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+ s.bind(('127.0.0.1', 6000))
+ while True:
+     line = s.recv(1024)
+     print line
+
+the program just prints those to stdout but other methods are possible (i feed them into a NMEA parser).
+
+benefits are that both programs can be started and stopped at will. none needs the other. gllin will not terminate if /tmp/nmeaNP is not there or not read from.
 
 [[Category:GPS]]
