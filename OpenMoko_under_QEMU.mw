@@ -120,6 +120,16 @@ QEMU lets you debug operating system kernels and bootloaders like you debug all 
 
 To debug u-boot, load the file "u-boot" into gdb (not "u-boot.bin") that is produced by "make" when building u-boot. To debug a Linux kernel, load the file "vmlinux" from the main source directory into gdb. These files are in ELF format and contain all the symbol information and are not stripped of debugging data until you run "strip" on them, unlike "u-boot.bin" and "Image"/"zImage"/"uImage". Next, tell QEMU to enable the gdbserver by appending the "-s" switch or issuing "gdbserver" in the monitor. Use the command <pre>(gdb) target remote localhost:1234</pre> to make a connection to the emulator. From there you should be able to use all the usual GDB commands, including stepping instructions, setting breakpoints, watchpoints, inspecting stack, variables, registers and more. If gdb is running in the same directory from which it grabbed the ELF executable, the "edit" command should work so you can jump right to the source line which is executing.
 
+== Simple network connection with pppd ==
+
+One simple way to get a network connection from the emulated Neo is via an emulated serial port. Add ''-serial vc -serial pty'' to the QEMU command line, and QEMU prints a device name on a line like "char device redirected to /dev/pts/12".
+
+On the Neo side, open a terminal and run the command "pppd nodetach debug /dev/ttySAC1".
+
+On the host computer side, open a root terminal and run the command "pppd nodetach debug 192.168.68.1:192.168.68.2 noauth /dev/pts/12", substituting the actual device name from above.
+
+Now on the host computer side, you should be able to "ping 192.168.68.2" and "ssh root@192.168.68.2".
+
 == Setting up USB connection ==
 
 It is possible (although not very straight forward, probably about the complexity of tun-tap networking) to connect the virtual, emulated Neo1973 to the Linux PC on which the emulator is running, and work with it as if a real Neo1973 was plugged into the computer's USB port, but no twiddling with cables is needed. If you're testing your applications on the Neo, it may be worth setting up this kind of connection because it lets you enable normal [[USB_Networking|networking between the PC and the phone and ssh into it]] (which is much more comfortable than typing commands into the OpenMoko's terminal emulator via on-screen keyboard). Here's what you will need in order to get this working:
