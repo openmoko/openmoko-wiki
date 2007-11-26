@@ -1,0 +1,56 @@
+'''Pexpect''' is a pure Python module for spawning child applications; controlling them; and responding to expected patterns in their output. Pexpect allows your script to spawn a child application and control it as if a human were typing commands. [[Pexpect]] can be used for automating interactive applications such as ssh, ftp, passwd, telnet, etc. It can be used to a automate setup scripts for duplicating software package installations on different servers. It can be used for automated software testing. The Pexpect interface was designed to be easy to use.
+
+
+==Download==
+Download [http://sourceforge.net/projects/pexpect/ the current version]  from sourceforge site.
+
+===installing pexpect===
+# download pexpect-2.1.tar.gz
+# tar zxf pexpect-2.1.tar.gz
+# cd pexpect-2.1
+# python setup.py install do this as root
+
+===example===
+Under the pexpect-2.1 directory you should find the examples directory. This is the best way to learn to use Pexpect. See the descriptions of [http://pexpect.sourceforge.net/examples.html Pexpect Examples].
+
+===API document===
+* [http://pexpect.sourceforge.net/pexpect.html pexpect] This is the main module that you want.
+* [http://pexpect.sourceforge.net/pxssh.html pxssh] Pexpect SSH is an extension of 'pexpect.spawn' that specializes in SSH.
+
+the following are experimental extensions to Pexpect
+
+* [http://pexpect.sourceforge.net/fdpexpect.html fdpexpect] fdpexpect extension of 'pexpect.spawn' that uses an open file descriptor.
+* [http://pexpect.sourceforge.net/screen.html SCREEN] This represents a virtual 'screen'.
+* [http://pexpect.sourceforge.net/ANSI.html ANSI] This parses ANSI/VT-100 terminal escape codes.
+* [http://pexpect.sourceforge.net/FSM.html FSM] This is a finite state machine used by ANSI.
+
+==How to use in neo==
+
+===build package===
+Download [[BitBake recipe]] from [http://www.openembedded.org/repo/org.openembedded.dev/packages/python/python-pexpect_2.1.bb here]. Using mokomake tool train:
+
+* copy this bitbake recipe to python package folder
+ cp python-pexpect_2.1.bb $OMDIR/openembedded/packages/python
+* use bitbake to build pexpect
+ bitbake python-pexpect
+* it generates the package files to this folder
+ $OMDIR/build/tmp/deploy/glibc/ipk/armv4tpython-pexpect_2.1-r0_armv4t.ipk
+
+===installing===
+Using SCP to upload the ipk file to neo
+
+* install pexpect to card memory, reference from [http://wiki.openmoko.org/wiki/Ipkg#Installing_Packages_to_the_Memory_Card here]
+ ipkg install -d card armv4tpython-pexpect_2.1-r0_armv4t.ipk
+
+* solve the PYTHON path problem
+ ipkg files python-pexpect
+ ipkg files python-io
+ export PYTHONPATH="/media/card/ipkg/usr/lib/python2.5/site-packages/:/media/card/ipkg/usr/lib/python2.5/lib-dynload/:/media/card/ipkg/usr/lib/python2.5/"
+
+* verify the pexpect module
+ python -c "import pexpect"
+
+* some examples: 
+ child = pexpect.spawn('libgsmd-tool -m shell')
+ child.sendline('O')
+ child.expect(['Power-On','ERROR','OK'])
