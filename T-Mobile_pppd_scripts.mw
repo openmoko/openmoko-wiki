@@ -1,99 +1,44 @@
-I got this working using wap.voicestream.com.  internet2 keeps giving me "LCP terminated by peer (^K!)" after CHAP auth.
+I've got pppd working with T-Mobile again.  The files I'm using are below.
 
-Note to the above comment (2008-08-19 by Ryan Adams): I finally got internet2.voicestream.com working (on OM2008.8).  Initially, like the user above, I received "LCP terminated by peer (^K!)" after CHAP authentication.  It turns out this only happened when I dialed in to "99***2".  When I used "99***1" instead I was able to get all the way through without any errors.  I have the "T-Mobile Total Internet Add-on" plan and live around Seattle, WA.
 
 == /etc/ppp/peers/tmobile ==
-   # File: /etc/ppp/peers/tmobile
-   #
-   /dev/ttySAC0
-   115200
-   crtscts
-   lock
-   hide-password
-   defaultroute # set the default route
-   usepeerdns
-   holdoff 3
-   ipcp-accept-local
-   lcp-echo-failure 12
-   lcp-echo-interval 3
-   noauth
-   noipdefault
-   novj
-   novjccomp
-   replacedefaultroute
-   persist
-   debug
-   
-   connect "/usr/sbin/chat -v -f /etc/ppp/chatscripts/tmobile"
-   disconnect "/usr/sbin/chat -v -f /etc/ppp/chatscripts/tmobile-disconnect"
+/dev/ttySAC0
+115200
+defaultroute # set the default route
+usepeerdns
+crtscts 
+lock   
+noauth
+local 
+     
+connect "/usr/sbin/chat -v -f /etc/ppp/chatscripts/tmobile"
+disconnect "/usr/sbin/chat -v -f /etc/ppp/chatscripts/tmobile-disconnect"
 
-
-----
-This almost worked as is for me.  I simply had to remove the "115200" line.  I'm using T-Mobile in Denver, CO so I'm not sure if that's what caused the differences. - Dave  
 ----
 
 === /etc/ppp/chatscripts/tmobile ===
-  TIMEOUT 10
-  ABORT 'BUSY'
-  ABORT 'NO ANSWER'
-  ABORT 'ERROR'
-  SAY 'Starting GPRS connect script\n'
- 
-  ""'ATZ'
-  SAY 'Setting APN\n'
-  OK 'AT+CGDCONT=1,"IP","wap.voicestream.com"'
- 
-  ABORT 'NO CARRIER'
-  SAY 'Dialing...\n'
-  OK 'ATD*99***1#'
-  CONNECT 
+TIMEOUT 10
+ABORT 'BUSY'
+ABORT 'NO ANSWER'
+ABORT 'ERROR'
+SAY 'Starting GPRS connect script\n'
 
-----
-I was able to use "internet2.voicestream.com".  Once again, not sure if being in Denver caused the difference.  - Dave
-----
+""'ATZ'
+SAY 'Setting APN\n'
+OK 'AT+CGDCONT=1,"IP","internet2.voicestream.com"'
+
+ABORT 'NO CARRIER'
+SAY 'Dialing...\n'
+OK 'ATD*99***1#'
+CONNECT ''
+
+---
 
 === /etc/ppp/chatscripts/tmobile-disconnect ===
-  "" "\K"
-  "" "+++ATH0"
-  SAY "GPRS disconnected."
+"" "\K"
+"" "+++ATH0"
+SAY "GPRS disconnected."
 
-----
-
-=== /etc/ppp/chap-secrets ===
-  # client        server  secret                  IP addresses
-    *             *       ""                      *
-
-----
+---
 
 Modified from info found here: [http://www.yepthatsme.com/2004/11/09/ppp-chat-scripts-for-t-mobile-sony-ericsson-t610-gprs-via-bluetooth-with-debian/]
-
-----
-
-=== Failed negotiation ===
-    root@fic-gta01:~$ pppd nodetach call tmobile
-    Starting GPRS connect script
-    Setting APN
-    Dialing...
-    Serial connection established.
-    using channel 6
-    Using interface ppp0
-    Connect: ppp0 <--> /dev/ttySAC0
-    sent [LCP ConfReq id=0x1 <asyncmap 0x0> <magic 0x4e9abed> <pcomp> <accomp>]
-    rcvd [LCP ConfRej id=0x1 <magic 0x4e9abed>]
-    sent [LCP ConfReq id=0x2 <asyncmap 0x0> <pcomp> <accomp>]
-    rcvd [LCP ConfAck id=0x2 <asyncmap 0x0> <pcomp> <accomp>]
-    rcvd [LCP ConfReq id=0xb <asyncmap 0x0> <auth chap MD5> <pcomp> <accomp>]
-    sent [LCP ConfAck id=0xb <asyncmap 0x0> <auth chap MD5> <pcomp> <accomp>]
-    sent [LCP EchoReq id=0x0 magic=0x0]
-    rcvd [CHAP Challenge id=0xc <c034dedca83809689a0180da3a2f2016460304ca4e64a1>, name = ""]
-    sent [CHAP Response id=0xc <1c2a6e0f23afc550eeae08d33717b79c>, name = "fic-gta01"]
-    rcvd [LCP EchoRep id=0x0 magic=0x0]
-    rcvd [CHAP Success id=0xc ""]
-    CHAP authentication succeeded
-    sent [CCP ConfReq id=0x1 <deflate 15> <deflate(old#) 15>]
-    sent [IPCP ConfReq id=0x1 <addr 0.0.0.0> <ms-dns1 0.0.0.0> <ms-dns3 0.0.0.0>]
-    rcvd [LCP ProtRej id=0x4 80 fd 01 01 00 0c 1a 04 78 00 18 04 78 00]
-    rcvd [LCP TermReq id=0x7 0b 21]
-    LCP terminated by peer (^K!)
-
-[[Category:GPRS]]
