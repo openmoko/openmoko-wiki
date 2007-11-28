@@ -1,6 +1,6 @@
 I've seen some progress getting pppd working with T-Mobile again.  The files I'm using are below.
 
-NOTE: This isn't working reliably for me yet.  It worked one time.  Now it hangs gsmd and fails to connect.  
+NOTE: This isn't working reliably for me yet.  It worked one time.  Now it hangs gsmd and fails to connect.
 
 
 == /etc/ppp/peers/tmobile ==
@@ -9,7 +9,7 @@ NOTE: This isn't working reliably for me yet.  It worked one time.  Now it hangs
    defaultroute # set the default route
    usepeerdns
    crtscts 
-   lock   
+   #lock   # Killing lock made it come much closer to working.  The output of a failed negoatiation is below.
    noauth
    local 
      
@@ -44,3 +44,67 @@ NOTE: This isn't working reliably for me yet.  It worked one time.  Now it hangs
 ----
 
 Modified from info found here: [http://www.yepthatsme.com/2004/11/09/ppp-chat-scripts-for-t-mobile-sony-ericsson-t610-gprs-via-bluetooth-with-debian/]
+
+----
+
+=== Failed negotiation ===
+    root@fic-gta01:~$ pppd nodetach call tmobile
+    Starting GPRS connect script
+    Setting APN
+    Dialing...
+    Serial connection established.
+    using channel 1
+    Using interface ppp0
+    Connect: ppp0 <--> /dev/ttySAC0
+    sent [LCP ConfReq id=0x1 <asyncmap 0x0> <magic 0xef8076e> <pcomp> <accomp>]
+    rcvd [LCP ConfRej id=0x1 <magic 0xef8076e>]
+    sent [LCP ConfReq id=0x2 <asyncmap 0x0> <pcomp> <accomp>]
+    rcvd [LCP ConfAck id=0x2 <asyncmap 0x0> <pcomp> <accomp>]
+    rcvd [LCP ConfReq id=0x1 <asyncmap 0x0> <auth chap MD5> <pcomp> <accomp>]
+    No auth is possible
+    sent [LCP ConfRej id=0x1 <auth chap MD5>]
+    rcvd [LCP ConfReq id=0x2 <asyncmap 0x0> <pcomp> <accomp>]
+    sent [LCP ConfAck id=0x2 <asyncmap 0x0> <pcomp> <accomp>]
+    sent [CCP ConfReq id=0x1 <deflate 15> <deflate(old#) 15>]
+    sent [IPCP ConfReq id=0x1 <compress VJ 0f 01> <addr 0.0.0.0> <ms-dns1 0.0.0.0> <ms-dns3 0.0.0.0>]
+    rcvd [CHAP Challenge id=0x1 <a3656462453129d4363dc6cfab4174bb>, name = ""]
+    rcvd [CHAP Challenge id=0x2 <8865b0475bc5c4c42e7114e58d7a9535c45898ed51ee1e560a41e1e30ef81f0a6d9325e6976b9f8e856ea133a99674fb962e21a16fc4bfc911>, name = ""]
+    sent [CCP ConfReq id=0x1 <deflate 15> <deflate(old#) 15>]
+    sent [IPCP ConfReq id=0x1 <compress VJ 0f 01> <addr 0.0.0.0> <ms-dns1 0.0.0.0> <ms-dns3 0.0.0.0>]
+    rcvd [CHAP Challenge id=0x3 <7d2400bb6f4812ff194cde3fbc27e276>, name = ""]
+    sent [CCP ConfReq id=0x1 <deflate 15> <deflate(old#) 15>]
+    sent [IPCP ConfReq id=0x1 <compress VJ 0f 01> <addr 0.0.0.0> <ms-dns1 0.0.0.0> <ms-dns3 0.0.0.0>]
+    rcvd [CHAP Challenge id=0x4 <c6768eabef749e56d8a4e38f86ea80fbe72ff684ae0f61e4f24778f386dc42b1160c991306f6608e0a088364852cb3b1a3b2>, name = ""]
+    sent [CCP ConfReq id=0x1 <deflate 15> <deflate(old#) 15>]
+    sent [IPCP ConfReq id=0x1 <compress VJ 0f 01> <addr 0.0.0.0> <ms-dns1 0.0.0.0> <ms-dns3 0.0.0.0>]
+    rcvd [CHAP Challenge id=0x5 <3435fc71de4feb4d1da30d8ae59c83ee833ab32c21b0b3dc18bf703ef9d1a2af59>, name = ""]
+    sent [CCP ConfReq id=0x1 <deflate 15> <deflate(old#) 15>]
+    sent [IPCP ConfReq id=0x1 <compress VJ 0f 01> <addr 0.0.0.0> <ms-dns1 0.0.0.0> <ms-dns3 0.0.0.0>]
+    rcvd [CHAP Challenge id=0x6 <70e760dce2f810770a0656cff2c7d38344ba6742bc26812b4ed929e8169eca8404>, name = ""]
+    sent [CCP ConfReq id=0x1 <deflate 15> <deflate(old#) 15>]
+    sent [IPCP ConfReq id=0x1 <compress VJ 0f 01> <addr 0.0.0.0> <ms-dns1 0.0.0.0> <ms-dns3 0.0.0.0>]
+    rcvd [CHAP Challenge id=0x7 <c11044afa6fa6e6e5d28725adbd741c1b8373c9979c25d3c9b6028e45f3c4fe4596428acb623cf7a501e1be1733141fb6d074a6dd87b361fa6b2eeb8f1f5>, name = ""]
+    sent [CCP ConfReq id=0x1 <deflate 15> <deflate(old#) 15>]
+    sent [IPCP ConfReq id=0x1 <compress VJ 0f 01> <addr 0.0.0.0> <ms-dns1 0.0.0.0> <ms-dns3 0.0.0.0>]
+    rcvd [CHAP Challenge id=0x8 <dc804fa72518eac6e2892a04927486de1fdd2b00da744f713aa355805456a66e1a8e49d853a548eb5e5fc346a6b4d1ade4601a7418>, name = ""]
+    sent [CCP ConfReq id=0x1 <deflate 15> <deflate(old#) 15>]
+    sent [IPCP ConfReq id=0x1 <compress VJ 0f 01> <addr 0.0.0.0> <ms-dns1 0.0.0.0> <ms-dns3 0.0.0.0>]
+    rcvd [CHAP Challenge id=0x9 <35a645e8c2f8ef68477055dccbd56f3334d5a62a61f9550d0749044e4cbe5ec7256c>, name = ""]
+    sent [CCP ConfReq id=0x1 <deflate 15> <deflate(old#) 15>]
+    sent [IPCP ConfReq id=0x1 <compress VJ 0f 01> <addr 0.0.0.0> <ms-dns1 0.0.0.0> <ms-dns3 0.0.0.0>]
+    rcvd [CHAP Challenge id=0xa <cf706cc1fed18a47c04db4af9ca71d71>, name = ""]
+    sent [CCP ConfReq id=0x1 <deflate 15> <deflate(old#) 15>]
+    sent [IPCP ConfReq id=0x1 <compress VJ 0f 01> <addr 0.0.0.0> <ms-dns1 0.0.0.0> <ms-dns3 0.0.0.0>]
+    rcvd [LCP TermReq id=0x1 cf 0a]
+    LCP terminated by peer (M-O^J)
+    sent [LCP TermAck id=0x1]
+    Connection terminated.
+    Starting GPRS connect script
+    Setting APN
+    Dialing...
+    Serial connection established.
+    using channel 2
+    Using interface ppp0
+    Connect: ppp0 <--> /dev/ttySAC0
+    tcflush failed: Bad file descriptor
+    tcsetattr: Invalid argument (line 1003)
