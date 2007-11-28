@@ -4,17 +4,31 @@ NOTE: This isn't working reliably for me yet.  It worked one time.  Now it hangs
 
 
 == /etc/ppp/peers/tmobile ==
-   /dev/ttySAC0
-   115200
-   defaultroute # set the default route
-   usepeerdns
-   crtscts 
-   #lock   # Killing lock made it come much closer to working.  The output of a failed negoatiation is below.
-   noauth
-   local 
-     
-   connect "/usr/sbin/chat -v -f /etc/ppp/chatscripts/tmobile"
-   disconnect "/usr/sbin/chat -v -f /etc/ppp/chatscripts/tmobile-disconnect"
+    # File: /etc/ppp/peers/tmobile
+    #
+    /dev/ttySAC0
+    115200
+    crtscts
+    lock
+    hide-password
+    defaultroute # set the default route
+    usepeerdns
+    holdoff 3
+    ipcp-accept-local
+    lcp-echo-failure 12
+    lcp-echo-interval 3
+    noauth
+    noipdefault
+    novj
+    novjccomp
+    replacedefaultroute
+    persist
+    debug
+
+    connect "/usr/sbin/chat -v -f /etc/ppp/chatscripts/tmobile"
+    disconnect "/usr/sbin/chat -v -f /etc/ppp/chatscripts/tmobile-disconnect"
+
+
 
 ----
 
@@ -59,22 +73,23 @@ Modified from info found here: [http://www.yepthatsme.com/2004/11/09/ppp-chat-sc
     Setting APN
     Dialing...
     Serial connection established.
-    using channel 4
+    using channel 6
     Using interface ppp0
     Connect: ppp0 <--> /dev/ttySAC0
-    sent [LCP ConfReq id=0x1 <asyncmap 0x0> <magic 0x90eb7f73> <pcomp> <accomp>]
-    rcvd [LCP ConfRej id=0x1 <magic 0x90eb7f73>]
+    sent [LCP ConfReq id=0x1 <asyncmap 0x0> <magic 0x4e9abed> <pcomp> <accomp>]
+    rcvd [LCP ConfRej id=0x1 <magic 0x4e9abed>]
     sent [LCP ConfReq id=0x2 <asyncmap 0x0> <pcomp> <accomp>]
     rcvd [LCP ConfAck id=0x2 <asyncmap 0x0> <pcomp> <accomp>]
-    rcvd [LCP ConfReq id=0x7 <asyncmap 0x0> <auth chap MD5> <pcomp> <accomp>]
-    sent [LCP ConfAck id=0x7 <asyncmap 0x0> <auth chap MD5> <pcomp> <accomp>]
-    rcvd [CHAP Challenge id=0xa <fb0f94f8e4ec158ea22337324c11ccd9e5f0d6285629e69e2d5d35811831848a>, name = ""]
-    sent [CHAP Response id=0xa <64c6f1a9dc27e14d701ae80f953cb22b>, name = "fic-gta01"]
-    rcvd [CHAP Success id=0xa ""]
+    rcvd [LCP ConfReq id=0xb <asyncmap 0x0> <auth chap MD5> <pcomp> <accomp>]
+    sent [LCP ConfAck id=0xb <asyncmap 0x0> <auth chap MD5> <pcomp> <accomp>]
+    sent [LCP EchoReq id=0x0 magic=0x0]
+    rcvd [CHAP Challenge id=0xc <c034dedca83809689a0180da3a2f2016460304ca4e64a1>, name = ""]
+    sent [CHAP Response id=0xc <1c2a6e0f23afc550eeae08d33717b79c>, name = "fic-gta01"]
+    rcvd [LCP EchoRep id=0x0 magic=0x0]
+    rcvd [CHAP Success id=0xc ""]
     CHAP authentication succeeded
     sent [CCP ConfReq id=0x1 <deflate 15> <deflate(old#) 15>]
-    sent [IPCP ConfReq id=0x1 <compress VJ 0f 01> <addr 0.0.0.0> <ms-dns1 0.0.0.0> <ms-dns3 0.0.0.0>]
-    rcvd [LCP ProtRej id=0x2 80 fd 01 01 00 0c 1a 04 78 00 18 04 78 00]
-    rcvd [LCP TermReq id=0x3 0b 21]
+    sent [IPCP ConfReq id=0x1 <addr 0.0.0.0> <ms-dns1 0.0.0.0> <ms-dns3 0.0.0.0>]
+    rcvd [LCP ProtRej id=0x4 80 fd 01 01 00 0c 1a 04 78 00 18 04 78 00]
+    rcvd [LCP TermReq id=0x7 0b 21]
     LCP terminated by peer (^K!)
-    sent [LCP TermAck id=0x3]
