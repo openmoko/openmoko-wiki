@@ -1,0 +1,44 @@
+I've got pppd working with T-Mobile again.  The files I'm using are below.
+
+
+== /etc/ppp/peers/tmobile ==
+/dev/ttySAC0
+115200
+defaultroute # set the default route
+usepeerdns
+crtscts 
+lock   
+noauth
+local 
+     
+connect "/usr/sbin/chat -v -f /etc/ppp/chatscripts/tmobile"
+disconnect "/usr/sbin/chat -v -f /etc/ppp/chatscripts/tmobile-disconnect"
+
+----
+
+=== /etc/ppp/chatscripts/tmobile ===
+TIMEOUT 10
+ABORT 'BUSY'
+ABORT 'NO ANSWER'
+ABORT 'ERROR'
+SAY 'Starting GPRS connect script\n'
+
+""'ATZ'
+SAY 'Setting APN\n'
+OK 'AT+CGDCONT=1,"IP","internet2.voicestream.com"'
+
+ABORT 'NO CARRIER'
+SAY 'Dialing...\n'
+OK 'ATD*99***1#'
+CONNECT ''
+
+---
+
+=== /etc/ppp/chatscripts/tmobile-disconnect ===
+"" "\K"
+"" "+++ATH0"
+SAY "GPRS disconnected."
+
+---
+
+Modified from info found here: [http://www.yepthatsme.com/2004/11/09/ppp-chat-scripts-for-t-mobile-sony-ericsson-t610-gprs-via-bluetooth-with-debian/]
