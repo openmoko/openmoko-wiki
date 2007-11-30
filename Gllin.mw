@@ -69,3 +69,74 @@ root@fic-gta01:/chroot$ chroot /chroot/ gllin -low 1<br />
 root@fic-gta01:/chroot$ chroot /chroot/ gllin -periodic 1<br />
 
 More infos and tricks are here: [[Manually_using_GPS]].
+
+== gllin options ==
+
+The /home/root/gllin file installed by the new (legitimate!) .ipk package is really just a shell script.  You can modify the options passed to gllin.real by editing that script.  Here are the options:
+<pre>
+Usage:
+
+-help                    Help
+-board <type>            Defines board type    Ex: '-board matchbox'
+                         supported: matchbox, trident
+-com <com port>          GPS com port;         Ex: '-com com6'
+-baud <baud rate>        Set baud rate;        Ex: '-baud 115200'
+-rft <RF type>           Set RF type;          Ex: '-rft RF_LN22OUT'
+-freq <freq plan> | ?    set frequency plan for GPS or show the list of all available plans
+                         Ex: '-freq FRQ_PLAN_OCXO_10000'
+                         Ex: '-freq ?' -- Show all available plans
+-g <URL>                 SUPL Server URL or IP address;
+                         Ex: '-g 216.15.9.46'
+-p <port>                SUPL Server port number;
+                         Ex: '-p 9118'
+-udp <port>              Local UDP port to send NMEA to.
+                         '-udp 6000'      [default]
+-gsm_cell <cell ID>      set GSM Cell ID information
+                         cell ID has the following format: '<MCC>.<MNC>.<LAC>.<CI>'
+                         Where:
+                               MCC - Mobile Country Code
+                               MNC - Mobile Network Code
+                               LAC - Location Area Code
+                               CI  - Cell Identification
+                         Ex: '-gsm_cell 310.170.367.25732'
+-set_assisted_off        disable SET assisted capability
+-set_based_off           disable SET based capability
+-msisdn <MSISDN>         set value for MSISDN (international phone number) as SET id
+                         Ex: '-msisdn 14081234567'
+-nai <nai>               specify Network Access Identifier as SET id
+                         Ex: '-nai 12345@mywebsite.com'
+-periodic <s>            make periodic request every s second (-1 to 64)
+                         -1  single shot: perform one fix, then quit
+                          0       native: perform fixes as fast as possible
+                         <s>       timed: report a position every <s> seconds
+                                          where <s> is 1 to 64
+-recover                 recover GLLIN after signaled exit
+-low [<count>]           low level test.  Default <count> is 1
+-low_debug               Low level debug ON
++low_debug               Low level debug OFF
+-train <count>           Send train data <count> times
++pty | -pty              Enable or disable NMEA output to pty "/tmp/nmeaPTY"
+                         Default is off [-pty]
++np | -np                Enable or disable NMEA output to named pipe "/tmp/nmeaNP"
+                         Default is on [-np]
++nmea | -nmea            Enable or disable NMEA output to log file
+                         Default is off [-nmea]
++daemon | -daemon        Become a daemon (or not)
+                         Default is -daemon
+-a2 | -a3 | -a0          Select a GTA01 board revision.  Default is a3
+-batch <st> <n> <fix>    perform batch test of <n> starts of type <st>
+                         <st> is hot, warm, cold, or SNR.
+                         Each start has <fix> fixes.
+-i                       start GLLIN command line
++pnd                     optimize for PND
+-pnd                     look for low signal strength signals
++sim                     using simulator so don't use almanac
+-sim                     not using simulator
+SNR                      manufacturing SNR test mode
+hot                      hot start [default]
+warm                     warm start
+cold                     cold start
+-v[n]                    Report GLLIN version string.
+                         n is 1234 to report selected versions.
+ version 1.1.7
+</pre>
