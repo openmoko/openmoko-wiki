@@ -142,3 +142,17 @@ cold                     cold start
                          n is 1234 to report selected versions.
  version 1.1.7
 </pre>
+
+Some notes:
+
+The listed defaults don't seem to be correct.  By default it DOES generate NMEA data in log files.  These log files are on your flash (/home/root/gllin/log/*) and are written to once every second.  Ridiculous!
+
+To stop this, add the option "-nmea" to the second of the two gllin.real commands in the startup script.
+
+But note further that the startup script also spawns a command to cat the output of the /tmp/nmeaNP named pipe to a gzipped file in /home/root.  If you want this to stop, you can do one of two things:
+
+  * cat to /dev/null instead of | gzip >> file
+
+  * add "-np" to the second gllin.real command
+
+You can't just take the cat out of the script, because with the named pipe activated, gllin will QUIT if it doesn't see anybody taking the output from the pipe.  To keep it going, either open that pipe or turn it off.
