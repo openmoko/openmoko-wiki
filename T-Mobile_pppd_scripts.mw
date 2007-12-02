@@ -2,62 +2,62 @@ I got this working using wap.voicestream.com.  internet2 keeps giving me "LCP te
 
 
 == /etc/ppp/peers/tmobile ==
-    # File: /etc/ppp/peers/tmobile
-    #
-    /dev/ttySAC0
-    115200
-    crtscts
-    lock
-    hide-password
-    defaultroute # set the default route
-    usepeerdns
-    holdoff 3
-    ipcp-accept-local
-    lcp-echo-failure 12
-    lcp-echo-interval 3
-    noauth
-    noipdefault
-    novj
-    novjccomp
-    replacedefaultroute
-    persist
-    debug
-    
-    connect "/usr/sbin/chat -v -f /etc/ppp/chatscripts/tmobile"
-    disconnect "/usr/sbin/chat -v -f /etc/ppp/chatscripts/tmobile-disconnect"
+# File: /etc/ppp/peers/tmobile
+#
+/dev/ttySAC0
+115200
+crtscts
+lock
+hide-password
+defaultroute # set the default route
+usepeerdns
+holdoff 3
+ipcp-accept-local
+lcp-echo-failure 12
+lcp-echo-interval 3
+noauth
+noipdefault
+novj
+novjccomp
+replacedefaultroute
+persist
+debug
+
+connect "/usr/sbin/chat -v -f /etc/ppp/chatscripts/tmobile"
+disconnect "/usr/sbin/chat -v -f /etc/ppp/chatscripts/tmobile-disconnect"
 
 
 
 ----
 
 === /etc/ppp/chatscripts/tmobile ===
-   TIMEOUT 10
-   ABORT 'BUSY'
-   ABORT 'NO ANSWER'
-   ABORT 'ERROR'
-   SAY 'Starting GPRS connect script\n'
+TIMEOUT 10
+ABORT 'BUSY'
+ABORT 'NO ANSWER'
+ABORT 'ERROR'
+SAY 'Starting GPRS connect script\n'
 
-   ""'ATZ'
-   SAY 'Setting APN\n'
-   OK 'AT+CGDCONT=1,"IP","wap.voicestream.com"'
+""'ATZ'
+SAY 'Setting APN\n'
+OK 'AT+CGDCONT=1,"IP","wap.voicestream.com"'
 
-   ABORT 'NO CARRIER'
-   SAY 'Dialing...\n'
-   OK 'ATD*99***1#'
-   CONNECT ''
+ABORT 'NO CARRIER'
+SAY 'Dialing...\n'
+OK 'ATD*99***1#'
+CONNECT ''
 
 ----
 
 === /etc/ppp/chatscripts/tmobile-disconnect ===
-   "" "\K"
-   "" "+++ATH0"
-   SAY "GPRS disconnected."
+"" "\K"
+"" "+++ATH0"
+SAY "GPRS disconnected."
 
 ----
 
 === /etc/ppp/chap-secrets ===
-   # client        server  secret                  IP addresses
-     *             *       ""                      *
+# client        server  secret                  IP addresses
+  *             *       ""                      *
 
 ----
 
