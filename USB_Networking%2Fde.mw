@@ -25,6 +25,35 @@ Danach erstellen Sie die datei /etc/network/if-up.d/08setupdns, die folgende Zei
 Auf diese Weise wird diese Datei vom PPP-Paket korrekt behandelt, wenn eine Einwahl per GPRS stattfindet.
 
 
+== Routing ==
+
+Sie benötigen eine zusätzliche Route für die Verbindung ins Internet. Diese verbindung kann von Ihrem PC geroutet werden (siehe unten), wenn der PC das Standardrouting-Ziel ist. Sie erreichen dies durch das Hinzufügen von
+
+ gateway 192.168.0.200
+
+zu Ihrer /etc/network/interfaces im Abschnitt usb0.
+
+= Desktop-Seite =
+
+== Manuelle Methode ==
+
+Nach dem Verbinden mit dem Gerät laden Sie das Modul usbnet und konfigurieren Sie die Schnittstelle usb0 (als root):
+<pre>
+ifconfig usb0 192.168.0.200 netmask 255.255.255.0
+</pre>
+Wenn Ihre eth0 Schnittstelle sich im selben 'Bereich' (z.B. 192.168.0.105) befinet, dann können Sie folgendes tun:
+1. Neo anpingen:
+ # ping -I usb0 192.168.0.202
+2. Route zum Neo hinzufügen:
+ # /sbin/route add -host 192.168.0.202/32 dev usb0
+3. Einloggen auf dem Neo:
+ # ssh root@192.168.0.202
+
+
+Wenn Sie keine notwendigen Module zum Erzeugen von usb0 haben, stellen Sie sicher, dass folgende Kernel Optionen aktiviert sind:
+* CONFIG_USB_USBNET
+* CONFIG_USB_NET_CDCETHER
+Beide Optionen sind unter Device Drivers -> USB support -> USB Network Adapters zu finden. Für weitere Informationen siehe [http://www.linux-usb.org/usbnet/ usbnet driver homepage].
 
 <span id="bottom"></span> 
 {{Languages|USB Networking}}
