@@ -185,11 +185,29 @@ und z.B. der Notebook funktioniert als DNS Proxy und leitet alle Anfragen basier
 
 '''Starten Sie den DNS Proxy nur auf der Schnittstelle usb0, um andere Netzwerkverbindungen nicht zu unterbrechen.'''
 
-=== Proxying with dnrd ===
+=== Weiterleiten mit dnrd ===
 
 The script is designed to use [http://dnrd.sourceforge.net/ dnrd] as the dns proxy. The [http://buildhost.automated.it/gta01 script] and a copy of [http://buildhost.automated.it/dnrd-2.20.3.tar.gz dnrd] are available from my site. The script also performs the initial setup of the connection as per the [[USB_Networking#Manual_method]] above.
 
 Der Script ist für die Nutzung von [http://dnrd.sourceforge.net/ dnrd] als DNS Proxy entwickelt. Der [http://buildhost.automated.it/gta01 Script] ist eine Kopie von [http://buildhost.automated.it/dnrd-2.20.3.tar.gz dnrd]. Der Script führt auch die Ersteinrichtung für die Verbindung mit [[USB_Networking/de#Manuelle_Methode]] oben.
+
+=== Weiterleiten mit einem UDP-Forwarder ===
+
+Eine weitere einfache Installation ist mit einem UDP-Forwarder von http://www.tapor.com/udpf/ mit dem folgenden Kommando möglich:
+
+ udpf-elf\
+        -p=53\
+        -f=`cat /etc/resolv.conf|awk '$1 == "nameserver"{print $2; exit(0);}'`:53
+
+=== Weiterleitung mit Iptables ===
+Es ist möglich DNS Anfragen mit Iptables und DNAT weiterzuleiten:
+
+ iptables -t nat -A PREROUTING -p tcp -s 192.168.0.202 -d 192.168.0.200 --dport domain -j DNAT --to-destination 192.168.0.1
+ iptables -t nat -A PREROUTING -p udp -s 192.168.0.202 -d 192.168.0.200 --dport domain -j DNAT --to-destination 192.168.0.1
+
+Dabei ist <tt>192.168.0.1</tt> die IP Adresse des Heimatgateways (Routers). Dies ist die einfachste Methode, aber sie ist nicht empfehlenswert, wenn Sie eine direkte Verbindung zum Internet haben und die DNS Server ihres ISP ändern können. Außerdem hat diese Methode keine Lastverteilung.
+
+
 
 
 <span id="bottom"></span> 
