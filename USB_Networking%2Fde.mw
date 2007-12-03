@@ -100,15 +100,76 @@ LABEL="net_start"
 
 # Bring devices up and down only if they're marked auto.
 # Use start-stop-daemon so we don't wait on dhcp
-ACTION=="add",          RUN+="/sbin/start-stop-daemon --start --background --pidfile /var/run/network/bogus --startas /sbin/ifup -- --allow auto $env{INTERFACE}"
+ACTION=="add",          RUN+="/sbin/start-stop-daemon --start --background --pidfile /var/run/network/bogus \
+ --startas /sbin/ifup -- --allow auto $env{INTERFACE}"
 
 LABEL="net_end"
 
-ACTION=="remove",       RUN+="/sbin/start-stop-daemon --start --background --pidfile /var/run/network/bogus --startas /sbin/ifdown -- --allow auto $env{INTERFACE}"
+ACTION=="remove",       RUN+="/sbin/start-stop-daemon --start --background --pidfile /var/run/network/bogus \ 
+ --startas /sbin/ifdown -- --allow auto $env{INTERFACE}"
 </pre>
 
 Der Fehler besteht darun, dass LABEL="net_end" an falscher Position steht.
 
+=== openSuSE ===
+/etc/sysconfig/network/ifcfg-usb0
+ # USB configuration for PDAs (openmoko)
+ IPADDR=192.168.0.200
+ NETMASK=255.255.255.0
+ STARTMODE=onboot
+
+=== Fedora (getestet unter FC8) ===
+/etc/sysconfig/network-scripts/ifcfg-usb0
+<pre>
+# USB configuration for PDAs (openmoko)
+# from http://www.handhelds.org/moin/moin.cgi/UsbNet
+DEVICE=usb0
+BOOTPROTO=none
+IPADDR=192.168.0.200
+NETMASK=255.255.255.0
+ONBOOT=yes
+</pre>
+
+=== Red Hat oder ähnliche ===
+Editieren Sie /etc/sysconfig/network-scripts/net.hotplug:
+
+Nach diesem Kommando
+<pre>
+    case $INTERFACE in
+	# interfaces that are registered after being "up" (?)
+</pre>
+fügen Sie hinzu
+<pre>
+	usb0)
+		ifconfig usb0 192.168.0.200 netmask 255.255.255.0
+		route add 192.168.0.202 usb0
+		iptables -I INPUT 1 -s 192.168.0.202 -j ACCEPT
+		iptables -I OUTPUT 1 -s 192.168.0.200 -j ACCEPT
+                iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
+                echo 1 > /proc/sys/net/ipv4/ip_forward
+		exit 0
+	;;
+</pre>
+
+=== Gentoo ===
+* Öffnen Sie /etc/conf.d/net und fügen Sie hinzu:
+ # Neo1973
+ config_usb0=( "192.168.0.200 netmask 255.255.255.0" )
+ routes_usb0=( "192.168.0.202/32 via 192.168.0.200" )
+* Erzeugen Sie einen neuen init Script:
+ cd /etc/init.d
+ ln -s net.lo net.usb0
+* Erzeugen Sie iptables Einträge:
+ iptables -I INPUT 1 -s 192.168.0.202 -j ACCEPT
+ iptables -I OUTPUT 1 -s 192.168.0.200 -j ACCEPT
+ iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
+* Speichern Sie das
+ /etc/init.d/iptables save
+* Wenn Sie möchten, dass Routing standardmäßig aktiviert wird:
+ rc-update add iptables default
+
+=== MacOS X ===
+Sehen Sie [[MacOS_X#USB_Networking|USB Netzwerk Abschnitt im MacOS X Artikel]].
 
 
 
