@@ -87,6 +87,31 @@ iface usb0 inet static
         down iptables -D POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24 &
 </pre>
 
+Wenn Sie das Kommando "echo 1 > /proc/..." manuell ausführen, könnte sudo nicht ausreichen, denn das Kommando sudo muss unter der Shell bash ausgeführt werden.
+
+Ubuntu Fiesty und Gusty haben offenbahr einen Fehler, dass ifdown nicht ausgeführt wird, solange die Schnittstelle "unplugged" ist. Das bedeutet, dass es nur dann funktioniert, wenn das System neu gebootet wird.
+
+Man kann die Datei /etc/udev/rules.d/85-ifupdown.rules patchen, indem man zwei Zeilen am Ende der Datei editiert:
+<pre>
+SUBSYSTEM=="net", DRIVERS=="?*", GOTO="net_start"
+GOTO="net_end"
+
+LABEL="net_start"
+
+# Bring devices up and down only if they're marked auto.
+# Use start-stop-daemon so we don't wait on dhcp
+ACTION=="add",          RUN+="/sbin/start-stop-daemon --start --background --pidfile /var/run/network/bogus --startas /sbin/ifup -- --allow auto $env{INTERFACE}"
+
+LABEL="net_end"
+
+ACTION=="remove",       RUN+="/sbin/start-stop-daemon --start --background --pidfile /var/run/network/bogus --startas /sbin/ifdown -- --allow auto $env{INTERFACE}"
+</pre>
+
+Der Fehler besteht darun, dass LABEL="net_end" an falscher Position steht.
+
+
+
+
 
 <span id="bottom"></span> 
 {{Languages|USB Networking}}
