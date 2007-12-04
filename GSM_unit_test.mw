@@ -1,14 +1,11 @@
-GSM unit test is for testing the interactions between [http://wiki.openmoko.org/wiki/Gsmd#libgsmd-tool libgsmd-tool] and [http://wiki.openmoko.org/wiki/Gsmd gsmd].  Here is a [[Python]] script to execute commands via libgsmd-tool.  We can write our own test cases to let GSM modem execute AT commands automatically.  It allows us to verify [[GSM]] basic functions, such like making phone calls, sending SMS, or registering to the network.
+GSM unit test is for testing the interactions between [http://wiki.openmoko.org/wiki/Gsmd#libgsmd-tool libgsmd-tool] and [http://wiki.openmoko.org/wiki/Gsmd gsmd].  Here is a [Python] script to execute commands via libgsmd-tool.  We can write our own test cases to let GSM modem execute AT commands automatically.  It allows us to verify GSM basic functions, such like making phone calls, sending SMS, or registering to the network.
 
 This python script is based on [http://wiki.openmoko.org/wiki/Pexpect Python Expect].  Pexpect is a pure Python module for spawning child applications; controlling them; and responding to expected patterns in their output.  We use this module to spawn [libgsmd-tool] and then can send commands to GSM modem via gsmd.
 
 == How to use this python script ==
 
-* python script  [[http://people.openmoko.org/erin_yueh/UnitTestv2.py  1]]
-* sample test case  [[http://people.openmoko.org/erin_yueh/casev1 2]]
-* register the network test case [[http://cs.nyu.edu/~wcy203/RegistertoNetwork 3]]
-* dial out test case [[http://people.openmoko.org/erin_yueh//DialOut 4]]
-* send/receive SMS test case  [[http://people.openmoko.org/erin_yueh/SendReceiveSMS 5]]
+  code is [[ here]]
+ sample test case is [[here]]
 
   usage:  python UnivTestv1.py  -t  casename  -c  libgsmd-tool  -m  shell
   -t :  testcase file
@@ -20,9 +17,10 @@ This python script is based on [http://wiki.openmoko.org/wiki/Pexpect Python Exp
 ==== text format ==== 
  it should be written as below: 
  
- C:r 
- E:Register,error 
- E:Netreg registered(home network),OK,error
+ <b>C:r </b>['C:' means it's a command]
+ <b>E:Register,error </b>['E:' means it's an expect list]
+ <b>E:Netreg registered(home network),error,OK </b>['E:' means it's an expect list]
+
  From above case, it sends 'r' command to libgsmd-tool and it tries to register the network.
 
 ==== real output from libgsmd-tool ====
@@ -37,18 +35,14 @@ This python script is based on [http://wiki.openmoko.org/wiki/Pexpect Python Exp
 ==== how to write expect list to match the result ====
 From above real output from libgsmd-tool, it's very easy to detect the expect behavior. The first expect, it prints the command descriptions. The second expect, we can use some keywords like 'Netreg registered' for this case.
 
-* use ',' for the delimiter 
+==== Always put the most matched one on the first element ====
+There can be a lot of matched elements in an expect list. For this python script, please put the most matched element on the expect list. 
 
-* always put the most matched one on the first element: There can be a lot of matched elements in an expect list.  Put this list before using 'error'
+==== Append .EOF and .TIMEOUT elements to the  expect list ====
+When it reads the second expect line, it appends these two more elements to the list. 
 
-* append .EOF and .TIMEOUT elements to the expect list: When it reads the second expect line, it appends these two more elements to the list. 
+==== How to know it's failed or passed ====
+After sending a command, it will print <b>'correct'</b> if it's passed.  If it's failed, it will print <b>'Timeout'</b> on the screen
 
-* how to know it's failed or passed:  there are 4 cases
-# correct: passed
-# error: failed
-# EOF: failed
-# timeout: failed
-
-* script log: It also stores the session log from 'libgsmd-tool', and the default file name is 'script.log'.
-
-[[Category:Test]]
+==== Script log ====
+It also stores the session log from 'libgsmd-tool', and the default file name is 'script.log'.
