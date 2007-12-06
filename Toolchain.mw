@@ -37,23 +37,21 @@ Finally, everytime you want to use this toolchain, you need to alter some enviro
 
 = Using the toolchain to build a sample project =
 
-First, download the sample project and extract it into your filesystem:
+In your home directory:
 
- cd ~/sources
- wget http://downloads.openmoko.org/development/openmoko-Sample-Project-20071130.tar.bz2
+ cp -r /usr/local/openmoko/arm/share/openmoko-sample2 ~/
+ . /usr/local/openmoko/arm/setup-env
+ om-conf openmoko-sample2
+ <modify it if you want and make>
+ om-make-ipkg openmoko-sample2
 
- mkdir ~/coding
- cd ~/coding
- tar xjvf ~/sources/openmoko-Sample-Project-20071130.tar.bz2
+Now you got openmoko-sample2_0.1_armv4t.ipk , you can `scp' it to your
+neo and install it:
 
-Since this is the first time you configure the project, you need to call <tt>./autogen.sh</tt> instead of the usual <tt>./configure</tt> to configure your sources.
+ scp openmoko-sample2_0.1_armv4t.ipk root@192.168.0.202:
+ ssh root@192.168.0.202 ipkg install openmoko-sample2_0.1_armv4t.ipk
 
- cd ~/coding/openmoko-Sample-Project-20071130
- ./autogen.sh --host=arm-angstrom-linux-gnueabi \
-              --target=arm-angstrom-linux-gnueabi \
-              --prefix=/usr/local/openmoko/target/sample
-
-You can then call <tt>make install</tt> to compile the sourcetree and install it into the configured prefix.
+If you want to install this project on host for staging usage later, a shared library, for example, you can then call <tt>make install</tt> to install it into the configured prefix.
 
  make install
 
