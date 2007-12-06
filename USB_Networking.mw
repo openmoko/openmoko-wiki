@@ -158,6 +158,20 @@ add
  /etc/init.d/iptables save
 * If you want the routing by default:
  rc-update add iptables default
+* You must also inform the kernel, to start forwarding.  One way to automate this is to create /etc/conf.d/net.usb0 as follows
+ 
+ preup() {
+        echo 1 > /proc/sys/net/ipv4/ip_forward
+        return 0
+ }
+ 
+ postdown() {
+        echo 0 > /proc/sys/net/ipv4/ip_forward
+        return 0
+ }
+
+This way, packet forwarding will be turned on when Neo is plugged in, and off when it's not.
+
 === MacOS X ===
 See the [[MacOS_X#USB_Networking|USB Networking section in the MacOS X article]].
 
