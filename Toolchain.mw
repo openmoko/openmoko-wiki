@@ -43,6 +43,15 @@ In your home directory:
  . /usr/local/openmoko/arm/setup-env
  om-conf openmoko-sample2
  <modify it if you want and make>
+
+If you want to install this project on host for staging usage later, a shared library, for example, you can then call <tt>make install</tt> to install it into the configured prefix.
+
+ make install
+
+== Packaging your application ==
+
+We have included a script to make an ipkg out of your application. 
+
  om-make-ipkg openmoko-sample2
 
 Now you got openmoko-sample2_0.1_armv4t.ipk , you can `scp' it to your
@@ -51,13 +60,26 @@ neo and install it:
  scp openmoko-sample2_0.1_armv4t.ipk root@192.168.0.202:
  ssh root@192.168.0.202 ipkg install openmoko-sample2_0.1_armv4t.ipk
 
-If you want to install this project on host for staging usage later, a shared library, for example, you can then call <tt>make install</tt> to install it into the configured prefix.
+Note that while you can redistribute the generated ipkg, be aware that this is a bare-bones ipk that contains no further information, i.e. you will lack library dependencies.
 
- make install
+You could supply the version number, a description, and an author / contacts string in a control file if you know how to use it:
 
-= Copying the sample project to the device and run it =
+ om-make-ipkg myapp myapp_control
 
-Once <tt>make install</tt> finished successfully, your binaries and data will be found in /usr/local/openmoko/target/sample. You can now copy these onto the device (i.e. over USB ethernet or with an SD card) and run them there.
+A template of myapp_control:
+
+ Package: $appname
+ Version: 0.1
+ Description: package built by openmoko toolchain
+ Section: openmoko/applications
+ Priority: optional
+ Maintainer: $USER
+ Architecture: armv4t
+ Homepage: http://www.openmoko.org/
+ Depends: 
+ Source: ${SRC}
+
+{{todo|hint how to get the package included in OE}}
 
 = Where to go from here =
 
@@ -68,16 +90,6 @@ Once <tt>make install</tt> finished successfully, your binaries and data will be
 == Installing additional libraries into the toolchain ==
 
 {{todo|write}}
-
-== Packaging your application ==
-
-We have included a script to make an ipkg out of your application. You need to supply the path to the filesystem, a version number, a description, and an author / contacts string.
-
- xgenpackage /usr/local/openmoko/target/sample 1.0 "My Sample Project" "openmoko@openmoko.org"
-
-Note that while you can redistribute the generated ipkg, be aware that this is a bare-bones ipk that contains no further information, i.e. you will lack library dependencies.
-
-{{todo|hint how to get the package included in OE}}
 
 = Troubleshooting =
 
