@@ -237,8 +237,29 @@ Vielleicht möchten Sie einen Schlüssel zur Umgehung der Anzeige des Anmeldebil
 ===SSH Schlüssel===
 ====Vom Host zum Neo====
 
+Zur Erzeugung des SSH Schlüssels für die Verwendung des Login Mechanismus geben sie folgendes ein:
 
+ ssh-keygen -t rsa
 
+Wenn Sie nach einem Passwort gefragt werden, drücken Sie Enter für leeren Passwort (''wirklich keine gute Idee'') oder geben Sie das Passwort für diesen Schlüssel ein. Loggen Sie sich am Neo mit ssh ein und erzeugen Sie das Verzeichnis ~/.ssh wie folgt:
+
+ # mkdir ~/.ssh
+
+Danach kopieren Sie die Datei '''.pub''' vom PC auf den Neo:
+
+ # scp ~/.ssh/id_rsa.pub phone:.ssh/authorized_keys
+
+Jetzt sollten Sie in der Lage sein, sich auf dem Neo direkt per ssh anzumelden.
+
+Zum Deaktivieren des Passwort Logins ('''nach dem Einrichten des Schlüssel Zuganges''') editieren Sie die Datei /etc/init.d/dropbear und ändern Sie folgende Zeile:
+
+ DROPBEAR_EXTRA_ARGS=
+
+zu
+
+ DROPBEAR_EXTRA_ARGS="-s"
+
+Jetzt müssen Sie den dropbear neu starten um die Änderung zu aktivieren.
 
 
 
