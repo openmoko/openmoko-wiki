@@ -1,13 +1,13 @@
 Please see [[Getting OpenMoko working on host with Xephyr]] which might contain more up-to-date information.
 
-== What is Host-based development ==
+==Host-based development==
 
 This term means you develop most of your application in your standard desktop environment until it's almost finished. Then you can use a [[Toolchain]] to cross-compile your application for the Neo1973. Host-based development is incredibly more efficient since you can use your (typically) fast computer, large monitor, etc.
 
-== What is Xoo ==
+==Xoo and Xephyr==
 [http://projects.o-hand.com/xoo/ Xoo] is a GTK2 based graphical wrapper around a ‘Windowed’ X Server.  The X server is typically '''Xnest''', the nested X server, or [http://projects.o-hand.com/xephyr Xephyr].  It is intended for embedded developers that want to simulate a target device (with an '''accurate''' display size, working hardware buttons, etc) on a desktop machine. 
 
-''Xoo is not required to simulate OpenMoko hardware - it just improves the presentation''
+Note that Xoo is not required to simulate OpenMoko hardware - it just improves the presentation.
 
 ==Prerequisites==
 
@@ -51,29 +51,8 @@ Here are the instructions to do this:
 
 {{todo|...}}
 
-== Setup the Image Filesystem ==
-The filesystem of the image can be found at build/tmp/rootfs . It is that image that we want to run in a chrooted environment.
+==Starting the nested OpenMoko==
 
-This image should also be packed/compressed as the file openmoko-devel-image-x86-$(DATE).rootfs.tar.gz in build/tmp/image/ - mine is here [http://www.ms.mff.cuni.cz/~kupem6am/openmoko-devel-image-x86-20070227064250.rootfs.tar.gz].
-
-=== Making X cooperate ===
-* Make sure your iptables do not prevent you from connecting to port 6000(x11) on localhost
-
-* Make sure your X is listening on port 6000(X11) on localhost (netstat is friend)
-
-* Enable conection from localhost
- # xhost localhost
-
-===  Preparing rootfs ===
-Unpack the rootfs file and copy the contents into a directory called /home/moko/mokobox. This will be our chrooted environment.
-
-make sure /dev of the host machine are visible from within mokobox
- # sudo mount --bind /dev/ /home/moko/mokobox/dev
-
-Start/Move into the protected mokobox environment
- # sudo chroot /home/moko/mokobox /bin/sh
-
-==  Starting the nested X server ==
 === Launch Xoo ===
 In another terminal (not related to mokobox), start Xoo. Download [http://www.datenfreihafen.org/~stefan/OpenMoko/neo1973-xoo-device.tar.bz2] and run for a nice neo 1973 theme.
  # xoo --device neo1973.xml
