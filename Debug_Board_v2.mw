@@ -79,13 +79,13 @@ Please see [[Neo1973 Debug Board v2/EEPROM]] if you have an "early adopter" boar
 
 ==== Drivers ====
 
-===== Linux =====
+===== libftdi =====
 
-Please make sure you have libftdi-0.8 or later.  Earlier versions are known to cause problems
+Please make sure you have libftdi-0.8 or later.  Earlier versions are known to cause problems. This should not be an issue if you are using statically-linked binaries.
 
-Furthermore, you will need to do the following:
+===== ftdi_sio module =====
 
-====== ftdi_sio module option ======
+This module must be loaded with parameters that identify the debug board:
 
  rmmod ftdi_sio
  modprobe ftdi_sio vendor=0x1457 product=0x5118
@@ -96,16 +96,57 @@ or the equivalent in your modules.conf
 
 Please install the rules from http://people.openmoko.org/laforge/misc/debug_board_v2/udev_rules/
 
-===== Windows =====
+====== Windows Driver ======
 
 Please use the driver from http://people.openmoko.org/laforge/misc/debug_board_v2/windows_drivers/
 
+==== Applications ====
+
+===== openocd =====
+
+[[openocd]] is required. It is recommended to use a statically-linked binary produced by the OpenMoko build system. Other versions may give "unrecognized command" errors while parsing the configuration file.
+
+====== openocd.cfg ======
+
+Openocd requires a configuration file in the directory from which you run the application. A typical example is shown below:
+
+<pre>
+telnet_port 4444
+gdb_port 3333
+interface ft2232
+jtag_speed 0
+ft2232_vid_pid 0x1457 0x5118
+ft2232_layout "jtagkey"
+reset_config trst_and_srst
+jtag_device 4 0x1 0xf 0xe
+daemon_startup attach
+target arm920t little reset_run 0 arm920t
+working_area 0 0x200000 0x4000 backup
+run_and_halt_time 0 5000
+ft2232_device_desc "Debug Board for Neo1973"
+</pre>
+
+===== dfu-util =====
+
+[[dfu-util]] is used to write images to the NAND flash once you have a functional u-boot. It is recommended to use a statically-linked binary produced by the OpenMoko build system.
+
 === Hardware connection ===
 
-* [[Connecting Neo1973 with Debug Board v2]]
-* Connect your favorite embedded project to the Debug Board v2:
+Refer to [[Connecting Neo1973 with Debug Board v2]]. The recommended connection sequence is:
+
+* Unplug both USB cables
+* Remove the Neo1973 battery
+* Connect the FPC between the Neo1973 and the debug board
+* Replace the Neo1973 battery
+* Plug the Neo1973 USB cable into your PC
+* If the Neo1973 does not turn on automatically at this point, hold the power button for 5 seconds
+* Plug the debug-board USB cable into your PC
+
+A Neo1973 with a working u-boot should power on when its USB cable is plugged in, but a "bricked" one will not. Note that there will be no visible feedback from the power-button press on a bricked device.
 
 ==== Pinouts ====
+
+The Debug Board v2 may be used for other embedded projects. It provides the following connectors:
 
 * J1 - is a regular 20 pin ARM JTAG at 3.3V level with 5V tolerance
 
@@ -134,9 +175,33 @@ The Linux kernel of your host system will create virtual serial devices called '
 
 You can use your favourite terminal emualtor (screen, minicom, cu, zc, ...) just like for any other/real serial port. The baud rate should be set to 115200. You may use gdb as well (eg. target remote /dev/ttya).
 
+The /dev/ttyUSB1 device node will be removed if the debug-board USB cable is unplugged. You should exit your terminal program before unplugging the cable, and then re-run it after the cable is plugged back in. 
+
 ===== JTAG =====
 
-Once you have installed libftdi >= 0.8 and configured [[OpenOCD]] with the correct openocd.cfg from [[OpenOCD#openocd.cfg]], it should work just fine.
+Once you have connected the hardware as described above, run "openocd" from the diretory containing its configuration file. You should see output similar to the following:
+
+ linux$ ./openocd
+ Info:    openocd.c:93 main(): Open On-Chip Debugger 1.0 (2007-12-13-14:05) svn:226M
+ Info:    openocd.c:94 main(): $URL: svn://svn.berlios.de/openocd/trunk/src/openocd.c $
+ Info:    jtag.c:1291 jtag_examine_chain(): JTAG device found: 0x0032409d (Manufacturer: 0x04e, Part: 0x0324, Version: 0x0)
+
+Note that the Neo1973 must be powered on for this step to succeed. Otherwise, you will see:
+
+ Error:   jtag.c:1253 jtag_examine_chain(): JTAG communication failure, check connection, JTAG interface, target power etc.
+ Error:   jtag.c:1440 jtag_init(): trying to validate configured JTAG chain anyway...
+ Error:   jtag.c:1346 jtag_validate_chain(): Error validating JTAG scan chain, IR mismatch, scan returned 0x00
+
+Once openocd is running, open another terminal window and connect to its telnet port:
+
+ linux$ telnet localhost 4444
+ Trying 127.0.0.1...
+ Connected to localhost.
+ Escape character is '^]'.
+ Open On-Chip Debugger
+ >
+
+You may now reset the device, set breakpoints, upload images, etc. 
 
 Please see [[OpenOCD#OpenOCD_and_Debug_Board]] for some more information.
 
