@@ -10,7 +10,9 @@ For this, you should use a prebuilt toolchain from the OpenMoko project. Here yo
 
 For this task, you should use [[OpenEmbedded]] which builds its own cross compiler during the bootstrapping/build process. System Integration and customizing a distribution is out of scope of this page.
 
-= Prerequisites = 
+=Basic toolchain usage=
+
+==Prerequisites==
 
 You should be reasonably familiar with Linux and its command line tools, have an x86-compatible computer with at least 1G of free disk space. You should have experience with compiling programs from source using your local compiler. The remainder of this document will also assume you have write access in your home directory (~) and <tt>/usr/local/</tt>. If this is not the case, please call your local administrator for help.
 
@@ -22,7 +24,7 @@ Last but not least you should have a working setup that allows you to compile na
 ** libtool
 ** ccache
 
-=Downloading and installing =
+==Downloading and installing==
 
 The prebuilt toolchain can be downloaded from [[http://downloads.openmoko.org/toolchains downloads.openmoko.org]]:
 
@@ -47,7 +49,7 @@ Finally, everytime you want to use this toolchain, you need to alter some enviro
 
  source /usr/local/openmoko/arm/setup-env
 
-= Building a sample project =
+==Building a sample project==
 
 In your home directory:
 
@@ -61,21 +63,21 @@ If you want to install this project on host for staging usage later, a shared li
  om-conf --prefix=/usr/local/openmoko openmoko-sample2
  make install
 
-== Packaging your application ==
+==Packaging your application==
 
-We have included a script to make an ipkg out of your application. 
+We have included a script to make an ipkg out of your application. Note that this is not needed to test your application on the Neo (for that you can just scp the resulting binary and data over), however it's very handy if you want to distribute your application to others.
 
  om-make-ipkg openmoko-sample2
 
 Now you got openmoko-sample2_0.1_armv4t.ipk , you can `scp' it to your
-neo and install it:
+Neo and install it:
 
  scp openmoko-sample2_0.1_armv4t.ipk root@192.168.0.202:
  ssh root@192.168.0.202 ipkg install openmoko-sample2_0.1_armv4t.ipk
 
-Note that while you can redistribute the generated ipkg, be aware that this is a bare-bones ipk that contains no further information, i.e. you will lack library dependencies.
+Note that while you can redistribute the generated ipkg, be aware that this is a bare-bones ipk that contains no further information, i.e. you will lack library dependencies. See below how to fix this.
 
-You could supply the version number, a description, and an author / contacts string in a control file if you know how to use it:
+You can also supply the version number, a description, and an author / contacts string in a control file:
 
  om-make-ipkg myapp myapp_control
 
@@ -92,13 +94,13 @@ A template of myapp_control:
  Depends: 
  Source: ${SRC}
 
-= Where to go from here =
+==Where to go from here==
 
 {{todo|write}}
 
-= Advanced topics =
+=Advanced topics=
 
-== Installing additional libraries into the toolchain ==
+==Installing additional libraries into the toolchain==
 
 Sooner or later you will want to compile an application that has dependencies which can't be fulfilled by the precompiled toolchain, e.g. some obscure libraries.
 
@@ -112,7 +114,13 @@ In that case, feel free to request the inclusion of additional libraries into th
 
 That's it.
 
-= Troubleshooting =
+==Getting your application packaged by OE==
+
+If you have written a cool application which you want to share with others, the best way to do that is to submit a [[BitBake]] recipe to [[OpenEmbedded]].
+
+{{todo||finish}}
+
+==Troubleshooting==
 
 {{todo|write}}
 
