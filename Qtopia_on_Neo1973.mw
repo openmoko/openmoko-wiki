@@ -34,16 +34,157 @@ After pressing the AUX button, the Neo should wake up from suspend tough and sho
 This bug seems isd to be [http://labs.trolltech.com/blogs/2007/12/04/neo-neuros-and-other-things/  half-workedarounded], but the fix is not included in the most recent (as of 2007-12-16) official Qtopia image yet. There is an unofficial image from Loren at http://llornkcor.com/neo/qtopia-4.3-snapshot-12192309-neo-flash.tgz that you can try out that includes his fix.
 
 == Flashing Qtopia images ==
-{{warning|Before you hit enter on one of the following commands, make sure that you are *not* issuing a plain "nand erase" command - always make sure you tell it which partition to erase. If you forget this you'll brick the Neo and you'll need a debug board to recover it.}}
-Before flashing the rootfs image, be sure to erase the rootfs using [[nand erase]]. Otherwise, the Neo may hang somewhere after on boot.
- nand erase clean rootfs
- nand erase clean kernel
+These are instructions for flashing the latest release of Qtopia (27112007). This seems to be the best working
+image yet, eg. voice _and_ SMS seems to work.
+
+The link to the archive file, Qtopia flash image for FIC Neo 1973,
+is mentioned below  
+
+http://www.qtopia.net/modules/mydownloads/singlefile.php?lid=50 [http://www.qtopia.net/modules/mydownloads/singlefile.php?lid=50]
+
+Get that and save it on your computer. It should be:
+"qtopia-4.3.1-snapshot-1127.tgz"
+
+Unpack it with:
+
+tar zxvf qtopia-4.3.1-snapshot-1127.tgz
+
+This should make you have the following two files, ie. a kernel file and
+a rootfs file:
+
+-rw-r--r-- 1 plr   1000 31956148 2007-11-27 06:55
+qtopia-rootfs.2-11270550.jffs2
+
+-rw-r--r-- 1 plr   1000  1538620 2007-11-10 20:57
+uImage-2.6.22.5-moko11+svnr3238-r7-neo1973.bin
+
+In case you already have a dfu-util utility, you will need to download it. The following version has been tried out and seemed to work.
+
+http://buildhost.automated.it/OM2007.2/dfu-util [http://buildhost.automated.it/OM2007.2/dfu-util]
+
+Before moving forward please make sure of the following
+
+1. You have the necessary permissions in your system (i.e. root access)
+
+2. dfu-util is executable
+
+3. Your Neo is in uboot mode
+
+4. And a USB cable is connected between your computer and the Neo
+
+5. Realize that the following is low-level stuff and doing something
+wrong may brick your Neo
+
+execute the following from a command line:
+
+    cu -l /dev/ttyACM0
+
+Which should get you the following:
+
+   Connected.
+   In:    usbtty
+   Out:   usbtty
+   Err:   usbtty
+   GTA01Bv4 # DEVICE_CONFIGURED: 1
+   Enabling automatic fast charge
+
+Press <Enter> and you should get:
+
+   GTA01Bv4 #
+
+
+{{warning|Before flashing the rootfs image, be sure to erase the rootfs using [[nand erase]]. Otherwise, the Neo may hang somewhere after on boot. Before you hit enter on one of the following commands, make sure that you are *not* issuing a plain "nand erase" command - always make sure you tell it which partition to erase. If you forget this you'll brick the Neo and you'll need a debug board to recover it.}}
+
+At that prompt type:
+
+   nand erase rootfs
+
+
+and the <Enter> key, which should get you:
+
+   NAND erase: device 0 offset 0x2e4000, size 0x3d1c000
+   OK
+   GTA01Bv4 #
+
+At that prompt don't press anything else, but:
+
+~.
+
+and the <Enter> key, which should disconnect you from the bootloader.
+
+
+Now, from the computer prompt, execute the following:
+
+   ./dfu-util  -a kernel -R -D uImage-2.6.22.5-moko11+svnr3238-r7-neo1973.bin
+
+which should get you the following, and it should only take a few
+seconds to finish:
+
+dfu-util - (C) 2007 by OpenMoko Inc.
+This program is Free Software and has ABSOLUTELY NO WARRANTY
+
+Opening USB Device 0x0000:0x0000...
+Claiming USB DFU Runtime Interface...
+Determining device status: state = appIDLE, status = 0
+Device really in Runtime Mode, send DFU detach request...
+Resetting USB...
+Opening USB Device...
+Found Runtime: [0x1457:0x5119] devnum=3, cfg=0, intf=0, alt=3, name="kernel"
+Claiming USB DFU Interface...
+Setting Alternate Setting ...
+Determining device status: state = dfuIDLE, status = 0
+dfuIDLE, continuing
+Transfer Size = 0x1000
+bytes_per_hash=30772
+Starting download: [##################################################]
+finished!
+state(2) = dfuIDLE, status(0) = No error condition is present
+Done!
+Resetting USB to switch back to runtime mode
+
+After that, execute the following:
+
+    ./dfu-util -a rootfs -R -D qtopia-rootfs.2-11270550.jffs2
+
+which should get you the following, and it should take between 5-10min
+to finish:
+
+dfu-util - (C) 2007 by OpenMoko Inc.
+This program is Free Software and has ABSOLUTELY NO WARRANTY
+
+Opening USB Device 0x0000:0x0000...
+Claiming USB DFU Runtime Interface...
+Determining device status: state = appIDLE, status = 0
+Device really in Runtime Mode, send DFU detach request...
+Resetting USB...
+Opening USB Device...
+Found Runtime: [0x1457:0x5119] devnum=5, cfg=0, intf=0, alt=5, name="rootfs"
+Claiming USB DFU Interface...
+Setting Alternate Setting ...
+Determining device status: state = dfuIDLE, status = 0
+dfuIDLE, continuing
+Transfer Size = 0x1000
+bytes_per_hash=639122
+Starting download: [##################################################]
+finished!
+state(2) = dfuIDLE, status(0) = No error condition is present
+Done!
+Resetting USB to switch back to runtime mode
+
+In both cases, some text on your Neo should appear, indicating that the
+kernel or the rootfs are being downloaded.
+
+After this, the Neo should be able to boot, and depending on how you
+have your boot menu set up, choose "Boot" or perhaps "Boot from NAND".
+The method described above in any case puts the software on the NAND
+flash, and not on an SD card, if you have that installed.
+
 
 The lasted official Qtopia flash images are found at: http://www.qtopia.net/modules/mydownloads/ (Scroll down on this page to find them)
 
 Unofficial Qtopia images can be found in the ScaredyCat and Chooseopen [[repositories]].
 
-For the process of actually flashing the Neo, see [[Flashing openmoko]].
+For more details on the the process of flashing the Neo, see [[Flashing openmoko]].
 
 == Dual-booting between Qtopia and X ==
 
