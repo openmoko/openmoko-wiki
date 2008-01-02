@@ -1,3 +1,16 @@
-The actual command line for starting the emulator may not be obvious if you use [[MokoMakefile]] command ''make run-qemu'' (or similar) to start it. However it is immediately visible in the Makefile in the root folder. If you need to start QEMU with options other than default, one of the ways is simply to create a new target, copy-pasting the ''run-qemu'', later changing the target name (for instance, into ''run-qemu-tty'') and editing the options.
+The actual command line for starting the emulator may not be obvious if you use [[MokoMakefile]] command ''make run-qemu'' (or similar) to start it. However it is immediately visible in the Makefile in the root folder. If you need to start QEMU with options other than default, one of the ways is simply to create a new target, copy-pasting the ''run-qemu'', later changing the target name (for instance, into ''run-qemu-vnc'') and editing the options.
+
+For instance, here is a target which opens the local connection to the virtual phone:
+
+ .PHONY: run-qemu-vnc
+ run-qemu-vnc: stamps/qemu build/qemu/openmoko/openmoko-sd.image
+  	( cd build/qemu && arm-softmmu/qemu-system-arm \
+ 	  	-M gta01 -m 130 -usb -show-cursor \
+ 	 	-vnc localhost:1 -monitor stdio \
+ 	 	-mtdblock openmoko/openmoko-flash.image \
+ 	 	-sd openmoko/openmoko-sd.image \
+ 	 	-kernel openmoko/openmoko-kernel.bin )
+
+After typing make run-qemu-vnc you can open ssh and scp connections to the emulated phone, as described in [[OpenMoko under QEMU#Simple network connection with pppd|QEMU manual]].
 
 [[Category:Developer software]]
