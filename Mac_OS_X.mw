@@ -176,6 +176,37 @@ http://wiki.openmoko.org/wiki/Bluetooth_Support#Networking
 
 http://www.macosxhints.com/article.php?story=20051220221237711
 
+NOT TESTED (10.4.11)
+
+In the Bluetooth System Preferences
+* go to the Sharing pane
+* add a new service "BluetoothAccessPoint" of type RS-232
+* Enable that it is shown in the network preferences pane
+* Apply
+
+In the Network System Preferences
+* activate the new network configuration (BluetoothAccessPoint)
+* go tot the Modem tab nd change the modem to "Null Modem 115200"
+* Apply
+
+In a Terminal, enter the following:
+ $ sudo /usr/sbin/pppd /dev/tty.BluetoothAccessPoint 115200 noauth local passive proxyarp asyncmap 0 silent persist :172.16.140.14
+
+Here you see the 172.16.140.14 address, which makes it possible not to use natd, since it's in the same network as the Mac is. So the firewall knows where to sent it to -- no routing problems etc. Pick any free address in your private range. For instance, if you are using the following ... firewall: 192.168.1.1, Mac: 192.168.1.2, you can enter 192.168.1.3, assuming it's not used elsewhere on your network.
+
+If you want to be sure you did it right, open the system.log file on the Mac (tail -f /var/log/system.log), and you should see something like this (line breaks added for a narrower display):
+Jun 25 10:33:57 hostname pppd[679]: 
+  pppd 2.4.2 (Apple version 229) started by username, uid 0
+Jun 25 10:33:57 hostname pppd[679]: 
+  Connect: ppp0 <--> /dev/tty.BluetoothAccessPoint
+
+In Terminal, write sudo sysctl -w net.inet.ip.forwarding=1, which should give the following feedback: net.inet.ip.forwarding: 0 -> 1
+
+In Terminal, write sudo ifconfig ppp0 up.
+
+On the OpenMoko do the following
+(needs to be copied from the Linux description)
+
 == Neo1973 as a server ==
 
 To Be Done.
