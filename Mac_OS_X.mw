@@ -149,13 +149,22 @@ ZMacSync does not yet synchronize but allows more easy access to the OpenMoko th
 
 Here is described how to enable your Mac to serve as a internet router for your OpenMoko device.
 
-Go to Control Panel, click Sharing and click the Internet tab. Check all the ethernet (en) interfaces you want to enable Internet access for.
+=== USB ===
 
-SSH into your Neo and create /etc/resolv.conf, specify your Internet router IP address as the name server.
+1. Go to Control Panel, click Sharing and click the Internet tab. Check all the ethernet (en) interfaces you want to enable Internet access for.
 
-Example:
+2. SSH into your Neo and create /etc/resolv.conf, specify your Internet router IP address as the name server.
 
-nameserver 192.168.1.200
+	Example:
+	nameserver 192.168.1.200    # replace by your real nameserver address
+
+3. Make sure your Neo routing table has entries so that all internet traffic is sent to your Mac (which will forward it to the outside world)
+
+	 root@fic-gta01:~$ route
+	 Kernel IP routing table
+	 Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+	 192.168.0.0     *               255.255.255.0   U     0      0        0 usb0
+	 default         192.168.0.200   0.0.0.0         UG    0      0        0 usb0
 
 === Bluetooth ===
 
@@ -164,10 +173,6 @@ This could help:
 http://wiki.openmoko.org/wiki/Bluetooth_Support#Networking
 
 http://www.macosxhints.com/article.php?story=20051220221237711
-
-=== USB ===
-
-If you install AJZaurusUSB driver you should be able to set up your Mac as a router (not tested).
 
 == Neo1973 as a server ==
 
