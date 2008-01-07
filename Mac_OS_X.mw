@@ -175,15 +175,15 @@ Don't forget to enable your USB interface for Internet Sharing!
 
 === Bluetooth ===
 
-This could help: 
+This is based on: 
 
 http://wiki.openmoko.org/wiki/Bluetooth_Support#Networking
 
 http://www.macosxhints.com/article.php?story=20051220221237711
 
-NOT TESTED (10.4.11)
+NOT YET WORKING
 
-In the Bluetooth System Preferences
+In the Bluetooth System Preferences (10.4.11)
 * go to the Sharing pane
 * add a new service "BluetoothAccessPoint" of type RS-232
 * Enable that it is shown in the network preferences pane
@@ -199,18 +199,36 @@ In a Terminal, enter the following:
 
 Here you see the 172.16.140.14 address, which makes it possible not to use natd, since it's in the same network as the Mac is. So the firewall knows where to sent it to -- no routing problems etc. Pick any free address in your private range. For instance, if you are using the following ... firewall: 192.168.1.1, Mac: 192.168.1.2, you can enter 192.168.1.3, assuming it's not used elsewhere on your network.
 
-If you want to be sure you did it right, open the system.log file on the Mac (tail -f /var/log/system.log), and you should see something like this (line breaks added for a narrower display):
-Jun 25 10:33:57 hostname pppd[679]: 
-  pppd 2.4.2 (Apple version 229) started by username, uid 0
-Jun 25 10:33:57 hostname pppd[679]: 
-  Connect: ppp0 <--> /dev/tty.BluetoothAccessPoint
+If you want to be sure you did it right, open the system.log file on the Mac (tail -f /var/log/system.log), and you should see something like this:
+ Jun 25 10:33:57 hostname pppd[679]:  pppd 2.4.2 (Apple version 229) started by username, uid 0
+ Jun 25 10:33:57 hostname pppd[679]:  Connect: ppp0 <--> /dev/tty.BluetoothAccessPoint
 
-In Terminal, write sudo sysctl -w net.inet.ip.forwarding=1, which should give the following feedback: net.inet.ip.forwarding: 0 -> 1
+In Terminal, write
+ sudo sysctl -w net.inet.ip.forwarding=1
+which should give the following feedback:
+ net.inet.ip.forwarding: 0 -> 1
 
-In Terminal, write sudo ifconfig ppp0 up.
+In Terminal, write
+ sudo ifconfig ppp0 up.
 
 On the OpenMoko do the following
-(needs to be copied from the Linux description)
+
+* Power on bluetooth (see above)
+
+* Scan for the Mac
+ root@fic-gta01:~$ hcitool scan
+ Scanning ...
+         00:0E:6D:C0:0l:6A       Sho
+         00:20:E0:5A:FE:C8       MacBook
+
+* Connect to the laptop pand
+ root@fic-gta01:~$ pand -c 00:20:E0:5A:FE:C8
+
+* Configure your IP address
+ ip a add 10.0.0.2/24 dev bnep0
+ ip r add default via 10.0.0.1
+
+* Enjoy
 
 == Neo1973 as a GPRS modem ==
 
