@@ -1,0 +1,31 @@
+If you want to create a new application, you might want to look at [[Toolchain]] first.  However, if the dependency is complex or you want to modify something already in system, currently the easiest way to go is still using [[OpenEmbedded]].
+
+= New Application =
+* [[Toolchain|OpenMoko toolchain]]
+* Anjuta plugin[http://free-opensource.qvantel.net/mediawiki/index.php/Preity-plugin]
+* [[OpenMokoFramework]]
+* [[Application Development FAQ]]
+
+= Develop with OE =
+After setting up the OE environment, making it build the latest component of OpenMoko is a must to avoid duplicated work.  Refer to [[OpenMoko2007.2#How_to_enable_autorev|How to enable autorev]] to find out how to do it.  Building for the first time will take a lot of time and occupy big disk space, but after that it will be reasonable.  You will also need to '''remove''' the
+ INHERIT += "rm_work
+line in your local.conf if it exists.
+
+Now, for example, if you want to modify openmoko-sample2, you can do this to build it first:
+ bitbake openmoko-sample2
+After that:
+ bitbake openmoko-sample2 -c devshell
+You will be dropped to a shell that the environment is set to build the package.  After the modification, usually a simple `make' will do the trick.  You should be able to find the new binary under a hidden .libs directory if this package uses autotools.
+
+== Tips ==
+* You might find it convenient to replace the source directory with a symlink to the same directory under your OpenMoko svn tree, once you get more understanding to OE.  You need to patch and configure the source again if you go this way.
+
+* If you don't want to use devshell, change directory to ${WORKDIR} directly (usually one level higher then the directory that devshell drops you to), do the modification, and invoke ./temp/run.do_compile.xxxx will also compile the source again.
+
+== Make ipkg for distributing ==
+Multiple ways to do this:
+* make a patch and add it to the bb file.  Rebuild.
+* bitbake oepnmoko-sample2 -c package_write
+
+{{Languages|Development_Environment}}
+[[Category:Developer]]
