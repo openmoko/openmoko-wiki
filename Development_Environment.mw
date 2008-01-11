@@ -17,6 +17,20 @@ After that:
  bitbake openmoko-sample2 -c devshell
 You will be dropped to a shell that the environment is set to build the package.  After the modification, usually a simple `make' will do the trick.  You should be able to find the new binary under a hidden .libs directory if this package uses autotools.
 
+= Use quilt =
+We could make modification and manage it by `quilt'.
+
+ $ # no need to mkdir patches.  already exists.
+ $ quilt new foo.patch
+ $ quilt add to_be_changed.c
+ $ vi to_be_changed.c
+ ''<coding monkey is working...>''
+ $ make
+ $ scp foobar neo:   # copy it to neo
+ ''<test... wow it works>''
+ $ quilt refresh
+ $ cp -r patches ~/miracle  # keep it somewhere
+
 == Tips ==
 * You might find it convenient to replace the source directory with a symlink to the same directory under your OpenMoko svn tree, once you get more understanding to OE.  You need to patch and configure the source again if you go this way.
 
@@ -24,7 +38,7 @@ You will be dropped to a shell that the environment is set to build the package.
 
 == Make ipkg for distributing ==
 Multiple ways to do this:
-* make a patch and add it to the bb file.  Rebuild.
+* Use quilt patches and add it to the bb file.  Rebuild.
 * bitbake oepnmoko-sample2 -c package_write
 
 {{Languages|Development_Environment}}
