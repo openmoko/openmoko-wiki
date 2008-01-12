@@ -10,9 +10,9 @@ Type cat ''after'' you start the gllin, not before. The output from the GPS driv
  $GPGGA,235946.99,,,,,00,00,5.0,,M,0.0001999,M,0.0020199,*57
  (and so on). 
 
-The data are presented in [http://gpsinformation.org/dale/nmea.htm NMEA format] which gives a lot of data. The coordinates themselves are reported with the two messages that are described below. Both messages occur in the normal output (also in conditions when the the device does not see any satellites and cannot give actually report the coordinates).
+The data are presented in [http://gpsinformation.org/dale/nmea.htm NMEA format] which gives a lot of data. The coordinates themselves are reported with the two messages that are described below. Both messages occur in the normal output (also in conditions when the the device does not see any satellites and cannot give actually report the coordinates). They consist of multiple comma separated fields. Even numeric fields like coordinates under some circumstances are empty. Empty fields are easy to recognize because commas are included anyway.
 
-== GPRMC ==
+== GPRMC message ==
 GPRMC tels the latitude, longitude, speed, time and date. Hence the proper signal could also be used to set up the clock. If the device can see the satellites, the message looks like
 
  $GPRMC,143812,A,4301.028,N,01232.000,E,020.0,083.4,240307,003.2,W*6A
@@ -33,4 +33,26 @@ If the device cannot see the satellites properly (it usually does not work indoo
 
 In this case it is necessary to go to the more open place. It may take several minutes before device reports the correct location.
 
+== GPGGA message ==
+This message does not tell the speed but it tells the number of satellites, estimates the quality and gives the latitude. The message looks like
+ $GPGGA,133515,4407.048,N,01131.000,E,1,07,0.9,544.4,M,44.4,M,,*47
+
+*133515       Fix taken at 13:35:15 UTC
+*4407.048,N   Latitude 44 deg 07.048' N
+*01431.400,E  Longitude 14 deg 31.040' E
+*1            Fix quality: 0 = invalid, 1 = GPS fix (SPS),                               2 = DGPS fix, 3 = PPS fix, 4 = Real Time Kinematic, 5 = Float RTK,                               6 = estimated, 7 = manual input, 8 = simulation mode
+*07           Number of satellites being tracked
+*0.8          Horizontal dilution of position
+*544.4,M      Altitude, Meters, above mean sea level
+* 44.4,M       Height of geoid (mean sea level) above WGS84
+                      ellipsoid
+*     (empty field) time in seconds since last DGPS update
+*     (empty field) DGPS station ID number
+* '''<nowiki>*</nowiki>47 the checksum, always begins with *
+
+If the device cannot see the satellites properly it reports the zero quality. The number of satellites can also be checked. For instance, the device on the writers desk (indoors) is currently reporting a rather sad story:
+
+ GPGGA,120213.58,,,,,00,00,1.0,,M,0.0001999,M,0.0020599,*56
+
+Which means that the UTM time is 12:02:13.58 (correct), the quality is 0 and 0 satellites can be seen. This explains why the coordinate fields are empty.
 [[Category:GPS]]
