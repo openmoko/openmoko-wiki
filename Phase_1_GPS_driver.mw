@@ -1,0 +1,73 @@
+This article describes problems and solutions that were extremely important in the past but seems obsolete now. This content is kept mainly to reflect the history of the project.
+
+In the very early shipment to 50 Phase 1 developers, a binary-only program for talking to the the GPS was accidentally included 
+in /home/root/DM2/gps, (and presumably, the same binary would function on a P0 device). It was compiled to OABI format which now is obsolete as OM2007.2 builds are in EABI format, but developers suggested tricks to run it with ''chroot''. These approaches seem now obsolete and the old binary seems even no longer easily available.
+
+== Binary Daemon GLLIN ==
+
+For those few with the binary driver in the meantime, Pavel Machek
+[http://pavelmachek.livejournal.com/39229.html provides] the
+following script for recording an NMEA stream from the binary program.
+
+ #!/bin/sh
+ echo 1 > /sys/class/leds/gta01\:vibrator/brightness
+ killall gllin cat
+ sleep 1
+ echo 0 > /sys/class/leds/gta01\:vibrator/brightness
+ mknod /tmp/nmeaNP p
+ cat /tmp/nmeaNP >> /tmp/gps.nmea &
+ /home/root/DM2/gps/gllin -low 5
+ /home/root/DM2/gps/gllin -periodic 3
+
+The binary program was compiled to OABI format which now is obsolete as OM2007.2 builds are in EABI format. You can still run the binary with ''chroot''. [[user:Zdanek|Bartek Zdanowski]] wrote an [http://www.openmoko.org.pl/node/55 aticle] how to run GPS receiver. Alternativly ld-linux can be used to do the trick:
+
+==The ld-linux trick==
+
+you need the following files:
+
+ bin/gllin
+ bin/gllin.sh
+ lib/ld-linux.so.2
+ lib/libc.so.6
+ lib/libgcc_s.so.1
+ lib/libm.so.6
+ lib/libnss_dns.so.2
+ lib/libnss_files.so.2
+ lib/libpthread.so.0
+ lib/libresolv.so.2
+ lib/librt.so.1
+ lib/libstdc++.so.6
+ lib/libutil.so.1
+
+the file bin/gllin.sh contains:
+
+ #!/bin/sh
+ `pwd`/lib/ld-linux.so.2 --library-path `pwd`/lib `pwd`/bin/gllin -low 5
+ test -p /tmp/nmeaNP || ( rm -f /tmp/nmeaNP && mknod /tmp/nmeaNP p )
+ `pwd`/lib/ld-linux.so.2 --library-path `pwd`/lib `pwd`/bin/gllin -periodic 3
+
+be shure to start at least a `cat /tmp/nmeaNP` somewhere.
+
+another aproach (chroot) is described in [[Gllin]] - here is also a link to a archive with all needed shared libraries in the right format.
+
+==Strange effects==
+
+the message 
+
+ Stack size 8864 bytes (9 KB)
+
+means, nobody is reading on the pipe /tmp/nmeaNP, you probably forgot to start the `cat ...`. 
+
+the message
+
+ gllin: early exit(3) in halInit()/681
+
+is issued by the low-level hardware test but gllin works fine afterwords.
+
+do not use the option
+
+ +daemon
+
+because gllin writes all files to /tmp then which is a bad idea. because /tmp is ram it is lost. because ram is limited the logfile will eat up your memmory.
+
+[[Category:GPS]]
