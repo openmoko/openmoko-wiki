@@ -10,6 +10,27 @@ Type cat ''after'' you start the gllin, not before. The output from the GPS driv
  $GPGGA,235946.99,,,,,00,00,5.0,,M,0.0001999,M,0.0020199,*57
  (and so on). 
 
-The data are presented in [http://gpsinformation.org/dale/nmea.htm NMEA format] which gives a lot of data. From the practical point of view, only the following lines seem interesting:
+The data are presented in [http://gpsinformation.org/dale/nmea.htm NMEA format] which gives a lot of data. The coordinates themselves are reported with the two messages that are described below.
+
+== GPRMC ==
+GPRMC tels the latitude, longitude, speed, time and date. Hence the proper signal could also be used to set up the clock. If the device can see the satellites, the message looks like
+
+ $GPRMC,143812,A,4301.028,N,01232.000,E,020.0,083.4,240307,003.2,W*6A
+
+Where:
+*'''143812'''       Fix taken at 14:38:12 UTC
+*'''A'''            '''A''' for the normal (active) message or '''V''' for the void message. Void messages are described below.
+*'''4301.028,N'''   Latitude 43 deg 01.028' N
+*'''01232.000,E'''  Longitude 12 deg 32.000' E
+*'''020.0'''        Speed over the ground in knots
+*'''083.4'''        Track angle in degrees True
+*'''240307'''       Date - 24rd of March 2007
+*'''003.2,W'''      Magnetic variation
+*'''<nowiki>*</nowiki>6A'''           The checksum, begins with *
+
+If the device cannot see the satellites properly (it usually does not work indoors unless very close to the window), it puts 'V' (void) at the output. In this case the GPRMC messages look like
+ GPRMC,114031.52,V,,,,,,,120108,,,N*76
+
+In this case it is necessary to go to the more open place. It may take several minutes before device reports the correct location.
 
 [[Category:GPS]]
