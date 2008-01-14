@@ -101,3 +101,200 @@ But note further that the startup script also spawns a command to 'cat' the outp
 You can't just take the 'cat' command out of the script, because with the named pipe activated, gllin will QUIT if it doesn't see anybody taking the output from the pipe.  To keep it going, either open that pipe or turn it off.
 
 You can use this [http://obri.sygroup.ch/gllin gllin initscript] to start and stop gllin
+
+== More Initscripts ==
+
+The gllin package doesn't come with a very good set of initscripts, and gpsd is flexible enough to use gllin or some other source of GPS coordinates.
+
+For gpsd and gllin to run together well, upon boot, the following scripts have worked well for me:
+
+/etc/init.d/gpsd:
+<pre>
+#!/bin/sh
+#
+# gpsd	This shell script starts and stops gpsd.
+#
+# chkconfig: 345 90 40
+# description: Gpsd manages access to a serial- or USB-connected GPS
+# processname: gpsd
+
+# Source function library.
+#. /etc/rc.d/init.d/functions
+
+RETVAL=0
+prog="gpsd"
+
+test -f /etc/default/${prog} && . /etc/default/${prog}
+
+start() {
+	# Start daemons.
+	echo -n "Starting ${prog}: "
+	# We don't use the daemon function here because of a known bug
+	# in initlog -- it spuriously returns a nonzero status when 
+	# starting daemons that fork themselves.  See
+	# http://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=130629
+	# for discussion.  Fortunately:
+	#
+	# 1. gpsd startup can't fail, or at least not in the absence of
+	# much larger resource-exhaustion problems that would be very obvious.
+	#
+	# 2. We don't need all the logging crud that daemon/initlog sets
+	# up -- gpsd does its own syslog calls.
+	#
+	
+	if [ -e "${GPS_DEV}" ]
+	then
+	    ${prog} -n ${GPSD_OPTS} ${GPS_DEV}
+	    RETVAL=$?
+	    echo "success"
+	else
+	    # User needs to symlink ${GPS_DEV} to the right thing
+	    # Do it automatically if the name contains "NP"
+	    if echo ${GPS_DEV} | grep -q NP
+	    then
+	        mknod ${GPS_DEV} p
+	        ${prog} -n ${GPSD_OPTS} ${GPS_DEV}
+	        RETVAL=$?
+	        echo "success"
+	    else
+	        RETVAL=$?
+	        echo "No ${GPS_DEV} GPS device, aborting gpsd startup. Check /etc/default/${prog}"
+	    fi
+	fi
+	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/gpsd
+	return $RETVAL
+}
+
+stop() {
+	# Stop daemons.
+	echo -n "Shutting down ${prog}: "
+        killall ${prog}
+	RETVAL=$?
+	echo
+	if [ $RETVAL -eq 0 ]
+	then
+	    test -e /var/lock/subsys/gpsd && rm -f /var/lock/subsys/gpsd;
+	fi
+	return $RETVAL
+}
+
+# See how we were called.
+case "$1" in
+  start)
+	start
+	;;
+  stop)
+	stop
+	;;
+  restart|reload)
+	stop
+	start
+	RETVAL=$?
+	;;
+  condrestart)
+	if [ -f /var/lock/subsys/gpsd ]; then
+	    stop
+	    start
+	    RETVAL=$?
+	fi
+	;;
+  status)
+#	status gpsd
+#	RETVAL=$?
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart|condrestart|status}"
+	exit 1
+esac
+
+exit $RETVAL
+</pre>
+
+/etc/init.d/gllin:
+<pre>
+#!/bin/sh
+#
+# This shell script starts and stops gllin.
+#
+
+RETVAL=0
+prog="gllin"
+GLLIN_PATH=/home/root/gllin
+
+test -f /etc/default/${prog} && . /etc/default/${prog}
+
+start() {
+	# Make fifo if it doesn't already exist
+	if [ ! -p /tmp/nmeaNP ]
+	then
+	  mknod /tmp/nmeaNP p
+	fi
+
+	# Check for gpsd ready (max 5 seconds)
+	echo -n "Waiting for gpsd . . . "
+	sleep 1
+	if [ ! "$(pidof gpsd)" ]
+	then
+	  sleep 4
+	  if [ ! "$(pidof gpsd)" ]
+	  then
+	    RETVAL=1
+	    echo "failure."
+	    return $RETVAL
+	  fi
+	fi
+	
+	# Start daemons.
+	echo -n "starting ${prog}: "
+	cd $GLLIN_PATH
+	sleep 1
+	if [ -e $GLLIN_PATH/${prog}.real ]
+	then
+	  $GLLIN_PATH/lib/ld-linux.so.2 --library-path $GLLIN_PATH/lib $GLLIN_PATH/${prog}.real -low 5 > /dev/null
+	  $GLLIN_PATH/lib/ld-linux.so.2 --library-path $GLLIN_PATH/lib $GLLIN_PATH/${prog}.real -periodic 1 +daemon
+	else
+	  $GLLIN_PATH/lib/ld-linux.so.2 --library-path $GLLIN_PATH/lib $GLLIN_PATH/${prog} -low 5 > /dev/null
+	  $GLLIN_PATH/lib/ld-linux.so.2 --library-path $GLLIN_PATH/lib $GLLIN_PATH/${prog} -periodic 1 +daemon
+	fi
+	echo "success."
+	RETVAL=$?
+	echo
+	return $RETVAL
+}
+
+stop() {
+	# Stop daemons.
+	echo -n "Shutting down ${prog}: "
+	pkill ld-linux.so.2	
+    	RETVAL=$?
+	echo "success."
+	return $RETVAL
+}
+
+# See how we were called.
+case "$1" in
+  start)
+	start
+	;;
+  stop)
+	stop
+	;;
+  restart|reload)
+	stop
+	start
+	RETVAL=$?
+	;;
+  status)
+#	RETVAL=$?
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart|condrestart|status}"
+	exit 1
+esac
+
+exit $RETVAL
+</pre>
+
+These scripts allow you (or init, if you have them numbered in rcX.d appropriately) to start gpsd *before* gllin.  This way, gpsd starts listening on /tmp/nmeaNP immediately, and gllin doesn't need to send output to /dev/null in order to stay alive.
+
+This version of the gpsd script will create the named pipe (if the device name includes "NP" in the filename) if it doesn't exist.
