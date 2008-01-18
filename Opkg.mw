@@ -1,162 +1,25 @@
-{{Languages|Opkg}}
+== What is Opkg? ==
+
+Opkg is a lightweight package management system based on Ipkg.
 
 
-{{Prioritybox|
-'''This project has moved.'''
+== New features ==
 
-Mid December, 2008, the project moved to Google code: http://code.google.com/p/opkg/
-* Group:  http://groups.google.com/group/opkg-devel
-* mailto: opkg-devel at googlegroups.com <opkg-devel at googlegroups.com>
-* Checkout Code: http://code.google.com/p/opkg/source/checkout
+Here is a list of additional features compared to Ipkg.
 
-Prior to that date, a mailing list for discussion was available here: http://lists.openmoko.org/mailman/listinfo/opkg-devel
-Source code was available in the subversion repository: http://svn.openmoko.org/trunk/src/target/opkg/. The repository could also be [http://svnweb.openmoko.org/trunk/src/target/opkg/ viewed online].
-}}
-
-== About Opkg ==
-
-Opkg is a lightweight [[package management]] system based on [[Ipkg]].
-
-You can learn how to create own [http://handhelds.org/moin/moin.cgi/BuildingIpkgs Opkg packages] on the Ipkg site.
-
-Packages should install .desktops at the very end of the installation process. This ensures that the icons referenced in the .desktop file are available. [https://docs.openmoko.org/trac/ticket/1524 Reference]
-
-== New Features ==
-
-This is a list of features that have been completed. Mostly this is a list of changes from Ipkg.
-
-* Use libcurl to download files
-* Send download progress updates to libopkg clients
-* Re-organize and clean up source code into sub directories
-* Verify package lists with gpg detached signature
-* Mark packages that were installed to satisfy dependencies (auto installed)
-* Additional command line option to remove "auto installed" packages
-* Support for faceted classification (similar to debtags). ''A "Tags" line has been added to the package information and opkg makes this available to clients, but does not process it in anyway. The command line client also does not use this features yet.''
+* Uses libcurl to download files
+* The command line client has a progress bar to show progress of downloads and libopkg support sending progress callbacks to clients.
 
 
-=== Ipkg Patches ===
+== Issues ==
 
-The following ipkg patches have been applied:
+* http proxy works but authentication not tested yet
 
-* "2-pkg-vec--Optimize-gross-inefficiency.patch" from OpenEmbedded 
-* "1-pkg-parse--Optimize-inefficient-parsing.patch" from OpenEmbedded
-
-* [http://svn.o-hand.com/view/poky/trunk/meta/packages/ipkg/files/update_version_comparision.patch?rev=3827&view=auto update_version_comparision.patch] from Richard Purdie
-* [http://svn.o-hand.com/view/poky/trunk/meta/packages/ipkg/files/enable_debversion.patch?rev=3827&view=auto enable_debversion.patch] from Richard Purdie
-
-== Planned features ==
-
-These are features either under development or planned for inclusion before the next release.
-
-* improve/cleanup [[libopkg]] api
-* locking system to prevent two simultaneous operations on the file system
-
-=== Bug fixes ===
-
-* Ipkg bug - Overflowing / crashes machine - [http://bugs.openembedded.net/show_bug.cgi?id=1028]
-* ipkg tries to access ro SD card - [http://bugs.openembedded.net/show_bug.cgi?id=1029]
-
-=== Lower priority features ===
-
-* Simple user interactions during postinstall
-* Improve command line options
-* Restructure source code and make it more robust
-* Store packages in database
-* Check available space in /tmp prior to downloading
-* Check available space in dest prior to unpacking
-
-== Possible Issues ==
-
-This is a list of possible issues or known bugs.
-
-* http proxy works but authentication not tested yet (--[[User:cberger|cberger]] tested version 0.1.4, does not recognize proxy_username and proxy_password for authentication)
-* autoremove feature only inspects "depends" and not "pre-depends"
-* if you encounter fork failures, and/or segmentation fault, you probably need more memory. To do so, add temporarily swap by (Main article: [[SwapSpace]]):
-** Creating a file which will be used for swap:
-***If you are using dd from coreutils:
- dd if=/dev/zero of=/media/card/file.swap bs=1M count=512
-***If you are using dd from busybox (Interrupt the process (ctrl+c) once the file is big enough. 128 MB should be enough):
- dd if=/dev/zero of=/media/card/file.swap
-**Turn the file into a swap
- mkswap /media/card/file.swap
-**Activate the swap through the file (until swapoff command is used, or reboot)
- swapon /media/card/file.swap
-**Upgrade
- opkg upgrade
-**Deactivate swap
-swapoff or reboot
-Next time you will simply need to reactivate the swap before upgrading.
-* running out of disk-space when downloading lots of updates is quite common, too. To avoid this install the updates one by one with a little script like this one:
- #!/bin/sh
- 
- opkg update
- for i in `opkg list_installed | sed 's/ - .*//'`; do opkg upgrade $i; done
-
-== Error Codes ==
-
-It looks like, in some cases, Opkg will return an error code if something goes wrong.  Here's a list that I pulled from the error.h file:
-
-* -1: Unknown Error
-* 0: No Error (Success)
-
-Configuration Errors:
-* 1: Could not set default destination
-* 2: Error parsing config file
-* 3: Could not create temporary directory
-* 4: Could not obtain administrative lock
-** This could be cause by assassin not releasing the lock on the package management. It can be released by killing its manager:
- killall packagekitd
-
-Package Errors
-* 5: Unsatisfied Dependencies
-* 6: Is Essential
-* 7: Has Dependents
-* 8: Has No Candidate
-* 9: PackageHas No Available Architecture
-
-Install Errors
-* 10: Not Trusted
-* 11: Download Error
-* 12: Conflicts
-* 13: Already Installed
-* 14: Dependencies
-* 15: No Downgrade
-* 16: Out Of Space
-* 17: Bad Signature
-* 18: MD5 Error
-* 19: Internal Error
-
-{{note|I had a problem where I was trying to manually install a package that had dependencies.  The dependencies had a bad signature (actually, my signature files were bad).  Instead of returning 17 because of the bad signature, it returned 14 because of a dependency problem.  So if you get a 14, try installing that package by itself and see what you get.  --[[User:Jtickle|Jtickle]] 18:16, 23 July 2008 (EST) }}
 
 == FAQ ==
 
 Q. What version of Ipkg is Opkg based on?
-
 A. It is based on the [http://www.handhelds.org/download/packages/ipkg/ipkg-0.99.163.tar.gz ipkg-0.99.163] tarball
 
 Q. Why "fork" and rename Ipkg?
-
-A. Ipkg is no longer actively maintained upstream and there are potential trademark issues with using the Ipkg name
-
-Q. Does opkg have a feature similar to APT pinning?
-
-A. Yes you can define priorities on the architecture field (the second field in a feed definition) in /etc/opkg/arch.conf
-
-Q. Does opkg have an auto completion system ?
-
-A. Yes, it's a contribution script available at the [http://blog.upme.fr/?/Linux/28-Openmoko-Opkg-Autocompletion-With-Packages-Names upme blog]
-
-Q. How similar is the ipk format, to the deb format? They look very similar; the data and control tar balls are identical as far as i can tell.
-
-A. Very similar. ipk files are basically deb files with documentation removed, and ipkg is even supposedly able to handle deb files. Opkg can install .deb packages directly, with no change. There may be issues with some packages, concerning preinst and postinst scripts
-
-
-== Neat Little Tricks ==
-
-At one point I ended up doing a complete upgrade before i had updated my opkg. As a result i borked a lot af packages. To reinstall them all, you can use this little sed magic.
- opkg -force-reinstall install `opkg list_installed | sed 's/ - .*//'`
-
-
-{{Languages|Opkg}}
-
-[[Category:Package management]]
+A. Ipkg is no longer actively maintained and there may be issues with using the Ipkg name
