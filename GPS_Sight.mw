@@ -1,61 +1,16 @@
-[[Image:Gpv 0 0 screen shot.jpg|thumb|right|The summary tab]]
-[[Image:Image-Gpv 0 0 screen shot 2.jpg|thumb|right|The map tab (walking forward and back through the same street)]]
-[[Image:Gpssight train.jpg|thumb|right|Speed changes in the moving train (includes 3 intermediate stations and tunnel). This NMEA log is available in the project page]]
-
-{{Application|GPS Sight}}
-
-The GPS Sight is a GTK based project to create a usable GUI tool with the simple output (no maps). It detects GPRMC and GPGGA messages and constantly shows the following data on the screen:
+The GPS preview is a GTK based project to create a usable GUI tool with the simple output (no maps). It is build and tested around the gllin driver but should work with any other driver via pipe at /tmp/nmeaNP. It detects GPRMC and GPGGA messages and constantly shows on the screen the following data:
 
 * Location.
 * Speed in kilometers per hour (converts from knots).
 * Altitude
 * Curved distance from the initially marked point (uses advanced IERC 2003 geodetic reference to convert degrees into kilometers).
-* Number of satellites.
+* Number of the satellites.
 * Time (UTM, not a local time).
 
-GPS Sight is unusual as it reads NMEA pipe directly, not relying on the intermediate library layer like gpsd or gipsy. This allows the developer to have an experience of directly interacting with GPS chip. Direct communication is practical because NMEA is a plain text format the must follow the standard and it is easy to get just by reading from the known location in the filesystem.  
+The source code of this project is available in the project page (http://projects.openmoko.org/projects/gpv/), under LGPL.
 
-Since the 0.0.2 release the application also has the "map" tab which shows the covered path. The map adjusts its scale automatically. The horizontal and vertical scales of the map are equal. Since the 0.0.4 release the program obtained two extra tabs where either altitude or velocity are shown in color in the covered path. GPS Sight concentrates on visualizing of the relative positioning data at the moment does not compete with the map based applications.
+The most interesting part of this project was to keep the external driver thread and GUI thread sufficiently happy together. We cannot just read from the pipe in a loop as this blocks the GUI repainting! Instead, the code schedules the GTK timer, and then it needs to check if any input from the pipe is available - again, without blocking the current thread for too long. This is done using select function.
 
-The source code of this project is available in the project page (http://projects.openmoko.org/projects/gpv/), under LGPL. The project uses GTK framework and C programming language.
+The GPS Preview program (gpv) is released either in .ipk file or in the form of the source code. The released installer still needs the gllin to run. 
 
-The GPS Preview program (gpv) is released either in .ipk file or in the form of the source code. 
-
-== Neo 1973 ==
-With Neo, the released installer still needs the [[gllin]] to run, but, if needed, can start it itself. Gllin could be replaced by any other driver that works with agreed pipe (currently /tmp/nmeaNP) and our dream is to drop the dependencies from that proprietary piece of software forever. GTA2 uses a different pipe, but such adaptation would be a minor fix.
-
-== FreeRunner ==
-GPS Sight should automatically detect FreeRunner GPS pipe (/dev/ttySAC1) and use it rather than /tmp/nmeaNP. FreeRunner does not need any GPS driver like gllin as its GPS chip generates standard NMEA directly.
-
-As FreeRunner is not currently available, it is difficult to test this piece of code. However we have tested by putting a file with NMEA content to /dev/ttySAC1, so the detection and switching works.
-
-== Inside the project ==
-The first version were trying to read from the NMEA pipe in periodic scheduled calls but this results "time travelling effect". Then 'select' function was involved that improved performance but created big loads on CPU. To reduce the loads, the incremental waiting time was introduced and finally we switched to using GTK built - in channel input library that can schedule call exactly when input from the pipe is available.
-
-The distance counter tries to track the curved distance, not the "bird flight" distance between two points. It adds the shifts in space, computing the length of the lat/long degrees into meters in accordance to the IERS 2003 goedetic reference - very new and not yet widely used in geography.
-
-It was some work to fullfil the natural requirement to have the equal scaling for the map. The length of the degree of the longitude (in meters) varies dramatically depending on the geographical location. This must be taken into consideration, computing the degree length first. The automatic scaling allows to use the map tab when working with relatively small distances (hundreds of meters of even less).
-
-== GPS Sight as library ==
-GPS Sight maintains global variables with coordinates, speed and altitude, and also global array variables with the history on how these components were changing over time. Hence it has a potential to be a part of some other application that wants to be location - aware. Work is, however, needed to make a serious library from it. If anybody is interested in, can contribute.
-== About mediating libraries ==
-Recently the talks started to appear that the "true" way to access GPS data is through some intermediate library rather than directly from the hardware. GPS Sight currently does not rely on any "standard" library. It has been written in times when the only "supporting software" available was the Linux cat command (cat /tmp/nmeaNP). Differently, we have spent a lot of time tuning our pipe reader that has big requirements for real time high precision positioning that Sight does. If you just read from it periodially, you get the "time travelling effect" when the coordinates shown are the coordinates from the past. If you spend too much in lopp waiting till the pipe is ready, this uses CPU power and drains the battery faster. If you check seldom, this makes the output unusable for some applications like tracking the player moving in the footbal field. The reader is where the most of work has been spent and the most interesting contributions were received from various people. Our reader currently uses GTK channel support together with GTK timer functions - so it is packed with calls to default libraries already. And the simple GUI on top allows to test immediately how does performance is affected by changes in the algorithm. We expect to contribute that code to the standard GPS access library after it matures and gets many hours of direct testing by multiple users.
-
-== Testing the device ==
-The device has been tested outdoors where it shows the correct location and altitude. The speed indicator has been tested on the train, correctly showing the speed of about 100 km/h. The distance meter also seems operating correctly.
-
-== Project organization ==
-The project uses CVS to host the most recent source code and all build environment and sometimes does releases of .ipk binaries and plain gzipped source code. Project also uses [http://projects.openmoko.org/plugins/wiki/index.php?id=108&type=g Wiki page] to describe various technical aspects.
-
-<onlyinclude>
-{{ApplicationBox|
-  Name=[[GPS Sight]]|
-  Description=The GPS Sight is a GTK based project to create a usable GUI tool with the simple output (no maps).|
-  Screenshot=Image-Gpv 0 0 screen shot 2.jpg|
-  Homepage=http://projects.openmoko.org/projects/gpv|
-  TestedOn=Neo 1973, FreeRunner|
-  PackageName=gpssight_0.8.4_freerunner.armv4t.ipk (FreeRunner), gpssight_0.8.4_armv4t.ipk (Neo)
-}}
-</onlyinclude>
-
-[[Category:GPS Applications]]
+[[Category:GPS]]
