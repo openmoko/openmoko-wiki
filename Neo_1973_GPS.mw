@@ -92,6 +92,19 @@ Usage (version 1.1.7):
  -v[n]                    Report GLLIN version string.
                          n is 1234 to report selected versions.
 
+The command line help appears to be wrong as it pertains to the nmea logging (ie The default is NOT off). So to keep the gllin from filling your flash in ./log/*.log here is a better gllin sh file:
+ #!/bin/sh
+ echo "Starting gllin..."
+ 
+ killall cat
+ killall gllin.real
+ 
+ mknod /tmp/nmeaNP p
+ cat /tmp/nmeaNP > /dev/null &
+ cd /home/root/gllin
+ lib/ld-linux.so.2 --library-path /home/root/gllin/lib:/home/root/gllin/usr/lib /home/root/gllin/gllin.real -low 5
+ lib/ld-linux.so.2 --library-path /home/root/gllin/lib:/home/root/gllin/usr/lib /home/root/gllin/gllin.real -periodic 1 -nmea
+
 === Possible GPS programs ===
 
 As people develop more sophisticated GPS applications, please note them here.
