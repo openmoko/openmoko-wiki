@@ -177,11 +177,18 @@ Don't forget to enable your USB interface for Internet Sharing!
 === Bluetooth ===
 {{InProgress}}
 
-This is based on: 
+This approach is based on: 
 
 http://wiki.openmoko.org/wiki/Bluetooth_Support#Networking
-
 http://www.macosxhints.com/article.php?story=20051220221237711
+
+Unfortunately we can't use the pand (PAN daemon for BNEP) or dund (Dial Up Networking daemon for LAP) since neither service is available for the Mac.
+
+So, we configure a RFCOMM connection and a ppp gateway on the Mac. Finally, we connect the OM as a ppp client to the Mac.
+
+The reversed direction is described shortly in http://wiki.openmoko.org/wiki/Manually_using_Bluetooth#PPP_Networking
+
+==== Making the Mac a PPP over Bluetooth Access Point ====
 
 In the Bluetooth System Preferences (10.4.11)
 * go to the Sharing pane
@@ -211,9 +218,13 @@ which should give the following feedback:
 In Terminal, write
  sudo ifconfig ppp0 up.
 
+==== Connecting the OpenMoko as a Client to the Mac ====
+
 On the OpenMoko do the following
 
-* Power on bluetooth (see above)
+* Power on bluetooth
+
+ root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-bt.0/power_on
 
 * Scan for the Mac
  root@fic-gta01:~$ hcitool scan
@@ -221,14 +232,9 @@ On the OpenMoko do the following
          00:0E:6D:C0:0l:6A       Sho
          00:20:E0:5A:FE:C8       MacBook
 
-NOTE: this is wrong for accessing a PPP (DialUp access point). We should configure the Neo to dial up through a nullmodem RFCOMM.
+* start the PPP client
 
-* Connect to the laptop and
- root@fic-gta01:~$ pand -c 00:20:E0:5A:FE:C8
-
-* Configure your IP address
- ip a add 10.0.0.2/24 dev bnep0
- ip r add default via 10.0.0.1
+ pppd 115000 192.168.1.202:192.168.1.200 local defaultroute pty 'rfcomm connect 0 00:16:CB:2F:A0:46 1'
 
 * Enjoy
 
