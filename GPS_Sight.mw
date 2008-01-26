@@ -16,6 +16,14 @@ The project releases the ready to run .ipk files and the packed plain source fil
 == Inside the project ==
 The most interesting part of this project was to keep the external driver thread and GUI thread sufficiently happy together. We cannot just read from the pipe in a loop as this blocks the GUI repainting! Instead, the code schedules the GTK timer, and then it needs to check if any input from the pipe is available - again, without blocking the current thread for too long. This is done using select function which can check the given stream for the availability of input, passing the certain time-out duration. This time-out seems also tricky: if the value or 0.1 s or less is passed on the Neo, function never reports any input present. However too large values block GUI in the input check step. The code now has a kind of adaptation, gradually increasing the duration of this check if there is no input available for a while.
 
+The distance counter may have its own problems, adding minor random changes of the reported location just due measurement error. The algorithm accepts these errors as an actual "walking step back and forward", so the distance counter may slowly go up while standing in place. This, however, should only be noticeable during slow walking - cycling is already fast enough to make this problem minor.
+
+== Testing ==
+The distance counter tries to track the curved distance, not the "bird flight" distance between two points. It adds the shifts in space, computing the length of the lat/long degrees into meters in accordance to the IERS 2003 goedetic reference. Nobody yet tested, how accurate it is (please update this information if you ever tried).
+
+== Dependencies ==
 The GPS Preview program (gpv) is released either in .ipk file or in the form of the source code. The released installer still needs the gllin to run, but, if needed, can start it itself.
+== Testing the device ==
+The device has been tested outdoors where it shows the correct location and altitude. The speed indicator has been tested on the train, correctly showing the speed of about km/h. It is not yet clear if the distance counter works as expected.
 
 [[Category:GPS]]
