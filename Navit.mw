@@ -64,3 +64,49 @@ For adventurous people, one way to do this:
  <speech type="cmdline" data="spd-say '%s'" />
  
  or "spd-say -l fr '%s'" for using the French voice for example.
+
+=== Script to download OSM maps ===
+[[User:Wurp][Wurp]] wrote a little python script to download all OSM maps within a lat/long rectangle.  Just copy the script to a file called dlOSM.sh, chmod +x it, and run it like "dlOSM.sh <minimum latitude> <maximum latitude> <minimum longitude> <maximum longitude>".
+
+It takes a long time for large maps.  I could optimize it some by having it try to get a big section at once, then breaking it into recursing into the pieces.  I'm not sure when/if I'll get around to that...
+
+dlOSM.sh:
+#!/usr/bin/python
+ 
+ import os
+ import sys
+ #import math
+ 
+ def doIt(cmd):
+   if False:
+     os.system(cmd)
+   else:
+     print(cmd)
+ 
+ def getOsms(basename, minLat, maxLat, minLon, maxLon):
+   '''basename - base name of map, maps are named {basename}{count}.osm
+      minLat - latitude of the west side of the map
+      maxLat - latitude of the east side of the map
+      minLon - longitude of the north side of the map
+      maxLon - longitude of the south side of the map'''
+ 
+   wgetCmdTemplate = 'wget -O %s%s.osm http://www.openstreetmap.org/api/0.5/map?bbox=%s,%s,%s,%s'
+ 
+   currLat = minLat
+   mapCount = 0
+   while currLat < maxLat:
+     nextLat = min(currLat + 0.1, maxLat)
+ 
+     currLon = minLon
+     while currLon < maxLon:
+       nextLon = min(currLon + 0.1, maxLon)
+ 
+       doIt(wgetCmdTemplate % (basename, mapCount, currLat, currLon, nextLat, nextLon))
+ 
+       currLon = nextLon
+       mapCount = mapCount + 1
+ 
+     currLat = nextLat
+ 
+ (minLat, maxLat, minLon, maxLon) = map(float, sys.argv[1:])
+ getOsms('map', minLat, maxLat, minLon, maxLon)
