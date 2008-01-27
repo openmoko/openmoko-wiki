@@ -19,11 +19,11 @@ following script for recording an NMEA stream from the binary program.
  /home/root/DM2/gps/gllin -low 5
  /home/root/DM2/gps/gllin -periodic 3
 
-The binary program was compiled to OABI format which now is obsolete as OM2007.2 builds are in EABI format. You can still run the binary with ''chroot''. [[user:Zdanek|Bartek Zdanowski]] wrote an [http://www.openmoko.org.pl/node/55 aticle] how to run GPS receiver. Alternativly ld-linux can be used to do the trick:
+The binary program was compiled to OABI format which now is obsolete as OM2007.2 builds are in EABI format. You can still run the binary with ''chroot''. [[user:Zdanek|Bartek Zdanowski]] wrote an [http://www.openmoko.org.pl/node/55 aticle] how to run GPS receiver. Alternatively ld-linux can be used to do the trick:
 
 ==The ld-linux trick==
 
-you need the following files:
+You need the following files:
 
  bin/gllin
  bin/gllin.sh
@@ -39,35 +39,35 @@ you need the following files:
  lib/libstdc++.so.6
  lib/libutil.so.1
 
-the file bin/gllin.sh contains:
+The file bin/gllin.sh contains:
 
  #!/bin/sh
  `pwd`/lib/ld-linux.so.2 --library-path `pwd`/lib `pwd`/bin/gllin -low 5
  test -p /tmp/nmeaNP || ( rm -f /tmp/nmeaNP && mknod /tmp/nmeaNP p )
  `pwd`/lib/ld-linux.so.2 --library-path `pwd`/lib `pwd`/bin/gllin -periodic 3
 
-be shure to start at least a `cat /tmp/nmeaNP` somewhere.
+Be sure to start at least a `cat /tmp/nmeaNP` somewhere.
 
-another aproach (chroot) is described in [[Gllin]] - here is also a link to a archive with all needed shared libraries in the right format.
+Another approach (chroot) is described in [[Gllin]] - here is also a link to an archive with all needed shared libraries in the right format.
 
 ==Strange effects==
 
-the message 
+The message 
 
  Stack size 8864 bytes (9 KB)
 
 means, nobody is reading on the pipe /tmp/nmeaNP, you probably forgot to start the `cat ...`. 
 
-the message
+The message
 
  gllin: early exit(3) in halInit()/681
 
-is issued by the low-level hardware test but gllin works fine afterwords.
+is issued by the low-level hardware test but gllin works fine afterwards.
 
-do not use the option
+Do not use the option
 
  +daemon
 
-because gllin writes all files to /tmp then which is a bad idea. because /tmp is ram it is lost. because ram is limited the logfile will eat up your memmory.
+because gllin then writes all data to file in /tmp which is a bad idea because /tmp is in kept in RAM so it's lost on reset. Also since the RAM is limited the logfile will eat up your memory.
 
 [[Category:GPS]]
