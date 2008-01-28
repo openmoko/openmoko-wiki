@@ -1,18 +1,18 @@
-В этой статье рассказывается как посылать и получать [[SMS]] сообщения через [[Gsm | GSM]] используя [[Neo1973_Hardware#GSM.2FGPRS | GSM - модуль]] [[Neo1973]].
+This article explains how to send and receive [[SMS]] messages over [[Gsm | GSM]] using the [[Neo1973_Hardware#GSM.2FGPRS | GSM hardware]] in the [[Neo1973]].
 
-Если вы сведущи в технологии SMS, пожалуйста проверьте AT команды SMS и измените их, если найдете ошибки (и удалите этот параграф).  I've done what I could with a single evening's crash course.
+If you're well versed in SMS, please review the SMS commands and update them (and remove this paragraph).  I've done what I could with a single evening's crash course.
 
-Если вы просто хотите преступить к практике без чтения дополнительной информации, переходите сразу к пункту Устройство.
+If you just want to do this without reading any background, skip directly to Setup.
 
-== Обзор ==
-GSM - модуль в Neo1973 использует расширенную версию [http://en.wikipedia.org/wiki/Hayes_command_set Набор команд Hayes AT] для отправки и получения сообщений.  Документацию по командам можно найти на [http://www.ctiforum.com/standard/standard/etsi/0705.pdf Техническая Спецификация GSM] форуме CTI. Так как в технических спецификациях стараются ради витиеватого слога и заключительного слова, я рекомендую почитать вместо них [http://www.developershome.com/sms/ Документацию SMS] на Developer's Home.
+== Overview ==
+The GSM hardware in the Neo1973 uses an extended version of the [http://en.wikipedia.org/wiki/Hayes_command_set Hayes AT command set] for sending and receiving messages.  Documentation on this command set can be found in the [http://www.ctiforum.com/standard/standard/etsi/0705.pdf GSM Technical Specification] at CTI Forum.  Since technical specs are usually referenced for the finer details and the final word, I recommend reading through the [http://www.developershome.com/sms/ SMS documentation] at Developer's Home instead.
 
 == libgsmd-tool ==
-Хотя использование команд [[gsmd | Gsmd]] посредством [[Gsmd#libgsmd-tool | libgsmd-tool]] должно работать правильно, gsmd would complain about "unsolicited responses" when reading back a list of SMS messages.  This would happen when multiple messages needed to be read, then sent back to libgsmd-tool.  It probably works properly when retrieving a single message.  This problem showed itself by libgsmd-tool displaying duplicate messages, or not displaying response lines.
+Though issuing the commands to [[gsmd | Gsmd]] via [[Gsmd#libgsmd-tool | libgsmd-tool]] seems to work properly, gsmd would complain about "unsolicited responses" when reading back a list of SMS messages.  This would happen when multiple messages needed to be read, then sent back to libgsmd-tool.  It probably works properly when retrieving a single message.  This problem showed itself by libgsmd-tool displaying duplicate messages, or not displaying response lines.
 
 For this reason, I recommend using [http://linux.die.net/man/1/cu cu], a program used to "call up" another computer.  If you have trouble using cu, you may want to refer to the article about [[manually using GSM]] for more information.
 
-== Устройство ==
+== Setup ==
 The article on [[manually using GSM]] goes through the process of making sure no other process was accessing the GSM modem device, then setting up the system for [http://en.wikipedia.org/wiki/UUCP UUCP] locking so cu can set up locking for the GSM modem device.  Personal experience with the Neo is that the directories for UUCP locking are already set up, and that stopping gsmd is sufficient.  Again, if you have any problems, refer to the [[manually using GSM]] article for additional setup details.
 
 === Stop the GSM Daemon ===
@@ -167,11 +167,12 @@ AT+CMGL="REC READ"
 OK
 </pre>
 
-Существуют другие команды для выборки (поиска) сообщений. Вы можете познакомиться с ними, почитав в свободное время литературу по ссылкам, приведенным в статье.
-== Заключение ==
-Для выхода из cu, воспользуйтесь "~.". Заметим, что ssh также использует escape последовательность для завершения соединения, поэтому вам надо напечатать "~~." в терминале для передачи "~." на другую сторону. 
+There are other commands for retrieving messages.  Learn by reading through the references at your leisure.
 
-Существуют как правило команды для удаления и сохранения сообщений. Вы можете узнать о них больше, прочитав литературу по ссылкам, приведенным в статье.
+== Final ==
+To exit cu, use "~.". Note that ssh also uses this escape sequence to disconnect a connection, so you may need to type "~~." into your terminal to produce a "~." on the other end. 
+
+There are commands for deleting and storing messages, as well.  Learn more about these by reading through the references listed throughout this page.
 
 {{Languages|Manually_using_SMS}}
 [[Category:Documentation]]
