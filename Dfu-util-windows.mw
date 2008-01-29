@@ -1,20 +1,6 @@
-== dfu-util for Win32 ==
-
-{{Note|This has been reported to work on Windows 2000, Windows XP and Windows Vista with the Neo FreeRunner.  No reports have been received on whether it works with other versions of Windows or with the Neo 1973.  There are some reports that image downloads and uploads are extremely slow for some people.  The exact cause of this has not yet been pinpointed.}}
-
-In order to use dfu-util for Win32, you need to install a Windows driver when the device is in U-Boot.  Theoretically, a USB standard-compliant DFU class driver should work, unfortunately, Windows does not come bundled with one.  If you do not have a DFU class driver (ie. Windows does not recognize the device in U-Boot mode and pops up the New Device Wizard), the LibUSB-Win32 driver and accompanying INF file for the Neo FreeRunner can be used, this driver can be found in OpenmokoDFU.zip at the link below.  When the Windows New Device Wizard pops up, use this driver.
-
-Once the driver is installed, then you can proceed and use the instructions found at the main [[dfu-util]] page.  
-
-The above mentioned files can be downloaded at: [http://projects.openmoko.org/projects/dfu-util-win32/ http://projects.openmoko.org/projects/dfu-util-win32/]
-
-EDIT: The above link is not working anymore, the files can still be downloaded at: [http://activationrecord.net/radekp/openmoko/ http://activationrecord.net/radekp/openmoko/] thanks to radekp server.
-
-The information below is for developers who would like to know how to compile dfu-util for Win32.
-
 == Porting dfu-util to Windows ==
 
-{{Note|This is entirely work in progress. Nevertheless hopefully the information on this page will serve as a starting point for anyone who find the time to take this further. After all, as many people still use Windows PCs as their every day computers, having a convenient way to re-flash a Neo from Windows would probably open up the user base.}}
+Note: This is entirely work in progress and has not yet been successfully finished. Nevertheless hopefully the information on this page will serve as a starting point for anyone who find the time to take this further. After all, as many people still use Windows PCs as their every day computers, having a convenient way to re-flash a Neo from Windows would probably open up the user base.
 
 === Potential Approaches ===
 
@@ -24,10 +10,7 @@ The information below is for developers who would like to know how to compile df
 * MinGW/MSYS
 : MinGW (Minimalist GNU for Windows) seems to be the platform of choice.
 
-* LibUSB-Win32
-: Will only be able to be built on a Windows box
-
-=== MinGW/MSYS port ===
+=== MinGW/MSYS port: What has been done so far ===
 
 The preferred order of installation is:
 
@@ -36,201 +19,39 @@ The preferred order of installation is:
 
 Here is step-by-step howto:
 
-1. Download MinGW-5.1.4.exe from http://sourceforge.net/project/showfiles.php?group_id=2435&package_id=240780&release_id=529741 and execute the installer. It will download additional files required and install MinGW.
-: {{Note|It has often been a good idea to install into a directory that has no spaces in the filename.}}
-2. Download MSYS-1.0.10.exe from http://sourceforge.net/project/showfiles.php?group_id=2435&package_id=24963 and install.
-: {{Note|Make sure to open the "Current Version: 1.0.10" folder as the newer version 1.0.11 does not have an installer yet.}}
-You will need to enter the path where you installed MinGW. It's a good idea to install MinGW and MSYS next to each other, i.e. C:\SOMEDIR\MinGW and C:\SOMEDIR\MSYS.
-: {{Note|For example if MinGW is installed in C:\MinGW enter 'C:/MinGW.' including the period.}}
-
-3. Download msysDTK-1.0.1.exe from http://sourceforge.net/project/showfiles.php?group_id=2435&package_id=67879&release_id=131044, which contains the autotools. Install into the same directory into which you installed MSYS itself. The installer might not automatically suggest the right directory.
+# Download http://sourceforge.net/project/showfiles.php?group_id=2435&package_id=240780&release_id=529741 and execute the installer.
+: Note: It has often been a good idea to install into a directory that has no spaces in the filename.
+# Download MSYS-1.0.10.exe from http://sourceforge.net/project/showfiles.php?group_id=2435&package_id=24963 and install. You will need to enter the path where you installed MinGW. It's a good idea to install MinGW and MSYS next to each other, i.e. C:\SOMEDIR\MinGW and C:\SOMEDIR\MSYS.
+: Note: Make sure to open the "Current Version: 1.0.10" folder as the newer version 1.0.11 does not have an installer yet. (See: http://sourceforge.net/mailarchive/message.php?msg_id=fhvul1%24f6j%241%40ger.gmane.org)
+# Download http://prdownloads.sourceforge.net/mingw/msysDTK-1.0.1.exe?download, which contains the autotools. Install into the same directory into which you installed MSYS itself. The installer might not automatically suggest the right directory.
+: Note: If anyone can spot this file from http://sourceforge.net/project/showfiles.php?group_id=2435, please edit this page. I was only able to find this direct link by using a search engine.
 
 That should give you an Icon in your Start menu in MinGW->MSYS with the name of msys. Open that one, and you will find yourself in a bourne compatible shell on your native Windows system.
 
 You can try to execute some commends such as gcc, make, etc. to make sure you installed everything correctly.
 
-4. Download autoconf 2.59 from http://sourceforge.net/project/showfiles.php?group_id=2435&package_id=67879&release_id=131044.  All you need to do to install it is to use a utility like [http://www.7-zip.org/ 7-Zip] to extract the files into your msys installation directory.
-
-5. You will also need pkg-config.  According to [http://www.mingw.org/MinGWiki/index.php/pkg-config http://www.mingw.org/MinGWiki/index.php/pkg-config], you need the following packages:
-
-  glib
-  glib-dev
-  libiconv
-  gettext
-  pkg-config
-
-You can get all of these from the GTK+ for Windows page at: [http://www.gtk.org/download-windows.html http://www.gtk.org/download-windows.html].  Unzip them to your msys\1.0 directory.
-
-6. Open the file /etc/profile (C:\msys\1.0\etc\profile) with your favorite editor (make sure it uses LF line endings) and add:
-
-  PKG_CONFIG_PATH=" /c/msys/1.0/lib/pkgconfig"
-
-ensuring that the path is accessible from the MSYS shell and points to the pkgconfig files.
-
-7. Download libusb-win32-device-bin-0.1.12.1.tar.gz from http://sourceforge.net/project/showfiles.php?group_id=78138&package_id=79216&release_id=495011. Then, copy the libusb.a file from the LibUSB-Win32\lib\gcc directory into the MinGW\lib directory and the usb.h file from LibUSB-Win32\include into MinGW\include (or you can copy it into your dfu-util\src directory).
-
-8. Then you will need to create a libusb.pc file in the msys\1.0\lib\pkgconfig directory.  I created the following:
-
-  prefix=c:/msys/1.0
-  exec_prefix=${prefix}
-  libdir=${exec_prefix}/lib
-  includedir=${prefix}/include
-  Name: LibUSB
-  Description: USB for Win32
-  Requires: 
-  Version: 0.1.12.1
-  Libs: -L${libdir} -lusb
-  Cflags: -I${includedir}
-
 === Getting dfu-util sources ===
 
-Use your favorite Subversion client to check out the dfu-util sources.  The dfu-util sources can be checked out from [https://svn.openmoko.org/trunk/src/host/dfu-util/ https://svn.openmoko.org/trunk/src/host/dfu-util/].
+Your home directory in msys lives in the location where you installed MSYS in %MSYS_HOME%\home\%USERNAME. Check out the dfu-util sources there or copy them into that directory in case you checked them out somehwere else on your Windows filesystem.
 
-=== Apply patch to compile with MinGW ===
+=== Where we're stuck ===
 
-Apply the following patch to the source code:
+configure.ac:4: error: Autoconf version 2.59 or higher is required
+configure.ac:4: the top level
+autom4te: /bin/m4 failed with exit status: 1
+configure.ac: `AM_INIT_AUTOMAKE' must be used
+automake: your implementation of AM_INIT_AUTOMAKE comes from an
+automake: old Automake version.  You should recreate aclocal.m4
+automake: with aclocal and run automake again.
+configure.ac: required file `./install-sh' not found
+configure.ac: required file `./mkinstalldirs' not found
+configure.ac: required file `./missing' not found
+automake: no `Makefile.am' found or specified
 
-<pre>
-Index: main.c
-===================================================================
---- main.c	(revision 4759)
-+++ main.c	(working copy)
-@@ -35,6 +35,10 @@
-#include "config.h"
-#endif
+Looks like we need newer versions of the autotools. There are .tar.bz2 packages with newer versions on SourceForge, but it looks as if you have to install them manually.
 
-+#ifdef __MINGW32__
-+#define sleep(seconds) Sleep((seconds)*1000)
-+#endif
-+
-#ifdef HAVE_USBPATH_H
-#include <usbpath.h>
-#endif
-@@ -579,6 +583,20 @@
+=== Where to go from here ===
 
-/* FIXME: check if the selected device really has only one */
+Even if the autotools will work and create a Makefile, any potential porting work is just about to start. There is a libusb port for Win32, but we don't know yet if the API will be compatible with the Linux version and what other problems might arise.
 
-+#ifdef __MINGW32__
-+		int configuration = dif->configuration;
-+
-+		if (configuration == 0) {
-+			dif->configuration = 1;
-+		}
-+		printf("Setting Configuration %u...\n", dif->configuration);
-+		if (usb_set_configuration(dif->dev_handle, dif->configuration) < 0) {
-+			fprintf(stderr, "Cannot set configuration: %s\n", usb_strerror());
-+			exit(1);
-+		}
-+		dif->configuration = configuration;
-+#endif
-+
-printf("Claiming USB DFU Runtime Interface...\n");
-if (usb_claim_interface(_rt_dif.dev_handle, _rt_dif.interface) < 0) {
-fprintf(stderr, "Cannot claim interface: %s\n",
-@@ -712,13 +730,19 @@
-exit(1);
-}
-
--#if 0
-+#ifdef __MINGW32__
-+	int configuration = dif->configuration;
-+
-+	if (configuration == 0) {
-+		dif->configuration = 1;
-+	}
-printf("Setting Configuration %u...\n", dif->configuration);
-if (usb_set_configuration(dif->dev_handle, dif->configuration) < 0) {
-fprintf(stderr, "Cannot set configuration: %s\n",
-usb_strerror());
-exit(1);
-}
-+	dif->configuration = configuration;
-#endif
-printf("Claiming USB DFU Interface...\n");
-if (usb_claim_interface(dif->dev_handle, dif->interface) < 0) {
-Index: sam7dfu.c
-===================================================================
---- sam7dfu.c	(revision 4759)
-+++ sam7dfu.c	(working copy)
-@@ -22,6 +22,11 @@
-#define O_BINARY 0
-#endif
-
-+#ifdef __MINGW32__
-+#define sleep(seconds) Sleep((seconds)*1000)
-+#define usleep(microseconds) Sleep((microseconds)/1000)
-+#endif
-+
-int sam7dfu_do_upload(struct usb_dev_handle *usb_handle, int interface,
-int xfer_size, const char *fname)
-{
-Index: usb_dfu.h
-===================================================================
---- usb_dfu.h	(revision 4759)
-+++ usb_dfu.h	(working copy)
-@@ -12,6 +12,13 @@
-
-#include <sys/types.h>
-
-+#ifdef __MINGW32__
-+#include <stdint.h>
-+#define u_int8_t uint8_t
-+#define u_int16_t uint16_t
-+#define u_int32_t uint32_t
-+#endif
-+
-#define USB_DT_DFU			0x21
-
-struct usb_dfu_func_descriptor {
-</pre>
-
-=== Build dfu-util ===
-
-In the Msys shell inside the dfu-util directory, run the following command:
-
-  ./autogen.sh
-  ./configure
-  make
-
-dfu-util should successfully compile and you should have the .exe files in the src directory. In case you get the following error
-
-  checking for USB... configure: error: *** Required libusb >= 0.1.4 not installed ***
-
-check your PKG_CONFIG_PATH (see above) to make sure it is correct, otherwise, you can try running the following command (if you are sure that libusb is correctly installed):
-
-  ./configure USB_CFLAGS=-Iinclude USB_LIBS=-lusb
-
-=== Preparing to use dfu-util ===
-
-A Windows driver needs to be installed when the device is in U-Boot and connected through the USB.  Windows does not come with a DFU class driver and Jungo seems to be the only one that has created a DFU class driver, but it is non-free.  You can use LibUSB-Win32 as the driver for the device by creating an INF file for it for this device.  Use inf-wizard.exe, which is a part of the LibUSB-Win32 binaries distribution.  Run the wizard, select the following device:
-
-  Vendor ID  Product ID  Description
-  [[USB Product IDs|0x1d50]]     [[USB Product IDs|0x5119]]      USB Device
-
-Insert the Manufacturer name: Openmoko, or FIC?
-
-Insert device description: Device Firmware Upgrade
-
-Then save the INF file along with the auto generated CAT files.
-
-When you get the New Device Wizard when plugging in the device in U-Boot mode into Windows, select this newly generated INF file.
-
-=== Running dfu-util ===
-
-Once the Windows driver is successfully installed, you can try some commands:
-
-  dfu-util --list
-
-and you should be able to list the device.  Example:
-
-  Found Runtime: [0x1d50:0x5119] devnum=7, cfg=0, intf=2, alt=0, name="USB Device Firmware Upgrade"  
-
-=== Binary ===
-
-[http://projects.openmoko.org/projects/dfu-util-win32/ http://projects.openmoko.org/projects/dfu-util-win32/]
-
-=== Outstanding issues ===
-
-Had to call usb_set_configuration() with configuration set to 1 before attempting to claim the device instead of using configuration 0 that the device returns.  It sounds like DFU implementation in U-Boot might not be compliant with USB spec.  A similar issue and discussion can be found here: [http://thread.gmane.org/gmane.comp.lib.libusb.devel.windows/1546/focus=1554 http://thread.gmane.org/gmane.comp.lib.libusb.devel.windows/1546/focus=1554]
-
-[[Category:Flashing Openmoko]]
+Stay tuned. Or even better: Help out!
