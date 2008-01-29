@@ -1,40 +1,40 @@
-В этой статье рассказывается как посылать и получать [[SMS]] сообщения через [[Gsm | GSM]] используя [[Neo1973_Hardware#GSM.2FGPRS | GSM - модуль]] [[Neo1973]].
+В этой статье рассказывается о том, как отправлять и получать [[SMS]] сообщения через [[Gsm | GSM]], используя [[Neo1973_Hardware#GSM.2FGPRS | GSM - модуль]] [[Neo1973]].
 
-Если вы сведущи в технологии SMS, пожалуйста проверьте AT команды SMS и измените их, если найдете ошибки (и удалите этот параграф).  I've done what I could with a single evening's crash course.
+Если вы хорошо разбираетесь в технологии SMS, пожалуйста проверьте приведенные здесь AT команды SMS и исправьте их (а также удалите этот параграф), если найдете ошибки. Эта статья написана путем проб и ошибок за один вечер.
 
-Если вы просто хотите преступить к практике без чтения дополнительной информации, переходите сразу к пункту Устройство.
+Если вы просто хотите приступить к практике без чтения дополнительной информации, то переходите сразу к пункту Организация.
 
 == Обзор ==
-GSM - модуль в Neo1973 использует расширенную версию [http://en.wikipedia.org/wiki/Hayes_command_set Набор команд Hayes AT] для отправки и получения сообщений.  Документацию по командам можно найти на [http://www.ctiforum.com/standard/standard/etsi/0705.pdf Техническая Спецификация GSM] форуме CTI. Так как в технических спецификациях стараются ради витиеватого слога и заключительного слова, я рекомендую почитать вместо них [http://www.developershome.com/sms/ Документацию SMS] на Developer's Home.
+GSM - модуль Neo1973 использует расширенную версию [http://en.wikipedia.org/wiki/Hayes_command_set набора (множества) команд Hayes AT] для отправки и получения сообщений. Документацию по командам можно найти на форуме CTI, [http://www.ctiforum.com/standard/standard/etsi/0705.pdf Техническая Спецификация GSM]. Так как часто оказывается, что  технические спецификации - компиляция ссылок на литературу и заключение, то я рекомендую почитать вместо них [http://www.developershome.com/sms/ документацию SMS] на Developer's Home.
 
 == libgsmd-tool ==
-Хотя использование команд [[gsmd | Gsmd]] посредством [[Gsmd#libgsmd-tool | libgsmd-tool]] должно работать правильно, gsmd would complain about "unsolicited responses" when reading back a list of SMS messages.  This would happen when multiple messages needed to be read, then sent back to libgsmd-tool.  It probably works properly when retrieving a single message.  This problem showed itself by libgsmd-tool displaying duplicate messages, or not displaying response lines.
+Хотя использование команд [[gsmd | Gsmd]] посредством [[Gsmd#libgsmd-tool | libgsmd-tool]] должно работать правильно, gsmd would complain about "unsolicited responses" when reading back a список SMS сообщений.  Это происходит, когда необходимо прочитать несколько сообщений, а затем вернуть обратно в libgsmd-tool.  Скорее всего он работает правильно при выборке одного сообщения. Эта проблема libgsmd-tool проявляется дублированием сообщений, или не показыванием response lines.
 
-For this reason, I recommend using [http://linux.die.net/man/1/cu cu], a program used to "call up" another computer.  If you have trouble using cu, you may want to refer to the article about [[manually using GSM]] for more information.
+Поэтому я рекомендую использовать [http://linux.die.net/man/1/cu cu], a program used to "call up" another computer. Если у вас возникнут проблемы при использовании cu, you may want to refer to the article about [[manually using GSM]] for more information.
 
-== Устройство ==
-The article on [[manually using GSM]] goes through the process of making sure no other process was accessing the GSM modem device, then setting up the system for [http://en.wikipedia.org/wiki/UUCP UUCP] locking so cu can set up locking for the GSM modem device.  Personal experience with the Neo is that the directories for UUCP locking are already set up, and that stopping gsmd is sufficient.  Again, if you have any problems, refer to the [[manually using GSM]] article for additional setup details.
+== Организация ==
+В статье [[manually using GSM]] мы подробно разберем путь от проверки отсутствия процессов, использующих GSM - модуль, подготовки системы к блокировке [http://en.wikipedia.org/wiki/UUCP UUCP], а затем и до блокировки GSM - модуля. Если вы можете проверить настройку каталогов для блокировки UUCP, остановить демон gsmd, то вашего опыта работы с Neo будет достаточно.  Опять же, если у вас возникнут затруднения, обращайтесь к статье [[manually using GSM]] за дополнительными деталями настройки системы.
 
-=== Stop the GSM Daemon ===
-This ensures gsmd is not using the GSM modem and will not interfere with your hacking.
+=== Остановка демона GSM ===
+Это действие гарантирует, что gsmd не будет использовать GSM - модуль и мешать вашим опытам. 
 
 <pre>
 root@fic-gta01:~$ /etc/init.d/gsmd stop 
 Shutting down gsmd: Terminated
 </pre>
 
-=== Reset the GSM Modem ===
-This can be done by powering off, then powering back on the modem.  It is inferred this can be done by the [[Manually_using_GSM#Powering_up_the_GSM_Modem | Powering up the GSM Modem]] section of the manually using GSM article.  If anyone can validate, or add the proper procedure, please update here.
+=== Сброс GSM - модуля ===
+Это действие может быть выполнено последовательным отключением, а затем включением GMS - модуля.  It is inferred this can be done by the [[Manually_using_GSM#Powering_up_the_GSM_Modem | Powering up the GSM Modem]] section of the manually using GSM article.  If anyone can validate, or add the proper procedure, please update here.
 
 <pre>
 root@fic-gta01:~$ echo 0 > /sys/bus/platform/devices/gta01-pm-gsm.0/power_on
 root@fic-gta01:~$ echo 1 > /sys/bus/platform/devices/gta01-pm-gsm.0/power_on
 </pre>
 
-Is there a location in /proc where one can verify the state of the GSM modem?
+Существует ли файл в /proc, по которому можно узнать состояние GSM - модуля?
 
-== Connect to the GSM Device ==
-Use cu to connect to the GSM device at /dev/ttySAC0.  At this point, if you have a typing mistake, don't use the [Backspace] or [Delete] key to correct it.  Use [Ctrl-H].
+== Подключение к GSM - модулю ==
+Воспользуйтесь программой cu, чтобы подключиться к GSM - модулю через /dev/ttySAC0.  Сейчас, если при наборе вы допустили ошибку, не используйте [Backspace] или [Delete] для правки, используйте [Ctrl-H].
 
 <pre>
 root@fic-gta01:~$ cu -l /dev/ttySAC0
@@ -42,7 +42,7 @@ Connected.
 AT-Command Inter
 </pre>
 
-Verify your connection by typing "AT" followed by [Enter] a few times.  You should eventually get an "OK" response.
+Для проверки соединения наберите "AT" и [Enter] несколько раз. В итоге должны получить ответ "OK".
 
 <pre>
 root@fic-gta01:~$ cu -l /dev/ttySAC0
@@ -53,76 +53,75 @@ AT
 OK
 </pre>
 
-== GSM Modem Setup ==
-At this point, the GSM modem has been reset and you are connected to it.  You'll need to connect to the network and configure SMS test mode by issuing a few commands.
+== Настрока GSM - модуля ==
+К этому моменту, GSM - модуль был сброшен и мы подсоединились к нему. Теперь нам нужно подключиться к сети GSM и настроить тестовый решим SMS несколькими командами.
+У нас не получится отправлять / получать SMS без применения следующих команд каждый раз при начале работы.
 
-I am unable to send/receive SMS consistently without issuing all of the following commands every time start up.
-
-=== Turn on Echo ===
-Turning on echo lets you see what you're doing.  This is done using the "ATE1" command.
+=== Включение эхо-повтора ===
+Включение эхо-повтора позволит вам увидеть что вы делаете. Этого можно достичь командой "ATE1".
 
 <pre>
 ATE1
 OK
 </pre>
 
-=== Miscellaneous Setup ===
-Depending on your SIM card and your country, the following commands may not be sufficient for you.  For a T-Mobile SIM card in the United States, these instructions are adequate.  For a PIN enabled SIM card, you may need to use the AT+CPIN="<PIN #>" command or in another country, you may need to enter an SMS Center with the AT+CSCA command.
+=== Дополнитеольные настройки ===
+В зависимости от вашего оператора сотовой связи, следующие команды могут быть не нужны для вас. Для T-Mobile США, эти инструкции адекватны. Если ваша SIM - карта PIN - заблокирована, то вам, скорее всего придется использовать команду AT+CPIN = "<PIN #>"; также вам возможно потребуется ввести SMS - центр командой AT+CSCA.
 
-If you find you need additional setup, please help everyone else by documenting it on this page.
+Если вы считаете, что нужны дополнительные настройки, пожалуйста, помогите всем остальным: опишите их на этой странице. 
 
-=== Power Up the GSM Modem ===
-Power up the GSM modem using "AT+CFUN=1".
+=== Включение GSM - модуля ===
+Чтобы включить GSM - модуль воспользуйтесь командой "AT+CFUN=1".
 
 <pre>
 AT+CFUN=1
 OK
 </pre>
 
-The best reference I've found for this command are the commands in gsmd (usock.c).  According to the code, the GSM modem can be turned off and on using the "AT+CFUN" command.  Refer to [[Manually_using_SMS#Reset the GSM Modem|Reset the GSM Modem]] to see how this is apparently accomplished from the command line.
+Самое лучшее описание работы этой команды я нашел в функциях gsmd (usock.c).  Согласно им, GSM - модуль можно отключать и включать командой "AT+CFUN".  Перейдя по ссылке [[Manually_using_SMS/ru#Сброс GSM - модуля|Сброс GSM - модуля]] вы узнаете как это сделать в командной строке.
 
-To power down the modem:
+Чтобы отключить модуль:
 <pre>
 AT+CFUN=0
 OK
 </pre>
 
-Reference: Source code for gsmd - usock.c
-Reference: [[Hardware:AT_Commands#Section_8.2C_Mobile_Termination_control_and_status_commands | Mobile Termination Control and Status Commands]]
+Ссылка: Исходный код gsmd - usock.c
+Ссылка: [[Hardware:AT_Commands#Section_8.2C_Mobile_Termination_control_and_status_commands | Mobile Termination Control and Status Commands]]
 
-=== Register with the GSM Network ===
-Use "AT+COPS" to ensure you are connected to a GSM network.
+=== Регистрация в сети GSM ===
+Чтобы проверить подключение к сети воспользуйтесь командой "AT+COPS".
 
-You may receive a variety of responses depending on the current state of the GSM modem.  This command makes sure you are connected to a provider.
+Вы можете получать различные ответы в зависимости от текущего состояния GSM - модуля. Результат работы команды дает представления о работе сети.
+
 <pre>
 AT+COPS
 OK
 </pre>
 
-To check the current GSM network, use "AT+COPS?".
+Чтобы узнать текущую сеть (оператора) воспользоваться командой "AT+COPS?".
 
 <pre>
 AT+COPS?
 +COPS: 0,0,"T - Mobile"
 </pre>
 
-Reference: [[Hardware:AT_Commands#Section_7.2C_Network_service_related_commands | Network Service Related Commands]]
-Reference: [http://www.developershome.com/sms/atCommandsIntro.asp AT Commands Introduction]
+Ссылка: [[Hardware:AT_Commands#Section_7.2C_Network_service_related_commands | Network Service Related Commands]]
+Ссылка: [http://www.developershome.com/sms/atCommandsIntro.asp Введение в AT команды (AT Commands Introduction)]
 
-=== SMS Text Mode ===
-Select SMS text mode with the "AT+CMGF=1" command.  Note that the goal of gsmd seems to be to make use of the SMS PDU (protocol data unit) mode which is better for programming.  However, use text mode here as it makes sending and receiving messages possible by mere humans.
+=== Режим SMS Text ===
+Чтобы перейти в режим SMS text воспользуйтесь командой "AT+CMGF=1". Заметим, что цель gsmd ,по-видимому, в том, чтобы использовать режим SMS PDU (protocol data unit), который лучше подходит для программирования. Вместе с тем использование режима SMS text делает отправку и получение сообщений возможным для простого человека.
 
 <pre>
 AT+CMGF=1
 OK
 </pre>
 
-Reference: [http://www.developershome.com/sms/operatingMode.asp Operating Mode]
-Reference: [http://www.developershome.com/sms/operatingMode2.asp Select the Operating Mode]
+Ссылка: [http://www.developershome.com/sms/operatingMode.asp Operating Mode]
+Ссылка: [http://www.developershome.com/sms/operatingMode2.asp Select the Operating Mode]
 
-== Send SMS ==
-To send an SMS, use the "AT+CMGS="<Phone #>"" command. You will be prompted for text with a ">" prompt.  Enter your text message and press [Enter].  Hit <Ctrl-Z> to signal the end of your text.  The message will be sent on its way.
-
+== Отправление SMS ==
+Чтобы отправить SMS сообщения воспользуйтесь командой "AT+CMGS="<Phone #>"". Появится приглашение командной строки ">". Введите текст сообщения и нажмите [Enter]. Нажатие <Ctrl-Z> - сигнал конца ввода текста. Сообщение будет отправлено адресату.
 <pre>
 AT+CMGS="5555551212"
 > HOWDY
@@ -130,8 +129,8 @@ AT+CMGS="5555551212"
 OK
 </pre>
 
-== Receive SMS ==
-Send an SMS to your Neo from an Internet service or another phone.  On your Neo, retrieve all your messages using the "AT+CMGL="ALL"" command.  It should be the last one listed.
+== Получение SMS ==
+Отправьте SMS на ваш Neo, воспользовавшись интернет - сервисами или другим мобильным телефоном. Чтобы получить на Neo все сообщения воспользуйтесь командой "AT+CMGL="ALL"". Вы получите что-то похожее.
 
 <pre>
 AT+CMGL="ALL"
@@ -151,7 +150,7 @@ Free MSG: $25.00 has been added to your account. Your new balance is 140 minutes
 OK
 </pre>
 
-To retrieve unread messages, use "AT+CMGL="REC UNREAD"".
+Чтобы получить непрочитанные сообщения воспользуйтесь "AT+CMGL="REC UNREAD"".
 
 <pre>
 AT+CMGL="REC UNREAD"
@@ -159,7 +158,7 @@ AT+CMGL="REC UNREAD"
 OK
 </pre>
 
-To retrieve read messages, use "AT+CMGL="REC READ"".
+Чтобы получить прочитанные сообщения воспользуйтесь "AT+CMGL="REC READ"".
 
 <pre>
 AT+CMGL="REC READ"
@@ -171,7 +170,7 @@ OK
 == Заключение ==
 Для выхода из cu, воспользуйтесь "~.". Заметим, что ssh также использует escape последовательность для завершения соединения, поэтому вам надо напечатать "~~." в терминале для передачи "~." на другую сторону. 
 
-Существуют как правило команды для удаления и сохранения сообщений. Вы можете узнать о них больше, прочитав литературу по ссылкам, приведенным в статье.
+Существуют, как правило, команды для удаления и сохранения сообщений. Вы можете узнать о них больше, прочитав литературу по ссылкам, приведенным в статье.
 
 {{Languages|Manually_using_SMS}}
 [[Category:Documentation]]
