@@ -1,0 +1,57 @@
+== Porting dfu-util to Windows ==
+
+Note: This is entirely work in progress and has not yet been successfully finished. Nevertheless hopefully the information on this page will serve as a starting point for anyone who find the time to take this further. After all, as many people still use Windows PCs as their every day computers, having a convenient way to re-flash a Neo from Windows would probably open up the user base.
+
+=== Potential Approaches ===
+
+* Cygwin
+: Not very attactive as Cygwin binaries require Cygwin in order to run. You will not get a simple, native dfu-util.exe which can be downloaded and used on any Windows machine that way.
+
+* MinGW/MSYS
+: MinGW (Minimalist GNU for Windows) seems to be the platform of choice.
+
+=== MinGW/MSYS port: What has been done so far ===
+
+The preferred order of installation is:
+
+# Install MinGW (the core installation should be sufficient)
+# Install MSYS (Note: make comes with MSYS while GCC comes with MinGW)
+
+Here is step-by-step howto:
+
+# Download http://sourceforge.net/project/showfiles.php?group_id=2435&package_id=240780&release_id=529741 and execute the installer.
+: Note: It has often been a good idea to install into a directory that has no spaces in the filename.
+# Download MSYS-1.0.10.exe from http://sourceforge.net/project/showfiles.php?group_id=2435&package_id=24963 and install. You will need to enter the path where you installed MinGW. It's a good idea to install MinGW and MSYS next to each other, i.e. C:\SOMEDIR\MinGW and C:\SOMEDIR\MSYS.
+: Note: Make sure to open the "Current Version: 1.0.10" folder as the newer version 1.0.11 does not have an installer yet. (See: http://sourceforge.net/mailarchive/message.php?msg_id=fhvul1%24f6j%241%40ger.gmane.org)
+# Download http://prdownloads.sourceforge.net/mingw/msysDTK-1.0.1.exe?download, which contains the autotools. Install into the same directory into which you installed MSYS itself. The installer might not automatically suggest the right directory.
+: Note: If anyone can spot this file from http://sourceforge.net/project/showfiles.php?group_id=2435, please edit this page. I was only able to find this direct link by using a search engine.
+
+That should give you an Icon in your Start menu in MinGW->MSYS with the name of msys. Open that one, and you will find yourself in a bourne compatible shell on your native Windows system.
+
+You can try to execute some commends such as gcc, make, etc. to make sure you installed everything correctly.
+
+=== Getting dfu-util sources ===
+
+Your home directory in msys lives in the location where you installed MSYS in %MSYS_HOME%\home\%USERNAME. Check out the dfu-util sources there or copy them into that directory in case you checked them out somehwere else on your Windows filesystem.
+
+=== Where we're stuck ===
+
+configure.ac:4: error: Autoconf version 2.59 or higher is required
+configure.ac:4: the top level
+autom4te: /bin/m4 failed with exit status: 1
+configure.ac: `AM_INIT_AUTOMAKE' must be used
+automake: your implementation of AM_INIT_AUTOMAKE comes from an
+automake: old Automake version.  You should recreate aclocal.m4
+automake: with aclocal and run automake again.
+configure.ac: required file `./install-sh' not found
+configure.ac: required file `./mkinstalldirs' not found
+configure.ac: required file `./missing' not found
+automake: no `Makefile.am' found or specified
+
+Looks like we need newer versions of the autotools. There are .tar.bz2 packages with newer versions on SourceForge, but it looks as if you have to install them manually.
+
+=== Where to go from here ===
+
+Even if the autotools will work and create a Makefile, any potential porting work is just about to start. There is a libusb port for Win32, but we don't know yet if the API will be compatible with the Linux version and what other problems might arise.
+
+Stay tuned. Or even better: Help out!
