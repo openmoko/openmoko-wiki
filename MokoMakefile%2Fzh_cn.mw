@@ -1,0 +1,297 @@
+MokoMakefile is a Makefile which saves lots of work when setting up an OpenMoko build environment.
+By automating the setup process of a new OpenMoko build environment, it provides an environment which is configured the same for all the existing developers and should therefore be preferred over manual procedures or individual setup procedures.
+It brings the same repeatability to build environment creation and maintenance as that which the BitBake scripts bring to [[OpenEmbedded]] ease and standardize the process of building OpenEmbedded.
+
+Unlike the manual process described at [[Building OpenMoko from scratch]], MokoMakefile does not install anything into your system (it can and should be started as normal user).
+MokoMakefile is a wrapper around all that to make it easy to set up and maintain a development environment that fully complies with the setup instructions published by OpenMoko.
+
+MokoMakefile is developed by [[User:RodWhitby|Rod Whitby]] - it is not an official product of OpenMoko (although I would be happy for them to pick it up and use it internally).  If there is any discrepancy between the [[OpenMoko2007.2#How_to_build|official OpenMoko build instructions]], and the operation of the MokoMakefile, then you should consider the official instructions to be correct.
+
+The MokoMakefile is able to build either OM-2007.1 or OM-2007.2 images.  The core team chooses the default, but you can select one or the other at the top of the Makefile.
+
+MokoMakefile also builds the QEMU-based Neo1973 emulator as part of the build process and has make targets to install the  OpenMoko images into it and run it. These commands can also be used without downloading and building the whole OpenMoko OpenEmbedded distribution. This part is described in [[Using QEMU with MokoMakefile]].
+
+== Requirements for building OpenMoko ==
+Independent on whether MokoMakefile or a manual process is used to setup an OpenMoko build environment, there are several requirements which must be fulfilled in order for the OpenMoko build to succeed:
+
+* RAM: The build host needs to have at least 512MB of RAM, and about the same amount of swap. Some packages built by OpenEmbedded like busybox are built by compiling all source files into one binary which causes gcc to grow beyond 300MB of size and no part of this memory may be on swap for the compile to finish in predictable time. For busybox, this can be turned off, but turning this off means that busybox will not as well optimized by gcc.
+
+* Disk space: You need about 12 GB of available disk space for the OpenMoko build to succeed (see below for a tip on how to reduce this).
+
+* Time: The initial build takes at least 5 hours (on 2GHz core2duo without multiprocessor optimization) and may take several days on slower machines.
+
+=== Required software ===
+The version control system used by OpenEmbedded is [http://monotone.ca monotone], it is not downloaded and installed by MokoMakefile. If your distribution does not provide a package, you can download and install a static binary from http://monotone.ca
+
+Some distribution specific hints on preparing your build host for building OpenEmbedded are on   http://www.openembedded.org/wiki/OEandYourDistro but they may be outdated, incomplete and do not cover everything which OpenMoko needs to build.
+
+A good guide is [[Building OpenMoko from scratch#Build host prerequisites|the section on build host prerequisites]] in [[Building OpenMoko from scratch]]
+
+If you forgot anything which OE needs itself, OE will tell you shortly after you start building, but it does not check build dependencies of OpenMoko, so you either have to install them before starting or install them after the build failed. OpenEmbedded will continue where it stopped when you restart the build afterwards.
+
+==== Package requirements by distribution ====
+Your distribution needs to provide these commands in order for OpenEmbedded to start building:
+ subversion texi2html texinfo help2man
+
+OpenMoko needs the development packages (with header files, development libraries and tools) in order to finish building:
+ ncurses zlib (or libz) OpenSSL GTK++
+
+Because there are bugs in the interaction of QEMU and GCC-4, you'll need a copy of gcc-3.x installed as well.
+
+===== Debian / Ubuntu =====
+  apt-get install subversion monotone build-essential help2man diffstat texi2html texinfo cvs gawk
+
+  apt-get install libncurses5-dev zlib1g-dev libssl-dev libgtk2.0-dev 
+  # To prevent errors in host validation
+  apt-get install ca-certificates
+  # For OpenMoko 2007.2 using BitBake-1.8.8:
+  apt-get install python-pysqlite2 sqlite3 sqlite3-doc python-pysqlite2-dbg
+  # For building faster
+  apt-get install quilt python-psyco ccache
+  # For qemu, install a second compiler for bug avoidance; MokoMakefile knows to look for it.
+  apt-get install gcc-3.4 g++-3.4 libsdl1.2-dev lynx netpbm dosfstools
+
+===== SuSE =====
+For building OpenMoko on 10.3, you need
+ gcc-c++ ncurses-devel zlib-devel libopenssl-devel gtk2-devel subversion diffstat texinfo help2man and [http://download.opensuse.org/repositories/devel:/tools:/scm/openSUSE_Factory/repodata/repoview/Development.Tools.group.html monotone]
+For MokoMakefile to not fail on compiling qemu-user, you need to use gcc33:
+ wget download.opensuse.org/repositories/devel:/tools:/gcc/openSUSE_Factory/i586/{cpp,gcc}33-3.3.3-41.8.i586.rpm
+ rpm -Uhv {cpp,gcc}33-3.3.3-41.8.i586.rpm
+
+See also the [[Talk:MokoMakefile#Building_on_SuSE_Linux_10.3-AMD64|Talk page on Building on SuSE Linux 10.3-AMD64]]
+
+10.1 and 10.2: same packages as 10.3, but install <code>openssl-devel</code> instead of libopenssl-devel. Use monotone for [http://download.opensuse.org/repositories/devel:/tools:/scm/openSUSE_10.2/repodata/repoview/Development.Tools.group.html 10.2] or [http://download.opensuse.org/repositories/devel:/tools:/scm/SUSE_Linux_10.1/repodata/repoview/Development.Tools.group.html 10.1]
+
+==== For all distributions ====
+As the QEMU-based neo1973 emulator is also built as part of the build process started by MokoMakefile, so you need gcc-3.3 and other packages for building QEMU installed. See [[Using QEMU with MokoMakefile#Build requirements|the build requirements section]] in [[Using QEMU with MokoMakefile]] for information on the required software.
+
+If you are having problems compiling QEMU and do not need it, you can disable building of QEMU by adding following line to build/conf/local.conf file:
+ ENABLE_BINARY_LOCALE_GENERATION = "0"
+
+== Building OpenMoko with MokoMakefile ==
+
+1 - Create your $OMDIR directory (note that you can change ~/moko to any directory you like. If you have your ~moko dir mounted from a different file system, be sure to edit /etc/mtab to add the 'exec' permission to the file system, else bitbake will fail with error messages stating that /usr/bin/env is an invalid interpreter):
+   mkdir ~/moko ; cd ~/moko
+2 - Grab MokoMakefile:
+   wget http://www.rwhitby.net/files/openmoko/Makefile
+
+If that doesn't work, try 
+
+   wget http://svn.nslu2-linux.org/svnroot/mokomakefile/trunk/Makefile
+
+   note: If you want to compile for the old version 2007.1 instead of the new
+         version edit the top of the Makefile. Edit the lines at the top to 
+         look like this:
+             OPENMOKO_GENERATION = 2007.1
+             #OPENMOKO_GENERATION = 2007.2
+
+{{note|For building 2007.2, MokoMakefile uses BitBake 1.8.8 which requires python-sqlite2 and sqlite-3.3 or later. Users of SUSE Linux 10.1 can update to [http://download.opensuse.org/pub/opensuse/distribution/10.2/repo/oss/suse/i586/sqlite-3.3.8-14.i586.rpm the version of openSUSE 10.2]}}
+
+3 - Set up the environment:
+   make setup
+4 - Start building. Before starting a lengthy make process, check the Tips section below for how to make Make multicore aware. You may want to modify the build/conf/local.conf file for your target (emulation/chroot) environment:
+   make openmoko-devel-image
+
+''Hint:'' The images build with this command can be found under {$OMDIR}/build/tmp/deploy/images/neo1973
+
+This will set up the recommended directory structure as described in [[Building OpenMoko from scratch]], will download all the required software (from the right places with the right versions), and will immediately start building an image.
+
+Once you have done this, you can choose to continue using the MokoMakefile to initiate your subsequent builds, or you can go into the build directory and run bitbake commands manually.  The choice is yours.
+
+==Updating the environment==
+For easy maintenance of your build environment the following commands are available.
+
+1 - To update the MokoMakefile to the latest version:
+   make update-makefile 
+
+2 - To make sure that any recent changes to the build directory structure have been applied:
+   make setup 
+
+3 - To update the OpenMoko repository checkout and the MokoMakefile patches to the latest version:
+   make update
+
+A quick way to rebuild a new image with the latest updates:
+   make update-makefile && make setup update openmoko-devel-image
+
+==Build issues==
+First, make sure that the problem is reproducible after running
+
+ make update-makefile && make setup && make update
+
+then run
+
+ make clean-package-<foo>
+
+(where you replace <foo> with the name of the package which is failing)
+
+and finally
+
+ make openmoko-devel-image
+
+If you can get the error to occur three times in a row after running that sequence of commands (including the update and setup steps) three times, then feel free to report it to rwhitby in #openmoko on [http://wiki.openmoko.org/wiki/Development_resources#IRC IRC].
+
+===Known MokoMakefile errors ===
+If you experience the following after changing from OM-2007.1 to OM-2007.2:
+
+ Patch bitbake-1.6.6-om3.patch does not apply (enforce with -f)
+
+then type "make clobber-patches" to fix it.  There was a period of 24 hours when there was a bug in the MokoMakefile which causes this problem.  Once the patches have been clobbered, they will re-download and the problem will not reoccur.
+
+If you see:
+
+ ERROR: No providers of build target u-boot-openmoko (for [])
+
+then look back in the log to see if you encountered an earlier error while building the openmoko-devel-image target. The above error is a side-effect of MokoMakefile's logic to handle the re-naming of "uboot-openmoko" to "u-boot-openmoko".
+
+===Fixes for distribution/environment-specific or isolated issues===
+
+Work-arounds for temporary or isolated problems can be found and should be added to the [[Talk:MokoMakefile|Discussion page]] which is associated with this page.  As they are fixed, they will be removed from that page.
+
+==Tips==
+*You can reduce the amount of consumed disk space significantly by adding
+   INHERIT += "rm_work"
+in your local.conf (e.g. ~/moko/build/conf/local.conf). This will remove the contents of each build/tmp/work/*/<package> directory after the corresponding package builds correctly. As of 10/16/07, this appears to be present in local.conf by default.
+
+*If you an encounter an error with monotone similar to the following:
+   mtn: misuse: database /home/''username''/moko/OE.mtn is laid out according to an old schema
+Then you need to upgrade OE.mtn  Use the following command while in ~/moko:
+   # mtn --db OE.mtn db migrate
+
+*If a certain package does not build due to corrupted download or some such try to remove the sources and rebuild it.
+ rm sources/<package>*
+ cd build
+ . ../setup-env
+ bitbake -crebuild <package>
+after that your build might just work again.
+
+*For people with multiple CPU's (or dual-core ones) this small patch might be useful to build things faster.
+Edit the local.conf and add the following lines:
+ PARALLEL_MAKE = "-j 4"
+ BB_NUMBER_THREADS = "4"
+
+Change the PARALLEL_MAKE and BB_NUMBER_THREADS values to something that suits better if it chokes your machine.
+
+*For amd64 host users you need the patch from http://bugs.openembedded.org/show_bug.cgi?id=1765 to build db3-native
+
+* If you encounter an error related with the qemu-native package and not compiling for the qemu, you can edit the build/conf/local.conf file and add ENABLE_BINARY_LOCALE_GENERATION = "0" line to avoid the error.
+
+* To prevent building tons of locales, add a line like this to local.conf:
+ GLIBC_GENERATE_LOCALES = "en_US.UTF-8 nl_NL.UTF-8"
+
+* To not build any binary locales at all, add this to local.conf:
+ ENABLE_BINARY_LOCALE_GENERATION = "0"
+
+* If you want to rebuild the package indexes (for instance, after compiling a new version of a package) without building <code>openmoko-devel-image</code>, run <code>make build-package-package-index</code>.
+
+[[User:Wurp]] will update this to be a little more comprehensible, but maybe it can help someone as-is in the meantime:
+* If MokoMakefile always fails on some fetch in zlib, just find the binary somewhere, add it to the downloads or sources directory manually (create the .md5 matching file if necessary), and retry.
+
+=== Useful commands ===
+Here is the list (not complete) of useful MokoMakefile commands (actually make targets) and a short description of each one. These should be run inside $OMDIR directory.
+
+; make openmoko-devel-image : build the full development image
+
+; make openmoko-devel-tools : build statically-linked [[dfu-util]] and [[openocd]] binaries
+
+; make openmoko-toolchain : builds [[toolchain]]
+
+; make qemu : builds qemu, downloads flash images from official repository, flashes qemu emulated Neo1973 and runs emulator (see also [[OpenMoko under QEMU]]). 
+
+; make qemu-local : same as ''make qemu'', but uses locally built images instead of official ones.
+
+; make run-qemu : runs qemu with usb keyboard ''(note: qemu must first be built!)''. This target starts the emulator with some predefined set of options. If you need to start it with other options (enable telnet, etc), see [[QEMU_command_line]].
+
+; make build-package-<package name> : buids ''<package name>'' package
+
+; make update-makefile : updates MokoMakefile
+
+; make clean-package-<foo>: cleans the "<foo>" package
+
+; make setup : to make sure that any recent changes to the build directory structure have been applied
+   
+; make update : to update the OpenMoko repository checkout and the MokoMakefile patches to the latest version
+
+==Developing with MokoMakefile==
+
+{{note|If using MokoMakefile with OM2007.2 then references to $OMDIR/openmoko should be replaced with $OMDIR/openembedded.  Also references to tmp/work/armv4t-linux should be replaced with tmp/work/fic-gta01-angstrom-linux-gnueabi}}
+
+For the following explanations $OMDIR is the directory where there Makefile puts all the stuff.
+
+To make in-tree changes and have them built and used by qemu:
+
+  cd $OMDIR/openmoko
+  quilt new descriptive-patch-name.patch
+  quilt add trunk/src/name-of-file-to-change # do this for every file you are about to modify
+  ...make the changes...
+  quilt refresh # this creates a file in $OMDIR/patches/openmoko-HEAD/ and updates the quilt series file there
+
+Note: Do '''NOT''' use absolute paths as this confuses quilt and will get you a diff of the file against /dev/null!
+
+To build the changes and have them used by qemu:
+
+  make build-qemu
+  make flash-qemu-local
+  make run-qemu
+
+If you want to modify applications instead of the openmoko toolchain, this is what you have to do (example: openmoko-messages):
+
+  cd $OMDIR/build
+  . ../setup-env
+  bitbake -c unpack openmoko-messages
+  cd ../build/tmp/work/armv4t-linux/openmoko-messages-0.0.1+svnnow-r2_2276/openmoko-messages/
+  ...make the changes...
+  cd -
+  bitbake openmoko-messages
+
+Then continue with MokoMakefile usage.
+
+If you want to add an application to your openmoko distribution, do this:
+All file edits should be done using quilt as described above. That way a patch can easily be submitted to the openmoko project.
+First, create a directory that will correspond to your package and edit a '''.bb''' file in there:
+  cd $OMDIR/openmoko/
+  quilt new mycoolpackage.patch
+  mkdir trunk/oe/packages/mycoolpackage
+  quilt add trunk/oe/packages/mycoolpackage/mycoolpackage_1.bb
+  quilt edit trunk/oe/packages/mycoolpackage/mycoolpackage_1.bb
+
+The file should have the following content:
+  DESCRIPTION = "This is a cool package"
+  SECTION = "username/mycoolpackage"
+  PV = "1"
+  
+  inherit autotools
+  
+  SRC_URI = "http://www.example.com/download/mycoolpackage-1.tar.gz"
+
+Explanation:
+* DESCRIPTION - Just a short text explaining the package
+* SECTION - I have no clue, but I'll use username/mycoolpackage for now
+* PV - Package Version
+* inherit autotools - The package can be compiled by './configure && make && make install' so we tell MokoMakefile to do it this way.
+* SRC_URI = ... - This is the download location of the package source. It's imperative that the tar.gz contains a directory called '''packagename-packageversion''' (in this case: mycoolpackage-1) so that MokoMakefile can find it automatically or the build will fail.
+
+This is not all. We also need to tell MokoMakfile that it needs to build and include the package in the image. To do this, do
+  $OMDIR/openmoko# quilt edit trunk/oe/packages/tasks/task-openmoko.bb
+Here, increase the value '''PR''' by one and add '''mycoolpackage \''' (with the backslash!) just before the line reading '''#  update-alternatives \'''.
+
+Now run
+  quilt refresh
+  cd ..
+  make update openmoko-devel-image
+
+And if everything's alright you should now have an OpenMoko image to flash to your phone or run in qemu as described above.
+
+=== Hello World application ===
+
+There is a [http://wiki.openmoko.org/wiki/Building_a_hello_world_application Hello World!] tutorial available too.
+
+==Testimonials==
+MokoMakefile is recommended by 4 out of 4 new developers on #openmoko, with testimonials such as "For some reason last night I couldn't get my manual install of everything to work (bb complained about my bbpath I think) ... but with your makefile, it works great!", "MokoMakefile rocks!", "Wow this build system is nice - it just seems more polished than my gumstix toolchain buildroot system", and "make openmoko-devel-image :) - no magic there".
+
+Project page:
+http://mokomakefile.projects.openmoko.org/
+
+{{Languages|MokoMakefile}}
+
+[[Category:Developer]]
+[[Category:Guides]]
