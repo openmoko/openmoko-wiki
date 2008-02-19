@@ -1,0 +1,29 @@
+== The Neo1973 GTA01 (v4) as a day to day OpenMoko phone ==
+''Note: This has been tested using the OpenMoko development snapshot named'' 
+ OpenMoko-openmoko-devel-image-glibc-ipk-P1-Snapshot-20080211-fic-gta01.rootfs.tar.gz
+
+''installed on the SD partition. Kernel is used as it is supplied right in this .tar.gz. ''
+''The author of this small text snippet sees no reason why this would not work with other openmoko configurations, though.''
+
+The main thing keeping most users at the moment (feb08) from using their GTA01 phone for daily use is probably the missing wake-up-from call functionality and default standby and the resulting unacceptable battery life. Now, usually, the phone DOES wake up from a call, but the serial connection to the modem will be messed up due to issues related to a shared line between the modem and the general neo1973 debugging console (info from other wiki pages). Also, it is usually not possible to use the phone part after a suspend-resume cycle.
+ 
+There are some pointer somewhere on this wiki which describe how to work around these serial port problems for QTopia, but apparantly, this still does not wake up the qtopia phone from a call, just makes the phone usable for further calls after it has been suspended (and resumed again).
+
+= Standby/Resume = 
+On my GTA01v4b phone, the default standby functionality in the above snapshot works most of the time (but I just had another annoying hang after suspend :( (white screen with just the top orange line showing the provider name))
+
+= Successful wake up from call and outgoing phone use after wakeup=
+This important, missing functionality can be enabled just like described for the QTopia image, by removing the 
+
+ console=ttySAC0,115200
+
+part from the boot argument line in the uboot boot menu.
+
+If you untar the above archive to your SD card, the following entry in uboot should give you a phone which lasts at least a full (24h) day of standby:
+
+menu_<x>=Boot SD standby-ready: setenv bootargs root=/dev/mmcblk0p1 rootdelay=5 console=tty0 loglevel=8 ${mtdparts}; mmcinit; ext2load mmc 0 0x32000000 /boot/${sd_image_name}; bootm 0x32000000
+
+To set this entry (replace <x> with your first unused menu entry number!) see the description at [[Bootloader]]. Remember to escape all $ and ; characters, or you phone will start booting! :-)
+
+= First results =
+Today's low usage (2 SMS, 2 calls) on a fully charged neo gave about 2/3 of remaining battery on the battery level display. This is after 22h (and maybe some 20min fully on) of standby time during which the phone was fully reachable.
