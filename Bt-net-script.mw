@@ -1,0 +1,31 @@
+Just copy the block below into a script called bt-net, and run bt-net to initiate IP over bluetooth.
+
+Don't forget to change XX:XX:XX:XX:XX:XX out for the bluetooth interface on your PC, as found by executing "hcitool scan" on your neo.
+
+<pre>
+#!/bin/sh
+echo '1' > /sys/bus/platform/devices/gta01-pm-bt.0/power_on 
+
+#!!! change XX... to your correct PC bluetooth interface id (use "hcitool scan" to find it) !!!
+export PC_BT_ID=XX:XX:XX:XX:XX:XX
+sleep 1
+
+#Winders stuff
+#pand -c $1 -r PANU -d NAP -e bnep0 -A -E -S
+#pand -n -c $1 -r PANU -d NAP -e bnep0 -A -E -S
+
+pand -c $PC_BT_ID --service NAP --autozap
+
+#wait for main pc to set up route
+while ! pand -l | grep bnep0
+do
+  echo waiting to connect
+  pand -c $PC_BT_ID --service NAP --autozap
+  sleep 1
+done
+
+
+ip a add 10.0.0.2/24 dev bnep0
+ip r del default
+ip r add default via 10.0.0.1
+</pre>
