@@ -1,6 +1,175 @@
-[[OpenEmbedded]] builds its own cross compiler during the bootstrapping/build process.
+= Introduction =
 
-The links on this page provided a standalone toolchain for [[Bootloader]] and [[Kernel]] development. But this is no longer used or up to date. Please use the toolchain that comes with [[OpenEmbedded]].
+A toolchain is a set of tools that allows you to compile code. For OpenMoko, we have to differenciate the following use-cases:
+
+* Developing a single application
+
+For this, you should use a prebuilt toolchain from the OpenMoko project. Here you can find a recipe to get started with this toolchain leading you through a series of steps to compile a project and run it on your target device. You might have heard about [[OpenEmbedded]], however as an application programmer, you should '''not''' be using [[OpenEmbedded]].
+
+* System Integration and customizing a distribution
+
+For this task, you should use [[OpenEmbedded]] which builds its own cross compiler during the bootstrapping/build process. System Integration and customizing a distribution is out of scope of this page.
+
+=Basic toolchain usage=
+
+==Prerequisites==
+
+You should be reasonably familiar with Linux and its command line tools, have an x86-compatible computer with at least 1G of free disk space. You should have experience with compiling programs from source using your local compiler. The remainder of this document will also assume you have write access in your home directory (~) and <tt>/usr/local/</tt> (becoming root if needed). If any of this is not the case, please call your local administrator for help.
+
+Last but not least you should have a working setup that allows you to compile native software packages using the autotools build system (the triade of '''./configure, make, make install''').
+
+A (partial) list of required packages -- please append as necessary:
+
+* For most Linux version you might only need to install the packages
+** autoconf, automake
+** binutils, gcc, gcc-c++
+** libtool
+** ccache
+** intltool
+
+* For ubuntu (7.10) the following is required:
+ sudo apt-get install gcc g++ autoconf automake binutils libtool libglib2.0-dev glib-gettextize ccache libxrender-dev
+
+==Downloading and installing==
+
+The prebuilt toolchain can be downloaded from [[http://downloads.openmoko.org/toolchains downloads.openmoko.org]]:
+
+* Creating a destination directory can be anywhere, but for example:
+
+  mkdir ~/sources
+  cd ~/sources
+
+* Depending on your CPU type (x86_64 or i686) download the proper package:
+
+  wget http://downloads.openmoko.org/toolchains/openmoko-x86_64-arm-linux-gnueabi-toolchain.tar.bz2
+ or
+  wget http://downloads.openmoko.org/toolchains/openmoko-i686-arm-linux-gnueabi-toolchain.tar.bz2
+
+
+Next, you want to extract it on your filesystem. This toolchain is ''not'' relocatable, it needs to be installed into <tt>/usr/local/openmoko/</tt>.
+Now you have the following options:
+
+* Extract it directly as root, so use command "su" first (or prefix the tar command with "sudo" when you are using Debian/Ubuntu):
+
+   cd /
+   tar xjvf ~/sources/openmoko-XYZ-arm-linux-gnueabi-toolchain.tar.bz2
+
+* On Debian-based systems, you can use alien(+fakeroot) to create an easy-to-uninstall package from this .tar.bz2 (install with dpkg -i <package.deb>):
+
+   bunzip2 openmoko-x86_64-arm-linux-gnueabi-toolchain.tar.bz2
+   gzip openmoko-x86_64-arm-linux-gnueabi-toolchain.tar
+   fakeroot alien -d openmoko-x86_64-arm-linux-gnueabi-toolchain.tar.gz
+
+* The prebuilt toolchain is for x86_64 or i686. If you wanted, you could build it on your own with OE:
+
+   bitbake meta-toolchain-openmoko
+
+Finally, everytime you want to use this toolchain, you need to alter some environment variables, so that your tools will be found. The toolchain provides a script to do that, so the only thing you need to do is to source it.
+Note that if you are not using a "sh" or "bash" shell (check with "echo $SHELL") that you need
+to start "sh" or "bash" first.
+
+ . /usr/local/openmoko/arm/setup-env
+
+==Building a sample project==
+
+In a choosen destination directory (in this example ~/):
+
+* copy the downloaded sample application source:
+
+ cp -r /usr/local/openmoko/source/openmoko-sample2 ~/
+
+* Remember to set the proper environment variables (again with "sh" or "bash") for openmoko:
+
+ . /usr/local/openmoko/arm/setup-env
+
+* You need to create a build configuration for this application. This also checks if all needed libraries, tools, etc.. is available on your system. If this fails see the notes about the needed packages in the section "Prerequisites" mentioned earlier.
+
+ om-conf openmoko-sample2
+
+* Optionally now you can modify the source code in openmoko-sample2/src
+
+* To build the application from the source code you only need to use "make":
+
+ cd openmoko-sample2
+ make
+
+If you want to install this project on host for staging usage later, a shared library, for example, you can do the following to install it into a given configured prefix.
+
+ om-conf --prefix=/usr/local/openmoko openmoko-sample2
+ cd openmoko-sample2
+ make install
+
+==Packaging your application==
+
+We have included a script to make an ipkg out of your application. Note that this is not needed to test your application on the Neo (for that you can just scp the resulting binary and data over), however it's very handy if you want to distribute your application to others.
+
+ om-make-ipkg openmoko-sample2
+
+Now you got openmoko-sample2_0.1_armv4t.ipk , you can `scp' it to your
+Neo and install it:
+
+ scp openmoko-sample2_0.1_armv4t.ipk root@192.168.0.202:
+ ssh root@192.168.0.202 ipkg install openmoko-sample2_0.1_armv4t.ipk
+
+Note that while you can redistribute the generated ipkg, be aware that this is a bare-bones ipk that contains no further information, i.e. you will lack library dependencies. See below how to fix this.
+
+You can also supply the version number, a description, and an author / contacts string in a control file:
+
+ om-make-ipkg myapp myapp_control
+
+A template of myapp_control:
+
+ Package: $appname
+ Version: 0.1
+ Description: package built by openmoko toolchain
+ Section: openmoko/applications
+ Priority: optional
+ Maintainer: $USER
+ Architecture: armv4t
+ Homepage: http://www.openmoko.org/
+ Depends: 
+ Source: ${SRC}
+
+==Where to go from here==
+
+Using the external toolchain is an easy way to build applications for your Neo. If you are familiar with this procedure, you might also want to look into
+* Using [[Qemu]] to test your applications in an emulated environment
+* Using [[Host-based_development_with_Xoo_and_Xephyr|host-based development]] to improve your efficiency
+* Using [[OpenEmbedded]] to customize your OpenMoko distribution image
+
+=Advanced topics=
+==Using toolchain provided libraries==
+Add the necessary libraries to the _LDADD field in src/Makefile.am, for example:
+ openmoko_sample2_LDADD  = @DEPENDENCIES_LIBS@ -lmokogsmd2
+
+make sure to run om-conf again after this.
+
+==Installing additional libraries into the toolchain==
+
+Sooner or later you will want to compile an application that has dependencies which can't be fulfilled by the precompiled toolchain, e.g. some obscure libraries.
+
+In that case, feel free to request the inclusion of additional libraries into the next release of the OpenMoko toolchain. Until then, here is how you enhance your already installed toolchain. Say, we want to add the library called liburiparse:
+
+ cd ~/source
+ wget http://downloads.sourceforge.net/uriparser/uriparser-0.6.0.tar.bz2
+ ./configure --host=arm-angstrom-linux-gnueabi --prefix=/usr/local/openmoko/arm
+ make
+ make install
+
+That's it.
+
+==Getting your application packaged by OE==
+
+If you have written a cool application which you want to share with others, the best way to do that is to
+
+# upload your application source code to a public location
+# submit a [[BitBake]] recipe to [[OpenEmbedded]], preferably via the [http://bugs.openembedded.org OpenEmbedded bugtracker].
+
+See also [[Customizing your OpenMoko distribution]].
+
+==Troubleshooting==
+
+* Please use the [http://lists.openmoko.org/mailman/listinfo/openmoko-devel OpenMoko-Devel] mailing list.
 
 {{Languages|Toolchain}}
 
