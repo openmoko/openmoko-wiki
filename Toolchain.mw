@@ -67,19 +67,39 @@ to start "sh" or "bash" first.
 
 ==Building a sample project==
 
-In your home directory:
+In a choosen destination directory (in this example ~/):
+
+* copy the downloaded sample application source:
 
  cp -r /usr/local/openmoko/source/openmoko-sample2 ~/
+
+* Remember to set the proper environment variables (again with "sh" or "bash") for openmoko:
+
  . /usr/local/openmoko/arm/setup-env
+
+* You need to create a build configuration for this application. This also checks if all needed libraries, tools, etc.. is available on your system. If this fails see notes about needed packages at the end of this section.
+
  om-conf openmoko-sample2
- <modify it if you want and make>
 
-[Edit] You may need to install packages 'intltool' and 'ccache' on your local linux machine if om-conf fails.
+* Optionally now you can modify the source code in openmoko-sample2/src
 
-If you want to install this project on host for staging usage later, a shared library, for example, you can then call <tt>make install</tt> to install it into the configured prefix.
+* To build the application from the source code you only need to use "make":
+
+ cd openmoko-sample2
+ make
+
+If you want to install this project on host for staging usage later, a shared library, for example, you can do the following to install it into a given configured prefix.
 
  om-conf --prefix=/usr/local/openmoko openmoko-sample2
+ cd openmoko-sample2
  make install
+
+Note that if you experience problems of missing packages the following might help: 
+
+* For most Linux version you might only need to install the packages 'intltool' and 'ccache'
+
+* For ubuntu (7.10) the following is required:
+  sudo apt-get install libtool libglib2.0-dev glib-gettextize ccache libxrender-dev
 
 ==Packaging your application==
 
