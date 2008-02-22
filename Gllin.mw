@@ -21,6 +21,20 @@ mkdir -p /s/s/bus/platform/devices/
 ln -s  /sys/bus/platform/devices/neo1973-pm-gps.0/ /s/s/bus/platform/devices/gta01-pm-gps.0
 </pre>
 
+''<font color=red>WARNING:</font>The first step above should not be executed on the phone itself, as BusyBox's sed will corrupt the binary file.  It worked for me when run on my host (thanks balrog-kun!)
+''
+<pre>
+# gllin.real2 was produced by BusyBox sed
+lib/ld-linux.so.2 --library-path /home/root/gllin/lib:/home/root/gllin/usr/lib /home/root/gllin/gllin.real2 -low 5
+/home/root/gllin/gllin.real2: error while loading shared libraries: /home/root/gllin/gllin.real2: ELF file version does not match current one
+
+# gllin.real3 was produced by GNU sed version 4.1.5
+$ lib/ld-linux.so.2 --library-path /home/root/gllin/lib:/home/root/gllin/usr/lib /home/root/gllin/gllin.real3 -low 5
+GPSpwr "1" > /s/s/bus/platform/devices/gta01-pm-gps.0/power_lp_io_3v3
+GPSpwr "1" > /s/s/bus/platform/devices/gta01-pm-gps.0/power_lp_io_3v3
+...
+</pre>
+
 == gllin options ==
 
 The /home/root/gllin/gllin file installed by the new (legitimate!) .ipk package is really just a shell script.  You can modify the options passed to gllin.real by editing that script.  Here are the options:
