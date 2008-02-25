@@ -14,33 +14,13 @@ The first set of parameters are used for CSD (Circuit Switched Data) service.
 !Type
 !Description
 |-
+| '''''Profile Name''''' 
+| String 
+| A name for identifying this connection profile object
+|-
 | '''''Dial Number'''''
 | String
 | Phone number to dial for connecting data service
-|-
-|}
-
-The second set of parameters is used for GPRS connections
-{|border="1" cellspacing="1" cellpadding="2" align="left" width="100%"
-!Name
-!Type
-!Description
-|-
-| '''''APN'''''
-| String
-| Access Point Name (as specified in [http://www.3gpp.org/ftp/Specs/archive/07_series/07.60/0760-720.zip 3GPP TS 07.60])
-|-
-|}
-
-The third set of parameters is common to both:
-{|border="1" cellspacing="1" cellpadding="2" align="left" width="100%"
-!Name
-!Type
-!Description
-|-
-| '''''Name'''''
-| String 
-| A name for identifying this connection profile object
 |-
 | '''''User Identity'''''
 | String
@@ -54,144 +34,32 @@ The third set of parameters is common to both:
 | enum(None, Secured,Unsecured)
 | Kind of authentication used, None, PAP, CHAP 
 |-
-| '''''Linger Time'''''
-| Number
-| Number of seconds after last request before releasing connection
-|-
-| '''''IP Addr'''''
-| IpAddr
-| Requested Internet Address
-|-
-| '''''DNS'''''
+| DNS
 | IpAddr
 | Internet Address for the DNS server
 |-
-| '''''Data Compression'''''
-| Boolean
-| Use data compression
-|-
-| '''''Headers Compression'''''
-| Boolean
-| Use headers compression
+| Linger Time
+| Number
+| Number of seconds after last request before releasing connection
 |-
 |}
 
-This connection profile and PLMN capabilities (more specificaly in term of number of simultaneous PDP contexts availables) will be the basis for network resource contention resolution.
-
-Here is a XML Schema for handling User Provisionning:
-
-  <?xml version="1.0"?>
-  <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-             targetNamespace="http://www.openmoko.org"
-             xmlns="http://www.openmoko.org"
-             elementFormDefault="qualified">
-  
-    <xs:element name="DialNum">
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:pattern value="\+?([0-9])+"/>
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:element>
-  
-    <xs:element name="APN" type="xs:string"/>
-    <xs:element name="Name" type="xs:string"/>
-    <xs:element name="UserId" type="xs:string"/>
-    <xs:element name="Password" type="xs:string"/>
-    <xs:element name="AuthentType" type="AuthentType"/>
-    <xs:element name="LingerTime" type="xs:positiveInteger"/>
-    <xs:element name="IpAddr" type="IpAddr"/>
-    <xs:element name="DNS" type="IpAddr"/>
-    <xs:element name="DataCompr" type="xs:boolean"/>
-    <xs:element name="HdrCompr" type="xs:boolean"/>
-  
-    <xs:simpleType name="quad">
-      <xs:restriction base="xs:integer">
-        <xs:minInclusive value="0"/>
-        <xs:maxInclusive value="255"/>
-      </xs:restriction>
-    </xs:simpleType>
-  
-    <xs:complexType name="IpAddr">
-      <xs:sequence>
-        <!-- IPAddr ::= quad1.quad2.quad3.quad4 -->
-        <xs:element name="quad1" type="quad"/>
-        <xs:element name="quad2" type="quad"/>
-        <xs:element name="quad3" type="quad"/>
-        <xs:element name="quad4" type="quad"/>
-      </xs:sequence>
-    </xs:complexType>
-  
-    <xs:simpleType name="AuthentType">
-      <xs:restriction base="xs:string">
-        <xs:enumeration value="None"/>
-        <xs:enumeration value="Unsecured"/>
-        <xs:enumeration value="Secured"/>    
-      </xs:restriction>
-    </xs:simpleType>
-  
-    <xs:element name="ProvCommon">
-      <xs:complexType> 
-        <xs:sequence>
-          <xs:element ref="Name"/>
-          <xs:element ref="UserId"/>
-          <xs:element ref="Password"/>
-          <xs:element ref="AuthentType"/>
-          <xs:element ref="LingerTime"/>
-          <xs:element ref="IpAddr"/>
-          <xs:element ref="DNS"/>
-          <xs:element ref="DataCompr"/>
-          <xs:element ref="HdrCompr"/>
-        </xs:sequence>
-      </xs:complexType>
-   </xs:element>
-  
-    <xs:element name="CsdProvisionning">
-      <xs:complexType>
-        <xs:sequence>
-          <xs:element ref="DialNum"/>
-          <xs:element ref="ProvCommon"/>
-        </xs:sequence>
-      </xs:complexType>
-    </xs:element>
-  
-    <xs:element name="GprsProvisionning">
-      <xs:complexType>
-        <xs:sequence>
-          <xs:element ref="APN"/>
-          <xs:element ref="ProvCommon"/>
-        </xs:sequence>
-      </xs:complexType>
-    </xs:element>
-  
-    <xs:element name="Provisionning">
-      <xs:complexType>
-        <xs:choice>
-          <xs:element ref="CsdProvisionning"/>
-          <xs:element ref="GprsProvisionning"/>
-        </xs:choice>
-      </xs:complexType>
-    </xs:element>
-  
-  </xs:schema>
-
-== Extra Parameters ==
-
-These parameters profiles are used for specifying the way a browser or a specific application will use Connection Profile to access data. 
-They are:
-
-* Profile name: (string) the name of this set of parameters
-* Homepage: (string) the home page URL
-* Protocol: (enum(WTP, HTTP)) if the browser or application support WAP this is the protocol used for accessing content (WTP/HTTP)
-* ProxySettings: this is a compound parameter for proxy usage. It contains:
-** UseProxy: (boolean) use/don't use a proxy
-** Login: (string) name for proxy user
-** Password: (string) password for proxy user
-** IP Addr: (ipaddr) IP address of the proxy
-** Secured Port: (positive integer) port for secured communication
-** Unsecured Port: (positive integer) port for unsecured communication
-* Connection Profile: (string) name of the connection profile to use
-
-For specific applications, some other parameters could be defined. For example, for an audio streaming application some could define QoS parameters or a home SDP.
-
-[[Category:Software ideas]]
+The second set of parameters is used for GPRS connections
+{|border="1" cellspacing="1" cellpadding="2" align="left" width="100%"
+!Name
+!Type
+!Description
+|-
+| Profile Name 
+| String 
+| A name for identifying this connection profile object
+|-
+| APN
+| String
+| Access Point Name (as specified in [http://www.3gpp.org/ftp/Specs/archive/07_series/07.60/0760-720.zip 3GPP TS 07.60])
+|-
+|
+|
+|
+|-
+|}
