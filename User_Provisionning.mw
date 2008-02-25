@@ -67,3 +67,97 @@ The third set of parameters is common to both:
 | Internet Address for the DNS server
 |-
 |}
+
+
+Here is a XML Schema for handling User Provisionning:
+
+  <?xml version="1.0"?>
+  <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+             targetNamespace="http://www.openmoko.org"
+             xmlns="http://www.openmoko.org"
+             elementFormDefault="qualified">
+  
+    <xs:element name="dialnum">
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:pattern value="+?[0-9]{10,13}"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:element>
+  
+    <xs:element name="apn" type="xs:string"/>
+    <xs:element name="name" type="xs:string"/>
+    <xs:element name="userid" type="xs:string"/>
+    <xs:element name="password" type="xs:string"/>
+    <xs:element name="authent_type" type="authent_type"/>
+    <xs:element name="linger_time" type="xs:positiveInteger"/>
+    <xs:element name="ipaddr" type="ipaddr"/>
+    <xs:element name="dns" type="ipaddr"/>
+  
+    <xs:simpleType name="quad">
+      <xs:restriction base:"xs:integer">
+        <xs:minInclusive value="0"/>
+        <xs:maxInclusive value="255"/>
+      </xs:restriction>
+    </xs:simpleType>
+  
+    <xs:complexType name="ipaddr">
+      <xs:sequence>
+        <!-- IPAddr ::= quad1.quad2.quad3.quad4 -->
+        <xs:element name="quad1" type="quad"/>
+        <xs:element name="quad2" type="quad"/>
+        <xs:element name="quad3" type="quad"/>
+        <xs:element name="quad4" type="quad"/>
+      </xs:sequence>
+    </xs:complexType>
+  
+    <xs:simpleType name="authent_type">
+      <xs:restriction base="xs:string">
+        <xs:enumeration value="None"/>
+        <xs:enumeration value="Unsecured"/>
+        <xs:enumeration value="Secured"/>    
+      </xs:restriction>
+    </xs:simpleType>
+  
+    <xs:element name="prov_common">
+      <xs:complexType> 
+        <xs:sequence>
+          <xs:element ref="name"/>
+          <xs:element ref="userid"/>
+          <xs:element ref="password"/>
+          <xs:element ref="authent_type"/>
+          <xs:element ref="linger_time"/>
+          <xs:element ref="ipaddr"/>
+          <xs:element ref="dns"/>
+        </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+  
+    <xs:element name="csd_provisionning">
+      <xs:complexType>
+        <xs:sequence>
+          <xs:element ref="dialnum"/>
+          <xs:element ref="prov_common"/>
+        </xs:sequence>
+      </xs:complexType>
+    </xs:element>
+  
+    <xs:element name="gprs_provisionning">
+      <xs:complexType>
+        <xs:sequence>
+          <xs:element ref="apn"/>
+          <xs:element ref="prov_common"/>
+        </xs:sequence>
+      </xs:complexType>
+    </xs:element>
+  
+    <xs:element name="provisionning">
+      <xs:complexType>
+        <xs:choice>
+          <xs:element name="csd_provisionning" type="csd_provisionning"/>
+          <xs:element name="gprs_provisionning" type="gprs_provisionning"/>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  
+  </xs:schema>
