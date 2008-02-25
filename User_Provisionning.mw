@@ -85,24 +85,24 @@ Here is a XML Schema for handling User Provisionning:
              xmlns="http://www.openmoko.org"
              elementFormDefault="qualified">
   
-    <xs:element name="dialnum">
+    <xs:element name="DialNum">
       <xs:simpleType>
         <xs:restriction base="xs:string">
-          <xs:pattern value="+?[0-9]{10,13}"/>
+          <xs:pattern value="\+?([0-9])+"/>
         </xs:restriction>
       </xs:simpleType>
     </xs:element>
   
-    <xs:element name="apn" type="xs:string"/>
-    <xs:element name="name" type="xs:string"/>
-    <xs:element name="userid" type="xs:string"/>
-    <xs:element name="password" type="xs:string"/>
-    <xs:element name="authent_type" type="authent_type"/>
-    <xs:element name="linger_time" type="xs:positiveInteger"/>
-    <xs:element name="ipaddr" type="ipaddr"/>
-    <xs:element name="dns" type="ipaddr"/>
-    <xs:element name="datacompr" type="xs:boolean"/>
-    <xs:element name="hdrcompr" type="xs:boolean"/>
+    <xs:element name="APN" type="xs:string"/>
+    <xs:element name="Name" type="xs:string"/>
+    <xs:element name="UserId" type="xs:string"/>
+    <xs:element name="Password" type="xs:string"/>
+    <xs:element name="AuthentType" type="AuthentType"/>
+    <xs:element name="LingerTime" type="xs:positiveInteger"/>
+    <xs:element name="IpAddr" type="IpAddr"/>
+    <xs:element name="DNS" type="IpAddr"/>
+    <xs:element name="DataCompr" type="xs:boolean"/>
+    <xs:element name="HdrCompr" type="xs:boolean"/>
   
     <xs:simpleType name="quad">
       <xs:restriction base="xs:integer">
@@ -111,7 +111,7 @@ Here is a XML Schema for handling User Provisionning:
       </xs:restriction>
     </xs:simpleType>
   
-    <xs:complexType name="ipaddr">
+    <xs:complexType name="IpAddr">
       <xs:sequence>
         <!-- IPAddr ::= quad1.quad2.quad3.quad4 -->
         <xs:element name="quad1" type="quad"/>
@@ -121,7 +121,7 @@ Here is a XML Schema for handling User Provisionning:
       </xs:sequence>
     </xs:complexType>
   
-    <xs:simpleType name="authent_type">
+    <xs:simpleType name="AuthentType">
       <xs:restriction base="xs:string">
         <xs:enumeration value="None"/>
         <xs:enumeration value="Unsecured"/>
@@ -129,43 +129,45 @@ Here is a XML Schema for handling User Provisionning:
       </xs:restriction>
     </xs:simpleType>
   
-    <xs:element name="prov_common">
+    <xs:element name="ProvCommon">
       <xs:complexType> 
         <xs:sequence>
-          <xs:element ref="name"/>
-          <xs:element ref="userid"/>
-          <xs:element ref="password"/>
-          <xs:element ref="authent_type"/>
-          <xs:element ref="linger_time"/>
-          <xs:element ref="ipaddr"/>
-          <xs:element ref="dns"/>
+          <xs:element ref="Name"/>
+          <xs:element ref="UserId"/>
+          <xs:element ref="Password"/>
+          <xs:element ref="AuthentType"/>
+          <xs:element ref="LingerTime"/>
+          <xs:element ref="IpAddr"/>
+          <xs:element ref="DNS"/>
+          <xs:element ref="DataCompr"/>
+          <xs:element ref="HdrCompr"/>
         </xs:sequence>
       </xs:complexType>
    </xs:element>
   
-    <xs:element name="csd_provisionning">
+    <xs:element name="CsdProvisionning">
       <xs:complexType>
         <xs:sequence>
-          <xs:element ref="dialnum"/>
-          <xs:element ref="prov_common"/>
+          <xs:element ref="DialNum"/>
+          <xs:element ref="ProvCommon"/>
         </xs:sequence>
       </xs:complexType>
     </xs:element>
   
-    <xs:element name="gprs_provisionning">
+    <xs:element name="GprsProvisionning">
       <xs:complexType>
         <xs:sequence>
-          <xs:element ref="apn"/>
-          <xs:element ref="prov_common"/>
+          <xs:element ref="APN"/>
+          <xs:element ref="ProvCommon"/>
         </xs:sequence>
       </xs:complexType>
     </xs:element>
   
-    <xs:element name="provisionning">
+    <xs:element name="Provisionning">
       <xs:complexType>
         <xs:choice>
-          <xs:element name="csd_provisionning" type="csd_provisionning"/>
-          <xs:element name="gprs_provisionning" type="gprs_provisionning"/>
+          <xs:element ref="CsdProvisionning"/>
+          <xs:element ref="GprsProvisionning"/>
         </xs:choice>
       </xs:complexType>
     </xs:element>
