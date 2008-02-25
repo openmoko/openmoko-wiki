@@ -41,7 +41,37 @@ Thus if the BOOT MENU shows, you just have to hit the space bar and the phone so
 
 While booting OpenMoko the progress will be shown in text mode. Depending on your computer's performance it might take a while (some minutes even) to complete the boot. When complete you will see the graphical interface as will be shown on the phone itself (but slightly larger due to  the larger pixelsize of your screen).
 
+A few pointers on using OpenMoko:
+* You can select the icon that looks like "+" for a list of applications you can run.
+* You can select the icon that looks like "three gears" for a list of applications that are running now. Here you can also terminate unwanted applications when you are unable to do so from within the application itself.
+* You can select the icon that looks like a "house" to get back to the first home screen.
+* The statusbar at the top is always shown and by clicking on the top-left corner you can switch to another application that is already running. The "Home" application is always running and clicking on it will bring you back to the home screen.
+
 See [[Qemu]] for more advanced information on running OpenMoko in Qemu.
+
+==Installing ipk packages==
+First you need a xxx.ipk package, see [[toolchain]] on how to compile an application for the ARM CPU and create the package.
+
+Note that if at this point you have the OpenMoko Qemu running, it is probably wise to terminate it first.
+Then you can install the xxx.ipk package for access by the Qemu emulator with:
+
+ cd openmoko
+ mkdir -p build/tmp/deploy/glibc/ipk/a
+ cp xxx.ipk build/tmp/deploy/glibc/ipk/a/xxx_a.ipk
+ make qemu-copy-package-xxx
+
+''Note: for some reason qemu-copy-package-xxx looks for above source file.
+Maybe this part can be improved, or a different command can overcome the problem of creating this directory.''
+
+When above make command was succesful the next time you start OpenMoko Qemu,
+you still need to make the installed application available in the application list.
+For this you can select from within OpenMoko the terminal application
+(Select icon that looks like "+" for the list of available applicaitons, select "Applications" and select the "Terminal").
+In this terminal double-click, so you can type in the commands:
+ ipkg install /media/mmcblk0/xxx_a.ipk
+ exit
+After the "exit" command you should return to the Task list, in which the newly
+added application should be listed under a name which was choosen when building the ipk package.
 
 == Update Openmoko==
 * Open your terminal (Applications->Accessories->Terminal).
