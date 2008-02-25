@@ -1,0 +1,55 @@
+The internal flash memory is divided into partitions of several uses. The exact partition sizes are stored in the [[bootloader]] environment variable "mtdblocks", and depend on [[bad blocks]] of each device. [[Flashing openmoko]] updates partition contents.
+
+GTA02 partitions different from GTA01 partitions, it comes with extra factory partition for productions 
+
+{| class="wikitable sortable" style="margin: 0em " cellspacing="0" cellpadding="3" border="1" 
+! Name !! DFU# !! Linux mtd# !! Size !! Purpose
+|-
+| u-boot || 1 || 0 || 256 kB || [[Bootloader]] binary
+|-
+| u-boot_env || 2 || 1 || 16 kB || Checksummed bootloader config
+|-
+| kernel || 3 || 2 || 2 MB || [[Kernel]] uImage binary
+|-
+| splash || 4 || 3 || 640 kB || [[Splash_screen#U-boot_Splash|Bootloader splash screen]]
+|-
+| rootfs || 5 || 4 || rest of the 64 MB || JFFS2-formatted [[userspace root image|file system]]
+|}
+
+== Via DFU ==
+
+:''See also [[USB DFU]] and [[dfu-util]].''
+
+<pre>
+memento:~# dfu-util -l
+dfu-util - (C) 2007 by OpenMoko Inc.
+This program is Free Software and has ABSOLUTELY NO WARRANTY
+
+Found DFU: [0x1457:0x5119] devnum=9, cfg=0, intf=0, alt=0, name="RAM 0x32000000"
+Found DFU: [0x1457:0x5119] devnum=9, cfg=0, intf=0, alt=1, name="u-boot"
+Found DFU: [0x1457:0x5119] devnum=9, cfg=0, intf=0, alt=2, name="u-boot_env"
+Found DFU: [0x1457:0x5119] devnum=9, cfg=0, intf=0, alt=3, name="kernel"
+Found DFU: [0x1457:0x5119] devnum=9, cfg=0, intf=0, alt=4, name="splash"
+Found DFU: [0x1457:0x5119] devnum=9, cfg=0, intf=0, alt=5, name="rootfs"
+</pre>
+
+== In U-Boot ==
+
+:''See also [[bootloader]].''
+
+<pre>
+GTA01Bv4 # printenv mtdparts
+mtdparts=mtdparts=neo1973-nand:0x00040000(u-boot),0x00004000(u-boot_env),0x00200000(kernel),0x000a0000(splash),0x03d1c000(rootfs)
+</pre>
+
+== In Linux ==
+
+<pre>
+root@fic-gta01:~$ cat /proc/mtd
+dev:    size   erasesize  name
+mtd0: 00040000 00004000 "u-boot"
+mtd1: 00004000 00004000 "u-boot_env"
+mtd2: 00200000 00004000 "kernel"
+mtd3: 000a0000 00004000 "splash"
+mtd4: 03d1c000 00004000 "rootfs"
+</pre>
