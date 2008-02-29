@@ -78,17 +78,14 @@ When you boot Linux on the smartphone, or if the smartphone powers down, Mac OS 
 
 == USB Networking ==
 
-There are two drivers you can use to talk to the RNDIS/Ethernet Gadget that the Neo1973 presents to its host system. The main difference between them is stability, but both have their own problems. Leopard needs further testing (Apple revised the driver).
+There are two drivers you can use to talk to the RNDIS/Ethernet Gadget that the Neo1973 presents to its host system. The main difference between them is stability, but both have their own problems. Leopard needs further testing (Apple revised the driver and the Network System Settings).
 
-MacOS X 10.4.10 and later includes a driver for RNDIS/Ethernet Gadget devices. Launch System Preferences -> Network and you should see "new interface detected enXX". Note: 10.5 (Leopard) doesn't show this for a Neo1973 running 2007.11. You'll only get the serial port, which is detected as a modem. I'm still investigating why. The Ethernet device will show up in ifconfig though.
+=== Apple CDC Ethernet driver 10.4.10 ===
+MacOS X 10.4.10 and later includes a driver for RNDIS/Ethernet Gadget devices. Launch System Preferences -> Network and you should see "new interface detected enXX". 
 
-The following has been reported on the Apple bug tracker, and they replied it should be fixed on Leopard: Each time you reboot, the interface will get a different Ethernet address. This in turn makes Mac OS X create a new configuration record. After a while you'll end up with a load of unusable enXX devices - if you don't periodically clean them out. Open System Preferences and go to Network -> Show(Network Port Configurations) -> Select an enXX -> Delete.
+<b>Issue</b>: Each time you reboot the Neo, the interface will get a different Ethernet address. This in turn makes Mac OS X create a new configuration record. After a while you'll end up with a load of unusable enXX devices - if you don't periodically clean them out. Open System Preferences and go to Network -> Show(Network Port Configurations) -> Select an enXX -> Delete.
 
-
-You can also use the open source driver from [http://www.dsitri.de/wiki.php?page=AJZaurusUSB]. It was developed for handheld devices like iPAQ, Sharp Zaurus and Motorola A760, but works for OpenMoko as well. Download and install according to the manual found inside the package. The code is GPL'd and should run on both Intel and PPC Macs.
-
-After rebooting or loading the kernel extension by hand, you should have a new Ethernet interface in your System Preferences/Network. (<i>NOTE: It does not have the same problem as the Apple driver does, where it constantly adds to the list of interfaces each time you reboot the neo, because the driver provides a constant ethernet address independently what the Neo says.</i>). <b>NOTE</b>: this driver is sometimes a bit flaky, and a reboot of the Mac seems to bring it back. It is especially critical about hot unplugging the OM and sleep modes of MacBooks. This may even result in a Kernel Panic.
-
+<b>Note</b>: this is not a problem to blaim MacOSX for because it tries to make network configuration simpler based on the assumption of stable Ethernet addresses.
 
 Use this configuration on the new interface:
 <pre>
@@ -98,9 +95,23 @@ Subnet:   255.255.255.0 (should be the default)
 Router:   192.168.0.202 (not actually needed, OS X can figure this out for itself, unless you have other conflicting configurations)
 </pre>
 
-This might conflict with some WLAN routers which also use the 192.168.0.0 network. Fixing this is beyond the scope of this guide, you need a more general introduction to networking then. If it doesn't conflict, You should be able to connect to your Neo! Try using ping 192.168.0.202 and the roundtrip time should be between 1 and 2 ms.
+<b>Tip</b>: This might conflict with some WLAN routers which also use the 192.168.0.0 network. Fixing this is beyond the scope of this guide, you need a more general introduction to networking then. If it doesn't conflict, You should be able to connect to your Neo! Try using ping 192.168.0.202 and the roundtrip time should be between 1 and 2 ms.
 
-run "ssh root@192.168.0.202" to get in, and try pinging (from the neo) the outside world (e.g. "ping google.com"). If that works then your Mac is routing the neo globally--congratulations!--if not.. <i>XXX fill in</i>. You can also [[scp]] files back and forth. You can telnet, SSH, SMB or do whatever you want if you install software that enables you to set up TCP/IP network over your USB connection.
+<b>Test</b>: run "ssh root@192.168.0.202" to get in, and try pinging (from the neo) the outside world (e.g. "ping google.com"). If that works then your Mac is routing the neo globally--congratulations!--if not.. <i>XXX fill in</i>. You can also [[scp]] files back and forth. You can telnet, SSH, SMB or do whatever you want if you install software that enables you to set up TCP/IP network over your USB connection.
+
+=== Apple CDC Ethernet driver 10.5.x ===
+
+<b>Issue</b>:10.5 (Leopard) doesn't show a new ethernet interface for a Neo1973 running 2007.11. You'll only get the serial port, which is detected as a modem. I'm still investigating why. The Ethernet device will show up in ifconfig though.
+
+=== AJZaurusUSB driver ===
+
+You can also use the open source driver from [http://www.dsitri.de/wiki.php?page=AJZaurusUSB]. It was developed for handheld devices like iPAQ, Sharp Zaurus and Motorola A760, but works for OpenMoko as well. Download and install according to the manual found inside the package. The code is GPL'd and should run on both Intel and PPC Macs.
+
+After rebooting or loading the kernel extension by hand, you should have a new Ethernet interface in your System Preferences/Network.
+
+<b>Note</b>: This driver does not have the same problem as the Apple driver does, where it constantly adds to the list of interfaces each time you reboot the neo, because the driver provides a constant ethernet address independently what the Neo says.
+
+<b>Issue</b>: this driver is sometimes a bit flaky, and a reboot of the Mac seems to bring it back. It is especially critical about hot unplugging the OM and sleep modes of MacBooks. This may even result in a Kernel Panic.
 
 == Telnet, ssh, SMB ==
 
