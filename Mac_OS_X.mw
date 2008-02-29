@@ -22,7 +22,7 @@ A Universal Binary version of dfu-utils tool (and libusb) is included in the Ope
 
 Alternatively, you can compile dfu-util manually as described at http://wiki.openmoko.org/wiki/User:SNMoore but you need libusb (e.g. through MacPorts).
 
-= Connecting to your device =
+= Connecting a Mac and an OpenMoko device =
 
 == USB Serial ==
 
@@ -113,73 +113,7 @@ After rebooting or loading the kernel extension by hand, you should have a new E
 
 <b>Issue</b>: this driver is sometimes a bit flaky, and a reboot of the Mac seems to bring it back. It is especially critical about hot unplugging the OM and sleep modes of MacBooks. This may even result in a Kernel Panic.
 
-== Telnet, ssh, SMB ==
-
-=== ssh ===
-
-After making the USB connection work, start ssh:
-
-ssh -l root 192.168.0.202
-
-If you don't have installed the key, it will ask for a "yes" on the first connection. The root password is blank unless you change it.
-
- MacBook-hns:~ hns$ ssh -l root 192.168.0.202
- root@192.168.0.202's password: 
- root@fic-gta01:~$ hostname
- fic-gta01
- root@fic-gta01:~$
-
-NOTE: the ssh daemon (dropbear 0.49) on the OpenMoko appears to have a bug when sending the exit status back to the client. From time to time you receive an exit status of 255.
-
-=== SMB ===
-To Be Done.
-
-== Bluetooth ==
-
-To Be Done. See also: [[Bluetooth_Support#PPP_Networking]].
-
-== WiFi ==
-
-To Be Done.
-
-= Synchronizing =
-{{InProgress}}
-
-This is not done yet. Possible solutions are SyncML or ZMacSync http://www.dsitri.de/wiki.php?page=ZMacSync
-
-ZMacSync does not yet synchronize but allows more easy access to the OpenMoko through Terminal/ssh.
-
-= Sharing connection =
-
-== Mac as an Internet Router ==
-
-Here is described how to enable your Mac to serve as a Internet Router for your OpenMoko device.
-
-Note: you have to open all services you want to use from the OpenMoko in the Mac Firewall.
-
-=== USB ===
-
-In the Sharing System Preferences
-* click the Internet tab
-* Check all the ethernet (en) interfaces you want to enable Internet access for (i.e. the USB connection)
-
-SSH into your Neo and create /etc/resolv.conf, specify your Internet router IP address as the name server. You can simply copy the /etc/resolv.conf from your Mac.
- scp /etc/resolv.conf root@192.168.0.202:/etc/resolv.conf
-
- Example:
- nameserver 192.168.1.200    # replace by your real nameserver address
-
-Make sure your Neo routing table has entries so that all internet traffic is sent to your Mac (which will forward it to the outside world)
-
- root@fic-gta01:~$ route
- Kernel IP routing table
- Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
- 192.168.0.0     *               255.255.255.0   U     0      0        0 usb0
- default         192.168.0.200   0.0.0.0         UG    0      0        0 usb0
-
-Don't forget to enable your USB interface for Internet Sharing!
-
-=== Bluetooth ===
+== Bluetooth Networking ==
 {{InProgress}}
 
 This approach is based on: 
@@ -193,7 +127,7 @@ So, we configure a RFCOMM connection and a PPP gateway on the Mac. Finally, we c
 
 The reversed direction (OM as the Access Point and the Mac as the client) is described shortly in http://wiki.openmoko.org/wiki/Manually_using_Bluetooth#PPP_Networking
 
-==== Making the Mac a PPP over Bluetooth Access Point ====
+=== Making the Mac a PPP over Bluetooth Access Point ===
 
 In the Bluetooth System Preferences (10.4.11)
 * go to the Sharing pane
@@ -223,7 +157,7 @@ which should give the following feedback:
 In Terminal, write
  sudo ifconfig ppp0 up.
 
-==== Connecting the OpenMoko as a Client to the Mac ====
+=== Connecting the OpenMoko as a Client to the Mac ===
 
 On the OpenMoko do the following
 
@@ -243,14 +177,84 @@ On the OpenMoko do the following
 
 * Enjoy
 
-== Neo1973 as a GPRS modem ==
+== WiFi Networking ==
 {{InProgress}}
 
 To Be Done.
 
-= Developing software =
+== Neo1973 as a Bluetooth GPRS modem ==
+{{InProgress}}
 
-== Using virtualization software==
+To Be Done.
+
+= Enabling the Mac as an Internet Router =
+
+Here is described how to enable your Mac to serve as a Internet Router for your OpenMoko device.
+
+Note: you have to open all services you want to use from the OpenMoko in the Mac Firewall.
+
+== USB connection ==
+
+In the Sharing System Preferences
+* click the Internet tab
+* Check all the ethernet (en) interfaces you want to enable Internet access for (i.e. the USB connection)
+
+SSH into your Neo and create /etc/resolv.conf, specify your Internet router IP address as the name server. You can simply copy the /etc/resolv.conf from your Mac.
+ scp /etc/resolv.conf root@192.168.0.202:/etc/resolv.conf
+
+ Example:
+ nameserver 192.168.1.200    # replace by your real nameserver address
+
+Make sure your Neo routing table has entries so that all internet traffic is sent to your Mac (which will forward it to the outside world)
+
+ root@fic-gta01:~$ route
+ Kernel IP routing table
+ Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+ 192.168.0.0     *               255.255.255.0   U     0      0        0 usb0
+ default         192.168.0.200   0.0.0.0         UG    0      0        0 usb0
+
+Don't forget to enable your USB interface for Internet Sharing!
+
+== Bluetooth connection ==
+{{InProgress}}
+
+= Accessing data and services on your device =
+
+== ssh ==
+
+After making the USB connection work, start ssh:
+
+ssh -l root 192.168.0.202
+
+If you don't have installed the key, it will ask for a "yes" on the first connection. The root password is blank unless you change it.
+
+ MacBook-hns:~ hns$ ssh -l root 192.168.0.202
+ root@192.168.0.202's password: 
+ root@fic-gta01:~$ hostname
+ fic-gta01
+ root@fic-gta01:~$
+
+NOTE: the ssh daemon (dropbear 0.49) on the OpenMoko appears to have a bug when sending the exit status back to the client. From time to time you receive an exit status of 255.
+
+== SMB ==
+{{InProgress}}
+
+To Be Done.
+
+== X11 ==
+Launch Apple X11. xhost +192.168.0.202. On the Neo: export DISPLAY=192.168.0.200:0.0
+
+== Synchronizing ==
+{{InProgress}}
+
+This is not done yet. Possible solutions are SyncML or ZMacSync http://www.dsitri.de/wiki.php?page=ZMacSync
+
+ZMacSync does not yet synchronize but allows more easy access to the OpenMoko through Terminal/ssh.
+
+
+= Developing OpenMoko software on a Mac =
+
+== Using virtualization software and MokoMakefile/OpenEmbedded ==
 
 You can use Parallels or VMWare to install your favourite Linux distribution and then develop just as on Linux.
 
