@@ -1,0 +1,65 @@
+==Overview==
+<pre>
+Bus name: org.openmoko.PhoneKit
+Object name: /org/openmoko/PhoneKit/Sms
+  interface org.freedesktop.DBus.Introspectable
+    (data:s) Introspect()
+  interface org.freedesktop.DBus.Properties
+    (value:v) Get(interface:s,propname:s)
+    () Set(interface:s,propname:s,value:v)
+  interface org.openmoko.PhoneKit.Sms
+    (sim_full:b,phone_full:b) GetMemoryStatus()
+    (uid:s) Send(number:s,message:s,report:b)
+    PhoneMemoryState(arg1:b)
+    SimMemoryState(arg1:b)
+    StatusChanged(arg1:i)
+</pre>
+
+==Introspect XML==
+<pre>
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node>
+  <interface name="org.freedesktop.DBus.Introspectable">
+    <method name="Introspect">
+      <arg name="data" direction="out" type="s"/>
+    </method>
+  </interface>
+  <interface name="org.freedesktop.DBus.Properties">
+    <method name="Get">
+      <arg name="interface" direction="in" type="s"/>
+      <arg name="propname" direction="in" type="s"/>
+      <arg name="value" direction="out" type="v"/>
+    </method>
+    <method name="Set">
+      <arg name="interface" direction="in" type="s"/>
+      <arg name="propname" direction="in" type="s"/>
+      <arg name="value" direction="in" type="v"/>
+    </method>
+  </interface>
+  <interface name="org.openmoko.PhoneKit.Sms">
+    <method name="GetMemoryStatus">
+      <arg name="sim_full" type="b" direction="out"/>
+      <arg name="phone_full" type="b" direction="out"/>
+    </method>
+    <method name="Send">
+      <arg name="number" type="s" direction="in"/>
+      <arg name="message" type="s" direction="in"/>
+      <arg name="report" type="b" direction="in"/>
+      <arg name="uid" type="s" direction="out"/>
+    </method>
+    <signal name="PhoneMemoryState">
+      <arg type="b"/>
+    </signal>
+    <signal name="SimMemoryState">
+      <arg type="b"/>
+    </signal>
+    <signal name="StatusChanged">
+      <arg type="i"/>
+    </signal>
+    <property name="Status" type="i" access="read"/>
+    </property>
+  </interface>
+</node>
+
+</pre>
