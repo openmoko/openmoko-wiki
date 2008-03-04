@@ -1,0 +1,132 @@
+Thank you for purchasing this Developer release of the Neo FreeRunner. If you are a developer, this user guide will help to know Neo FreeRunner and explain how to flash a new root filesystem and kernel, set up a development environment, and compile a sample application.
+
+ The latest version of this user guide will always be available at:
+ http://wiki.openmoko.org/wiki/Get_Started
+
+[[Image:GTA02.gif |200px|right|frontside]]
+
+==Contents==
+	What Is In The Box
+	Getting To Know Neo FreeRunner
+	Turning On Neo FreeRunner
+	Flashing Neo FreeRunner
+	Connect To Neo FreeRunner By USB Networking
+
+What Is In The Box
+
+		Neo FreeRunner
+		Stylus
+		Headset
+		Battery
+		Charger
+		USB Cable 
+		Micro SD Card 512MB
+
+Getting To Know Neo FreeRunner
+
+
+
+Turning On Neo FreeRunner
+
+There are three ways to boot your Neo FreeRunner. You can power up into OpenMoko Image from NAND Flash or NOR Flash. Alternately, you may boot into U-Boot which will allow you to update the kernel, root filesystem.
+
+1) Power Up Into OpenMoko Image From NAND Flash
+
+Press and hold Power button until OpenMoko splash screen shows up. You may now release the Power button, and Neo FreeRunner will continue to boot into OpenMoko Image.
+
+2) Power Up Into OpenMoko Image From NOR Flash
+
+Press and hold Power button and Auxiliary button simultaneously.
+
+3) Power Up Into U-Boot
+
+You can download the connection tool from :
+http://svn.openmoko.org/developers/werner/neocon
+
+Connect Neo FreeRunner to Linux host with USB cable
+Key in the command in the terminal of Linux host
+
+ ./neocon /dev/ttyACM0
+
+Press Enter
+
+ [Closed]
+
+Power on Neo Neo FreeRunner and press Enter in the terminal of Linux host above
+
+ [Open]
+ In: usbtty
+ Out: usbtty
+ Err: usbtty
+ switching led 0 1
+ DEVICE_CONFIGURED: 1
+ Hit any key to stop autoboot: 0
+
+Please hit any key to stop autoboot and get into U-Boot
+ 
+ GTA02v5#
+
+Flashing Neo FreeRunner
+
+You can download the flashing tool from : http://buildhost.openmoko.org/daily/neo1973/deploy/glibc/images/neo1973/dfu-util
+
+As OpenMoko development continues, OpenMoko regularly releases updated versions of the OpenMoko root filesystem, the kernel, and the U-Boot. These may be programmed into the Flash memory of Neo FreeRunner. You can use the USB cable and OpenMoko provided tool to flash Neo FreeRunner.
+
+Neo FreeRunner needs to boot into U-Boot when flashing.
+
+1) Flashing Kernel
+
+You can download the latest kernel from :
+http://buildhost.openmoko.org/daily/neo1973/deploy/glibc/images/neo1973/
+
+Key in the command in the terminal of Linux host
+
+./dfu-util -a kernel -R -D uImage-2.6.24+svnr4082-r4055-r3-neo1973.bin
+
+When flashing succed
+
+status(0) = No error condition is present
+Done!
+
+2) Flashing Root Filesystem
+
+You can download the latest root filesystem from :
+http://buildhost.openmoko.org/daily/neo1973/deploy/glibc/images/neo1973/
+
+Key in the command in the terminal of Linux host
+
+./dfu-util -a rootfs -R -D openmoko-devel-image-fic-gta02.jffs2
+
+When flashing succed
+
+status(0) = No error condition is present
+Done!
+
+Connect To Neo FreeRunner By USB Networking
+
+Connect Neo FreeRunner to Linux host with USB cable. After booting to OpenMoko Image, there will be a new interface usb0 in your Linux host.
+
+1) Manual Method
+
+Key in the command in the terminal of Linux host
+
+ ifconfig usb0 192.168.0.200 netmask 255.255.255.0
+ ssh root@192.168.0.202
+
+Press Enter to pass the password.
+
+2) Automatic Method
+
+Using Ubuntu
+Edit /etc/network/interfaces
+
+ auto usb0
+ iface usb0 inet static
+ address 192.168.0.200
+ netmask 255.255.255.0
+
+Restart the networking service and key in the command in the terminal of Linux host
+
+ ssh root@192.168.0.202
+
+Press Enter to pass the password.
