@@ -11,7 +11,24 @@ http://lists.openmoko.org/pipermail/community/2007-November/011916.html.
 
 The similar instructions are described in more details at [[getting GPS console output with gllin]].
 
+
+
 Unfortunately, gllin expects paths such as /sys/bus/platform/devices/gta01-pm-gps.0/pwron ... and 2.6.24 kernel provides neo1973-pm-gps.0 instead :-(.
+
+-- The following steps seem to be not necessary (anymore?). -- [[User:Homyx|homyx]] Mar 08, 2008
+
+<pre>
+root@fic-gta01:/media/card/home/root/gllin# cat gllin.real | grep /sys/bus/platform/devices/
+/sys/bus/platform/devices/gta01-pm-gps.0/reset
+...
+
+root@fic-gta01:/sys/bus/platform/devices# ls -l gta01-pm-gps.0
+lrwxrwxrwx    1 root     root            0 Mar  8 11:01 gta01-pm-gps.0 -> ../../../devices/platform/s3c2410-i2c/i2c-adapter/i2c-0/0-0008/neo1973-pm-gps.0
+root@fic-gta01:/sys/bus/platform/devices# ls -l neo1973-pm-gps.0
+lrwxrwxrwx    1 root     root            0 Mar  8 11:01 neo1973-pm-gps.0 -> ../../../devices/platform/s3c2410-i2c/i2c-adapter/i2c-0/0-0008/neo1973-pm-gps.0
+root@fic-gta01:/sys/bus/platform/devices# uname -a
+Linux fic-gta01 2.6.24 #1 PREEMPT Wed Mar 5 00:16:31 UTC 2008 armv4tl unknown
+</pre>
 
 Fortunately, you can do evil hack:
 
