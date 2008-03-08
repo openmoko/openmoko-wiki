@@ -173,9 +173,29 @@ pin name
 
 The Linux kernel of your host system will create virtual serial devices called '''/dev/ttyUSBx''' where 'x' is a sequentially assigned number.  If you don't have any other USB serial converters attached to your machine, the device name will be '''/dev/ttyUSB1''' for the serial port. A '''/dev/ttyUSB0''' will also be created initially, but will disappear once [[openocd]] connects to the JTAG port.
 
-You can use your favourite terminal emualtor (screen, minicom, cu, zc, ...) just like for any other/real serial port. The baud rate should be set to 115200. You may use gdb as well (eg. target remote /dev/ttya).
+You can use your favourite terminal emulator (screen, minicom, cu, zc, ...) just like for any other/real serial port. The baud rate should be set to 115200. You may use gdb as well (eg. target remote /dev/ttya).
 
-The /dev/ttyUSB1 device node will be removed if the debug-board USB cable is unplugged. You should exit your terminal program before unplugging the cable, and then re-run it after the cable is plugged back in. 
+The /dev/ttyUSB1 device node will be removed if the debug-board USB cable is unplugged. You should exit your terminal program before unplugging the cable, and then re-run it after the cable is plugged back in.
+
+'''Note'''
+
+After Neo's boot, this last line will be displayed at the console:
+
+ gta01-pm-gsm gta01-pm-gsm.0: powering up GSM, thus disconnecting serial console
+
+for reconnecting your serial console, please stop the gsmd daemon:
+
+ /etc/init.d/gsmd stop
+
+and respawn getty on ttySAC0. 
+
+For example, if getty is on tty1 (given by: '''ps -aux | grep getty''') then you could type:
+ cd /dev
+ mv tty1 tty10
+ ln -s ttySAC0 tty1
+ pkill getty
+
+if kernel messages on the console are too verbose, use klogd or dmesg (e.g. '''klogd -c 4''').
 
 ===== JTAG =====
 
