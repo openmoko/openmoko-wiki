@@ -8,6 +8,200 @@ You could find more high level definition in [[Neo_FreeRunner_GTA02_Hardware_Spe
 [[Image:Gta02a5 pcba ps.JPG|thumb|400px|component (back) side NOTE: GTA02 A5 PCBA Print Side photo]]
 [[Image:GTA02 A5 PCB CS.jpg|thumb|400px|component (back) side NOTE: GTA02 A5 PCB Print Side photo]]
 
+=Summary=
+*FIC building a Linux based smart phone with full GPL compatible firmware source code for OPENMOKO, project code named GTA02 (Neo FreeRunner)
+
+Detail hardware component selection could be found in [[Neo FreeRunner GTA02 Hardware]]
+
+=Features=
+*Display-   Topply o2.8, 480 x 640 pixels, VGA, 200 NIT minimum, resistance type touch 
+
+*User Interface Navigation- Touch screen on LCD, 2 control “buttons”, 1 Power button, 1 Aux for 911 emergency call  
+
+*Built in 802.11b/g Radio (Atheros chipset AR6001 Flash version) 
+
+*Built in Bluetooth 2.0 + EDR (CSR and support PCM audio , BC4 frimware version) 
+
+*Built in 2D/3D graphics acceleration chip (S-Media 3362) 
+
+*Built in 2x Tri-Axis sensor (ST accelerometer LIS3LV02DL) 
+
+*Built in GPS Radio – -130 dbm with internal antenna, -157 dbm tracking on chipset specification , TTFF under 40 seconds with -130 dbm signal strength, and tracking (u-Blox) 
+
+*Antenna – Specialized antenna for best in hand hold GPS, GPRS and Wi-Fi/Bluetooth performance are required, -105dbm on receiving, Tx 30dbm+2 on GSM 
+
+*External Antennae –   MMCX GPS connector 
+
+*GPRS Radio –GSM/GPRS radio.  A Pre-PTCRB certified module will be preferred 
+
+*Linux – Linux kernel 2.6.24 or later OpenMoko kernel 
+
+*USB -  Client and Host mode switch-able (to be used for software downloading), provide host 5v power 
+
+*Power- Normal mode power will be via 1200 mAh battery with built-in coulomb counter, could charge via specialized charger.  Internal Lithium Ion or Lithium Polymer battery will keep device in standby mode. Battery life (Approximation/Ideal Target) Standby time 150-200 Hrs (GSM) Talk time (Backlight off) Up to 3-4 hrs(GSM) 
+
+*LED- LED indicator under Aux/Power button key
+
+=Hardware Specification=
+===Hardware Electrical=== 
+
+*400/500 MHz Samsung 2442B Processor/SOC (400 minimum) 
+*Boot code in NAND FLASH or 2MB NOR FLASH (optional design)
+*128 MB SDRAM total, 64 MB CPU internal, 64 MB external 
+*256MB NAND Flash MCP package. 
+
+=== Display ===  
+*Topploy VGA ; 2.8” diagonal, 480 x 640 pixels  
+*Transmissive display: good readability in high ambient light is essential 
+*White LED backlight.  Required brightness is 200 NIT minimum. 
+*Resistance type touch panel. 
+
+=== WiFi 802.11 b/g transceiver ===  
+*Must have GPL support source or GPL compatible policy
+*TX power at 11 Mbps: 13 dBm minimum  
+*RX sensitivity at 11 Mbps: -89 dBm desired, -83 dBm minimum 
+*AP mode desirable, not required 
+*WEP and WPA supported 
+*Atheros perferred because it's GPL policy
+
+=== Serial interfaces (UART) ===
+*Three serial interfaces are required   
+*Console  
+*A-GPS or GPS
+*GSM/GPRS
+
+=== Accelerometer ===
+* 2x accelerometer required
+* Could support interrupt while suspend or power save mode
+* 3 axis sensing
+
+=== A-GPS === 
+*GPS chipset receiver and antenna 
+*Sensitivity at Antenna port: -157 dBm tracking on chipset specifiaction
+*LNA and SAW filter for maximum interference protection
+*Cold start time to first fix: 40 sec typical at -130 dBm, 60 sec max
+*Must support GPL for Assist-GPS function with open API
+*Industry quality GPS 
+*Could fit in GTA01 GPS area on the PCB
+
+=== GPS Antenna Performance === 
+*Antenna is passive and internal; 15 mm x 15 mm ceramic patch is nominal design 
+*Antenna LNA and SAW filter are required to meet GPS performance 
+*15 mm square ground plane (minimum 1 mm ground border around patch) (TBA) 
+*There will be one external GPS antenna connector (MMCX)
+*C/N ratio should higher than 35 on production testing
+
+=== Buttons === 
+*Touch screen over LCD is primary data entry mechanism 
+*Two “hard” buttons: Power button (on side of Neo1973) is a mechanical switch actuated by a plastic pushbutton in a hole in the housing.  Aux (911) button on the top of the device, All two of these buttons, when pushed by the operator, are binary inputs (on/off or pressed/not pressed) to the software.  The effect of each button is determined by the application software in the device  
+*Buttons may need to be backlit
+*50000 cycles on hardware specification 
+
+=== Sound outputs === 
+*Speaker in box (need good volume and acoustic behavior innoise environment)   
+*Audio is monophonic*Max volume: 100 dB at 5 cm to assure good performance in environment.
+*Support earphone with mic by jack
+
+=== Power Design Requirements===
+*Software based power managment uint perferred
+*NXP PCF series perferred
+*Need support charge from USB function
+*Need support powered by USB function
+*Power switch:  Neo1973 will have a power switch, for power on/off and suspend 
+* Power/Aux switch must be backlit 
+*Switch controls whether device is running or suspended by presses of the switch 
+*Switch does not shut off the power; it only suspends/resumes the device 
+*Internal Li-Ion or Li-Polymer battery is included.  This battery supplies standby power to the device eliminates the rebooting of the device when local power is again reapplied.  Battery is 1200 ma-hr. 
+*Battery life (Approximation) Ideal/Target Standby time 150-200 Hrs (GSM) Talk time (Backlight off) Up to 4 hrs(GSM) 
+*Estimated current draw for the entire device when in suspend mode (and ALL peripherals are turned off or set for deep sleep) is <5 mA at 3.6 volts (LiIon terminal voltage).
+*GSM module deep sleep(alive and keep contact with base station) stage should take less than 8mA
+*Battery will reach half capacity (~600 ma-hr) with 500 charge-discharge cycles.  This will occur in less than 2 years of daily service. 
+*When powered continuously, Neo1973 must suspend (to low power mode) based either on observed low battery voltage condition or a configurable time delay. 
+*Neo1973 must monitor battery status while suspended and resume automatically if the charger is inserted.   
+*Primary power connection: 1200mAh battery 
+*USB charger have ID pin 47.5k pull down for OPENMOKO identification  
+*Indicators: an LED indicator visible from the side of the unit will illuminate when charging or have missing incoming call
+
+=== GSM/GPRS ===
+*850/1800/1900 and 900/1800/1900 MHz bands must be supported 
+*Design should allow for multi-band version (850/900 MHz) 
+*Module based GPRS transceiver could meeting PTCRB and appropriate FCC certifications.  It preferred that the module be pre-certified with PTCRB or OTA test 
+*FCC/CE certification required for GSM/GPRS part 
+
+=== GSM-GPRS Antenna Performance === 
+*-105 dBm receiving on each channel (GSM/PCS) 
+*30+2 dBm transmission on GSM channel 
+
+=== Wi-Fi Modules ===
+*Must support GPL driver
+*Atheros AR6k perferred
+*Flash version required
+
+=== Wi-Fi Antenna Performance === 
+*The  Wi-Fi antenna with TX 13 to 15 dBm
+*RX -89 to -83 dBm @802.11b 11Mbps or an equivalent performance antenna 
+
+=== Bluetooth ===
+*CSR BC4 or later solutions
+
+=== USB === 
+*Neo1973 GTA02 will have USB, client/host.  Using USB 1.1    
+*Could provide USB host 5v power
+*Could be powered by USB
+
+=== Microphone === 
+1 microphone is in the device 
+
+=== Firmware Image ===
+*Using Linux 2.6.24 or later
+*Could support boot from NAND or Boot from NOR
+*Shiiping image should come with basic phone function
+*Could do full firmware upgrade by USB cable
+
+=== PSN ===
+*Device will have a PSN (product serial number) printed on the product label and machine readable in system NAND memory
+
+=== IMEI ===
+*Production phase should have IMEI code wriiten
+
+= Package Specification = 
+*Weight: ~150 grams with battery. 
+*4 in 1 laser pen passed RoHs and safty regulation for laser equipment safty
+*1x 512MB microSD Card (SandDisk/Trendcend)
+*1x USB cable Standard A to mini-B connector
+*1x 1200mAh smart/gauge battery
+*Quick start guide 
+*5v USB power cord w/100-240 switchable power plug 
+*Safety card, warrantee card
+*Package could pass 1m to 1.5m drop test
+*AC USB charger,100v-240v, Passed UL and all required safty regulation
+*Must pass FCC/CE certification
+*Must pass NCC certification for Taiwain import regulation
+*RoHS Compatible
+*WEEE Report required
+
+= Life Cycle Specification = 
+
+=== Product Life === 
+The product is designed to last a minimum of 2 years. 
+
+=== Operating Temperature === 
+*Target operating range is –10°C to +60°C 
+
+=== Storage Temperature === 
+*-15 deg C to +70 deg C  
+
+=== ESD === 
+The device can withstand a 4.0kV contact discharge and  8.0kV air  
+
+=== Drop test ===
+Should pass 1m direct drop to concrete ground or 1.5m on slide with carpet
+
+[[Category:Hardware ]]
+[[Category:Supported Phone| ]]
+[[Category:GTA02 Hardware]]
+
+
 == Physical Dimensions ==
 * 120.7 x 62 x 18.5 mm (4.75 x 2.44 x 0.728 inch)
 * 110 +/- 5 g (4 ounces) without battery <br>
