@@ -99,6 +99,77 @@ If you want to install this project on host for staging usage later, a shared li
  cd openmoko-sample2
  make install
 
+==How to modify the sample project==
+
+In order to build your own project by using openmoko-sample2 files, some changes are needed:
+
+* copy the downloaded sample application source
+
+ cp -r /usr/local/openmoko/source/openmoko-sample2 ~/
+ 
+* rename the folder with the name of your project (in this example your-project-name) and delete old sample files 
+
+ mv openmoko-sample2 your-project-name
+ cd your-project-name
+ cd src
+ rm *.c
+
+* copy your sources (in this example your-sources) into src/
+
+ cp your-sources .
+ cd ..
+
+* now in the main folder modify autogen.sh by updating the following lines
+
+ PKG_NAME="your-project-name"
+
+* modify configure.ac by updating the following lines ('main.c' should be the main file in your project)
+
+ AC_INIT(your-project-main, 0.0.1, http://www.openmoko.org/)    
+ AC_CONFIG_SRCDIR(src/main.c)
+
+* go into data/ folder and rename these files with the name of your project
+
+ cd data
+ mv openmoko-sample.png your-project-name.png
+ mv openmoko-sample.desktop your-project-name.desktop
+
+* modify Makefile.am inside data/ by updating the following lines
+
+ dist_desktop_DATA = your-project-name.desktop
+ dist_appicon_DATA = your-project-name.png
+
+* modify Makefile.in inside data/ by updating the following lines
+ 
+ dist_desktop_DATA = smart-search.desktop
+ dist_appicon_DATA = smart-search.png
+
+* modify your-project-name.desktop by updating the following lines
+
+ Name=your-project-name
+ Encoding=UTF-8
+ Version=0.0.1
+ Type=Application
+ Exec=your-project-name
+
+* and by adding the following line
+
+ Icon=your-project-name
+
+* move into src/ folder
+
+ cd ..
+ cd src
+
+* modify Makefile.am by updating the following lines
+
+ bin_PROGRAMS = your-project-name	
+ your_project_name_SOURCES = \				
+  		main.c 
+ your_project_name_LDADD  = @DEPENDENCIES_LIBS@
+
+* be sure to put instead of main.c all your .c and .h files and modify all the '-' characters with '_' in the variable names
+
 ==Packaging your application==
 
 We have included a script to make an ipkg out of your application. Note that this is not needed to test your application on the Neo (for that you can just scp the resulting binary and data over), however it's very handy if you want to distribute your application to others.
