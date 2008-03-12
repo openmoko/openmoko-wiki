@@ -346,14 +346,21 @@ The USB Host controller is inside the S3C2442
 * Driver: Stock Linux kernel ohci_hcd
 * USB version 1.1
 * Supply USB 5v in Host mode using usb power switch AAT1275IRN-5.0-T1
-* http://www.analogictech.com/products/digitalfiles/AAT1275.pdf
+** http://www.analogictech.com/products/digitalfiles/AAT1275.pdf
+* A net EN_USBHOST is controlled by PMU GPIO "GPO", this one signal when asserted (high)
+** enables generation of 5V for external device using a charge pump
+** enables connection of 15K pulldowns to D+ and D- to allow device insertion and removal detection for host mode
+** DISABLES the path for USB power to charge the battery
 
-It should also be possible to use host mode with externally-provided power. This will allow the FreeRunner to be connected to a USB device and powered at the same time.
-* Connect gnd, d+, d-, +5 to your USB device
+It should also be possible to use host mode with externally-provided power. This will allow the FreeRunner to be connected to a USB device and be powered and charging the battery if present at the same time.
+
+* Connect 0V, d+, d-, +5 to your USB device
 * Connect a 15k ohm resistor between d+ and ground
 * Connect a 15k ohm resistor between d- and ground
-* Connect a 47.5k ohm 1% resistor between the ID pin and ground
-* Connect gnd, +5 to your >1A power source
+* Connect 0V, +5 to your >1A power source
+** If your power source was not the OpenMoko 1A charger, additionally connect a 47K ohm 5% resistor between the ID pin and ground to pretend to be the 1A charger.
+
+In addition you need to make sure EN_USBHOST signal that enables the physical Host mode power generation and disables the USB -> PMU charging path is deasserted.  This may be taken care of automatically shortly by detection of the 48K resistor on a USB insertion leading to forcing EN_USBHOST deasserted.  The charge pump that generates the 5V in host mode doesn't seem to mind getting external 5V given to it, but the real issue is that the battery will not be charged at all if we leave EN_USBHOST asserted since one of its jobs is to stop that happening.
 
 The last two points are taken care of by the external AC charger, so you could use a Y cable that brings the AC adapter together with a cable that connects up the rest.
 
