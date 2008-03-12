@@ -1,4 +1,4 @@
-You need to have [[GSM]] parts already initialized, with modem logged in to the network, for this to work. It is best to test it by doing test call. The GPRS connection is made using the PPP protocol to a server identified by an "APN" at the network operator. 
+The GPRS connection is made using the PPP protocol to a server identified by an "APN" at the network operator. 
 
 The program that implements PPP on Linux is [[pppd]], which we need to configure and run to get a connection. When that is working, we can configure pppd to wait until it's needed before it connects, and to disconnect if the connection becomes idle. Further, we can start pppd in the background during the boot process.
 
@@ -65,28 +65,25 @@ And you'll need /etc/ppp/gprs-connect-chat (needs "chmod +x"):
 <pre>
 #!/bin/sh -e
 exec chat -v\
-	ABORT BUSY\
-	ABORT DELAYED\
-	ABORT "NO ANSWER"\
-	ABORT "NO DIALTONE"\
-	ABORT VOICE\
-	ABORT ERROR\
-	ABORT RINGING\
-	TIMEOUT 3\
-	"" ATZ\
-	OK-\\k\\k\\k\\d+++ATH-OK ATE1\
-	OK AT+CFUN=0\
-	OK \\dAT+CFUN=1\
-	ERROR AT+CPIN\?\
-	"+CPIN: READY-AT+CPIN=\"2222\"-OK" AT\
-	TIMEOUT 60\
-	OK AT+COPS\
-	OK AT+CGDCONT=1,\"IP\",\"internet\"\
-	OK ATD*99#\
-	CONNECT \d\c
+        ABORT BUSY\
+        ABORT DELAYED\
+        ABORT "NO ANSWER"\
+        ABORT "NO DIALTONE"\
+        ABORT VOICE\
+        ABORT ERROR\
+        ABORT RINGING\
+        TIMEOUT 60\
+        "" +++\
+        AT ATZ\
+        OK ATE1\
+        OK AT+CFUN=1\
+        OK AT+COPS\
+        OK AT+CGDCONT=1,\"IP\",\"internet\"\
+        OK ATD*99#\
+        CONNECT /n/d
 </pre>
 
-You will need to adjust the APN name "internet" in at+cgdcont line to match what your network operator provides. See below in the table "Some APN names for reference" for the right settings for your operator.
+You will need to adjust the APN name "internet" in at+cgdcont line and possibly the phone number in the ATD line to match what your network operator provides. See below in the table "Some APN names for reference" for the right settings for your operator.
 
 Also good to have is /etc/ppp/gprs-disconnect-chat (needs "chmod +x"):
 
@@ -107,15 +104,35 @@ Also good to have is /etc/ppp/gprs-disconnect-chat (needs "chmod +x"):
 	"NO CARRIER-AT-OK" ""
 </pre>
 
-You need a proper /etc/resolv.conf:
+The following script can be used to start the ppp connection. First it stops gsmd because gsmd may put the phone in a unknown state. It then turns on the power to the phone, modifies the ownership, and then creates a tty connection. Finally it starts [[pppd]] with the gprs settings.
+ 
+<pre>
+/etc/init.d/gsmd stop
+echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/power_on
+chown uucp.uucp /dev/ttySAC0
+stty -F /dev/ttySAC0 crtscts
+pppd call gprs
+</pre>
+
+If you are having problems connecting replace the last line with the below line. This will allow you to see the details of the connection on the console. 
+
+<pre>
+pppd debug nodetach call gprs
+</pre>
+
+The config above will establish a persistant link over gprs. The battery will run low in less than an hour. See an example for an on-demand config below.
+
+=== Resolve.conf issues ===
+
+The latest build seems to have solved the following issue, it should be automatically updated by pppd.
+
+If you expeience DNS issues after connecting to DNS you may need a proper /etc/resolv.conf:
 
 <pre>
 ln -sf /var/run/resolv.conf /etc
 </pre>
 
 If needed put your nameserver for usb-net into /var/run/resolv.conf, not in /etc.
-
-=== Required fixes ===
 
 The image does not set a correct resolv.conf. i do so with an 
 
@@ -142,16 +159,7 @@ if [ -f $PPPCONF ] ; then
 fi
 </pre>
 
-=== Starting pppd ===
 
-Then, after initializing GSM, you should be able to initialize GPRS by `pppd call gprs`. Good luck!
-
-To dial in - and get verbose output on the terminal - use pppd
-<pre>
-pppd debug nodetach call gprs
-</pre>
-
-The config above will establish a 'persist'ant link over gprs. The battery will run low in less than an hour. See an example for an on-demand config below.
 
 === Some APN names for reference ===
 
@@ -159,7 +167,7 @@ The config above will establish a 'persist'ant link over gprs. The battery will 
 ! Country
 ! Carrier
 ! Plan
-! APN
+! APN/Phone
 ! user/password if required
 ! Working pppd scripts
 |-
@@ -185,7 +193,7 @@ The config above will establish a 'persist'ant link over gprs. The battery will 
 |-
 | Germany || Vodafone || Any, behind NAT || web.vodafone.de || ||
 |-
-| New Zealand || Vodafone || Any || live.vodafone.com ||  ||
+| New Zealand || Vodafone || Any || live.vodafone.com / *99***2#||  ||
 |-
 | Norway || Netcom || Any || internet.netcom.no || ||
 |-
@@ -210,6 +218,8 @@ The config above will establish a 'persist'ant link over gprs. The battery will 
 |}
 
 [1] connected through a WAP proxy (slower, but the only way to access Vodafone live! and SFR portal)
+
+[2] Unless stated otherwise the phone number to call is "*99#"
 
 == Starting pppd automatically ==
 
