@@ -130,6 +130,46 @@ On the host computer side, open a root terminal and run the command "pppd nodeta
 
 Now on the host computer side, you should be able to "ping 192.168.68.2" and "ssh root@192.168.68.2".
 
+==Setting up Internet connection for your qemu neo:==
+
+(I assume that your local ip-adress is 192.168.0.100 and your router is 192.168.0.1)
+
+In qemu terminal (or via ssh) type:
+
+<pre>
+$ ifdown usb0
+$ route add default gw 192.168.68.1
+</pre>
+
+Edit /etc/resolv.conf:
+nameserver 192.168.0.1
+
+On the host-computer type:
+
+<pre>
+$ echo 1 >> /proc/sys/net/ipv4/ip_forward
+$ echo 1 >> /proc/sys/net/ipv4/ip_dynaddr
+
+$ modprobe ip_tables
+$ modprobe iptable_nat
+$ modprobe ipt_MASQUERADE
+
+$ iptables -t filter -F
+$ iptables -t nat    -F
+
+$ iptables -t filter -P INPUT       ACCEPT
+$ iptables -t filter -P FORWARD     ACCEPT
+$ iptables -t filter -P OUTPUT      ACCEPT
+$ iptables -t nat    -P PREROUTING  ACCEPT
+$ iptables -t nat    -P POSTROUTING ACCEPT
+
+$ iptables -t nat -A POSTROUTING -o eth0 -s 192.168.68.0/24 -j MASQUERADE
+</pre>
+
+(Where eth0 is your network interface connected to the router)
+
+Thats it - now you can enjoy internet in qemu.
+
 == Setting up USB connection ==
 
 It is possible (although not very straight forward, probably about the complexity of tun-tap networking) to connect the virtual, emulated Neo1973 to the Linux PC on which the emulator is running, and work with it as if a real Neo1973 was plugged into the computer's USB port, but no twiddling with cables is needed. If you're testing your applications on the Neo, it may be worth setting up this kind of connection because it lets you enable normal [[USB_Networking|networking between the PC and the phone and ssh into it]] (which is much more comfortable than typing commands into the OpenMoko's terminal emulator via on-screen keyboard). Here's what you will need in order to get this working:
