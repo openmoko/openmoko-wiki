@@ -1,116 +1,33 @@
-We'd like to know the real network registration status by our NEO devices in the world.  Please provide some information about your NEO status!  The question list as below:
+We'd like to know the real network registration status by our NEO devices in the world. Please provide some information about your NEO status! The question list as below:
 
-== Instructions ==
+1. What NEO device you are using? GTA01 or GTA02
 
-1. What NEO device you are using? [[GTA01]] or [[GTA02]].
-
-2. Where is your location and what is your network provider? eg. T-Mobile, San Francisco in USA.
+2. Where is your location and what is your network provider? eg. T-Mobile, San Francisco in USA
 
 3. When you boot the NEO, how long it takes to register the network? eg. in normal case, it should be able to register to a network in 1~2 minutes immediately.
 
-4. What is your GSM firmware version? You can get this number by an AT command. Using [[USB_Networking|SSH]] to connect to your NEO, then type these commands:
+4. What is your GSM firmware version? you can get this number by an AT command. Using SSH to your NEO, then type this command:
 
-  root@fic-gta02:~# [[Gsmd|libgsmd-tool]] -m atcmd
-  AT+CGMR
-  STR=`AT+CGMR'
-  RSTR=`+CGMR: "HW: GTA02BV5, GSM: gsm_ac_gp_fd_pu_em_cph_ds_vc_cal35_ri_36_amd8_ts0-Moko6"'
+root@fic-gta02:~# libgsmd-tool -m atcmd
+libgsm-tool - (C) 2006-2007 by Harald Welte and OpenMoko, Inc.
+This program is Free Software and has ABSOLUTELY NO WARRANTY
 
-5. What is your [[IMEI]] code? Check by using this [[Hardware:AT Commands|AT command]] like previous steps.
-  AT+CGSN
-  STR=`AT+CGSN'
-  RSTR=`+CGSN: 000000000000000'
+AT+CGMR
+STR=`AT+CGMR'
+RSTR=`+CGMR: "HW: GTA02BV5, GSM: gsm_ac_gp_fd_pu_em_cph_ds_vc_cal35_ri_36_amd8_ts0-Moko6"'
 
-6. if NEO takes over 3 minutes to register to the network or it just re-register to the network again and again. Please attach your gsm log file ('/tmp/gsm.log') to our bugzilla, we already created a bug for [http://bugzilla.openmoko.org/cgi-bin/bugzilla/show_bug.cgi?id=1024 this issue].
+5. What is your IMEI code? by this AT command like previous steps.
+AT+CGSN
+STR=`AT+CGSN'
+RSTR=`+CGSN: 000000000000000'
 
-(#4 and #5 Under FSO/frameworkd - use "mdbus -s org.freesmartphone.ophoned /org/freesmartphone/GSM/Device GetInfo" to retrieve both IMEI and version string at once - mdbus is provided by the package 'mickeydbus' if not already installed)
-
-In qtopia/qtextended, go into Applications->System Info->Modem. Look for 'Revision'.
-
-== Results table ==
+6. if NEO takes over 3 minutes to register to the network or it just re-register to the network again and again. Please attach your gsm log file ('/tmp/gsm.log') to our bugzilla, we already created a bug for this issue.
+http://bugzilla.openmoko.org/cgi-bin/bugzilla/show_bug.cgi?id=1024
 
 
+PS. Check our wiki site, if you have problems on these stuff.
 
-{| border="1"
-|  Owner    ||   Location   |||   Network Provider || How/When purchased [[SIM card]] || Device   || GSM firmware ||   IMEI  ||   Status ||   GSM log
-|-
-| [[User:MichaelShiloh]] || San Francisco, CA, USA ||T-Mobile|| with phone, > 2years ||GTA01||Moko6||YES||just fine||no
-|-
-| [[User:MichaelShiloh]] || San Francisco, CA, USA ||AT&T|| with phone, 8/28/07 ||GTA01||Moko6||YES||takes several minutes to register, home network rejects, CME error 32, reregisters continuously||no
-|-
-| [[User:MichaelShiloh]] || San Francisco, CA, USA ||AT&T|| replacement for one received with phone, 3/17/08 ||GTA01||Moko6||YES||preliminary test: registers promptly to home network. Will test in various locations and report back.||no
-|-
-| [[User:MichaelShiloh]] || San Francisco, CA, USA ||AT&T|| prepaid, no phone, 3/13/08 ||GTA01||Moko6||YES||just fine in some locations, but in others it takes several minutes to register and reregisters continuously. however, always better than card that came with phone||no
-|-
-| [[User:SpeedEvil]] || Fife, Scotland, UK||T-Mobile||PAYG with phone 7/2007||GTA01||Moko1||YES||Just fine||no
-|-
-| [mailto:erin_yueh@openmoko.com  Erin Yueh]   ||   Taipei, Taiwan    ||   TW mobile     || ||    GTA02BV5  ||  Moko6   ||   NO   ||   Normal, can register to the network immediately||   no
-|-
-| [mailto:marcus.bauer@gmail.com  Marcus Bauer]   ||   Nice, France    || Orange     || ||   GTA01Bv4 ||  Moko4   ||   YES   ||   Registers immediately and stays registered for ~10 minutes before the re-registering loop starts once per minute||   [http://bugzilla.openmoko.org/cgi-bin/bugzilla/attachment.cgi?id=554&action=view log]
-|-
-| [mailto:ahvenas@gmail.com  Henrik Pihl]   ||   Kuressaare, Estonia    || Elisa     || ||    GTA01Bv4  ||  Moko4   ||   YES   ||   Normal, can register to the network immediately, but starts reconnecting to the network in the first minutes.||   [http://bugzilla.openmoko.org/cgi-bin/bugzilla/attachment.cgi?id=555&action=view log]
-|-
-| [[User:MarcinHrwJuszkiewicz | Marcin 'Hrw' Juszkiewicz]]   ||   Poznań, Poland    ||   Era (Heyah)     || prepaid, bought in October 2007, never charged, expired ||    GTA01Bv4  ||  phase0 phone (red PCB) with old GSM firmware   ||   YES   ||   Card expired, home network rejects it with CME Error 32 (emergency calls only), system displays "Registering..." for several minutes. ||   NO
-|-
-| [[User:MarcinHrwJuszkiewicz | Marcin 'Hrw' Juszkiewicz]]   ||   Poznań, Poland    ||   PlusGSM     || prepaid, several years old, not charged ||    GTA01Bv4  ||  phase0 phone (red PCB) with old GSM firmware   ||   YES   ||   Registered after entering PIN. Normal work after register. ||   NO
-|-
-| [mailto:plr@udgaard.com Peter Rasmussen]   ||   Copenhagen Denmark    || DK Sonofon     || Pre-paid BiBoB service since Oct. 2007 ||    GTA01Bv4  ||  Moko1   ||   YES   ||   Registered immediatly after entering PIN. Works after that. No /tmp/gsm.log appears ||   NO
-|-
-| [[User:Kevin_Dean | Kevin Dean]]   ||   Washington DC Metro Area, USA    || T-Mobile     || ||    GTA01Bv4  ||  Moko1   ||   YES   ||   Normal, can register to the network immediately, no PIN needed||   [http://www.monochromementality.com/data/files/logs/openmoko/2008-03-17/gsm.log.edited Log (Replaced my wife's # with 9991231122)]
-|-
-| [[User:Dennis_Wollersheim | Dennis Wollersheim]]   ||   Melbourne, Australia ||   Telstra     || ||    GTA01Bv4  ||  Moko4   ||   Yes   ||   Registers quickly, reregisters every 30 seconds or so||   [http://bugzilla.openmoko.org/cgi-bin/bugzilla/attachment.cgi?id=556&action=view  gsm log]
-|-
-| [[User:thomasg | Thomas Gstädtner]]   ||   Nuremberg, Germany   || T-Mobile (Ericsson RBS2206, GSM900) || 2004 || GTA01Bv4 || Moko 1 || Yes || Registers nearby immediately, w/ PIN or w/o || NO
-|-
-| [[User:thakoman | thakoman]]   ||   Kassel, Germany   || vodafone d2 || 2008 || GTA02BV5 || Moko 8 || Yes || The first SIM wasn'n found at all, The second made one call and after some minutes the firmware died!? Since that same issues as with the first one || No
-|-
-| [[User:emdete | emdete]]   ||   Duesseldorf, Germany   || vodafone d2 || 200x || GTA01Bv4 || Moko 1 || Yes || No problems || No
-|-
-| [[User:emdete | emdete]]   ||   Duesseldorf, Germany   || vodafone d2 || 200x || GTA02 || Moko 6 || No || Does not register, pin entry works, net scan also. || No
-|-
-| [[User:emdete | emdete]]   ||   Duesseldorf, Germany   || e-plus || 200x || GTA02 (same as above) || Moko 6 || No || No problems || No
-|-
-| [[User:ScaredyCat | ScaredyCat]]   ||   Ipswich, UK   || Virgin || 2007 || GTA01 || Moko 1 || Yes || No problems || No
-|-
-| [[User:ScaredyCat | ScaredyCat]]   ||   Lelystad, Netherlands   || Virgin (Roaming on T-Mobile NL) || 2007 || GTA01 || Moko 1 || Yes || No problems || No
-|-
-| [[user:jluis|jluis]]   ||   Barcelona, Spain    ||   Orange (Amena)    || 082007 ||   GTA01Bv4 ||  Moko1   ||   YES   || No problems|| No
-|-
-| [[user:jluis|jluis]]   ||   Barcelona, Spain    ||   Vodafone    || phone > 3 years ||   GTA01Bv4 ||  Moko1   ||   YES   || No problems|| No
-|-
-| [[User:Joachim | Joachim Jaeger]]   ||   Eschbach, Germany    ||   O2     || Fonic prepaid card, 01/2008 ||    GTA01Bv4  || Moko 4   ||   YES   ||   Registers immediately after entering PIN. Normal work after register. ||   NO
-|-
-| [[user:liuxf|liuxf]]   ||   Beijing, China ||   CU-GSM || 2006 ||   GTA01Bv4 ||  Moko1   ||   YES   || No problems|| No
-|-
-| [[user:ismo|ismo]]   ||   Zurich, Switzerland ||   sunrise || 2007 ||   GTA01Bv4 ||  Moko1   ||   YES   || No problems || No
-|-
-| [[User:emdete | emdete]]   ||   Duesseldorf, Germany   || vodafone || 200x || GTA02 || Moko 7 || Yes || No problems || No
-|-
-| [[User:homyx | homyx]]   ||   Ingolstadt, Germany   || o2 || 2005, 2007 || GTA01 || Moko 1 || yes || No Problems || No
-|-
-| [[User:BasilK | basilk]]   ||   Moskow, Russia   || MegaFon || 2008 ||  GTA01Bv4 || Moko 4 || YES || No Problems || No
-|-
-| [[User:ibb | Ib Bentzen]]   || Copenhagen, Denmark || TDC Mobil (Telmore) || 4 yrs || GTA01Bv4 || Moko4 || YES || OK || No
-|-
-| [[User:Zrich | zrich]]   || Cambridge, MA, USA || Cingular || > 3 Years || GTA02 || Moko7 || Yes || No Problems || No
-|-
-| [[User:Infoport | William Vidrine]]   || Greensboro, NC, USA || AT&T || replaced SIM sold with service Jul-18-08; model 71234 O 4022 || GTA02 || Moko8 || Yes || doesn't try to register on boot; sometimes takes switching on/off to register; re-registers with Home network frequently || No
-|-
-| [[User:robolange | Robert Lange]]   || Philadelphia, PA, USA || AT&T || obtained with AT&T prepaid phone in July 2008; model 71234 O 4022 || GTA02Bv5 || Moko8 || Yes || Had problems with OM2007.2 occasionally failing to power up the antenna, and with losing GSM connection necessitating a reboot every few hours.  With OM2008.9, I see none of these problems and the voice/sms works fine. || N/A
-|-
-| KB || Denmark || TDC || From TDC business in 2007 (64K43) didn't work, got new card for free (64K23) and that worked! || GTA02Bv5 || Moko8 || ¿What? || Works with new card || File not found
-|-
-| clare johnstone||Perth, Australia ||Vodafone AU || Prepaid 10 days||GTA02bv5 ||Moko8||YES ||no service briefly 2 min intervals for  10 hours today||MDBUS listing
-|-
-| [[User:gercamjr | Gerardo Camorlinga]]||Amarillo, TX, USA ||ATT || Prepaid $15 Motorola phone, pay as you go plan ||GTA02 ||Moko8||YES ||works great, used the gui script from [http://wiki.openmoko.org/wiki/Manually_using_GPRS Manually using GPRS]||No
-|-
-| [[User:pini | Pini]]||Lyon, France ||SFR || > 3 years ||GTA02Bv5 ||??||YES ||Just fine||No
-|-
-| [[User:W23 | w23]] || Novosibirsk, Russia || MegaFon || prepaid, ~2005 || GTA02 || Moko9-beta || Yes (?) || No problems || No
-|-
-| [[User:RzR | RzR]] || France || simyo.fr || prepaid, ~200911 || GTA02 || Moko9-beta1 || Yes || No problems on qtmoko || No
-|-
-
-== See also ==
-* [[FreeRunner unable to work with 3G SIM cards]]
-
-[[Category:GSM]]
+How to use SSH on NEO:
+http://wiki.openmoko.org/wiki/USB_Networking
+How to use libgsmd-tool:
+http://wiki.openmoko.org/wiki/Gsmd
