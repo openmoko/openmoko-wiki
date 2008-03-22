@@ -1,0 +1,34 @@
+This page is to explain how to run debian armel port on neo1973. This instructions are likely to work on freerunner, too.
+= 1. (optional) install known good kernel =
+ wget http://rabenfrost.net/celtune/uImage-2.6.24+svnr4194-r4165-r4-neo1973.bin
+ ./dfu-util -d 0x1457:0x5119 -a kernel -R -D ./uImage-2.6.24+svnr4194-r4165-r4-neo1973.bin
+
+= 2.1. (option #1) debootstrap your own armel rootfs =
+debootstrap your rootfs on debian or ubuntu
+ debootstrap --verbose --arch armel --foreign sid ./armel-chroot http://ftp.de.debian.org/debian/
+Format your sd card appropriately. I'm using an 8GB shcd card here.
+ umount /media/card
+ mkfs.ext3 /dev/mmcblk0p1
+ mount /dev/mmcblk0p1 /media/card
+copy the armel chroot to your device by tar'ing it to preserve symbolic link cycles (https://bugzilla.mindrot.org/show_bug.cgi?id=1059 <= WONTFIX)
+ tar -C ./armel-chroot/ -c . | ssh root@192.168.0.202 tar -C /media/card -xv
+ssh to your device and execure the following commands (just copypaste everything below)
+ echo "nameserver 192.168.0.200" > /media/card/etc/resolv.conf
+ echo "127.0.0.1 localhost.localdomain localhost" > /media/card/etc/hosts
+ echo "fix-gta01" > /media/card/etc/hostname
+ echo -e "auto lo\n\
+ iface lo inet loopback\n\
+ auto usb0\n\
+ iface usb0 inet static\n\
+     address 192.168.0.202\n\
+     netmask 255.255.255.0\n\
+     network 192.168.0.0\n\
+     gateway 192.168.0.200\n\
+     up echo nameserver 192.168.0.200 >/etc/resolv.conf" > /media/card/etc/network/interfaces
+now chroot into your armel rootfs and finish the install
+ chroot /media/card
+ /debootstrap/debootstrap --second-stage
+ echo "deb http://ftp.de.debian.org/debian sid main" > /etc/apt/sources.list
+ apt-get update
+ apt-get install openssh-server
+= 2.2. (option #2) download ready to use armel rootfs =
