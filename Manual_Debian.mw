@@ -20,6 +20,7 @@ copy the armel chroot to your device by tar'ing it to circumvent symbolic link c
 ssh to your device and execute the following commands (just copypaste everything below)
  echo "nameserver 192.168.0.200" > /media/card/etc/resolv.conf
  echo "fix-gta01" > /media/card/etc/hostname
+ echo "127.0.0.1 localhost.localdomain localhost fic-gta01" > /media/card/etc/hosts
  echo -e "auto lo\n\
  iface lo inet loopback\n\
  auto usb0\n\
@@ -29,11 +30,33 @@ ssh to your device and execute the following commands (just copypaste everything
      network 192.168.0.0\n\
      gateway 192.168.0.200\n\
      up echo nameserver 192.168.0.200 >/etc/resolv.conf" > /media/card/etc/network/interfaces
+ echo -e "rootfs  /                ext3    defaults,errors=remount-ro,noatime 0 1\n\
+ proc    /proc            proc    defaults                           0 0\n\
+ tmpfs   /etc/network/run tmpfs   defaults,noatime                   0 0\n\
+ tmpfs   /tmp             tmpfs   defaults,noatime                   0 0\n\
+ tmpfs   /var/lock        tmpfs   defaults,noatime                   0 0\n\
+ tmpfs   /var/log         tmpfs   defaults,noatime                   0 0\n\
+ tmpfs   /var/run         tmpfs   defaults,noatime                   0 0\n\
+ tmpfs   /var/tmp         tmpfs   defaults,noatime                   0 0" > /media/card/etc/fstab
 now chroot into your armel rootfs and finish the install
  chroot /media/card
  /debootstrap/debootstrap --second-stage
  echo "deb http://ftp.de.debian.org/debian sid main" > /etc/apt/sources.list
  apt-get update
  apt-get install openssh-server
+ apt-get install locales
+ dpkg-reconfigure locales
+ apt-get install udev
+ passwd
+You may also copy some kernel modules over
+ wget http://rabenfrost.net/celtune/modules-2.6.24+svnr4194-r4165-r3-neo1973.tgz
+ tar -C /media/card -xzvf modules-2.6.24+svnr4194-r4165-r3-neo1973.tgz
+ chroot /media/card
+ depmod -a
 now reboot and start your debian. you can login with ssh and start configuring xorg - I will add this soon.
+ apt-get install xorg
+doing this I get:
+ Fatal server error:
+ xf86OpenConsole: Cannot open virtual console 255 (No such file or directory)
+this sux as I already fixed this problem a while ago but cannot remember how I did it - can anybody fix this?
 = 3.2. (option #2) download ready to use armel rootfs =
