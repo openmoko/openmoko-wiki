@@ -1,16 +1,21 @@
 This page is to explain how to run debian armel port on neo1973. This instructions are likely to work on freerunner, too.
 = 1. (optional) install known good kernel =
- wget http://rabenfrost.net/celtune/uImage-2.6.24+svnr4194-r4165-r4-neo1973.bin
- ./dfu-util -d 0x1457:0x5119 -a kernel -R -D ./uImage-2.6.24+svnr4194-r4165-r4-neo1973.bin
+this kernel was build by Marcel_M and has some important patches in it such as removing sd debug symbols and buildin ext3 support.
+ wget http://rabenfrost.net/celtune/uImage-2.6.24+svnr4194-r4165-r3-neo1973.bin
+ ./dfu-util -d 0x1457:0x5119 -a kernel -R -D ./uImage-2.6.24+svnr4194-r4165-r3-neo1973.bin
 
-= 2.1. (option #1) debootstrap your own armel rootfs =
+= 2. configure booting from sd/sdhc =
+
+Do as proposed here: [[Booting_from_SD]]
+
+= 3.1. (option #1) debootstrap your own armel rootfs =
 debootstrap your rootfs on debian or ubuntu
  debootstrap --verbose --arch armel --foreign sid ./armel-chroot http://ftp.de.debian.org/debian/
 Format your sd card appropriately. I'm using an 8GB shcd card here.
  umount /media/card
  mkfs.ext3 /dev/mmcblk0p1
  mount /dev/mmcblk0p1 /media/card
-copy the armel chroot to your device by tar'ing it to preserve symbolic link cycles (https://bugzilla.mindrot.org/show_bug.cgi?id=1059 <= WONTFIX)
+copy the armel chroot to your device by tar'ing it to circumvent symbolic link cycles (https://bugzilla.mindrot.org/show_bug.cgi?id=1059 <= WONTFIX)
  tar -C ./armel-chroot/ -c . | ssh root@192.168.0.202 tar -C /media/card -xv
 ssh to your device and execute the following commands (just copypaste everything below)
  echo "nameserver 192.168.0.200" > /media/card/etc/resolv.conf
@@ -30,5 +35,5 @@ now chroot into your armel rootfs and finish the install
  echo "deb http://ftp.de.debian.org/debian sid main" > /etc/apt/sources.list
  apt-get update
  apt-get install openssh-server
-
-= 2.2. (option #2) download ready to use armel rootfs =
+now reboot and start your debian. you can login with ssh and start configuring xorg - I will add this soon.
+= 3.2. (option #2) download ready to use armel rootfs =
