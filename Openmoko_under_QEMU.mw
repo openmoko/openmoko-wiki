@@ -1,0 +1,396 @@
+QEMU can basically be used in three ways to run [[OpenMoko]]. Depending on the purpose that you are going to use the emulator for, you should decide on the target platform.
+
+*''PC'' - OpenMoko can be built to run on regular i386 hardware, 32- or 64-bit and this is probably the fastest way to get OpenMoko running if you want to get an impression of how it looks.  In this scenario QEMU would only serve for isolating your [[OpenMoko]] installation from your normal system, or, if you're not on a UNIX system, QEMU provides a non-intrusive way to get Linux up quickly. More information can be found in the [[FAQ]] and [[Getting Openmoko working on host with Xoo|here]].
+
+*''Integrator/CP'' - this is the default ARM-based machine that QEMU knows about. This target is used with MACHINE="qemuarm" and it is sufficient to run the original OpenMoko rootfs image, although it doesn't emulate any of the [[:Category:Neo1973 Hardware | Neo1973 Hardware]] except the very CPU core. Read more in the [[FAQ#Q:_Is_there_an_emulator_available_for_OpenMoko.3F|FAQ]].
+
+*''Neo1973'' - the QEMU tree available from OpenMoko repositories is also capable of emulating most of the actual [[Neo1973]] hardware, although not all of it at this moment. It is a work-in-progress and when it's more mature it is going to be submitted for merging to the main QEMU development tree.
+
+== Neo1973 emulation ==
+
+This target will (obviously) run original OpenMoko rootfs images, but then it should also be able to run the original u-boot and kernel images, the same ones that a real Neo1973 uses. Among other differences you will notice between this approach and the Integrator/CP target is you also get correct screen resolution, some (fake) battery readings, and other goodness. Currently missing parts of the emulator are: [[Hardware:AGPS|AGPS]] and [[Bluetooth]] - these things will still be worked on, as well as general usability. Even with these things missing, QEMU should provide substantial help in debugging kernel and u-boot issues to developers.
+
+What QEMU can '''*not*''' be used for, and probably no other emulator can, is speed measures and getting the general feel of OpenMoko performance. Code running in qemu runs with the maximum speed your host computer can provide with an overhead of translating target code to host code, and this overhead is not uniform across different instructions. This means that even if your virtual Neo reports near 100 BogoMIPS (which is the speed of a real Neo), different actions performed in the emulator will not run with the same speed. On most PCs you will notice the virtual Neo running faster than a real one (Audio related operations may be one of the exceptions).
+
+=== What hardware is supported ===
+
+Rough status for each of the components that need emulation, following the outline of [[:Category:Neo1973 Hardware | Neo1973 Hardware]] page.
+{|
+! Hardware !! Status !! Usage notes
+|- style="background-color:#eeeedd;"
+! colspan="3"|S3C2410A Processor
+|-
+|ARM920T core || Works || Already in mainline QEMU.
+|-
+|Basic guts || Work || This includes GPIO interface, DMA, Interrupt Controller, Timers, NAND controller, MMC/SD host, [[I2C]] and IIS interfaces, Memory & Clock & Power management controllers, RAM.
+|-
+|Serial ports || Works || Use the "-serial" switch (maybe be specified multiple times) to tell QEMU where serial input/output should go to. GSM module will be connected on UART0.
+|-
+|RTC || Works || On start QEMU will load it with current time/date - the Neo1973 [[kernel]] doesn't use it for time/date source currently.
+|-
+|SPI || Works || The guest kernel can drive it using either the SPI interface or raw GPIO bitbanging.
+|-
+|LCD || Works || The virtual LCD will display contents in QEMU window unless "-nographic" is specified on command line.
+|-
+|ADC || Works || Mouse events in QEMU window generate what would be touchscreen events on a Neo1973 and are passed to the guest OS through the on-chip ADC.
+|-
+|OHCI USB || Works || This part is in mainline QEMU. Use the "-usb" switch to enable the controller and "usb_add" in QEMU monitor to attach new virtual or physical USB devices.
+|-
+|Slave USB || Works || Linux's dummy HCD in conjunction with gadget filesystem API is used to make the virtual Neo appear as a real one connected to the host computer. See [[#Setting up USB connection|Setting up USB connection]] below. (Experimental)
+|-
+|Watchdog || Works || This is one of the less important on-chip peripherals in S3C2410. It is however used by Linux for rebooting the board.
+|- style="background-color:#eeeedd;"
+! colspan="3"|[[I2C]] bus peripherals
+|-
+|[[PCF50606]] || Works || (Aka PMU) Fakes the battery charge level (set at 88%), POWER button, etc. Also contains an RTC, also unused by Linux.
+|-
+|[[LM4857]] || Works
+|-
+|[[WM8753L]] || Works || The CODEC is also connect to the CPU's IIS port. Basic [[Neo1973 Audio Subsystem|audio functionality]] is supported - see QEMU documentation on getting audio input/output from the emulator. Volume control has no effects.
+|- style="background-color:#eeeedd;"
+! colspan="3"|Other peripherals
+|-
+|NAND Flash || Works || However, some pieces are not confirmed to be completely compatible with the real hardware because of lack thereof. Use "-mtdblock flashimagefilenamehere" switch to point QEMU to your flash image. The file should be at least 69206016 bytes big.
+|-
+|JBT6K74-AS(PI) || Works || (Aka LCM) Wired to the SPI channel 1
+|-
+|Buttons || Work || Enter is the AUX button, Space is the POWER button. Wired to on-chip GPIO and PCF50606.
+|-
+|SD card || Works || This part is already in mainline QEMU. Use the "-sd cardimagegoeshere" switch to point QEMU to the card image. The regular QEMU monitor commands for removable media can also be used. The card works, however the on-chip host controller gave block length errors on heavy I/O despite working as described in specification. I suspect the kernel driver. DMA operation is not tested.
+|-
+|Bluetooth
+|style="background-color:#ffffcc;"|Works
+|A generic Bluetooth HCI (just like the BlueCore4 chip) is connected to internal USB hub (just like the Delta DBFM dongle). Currently qemu emulates no other bluetooth devices, so the dongle behaves as if there was no BT-enabled slaves around, being the only device on the piconet, i.e. is not really useful. Likely a Bluetooth keyboard will be emulated. A physical Bluetooth dongle can also be attached to the emulator (see USB documentation in QEMU).
+|-
+|[[GSM]] || Works || A fake modem is connected to UART0 understanding a (currently quite limited) subset of AT commands. Ultimately it should support as much functionality as possible (basic AT command set, fake GPRS connections, dialing and SMS send/receive). This way all parts of the phone subsystem (CALYPSO, TWL3014, TRF6151) will not have to be emulated. There is a possibility to wire a real GSM modem to QEMU's serial port, or the [http://doc.trolltech.com/qtopia-4.3-snapshot/fd-ModemSimulator.html phonesim] modem simulator from the ''Qtopia'' project (use the --enable-phonesim switch to ./configure) as well as the [http://doc.trolltech.com/qtopia-4.3-snapshot/modem-emulator.html atinterface] modem emulator, also from Qtopia.
+|-
+|[[Hardware:AGPS|AGPS]]
+|style="background-color:#ffcccc;"|To Do
+|There are obvious difficulties emulating the chip, but hopefully it can be made to present the guest OS with some fixed coordinates later when more is known about the chip. Again a real chip could be connected to QEMU's serial port.
+|}
+
+Current development is aiming for [[:Category:Neo1973_Hardware#GTA01Bv4 | GTA01Bv4]] compatibility; [[:Category:Neo1973_Hardware#GTA01Bv3 | earlier revisions]] can also be emulated if needed. The differences between the hardware revisions currently only manifest themselves in GPIO wiring. Hardware emulation is implemented in a clean-room manner using official specifications where possible.
+
+== How to get it running ==
+
+=== Using MokoMakefile ===
+
+This is arguably the easiest way of building qemu-neo1973 since you won't need to deal with the compiling and flashing processes yourself. See [[Using_QEMU_with_MokoMakefile|MokoMakefile]] for details.
+
+If you *just* build QEMU and use the official images by typing "make qemu" only (as opposed to setting up monotone and openembedded and building an entire new image for yourself with MokoMakefile), then the build takes less time than the manual instructions below (since it's all done automatically).
+
+=== Manual setup ===
+
+To obtain the latest source code for the emulator, you will want to do something like the following:
+<pre>
+$ svn checkout https://svn.openmoko.org/trunk/src/host/qemu-neo1973
+$ cd qemu-neo1973
+</pre>
+Now, we're going to configure and build the emulator (Note [[#Requirements|Requirements]] below):
+<pre>
+$ ./configure --target-list=arm-softmmu  # GCC 3.x will be required, see --cc=
+$ make
+</pre>
+See other available options for the configure script by appending "--help".
+Now you should have a working emulator under the name "arm-softmmu/qemu-system-arm". To run OpenMoko you will also need to somehow install OpenMoko on your virtual phone, which is totally clean of any software at this moment. There are several block devices to choose from, the best option is probably to do exactly what the Neo1973 manufacturer does before it ships the device to the final user. This process is described in [[Bootloader]], [[Kernel]], [[NAND bad blocks]] and [[Devirginator]] but you don't need to know all the details. Two scripts are provided to generate a firmware for your phone, as realistic as possible. First run
+<pre>$ openmoko/download.sh</pre>
+which will look up the list of latest available OpenMoko snapshot builds from buildhost.openmoko.org and choose the most recent [[u-boot]], Kernel, and root filesystem images, and download the images (unless they are already found in the openmoko/ directory). These binaries will be used by the flash.sh script. First make sure you have the netpbm package installed for some graphics conversion utilities. On Ubuntu this can be done by:
+<pre>sudo apt-get install netpbm</pre>
+Then run:
+<pre>$ openmoko/flash.sh</pre>
+which runs the emulator, loads u-boot into it and then uses u-boot's capability to program the Flash memory to install all the necessary parts of the system into the virtual Flash. It will also set up all the bootloading process including a boot menu (ENTER is [AUX] and SPACE is [POWER]), splash, u-boot environment and some default kernel parameters. If everything goes OK, the script should print a command which you can use to start using the emulator.
+
+QEMU has '''*tons*''' of commandline switches and things that can be configured. You can look them up in [http://www.qemu.org/user-doc.html QEMU user docs]. You will probably want to use the "-snapshot" switch, among other ones. Saving and restoring emulation state at any point (unrelated to "-snapshot") should work as per QEMU user docs too. In addition the monitor commands "help" and "info" are of great help. The monitor usually sits in second virtual console, thus ctrl-alt-2 and ctrl-alt-1 switch to monitor and back.
+
+=== Pre-built binaries ===
+
+Win32 binaries shipped with firmware can be downloaded from [http://mdk.linux.org.tw/~jserv/openmoko/openmoko-emulator-win32-bin-20070625.zip openmoko-emulator-win32-bin-20070625.zip] ([http://snakesoftruth.com/openmoko-emulator-win32-bin-20070625.zip or a mirror here]). Tested on MS Windows XP and Vista Business.
+
+== Convenient Scripts ==
+
+* openmoko/qemu-auto.sh
+
+launches qemu and opens a unix socket for communication. All additional parameters are passed to qemu. (e.g. openmoko/qemu-auto.sh -nographic launches the virtual machine with no graphics etc.).
+
+* openmoko/qemu-upload.sh <filename>
+
+produces a SD card image with one partition with the given file(s) on it (you can pass a list of files) and inserts it into the phone. The OpenMoko kernel should detect the event and the automounter should mount the partition. openmoko/qemu-auto.sh must be running already. If you pass no parameters, it ejects the media (the OM kernel is too dumb to detect this unfortunately). This will only work with gta01 emulation because gta02 has no SD.
+
+* openmoko/qemu-quit.sh
+
+powers the VM down cleanly.
+
+* openmoko/qemu-gadget.sh
+
+attempts to connect target's S3C USB slave to host's dummy HCD (if present and gadgetfs is mounted).
+
+== Requirements ==
+
+This QEMU tree has only been tested on GNU/Linux. To get graphical (not counting VNC) and/or audio output from the emulator you will need either SDL or Cocoa installed on your computer. To enable audio, see the available switches to the ./configure script.
+
+The scripts that sit in openmoko/ require lynx, wget, python, netpbm and most GNU base utilities installed in standard locations. The netpbm package contains tools necessary for bootsplash image conversion.
+
+All of the build-time and run-time requirements listed in [http://www.qemu.org/user-doc.html QEMU documentation] apply. This includes zlib, etc. On distributions that use binary packages, remember that you need the packages ending in '''-dev''' or '''-devel'''.
+
+== QEMU and GNU debugger ==
+
+QEMU lets you debug operating system kernels and bootloaders like you debug all other programs. To do this you will need a debugger that speaks the GDB remote debugging protocol - [http://sourceware.org/gdb/ GDB] is the obvious choice. Some cross toolchains come with GDB already set up. Otherwise building cross-GDB yourself is quick and easy (compared to building binutils and cross-gcc).
+
+To debug u-boot, load the file "u-boot" into gdb (not "u-boot.bin") that is produced by "make" when building u-boot. To debug a Linux kernel, load the file "vmlinux" from the main source directory into gdb. These files are in ELF format and contain all the symbol information and are not stripped of debugging data until you run "strip" on them, unlike "u-boot.bin" and "Image"/"zImage"/"uImage". Next, tell QEMU to enable the gdbserver by appending the "-s" switch or issuing "gdbserver" in the monitor. Use the command <pre>(gdb) target remote localhost:1234</pre> to make a connection to the emulator. From there you should be able to use all the usual GDB commands, including stepping instructions, setting breakpoints, watchpoints, inspecting stack, variables, registers and more. If gdb is running in the same directory from which it grabbed the ELF executable, the "edit" command should work so you can jump right to the source line which is executing.
+
+== Simple network connection with pppd ==
+
+One simple way to get a network connection from the emulated Neo is via an emulated serial port and [[pppd]]. Add ''-serial vc -serial pty'' to the [[QEMU command line]], and QEMU prints a device name on a line like "char device redirected to /dev/pts/12".
+
+On the Neo side, open a terminal and run the command "pppd nodetach debug /dev/ttySAC1".
+
+On the host computer side, open a root terminal and run the command "pppd nodetach debug 192.168.68.1:192.168.68.2 noauth /dev/pts/12", substituting the actual device name from above.
+
+Now on the host computer side, you should be able to "ping 192.168.68.2" and "ssh root@192.168.68.2".
+
+==Setting up Internet connection for your qemu neo:==
+
+(I assume that your local ip-adress is 192.168.0.100 and your router is 192.168.0.1)
+
+In qemu terminal (or via ssh) type:
+
+<pre>
+$ ifdown usb0
+$ route add default gw 192.168.68.1
+</pre>
+
+Edit /etc/resolv.conf:
+nameserver 192.168.0.1
+
+On the host-computer type:
+
+<pre>
+$ echo 1 >> /proc/sys/net/ipv4/ip_forward
+$ echo 1 >> /proc/sys/net/ipv4/ip_dynaddr
+
+$ modprobe ip_tables
+$ modprobe iptable_nat
+$ modprobe ipt_MASQUERADE
+
+$ iptables -t filter -F
+$ iptables -t nat    -F
+
+$ iptables -t filter -P INPUT       ACCEPT
+$ iptables -t filter -P FORWARD     ACCEPT
+$ iptables -t filter -P OUTPUT      ACCEPT
+$ iptables -t nat    -P PREROUTING  ACCEPT
+$ iptables -t nat    -P POSTROUTING ACCEPT
+
+$ iptables -t nat -A POSTROUTING -o eth0 -s 192.168.68.0/24 -j MASQUERADE
+</pre>
+
+(Where eth0 is your network interface connected to the router)
+
+Thats it - now you can enjoy internet in qemu.
+
+== Setting up USB connection ==
+
+It is possible (although not very straight forward, probably about the complexity of tun-tap networking) to connect the virtual, emulated Neo1973 to the Linux PC on which the emulator is running, and work with it as if a real Neo1973 was plugged into the computer's USB port, but no twiddling with cables is needed. If you're testing your applications on the Neo, it may be worth setting up this kind of connection because it lets you enable normal [[USB_Networking|networking between the PC and the phone and ssh into it]] (which is much more comfortable than typing commands into the OpenMoko's terminal emulator via on-screen keyboard). Here's what you will need in order to get this working:
+
+A Linux host with a 2.6 series kernel. The following drivers compiled-in or in modules: dummy_hcd, gadgetfs, usbnet, cdc_ether. [[Building Gadget USB Module|A detailed guide to building the necessary modules is available (primarily Ubuntu focused).]] Generic instructions follow.
+
+Note that you need root access to perform most actions described here. Here's how to enable the drivers in menuconfig.
+
+Find and enable '''Device Drivers''' -> '''USB support''' -> '''USB Gadget Support''' -> '''Support for USB Gadgets'''
+
+Find '''Device Drivers''' -> '''USB support''' -> '''USB Gadget Support''' -> '''USB Peripheral Controller''' and set it to '''Dummy HCD (DEVELOPMENT)'''
+
+Find and enable '''Device Drivers''' -> '''USB support''' -> '''USB Gadget Support''' -> '''Gadget Filesystem (EXPERIMENTAL)''' (this one is good to have as a module)
+
+Find and enable '''Device Drivers''' -> '''USB support''' -> '''USB Network Adapters''' -> '''Multi-purpose USB Networking Framework'''
+
+Find and enable '''Device Drivers''' -> '''USB support''' -> '''USB Network Adapters''' -> '''Multi-purpose USB Networking Framework''' -> '''CDC Ethernet support (smart devices such as cable modems)'''
+
+These last two drivers are the same [[Getting Started with your Neo1973#By using Ethernet emulation over a USB cable|drivers that you need to work with a real Neo over USB network]]. After you've built the drivers, make sure that the copy of kernel headers in /usr/include/linux is up to date. In particular the file /usr/include/linux/usb_gadgetfs.h needs to be present and if your distribution came with headers older than 2.6.18 or so, then you need tell the package manager to update them, or you can do that manually with
+<pre> # cp -a /usr/src/linux/include/linux/* /usr/include/linux/</pre>
+(assuming that your kernel sources are in /usr/src/linux). It is important that this is done before building qemu because the build system checks if these headers are functional and in case they aren't found it will disable the USB Slave functionality.  Run "grep CONFIG_GADGETFS config-host.h" in qemu build directory to make sure that the detection succeeded.  If it didn't, correct your linux headers and reconfigure qemu.
+
+After building qemu and before running it, make sure that the modules are loaded into the kernel. I found it useful to load gadgetfs with the following command:
+<pre> # modprobe gadgetfs default_uid=1000  # assuming my User ID is 1000</pre>
+and added the following line to my /etc/fstab:
+<pre>gadget         /dev/gadget    gadgetfs   noauto,user,group         0   0</pre>
+Make sure that the mountpoint /dev/gadget exists:
+<pre> # mkdir -p /dev/gadget</pre>
+After that the rest of the procedure can be performed from your regular user account. Mounting gadgetfs is done with:
+<pre> $ mount /dev/gadget</pre>
+The "default_uid" parameter changes the ownership on all files under /dev/gadget to your own and since the files there are created and destroyed dynamically, there's no easy way to have that performed by ''udev''. Now running qemu as you usually do but appending "-usb -usbgadget" (in the current version of the [[MokoMakefile]] this is not included) should enable the USB Slave functionality. The qemu monitor commands "info usbslave" and "usb_add gadget" will be useful. The former instruction asks the OS running under the emulator (OpenMoko) to describe its slave features (that's what ''lsusb'' does after a Neo1973 is connected to a PC). You can see the available USB configurations in this command's output. Since gadgetfs allows only one configuration, we will need to choose the desired configuration - most device have only one such configuration, in which case you can use just "usb_add gadget" to connect to host; CDC ethernet devices however usually include a second configuration for RNDIS networking (i.e. Ms Windows compatibility) and so does OpenMoko when using the g_ether driver. Hence, to get this right, wait for OpenMoko to fully boot up and execute the following in QEMU monitor:
+<pre>
+QEMU 0.9.0 monitor - type 'help' for more information
+(qemu) info usbslave 
+USB2.2 device 1457:5122:
+Manufacturer: Linux 2.6.20.7-moko8/s3c2410_udc
+Product: RNDIS/Ethernet Gadget
+Configuration 0: RNDIS
+Configuration 1: CDC Ethernet
+(qemu) 
+(qemu) usb_add gadget:1
+</pre>
+If qemu gives "couldn't add device gadget:1", double-check that it was built against gadgetfs - the file config-host.h must contain the line "#define CONFIG_GADGETFS 1".
+
+The "1" in "usb_add gadget:N" is the number of the USB configuration that we want to use. If everything went correctly - you can check that in dmesg - you should now have a new network interface called ''usb0'' on the PC, through which you can talk to the OpenMoko running in QEMU:
+<pre>
+ $ dmesg | tail
+<6>gadgetfs: bound to dummy_udc driver
+<7>hub 3-0:1.0: debounce: port 1: total 100ms stable 100ms status 0x101
+<6>usb 3-1: new high speed USB device using dummy_hcd and address 3
+<6>gadgetfs: connected
+<7>usb 3-1: default language 0x0409
+<7>usb 3-1: new device strings: Mfr=1, Product=2, SerialNumber=0
+<6>usb 3-1: Product: RNDIS/Ethernet Gadget
+<6>usb 3-1: Manufacturer: Linux 2.6.20.7-moko8/s3c2410_udc
+<6>usb 3-1: configuration #1 chosen from 1 choice
+<7>usb 3-1: adding 3-1:1.0 (config #1, interface 0)
+<7>usb 3-1:1.0: uevent
+<7>cdc_ether 3-1:1.0: usb_probe_interface - got id
+<7>cdc_ether 3-1:1.0: status ep3in, 16 bytes period 14
+<7>usb 3-1: adding 3-1:1.1 (config #1, interface 1)
+<7>usb 3-1:1.1: uevent
+ $ su -
+Password:
+ # tail /var/log/everything/current
+May  8 19:25:32 [kernel] gadgetfs: connected
+May  8 19:25:32 [kernel] gadgetfs: disconnected
+May  8 19:25:32 [kernel] gadgetfs: configuration #1
+May  8 19:25:32 [kernel] usb0: register 'cdc_ether' at usb-dummy_hcd-1, CDC Ethernet Device, 52:e7:eb:76:0a:d0
+ # lsusb -vvv
+Bus 003 Device 003: ID 1457:5122  
+Device Descriptor:
+  bLength                18
+  bDescriptorType         1
+  bcdUSB               2.00
+  bDeviceClass            2 Communications
+  bDeviceSubClass         0 
+  bDeviceProtocol         0 
+  bMaxPacketSize0        64
+  idVendor           0x1457 
+  idProduct          0x5122 
+  bcdDevice            2.12
+  iManufacturer           1 Linux 2.6.20.7-moko8/s3c2410_udc
+  iProduct                2 RNDIS/Ethernet Gadget
+  iSerial                 0 
+  bNumConfigurations      1
+  Configuration Descriptor:
+    bLength                 9
+    bDescriptorType         2
+    wTotalLength           80
+    bNumInterfaces          2
+    bConfigurationValue     1
+    iConfiguration          7 CDC Ethernet
+    bmAttributes         0xc0
+      Self Powered
+    MaxPower                0mA
+    Interface Descriptor:
+      bLength                 9
+      bDescriptorType         4
+      bInterfaceNumber        0
+      bAlternateSetting       0
+      bNumEndpoints           1
+      bInterfaceClass         2 Communications
+      bInterfaceSubClass      6 Ethernet Networking
+      bInterfaceProtocol      0 
+      iInterface              5 CDC Communications Control
+      CDC Header:
+        bcdCDC               1.10
+      CDC Union:
+        bMasterInterface        0
+        bSlaveInterface         1 
+      CDC Ethernet:
+        iMacAddress                      3 52E7EB760AD0
+        bmEthernetStatistics    0x00000000
+        wMaxSegmentSize               1514
+        wNumberMCFilters            0x0000
+        bNumberPowerFilters              0
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x83  EP 3 IN
+        bmAttributes            3
+          Transfer Type            Interrupt
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0010  1x 16 bytes
+        bInterval              14
+    Interface Descriptor:
+      bLength                 9
+      bDescriptorType         4
+      bInterfaceNumber        1
+      bAlternateSetting       0
+      bNumEndpoints           0
+      bInterfaceClass        10 Data
+      bInterfaceSubClass      0 Unused
+      bInterfaceProtocol      0 
+      iInterface              0 
+    Interface Descriptor:
+      bLength                 9
+      bDescriptorType         4
+      bInterfaceNumber        1
+      bAlternateSetting       1
+      bNumEndpoints           2
+      bInterfaceClass        10 Data
+      bInterfaceSubClass      0 Unused
+      bInterfaceProtocol      0 
+      iInterface              4 Ethernet Data
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x81  EP 1 IN
+        bmAttributes            2
+          Transfer Type            Bulk
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0040  1x 64 bytes
+        bInterval               0
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x02  EP 2 OUT
+        bmAttributes            2
+          Transfer Type            Bulk
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0040  1x 64 bytes
+        bInterval               0
+Device Qualifier (for other device speed):
+  bLength                10
+  bDescriptorType         6
+  bcdUSB               2.00
+  bDeviceClass            2 Communications
+  bDeviceSubClass         0 
+  bDeviceProtocol         0 
+  bMaxPacketSize0        64
+  bNumConfigurations      1
+
+ # ifconfig usb0 inet 192.168.0.200 netmask 255.255.255.0
+ # exit
+ $ ssh root@192.168.0.202
+The authenticity of host '192.168.0.202 (192.168.0.202)' can't be established.
+RSA key fingerprint is de:21:87:93:52:1c:6b:c7:69:29:6c:af:66:50:02:02.
+Are you sure you want to continue connecting (yes/no)? yes
+Warning: Permanently added '192.168.0.202' (RSA) to the list of known hosts.
+root@192.168.0.202's password: 
+root@fic-gta01:~$ uname -a
+Linux fic-gta01 2.6.20.7-moko8 #1 PREEMPT Wed Apr 25 11:13:52 UTC 2007 armv4tl unknown
+</pre>
+
+== Connecting to the serial port/Communicating with u-boot  ==
+If you add the option ''-serial telnet:localhost:1200,server'' to QEMU will create a telnet server on port 1200 that you can connect to as the serial port.<br>
+This will allow you to experiment with u-boot configuration without risking to brick the real device.<br>
+<br>
+Please note that QEMU will wait for you to connect to the telnet server at port 1200 before starting the emulation.<br>
+(use the command ''telnet localhost 1200'' to establish the connection)
+
+== See also ==
+*[[Building Gadget USB Module]] - Helpful guide
+*[[Xephyr]] - OpenMoko on i386
+*[[Xoo]] - OpenMoko on i386
+
+{{Languages|OpenMoko_under_QEMU}}
+
+[[Category:Developer software]]
+
+[[Category:Guides]]
