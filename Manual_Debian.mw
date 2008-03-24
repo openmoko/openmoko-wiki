@@ -12,12 +12,18 @@ Do as proposed here: [[Booting_from_SD]]
 = 3.1. (option #1) debootstrap your own armel rootfs =
 debootstrap your rootfs on debian or ubuntu
  debootstrap --verbose --arch armel --foreign sid ./armel-chroot http://ftp.de.debian.org/debian/
+= 3.2. (option #2) download ready to use armel rootfs =
+ wget http://rabenfrost.net/openmoko/armel-chroot-first-stage.tar.gz
+= 4 prepare sd card =
 ssh to your neo and format your sd card appropriately. I'm using an 8GB shcd card here.
  umount /media/card
  mkfs.ext3 /dev/mmcblk0p1
  mount /dev/mmcblk0p1 /media/card
 copy the armel chroot to your device by tar'ing it to circumvent symbolic link cycles (https://bugzilla.mindrot.org/show_bug.cgi?id=1059 <= WONTFIX)
  tar -C ./armel-chroot/ -c . | ssh root@192.168.0.202 tar -C /media/card -xv
+or if you downloaded the archive
+ cat armel-chroot-first-stage.tar.gz | ssh root@192.168.0.202 tar -C /media/card -xzv
+= 5. complete debootstrap process =
 ssh to your device and execute the following commands (just copypaste everything below)
  echo "nameserver 192.168.0.200" > /media/card/etc/resolv.conf
  echo "fic-gta01" > /media/card/etc/hostname
@@ -54,6 +60,7 @@ You may also copy some kernel modules over doing this (still on the neo)
  tar -C /media/card -xzvf modules-2.6.24+svnr4194-r4165-r3-neo1973.tgz
  chroot /media/card
  depmod -a
+= 6. get x running =
 now reboot and start your debian. you can login with ssh and start configuring xorg - I will add this soon.
  apt-get install xorg
  startx
@@ -61,4 +68,3 @@ doing this I get:
  Fatal server error:
  xf86OpenConsole: Cannot open virtual console 255 (No such file or directory)
 this sux as I already fixed this problem a while ago but cannot remember how I did it - can anybody fix this?
-= 3.2. (option #2) download ready to use armel rootfs =
