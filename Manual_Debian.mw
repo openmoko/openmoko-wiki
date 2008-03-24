@@ -1,8 +1,9 @@
 This page is to explain how to run debian armel port on neo1973. This instructions are likely to work on freerunner, too.
 = 1. (optional) install known good kernel =
-this kernel was build by Marcel_M and has some important patches in it such as removing sd debug symbols and buildin ext3 support.
+this kernel was build by Marcel_M and has some important patches in it such as removed sd debug symbols and build-in ext3 support.
  wget http://rabenfrost.net/celtune/uImage-2.6.24+svnr4194-r4165-r3-neo1973.bin
  ./dfu-util -d 0x1457:0x5119 -a kernel -R -D ./uImage-2.6.24+svnr4194-r4165-r3-neo1973.bin
+As there is no way to boot from sdhc with uboot directly I always copy my kernel to flash and let it boot my rootfs from sd but feel free to do it your way.
 
 = 2. configure booting from sd/sdhc =
 
@@ -11,7 +12,7 @@ Do as proposed here: [[Booting_from_SD]]
 = 3.1. (option #1) debootstrap your own armel rootfs =
 debootstrap your rootfs on debian or ubuntu
  debootstrap --verbose --arch armel --foreign sid ./armel-chroot http://ftp.de.debian.org/debian/
-Format your sd card appropriately. I'm using an 8GB shcd card here.
+ssh to your neo and format your sd card appropriately. I'm using an 8GB shcd card here.
  umount /media/card
  mkfs.ext3 /dev/mmcblk0p1
  mount /dev/mmcblk0p1 /media/card
@@ -19,7 +20,7 @@ copy the armel chroot to your device by tar'ing it to circumvent symbolic link c
  tar -C ./armel-chroot/ -c . | ssh root@192.168.0.202 tar -C /media/card -xv
 ssh to your device and execute the following commands (just copypaste everything below)
  echo "nameserver 192.168.0.200" > /media/card/etc/resolv.conf
- echo "fix-gta01" > /media/card/etc/hostname
+ echo "fic-gta01" > /media/card/etc/hostname
  echo "127.0.0.1 localhost.localdomain localhost fic-gta01" > /media/card/etc/hosts
  echo -e "auto lo\n\
  iface lo inet loopback\n\
@@ -48,13 +49,14 @@ now chroot into your armel rootfs and finish the install
  dpkg-reconfigure locales
  apt-get install udev
  passwd
-You may also copy some kernel modules over
+You may also copy some kernel modules over doing this (still on the neo)
  wget http://rabenfrost.net/celtune/modules-2.6.24+svnr4194-r4165-r3-neo1973.tgz
  tar -C /media/card -xzvf modules-2.6.24+svnr4194-r4165-r3-neo1973.tgz
  chroot /media/card
  depmod -a
 now reboot and start your debian. you can login with ssh and start configuring xorg - I will add this soon.
  apt-get install xorg
+ startx
 doing this I get:
  Fatal server error:
  xf86OpenConsole: Cannot open virtual console 255 (No such file or directory)
