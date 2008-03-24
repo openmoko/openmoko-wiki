@@ -1,27 +1,25 @@
-{{Languages|Getting_Openmoko_working_on_host_with_Xephyr}}
-
-The goal of this page is to show you how to run an Openmoko development image on your host x86 development machine in a chrooted environment.
+The goal of this page is to show you how to run an OpenMoko development image on your host x86 development machine in a chrooted environment.
 
 == What is Xephyr ==
-[http://projects.o-hand.com/xephyr Xephyr] is a modern X Server in a window which can be used to simulate small displays in a desktop development enviroment.  It is maintained on the [http://projects.o-hand.com/Home OpenedHand] projects page. Xephyr is now part of xorg-server. Please note that even though it will render Openmoko pixel for pixel, it will likely display almost 4 times larger than the actual device since portable devices tend to have smaller pixels than computer monitors.
+[http://projects.o-hand.com/xephyr Xephyr] is a modern X Server in a window which can be used to simulate small displays in a desktop development enviroment.  It is maintained on the [http://projects.o-hand.com/Home OpenedHand] projects page. Xephyr is now part of xorg-server. Please note that even though it will render OpenMoko pixel for pixel, it will likely display almost 4 times larger than the actual device since portable devices tend to have smaller pixels than computer monitors.
 
 === Xephyr on your system ===
 
 ==== gentoo ====
 To have it on your system, add ''kdrive'' flag in /etc/make.conf or on your x11-base/xorg-server use flags.
 
-== Build an Openmoko Image ==
+== Build an OpenMoko Image ==
 
 First, you'll need to build an openmoko-devel-image. You'll need to edit your local.conf file during build process (before step 5).
 
-You should use [[MokoMakefile|Building Openmoko using the MokoMakefile]] to build an openmoko-devel-image for your host architecture (x86 in our case). Make sure you put the moko makefile in /home/moko/Makefile .
+You should use [[MokoMakefile|Building OpenMoko using the MokoMakefile]] to build an openmoko-devel-image for your host architecture (x86 in our case). Make sure you put the moko makefile in /home/moko/Makefile .
 
 Prior to that, edit your build/conf/local.conf to make it look like this:
 
  MACHINE = "x86"
  DISTRO = "openmoko"
  BUILD_ARCH = "i686"
- INHERIT += " rm_work devshell"
+ INHERIT += " devshell"
 
 Once you have built the image, you can start working toward running the image.
 
@@ -29,8 +27,6 @@ Once you have built the image, you can start working toward running the image.
  TARGET_FPU = ""
 
 ([[User:Enjahova]]) I had to remove all references to uboot from the makefile to get it to get "make openmoko-devel-image" to complete.
-
-([[User:iad.mike2]]) me too -> look at [http://docs.openmoko.org/trac/ticket/1386]
 
 == Setup the image filesystem ==
 
@@ -81,7 +77,7 @@ Remove touch screen calibrator. Since touch screen hardware is not present, the 
 
 === Supplying fonts ===
 
-You might need to install fonts supplied by Openmoko to your host system. The easiest way to do is in Gnome is to go Preferences -> Font - > Details -> Go to font folder and then drag and drop TTF font files from build/tmp/rootfs/usr/share/fonts/ in Nautilus.
+You might need to install fonts supplied by OpenMoko to your host system. The easiest way to do is in Gnome is to go Preferences -> Font - > Details -> Go to font folder and then drag and drop TTF font files from build/tmp/rootfs/usr/share/fonts/ in Nautilus.
 Using Xubuntu (no Gnome) I found copying the ttf folder into /usr/X11R6/lib/X11/fonts worked.
 
 === Launching Xephyr ===
@@ -97,7 +93,7 @@ Now, back in chroo'ted environment, start X client:
  eval $(dbus-launch)
  /etc/X11/Xsession
 
-You should see Openmoko booting in the Xephyr window.
+You should see OpenMoko booting in the Xephyr window.
 
 [[Image:Xephyr.png]]
 
@@ -113,20 +109,20 @@ The following script sets up the most of root fs environment automatically
 <pre>
 #!/bin/bash
 #
-# Set-up x86 Openmoko root jail. This script must be run as root.
+# Set-up x86 OpenMoko root jail. This script must be run as root.
 #
 # Root jail is an environment, where the file system root has been
-# changed to the Openmoko root file system folder. Please don't
+# changed to the OpenMoko root file system folder. Please don't
 # use the build/rootfs, but make a copy of it, since build/rootfs
 # gets overwritten each time you build openmoko-devel-image
 #
 # You need to set-up another X server (nested preferably) to 
-# act as a Openmoko screen. Otherwise chrooted applications are executed
+# act as a OpenMoko screen. Otherwise chrooted applications are executed
 # as is on the host hardware and the kernel.
 #
 # See: 
 #
-# http://wiki.openmoko.org/wiki/Getting_Openmoko_working_on_host_with_Xephyr
+# http://wiki.openmoko.org/wiki/Getting_OpenMoko_working_on_host_with_Xephyr
 # 
 #
 # 2007 Mikko Ohtamaa - Red Innovation Ltd.
@@ -180,5 +176,7 @@ chroot . /bin/sh
 
 See [[Getting Openmoko working on host with Xoo]] for more information.
 
-
+[[Category:Developer software]]
 [[Category:Emulation]]
+[[Category:Guides]]
+{{Languages|Getting_OpenMoko_working_on_host_with_Xephyr}}
