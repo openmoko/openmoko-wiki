@@ -87,3 +87,19 @@ configure /etc/X11/xorg.conf so that it looks like this:
  EndSection
 start x in the first vt:
  startx -- vt1
+
+= 7. get touchscreen working =
+this is WIP as the x/y axis have to be swapped 90 degrees - please edit if you know how.
+
+install the tslib driver:
+ apt-get install xserver-xorg-input-tslib
+create this link as the device is hardcoded for now:
+ ln -s /dev/input/event1 /dev/event0
+and edit the InputDevice section in your xorg.conf
+ Section "InputDevice"
+        Identifier "Configured Mouse"
+        Driver "tslib"
+        Option "CorePointer"
+        Option "Device" "/dev/input/mice"
+        Option "Protocol" "Auto"
+ EndSection
