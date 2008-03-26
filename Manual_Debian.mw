@@ -25,6 +25,8 @@ copy the armel chroot to your device by tar'ing it to circumvent symbolic link c
 or if you downloaded the archive
  cat armel-chroot-first-stage.tar.gz | ssh root@192.168.0.202 tar -C /media/card -xzv
 = 5. complete debootstrap process =
+make sure your internal clock is set to the correct date because apt-get will complain if otherwise
+ hwclock --set --date="MM/DD/YY hh:mm:ss"
 ssh to your device and execute the following commands (just copypaste everything below)
  echo "nameserver 192.168.0.200" > /media/card/etc/resolv.conf
  echo "fic-gta01" > /media/card/etc/hostname
@@ -49,13 +51,19 @@ ssh to your device and execute the following commands (just copypaste everything
 now chroot into your armel rootfs and finish the install
  chroot /media/card
  /debootstrap/debootstrap --second-stage
+install openssh so you can login remotely
  echo "deb http://ftp.de.debian.org/debian sid main" > /etc/apt/sources.list
  apt-get update
  apt-get install openssh-server
+install and configure locales
  apt-get install locales
  dpkg-reconfigure locales
+install udev to dynamically create /dev
  apt-get install udev
+set a root password
  passwd
+create a normal user
+ adduser <yournamehere>
 You may also copy some kernel modules over doing this (still on the neo)
  wget http://rabenfrost.net/celtune/modules-2.6.24+svnr4194-r4165-r3-neo1973.tgz
  tar -C /media/card -xzvf modules-2.6.24+svnr4194-r4165-r3-neo1973.tgz
@@ -92,8 +100,9 @@ start x in the first vt:
 = 7. get touchscreen working =
 install the tslib driver:
  apt-get install xserver-xorg-input-tslib
-create this link as the device is hardcoded for now:
- ln -s /dev/input/event1 /dev/event0
+edit /etc/udev/udev.rules as the tslib device is hardcoded for now. search for the input devices section and make the first line look like this:
+ # input devices
+ KERNEL=="event1",               NAME="event0"
 and edit the InputDevice section in your xorg.conf
  Section "InputDevice"
         Identifier "Configured Mouse"
@@ -108,5 +117,9 @@ start x and enjoy!!
  startx -- vt1
 = 8. install xfce4 =
 simple...
- apt-get install xfce4
- startx /usr/bin/xfce4-session -- vt1
+ apt-get install gdm xfce4 xvkbd
+configure gdm so xkvbd will allow you to put in your username and password. simply add this to the end of /etc/gdm/Init/Default before exit 0 so that the three last lines look like this:
+ fi
+ sleep 20 && /usr/bin/xvkbd -xdm -geometry 480x210+0+0 &
+ exit 0
+on each boot gdm should start automatically now
