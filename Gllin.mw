@@ -11,55 +11,28 @@ http://lists.openmoko.org/pipermail/community/2007-November/011916.html.
 
 The similar instructions are described in more details at [[getting GPS console output with gllin]].
 
+== /sys/ path issues with some kernel versions ==
 
+gllin expects to find the gps devices /sys/ interface in the path: 
+'''/sys/bus/platform/devices/gta01-pm-gps.0/'''
 
-Unfortunately, gllin expects paths such as /sys/bus/platform/devices/gta01-pm-gps.0/pwron ... and 2.6.24 kernel provides neo1973-pm-gps.0 instead :-(.
+If your kernel does not create the path mentioned above but only i.e. 
+'''/sys/bus/platform/devices/neo1973-pm-gps.0/'''
+you can try the following solution:
 
--- The following steps seem to be not necessary (anymore?). -- [[User:Homyx|homyx]] Mar 08, 2008
+As it is not possible to create symlinks in /sys/ or /proc/ and similar kernel virtual
+filesystems a different approach needs to be taken: bind-mounts.
 
-<pre>
-root@fic-gta01:/media/card/home/root/gllin# cat gllin.real | grep /sys/bus/platform/devices/
-/sys/bus/platform/devices/gta01-pm-gps.0/reset
-...
-
-root@fic-gta01:/sys/bus/platform/devices# ls -l gta01-pm-gps.0
-lrwxrwxrwx    1 root     root            0 Mar  8 11:01 gta01-pm-gps.0 -> ../../../devices/platform/s3c2410-i2c/i2c-adapter/i2c-0/0-0008/neo1973-pm-gps.0
-root@fic-gta01:/sys/bus/platform/devices# ls -l neo1973-pm-gps.0
-lrwxrwxrwx    1 root     root            0 Mar  8 11:01 neo1973-pm-gps.0 -> ../../../devices/platform/s3c2410-i2c/i2c-adapter/i2c-0/0-0008/neo1973-pm-gps.0
-root@fic-gta01:/sys/bus/platform/devices# uname -a
-Linux fic-gta01 2.6.24 #1 PREEMPT Wed Mar 5 00:16:31 UTC 2008 armv4tl unknown
-</pre>
-
-Fortunately, you can do evil hack:
+The old path .../gta01-pm-gps.0/ can be made avainable again to gllin by creating a bind mount with:
 
 <pre>
-cat gllin.real | sed 's-/sys/-/s/s/-g' > gllin.real2
-mkdir -p /s/s/bus/platform/devices/
-ln -s  /sys/bus/platform/devices/neo1973-pm-gps.0/ /s/s/bus/platform/devices/gta01-pm-gps.0
+echo "/sys/bus/platform/devices/neo1973-pm-gps.0 /sys/bus/platform/devices/gta01-pm-gps.0 none bind 0 0" >>/etc/fstab
+mount /sys/bus/platform/devices/neo1973-pm-gps.0
 </pre>
 
-''<font color=red>WARNING:</font>The first step above should not be executed on the phone itself, as BusyBox's sed will corrupt the binary file.  It worked for me when run on my host (thanks balrog-kun!)
-''
-<pre>
-# gllin.real2 was produced by BusyBox sed
-lib/ld-linux.so.2 --library-path /home/root/gllin/lib:/home/root/gllin/usr/lib /home/root/gllin/gllin.real2 -low 5
-/home/root/gllin/gllin.real2: error while loading shared libraries: /home/root/gllin/gllin.real2: ELF file version does not match current one
+Other approaches using '''sed''' on gllin or some symlink approach were proposed but 
+creating a simple bind mount seems to be the cleanest solution.
 
-# gllin.real3 was produced by GNU sed version 4.1.5
-$ lib/ld-linux.so.2 --library-path /home/root/gllin/lib:/home/root/gllin/usr/lib /home/root/gllin/gllin.real3 -low 5
-GPSpwr "1" > /s/s/bus/platform/devices/gta01-pm-gps.0/power_lp_io_3v3
-GPSpwr "1" > /s/s/bus/platform/devices/gta01-pm-gps.0/power_lp_io_3v3
-...
-</pre>
-
--- I didn't do the above steps; instead I just linked the old directory to the new one.  No sed black magic was required. See below. -- [[User:Wurp]] Mar 12, 2008
-
--- The below link appears not to work - giving a "No such file or directory" error when trying to create any file in this directory. This is with the 20 Feb build. -- [[User:Cheetah100]] Mar 21, 2008
-
-<pre>
-cd /sys/bus/platform/devices/
-ln -s  neo1973-pm-gps.0 gta01-pm-gps.0
-</pre>
 
 == gllin options ==
 
