@@ -26,8 +26,6 @@ copy the armel chroot to your device by tar'ing it to circumvent symbolic link c
 or if you downloaded the archive
  cat armel-chroot-first-stage.tar.gz | ssh root@192.168.0.202 tar -C /media/card -xzv
 = 5. complete debootstrap process =
-make sure your internal clock is set to the correct date because apt-get will complain if otherwise
- hwclock --set --date="MM/DD/YY hh:mm:ss"
 ssh to your device and execute the following commands (just copypaste everything below)
  echo "nameserver 192.168.0.200" > /media/card/etc/resolv.conf
  echo "fic-gta01" > /media/card/etc/hostname
@@ -52,6 +50,8 @@ ssh to your device and execute the following commands (just copypaste everything
 now chroot into your armel rootfs and finish the install
  chroot /media/card
  /debootstrap/debootstrap --second-stage
+make sure your internal clock is set to the correct date because apt-get will complain if otherwise
+ hwclock --set --date="MM/DD/YY hh:mm:ss"
 install openssh so you can login remotely
  echo "deb http://ftp.de.debian.org/debian sid main" > /etc/apt/sources.list
  apt-get update
