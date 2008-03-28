@@ -53,7 +53,7 @@ Now we also want the kernel on there. In OM-2007.2 the last built kernel gets a 
 
 On my Phase-1 Neo the boot menu entry existed already. If yours is missing it follow those instructions: Start uboot in bootmenu mode (= hold AUX while powering on) and add the following entry via serial console: (See  [[Bootloader]] section on how to access an bootloader).
 
- GTA01Bv4 # setenv menu_4 Boot from SD: setenv bootargs root=/dev/mmcblk0p1 rootdelay=5 console=ttySAC0,115200 console=tty0 loglevel=8 \${mtdparts}\; mmcinit\; ext2load mmc 0 0x32000000 /boot/\${sd_image_name}\; bootm 0x32000000
+ GTA01Bv4 # setenv menu_4 Boot from SD: setenv bootargs root=/dev/mmcblk0p1 rootdelay=5 console=ttySAC0,115200 console=tty0 \${mtdparts}\; mmcinit\; ext2load mmc 0 0x32000000 /boot/\${sd_image_name}\; bootm 0x32000000
  GTA01Bv4 # setenv sd_image_name uImage
  GTA01Bv4 # saveenv
 
@@ -85,7 +85,7 @@ First you can follow Step 1 to get an kernel-image with mmc- and ext2-support. B
 Now you can continue with Step 2 (like mentioned before you do not have to copy your uImage to the rootfs) and follow the instructions to Step 3.
 Instead of the setenv commands in Step 3 you have to enter the following:
 
- GTA01Bv4 # setenv menu_5 Boot from SDHC: setenv  bootargs root=/dev/mmcblk0p1 console=tty0 loglevel=8 rootdelay=5 neo1973-nand:0x00040000(u-boot),0x00004000(u-boot_env),0x00200000(kernel),0x000a0000(splash)\; nand read.e 0x32000000 kernel\; bootm 0x32000000
+ GTA01Bv4 # setenv menu_5 Boot from SDHC: setenv  bootargs root=/dev/mmcblk0p1 console=tty0 rootdelay=5 neo1973-nand:0x00040000(u-boot),0x00004000(u-boot_env),0x00200000(kernel),0x000a0000(splash)\; nand read.e 0x32000000 kernel\; bootm 0x32000000
  GTA01Bv4 # saveenv
 
 And that's it!
@@ -101,7 +101,7 @@ Set a new Bootmenu Entry for booting from NAND first
 
 then Power-off, and enter the Bootmenu to test the new Entry.If you can boot from NAND, shutdown, enter Boot menu, connect to bootloader and set the (auto)bootcmd for boot from SDHC:
 
- GTA01Bv4 # setenv bootcmd setenv bootargs root=/dev/mmcblk0p1 rootdelay=10 console=tty0 loglevel=8 neo1973-nand:0x00040000(u-boot),0x00004000(u-boot_env),0x00200000(kernel),0x000a0000(splash)\; nand read.e 0x32000000 kernel\; bootm 0x32000000 
+ GTA01Bv4 # setenv bootcmd setenv bootargs root=/dev/mmcblk0p1 rootdelay=10 console=tty0 neo1973-nand:0x00040000(u-boot),0x00004000(u-boot_env),0x00200000(kernel),0x000a0000(splash)\; nand read.e 0x32000000 kernel\; bootm 0x32000000 
  GTA01Bv4 # saveenv
 
 Now you boot from SDHC everytime you press the Power-Button or reboot and if you like to boot from NAND -just use the bootmenu.
@@ -111,6 +111,29 @@ Now you boot from SDHC everytime you press the Power-Button or reboot and if you
 Udev automatically mounts the SD Card in /media/mmcblk0p1/ you can disable this with
 
  echo /dev/mmcblk >> /etc/udev/mount.blacklist
+
+
+== Remarks on Kernel Parameters ==
+
+==== loglevel ====
+
+Some people suggested adding:
+
+ loglevel=8
+
+top the kernel command line. This makes the boot process extremely slow because 
+the framebuffer (the neo display in text mode) has to print out tons of lines of
+debug messages like:
+
+ s3c2410-sdi s3c2410-sdi: ......
+ mmc0: ....
+
+==== rootdelay ====
+
+Is suggested to be added when the root filesystem is on the SD card and not in the NAND flash.
+Also see: http://osdir.com/ml/handhelds.linux.kernel/2006-12/msg00066.html
+
+
 
 
 
