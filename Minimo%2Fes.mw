@@ -1,0 +1,84 @@
+[[Image:Minimo-slashdot.jpeg|thumb|minimo in QEMU displaying it.slashdot.org]]
+[[Image:GTA01-minimo.JPG|thumb|minimo on GTA01 displaying www.heise.de]]
+
+= Installing Minimo web browser =
+
+[http://www.mozilla.org/projects/minimo/develop.html Minimo] es un navegador web basado en Mozilla. It features full [http://en.wikipedia.org/wiki/Ajax_%28programming%29 AJAX] support and other goodies. Currently stock OpenMoko build doesn't include Minimo. Here are instructions on how to run minimo in Xephyr PC environment and how to use other third party packages too. 
+
+* [http://bec-systems.com/web/content/view/79/9/ Instructions for including new OpenEmbedded packages to your project]
+
+These instructions should be updated to use a custom image rather than DISTRO_EXTRA_RDEPENDS -- see link above.
+
+== Setup build environment ==
+
+If you have built your OpenMoko using MokoMakefile some of these steps might not be familiar to you.
+
+Assume your OpenMoko root is at ~/workspace/moko
+
+First setup build environment variables:
+<pre>
+moo@hacker:~/workspace/moko/build$ . ../setup-env 
+</pre>
+
+Then checkout minimo from OpenEmbedded repository:
+<pre>
+moo@hacker:~/workspace/moko/build$ bitbake minimo
+</pre>
+
+Edit local.conf and add minimo to build dependencies list.
+
+<pre>
+MACHINE = "qemux86"
+DISTRO = "openmoko"
+BUILD_ARCH = "i686"
+INHERIT += " devshell"
+SRCDATE_eds-dbus = "now"
+DISTRO_EXTRA_RDEPENDS = "minimo"
+</pre>
+
+After local.conf has added new packages, one must refresh bitbake tasks.
+
+<pre>
+bitbake task-base -crebuild
+</pre>
+
+Now, you should be able to rebuild root fs using MokoMakefile.
+
+<pre>
+make openmoko-devel-image
+</pre>
+
+== Tips ==
+
+The default OpenMoko distribution lacks ''/etc/resolv.conf'' file which is used to configure system DNS look-up. Without this file, failing  domain name look-up prevents web browsing. The easiest way to fix is to copy the host system resolv.conf to the rootfs.
+
+<pre>
+moo@hacker:~/workspace/moko$ cp /etc/resolv.conf rootfs/etc/resolv.conf
+</pre>
+
+
+If build fails with 
+
+<pre>
+/usr/bin/ld: skipping incompatible $OMDIR/local/tmp/staging/arm-angstrom-linux-gnueabi/lib/libIDL-2.a when searching for -lIDL-2
+</pre>
+(here minimo is installed in a [http://wiki.openmoko.org/wiki/Application_Development_Crash_Course#Setting_Up_a_Local_Overlay Local Overlay], so your path will perhaps differ) try installing the libidl-dev package on the buildhost:
+
+<pre>
+sudo aptitude install libidl-dev
+</pre>
+
+== In chroot'ed environment ==
+
+Following instructions in [[Getting OpenMoko working on host with Xephyr]] to get yourself chroot'ed into OpenMoko environment. 
+
+Start Xephyr. You don't need to start OpenMoko session, minimo can run as is. 
+
+<pre>
+/ $ minimo  
+</pre>
+{{Languages|Minimo}}
+
+[[Category:Software ]]
+[[Category:Applications]]
+[[Category:Guides]]
