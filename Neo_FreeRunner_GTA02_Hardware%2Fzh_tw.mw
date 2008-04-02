@@ -1,4 +1,4 @@
-[[OpenMoko]] 是一個建構在[[hardware|硬體平台]] 上的軟體套件架構。 [[Neo FreeRunner]] 手機則是採用Openmoko套件的第二代硬體平台。透過本網頁的介紹，你可以在本頁頁尾取得硬體規格的相關資訊。
+[[OpenMoko]] 是一個建構在硬體平台[[hardware]] 上的軟體套件架構。 [[Neo FreeRunner]] 手機則是採用Openmoko套件的第二代硬體平台。透過本網頁的介紹，你可以在本頁頁尾取得硬體規格的相關資訊。
 {{note| 本頁內容中所介紹的硬體目前為“設計中／已有原型機”之階段，將會不時的變更規格。}}
 
 [[Image:Gta02a5 pcba cs.JPG|thumb|400px|display (top) side NOTE: GTA02 A5 PCBA Component Side photo]]
@@ -39,3 +39,162 @@
 *電源- 一般模式電源將可以透過 1200 mAh 電池battery with built-in coulomb counter, 可以透過特製的充電器充電。Internal Lithium Ion or Lithium Polymer battery will keep device in standby mode. Battery life (Approximation/Ideal Target) Standby time 150-200 Hrs (GSM) Talk time (Backlight off) Up to 3-4 hrs(GSM) 
 
 *LED- LED 指示器位於 Aux/Power 按鈕下。
+
+=硬體規格=
+===硬體Hardware Electrical=== 
+
+*400/500 MHz Samsung 2442B處理器/SOC (至少400) 
+*置入NAND  FLASH 啟動程式或 2MB NOR FLASH (選項)
+*128 MB SDRAM ， 64 MB CPU internal, 64 MB external 
+*256MB NAND Flash MCP package. 
+
+=== 顯示 ===  
+*Topploy VGA ; 2.8” diagonal, 480 x 640 pixels  
+*Transmissive display: good readability in high ambient light is essential 
+*White LED backlight.  Required brightness is 200 NIT minimum. 
+*Resistance type touch panel. 
+
+=== WiFi 802.11 b/g 無線接收器 ===  
+*須含 GPL 支援的資源或者是 GPL 相容
+*TX power at 11 Mbps: 13 dBm minimum  
+*RX sensitivity at 11 Mbps: -89 dBm desired, -83 dBm minimum 
+*AP mode desirable, not required 
+*WEP and WPA supported 
+*Atheros preferred because it's GPL policy
+
+=== Serial interfaces (UART) ===
+*需具備三個串列界面  (Serial interfaces) 
+*控制台Console  
+*A-GPS或 GPS
+*GSM/GPRS
+
+=== 加速器 ===
+* 須備有2x 加速器
+* 可支援中斷(suspend)或者是省電模式
+* 3 axis sensing
+
+=== A-GPS === 
+*GPS chipset receiver and antenna 
+*Sensitivity at Antenna port: -157 dBm tracking on chipset specification
+*LNA and SAW filter for maximum interference protection
+*Cold start time to first fix: 40 sec typical at -130 dBm, 60 sec max
+*Must support GPL for Assist-GPS function with open API
+*Industry quality GPS 
+*Could fit in GTA01 GPS area on the PCB
+
+=== GPS 天線效能 === 
+*天線位於裝置內部，並Antenna is passive and internal; 15 mm x 15 mm 陶製patch is nominal design 
+*天線加入 LNA 及and SAW 篩選器以迎合 GPS 效能 
+*15 mm 立方的平面square ground plane (minimum 1 mm ground border around patch) (TBA) 
+*將備有一個外部 GPS天線連接器 (MMCX)
+*在製造期間C/N 率必須高於 35
+
+=== 按鈕 === 
+*透過觸控式螢幕傳送資料為主要的資料輸入方法 
+*機款外圍有二個實體按鈕：電源按鈕 ( Neo1973) 是一個機械式的開關，可藉由外罩式塑膠製的按鈕啟動。Aux (911) 按鈕位於裝置上方。這兩個按鈕在以按下按鈕的方式操作時，對於軟體而言，為開/關或者是按下/未按下等二種模式的輸入。而每個按鈕的功能，則取決於應用程式定義的功能。
+
+*按鈕應有背光燈
+*硬體規格配置可循環使用50000 次 
+
+=== 聲音輸出 === 
+*喇叭 (必須擁有良好的音量大小及無雜音的聽覺環境)   
+*單聲道音效播送
+*最大音量：5公分內100 dB以確保在實際環境下能擁有良好的效能
+*以插孔方式支援耳機及麥克風功能
+=== 電源設定需求===
+*軟體依電源管理功能為優先
+*NXP PCF 優先
+*需支援USB供電
+*需透過USB功能支援充電
+*電源切換：Neo1973有一組電源切換，做為開／關及休眠（suspend ）
+* Power/Aux 必須配置背光燈 
+*不管裝置目前處於執行狀態或者是休眠狀態，必須可以以切換方式控制
+*切換器並不會關閉電源。它只能停止或者是重新啟動裝置。 
+*內置 Li-Ion或 Li-Polymer 電池。電池支援電源待命This battery supplies standby power to the device eliminates the rebooting of the device when local power is again reapplied.  Battery is 1200 ma-hr. 
+*電池壽命 (近似值) 最佳／目標 停留時間 150-200 Hrs (GSM) ，通話時間 (Backlight off) Up to 4 hrs(GSM) 
+*Estimated current draw for the entire device when in suspend mode (and ALL peripherals are turned off or set for deep sleep) is <5 mA at 3.6 volts (Li-Ion terminal voltage).
+*GSM module deep sleep (alive and keep contact with base station) stage should take less than 8mA
+*電池在充電500次後，必須備有約一半的電量 (~600 mAh)。即每日使用，近二年的時間。
+*在持續充電的狀況下，為了能觀察低電量或者是可設定的時間延遲，Neo1973必須進入休眠狀態 (即耗電模式)。
+*在充電器插入的狀況下，Neo1973必須在休眠狀態及蓄電狀態下自動監控電池狀態 。 
+*主供電連接器：1200mAh 電源。 
+*USB 充電器有USB charger have ID pin 47.5k pull down for OPENMOKO identification
+*指示器：LED指示燈位於裝置側邊，在充電或有漏接電話時會被點亮。
+
+=== GSM/GPRS ===
+*支援850/1800/1900 and 900/1800/1900 MHz 等頻率 
+*須被設計為具雙頻之裝置 (850/900 MHz) 
+*模組型GPRS 無線電話機，以符合PTCRB及FCC 驗證。最佳模式為模組在PTCRB或OTA測試前被驗證
+*GSM/GPRS 必須通過FCC/CE 驗證 
+
+=== GSM-GPRS 天線效能=== 
+*每個頻道能接收-105 dBm  (GSM/PCS) 
+*30+2 dBm 可在GSM頻道被傳送 
+
+=== Wi-Fi 模組 ===
+*必須支援 GPL 驅動程式
+*Atheros AR6k preferred
+*需有Flash 版本
+
+=== Wi-Fi 天線效能 === 
+* TX 13-15 dBm的 Wi-Fi天線
+*802.11b 11Mbps  RX -89 到 -83 dBm 或相等效能的天線
+=== 藍芽 ===
+*CSR BC4或之後版本的解決方案
+=== USB === 
+*Neo1973 GTA02 使用USB 1.11，將會有 主／副 （client/host）USB    
+*可提供主USB 5v電力
+*可透過USB進行充電
+
+=== 麥克風 === 
+裝置配有1 組麥克風
+=== 韌體映像檔 ===
+*使用 Linux 2.6.24 或之後版本
+*可支援自NAND啟動或自NOR啟動
+*搭載之映像檔必須含有基本的話機功能
+*無法藉由USB進行完整的韌體更新
+=== PSN ===
+*裝置將會包含 PSN (產品系列編號) ，列印在產品標籤及系統可讀取之NAND記體體中
+
+=== IMEI ===
+*產品需寫上IMEI 碼
+
+= 套件規格 = 
+*重量：:含電池重 ~150克 
+*4 in 1 laser pen passed RoHs and safty regulation for laser equipment safty
+*1x 512MB microSD Card (SanDisk/Transcend)
+*1x USB線，標準 A 到 mini-B 連接器
+*1x 1200mAh smart/gauge battery
+*快速啟動指南 
+*5v USB power cord w/100-240 switchable power plug 
+*Safety card, warranty card
+*產品包裝能通過 1m 到1.5m 掉落測試
+*AC USB 充電器，100v-240v，通過 UL 及所有必須的安全性規範
+*必須通卜咼 FCC/CE 驗證
+*必須通過 NCC驗證或台灣出口規範
+*RoHS 相容
+*須備有WEEE 報告
+
+= 生命週期規格 = 
+
+=== 產品生命週期 === 
+本產品設計至少可使用二年. 
+
+=== 操作適溫 === 
+*操作適溫為 –10°C 到 +60°C 
+
+=== 倉儲溫度 === 
+*-15  °C to +70 ° C  
+
+=== ESD === 
+裝置必須能耐 4.0kV contact discharge and  8.0kV air  
+
+=== 掉落測試 ===
+需通過掉落測驗 1m直接掉落水泥地板或1.5m 覆蓋物測試草地on slide with carpet
+
+
+= GTA02 硬體元件選擇 =
+
+== 實物尺寸 ==
+* 120.7 x 62 x 18.5 mm (4.75 x 2.44 x 0.728 英吋)
+* 110 +/- 5 g (4 盎司) 不含電池 <br>
