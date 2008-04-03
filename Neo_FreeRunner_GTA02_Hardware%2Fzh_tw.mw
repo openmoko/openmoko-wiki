@@ -253,7 +253,188 @@
 *[http://focus.ti.com/general/docs/wtbu/wtbuproductcontent.tsp?templateId=6123&navigationId=12296&contentId=4701 TRF615 產品首頁] <br>
 GPRS Class12/CS4 <br>
 
+== USB 裝置 ==
+USB裝置控制器置於S3C2442內 
+*驅動程式： https://svn.openmoko.org/trunk/src/target/kernel/patches/s3c2410_udc.patch
+* 請參考 [[USB Product IDs]] 暸解我們所使用的銷售／產品ID。
+* 1200mAh電池在連接到主USB時進行充電
+* Mini-AB 連接器與此相同[http://www.cypressindustries.com/shoponline/proddetail.asp?prod=CCMUSBAB-32005-700&cat=34 this one].
 
+== I2C 裝置 ==
+I2C是一個簡單的溝通標準，它可以用來移除晶片中小量的資料
+請參考 [[I2C | Neo I2C Devices]] 取得更多資訊及裝置清單及目前所使用的位置，與 Neo1973文件<br>
+
+== 聲音 ==
+參考： [[Neo1973 Audio Subsystem]]
+
+=== Wolfson Codec ===
+ [[WM8753]] Wolfson Microelectronics CODEC (它並無法播放MP3，它是個簡單的音效卡。
+* 產品首頁： http://www.wolfsonmicro.com/products/WM8753/
+* Data Sheet: [http://www.wolfsonmicro.com/uploads/documents/en/WM8753.pdf WM8753.pdf]
+* 連接：S3C2442 IIS界面 (PCM 資料)，S3C2442 I2C (控制)
+* 驅動程式：https://svn.openmoko.org/trunk/src/target/kernel/patches/asoc.patch
+
+=== Mono Amplifier ===
+在WM8753的類比聲音輸出中含有National Semiconductor [[LM4853]] Mono Amplifier 
+* 產品首頁： [http://www.national.com/pf/LM/LM4853.html LM4853.html]
+* Data Sheet: [http://www.national.com/ds.cgi/LM/LM4853.pdf LM4853.pdf]
+*連接：S3C2442 I2C (Control)
+
+=== 類比代有線耳機 ===
+包含了four-ring 2.5mm 音體插孔，能連接舊型的有線耳機
+
+使用Motorola 智慧型手機(A780,A1200, ...) 及V-360 耳機，包含相容的設定。
+
+=== 按鈕 ===
+Neo1973 GTA02有二組按鈕：
+* [[Neo1973 Power Button|The Power Button]]
+* [[Neo1973 AUX Button|The "Aux" button]]
+
+==機鷇==
+FreeRunner機瞉為全黑，您可以在WIKI首頁中看到產品圖。
+來源：IRC Mickey 
+=配件=
+
+== 觸控筆 ==
+使用四合一式雷射型觸控筆
+*販售商： [http://www.quarton.com/laser_pen.html Quarton XPII]
+*GTA02標準設定[http://www.quarton.com.tw/laser_pen_infiniter_xp_2.html QUARTON XPII 4 in 1 laser pen]
+
+== 電池 ==
+[[Neo FreeRunner (GTA02) Battery]] 與 [[Neo1973 GTA01 Battery]]相容，並且有限制的與Nokia BL6C 電池相容。
+參考此郵件清單 [http://lists.openmoko.org/pipermail/community/2007-February/003758.html this] 
+[http://wiki.openmoko.org/index.php?title=Image:Neo1973-with-BL5C-battery.png Neo1973 照片圖]
+
+* GTA02使用 TI bq27000晶片智慧型電池
+* SANYO UF653450S 1200mAh<br>
+*查看電池圖片 [http://people.openmoko.org/tony_tu/GTA02/hardware/GTA02/CT-GTA02.pdf GTA02 Smart Battery Schematics]
+
+== microSD  ==
+
+GTA02 會使用下列的microSD 記憶卡
+
+* [http://www.transcendusa.com/ Transcend] 512MB microSD card
+* [http://www.sandisk.com/ SanDisk] 512MB microSD card<br>
+
+== 充電器 ==
+
+AKII Technology 充電器
+
+*模組： [http://www.ak2.com.tw/pd_main.asp?sg_id=11 A10P1-05MP]
+*輸入： 100-240v~ /0.3A
+*輸出： +5v up to 2.0A
+*Add 47.5k 1% resistor between ID pin and ground for openmoko charger identification<br>
+
+= History =
+
+== GTA02v1 ==
+第一代原型機為 Openmoko 軟體開發使用。共組裝了30 pc。
+
+*2440下運做良好，擁有外部NAND/SDRAM 及NOR記憶體
+*因 04 N3無法使用故使用PCF50633 05 N3 。re-work power for basic schematics verification
+*使用GTA01 SIM 卡插槽
+*加內外部除錯埠
+*使用Global locate A-GPS
+
+== GTA02v2 ==
+第二代原型機。共50只，用於 Taipei SMT工廠MOUNT
+
+*最佳的組合是使用 Samsung 256 MB NAND ，因晶片可以使用S3C2442 B43
+*Using correct PMU PCF50633 04 N3
+*更換新的SIM 卡插槽
+*更新到 u-blox A-GPS
+*LCM power 從3.3v 改為1.8v
+*USB 電源切換規畫／pin指定錯誤，無法驗證USB 主要供電為 5v 功能
+*GPS功能驗證ok，並具一定的靈敏度
+== GTA02v3 ==
+製造驗證版本 2007/10/11 28 pcFIC 蘇州工廠組裝
+
+*使用S3C2442 B43 做為硬體驗證
+*使用 control pilot run 驗證S3C2442 B54 晶片組<br>
+
+== GTA02v4 ==
+大量製造釋出侯選版本1
+
+2 weeks after v3 gerber out, release the v4 gerber, and 2007/10/20 20 pcs fabricate at FIC SuZhou 
+
+* 因顯示穩定性因素，LCM 電源從 1.8v 變更為 3.3v 
+*rate/production verification用途組裝 200 pcs
+*組裝使用S3C2442 B43 (128 MB NAND) 的50 pc做為品質比較之用
+*USB 主電源晶片在Vb/Vcc 下，因不同的供電來源有輸出電壓穩定性問題。
+*電池庫倫電量設定無法使用在A4
+
+== GTA02v5 ==
+大量製造侯選版本
+
+*  2008/1/14 於 FIC SuZhou大量製造
+* 大量製造A5 試用版，自2008 March開始，與A5原型機相較之下製造100支原型機，包含一些resistor/capacitor 變更，用於GTA02開發人員使用，可參考此頁取得更多資訊 developers was tracked in the [[Prototypes| Prototypes Page]]
+*庫倫計算問題修正
+* USB 主供電切換修正
+* 因穩定性因素，需要加入PMU Vbat ，此項問題可以藉由SMT 或手工進行處理
+* 為了MPU穩定性考量，需為 PMU Vbat加入電容。
+* Need manual rework GSM IR UART path a 100k pull down for better GSM deep sleep
+* ATAG_REVISION： 0350
+
+== GTA02v6 ==
+大量製造侯選版本 3/Mass production version<br>
+
+A6 為A5的簡單調整。只進行些許的變更以使於提高更高的品質及版本控制。在A6上的電容及電阻變更，也被用於A5的大量製造上<br>
+
+*2008 March先行製造100 pc
+*為Vbat加入電容空間，降低SMT負荷
+*加入GSM IR 電阻以利GSM深眠模式
+*保留3 GPIO做為硬體版本控制
+= Debug Board =
+
+== Debug Board Connector definition ==
+
+以下為做為連接到偵錯板[[Debug Board]]或其它硬體的連接器。
+
+這些連接器為：
+* 39 - GND
+* 38 - STDI
+* 37 - _RESET
+* 36 - STMS
+* 35 - STCK
+* 34 - STDO
+* 33 - GSM_EN
+* 29 - _STRST
+* 19 - X_I2C_SCL (H-TP4703)
+* 18 - X_I2C_SDA (H-TP4704)
+* 17 - SPI_CLK0
+* 16 - SPI_MOSI0
+* 15 - SPI-MISO0 
+* 14 - SS0
+* 13 - EINT3 (H-TP4705)
+* 3 - CONSOLE_TXD (H-TP4701)
+* 2 - CONSOLE_RXD (H-TP4702)
+
+資料來源[http://people.openmoko.org/roh/Debugport_GTA01bv4.png].
+
+= Distinguishing hardware revisions =
+== Inside the [[Bootloader]] ==
+每個硬體版本都擁有自己的u-boot 映像檔，雖然 bootloader 有固定的版本。硬體的版本透過ATAG傳送到kernel via the ATAG (ATAG_REVISION)
+
+== Inside the [[Kernel]] ==
+kernel在啟動時接收ATAG_REVISION ，並且將內容儲存於 "system_rev" 全域變數。
+
+== From Userspace ==
+kernel在 /proc/cpuinfo輸出 system_rev 變數
+"Revision :" line.
+
+= 驗證 =
+
+== FCC ==
+*輸入美國用
+** 850/1800/1900 Band, FCC ID: EUNGTA02
+** 900/1800/1900 Band, FCC ID: EUNGTA02E
+** [http://people.openmoko.org/tony_tu/GTA02/certificate/EUNGTA02_850_1800_1900/ FCC test report(GTA02)]
+** [http://people.openmoko.org/tony_tu/GTA02/certificate/EUNGTA02E_900_1800_1900/ FCC test report(GTA02E)]
+
+== NCC ==
+*輸入台灣用
+**NCC驗證碼： CCAF08DG0080T0 
+**[http://people.openmoko.org/tony_tu/GTA02/certificate/NCC NCC test report]
 
 [[Category:Hardware ]]
 [[Category:GTA02 Hardware]]
