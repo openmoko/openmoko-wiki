@@ -1,229 +1,39 @@
 This is the Software specification for the Openmoko Neo FreeRunner Button and LEDs.
-
-{{InProgress}}
+''Note that this is a future specification which is not yet implemented in the software''
 
 =Taxonomy=
 
-==What's currently implemented==
- /sys/devices/platform/gta02-led.0/leds/gta02-aux:red/
- /sys/devices/platform/gta02-led.0/leds/gta02-power:blue/
- /sys/devices/platform/gta02-led.0/leds/gta02-power:orange/
-Those are all userspace directories for controlling the LEDs. echo 0 > brightness will turn the LED off. echo 1 > brightness will turn it on.
-trigger currently does nothing.
-
 ==Buttons==
-* AUX = Button on the left side of the device, upper area
-* POWER = Button on the right side of the device, center area (right below the USB socket)
+AUX = Button on the left side of the device, upper area
+POWER = Button on the right side of the device, center area (right below the USB socket)
 
 ==Leds==
-{| border=1 cellspacing=0 cellpadding=5
-| EVENT
-|style="background:#FF0000;color:white;"| '''red'''
-| behind AUX button
-|-
-| HEARTBEAT
-|style="background:#FF8040;color:white;"| '''orange'''
-| behind POWER button
-|-
-| WIRELESS / BLUETOOTH
-|style="background:#0000FF;color:white;"| '''blue'''
-| behind POWER button
-|-
-| MIXING TWO LEDS
-|style="background:#80409F;color:white;"| '''purple'''
-| behind POWER button if turning on the blue and the orange buttons together
-|}
+EVENT = Red LED behind the AUX Button
+HEARTBEAT = Orange LED behind the Power Button
+WIRELESS = Blue LED behind the Power Button
 
 ==Modes==
-* OFF = Device has no power or has been shutdown
-* ON = Device is fully powered
-* ON+CHARGING = Device is fully powered and has been connected to a USB host or Openmoko charger.
-* LOCK = Device is fully powered, but has screen lock displayed
-* SUSPEND = Device has been suspended to low-power mode
+OFF = Device has no power or has been shutdown
+ON = Device is fully powered
+LOCKED = Device is fully powered, but has screen lock displayed
+SUSPENDED = Device has been suspended to low-power mode
 
 =Basic Button Usage=
 
 This is grouped by mode:
 
-==Mode: OFF==
+==Mode = OFF==
 
-* To switch the device on: Press and hold POWER until the boot logo appears.
-* To enter the "normal" (NAND) boot menu: Press and hold POWER, one second later press and hold AUX.
-* To enter the "rescue" (NOR) boot menu: Press and hold AUX, then press and hold POWER.
+...
 
-==Mode: ON==
+==Mode = ON==
 
-* To suspend the device: Press POWER.
-* To shut down the device: Press and hold POWER for 4 seconds. If the device hangs, press and hold POWER for 8 seconds. If it still hangs, remove the battery and disconnect from USB.
-* To go to the home screen: Press AUX.
-* To display the profile screen: Press and hold AUX until it appears.
-
-==Mode: SUSPEND==
-
-* To wakeup the device: Press POWER.
+==MODE = OFF==
 
 =Basic LED Usage=
 
-LEDs are very useful in broadcasting valuable basic status information to the user in a way that the user does not have to unlock the device, enable the screen or turning the screen saver off and subsequently search the screen for basic status information.
-
-''This is grouped by mode:''
-
-==Mode: OFF==
-
-* All LEDs will be turned off.
-
-==Mode: ON==
-
-* HEARTBEAT will emit a short blink every 4 seconds.
-* If Bluetooth is powered on, WIRELESS will emit a short blink every 2 seconds.
-* If Wifi is powered on, WIRELESS will emit a long blink every 2 seconds.
-* If Bluetooth and Wifi are powered on, WIRELESS will be lit continuosly.
-
-==Mode: ON+CHARGING==
-
-''Same as ON, with the exception of''
-* HEARTBEAT will increase blinking as the charge level of the battery increases.
-* HEARTBEAT will be continuosly lit, if the battery has been fully charged.
-
-==Mode: SUSPEND==
-
-* All LEDs will be turned off.
+...
 
 =Advanced Button/LED Usage=
 
-* In ON-Mode, EVENT will blink every 2 seconds if there's an event that needs your attention.
-* The more events, the faster EVENT will blink.
-* Pressing AUX will acknowledge the event with the topmost priority and display it to you.
-* EVENT will stop to blink once all events have been acknowledged.
-
-
-=A first rules implementation=
-A C implementation of these rules has been [http://lists.openmoko.org/pipermail/openmoko-devel/2008-July/003458.html done by smurfy - phil] and is available at http://www.smurfy.de/files/neo/openmoko-led-v1.tar.gz
-
-
-= Implementations of other LED behaviors =
-
-== Blink LEDs to a user-definable rhythm ==
-
-A Python Script For Blinking Leds By Beats. This script reads beats from a file and blinks FreeRunners LEDs accordingly.
- 
-File format is human readable text, consisting of a simple sequence of integer quartet (4 numbers).  The first number representing status of blue power-led, second means status of orange power-led and third means status of red aux-led. 0=OFF, 1=ON. (If blue=1 and orange=1 then power=lila. This has nothing to do with this python script or this file format.) The last number represents the duration in milliseconds to hold that situation of leds.  Any non digit characters in the file count as a separators between numbers, but are otherwise ignored.
-
-It requires packages python-core and python-re from opkg.
-==== Led blinker ====
-
- #!/usr/bin/python
- """Led Blinker Player
- 
- Usage: python leds.py [filename]
- """
- import sys
- import time
- import re
- 
- def loadFromTextFile(filename):
-    infile = open(filename)
-    contents = infile.read()
-    return re.findall("(\d+)\D*(\d+)\D*(\d+)\D*(\d+)", contents)
- 
- def playNote(blue_value, orange_value, red_value, duration):
-    blue.write(str(blue_value) + "\n")
-    orange.write(str(orange_value) + "\n")
-    red.write(str(red_value) + "\n")
-    time.sleep(float(duration) / 1000.0)
- 
- def playFile(filename):
-    global blue, orange, red 
-    notes = loadFromTextFile(filename)
-    blue = open("/sys/class/leds/gta02-power:blue/brightness", "w", 1)
-    orange = open("/sys/class/leds/gta02-power:orange/brightness", "w", 1)
-    red = open("/sys/class/leds/gta02-aux:red/brightness", "w", 1)
- 
-    for first,second,third, duration in notes:
-        playNote(first,second,third,duration)
- 
-    playNote(0, 0, 0, 0)
-    blue.close()
-    orange.close()
-    red.close()
- 
- if __name__ == "__main__":
-    playFile(sys.argv[1])
-
-
-
-==== Example Beat ====
-The following is an example "fireworks"-file that can be used to test the led blinker.
-
- 1 0 0 100
- 1 0 1 100
- 1 1 0 100
- 0 1 0 100
- 0 1 1 100
- 0 0 1 100
- 1 1 1 100
- 1 0 0 100
- 1 0 1 100
- 1 1 0 100
- 0 1 0 100
- 0 1 1 100
- 0 0 1 100
- 1 1 1 100
- 1 0 0 100
- 1 0 1 100
- 1 1 0 100
- 0 1 0 100
- 0 1 1 100
- 0 0 1 100
- 1 1 1 100
-
-== Charge State and Wi-Fi transfer ==
-
-Seba has written a script called ledd which indicates charging state and transferring data over
-wifi on the LEDs. It is available [http://openmoko.opendevice.org/~dos/ledd here].
-
-== Power Status ==
-
-The following shell script
-uses the blue and orange LEDs under the power button to show battery power status.  
-
-The script will indicate high battery with blue, medium battery by purple (blue + orange), and low battery by orange.  Adjust low_thresh and high_thresh values (as percent of full power) for your needs.  
-
-You can have it autostart by saving the script as /etc/init.d/lights.sh<br>
-and then create a symlink to it by running
- ln -s /etc/init.d/lights.sh /etc/rc5.d/S15lights
-
-Don't forget to "chmod +x" this script. :)
-
-lights.sh:
-
- #!/bin/sh
- cd /sys/devices/platform/gta02-led.0/leds/
- high_thresh=75
- low_thresh=30
- while :; do
- 
-    value=$(cut -d' ' -f7 < /proc/apm | cut -d% -f1)
- 
-    echo "Value: $value"
-    if [ $value -lt $low_thresh ]; then
-        echo "Low Battery"
-        echo 1 > gta02-power:orange/brightness
-        echo 0 > gta02-power:blue/brightness
- 
-    elif [ $value -gt $high_thresh ]; then
-        echo "High Battery"
-        echo 1 > gta02-power:blue/brightness
-        echo 0 > gta02-power:orange/brightness
-    else
-        echo "Mid Battery"
-        echo 1 > gta02-power:blue/brightness
-        echo 1 > gta02-power:orange/brightness
-    fi
- 
-    sleep 15
- 
- done &
- 
-
-[[Category:Neo FreeRunner Hardware]]
+...
