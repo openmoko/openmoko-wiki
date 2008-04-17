@@ -1,0 +1,146 @@
+本篇文章的內容主要教導您如何將你的Neo 1973更新到最新的版本。在這裡，我們將會在內建的快閃記憶體中選擇性 的更新kernel、root filesystem。
+{{warning|If you're updating u-boot and don't have a [[Debug Board]], you might render your unit unusable if the flashing procedure is interrupted}}
+
+{{warning| 如困你有較舊的U-boot 版本，並且上傳了較之前版本更小的映像檔，或者，你撰寫了一個較jiffs2更小的rootfs，更新並不會產生作用—你必須在你上傳rootfs前執行[[Nand_erase|nand erase rootfs]]"，會比在你開始寫入新的rootfs前執行"nand erase rootfs"前每次都執行"nand erase rootfs" 來的快，並且可以節省掉第二個rootfs上傳的時間。<b>注意：</b>如果你 [[Nand_erase|清除NAND]] 且沒有指出你要清除的分割區，u-boot 將會被抹掉，並且Neo 將會bricked}}
+
+==檔案下載==
+{{Note|
+* MacOS X 使用者：請參考 [[MacOS_X]]。
+* 沒有Linux 的使用者請參考 [[No_Linux]] 。
+}}
+
+您下載的rootfs & kernel映象檔必須是相同的版本。Kernel可載入的模組被放在[[partition| 分割區]]的 /lib/modules/ 下—如果你下載了錯誤的版本組合，你會在啟動的過程中得到無法存取/lib/modules/x.y.z-moko123 的一些錯誤訊息，若發生這種情形，請交換kernel或rootfs 到相對應的版本。
+不幸的是，rootfs檔案名稱並無法看出與它相容的kernel版本，你可能要一個一個試驗。'''NOTE:''' 至少某些不對應的版本組合看起來可以在不同模組版本下被啟動，因此在進行更新啟動後，請到控制台下查看它的版本。
+
+列列錯誤訊息中的 "moko123" 會指出openmoko patchset 版本。
+
+必須的檔案為：
+*http://buildhost.openmoko.org/OM2007.2/tmp/deploy/glibc/images/neo1973/?C=M;O=D
+
+*http://buildhost.openmoko.org/daily/neo1973/deploy/glibc/images/neo1973/?C=M;O=D (Daily unstable builds) 
+
+*http://buildhost.automated.it/OM2007.2/?M=D (Location of more current unofficial builds.)
+
+下載清單可以在[[Repositories| 此]]找到。您可以在[[Phase 1 Software Testing|Phase 1 軟體測試]]中找到測試過的映像檔。
+
+修改記錄(Changelogs )可以在下列位置找到：
+*http://cia.vc/stats/project/openembedded/.rss
+
+*http://cia.vc/stats/project/openmoko/.rss
+
+
+Get:
+* [[dfu-util]] (針對Linux /i386的預先編譯的二進位檔位於 http://buildhost.openmoko.org)
+** (這部份將於個人電腦上執行，將會把檔案透過USB傳到手機上)
+* openmoko-devel-image-fic-gta01-2007********.rootfs.jffs2
+* uImage-2.6.21.*-moko*-r*_0_****_0-fic-gta01.bin
+*給phase 0 (Bv03) 手機裝置：
+** 已有一些人進行測試： <BR>u-boot-gta01bv3-r8_70124c2602ae2d4c5d3dba05b482d91548242de8_0_2040.bin<BR>MD5SUM: 60c5aeba1bd6642b05b3a5e6f2dafe83
+** 測試： hrw:<BR>u-boot-gta01bv3-r8_70124c2602ae2d4c5d3dba05b482d91548242de8_0_2062.bin<BR>MD5SUM: 716f1eba9b0f2be4a0a3be4a56724935
+* 針對phase 1 手機，uboot 更新則為非必須。
+==將手機準備為DFU模式==
+
+你必須將你的裝置啟動到uboot 選單下，以下列的方法執行：
+
+* 拔除HOST上的USB裝置
+* 按住手機的[[Neo1973 AUX Button | AUX 按鈕]] 接著按住手機[[Neo1973 Power Button | 電源按鈕]].
+** 在裝置正式被啟動前，你必須按住電源按鈕約4分鐘。否則，螢幕只會呈現白色啟動模式，但並不會啟動電源。
+* 螢幕上會出現u-boot 選單： 
+<pre>
+U-Boot ..
+
+=== 啟動選單===
+
+BOOT
+Set console to USB
+Set console to serial
+Power off
+Boot from SD
+Factory reset
+
+按下[AUX] 選取您要的選項，按下[POWER] 執行。
+</pre>
+
+*透過USB接線將Neo1973 接到host，(直接連接電話到電腦上，不要透過HUB)
+
+'''Note:''' 如果bootloader 在30秒內沒有動作，沒有任何按鍵動作或者是使用serial console，裝置會自動的被啟動。
+你可以透過每30秒鐘按下AUX 按鈕告訴bootloader 延續這個動作。當你決定進行這個動作時，請連接到bootloader：
+<pre>
+cu -l /dev/ttyACM0
+GTA01Bv4 # setenv boot_menu_timeout 65000
+GTA01Bv4 # saveenv
+</pre>
+若您不熟悉cu，要離開的話你必須按下"~." 
+
+(你可能必須安裝uucp 套件來存取cu，之前也可能必須要使用"<code>chown uucp:uucp /dev/ttyACM0</code>")
+
+u-boot並沒有需要進一步觀察的內容 – 裝置會在被告知要更新dfu-util接著會開始自動進行更新映像檔的工作。更新了所有的檔案之後，你可以選擇"Boot" 選項，啟動最新的檔案。
+
+== 確實更新裝置==
+再次確認u-boot 是否符合你的硬體裝置的版本，若你有[[debug board|除錯板]]來修復失敗的u-boot更新時，你可能只需要更新u-boot 。你也可以查看目前的[[partitions|分割]].
+
+Note: 以root身份執行應用程式為必須的(至少在Ubuntu 及Debian下是如此)。
+
+Note: 為了避免一個以上的use裝置成為作用中裝置，請使用-d 0x1457:0x5119 選項。
+
+更新u-boot：
+{{Warning| 除非你有[[debug board|除錯板裝置]]或者，你真的對更新程序有非常深入的暸解，不然不要輕易更新u-boot。更新到錯誤的 u-boot 映像檔將會brick your device! 特別是映像檔被放在GTA01B_v03上，而不是GTA01B_v04。
+
+ ./dfu-util -a u-boot -R -D u-boot-gta01bv3-r8_70124c2602ae2d4c5d3dba05b482d91548242de8_0_2040.bin}}
+
+更新kernel：
+ ./dfu-util -a kernel -R -D ./uImage-2.6.21.1-moko10-r0_0_1883_0-fic-gta01.bin
+
+更新kernel至少必須需要一分鐘的時間，如果你遇到困難，你可能需要比較一下輸出 " [[Flashing openmoko/Known good kernel flash U-Boot output | U-Boot]]/[[Flashing openmoko/Known good kernel flash dmesg output | dmesg]]/[[Flashing openmoko/Known good kernel flash dfu-util output | dfu-util]] 。
+手機應該會顯示"Starting DFU DOWNLOAD to partition 'kernel'.
+
+更新root 檔案系統：
+ ./dfu-util -a rootfs -R -D ./Openmoko-devel-image-fic-gta01-20070501054014.rootfs.jffs2
+
+更新root 檔案系統可能會花費約13分鐘左右的時間。請注意若你使用XEN VM 進行更新工作，它將會花費更久的時間。
+
+這裡是已知無誤的輸出 [[Flashing openmoko/Known good rootfs flash U-Boot output | U-Boot]]、[[Flashing openmoko/Known good rootfs flash dmesg output | dmesg]]及 [[Flashing openmoko/Known good rootfs flash dfu-util output | dfu-util]]。手機的螢幕將會顯示"Starting DFU DOWNLOAD to partition 'rootfs'。
+
+請注意一般它不需要再更新任何東西。只有特殊需求才需要更新其它內容。
+
+...現在，你已經應該可以啟動系統了，但並不會看到任何audio/SD 卡。你必須下載相對應的modules.tgz ，並且將他們複製到openmoko。  - 更新：GTA01 不會需要進行這項動作，除非你安裝了包含在root映像檔中相符合的kernel ('uname -r' 可以用來顯示kernel 版本， 'ls /lib/modules/'  將會顯示出目前模組的版本)
+
+VERY IMPORTANT NOTE  (我將此視為設計上的瑕疵-- dfu-util 應該要自動執行才對)：如果你上傳一個與之前不能運作的rootfs 映像檔相似的檔案—你應該要連接到u-boot bootloader，先清掉NAND，接著上傳你的rootf：
+
+<pre>
+cu -l /dev/ttyACM0
+GTA01Bv3 # nand erase rootfs
+</pre>
+
+舊版的u-boot 錯誤還蠻多的，你必須要每25秒按著AUX 按鈕，以避免手機在進行內容更新時，進入深眠模式。它並不會在更新時清除掉rootfs ，為了達到這個目地，請執行minicom /dev/ttyACM0，接著在nand中刪掉rootfs。
+
+Good luck!
+
+== Where to go from here ==
+
+執行到這個階段，現在你已經擁有了目前最新的kernel及rootfs映像檔，或者至少是(半)正式的版本，接著，要做些什麼事？
+
+你可能必須要設定[[USB_Networking]]並且進一步的設定你的Neo1973。請不要忘記使用下列指令更新你的Neo1973 ：
+
+ ipkg update && ipkg upgrade
+
+並且參考ipkg [[repositories]].
+
+== 問題排除==
+
+如果在更新映像檔時發生錯誤，可能肇因於連接到Neo1973的USB hub或USB 接線品質太差。建議您在使用dfu-util時，直接將手機連接到host端(即系統)。
+如果dfu-util 在開始更新前傳送如下的訊息：
+<pre>
+Resetting USB...
+not at least 2 device changes found ?!?
+Lost device after RESET?</pre> 
+請重新試著鍵入上述的指令—它應該會重新執行。
+而上述訊息也可能在出現bookloader選單時，連接到usb 接線時出現。你必須小心的依照本篇文章中所提到的順序著手進行，不要太早的連接USB接線。
+
+dfu-util 無法在Windows 作業系統所模擬的linux 環境下執行。
+請參考[[Dfu-util|Dfu-util]]頁面取得更多資訊。
+
+[[Category:Software]]
+[[Category:Applications]]
+[[Category:Openmoko]]
+[[Category:Guides]]
