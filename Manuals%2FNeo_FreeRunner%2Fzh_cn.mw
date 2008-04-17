@@ -1,0 +1,123 @@
+[[Image:GTA02.gif |200px|right|frontside]]
+
+感谢您购买开发人员版的Neo FreeRunner！
+本手册将有助于使用者暸解Neo FreeRunner的内容及如何使用它：
+*''更新root filesystem''
+*''更新kernel''
+*''设定开发环境并且编译一个简单样本应用程序。
+
+== Contents==
+*产品包装内容物
+*暸解Neo FreeRunner
+*启动Neo FreeRunner
+*更新Neo FreeRunner
+*透过USB 连接到Neo FreeRunner 
+
+==产品包装内容物==
+*Neo FreeRunner 手机
+*雷射触控笔 
+*电池
+*充电器
+*USB 连接线 
+*microSD Card 512MB
+
+==暸解Neo FreeRunner==
+===启动Neo FreeRunner===
+有三种方法可以启动Neo FreeRunner。
+你可以自NAND 内存或NOR 内存启动Openmoko 映像文件。或者，你也可以自U-Boot中启动Neo FreeRunner ，利用这个方法，可以让你更新kernel、root filesystem。
+
+====自NAND Flash中启动Openmoko映像档====
+按下电源按钮直到Openmoko 开机画面出现，即可放开电源按钮。
+Neo FreeRunner将会开始进入启动 Openmoko 映像档。
+Image.
+
+====自NOR  Flash中启动Openmoko映像档====
+同时按下电源按钮及Aux按钮。
+====启动电源，进入U-Boot====
+你可以自以下的网址下载连接工具：
+[ http://svn.openmoko.org/developers/werner/neocon | http://svn.openmoko.org/developers/werner/neocon]
+
+使用USB接线分别连接Neo FreeRunner及Linux主机。在主机输入以下指令：
+
+ ./neocon /dev/ttyACM0
+
+按下ENTER键
+
+ [Closed]
+
+启动Neo Neo FreeRunner 并在LINUX主机上按下Enter键，屏幕上会出现上述讯息：
+
+ [Open]
+ In: usbtty
+ Out: usbtty
+ Err: usbtty
+ switching led 0 1
+ DEVICE_CONFIGURED: 1
+ Hit any key to stop autoboot: 0
+
+请按下任何键，停止自动启动功能，并且进入U-Boot：
+ 
+GTA02v5#
+
+===更新Neo FreeRunner===
+随着Openmoko不断发展，Openmoko会不定时的上传Openmoko root filesystem的版本、kernel及U-Boot。这些可以被写入Neo FreeRunner的内存当中。你可以使用USB接线及Openmoko所提供的工具来更新Neo FreeRunner。
+
+Neo FreeRunner需要在更新时进入U-Boot：
+
+你可以在下面的位置下载更新工具： 
+http://buildhost.openmoko.org/daily/neo1973/deploy/glibc/images/neo1973/dfu-util
+
+====更新Kernel====
+你可以自下面的位置更新最近的kernel：
+http://buildhost.openmoko.org/daily/neo1973/deploy/glibc/images/neo1973/
+
+在Linux 主机上键入以下的指令：
+
+./dfu-util -a kernel -R -D uImage-2.6.24+svnr4082-r4055-r3-neo1973.bin
+
+当更新完成时，会出现下列讯息：
+
+status(0) = No error condition is present
+Done!
+
+====更新Root Filesystem====
+你可以自下面的地址更新最近的root filesystem：
+http://buildhost.openmoko.org/daily/neo1973/deploy/glibc/images/neo1973/
+
+在Linux 主机上键入以下的指令内容：
+
+./dfu-util -a rootfs -R -D openmoko-devel-image-fic-gta02.jffs2
+
+在更新完成时会出现下面的讯息：
+
+status(0) = No error condition is present
+Done!
+
+====由USB 连接到Neo FreeRunner ====
+
+使用USB接线连接Neo FreeRunner 与Linux主机，在启动Openmoko 映像档之后，在你的Linux Host端将会出现一个新的界面。
+
+=====手动控制=====
+在Linux 主机上输入以下的指令：
+
+ ifconfig usb0 192.168.0.200 netmask 255.255.255.0
+ ssh root@192.168.0.202
+
+按下Enter键并且输入您的密码。
+=====自动更新法=====
+使用 Ubuntu
+编辑/etc/network/interfaces
+
+ auto usb0
+ iface usb0 inet static
+ address 192.168.0.200
+ netmask 255.255.255.0
+
+重新启动网络服务，并且在Linux主机中输入以下的指令：
+
+ ssh root@192.168.0.202
+
+按下 Enter ，并输入密码。
+
+ [[Category:Software]]
+[[Category:Documentation]]
