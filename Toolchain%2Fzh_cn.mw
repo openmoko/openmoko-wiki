@@ -5,120 +5,182 @@
 
 * 开发简单的应用程序
 
-For this, you should use a prebuilt toolchain from the OpenMoko project. Here you can find a recipe to get started with this toolchain leading you through a series of steps to compile a project and run it on your target device. You might have heard about [[OpenEmbedded]], however as an application programmer, you should '''not''' be using [[OpenEmbedded]].
+针对这个用途，你应该可以使用针对Openmoko项目所预先建立好的toolchain。在这里你可以找到如何使用toolchain的方法，带领你进入编译项目的一连串程序，并且让程序能顺利的在你的手持式装置上执行。你应该听过 [[OpenEmbedded]]，身为一个程序开发人员，你应该’’’不要’’’使用[[OpenEmbedded]]。
 
 * 系统集成和定制发行版
 
-For this task, you should use [[OpenEmbedded]] which builds its own cross compiler during the bootstrapping/build process. System Integration and customizing a distribution is out of scope of this page.
+针对系统整合及客制化套件，在ootstrapping/build process时，你应该使用[[OpenEmbedded]]来建立cross compiler。系统整合及套件客制化整合等问题，超过本文章所要讨论的问题，因此在此不加以讨论。
 
 =基本工具链的用法=
 
 ==先决条件==
+==基本安装条件==
+熟悉Linux 及其基本的指令工具是最基本的，你必须有x86兼容，至少1G的磁盘空间。你也必须要有使用本机编译器来编译原始码的相关操作经验。在此，提醒您，本篇文章是假设你有存取/home及/usr/local/ 目录的权限 (有需要时，需成为root)。如果你没有上述的权限，请与你的管理人员连络。
 
-You should be reasonably familiar with Linux and its command line tools, have an x86-compatible computer with at least 1G of free disk space. You should have experience with compiling programs from source using your local compiler. The remainder of this document will also assume you have write access in your home directory (~) and <tt>/usr/local/</tt> (becoming root if needed). If any of this is not the case, please call your local administrator for help.
+你至少应该能使用安装程序的权限，允许你使用autotools编译软件包。(the triade of '''./configure, make, make install''').
 
-Last but not least you should have a working setup that allows you to compile native software packages using the autotools build system (the triade of '''./configure, make, make install''').
-
-A (partial) list of required packages -- please append as necessary:
-
-* For most Linux version you might only need to install the packages
+需要安装的软件—有需要请加入以下 的套件：
+* 针对大部份版本的Linux ，你可能只需要安装以下的软件：
 ** autoconf, automake
 ** binutils, gcc, gcc-c++
 ** libtool
 ** ccache
 ** intltool
 
-* For ubuntu (7.10) the following is required:
- sudo apt-get install gcc g++ autoconf automake binutils libtool libglib2.0-dev glib-gettextize ccache libxrender-dev
+* 针对 ubuntu (7.10) ，则需要安装以下的套件：
+ sudo apt-get install gcc g++ autoconf automake binutils libtool libglib2.0-dev ccache libxrender-dev intltool
 
-==下载和安装==
+==下载及安装==
 
-The prebuilt toolchain can be downloaded from [[http://downloads.openmoko.org/toolchains downloads.openmoko.org]]:
+toolchain 可以自 [[http://downloads.openmoko.org/toolchains downloads.openmoko.org]]下载：
 
-* Creating a destination directory can be anywhere, but for example:
-
+* 在计算机中建立一个目标目录位置，如：
   mkdir ~/sources
   cd ~/sources
 
-* Depending on your CPU type (x86_64 or i686) download the proper package:
+* 依您的CPU 类型 (x86_64 or i686) 下载合适的套件：
 
   wget http://downloads.openmoko.org/toolchains/openmoko-x86_64-arm-linux-gnueabi-toolchain.tar.bz2
  or
   wget http://downloads.openmoko.org/toolchains/openmoko-i686-arm-linux-gnueabi-toolchain.tar.bz2
 
 
-Next, you want to extract it on your filesystem. This toolchain is ''not'' relocatable, it needs to be installed into <tt>/usr/local/openmoko/</tt>.
-Now you have the following options:
+接着，你想要将它解压缩到档案系统时，toolchain 它必须安装到<tt>/usr/local/openmoko/</tt>.
 
-* Extract it directly as root, so use command "su" first (or prefix the tar command with "sudo" when you are using Debian/Ubuntu):
+现在，你有以下的选项：
+* 将它直接解压缩到root请使用"su" (或者若您使用的是Debian/Ubuntu，在tar指令前加入"sudo")：
 
    cd /
-   tar xjvf ~/sources/openmoko-XYZ-arm-linux-gnueabi-toolchain.tar.bz2
+   tar -xjvf ~/sources/openmoko-XYZ-arm-linux-gnueabi-toolchain.tar.bz2
 
-* On Debian-based systems, you can use alien(+fakeroot) to create an easy-to-uninstall package from this .tar.bz2 (install with dpkg -i <package.deb>):
+* 在Debian-based 系统上，你可以使用alien(+fakeroot)自.tar.bz2来建立一个易于安装的套件 (使用dpkg -i <package.deb>)： 
+
 
    bunzip2 openmoko-x86_64-arm-linux-gnueabi-toolchain.tar.bz2
    gzip openmoko-x86_64-arm-linux-gnueabi-toolchain.tar
    fakeroot alien -d openmoko-x86_64-arm-linux-gnueabi-toolchain.tar.gz
 
-* The prebuilt toolchain is for x86_64 or i686. If you wanted, you could build it on your own with OE:
+* 预建的toolchain是针对x86_64或i686。如果你希望的话，你可以使用OE建立自己的toolchain：
 
    bitbake meta-toolchain-openmoko
 
-Finally, everytime you want to use this toolchain, you need to alter some environment variables, so that your tools will be found. The toolchain provides a script to do that, so the only thing you need to do is to source it.
-Note that if you are not using a "sh" or "bash" shell (check with "echo $SHELL") that you need
-to start "sh" or "bash" first.
+最后，每次你想要使用这个工具时，必须改变环境变量，这样才会找到要用的工具。Toolchain提供了script进行这项工作，因此你必须做的事只是取得它。
+
+请注意，如果你并没有使用"sh" 或"bash" shell (用"echo $SHELL" 查看) ，那你必须先从"sh" 或"bash"开始。
 
  . /usr/local/openmoko/arm/setup-env
 
-==构建简单的项目==
+==建立一个简单的项目==
 
-In a choosen destination directory (in this example ~/):
+在选定的目标目录地址中 (在本范例中为~/):
 
-* copy the downloaded sample application source:
+* 复制下载的范例应用程序原始码：
 
  cp -r /usr/local/openmoko/source/openmoko-sample2 ~/
 
-* Remember to set the proper environment variables (again with "sh" or "bash") for openmoko:
+* 请记得设定适当的环境变量 (使用"sh" 或 "bash")提供给Openmoko使用。
 
  . /usr/local/openmoko/arm/setup-env
 
-* You need to create a build configuration for this application. This also checks if all needed libraries, tools, etc.. is available on your system. If this fails see the notes about the needed packages in the section "Prerequisites" mentioned earlier.
+* 你必须为这个应用程序建立一个设定值，这个也可以用来检查你的系统上可以使用的所有必须的链接库、工具…等。如果这项工作无法完成时，请参考"需求环境"一节，取得更多信息。
 
- om-conf openmoko-sample2
+om-conf openmoko-sample2
 
-* Optionally now you can modify the source code in openmoko-sample2/src
+* 现在你可以选择性的修改openmoko-sample2/src 中的源码。
 
-* To build the application from the source code you only need to use "make":
+* 要从源码中建立应用程序，你应该使用"make"：
 
  cd openmoko-sample2
  make
 
-If you want to install this project on host for staging usage later, a shared library, for example, you can do the following to install it into a given configured prefix.
-
+如果你希望在主机上安装这个项目，你可以利用下面的操作，将它安装到一个现有的设定中：
  om-conf --prefix=/usr/local/openmoko openmoko-sample2
  cd openmoko-sample2
  make install
 
-==打包编译好的应用程序==
+==如何修改范例项目==
 
-We have included a script to make an ipkg out of your application. Note that this is not needed to test your application on the Neo (for that you can just scp the resulting binary and data over), however it's very handy if you want to distribute your application to others.
+为了要使用Openmoko-sample2 档案来制作你自己的项目，某些变更是必须的： * 复制下载的范例应用程序：
+cp -r /usr/local/openmoko/source/openmoko-sample2 ~/
+ 
+* 将档案夹以你的项目名称命名 ( 在这个范例中为your-project-name) ，并删除旧有的范例档案。
+
+ mv openmoko-sample2 your-project-name
+ cd your-project-name
+ cd src
+ rm *.c
+
+* copy your sources (in this example your-sources) into src/
+
+ cp your-sources .
+ cd ..
+
+* 现在，在主要的档案夹中，使用下面的指令修改autogen.sh 。
+
+ PKG_NAME="your-project-name"
+
+* 藉由更新下面的内容修改configure.ac 
+ AC_INIT(your-project-main, 0.0.1, http://www.openmoko.org/)    
+ AC_CONFIG_SRCDIR(src/main.c)
+
+* 到data/ 档资夹，并且重新将这些档案命名： 
+ cd data
+ mv openmoko-sample.png your-project-name.png
+ mv openmoko-sample.desktop your-project-name.desktop
+
+* 用下列的指令修改data/下的Makefile.am 档案。
+
+ dist_desktop_DATA = your-project-name.desktop
+ dist_appicon_DATA = your-project-name.png
+
+* 透过修改下面的内容，修改data/路径下的 Makefile.in
+ 
+ dist_desktop_DATA = smart-search.desktop
+ dist_appicon_DATA = smart-search.png
+
+* 透过下面的内容，修改your-project-name：
+
+ Name=your-project-name
+ Encoding=UTF-8
+ Version=0.0.1
+ Type=Application
+ Exec=your-project-name
+
+*加入以下的内容，
+
+ Icon=your-project-name
+
+* 切换到src/ 资料夹
+
+ cd ..
+ cd src
+
+* 藉由更新下面的程序，修改Makefile.am
+
+ bin_PROGRAMS = your-project-name	
+ your_project_name_SOURCES = \				
+  		main.c 
+ your_project_name_LDADD  = @DEPENDENCIES_LIBS@
+
+* 请确认除了 main.c 外，修改，将所有的.c 及.h 档案 参数名称的 '-' 字符修改为 '_' 。
+
+==封装你的应用程序==
+
+我们已经加入了一个script在你的应用程序外制作了ipkg 。请注意这并不是要在Neo上测试你的应用程序 ( 若你要测试应用程序，你只要使用SCP产出的二进制代码及数据)，它对于想你将你的软件发布给其它人而言，相当方便。
 
  om-make-ipkg openmoko-sample2
 
-Now you got openmoko-sample2_0.1_armv4t.ipk , you can `scp' it to your
-Neo and install it:
+现在你已经取得了openmoko-sample2_0.1_armv4t.ipk ，你可以将它`scp' 到你的Neo，并且安装它。
 
  scp openmoko-sample2_0.1_armv4t.ipk root@192.168.0.202:
  ssh root@192.168.0.202 ipkg install openmoko-sample2_0.1_armv4t.ipk
 
-Note that while you can redistribute the generated ipkg, be aware that this is a bare-bones ipk that contains no further information, i.e. you will lack library dependencies. See below how to fix this.
-
-You can also supply the version number, a description, and an author / contacts string in a control file:
+请注意当你重新发布产生的ipkg ，请注意它只是一个有更多信息的ipk骨架，若你无法取得链接库的独立性。查看下面的内容来暸解如何修复这个问题。
+你也可以在控制档中提出这个版本的编号，描述及作者/连络方式。
 
  om-make-ipkg myapp myapp_control
 
-A template of myapp_control:
+myapp_control的范本：
 
  Package: $appname
  Version: 0.1
@@ -131,25 +193,26 @@ A template of myapp_control:
  Depends: 
  Source: ${SRC}
 
-==Where to go from here==
+==从这里出发的目的地==
 
-Using the external toolchain is an easy way to build applications for your Neo. If you are familiar with this procedure, you might also want to look into
-* Using [[Qemu]] to test your applications in an emulated environment
-* Using [[Host-based_development_with_Xoo_and_Xephyr|host-based development]] to improve your efficiency
-* Using [[OpenEmbedded]] to customize your OpenMoko distribution image
+使用外部的 toolchain是一个为Neo建立程序的好方法。如果你熟悉这个产品的话，你也会想要参考：
+* 使用[[Qemu]] 在仿真环境下测试应用程序
+** Ubuntu使用者可能想要查看[[Automatic_emulation_in_Ubuntu]]
+* 使用[[Host-based_development_with_Xoo_and_Xephyr|host-based development]] 加强效能
+* 使用[[OpenEmbedded]] 客制化你的Openmoko套件映像档
 
-=Advanced topics=
-==Using toolchain provided libraries==
-Add the necessary libraries to the _LDADD field in src/Makefile.am, for example:
+=进阶议题=
+==使用 toolchain 提供的链接库==
+加入必要的链接库到src/Makefile.am 的 _LDADD 字段，如：
  openmoko_sample2_LDADD  = @DEPENDENCIES_LIBS@ -lmokogsmd2
 
-make sure to run om-conf again after this.
+之后，请确定再次执行
+om-conf 
 
-==Installing additional libraries into the toolchain==
+==将其它的链接库安装到toolchain==
+不久之后，你会想要编译一个无法透过预先编译toolchain来完成依存性的程序，’如一些obscure libraries。
 
-Sooner or later you will want to compile an application that has dependencies which can't be fulfilled by the precompiled toolchain, e.g. some obscure libraries.
-
-In that case, feel free to request the inclusion of additional libraries into the next release of the OpenMoko toolchain. Until then, here is how you enhance your already installed toolchain. Say, we want to add the library called liburiparse:
+在这样的案例当中，请放心的将其它的libraries 放到下一次释出的Openmoko toolchain。以下是你如何扩充 toolchain安装。也就是说，我们想要加入一个名为liburiparse的链接库：
 
  cd ~/source
  wget http://downloads.sourceforge.net/uriparser/uriparser-0.6.0.tar.bz2
@@ -157,18 +220,18 @@ In that case, feel free to request the inclusion of additional libraries into th
  make
  make install
 
-That's it.
+==使用OE包装应用程序==
+当你撰写了一支很好的应用式，而你想要与其它人分享，最佳的方式是
+# 上传你的程序原始码到公共的区域
+# 送出[[BitBake]]到[[OpenEmbedded]]，最好的方法是透过[http://bugs.openembedded.org OpenEmbedded bugtracker]
 
-==Getting your application packaged by OE==
+您也可以参考 [[Customizing your OpenMoko distribution|客制化你的Openmoko套件]].
 
-If you have written a cool application which you want to share with others, the best way to do that is to
+==问题排除==
 
-# upload your application source code to a public location
-# submit a [[BitBake]] recipe to [[OpenEmbedded]], preferably via the [http://bugs.openembedded.org OpenEmbedded bugtracker].
+* 请使用[http://lists.openmoko.org/mailman/listinfo/openmoko-devel OpenMoko-Devel] 邮件清单来取得更多帮助。
 
-See also [[Customizing your Openmoko distribution]].
 
-==Troubleshooting==
-
-* Please use the [http://lists.openmoko.org/mailman/listinfo/openmoko-devel OpenMoko-Devel] mailing list.
+[[Category:Software ]]
+[[Category:Application Developer]]
 [[Category:Openmoko]]
