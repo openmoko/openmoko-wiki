@@ -1,0 +1,234 @@
+= 簡介=
+
+Toolchain是一整組可以讓你編譯檔案的工具。針對Openmoko，你可以依下列不同的用途使用不同的工具。
+
+== 開發單一應用程式==
+針對這個用途，你應該可以使用針對Openmoko專案所預先建立好的toolchain。在這裡你可以找到如何使用toolchain的方法，帶領你進入編譯專案的一連串程序，並且讓程式能順利的在你的手持式裝置上執行。你應該聽過 [[OpenEmbedded]]，身為一個程式開發人員，你應該’’’不要’’’使用[[OpenEmbedded]]。
+
+==系統整合及客製化套件==
+針對系統整合及客製化套件，在ootstrapping/build process時，你應該使用[[OpenEmbedded]]來建立cross compiler。系統整合及套件客製化整合等問題，超過本文章所要討論的問題，因此在此不加以討論。
+
+
+=基本的toolchain 環境需求=
+
+==基本安裝條件==
+熟悉Linux 及其基本的指令工具是最基本的，你必須有x86相容，至少1G的磁碟空間。你也必須要有使用本機編譯器來編譯原始碼的相關操作經驗。在此，提醒您，本篇文章是假設你有存取/home及/usr/local/ 目錄的權限 (有需要時，需成為root)。如果你沒有上述的權限，請與你的管理人員連絡。
+
+你至少應該能使用安裝程式的權限，允許你使用autotools編譯套裝軟體。(the triade of '''./configure, make, make install''').
+
+需要安裝的軟體—有需要請加入以下 的套件：
+* 針對大部份版本的Linux ，你可能只需要安裝以下的軟體：
+** autoconf, automake
+** binutils, gcc, gcc-c++
+** libtool
+** ccache
+** intltool
+
+* 針對 ubuntu (7.10) ，則需要安裝以下的套件：
+ sudo apt-get install gcc g++ autoconf automake binutils libtool libglib2.0-dev ccache libxrender-dev intltool
+
+==下載及安裝==
+
+toolchain 可以自 [[http://downloads.openmoko.org/toolchains downloads.openmoko.org]]下載：
+
+* 在電腦中建立一個目標目錄位置，如：
+  mkdir ~/sources
+  cd ~/sources
+
+* 依您的CPU 類型 (x86_64 or i686) 下載合適的套件：
+
+  wget http://downloads.openmoko.org/toolchains/openmoko-x86_64-arm-linux-gnueabi-toolchain.tar.bz2
+ or
+  wget http://downloads.openmoko.org/toolchains/openmoko-i686-arm-linux-gnueabi-toolchain.tar.bz2
+
+
+接著，你想要將它解壓縮到檔案系統時，toolchain 它必須安裝到<tt>/usr/local/openmoko/</tt>.
+
+現在，你有以下的選項：
+* 將它直接解壓縮到root請使用"su" (或者若您使用的是Debian/Ubuntu，在tar指令前加入"sudo")：
+
+   cd /
+   tar -xjvf ~/sources/openmoko-XYZ-arm-linux-gnueabi-toolchain.tar.bz2
+
+* 在Debian-based 系統上，你可以使用alien(+fakeroot)自.tar.bz2來建立一個易於安裝的套件 (使用dpkg -i <package.deb>)： 
+
+
+   bunzip2 openmoko-x86_64-arm-linux-gnueabi-toolchain.tar.bz2
+   gzip openmoko-x86_64-arm-linux-gnueabi-toolchain.tar
+   fakeroot alien -d openmoko-x86_64-arm-linux-gnueabi-toolchain.tar.gz
+
+* 預建的toolchain是針對x86_64或i686。如果你希望的話，你可以使用OE建立自己的toolchain：
+
+   bitbake meta-toolchain-openmoko
+
+最後，每次你想要使用這個工具時，必須改變環境變數，這樣才會找到要用的工具。Toolchain提供了script進行這項工作，因此你必須做的事只是取得它。
+
+請注意，如果你並沒有使用"sh" 或"bash" shell (用"echo $SHELL" 查看) ，那你必須先從"sh" 或"bash"開始。
+
+ . /usr/local/openmoko/arm/setup-env
+
+==建立一個簡單的專案==
+
+在選定的目標目錄位址中 (在本範例中為~/):
+
+* 複製下載的範例應用程式原始碼：
+
+ cp -r /usr/local/openmoko/source/openmoko-sample2 ~/
+
+* 請記得設定適當的環境變數 (使用"sh" 或 "bash")提供給Openmoko使用。
+
+ . /usr/local/openmoko/arm/setup-env
+
+* 你必須為這個應用程式建立一個設定值，這個也可以用來檢查你的系統上可以使用的所有必須的程式庫、工具…等。如果這項工作無法完成時，請參考"需求環境"一節，取得更多資訊。
+
+om-conf openmoko-sample2
+
+* 現在你可以選擇性的修改openmoko-sample2/src 中的源碼。
+
+* 要從源碼中建立應用程式，你應該使用"make"：
+
+ cd openmoko-sample2
+ make
+
+如果你希望在主機上安裝這個專案，你可以利用下面的操作，將它安裝到一個現有的設定中：
+ om-conf --prefix=/usr/local/openmoko openmoko-sample2
+ cd openmoko-sample2
+ make install
+
+==如何修改範例專案==
+
+為了要使用Openmoko-sample2 檔案來製作你自己的專案，某些變更是必須的： * 複製下載的範例應用程式：
+cp -r /usr/local/openmoko/source/openmoko-sample2 ~/
+ 
+* 將檔案夾以你的專案名稱命名 ( 在這個範例中為your-project-name) ，並刪除舊有的範例檔案。
+
+ mv openmoko-sample2 your-project-name
+ cd your-project-name
+ cd src
+ rm *.c
+
+* copy your sources (in this example your-sources) into src/
+
+ cp your-sources .
+ cd ..
+
+* 現在，在主要的檔案夾中，使用下面的指令修改autogen.sh 。
+
+ PKG_NAME="your-project-name"
+
+* 藉由更新下面的內容修改configure.ac 
+ AC_INIT(your-project-main, 0.0.1, http://www.openmoko.org/)    
+ AC_CONFIG_SRCDIR(src/main.c)
+
+* 到data/ 檔資夾，並且重新將這些檔案命名： 
+ cd data
+ mv openmoko-sample.png your-project-name.png
+ mv openmoko-sample.desktop your-project-name.desktop
+
+* 用下列的指令修改data/下的Makefile.am 檔案。
+
+ dist_desktop_DATA = your-project-name.desktop
+ dist_appicon_DATA = your-project-name.png
+
+* 透過修改下面的內容，修改data/路徑下的 Makefile.in
+ 
+ dist_desktop_DATA = smart-search.desktop
+ dist_appicon_DATA = smart-search.png
+
+* 透過下面的內容，修改your-project-name：
+
+ Name=your-project-name
+ Encoding=UTF-8
+ Version=0.0.1
+ Type=Application
+ Exec=your-project-name
+
+*加入以下的內容，
+
+ Icon=your-project-name
+
+* 切換到src/ 資料夾
+
+ cd ..
+ cd src
+
+* 藉由更新下面的程式，修改Makefile.am
+
+ bin_PROGRAMS = your-project-name	
+ your_project_name_SOURCES = \				
+  		main.c 
+ your_project_name_LDADD  = @DEPENDENCIES_LIBS@
+
+* 請確認除了 main.c 外，修改，將所有的.c 及.h 檔案 參數名稱的 '-' 字元修改為 '_' 。
+
+==封裝你的應用程式==
+
+我們已經加入了一個script在你的應用程式外製作了ipkg 。請注意這並不是要在Neo上測試你的應用程式 ( 若你要測試應用程式，你只要使用SCP產出的二進位碼及資料)，它對於想你將你的軟體發佈給其它人而言，相當方便。
+
+ om-make-ipkg openmoko-sample2
+
+現在你已經取得了openmoko-sample2_0.1_armv4t.ipk ，你可以將它`scp' 到你的Neo，並且安裝它。
+
+ scp openmoko-sample2_0.1_armv4t.ipk root@192.168.0.202:
+ ssh root@192.168.0.202 ipkg install openmoko-sample2_0.1_armv4t.ipk
+
+請注意當你重新發佈產生的ipkg ，請注意它只是一個有更多資訊的ipk骨架，若你無法取得程式庫的獨立性。查看下面的內容來暸解如何修復這個問題。
+你也可以在控制檔中提出這個版本的編號，描述及作者/連絡方式。
+
+ om-make-ipkg myapp myapp_control
+
+myapp_control的範本：
+
+ Package: $appname
+ Version: 0.1
+ Description: package built by openmoko toolchain
+ Section: openmoko/applications
+ Priority: optional
+ Maintainer: $USER
+ Architecture: armv4t
+ Homepage: http://www.openmoko.org/
+ Depends: 
+ Source: ${SRC}
+
+==從這裡出發的目的地==
+
+使用外部的 toolchain是一個為Neo建立程式的好方法。如果你熟悉這個產品的話，你也會想要參考：
+* 使用[[Qemu]] 在模擬環境下測試應用程式
+** Ubuntu使用者可能想要查看[[Automatic_emulation_in_Ubuntu]]
+* 使用[[Host-based_development_with_Xoo_and_Xephyr|host-based development]] 加強效能
+* 使用[[OpenEmbedded]] 客製化你的Openmoko套件映像檔
+
+=進階議題=
+==使用 toolchain 提供的程式庫==
+加入必要的程式庫到src/Makefile.am 的 _LDADD 欄位，如：
+ openmoko_sample2_LDADD  = @DEPENDENCIES_LIBS@ -lmokogsmd2
+
+之後，請確定再次執行
+om-conf 
+
+==將其它的程式庫安裝到toolchain==
+不久之後，你會想要編譯一個無法透過預先編譯toolchain來完成依存性的程式，’如一些obscure libraries。
+
+在這樣的案例當中，請放心的將其它的libraries 放到下一次釋出的Openmoko toolchain。以下是你如何擴充 toolchain安裝。也就是說，我們想要加入一個名為liburiparse的程式庫：
+
+ cd ~/source
+ wget http://downloads.sourceforge.net/uriparser/uriparser-0.6.0.tar.bz2
+ ./configure --host=arm-angstrom-linux-gnueabi --prefix=/usr/local/openmoko/arm
+ make
+ make install
+
+==使用OE包裝應用程式==
+當你撰寫了一支很好的應用式，而你想要與其它人分享，最佳的方式是
+# 上傳你的程式原始碼到公共的區域
+# 送出[[BitBake]]到[[OpenEmbedded]]，最好的方法是透過[http://bugs.openembedded.org OpenEmbedded bugtracker]
+
+您也可以參考 [[Customizing your OpenMoko distribution|客製化你的Openmoko套件]].
+
+==問題排除==
+
+* 請使用[http://lists.openmoko.org/mailman/listinfo/openmoko-devel OpenMoko-Devel] 郵件清單來取得更多幫助。
+
+{{Languages|Toolchain}}
+[[Category:Software ]]
+[[Category:Application Developer]]
+[[Category:Openmoko]]
