@@ -1,4 +1,3 @@
-{{Languages|Toolchain}}
 = 簡介=
 
 Toolchain是一整組可以讓你編譯檔案的工具。針對Openmoko，你可以依下列不同的用途使用不同的工具。
@@ -7,7 +6,8 @@ Toolchain是一整組可以讓你編譯檔案的工具。針對Openmoko，你可
 針對這個用途，你應該可以使用針對Openmoko專案所預先建立好的toolchain。在這裡你可以找到如何使用toolchain的方法，帶領你進入編譯專案的一連串程序，並且讓程式能順利的在你的手持式裝置上執行。你應該聽過 [[OpenEmbedded]]，身為一個程式開發人員，你應該’’’不要’’’使用[[OpenEmbedded]]。
 
 ==系統整合及客製化套件==
-針對系統整合及客製化套件，在 bootstrapping/build process 時，你應該使用[[OpenEmbedded]]來建立cross compiler。系統整合及套件客製化整合等問題，超過本文章所要討論的問題，因此在此不加以討論。
+針對系統整合及客製化套件，在ootstrapping/build process時，你應該使用[[OpenEmbedded]]來建立cross compiler。系統整合及套件客製化整合等問題，超過本文章所要討論的問題，因此在此不加以討論。
+
 
 =基本的toolchain 環境需求=
 
@@ -24,73 +24,50 @@ Toolchain是一整組可以讓你編譯檔案的工具。針對Openmoko，你可
 ** ccache
 ** intltool
 
-* 對Ubuntu 8.04（以前的版本不支持libmokoui2）下列要求：
-
- sudo apt-get install gcc g++ autoconf automake binutils libtool libglib2.0-dev \
- ccache libxrender-dev intltool libmokoui2-dev libgconf2-dev mtools fakeroot alien check
-
-* 對Ubuntu 8.10下面的附加要求，還安裝上面列出的那些：
-
- sudo apt-get install uboot-mkimage
-
-* 為Fedora-Core下面是必需的，而作為 root登錄：
-
- yum install gcc gcc-c++ autoconf automake binutils libtool glib2-devel \
- ccache libXrender-devel intltool GConf2-devel mtools gettext-devel
-
-Fedora-Core似乎沒有libmokoui2可用
-
-* 對於Debian（SID）的執行（以root）：
-
- apt-get install build-essential ccache autoconf automake autotools-dev libtool \
- gettext intltool curl uboot-mkimage mtools fakeroot alien check libglib2.0-dev \
- libxrender-dev libgconf2-dev
+* 針對 ubuntu (7.10) ，則需要安裝以下的套件：
+ sudo apt-get install gcc g++ autoconf automake binutils libtool libglib2.0-dev ccache libxrender-dev intltool
 
 ==下載及安裝==
 
-預先建立的toolchain可以自[http://downloads.openmoko.org/toolchains downloads.openmoko.org]下載：
+toolchain 可以自 [[http://downloads.openmoko.org/toolchains downloads.openmoko.org]]下載：
 
 * 在電腦中建立一個目標目錄位置，如：
- mkdir ~/sources
- cd ~/sources
+  mkdir ~/sources
+  cd ~/sources
 
-* 小心下載正確的版本，依您的CPU類型下載合適的套件：
+* 依您的CPU 類型 (x86_64 or i686) 下載合適的套件：
 
-32bit
+  wget http://downloads.openmoko.org/toolchains/openmoko-x86_64-arm-linux-gnueabi-toolchain.tar.bz2
+ or
+  wget http://downloads.openmoko.org/toolchains/openmoko-i686-arm-linux-gnueabi-toolchain.tar.bz2
 
- wget http://downloads.openmoko.org/developer/toolchains/openmoko-i686-20090323-armv4t-linux-gnueabi-toolchain-openmoko.tar.bz2
-
-64bit
-
- wget http://downloads.openmoko.org/developer/toolchains/openmoko-x86_64-arm-linux-gnueabi-toolchain.tar.bz2
 
 接著，你想要將它解壓縮到檔案系統時，toolchain 它必須安裝到<tt>/usr/local/openmoko/</tt>.
 
 現在，你有以下的選項：
 * 將它直接解壓縮到root請使用"su" (或者若您使用的是Debian/Ubuntu，在tar指令前加入"sudo")：
 
- cd /
- tar -xjvf ~/sources/openmoko-XYZ-arm-linux-gnueabi-toolchain.tar.bz2
+   cd /
+   tar -xjvf ~/sources/openmoko-XYZ-arm-linux-gnueabi-toolchain.tar.bz2
 
-* 在Debian-based 系統上，你可以使用alien(+fakeroot)自.tar.bz2來建立一個易於安裝的套件 (使用dpkg -i <package.deb>)：
+* 在Debian-based 系統上，你可以使用alien(+fakeroot)自.tar.bz2來建立一個易於安裝的套件 (使用dpkg -i <package.deb>)： 
 
- bunzip2 openmoko-x86_64-arm-linux-gnueabi-toolchain.tar.bz2
- gzip openmoko-x86_64-arm-linux-gnueabi-toolchain.tar
- fakeroot alien -d openmoko-x86_64-arm-linux-gnueabi-toolchain.tar.gz
+
+   bunzip2 openmoko-x86_64-arm-linux-gnueabi-toolchain.tar.bz2
+   gzip openmoko-x86_64-arm-linux-gnueabi-toolchain.tar
+   fakeroot alien -d openmoko-x86_64-arm-linux-gnueabi-toolchain.tar.gz
+
+* 預建的toolchain是針對x86_64或i686。如果你希望的話，你可以使用OE建立自己的toolchain：
+
+   bitbake meta-toolchain-openmoko
 
 最後，每次你想要使用這個工具時，必須改變環境變數，這樣才會找到要用的工具。Toolchain提供了script進行這項工作，因此你必須做的事只是取得它。
 
-請注意，如果你並沒有使用"sh" 或"bash" shell (用"echo $SHELL" 查看) ，那你必須啟動"sh" 或"bash"。
+請注意，如果你並沒有使用"sh" 或"bash" shell (用"echo $SHELL" 查看) ，那你必須先從"sh" 或"bash"開始。
 
  . /usr/local/openmoko/arm/setup-env
 
-做完之後可以使用  env|grep openmoko 來看是否有把env的環境變數設定好了。
-
-==建立一個範例專案==
-
-若要建立範例專案你需要安裝libmokoui2-dev和gconf-dbus-dev在你的opkg環境。設置你的環境如同上述[1]。現在安裝函式庫使用下面的命令：
-
- opkg-target install libmokoui2-dev gconf-dbus-dev
+==建立一個簡單的專案==
 
 在選定的目標目錄位址中 (在本範例中為~/):
 
@@ -104,17 +81,14 @@ Fedora-Core似乎沒有libmokoui2可用
 
 * 你必須為這個應用程式建立一個設定值，這個也可以用來檢查你的系統上可以使用的所有必須的程式庫、工具…等。如果這項工作無法完成時，請參考"需求環境"一節，取得更多資訊。
 
- om-conf openmoko-sample2
+om-conf openmoko-sample2
 
-* 現在你可以選擇性的修改openmoko-sample2/src中的程式碼。在下一步之前，先進入範例專案的目錄。
+* 現在你可以選擇性的修改openmoko-sample2/src 中的源碼。
+
+* 要從源碼中建立應用程式，你應該使用"make"：
 
  cd openmoko-sample2
-
-* 如果你使用的是舊版的toolchain，可能必須藉由"./autogen.sh"來建立makefile。否則，由原始碼建立應用程式只需要輸入：
-
  make
-
-* 如果出現有錯誤訊息（如“你需要從GNOME CVS上安裝gnome-common”）。另請參見“疑難解答”部分，在本頁的下方。
 
 如果你希望在主機上安裝這個專案，你可以利用下面的操作，將它安裝到一個現有的設定中：
  om-conf --prefix=/usr/local/openmoko openmoko-sample2
@@ -230,7 +204,7 @@ myapp_control的範本：
  openmoko_sample2_LDADD  = @DEPENDENCIES_LIBS@ -lmokogsmd2
 
 之後，請確定再次執行
- om-conf 
+om-conf 
 
 ==將其它的程式庫安裝到toolchain==
 不久之後，你會想要編譯一個無法透過預先編譯toolchain來完成依存性的程式，’如一些obscure libraries。
@@ -248,10 +222,13 @@ myapp_control的範本：
 # 上傳你的程式原始碼到公共的區域
 # 送出[[BitBake]]到[[OpenEmbedded]]，最好的方法是透過[http://bugs.openembedded.org OpenEmbedded bugtracker]
 
-您也可以參考 [[Customizing the Openmoko Distribution/zh tw|客製化你的Openmoko套件]].
+您也可以參考 [[Customizing your OpenMoko distribution|客製化你的Openmoko套件]].
 
 ==問題排除==
 
-* 請使用[http://lists.openmoko.org/mailman/listinfo/openmoko-devel Openmoko-Devel] 郵件清單來取得更多幫助。
+* 請使用[http://lists.openmoko.org/mailman/listinfo/openmoko-devel OpenMoko-Devel] 郵件清單來取得更多幫助。
 
-[[Category:Application Developer/zh tw]]
+{{Languages|Toolchain}}
+[[Category:Software ]]
+[[Category:Application Developer]]
+[[Category:Openmoko]]
