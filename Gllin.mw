@@ -11,30 +11,6 @@ http://lists.openmoko.org/pipermail/community/2007-November/011916.html.
 
 The similar instructions are described in more details at [[getting GPS console output with gllin]]. The downloaded .ipk package can be installed and works not just on OpenMoko but also on Qtopia.
 
-== /sys/ path issues with some kernel versions ==
-
-gllin expects to find the gps devices /sys/ interface in the path: 
-'''/sys/bus/platform/devices/gta01-pm-gps.0/'''
-
-If your kernel does not create the path mentioned above but only i.e. 
-'''/sys/bus/platform/devices/neo1973-pm-gps.0/'''
-you can try the following solution:
-
-As it is not possible to create symlinks in /sys/ or /proc/ and similar kernel virtual
-filesystems a different approach needs to be taken: bind-mounts.
-
-The old path .../gta01-pm-gps.0/ can be made avainable again to gllin by creating a bind mount with:
-
-<pre>
-echo "/sys/bus/platform/devices/neo1973-pm-gps.0 /sys/bus/platform/devices/gta01-pm-gps.0 none bind 0 0" >>/etc/fstab
-mount /sys/bus/platform/devices/neo1973-pm-gps.0
-</pre>
-
-Other approaches using '''sed''' on gllin or some symlink approach were proposed but 
-creating a simple bind mount seems to be the cleanest solution.
-
---[[User:Spin|Spin]] 22:44, 26 March 2008 (CET)
-
 
 == gllin options ==
 
