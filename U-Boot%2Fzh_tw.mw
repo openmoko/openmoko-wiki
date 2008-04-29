@@ -1,14 +1,15 @@
 [[Image:GTA01-U-Boot.JPG|thumb|300px|u-boot menu on Neo1973]] [[Image:Neo1973 uboot splash closeup.jpg|thumb|300px|u-boot splash screen on Neo1973]]
-[[Neo1973]]上的bootloader-- '''U-Boot''' ，負責硬體裝置的功能運作，直到 [[Openmoko]]被啟動載入裝置為止。這包括用來[[flashing Openmoko|更新Openmok]]的 [[USB DFU]]、螢幕顯示、啟動選單、[[bootloader commands|bootloader 指令列]]控制台、透過 [[bootloader environment|bootloader 環境]]設定及載入[[kernel]]等。
+
+ [[Neo1973]]上的bootloader  '''U-Boot'''，負責硬體裝置的功能運作，直到 [[Openmoko]]被啟動載入裝置為止。這包括用來[[flashing OpenMoko|更新Openmok]]的 [[USB DFU]]、螢幕顯示、啟動選單、[[bootloader commands|bootloader 指令列]] 控制台。透過 [[bootloader environment|bootloader 環境]]設定及載入[[kernel]]等。
 
 有不同的[[bootloader versions|bootloader版本]]可供使用：
 
 == Phase0 快速啟動==
 * 請確認你的電話是目前是裝好電池，並且USB接線至少移開30秒以上。
-* 利用USB接線，連接Neo (ie 並不是偵錯板) 到Linux主機。
-* 在啟動電源時，按住AUX 按鈕以存取選單。
-* 將控制台設定為USB
-* 在Linux主機上利用「終端機」連接到/dev/ttyACM0 (你可能會用到chown uucp.uucp /dev/ttyACM0 )
+* 利用USB接線，將Neo (並不是偵錯板) 連接到Linux主機。
+* 在啟動電源時，按住AUX按鈕以存取選單。
+* 將控制台設定為USB。
+* 在Linux主機上利用「終端機」連接到/dev/ttyACM0 (你可能會用到chown uucp.uucp /dev/ttyACM0 )。
 * 請注意cdc_acm /dev/ttyACM0 存取會連同Neo boots一起消失，它會被cdc_ether usb0網路存取取代。
 * 你現在會進入bootloader 提示指令下。
 *如果你希望在每次啟動時都停留在bootloader，將bootdelay uboot 環境變數設定為-1 。
@@ -23,24 +24,23 @@ GTA01 使用[http://u-boot.sourceforge.net/ u-boot] bootloader.
 
 您也可以參考下面的內容，得到其它u-boot的資訊： 
 * 使用[[S3C2410 Steppingstone]]支援從NAND 中啟動
-* 支援S3C2410 NAND flash
+* 支援S3C2410 NAND 記憶體
 * 支援透過S3C2410 USB 裝置控制器下載程式
 * 支援在S3C2410 Framebuffer中顯示啟動logo / 狀態 
-
 然而，u-boot並不會支援GTA01所需要的功能，如
 *支援從SD/Transflash讀取kernel/initrd 
 
 [[User:HaraldWelte|HaraldWelte]]目前正在進行這項工作，事實上，已完成大部份的工作。
 
 == Bootloader 源碼==
-目前的bootloader patches 可以在下面的位置取得： http://svn.openmoko.org/trunk/src/target/u-boot/patches/. 
+目前的bootloader patche 可以在[http://svn.openmoko.org/trunk/src/target/u-boot/patches/| http://svn.openmoko.org/trunk/src/target/u-boot/patches/這個位置]]下位置取得。. 
 
-將源碼解壓縮縮，套用到patch，執行"make gta01bv3_config" (或gta01bv2_config, 或你擁有的任何硬體版本)，執行"make"。你將會得到"u-boot.bin" 映像檔，你可以在NAND中直接更新(也可以使用現有的bootloader 或 [[sjf2410-linux]])。
+將源碼解壓縮縮，套用到patch，執行"make gta01bv3_config" (或gta01bv2_config, 或你擁有的任何硬體版本)，執行"make"。你將會得到"u-boot.bin" 映像檔，你可以在NAND中直接更新 (也可以使用現有的bootloader 或 [[sjf2410-linux]])。
 
 
 == Bootloader 二進位檔==
 
-最新的bootloader 二進位檔可以在以下的位置中找到under http://buildhost.openmoko.org/snapshots in the subdirectory 200X.XX/images/。它應該被寫入NAND 0x00000000的位置 (大小為0x30000) (第一個分割區[[partition]]).
+最新的bootloader 二進位檔可以在以下的位置中找到under http://buildhost.openmoko.org/snapshots in the subdirectory 200X.XX/images/。它應該被寫入NAND 0x00000000的位置 (大小為0x30000) (第一個 [[partition|分割區]]).
 
 == 開發Bootloader ==
 
@@ -54,7 +54,7 @@ GTA01 使用[http://u-boot.sourceforge.net/ u-boot] bootloader.
 
 在GTA01上開發bootloader是很辣手的一件事情，首先，我們並不會有任何的NOR記憶體。第二，並沒有其它的方法可以不從NAND中啟動。然而，我們也不會有一個像QT2410一樣的USB下載器。
 
-最主要的問題是： [[S3C2410 Steppingstone]]內部的SRAM的前4K並沒有被限制。SRAM 分割並非絕對性的對應到實體0的位置。我們要如何因應呢？
+最主要的問題是：[[S3C2410 Steppingstone]]內部的SRAM的前4K並沒有被限制。SRAM 分割並非絕對性的對應到實體0的位置。我們要如何因應呢？
 
 ==== 使用JTAG 自RAM中啟動====
 那我們要如何自RAM啟動？我們使用JTAG / OpenOCD 進行：
@@ -67,7 +67,7 @@ cpsr: 0x400000d3 pc: 0x00000000
 MMU: disabled, D-Cache: disabled, I-Cache: disabled
 </pre>
 
-* 針對低階SDRAM啟動下載程式片段(做為4k的sram的踏腳石)
+* 針對低階SDRAM啟動下載程式片段 (做為4k的sram踏腳石)
 <pre>
 > load_binary /space/misc/gta01/u-boot.git/board/gta01/lowlevel_foo.bin 0            
 downloaded 332 byte in 0s 21899us
@@ -76,15 +76,15 @@ downloaded 332 byte in 0s 21899us
 * 在0x33f80000插入中斷點 (能指出低階程式已完成)
 <pre>
 > bp 0x33f80000 4 hw
-breakpoint added at address 0x33f80000
+在0x33f80000 中加入中斷點
 </pre>
 
 * 執行程式到中斷點
 <pre>
 > resume
-Target 0 resumed
+Target 0 重新開始
 > Target 0 halted
-target halted in ARM state due to breakpoint, current mode: Supervisor
+因中斷點的關係，目標暫停，目前的模式為：Supervisor
 cpsr: 0x600000d3 pc: 0x33f80000
 MMU: disabled, D-Cache: disabled, I-Cache: enabled
 </pre>
@@ -98,7 +98,7 @@ downloaded 135692 byte in 6s 567264us
 * 繼續處理
 <pre>
 > resume
-Target 0 resumed
+Target 0 重新開始
 </pre>
 
 在進行到這裡時，顯示的背光會變明亮，我們會看到下面的指令：
@@ -269,7 +269,7 @@ Device Status:     0x0001
   Self Powered
 </pre>
 
-接下來，你可以使用你最喜歡的終端機程式存取它。之後，若環境仍然不正確的話，你必須使用目前的控制台(如序列控制台(serial console)) 來變更[[bootloader environment#console|控制台環境下的輸入選項]]:
+接下來，你可以使用你最喜歡的終端機程式存取它。之後，若環境仍然不正確的話，你必須使用目前的控制台(如序列控制台(serial console)) 來變更[[bootloader environment#console|控制台環境下的輸入選項]]：
 <pre>
 GTA01Bv2 # setenv stderr usbtty
 GTA01Bv2 # setenv stdout usbtty
@@ -295,7 +295,7 @@ GTA01Bv3 #
 
 === bootloader 提示字元下的指令===
 
-:''請參考[[bootloader commands|bootloader 指令集]].''
+'請參考[[bootloader commands|bootloader 指令集]].''
 
 
 == 裝置軔體更新==
