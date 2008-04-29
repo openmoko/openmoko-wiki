@@ -1,5 +1,4 @@
 [[Image:GTA01-U-Boot.JPG|thumb|300px|u-boot menu on Neo1973]] [[Image:Neo1973 uboot splash closeup.jpg|thumb|300px|u-boot splash screen on Neo1973]]
-
 [[Neo1973]]上的bootloader-- '''U-Boot''' ，負責硬體裝置的功能運作，直到 [[Openmoko]]被啟動載入裝置為止。這包括用來[[flashing Openmoko|更新Openmok]]的 [[USB DFU]]、螢幕顯示、啟動選單、[[bootloader commands|bootloader 指令列]]控制台、透過 [[bootloader environment|bootloader 環境]]設定及載入[[kernel]]等。
 
 有不同的[[bootloader versions|bootloader版本]]可供使用：
@@ -159,14 +158,14 @@ bootloader 命令提示可以在序列控制台上進行 (透過[[Debug Board]])
 
 取得必要的權限(甚至是root)
 
-A nice alternative for cu is Werner Almesberger's [[NeoCon|neocon]].
+可以用來取代cu的另一個方法是 Werner Almesberger的 [[NeoCon|neocon]]。
 
-First, you should try to check whether the USB device shows up in 'lsusb' while you're running in u-boot mode:
+首先，你必須試著去查看在你執行u-boot模式時，USB裝置是否出現了'lsusb' 。
 
  # lsusb -d 1457:5119
  Bus 005 Device 079: ID 1457:5119  
 
-Second, lets see some more details about the available endpoints and configurations:
+接著，讓我們來查看更多可用的endpoint及設定：
 
 <pre>
 # lsusb -v -d 1457:5119
@@ -270,16 +269,14 @@ Device Status:     0x0001
   Self Powered
 </pre>
 
-Next, you can access it using your favourite terminal program.
-
-Then, if the environment is not set correctly, you will need to use the current console (e.g. serial console) to change the [[bootloader environment#console|console entries in the environment]]:
+接下來，你可以使用你最喜歡的終端機程式存取它。之後，若環境仍然不正確的話，你必須使用目前的控制台(如序列控制台(serial console)) 來變更[[bootloader environment#console|控制台環境下的輸入選項]]:
 <pre>
 GTA01Bv2 # setenv stderr usbtty
 GTA01Bv2 # setenv stdout usbtty
 GTA01Bv2 # setenv stdin usbtty
 </pre>
 
-==== Typical u-boot prompt ====
+==== 典型的u-boot提示字元====
 
 <pre>
 U-Boot 1.2.0-moko1 (Feb 16 2007 - 00:36:13)
@@ -296,21 +293,19 @@ Hit any key to stop autoboot:  0
 GTA01Bv3 #
 </pre>
 
-=== Commands on the bootloader prompt ===
+=== bootloader 提示字元下的指令===
 
-:''See [[bootloader commands]].''
+:''請參考[[bootloader commands|bootloader 指令集]].''
 
 
-== Device Firmware Upgrade ==
+== 裝置軔體更新==
 
-Our version of u-boot also implements [[USB DFU]]. This can be useful to
-load files and kernel for quick testing.
-
-To find out whether your version of u-boot supports this, use the output of
+u-boot也可以使用[[USB DFU]]做為更新工具。對於快速測試下的載入檔案及kernel而言，是很有效的一個方法。
+要找出你的u-boot版本是否支援這個USB DFU，請使用下面的方法：
  $ lsusb -v -d 1457:5119
-while the phone is in u-boot mode.
+當裝置目前使用的是u-boot模式。
 
-If it supports DFU, you should see the following snippet towards the end of the output:
+如果它支援DFU，你可以在輸出的訊息後面看到以下的內容：
 <pre>
     Interface Descriptor:
       bLength                 9
@@ -324,19 +319,18 @@ If it supports DFU, you should see the following snippet towards the end of the 
       iInterface              0 
 </pre>
 
-For information on how to do firmware upgrades, please see [[dfu-util]].
+要查看韌體如何更新，請參考[[dfu-util]]。
 
-=== Booting files over DFU ===
+=== 透過DFU置入檔案 ===
 
-To load a file at memory address 0x32000000:
+要將檔案載入記憶體位置0x32000000：
 <pre>
 dfu-util -a 0 -D fileToLoad -R
 </pre>
 
-After that, send 'bootm 0x32000000' to u-boot or 'bootelf 0x32000000' if
-its an elf file.
+之後，傳送'bootm 0x32000000' 到u-boot或者 'bootelf 0x32000000'，如果它是一個elf檔案。
 
-Simple python script that can boot an ELF image - avoiding a ACM bug that breaks on large packets.
+簡單的python script可以啟動ELF映像檔—以防止ACM bug破壞較大的封包。
 
 <pre>
 #!/usr/bin/python
@@ -373,18 +367,20 @@ else:
     sys.exit(2)
 </pre>
 
-== Troubleshooting ==
+== 問題排除 ==
 
-=== USB connectivity problems ===
+=== USB連接問題 ===
 
-I once got errors like this (in dmesg or /var/log/messages) on the host side while connecting the neo in u-boot:
+在連接Neo時，位於u-boot下，在Linux主機上，我曾經遇到如下的問題 (在 dmesg or /var/log/messages) o。
 
- usb 2-1: device descriptor read/64, error -110
- usb usb2: Controller not stopped yet!
+usb 2-1: device descriptor read/64, error -110
+usb usb2: Controller not stopped yet!
 
-The problem disappeared at least for me by the command below on the host side. Please note that if you have usb keyboard or mouse then the command might cause trouble.. I only have PS/2 so I couldn't test it.
+利用下面的指令，我解決掉上述的問題。請注意，如果你沒有USB鍵盤或者是滑鼠，用這些指令可能會造成問題。 我只有PS/2界面的裝置，所以，並無法測試這個問題。
 
- rmmod uhci_hcd ; modprobe uhci_hcd
+rmmod uhci_hcd ; modprobe uhci_hcd
+
+{{Languages|Bootloader}}
 
 [[Category:Software]]
 [[Category:Kernel]]
