@@ -80,63 +80,63 @@
 
  . /usr/local/openmoko/arm/setup-env
 
-* 你必须为这个应用程序建立一个设定值，这个也可以用来检查你的系统上可以使用的所有必须的链接库、工具…等。如果这项工作无法完成时，请参考"需求环境"一节，取得更多信息。
+* 你需要为这个应用程序建立配置文件，这个过程也用来检查你的计算机上的函数库和工具等是否可用。如果这项工作无法完成时，请参考本文的"基本安装环境"一节。
 
-om-conf openmoko-sample2
+ om-conf openmoko-sample2
 
 * 现在你可以选择性的修改openmoko-sample2/src 中的源码。
 
-* 要从源码中建立应用程序，你应该使用"make"：
+* 要从源代码中构建应用程序，你应该使用"make"：
 
  cd openmoko-sample2
  make
 
-如果你希望在主机上安装这个项目，你可以利用下面的操作，将它安装到一个现有的设定中：
+如果你希望在主机上安装这个程序，作为后续使用的共享库，那么你可以进行如下操作来将它安装到指定目录中：
  om-conf --prefix=/usr/local/openmoko openmoko-sample2
  cd openmoko-sample2
  make install
 
-==如何修改范例项目==
+==如何修改示例项目==
 
-为了要使用Openmoko-sample2 档案来制作你自己的项目，某些变更是必须的： * 复制下载的范例应用程序：
-cp -r /usr/local/openmoko/source/openmoko-sample2 ~/
+为了要使用Openmoko-sample2 文件来制作你自己的项目，需要做适度修改：
+* 复制下载的示例应用程序：
+ cp -r /usr/local/openmoko/source/openmoko-sample2 ~/
  
-* 将档案夹以你的项目名称命名 ( 在这个范例中为your-project-name) ，并删除旧有的范例档案。
+* 重命名文件夹 ( 在这个示例中为"your-project-name") ，并删除旧有的示例文件。
 
  mv openmoko-sample2 your-project-name
  cd your-project-name
  cd src
  rm *.c
 
-* copy your sources (in this example your-sources) into src/
-
+* 将你自己的源代码复制到src/目录(本示例中为"your-sources")：
  cp your-sources .
  cd ..
 
-* 现在，在主要的档案夹中，使用下面的指令修改autogen.sh 。
+* 现在，在主目录下，修改autogen.sh：
 
  PKG_NAME="your-project-name"
 
-* 藉由更新下面的内容修改configure.ac 
- AC_INIT(your-project-main, 0.0.1, http://www.openmoko.org/)    
+* 修改configure.ac文件（"main.c"应该是项目中的主程序文件） 
+ AC_INIT(your-project-main, 0.0.1, [http://www.openmoko.org/ http://www.openmoko.org/])    
  AC_CONFIG_SRCDIR(src/main.c)
 
-* 到data/ 档资夹，并且重新将这些档案命名： 
+* 切换到data/目录，以你的项目名重命名几个文件： 
  cd data
  mv openmoko-sample.png your-project-name.png
  mv openmoko-sample.desktop your-project-name.desktop
 
-* 用下列的指令修改data/下的Makefile.am 档案。
+* 修改data/下的Makefile.am文件：
 
  dist_desktop_DATA = your-project-name.desktop
  dist_appicon_DATA = your-project-name.png
 
-* 透过修改下面的内容，修改data/路径下的 Makefile.in
+* 修改data/下的 Makefile.in文件
  
  dist_desktop_DATA = smart-search.desktop
  dist_appicon_DATA = smart-search.png
 
-* 透过下面的内容，修改your-project-name：
+* 修改your-project-name.desktop文件：
 
  Name=your-project-name
  Encoding=UTF-8
@@ -144,41 +144,40 @@ cp -r /usr/local/openmoko/source/openmoko-sample2 ~/
  Type=Application
  Exec=your-project-name
 
-*加入以下的内容，
+* 在your-project-name.desktop文件加入以下的内容，
 
  Icon=your-project-name
 
-* 切换到src/ 资料夹
+* 切换到src/目录：
 
  cd ..
  cd src
 
-* 藉由更新下面的程序，修改Makefile.am
+* 修改Makefile.am文件
 
  bin_PROGRAMS = your-project-name	
  your_project_name_SOURCES = \				
   		main.c 
  your_project_name_LDADD  = @DEPENDENCIES_LIBS@
 
-* 请确认除了 main.c 外，修改，将所有的.c 及.h 档案 参数名称的 '-' 字符修改为 '_' 。
+* 请将main.c之外的所有.c和.h文件放入其中，并将变量名称中的 '-' 字符修改为 '_' 。
 
-==封装你的应用程序==
+==将你的应用程序打包==
 
-我们已经加入了一个script在你的应用程序外制作了ipkg 。请注意这并不是要在Neo上测试你的应用程序 ( 若你要测试应用程序，你只要使用SCP产出的二进制代码及数据)，它对于想你将你的软件发布给其它人而言，相当方便。
+工具链中有一个脚本用来将应用程序制作为ipkg包。请注意，你并不需要在Neo手机上测试此应用程序 ( 若要在Neo手机上测试此应用程序，只需要使用scp将生成的二进制代码和数据传送到手机上即可)，打成ipkg包也是为了方便发布给他人。
 
  om-make-ipkg openmoko-sample2
 
-现在你已经取得了openmoko-sample2_0.1_armv4t.ipk ，你可以将它`scp' 到你的Neo，并且安装它。
+现在你已经得到了openmoko-sample2_0.1_armv4t.ipk ，你可以使用"scp"将它传输到Neo手机并安装：
 
  scp openmoko-sample2_0.1_armv4t.ipk root@192.168.0.202:
  ssh root@192.168.0.202 ipkg install openmoko-sample2_0.1_armv4t.ipk
 
-请注意当你重新发布产生的ipkg ，请注意它只是一个有更多信息的ipk骨架，若你无法取得链接库的独立性。查看下面的内容来暸解如何修复这个问题。
-你也可以在控制档中提出这个版本的编号，描述及作者/连络方式。
+请注意：这个ipkg包并未包含控制信息，例如函数库的依赖关系，所以，如果你想分发此ipkg包，应该加入控制信息文件。你可以在控制信息文件中提供版本号、软件包描述、作者和联系方式等：
 
  om-make-ipkg myapp myapp_control
 
-myapp_control的范本：
+myapp_control的模板如下：
 
  Package: $appname
  Version: 0.1
@@ -187,30 +186,30 @@ myapp_control的范本：
  Priority: optional
  Maintainer: $USER
  Architecture: armv4t
- Homepage: http://www.openmoko.org/
+ Homepage: [http://www.openmoko.org/ http://www.openmoko.org/]
  Depends: 
  Source: ${SRC}
 
-==从这里出发的目的地==
+==你下一步要参考的内容==
 
-使用外部的 toolchain是一个为Neo建立程序的好方法。如果你熟悉这个产品的话，你也会想要参考：
-* 使用[[Qemu]] 在仿真环境下测试应用程序
-** Ubuntu使用者可能想要查看[[Automatic_emulation_in_Ubuntu]]
-* 使用[[Host-based_development_with_Xoo_and_Xephyr|host-based development]] 加强效能
-* 使用[[OpenEmbedded]] 客制化你的Openmoko套件映像档
+使用外部工具链来为Neo构建应用程序比较简单。如果你熟悉这个流程的话，你也会想要参考：
+* 使用[[Qemu]] 在仿真环境下测试你的应用程序
+** Ubuntu使用者可能想要查看的[[Automatic_emulation_in_Ubuntu]]
+* 使用[[Host-based_development_with_Xoo_and_Xephyr|host-based development]] 提高效率
+* 使用[[OpenEmbedded]] 定制你的Openmoko发行版映像文件
 
-=进阶议题=
-==使用 toolchain 提供的链接库==
-加入必要的链接库到src/Makefile.am 的 _LDADD 字段，如：
+=高级主题=
+==使用工具链提供的链接库==
+向src/Makefile.am文件的 _LDADD 字段加入必要的链接库，示例如下：
  openmoko_sample2_LDADD  = @DEPENDENCIES_LIBS@ -lmokogsmd2
 
-之后，请确定再次执行
-om-conf 
+之后，请再次运行
+ om-conf 
 
-==将其它的链接库安装到toolchain==
-不久之后，你会想要编译一个无法透过预先编译toolchain来完成依存性的程序，’如一些obscure libraries。
+==向工具链中安装附加函数库==
+不久之后，你也许想要编译一个应用程序，这个应用程序依赖于生僻的函数库，而这些函数库并未由预编译的工具链提供。
 
-在这样的案例当中，请放心的将其它的libraries 放到下一次释出的Openmoko toolchain。以下是你如何扩充 toolchain安装。也就是说，我们想要加入一个名为liburiparse的链接库：
+这种情况下，你可以请求将附加的函数库放入下一版本的OpenMoko工具链，而在那之前，你可以通过如下方式增强现有的工具链。这里演示了如何向工具链中加入一个名为liburiparse的函数库：
 
  cd ~/source
  wget http://downloads.sourceforge.net/uriparser/uriparser-0.6.0.tar.bz2
@@ -218,16 +217,16 @@ om-conf
  make
  make install
 
-==使用OE包装应用程序==
-当你撰写了一支很好的应用式，而你想要与其它人分享，最佳的方式是
-# 上传你的程序原始码到公共的区域
-# 送出[[BitBake]]到[[OpenEmbedded]]，最好的方法是透过[http://bugs.openembedded.org OpenEmbedded bugtracker]
+==使用OE打包应用程序==
+当你编写了一个很酷的应用程序并想与他人分享，最佳方法是
+# 上传你的应用程序源代码到公共区域
+# 提交一个[[BitBake]]包到[[OpenEmbedded]]，最好通过[http://bugs.openembedded.org OpenEmbedded bugtracker]
 
-您也可以参考 [[Customizing your OpenMoko distribution|客制化你的Openmoko套件]].
+您也可以参考 [[Customizing your OpenMoko distribution|定制化你的OpenMoko发行版]].
 
 ==问题排除==
 
-* 请使用[http://lists.openmoko.org/mailman/listinfo/openmoko-devel OpenMoko-Devel] 邮件清单来取得更多帮助。
+* 请使用[http://lists.openmoko.org/mailman/listinfo/openmoko-devel OpenMoko-Devel] 邮件列表来获得帮助。
 
 
 [[Category:Software ]]
