@@ -1,0 +1,241 @@
+=Overview: stgit and git=
+Linus Torvalds invented git and uses it heavily in Linux development, most people would take that as an impressive suggestion it might be useful in kernel and similar development work.
+
+* '''git''' is a lightweight distributed revision control system.  In practical terms, it adds a ./.git directory in the top level of your project, git stores everything in there about your project including all the revisions.  The commands all start "git <something>".  ''Nice feature: if you create tarball of your project directory, you will also capture all your project history as it will archive ./.git''
+
+* '''stgit''' does a similar job to quilt, using the same kind of verbs like top, push, pop, refresh and so on, but it is internally completely aware it is running on top of git, and it too stores all its files down ./.git so you backup stgit's state completely with tar too.  The commands all start "stg <something>".  ''Nice feature: while quilt makes you do "quilt add" before you modify a file, stgit does not need it: it knows what you changed without being told by checking because of its integration with git.  (You still have to do "stg add" if you created a new file though; that also adds it to git.)''
+
+'''Your stgit patch stack appears in your local git repo in a synchronized way, without explicit commits''' -- as you add, edit and remove patches in stgit your git repo is making the same moves, without losing the patch stack.
+
+When you use the two together, you have a fast and flexible system for dealing with many branches of large source trees, rebasing them in a controlled way, and generating and managing patches to export elsewhere.
+
+=Setting up your development box=
+You just need to install the '''git''' and '''stgit''' packages for your distribution.  There are GUI tools like '''qgit''' that can be helpful to navigate projects that you can install too.
+
+You can optionally edit your ~/.bashrc to define some environment variables to control your commit identity for git
+
+* export GIT_AUTHOR_NAME=yourhandle
+* export GIT_COMMITTER_NAME=yourhandle
+* export GIT_AUTHOR_EMAIL="your@email"
+* export GIT_COMMITTER_EMAIL="your@email"
+
+=Beginning with git and stgit=
+
+==Adding git and stgit to an existing project of your own==
+# cd to the top level of your project
+# '''git init''' -- this creates an empty ./.git tree with a "master" branch only
+# '''make distclean''' -- or equivalent - clean out all generated files
+# '''git add *''' -- prepares to make an initial commit of all your stuff
+# '''git commit''' -- takes a commit message (like, "initial commit") in vi and stores all the added files into the repo
+# '''stg init''' -- initializes the stgit state for the new branch
+
+The git init command should have created a default ''.gitignore'' file at the top level directory of your project -- you can edit this to ensure that any generated files other than the default *.o and so on are ignored by git if you need to, normally the default ones are enough.
+
+==Cloning a remote git repo and adding stgit==
+If you want to work on a tree that already existed in a remote repo, the first move is to '''clone''' it.  This is different than "checking it out", when you clone it you are not just getting HEAD but *all revisions* of the project.  (If the remote repo lost everything about that project tomorrow, what you cloned would be a full replacement for what it had.)
+
+# '''git clone git://git.openmoko.org/git/kernel.git linux-2.6''' -- this example shows how to pull the 2.6 tracking project into a new local directory called "linux-2.6"
+# '''git checkout origin/andy''' -- configures the source files in the directory to reflect the state of the origin/andy branch instead of the default master branch
+# '''git branch fix-andys-bugs''' -- create a local branch based on origin/andy so you can do work on top of it
+# '''git checkout fix-andys-bugs''' -- go to the new local branch
+# '''stg init''' -- prepare your fix-andys-bugs branch to be used with stgit
+
+==Safe experimentation==
+Don't forget to tarball up your project directory before doing an experiment with git and stgit, until you are used to it.  The tarball will fully capture and restore the project and git / stgit state, so you can try things without worrying about how to "hit undo".
+
+=Workflow=
+==Basic stgit Workflow==
+Using stgit is a great deal like using quilt.
+
+* '''stg new my-patch-description.patch''' -- adds a new empty patch to the top of the stack and opens vi to add a description for the patch -- you need to ensure the first line of the description is "my-patch-description.patch", to avoid the patch filename getting lost if the patch is later pulled from git directly
+
+* '''stg series''' lets you see the patch stack and where you are on it
+
+* '''stg top''' lets you see the current top patch you would be modifying
+
+* Then you just start editing files.  If you create any new files, you should do '''stg add <filepath>''' which adds the file to git and the current stgit patch.  If you deleted a file from the project as part of this patch, you can do '''stg rm <filepath>'''
+
+* If you are worried about ensuring that you included any new files with stg add, you can do '''stg status''' at any time to see if there are files around that git does not know about
+
+* '''stg refresh''' -- regenerates the top patch by finding all the edits you made
+
+* '''stg show''' -- displays the top patch in vi
+
+* '''stg pop''' and '''stg push''' move up and down the patch stack
+
+* '''stg pop --all''' and '''stg push --all''' pop or push to the start or end of the series in one action
+
+* '''stg goto <patchname>''' is a nice feature that pushes or pops as needed to get the requested patch to be the current top one.  <patchname> is a name that appears in the series, eg, my-patch.patch
+
+* '''stg delete <patchname>''' or, eg '''stg delete `stg top`''' will pop and delete the given patch (or the current top patch in the second example).
+
+==Clearing merge problems==
+If you experience a genuine merge problem during an stg push for example, stgit will tell you about which source file had the problem, and where it put a copy of the merge diff.  When you cleared the problem, you must run
+
+'''stg resolved <filepath>'''
+
+to tell stgit that you have resolved the merge problem in <filepath>.  Then you will be able to do
+
+'''stg refresh'''
+
+to capture the changes under that patch and go on about your business.
+
+==Exporting patches==
+Exporting patches is super easy
+
+'''stg export'''
+
+will very rapidly export your whole patch stack in a directory ./patches-<branch> and create a series file in there as well.  If you append a patch name to stg export, it just exports that one to the same directory.
+
+==Importing patches==
+You can import individual patches with
+
+'''stg import <path to patch>'''
+
+or a whole series at a time by pointing it to the series
+
+'''stg import -i -s <path to series file>'''
+
+The patches are imported to be above the current applied patch top, which doesn't have to be the top of your patch series.
+
+BUT stgit is picky about patch formatting on import.
+
+* The first line of the patch file should be the patch's own filename, eg, my-patch.patch should have a first line of my-patch.patch.  This is so that later recovery of the patch from git into stgit will result in the same filename used for the patch, and a consistent name is shown in gitweb (the web interface for git repos as used in git.openmoko.org)
+
+* It will spew warnings about whitespace problems in the patch according to kernel rules, then quench them and report the total (thousands in the case of the YAFFS patch...).  Kernel folks take the whitespace rules seriously, but the import will proceed okay.
+
+* A serious one -- stgit has a bug at the moment where it will fail to recognize some diff headers sometimes.  The workaround is to add a line
+
+:''Index: blah''
+
+:after the patch description and the first patch header, which allows it to match.  You have to watch closely for this one because you only get a warning "''Warning: No diff found, creating empty patch''", and stgit has imported the whole patch silently as a long description with no diff!  The diff appears in the description though so if you didn't know about the problem, it looks like a diff is in there!  However, you can find these bad imports easily enough -- do an stg pop --all, then stg push one at a time.  If a patch had this problem on import, the stg push will give a result like this
+
+:''Pushing patch "gta01-no_nand_partitions.patch" ... done (empty patch)''
+
+:You should do an '''stg remove `stg top`''', edit the patch to add the "Index: blah" workaround, and then re-import with '''stg import <path to patch>'''.  You can then go on with pushing the other patches.
+
+:Patches that are produced by git should be fine -- they have the Index: line already attached.  I guess the stgit guys are only using patches from other git users and that is why this bug survives.
+
+* Another serious one -- no fuzz is allowed in the incoming patch matching by default.  It means that an incoming patch that will apply with the patch utility will claim to be a failure during '''stg import'''.  The procedure to cope with this is to iteratively '''stg import -i -s <path to series file>''', and when you have a failure due to fuzz
+
+::a=<path to patches dir>/`stg top`; patch -p1 <$a && if [ ! -z "`grep -- \-\-\-\ \/dev\/null $a`" ] ; then stg add `cat $a | sed -n '/\-\-\-\ \/dev\/null/{n;p;}' | cut -d' ' -f2 | cut -f1 | cut -d'/' -f2-` ; fi && stg refresh
+
+:then resume the series import by repeating that command.  If the patch itself really didn't apply fully, you can either merge it by hand if it is a genuine issue, or you can back out that import and fully recover by '''stg refresh''' then '''stg delete `stg top`''' and you can try to fix the patch and re-import it again.
+
+Typically you are importing external patches once, but if you need to accept patches on a continuing basis you should export any patches that caused trouble from stgit once they are imported, and provide these versions back to where your imported patches came from so that ongoing patch updates will go in without difficulty next time.  Most times you are in fact removing fuzz from the patches by doing this.
+
+==Identifying patches that changed a file==
+Sometimes you see there is a problem in a source file you need to fix, but you want to make sure the fix goes in the right patch and you don't know which is the right one.
+
+'''stg patches <file>''' will list all the patches ''in the current branch patch stack'' that modfied <file>.  You can then use '''stg goto <patch name>''' to move to that patch in the patch stack and make the edit in that context.
+
+=Branches and rebasing=
+==Introducing branches==
+You can make hierarchies of branched versions in git/stgit really easily with minimal disturbance.  The main thing you have to watch is that your "current working directory" as it were, the current branch you are in, is the one you think it is.  You can check that with
+
+* '''git branch''' or '''stg branch''' if the branch is initialized with stgit
+
+You can move to an existing stgit-initialized branch with
+
+* '''stg branch mybranch'''
+
+:what this does is literally add, delete and modify the files in the project directory so they correspond to the state you left the "mybranch" branch at.  Because of that, stgit takes care to first check there are no un-refreshed changes in the current branch before allowing the move to the different branch.
+
+:It also configures stgit with ''that branch's'' patch stack, leaving the patch stack for whatever branch you were on safely with that branch.
+
+* '''git branch mynewbranch'''
+* '''stg branch mynewbranch'''
+* '''stg init'''
+
+:creates a new branch if the branch "mynewbranch" didn't already exist -- this new branch is "based on" the branch you were on when you created it.
+
+* '''git branch -d myoldbranch''' deletes myoldbranch when you're finished with it
+
+==Rebasing==
+The branching stuff initially sounds like it can be a can of worms, because once you made these easy, cheap branches, what do you do when the thing you based it on gets new patches and commits?  Your stuff is still based on the parent's version at the time you branched it, right?  Isn't it just a big mess?
+
+It's true that your branch will stay at the parent's version at the time it was branched, even if new commits come into the parent branch -- until you '''rebase''' it.  Git and stgit together make rebasing almost as easy as spawning the new branch.  Let's say we had the default "master" branch and we made a new branch from it
+
+* '''stg branch master''' -- go to the master branch
+* '''git branch newbranch''' -- create a branch off of master called newbranch
+* '''stg branch newbranch''' -- move stgit to the new child branch
+* '''stg init''' -- prepare newbranch to work with stgit
+* '''stg series''' -- observe there are no patches yet in the new child branch
+
+Then we did lots of work on newbranch
+
+* '''stg new my-super-patch.patch'''
+* <edits>
+* '''stg refresh'''
+* '''stg new another-awesome-patch.patch'''
+* <edits>
+* '''stg refresh'''
+
+But then we decided we needed to update master (in this example master pulls from a remote repo to get updates) perhaps to get a bugfix
+
+* '''stg branch master''' -- go to the master branch
+* '''stg pull''' -- collect any new commits
+* '''stg branch newbranch''' -- go back to newbranch (it's unchanged)
+
+and we wanted those updates on newbranch too.  Easy (we are in newbranch again remember)
+
+* '''stg pop --all''' -- pop all our newbranch patches
+* '''git reset --hard master''' -- reset our branch to current master
+* '''stg push --all''' -- push all our newbranch patches back on
+
+So we are able to update master and reset newbranch to start from the new master HEAD without disturbing the patch series associated with newbranch, except we have to push them back on and deal with any failures to merge due to conflicting edits in the new patches... but that's what we have to do anyway, and we can do it inside the patch stack system.
+
+==Practical use for branches==
+The kernel trees in git currently use branches in a structured way to allow staged rebasing.  
+
+* The default '''master''' branch is just the vanilla kernel.org kernel, either tracking git or at a fixed stable version.
+
+* A '''mokopatches''' branch off master contains the current OpenMoko kernel patchset for the kernel
+
+* A '''development''' (or some other names) branch(es) off '''mokopatches''' then contains just the patch stack that is being worked on in that branch for whatever reason
+
+This allows master to be pulled from kernel.org or otherwise updated when needed, separately the moko patchset can be updated when needed and lastly the working branches can be rebased as described above when needed
+
+=stgit and branch history=
+==stgit uses git history to track applied patches==
+stgit has a very tight coupling to git commits -- when you stg pop a patch the patch is undone on the files and the commit history for the patch is '''erased''', not reverted.  This works great for local use, since the patch stack retains the information needed to bring the patch back with stg push again and you didn't care about tracking your history of pushing and popping patches from the stack since you do it all the time randomly.  The git 'history' in the local case is just reflecting the currently applied patchset rather than any actual 'history'.
+
+==Public trees use git history as history to sync against==
+The problems start when another repo, say a public repo you push to, or pull from, will have its own commit history for that project.  If you clone the remote repo locally and then use stgit directly on the branches, say to stg uncommit and then stg delete a patch, your git history for that branch is no longer an unbroken thread in agreement with the origin: the uncommit snipped a bit of the history off on your version.  You won't be able to push any more to the other repo: git will give you an error.
+
+==Either: 1: Only use stgit on local-only or temporary branches==
+The only way to maintain a consistent public history for people to work with is to never erase history with stgit on those shared branches.  It means that you have to work on a temporary branch and export the patches, importing them into your stable branch in a single action without using stgit... but if you have to remove a patch that was committed to the stable branch, use '''git revert''' to issue an anti-patch.
+
+==Or: 2: Your public repo branch is a "mirror"==
+The other way to deal with this is to accept that the public repo isn't there to maintain a project history but to make public your branch in a "snapshot" kind of mode.
+
+You do this by pushing your local branch using this syntax:
+
+'''git push ssh://git@git.openmoko.org/var/cache/git/<projectname>.git +<remote-branch-name>:<local-branch-name>;'''
+
+...this will overwrite <remote-branch-name> with the contents of <local-branch-name>.  So when you want to expose a snapshot of your branch state on the public repo, you run the line above to force the remote branch into sync with yours.
+
+=Making your tree public on git.openmoko.org=
+# Send your ssh key to Gismo.  He will add it to the git user authorized_keys, so you can ssh in
+# '''ssh git@git.openmoko.org'''
+# '''cd /var/cache/git'''
+# '''./ADD_NEW_REPO <your-project-name>''' -- without the .git on the end
+# in your project directory, execute the suggested git push command shown by the ADD_NEW_REPO script
+# '''vi <your-project-name>.git/description''' -- change to a few words describing your project
+# You can immediately see your tree on http://git.openmoko.org/ and browse it
+
+Keep a copy of the git push command, you can use it without the --all to update the remote git repo with changes to your local git
+
+If something goes wrong, you can fully delete your project on there with
+
+'''rm -rf /var/cache/git/<your-project-name>.git'''
+
+and start over from step 3.
+
+You can backup your remote repo either on the git.openmoko.org box by using:
+
+'''tar czf /home/git/<project>-backup.tar.gz /var/cache/git/<project>.git'''
+
+or remotely by something like:
+
+'''rsync -avz --delete git@git.openmoko.org:/var/cache/git/<project>.git <project>-backup'''
