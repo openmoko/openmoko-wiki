@@ -1,5 +1,5 @@
 =Overview: stgit and git=
-Linus Torvalds invented [http://en.wikipedia.org/wiki/Git_%28software%29 git] and uses it heavily in Linux development, most people would take that as an impressive suggestion it might be useful in kernel and similar development work.
+Linus Torvalds invented git and uses it heavily in Linux development, most people would take that as an impressive suggestion it might be useful in kernel and similar development work.
 
 * '''git''' is a lightweight distributed revision control system.  In practical terms, it adds a ./.git directory in the top level of your project, git stores everything in there about your project including all the revisions.  The commands all start "git <something>".  ''Nice feature: if you create tarball of your project directory, you will also capture all your project history as it will archive ./.git''
 
@@ -14,8 +14,8 @@ You just need to install the '''git''' and '''stgit''' packages for your distrib
 
 You can optionally edit your ~/.bashrc to define some environment variables to control your commit identity for git
 
-* export GIT_AUTHOR_NAME="yourhandle"
-* export GIT_COMMITTER_NAME="yourhandle"
+* export GIT_AUTHOR_NAME=yourhandle
+* export GIT_COMMITTER_NAME=yourhandle
 * export GIT_AUTHOR_EMAIL="your@email"
 * export GIT_COMMITTER_EMAIL="your@email"
 
@@ -35,12 +35,10 @@ The git init command should have created a default ''.gitignore'' file at the to
 If you want to work on a tree that already existed in a remote repo, the first move is to '''clone''' it.  This is different than "checking it out", when you clone it you are not just getting HEAD but *all revisions* of the project.  (If the remote repo lost everything about that project tomorrow, what you cloned would be a full replacement for what it had.)
 
 # '''git clone git://git.openmoko.org/git/kernel.git linux-2.6''' -- this example shows how to pull the 2.6 tracking project into a new local directory called "linux-2.6"
-# '''git branch -a''' -- list all the branches available in the repo we just pulled
-# '''git checkout origin/andy''' -- configures the source files in the directory to reflect the state of the origin/andy branch instead of the default master branch.  The "origin/" part is added in your local copy of the repo only for branches coming from upstream.
-# '''git checkout -b fix-andys-bugs''' -- create a local branch based on origin/andy so you can do work on top of it
+# '''git checkout origin/andy''' -- configures the source files in the directory to reflect the state of the origin/andy branch instead of the default master branch
+# '''git branch fix-andys-bugs''' -- create a local branch based on origin/andy so you can do work on top of it
+# '''git checkout fix-andys-bugs''' -- go to the new local branch
 # '''stg init''' -- prepare your fix-andys-bugs branch to be used with stgit
-
-What you end up there is a local branch fix-andys-bugs which has no patch stack, but is at exactly the state of origin/andy.  So when you add local patches, they are against current origin/andy.
 
 ==Safe experimentation==
 Don't forget to tarball up your project directory before doing an experiment with git and stgit, until you are used to it.  The tarball will fully capture and restore the project and git / stgit state, so you can try things without worrying about how to "hit undo".
@@ -176,13 +174,13 @@ Then we did lots of work on newbranch
 But then we decided we needed to update master (in this example master pulls from a remote repo to get updates) perhaps to get a bugfix
 
 * '''stg branch master''' -- go to the master branch
-* '''git pull''' -- collect any new commits
+* '''stg pull''' -- collect any new commits
 * '''stg branch newbranch''' -- go back to newbranch (it's unchanged)
 
 and we wanted those updates on newbranch too.  Easy (we are in newbranch again remember)
 
 * '''stg pop --all''' -- pop all our newbranch patches
-* '''git reset --hard origin/stable''' -- reset our branch to current origin/stable
+* '''git reset --hard master''' -- reset our branch to current master
 * '''stg push --all''' -- push all our newbranch patches back on
 
 So we are able to update master and reset newbranch to start from the new master HEAD without disturbing the patch series associated with newbranch, except we have to push them back on and deal with any failures to merge due to conflicting edits in the new patches... but that's what we have to do anyway, and we can do it inside the patch stack system.
@@ -192,7 +190,7 @@ The kernel trees in git currently use branches in a structured way to allow stag
 
 * The default '''master''' branch is just the vanilla kernel.org kernel, either tracking git or at a fixed stable version.
 
-* A '''mokopatches''' branch off master contains the current Openmoko kernel patchset for the kernel
+* A '''mokopatches''' branch off master contains the current OpenMoko kernel patchset for the kernel
 
 * A '''development''' (or some other names) branch(es) off '''mokopatches''' then contains just the patch stack that is being worked on in that branch for whatever reason
 
@@ -213,70 +211,31 @@ The other way to deal with this is to accept that the public repo isn't there to
 
 You do this by pushing your local branch using this syntax:
 
-'''git push ssh://git@git.openmoko.org/<projectname> +<remote-branch-name>:<local-branch-name>;'''
+'''git push ssh://git@git.openmoko.org/var/cache/git/<projectname>.git +<remote-branch-name>:<local-branch-name>;'''
 
 ...this will overwrite <remote-branch-name> with the contents of <local-branch-name>.  So when you want to expose a snapshot of your branch state on the public repo, you run the line above to force the remote branch into sync with yours.
 
 =Making your tree public on git.openmoko.org=
-# go to http://admin-trac.openmoko.org and open a ticket
-# attach your public key to the ticket and also add some descriptions.
+# Send your ssh key to Gismo.  He will add it to the git user authorized_keys, so you can ssh in
+# '''ssh git@git.openmoko.org'''
+# '''cd /var/cache/git'''
+# '''./ADD_NEW_REPO <your-project-name>''' -- without the .git on the end
+# in your project directory, execute the suggested git push command shown by the ADD_NEW_REPO script
+# '''vi <your-project-name>.git/description''' -- change to a few words describing your project
+# You can immediately see your tree on http://git.openmoko.org/ and browse it
 
-=Useful scripts=
+Keep a copy of the git push command, you can use it without the --all to update the remote git repo with changes to your local git
 
-== Create a new patch ==
+If something goes wrong, you can fully delete your project on there with
 
- #!/bin/sh
- NAME="Britney Spears"
- EMAIL="britney@spears"
- if [ -z "$1" ] ; then
-  echo "Usage: $0 patch-name.patch"
-  exit 1
- fi
- PATCHNAME=$1
- stg new --author "$NAME <$EMAIL>" --commname="$NAME" --commemail="$EMAIL" --sign --message="$PATCHNAME" $PATCHNAME
+'''rm -rf /var/cache/git/<your-project-name>.git'''
 
-==Check a patch for correctness==
+and start over from step 3.
 
- #!/bin/sh
- PATCH=$1
- echo `pwd`
- if [ -z "$1" ] ; then
-  stg refresh
-  PATCH=`stg top`
-  echo "*** checking top patch $PATCH"
- fi
- while [ ! -f ./scripts/checkpatch.pl ]; do
-   cd ..
-   echo looking for checkpatch.pl, cd `pwd`
- done
- if [ -f ./scripts/checkpatch.pl ]; then
-   stg export $PATCH && \
-   ./scripts/checkpatch.pl -strict patches-`stg branch`/$PATCH
- else
-   echo "./scripts/checkpatch.pl not found."
-   echo "Please cd to the kernel tree!"
- fi
+You can backup your remote repo either on the git.openmoko.org box by using:
 
-==Sending a set of patches==
+'''tar czf /home/git/<project>-backup.tar.gz /var/cache/git/<project>.git'''
 
-Send a patch using a gmail account. You have to find a way to make this work for you with another provider.
+or remotely by something like:
 
- OPT=
- #TO=linux-kernel@vger.kernel.org # mainline!
- #TO=openmoko-kernel@lists.openmoko.org # OM people
- TO=new_kernel_hacker@gmail.com # Send these first for yourself and check!
- 
- echo "pass:"
- read -s PASS
- #OPT=-e # Edit first message
- OPT=-E # Edit each patch before sending it, do not get used to this.
- 
- GMAIL_USER_NAME=new_kernel_hacker
- 
- # this will disclose your password to ps! I am the only user in my machine
- # thus I don't care much. A better way to do this?
- stg mail $OPT -a --to $TO --smtp-server smtp.gmail.com:587 -u $GMAIL_USER_NAME -p $PASS -T $OPT
-
-{{Languages|Hints_on_using_GIT_and_stgit}}
-
-[[Category:Developer resources]]
+'''rsync -avz --delete git@git.openmoko.org:/var/cache/git/<project>.git <project>-backup'''
