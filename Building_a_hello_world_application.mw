@@ -228,17 +228,39 @@ I documented every line of which I found out what it actually does. The first li
  # Checks for library functions that we really need.
  AC_FUNC_MALLOC
  
- # Check for doxygen, so we can decide if we create a "doc" make target
- # that depends on doxygen- 
- AC_CHECK_PROG([DOXYGEN], [doxygen], [doc], [])
- AC_SUBST(DOXYGEN)
- 
  # A list of all configuration files we have to generate
- AC_CONFIG_FILES([Makefile src/Makefile src/images/Makefile po/Makefile.in doc/Makefile]) #help/Makefile 
+ AC_CONFIG_FILES([Makefile src/Makefile src/images/Makefile po/Makefile.in]) #help/Makefile 
  
  # Tell autoconf to start outputting whatever it has to.
  AC_OUTPUT
+===== Makefile.am =====
+This file is a template top-level-Makefile that will be filled with life by the configure script.
 
+One thing that is added to the standard Makefile is code for automatically generate the '''_control'''-file mentioned above on a '''make dist'''
+ # A list of all subdirectories.
+ SUBDIRS = src po # help
+ 
+ # Allow automake to interpret m4 macros (needed for interpreting
+ # gettext's makefile.in
+ ACLOCAL_AMFLAGS = -I m4
+ # Files that aren't source files and still have to be in the tarball
+ EXTRA_DIST = @PACKAGE_NAME@_control
+ 
+ # An (currently unused) extension to the "install" target
+ install-data-local:
+ 
+ @PACKAGE_NAME@_control: Makefile.am configure.ac
+ 	echo "Package: @PACKAGE_NAME@">$@
+ 	echo "Version: @PACKAGE_VERSION@">>$@
+ 	echo "Description: An voice recorder that can stop recording during silence">>$@
+ 	echo "Section: openmoko/applications">>$@
+ 	echo "Priority: optional">>$@
+ 	echo "Maintainer: your_name">>$@
+ 	echo "Architecture: armv4t">>$@
+ 	echo "Homepage: (The homepage of this project)">>$@
+ 	echo "Depends: gtk+ alsa-lib libogg libvorbis gnome-vfs libgnomeui">>$@
+ 	echo "Source: \$${SRC}">>$@
+ 
 {{Languages|Building_a_hello_world_application}}
 [[Category:Software]]
 [[Category:Guides]]
