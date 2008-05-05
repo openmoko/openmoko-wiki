@@ -1,0 +1,154 @@
+[[Image:Qemu-ubuntu1.png|thumb|emulation of [[Openmoko]] running on Ubuntu]]
+
+This is a tutorial for getting an emulation environment on an Ubuntu system. For other systems see the [[Installation guide]]
+
+== 安装 ==
+
+你要知道，有一个很好用的工具能使openmoko运行在Linux系统上，即[ mokomakefile ] 。This is a sort of wrapper round several instructions，所以它是很容易建立和维护的开发环境。如果您编译整个[ mokomakefile ] ，将需要硬盘大约12GB，swap + RAM内存约1GB和最低5个小时的时间。但我们将只编译qemu （我使用的模拟器）就只需要（我的系统上）890mb和15分钟的时间。
+	
+要让它运行，您将不得不调整您的Ubuntu（这不会影响其他程序，一切都会像以前一样） 。
+*设定您的源 (System -> Administration -> Software Sources)选择：
+** Canonical-supported Open Source software (main)
+** Community-maintained Open Source software (universe)
+*打开终端 (Applications -> Accessories -> Terminal)。
+*输入以下命令，当要求安装 dash 作为/bin/sh时并选择NO （您需要输入您的密码）
+     sudo dpkg-reconfigure dash
+*安装必需的程序（您需要输入您的密码） ：
+    sudo apt-get install monotone git-core cogito python-dev ccache m4 sed bison make cvs gawk libc6-dev g++ subversion sharutils docbook openjade quilt libmpfr-dev libpcre3-dev texinfo texi2html libboost-date-time-dev libboost-filesystem-dev libboost-regex-dev libboost-test-dev libboost-dev zlib1g-dev build-essential dh-make debhelper devscripts gcc-3.4 lynx netpbm libsdl1.2-dev dosfstools help2man python-psyco lynx
+
+您的系统已经准备好安装openmoko 。
+
+现在我们就在MokoMakefile下载的目录安装和编译Openmoko。
+* 新建一个目录并进入到这个目录：
+    mkdir openmoko
+    cd openmoko
+* 得到 MokoMakefile:
+    wget <nowiki>http://www.rwhitby.net/files/openmoko/Makefile</nowiki>
+* Make the MokoMakefile and tell it, you want to install it for qemu:
+    make qemu
+
+这步将下载所需的最新版本的文件，并根据mokomakefile编译它们 。之后，我们装第一次进入模拟器。 现在您已经成功安装openmoko到您的Ubuntu的系统了。
+
+===为Openmoko新建一个菜单项（可选）===
+
+按照以下步骤你可以新建一个菜单项来启动Openmoko：
+
+*打开终端(Applications->Accessories->Terminal)
+
+*进入到openmoko文件夹：
+
+ cd ~/openmoko
+
+*用'''gedit'''打开moko.sh文件:
+
+ gedit moko.sh
+
+*在文件中插入以下行：
+
+ #!/bin/bash
+ cd ~/openmoko
+ make run-qemu
+
+*保存并退出
+
+*运行以下命令：
+ chmod +x moko.sh
+ alacarte
+
+*用下边的值来添加菜单:
+**Name: Openmoko
+**Command: ~/openmoko/moko.sh
+
+如果您原意，按左上角的图片就可以添加一个适当的图标。您也可以下载一些有用的图标在下面的链接里：
+***[http://wiki.openmoko.org/wiki/Artwork Artwork in the Openmoko wiki]
+***[http://openclipart.org/media/tags/openmoko Openmoko at the Open Clip Art Library]
+
+==在Qemu中运行Openmoko==
+
+如果您已经创建了一个菜单项，就可以通过Ubuntu的菜单启动Openmoko。如果您还没有，您就可以通过以下步骤启动它：
+
+* 打开终端(Applications->Accessories->Terminal).
+* 进入到文件夹:
+    cd openmoko
+* 通过 MokoMakefile启动
+    make run-qemu
+ 	
+第一个屏幕将显示openmoko的LOGO，之后立即出现启动菜单，这是由bootloader完成的。
+	
+在启动菜单，您可以选择不同的选项。选择一个选项，你必须按下ENTER （ =aux） ，用space键（ =power）来执行 。默认选择将引导openmoko 。
+因此，如果启动菜单显示，你只需要点击空格键。
+
+openmoko的开机过程将以文本模式显示。根据您的计算机的性能，它可能需要一段时间（约几分钟）完成引导。完成时，您将看到的图形界面就像真机上显示的一样（可能略大，取决于你的屏幕像素） 。
+
+使用Openmoko过程中的一点见意：
+* You can select the icon that looks like "+" for a list of applications you can run.
+* You can select the icon that looks like "three gears" for a list of applications that are running now. Here you can also terminate unwanted applications when you are unable to do so from within the application itself.
+* You can select the icon that looks like a "house" to get back to the first home screen.
+* The statusbar at the top is always shown and by clicking on the top-left corner you can switch to another application that is already running. The "Home" application is always running and clicking on it will bring you back to the home screen.
+
+See [[Qemu]] for more advanced information on running Openmoko in Qemu.
+
+==安装 ipk 包==
+First you need a xxx.ipk package, see [[toolchain]] on how to compile an application for the ARM CPU and create the package.
+
+Note that if at this point you have the Openmoko Qemu running, it is probably wise to terminate it first.
+Then you can install the xxx.ipk package for access by the Qemu emulator with:
+
+ cd openmoko
+ mkdir -p build/tmp/deploy/glibc/ipk/a
+ cp xxx.ipk build/tmp/deploy/glibc/ipk/a/xxx_a.ipk
+ make qemu-copy-package-xxx
+
+''Note: for some reason qemu-copy-package-xxx looks for above source file.
+Maybe this part can be improved, or a different command can overcome the problem of creating this directory.''
+
+When above make command was succesful the next time you start Openmoko Qemu,
+you still need to make the installed application available in the application list.
+For this you can select from within Openmoko the terminal application
+(Select icon that looks like "+" for the list of available applicaitons, select "Applications" and select the "Terminal").
+In this terminal double-click, so you can type in the commands:
+ opkg install /media/mmcblk0/xxx_a.ipk
+ exit
+After the "exit" command you should return to the Task list, in which the newly
+added application should be listed under a name which was choosen when building the ipk package.
+
+== 升级 Openmoko==
+* 打开终端 (Applications->Accessories->Terminal).
+* 进入的文件夹:
+    cd openmoko
+* 用 MokoMakefile升级
+    make qemu
+
+== 问题 ==
+如果你有什么问题把它添加到这里
+
+After issuing the command 'make qemu' in Gutsy, the installation eventually borks with
+
+    make[2]: Leaving directory `/usr/local/src/openmoko/build/qemu/arm-softmmu'
+    make[1]: Leaving directory `/usr/local/src/openmoko/build/qemu'
+    [ -e images/openmoko ] || mkdir -p images/openmoko
+    ln -sf `pwd`/openmoko/trunk/src/host/qemu-neo1973/openmoko/env images/openmoko/env
+    ( cd images && ../openmoko/trunk/src/host/qemu-neo1973/openmoko/download.sh )
+        Retrieving available builds list...
+        Kernel is... not found
+    make: *** [download-images] Error 255
+
+[[User:BioGeek|BioGeek]] 02:03, 27 March 2008 (CET)
+
+Do you still have the problem?
+
+[[User:Dolfje|Dolfje]] 20:54, 9 April 2008 (CEST)
+
+I tested this today (uImage-2.6.24+svnr4301-r4251-r5-om-gta01.bin) on '''hardy'''. Qemu doesn't compile with gcc4 you need:
+    sudo aptitude install gcc-3.4
+After the init process started, became the emulation extremely slow. It takes more than 15 minutes
+to boot the GUI on 2GHz CPU and you have to klick & hold the mouse several seconds to see
+any visual response. It would be great if there was a easy way to get a shell,
+i.e. why the serial port (ctrl+shift-3) doesn't have a getty & co attached?<br />
+Can anybody confirm this?
+--[[User:Captn|Captn]] 12:29, 18 April 2008 (CEST)
+
+{{Languages|Automatic emulation in Ubuntu}}
+[[Category:Technical  ]]
+[[Category:Software]]
+[[Category:Documentation]]
