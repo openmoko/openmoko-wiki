@@ -27,26 +27,31 @@
 
  mkdir local local/conf local/classes local/packages local/packages/images local/packages/tasks -p
 
-* Copy <code>site.conf</code> from the openmoko tree to <code>local/conf</code>
+* 從openmoko樹狀目錄下複製 <code>site.conf</code> 到<code>local/conf</code>路徑。
 
  cp build/conf/site.conf local/conf/site.conf
 
-* Edit the local/conf/site.conf you copied to add the new tree as a source for bitbake recipes.
-{{Note | I had to edit the build/conf/site.conf file instead to avoid "no provider of build target" errors.
-I'm guessing it's a problem with '''export BBPATH''' in a later step-[[User:Flerchjj|Flerchjj]]}}
+* 編輯你複製檔案的local/conf/site.conf 路徑，並且為bitbake recipes建立一源碼目錄。
 
-Change the current <code>BBFILES</code> to look like this:
+{{Note | 我必須編輯 build/conf/site.conf 檔案，以避免 "no provider of build target" 錄誤發生。
+
+我想它會產生一個 '''export BBPATH'''的問題，在接下來的操作中-[[User:Flerchjj|Flerchjj]]}}
+
+將目前的<code>BBFILES</code> 修改為如下內容：
  BBFILES := "${OMDIR}/openembedded/packages/*/*.bb ${OMDIR}/oe/packages/*/*.bb ${OMDIR}/local/packages/*/*.bb"
-Change your <code>BBFILE_COLLECTIONS</code> line to look like this:
+
+將<code>BBFILE_COLLECTIONS</code> 這行內容修改為如下內容：
  BBFILE_COLLECTIONS = "upstream local overlay"
-Add this line:
+
+加入以下內容：
  BBFILE_PATTERN_overlay = "^${OMDIR}/local/"
-Add this line:
+
+加入以下內容：
  BBFILE_PRIORITY_overlay = "20"
 
-The <code>BBFILE_PRIORITY</code> should be greater than all the other <code>BBFILE_PRIORITY</code> variables on the same file.
-
-Make sure there is a BBFILE_PRIORITY_* and a BBFILE_PATTERN_* for each name given in BBFILE_COLLECTIONS. For examle, if you only define the entries above, reduce BBFILE_COLLECTIONS to "overlay".
+<code>BBFILE_PRIORITY</code> 參數必須在檔案中較其它的參數為重要。
+should be greater than all the other <code>BBFILE_PRIORITY</code> 。
+請確認在名為BBFILE_COLLECTIONS內有BBFILE_PRIORITY_* 及BBFILE_PATTERN_* f。舉個例子來說，你只定義了上列的內容，即會減少 BBFILE_COLLECTIONS 到架構中。
 
 * Change your <code>BBPATH</code> environment variable to add the new tree ''before'' the two others in your <code>setup-env</code> file. Bitbake only seems to use the first site.conf file it finds. <code>setup-env</code> is created by [[MokoMakefile]] automatically and is located in your <code>${OMDIR}</code> directory.
 
