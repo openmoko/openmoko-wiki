@@ -1,89 +1,80 @@
-{{Languages|Customizing the Openmoko Distribution}}
-
-
-
 == 目標 ==
-本頁內容主要是教您如何將自行撰寫的應用程式程式碼(或者範例程式)涵蓋到你的rootf。這篇文章屬於綜合性的文章。這篇文章的內容是綜合了[[MokoMakefile]]、[[User:CesarB/Using a local overlay|Using a local overlay]]、[[Building a hello world application|建立Hello World 應用程式]]及[[Create a package from existing sources|自目前的原始碼中建立]]。
-因此，你可以看到本篇文章的目地是做一個最通透的介紹，它會為你帶來應用程式的概念。
+本頁內容主要是教您如何將你撰寫的應用程式程式碼 (或者範例程式) 涵蓋到你的rootf。這篇文章屬於綜合性的文章，這篇文章的內容是綜合了[[MokoMakefile]]、[[User:CesarB/Using a local overlay|Using a local overlay]]、[[Building a hello world application|建立Hello World 應用程式]]及[[Create a package from existing sources|自目前的原始碼中建立]]. So as you can see the goal is for it to be a very thorough introduction, and will take you from "Idea to Inclusion" of your application.
 
-== 設定Openmoko環境 ==
+
+== Setting Up the Openmoko Environment ==
 
 {| border="1" cellspacing="0" cellpadding="5" 
- |*如果你已經設定好了程式開發環境，那你必須進行的工作就是更新你的Makefile。你可以利用下面的指令進行更新：
+ |*If you already have the environment set up then it is imperative that you update your Makefile.
+Do this by running:
 <pre>make update-makefile</pre>
 |}
 
-本份文件的內容相當的基本，我相當的喜愛[[MokoMakefile]]--它實在是很奇妙的工具。它的發明者目前仍為它進行很多維護的工作。我找不到任何一個不使用它的原因。我把我的Openmoko 開發環境目錄放在 /home/bryce/mokodev/ 目錄下，它目前運做的也相當良好。你也可以使用相同的方式，或者是你可以將它放在任何你喜歡的使用者目錄之下(或者是系統下的任何地方)。
+This part of the tutorial is going to be pretty basic. I absolutely love [[MokoMakefile]] -- it's fantastic. The creator has done and continues to do a fantastic job with this. I see absolutely no reason not to use it. I put my OpenMoko development directory in /home/bryce/mokodev/ and it works great for me. You can feel free to do the same or put it anywhere else in your user directory (or anywhere on your system if you're feeling daring and a little nutty).
 
-要讓你的環境建置完戶，請依照[[MokoMakefile]]設定它。然而，如果你已經手動建立了一個開發環境，你必須確定你目前所進行的進度，並且繼續接下來的工作。
+To get your environment set up, please get it set up according to [[MokoMakefile]]. However, if you do have the build environment set up manually and you're sure you know what you're doing, then feel free to go forward with this.
 
+== Setting Up a Local Overlay ==
+If you're at the point of setting up a local overlay, this means a couple things. First: you've had a brilliant idea for an application that you just need to have on the OpenMoko platform. Second: you realize that this killer app of yours needs to be done properly and you're not going to do anything silly like include it in the actual tree for the OpenMoko distro because it would probably end up just getting overwritten eventually, or you just realize that it's bad practice!
 
-== 架構設定==
-如果你想要設定一個本機的架構，這表示你必須進行下列的工作。首先，你必須有在Openmoko平台下開發程式的想法。第二：你必須執行正確的工作，並且你不會做出任何像是將Openmoko套件包含在本身目錄下的蠢事，最後讓它自我覆藝掉，或者，你只暸解到它是一個不良的示範。
+If you're wondering why and what a local overlay is then let me take this time to explain it to you. A local overlay is where you, as a developer, keep your local files in an OE style setup so that you can simply pull your updated code into the tree. You add your overlay tree into the bitbake setup so that when you call bitbake it will pull your own or your customized packages before going to the OE or OpenMoko trees. This keeps everything nice and organized for you and also allows you to build/rebuild/include your apps by using the [[MokoMakefile]]
 
-如果你並不暸解本機的架構，那就讓我花一點時間來解釋。本機架構指的就是身為程式開發人員，將你的本機檔案放在OE style安裝下，讓你可以能輕鬆的將更新的程式放進你的樹狀目錄下。你可以將你的架構樹(overlay tree)放進bitbake 安裝，這樣就可以在你呼叫bitbake時，它將會在進入OE或者是Openmoko樹時，先行置入。這樣可以讓事情都保持組織完整及運做，並且允許使用[[MokoMakefile]]在你的應用程式中建立/rebuild/。
-感謝[[User:CesarB]]針對本頁的付出。
+Thank you to [[User:CesarB]] for this part of the wiki.
 
+To create a local overlay:
 
-要建立本機架構：
-
-* 建立一個 "本機" 目錄，及它的子目錄，(在你的root moko 目錄下，會出現$OMDIR 指示)
+* Create a "local" directory and its subdirectories (in your root moko directory, where $OMDIR points)
 
  mkdir local local/conf local/classes local/packages local/packages/images local/packages/tasks -p
 
-* 從openmoko樹狀目錄下複製 <code>site.conf</code> 到<code>local/conf</code>路徑。
+* Copy <code>site.conf</code> from the openmoko tree to <code>local/conf</code>
 
  cp build/conf/site.conf local/conf/site.conf
 
-* 編輯你複製檔案的local/conf/site.conf 路徑，並且為bitbake recipes建立一源碼目錄。
+* Edit the local/conf/site.conf you copied to add the new tree as a source for bitbake recipes.
+{{Note | I had to edit the build/conf/site.conf file instead to avoid "no provider of build target" errors.
+I'm guessing it's a problem with '''export BBPATH''' in a later step-[[User:Flerchjj|Flerchjj]]}}
 
-{{Note | 我必須編輯 build/conf/site.conf 檔案，以避免 "no provider of build target" 錄誤發生。
-
-我想它會產生一個 '''export BBPATH'''的問題，在接下來的操作中-[[User:Flerchjj|Flerchjj]]}}
-
-將目前的<code>BBFILES</code> 修改為如下內容：
+Change the current <code>BBFILES</code> to look like this:
  BBFILES := "${OMDIR}/openembedded/packages/*/*.bb ${OMDIR}/oe/packages/*/*.bb ${OMDIR}/local/packages/*/*.bb"
-
-將<code>BBFILE_COLLECTIONS</code> 這行內容修改為如下內容：
+Change your <code>BBFILE_COLLECTIONS</code> line to look like this:
  BBFILE_COLLECTIONS = "upstream local overlay"
-
-加入以下內容：
+Add this line:
  BBFILE_PATTERN_overlay = "^${OMDIR}/local/"
-
-加入以下內容：
+Add this line:
  BBFILE_PRIORITY_overlay = "20"
 
-<code>BBFILE_PRIORITY</code> 參數必須在檔案中較其它的參數為重要。
-should be greater than all the other <code>BBFILE_PRIORITY</code> 。
-請確認在名為BBFILE_COLLECTIONS內有BBFILE_PRIORITY_* 及BBFILE_PATTERN_* f。舉個例子來說，你只定義了上列的內容，即會減少 BBFILE_COLLECTIONS 到架構中。
+The <code>BBFILE_PRIORITY</code> should be greater than all the other <code>BBFILE_PRIORITY</code> variables on the same file.
 
-*變更 <code>BBPATH</code> 環境變數，加入新的架構樹到<code>setup-env</code> 檔案前。 Bitbake看起來只會使用它找到的第一個 site.conf 檔案。 <code>setup-env</code> 是由 [[MokoMakefile]] 自動建立的。而它位於 <code>${OMDIR}</code> 目錄下。
+Make sure there is a BBFILE_PRIORITY_* and a BBFILE_PATTERN_* for each name given in BBFILE_COLLECTIONS. For examle, if you only define the entries above, reduce BBFILE_COLLECTIONS to "overlay".
 
-滙出 BBPATH="${OMDIR}/local:${OMDIR}/build:${OMDIR}/oe:${OMDIR}/openembedded"
+* Change your <code>BBPATH</code> environment variable to add the new tree ''before'' the two others in your <code>setup-env</code> file. Bitbake only seems to use the first site.conf file it finds. <code>setup-env</code> is created by [[MokoMakefile]] automatically and is located in your <code>${OMDIR}</code> directory.
 
-== 使用本機架構 ==
+ export BBPATH="${OMDIR}/local:${OMDIR}/build:${OMDIR}/oe:${OMDIR}/openembedded"
 
-=== 變更 conf/ 檔案 ===
+== Using Your New Local Overlay ==
 
-要變更 conf/ 中的檔案，只要將檔案複製到架構目錄中(保留目錄結構) 並且編輯它。
+=== Changing files in conf/ ===
 
-=== 變更 classes/ 下的檔案===
+To change a file in conf/, just copy the file to the overlay tree (preserving the directory structure) and edit it.
 
-要變更classes/，請將檔案複製到架構樹下，並且編輯它。
+=== Changing files in classes/ ===
 
-=== 變更套件 ===
+To change a file in classes/, just copy the file to the overlay tree and edit it.
 
-變更套件有點小小的複雜。你必須將它複製起來 (or symlink) 而不是只針對套件複製.bb的檔案，同時也必須複製 ''所有''  <code>require</code>及<code>FILESDIR</code> 目錄。(所有對應到 <code>FILESDIR</code>下的目錄，通常被命名為 ''package''-''version'' 或者是or <code>files</code>)。如果你忘記了他們其中的一個，build 會給你錯誤訊息(這也會發生在傳送<code>FILESDIR</code>時，或者當你試著建立 <code>FILESDIR</code> 目錄時發生)。
+=== Changing packages ===
 
-=== 加入新套裝軟體 ===
+Changing a package's recipe is a bit more complex. You have to copy over (or symlink) not only the .bb file for the package, but also ''all'' the files it includes with <code>require</code>, and the <code>FILESDIR</code> directories (all directories referred to by <code>FILESDIR</code>, usually named either ''package''-''version'' or <code>files</code>). If you forget one of them, the build will give an error (either when parsing the recipe in the case of <code>require</code>, or when trying to build in the case of the <code>FILESDIR</code> directories).
 
-你可以藉由在架構中建立它來加入新的套裝軟體 ( 或者為新版的套裝軟體加入 recipe )。
+=== Adding a new package ===
 
-=== 建立自己的影像檔 ===
+You can add a new package (or a recipe for a new version of a package) to the overlay tree simply by creating it on the overlay tree.
 
-要建立你自己的映像檔的話，我們會使用 openmoko .bb 檔案，並且修改它。當你看到 ''scaredycat'' 用其它的東西取代掉它，以驗證你自己的映像檔。
+=== Creating your own images ===
 
-編輯local/packages/images/scaredycat-openmoko-devel-image.bb 並且貼入如下的內容：
+To create you own images we'll use the base openmoko .bb files and modify them to suit. Where you see ''scaredycat'' replace this with something to identify your own images.
+
+edit local/packages/images/scaredycat-openmoko-devel-image.bb and paste this:
 
 <pre>
 require scaredycat-openmoko-image.bb
@@ -92,11 +83,11 @@ IMAGE_INSTALL += "task-openmoko-debug"
 
 </pre>
 
-然後編輯local/packages/images/scaredycat-openmoko-image.bb
+then edit local/packages/images/scaredycat-openmoko-image.bb
 
 <pre>
 #------------------------------------------------------
-# Openmoko Image Recipe
+# OpenMoko Image Recipe
 #------------------------------------------------------
 
 export IMAGE_BASENAME = "${PN}"
@@ -123,10 +114,10 @@ ROOTFS_POSTPROCESS_COMMAND += 'date "+%m%d%H%M%Y" >${IMAGE_ROOTFS}/etc/timestamp
 </pre>
 
 
-編輯 local/packages/tasks/task-openmoko-scaredycat.bb - 這裡是我們想要在映像檔中放入想要的東西的目錄位置。這個範例包括了 '''[http://wiki.openmoko.org/wiki/Scummvm scummvm]'''及 '''[http://www.handhelds.org/moin/moin.cgi/kbdd kbdd]'''。如果你修改了這個檔案，請確定你藉由每次增加它的次數的方法，更新 '''PR''' 。
+edit local/packages/tasks/task-openmoko-scaredycat.bb - this is where we put the things we want to include in our image, above and beyond the standard image. This example includes '''[http://wiki.openmoko.org/wiki/Scummvm scummvm]''' and '''[http://www.handhelds.org/moin/moin.cgi/kbdd kbdd]'''. If you modify this file, make sure you update the '''PR''' by incrementing the number each time.
 
 <pre>
-DESCRIPTION = "Openmoko: Scaredycat Additions"
+DESCRIPTION = "OpenMoko: Scaredycat Additions"
 SECTION = "openmoko/base"
 LICENSE = "original"
 PR = "r2"
@@ -140,35 +131,32 @@ RDEPENDS_task-openmoko-scaredycat = "\
 
 </pre>
 
-====實際的建立映像檔 ====
+==== Actually building your image ====
 
 To build you image, which will be located with your other images, do the following:
 
  # cd build ; . ../setup-env ; bitbake scaredycat-openmoko-devel-image
 
-== 你的第一支程式 ==
+== Your First Application ==
 
-我知道我己經說過我有一支 GDK 程式，但是，我希望能讓這個課程完成，並且讓各位可以先著手開始寫程式，而不是看著我如何寫程式。
+I know that I said I'd have a GDK application in here, however, I'd really like to get this whole course done first and have you guys starting to code instead of just looking at what I've written!
 
-這是一支很簡單的 CLI hello world。
+This will be a very simple CLI hello world.
 
-=== 在我們開始撰寫程式之前 ===
+=== Before We Code ===
 
-一個好的程式人員在寫程式時，是會有明確的想法，並且知道自己是朝向對的開發方向。
-現在將目錄變更到<code>local/packages</code> ，下方的指令會希望你是在這個目錄下執行：
-你會希望用你的程式名稱做為目錄名稱，及使用檔案名稱做為子目錄的名稱。
+Like a good coder you want to make sure that you're not just doing things, but that you're doing them the right way! 
 
+Now change directories into your <code>local/packages</code> directory.The following commands expect you'll be in that directory so don't change unless you know what you're doing!
+
+You'll want to make a directory with the name of your application, and a subdirectory called files.
   mkdir myhelloworld myhelloworld/files
-
-現在，你會想要在<code>files</code> 目錄下建立兩個檔案。
-
+Now you'll want to create two files in the <code>files</code> directory
   touch myhelloworld/files/README.txt myhelloworld/files/myhelloworld.c
-
-最後，你會想要建立一個bitbake file。
-
+And finally you'll want to create a bitbake file.
   touch myhelloworld/myhelloworld.bb
 
-好了，現在必要的檔案都建立完成了，讓我們速度快點。
+Alrighty now all your necessary files are created so lets go over this real quick.
 <pre>
 $HOME
  +- $OMDIR (contains the official openmoko tree)
@@ -181,10 +169,10 @@ $HOME
  |              +- README.txt
 </pre>
 
-你的目錄結構會像上述結構，如果你的目錄樹並沒有如上的型態，請修復你的目錄樹。
-===填入檔案 ===
+That should be your structure, if it's not you should go and fix it up.
+=== Filling the Files ===
 
-所以，現在你己經放好了所有的檔案，現在讓我們實際的來做出一些東西。
+So you've got your sample files all laid out now it's time to make them actually do something.
 
 myhelloworld.c
 <pre>
@@ -234,15 +222,14 @@ do_install() {
 
 </pre>
 
-=== 第一次執行編譯===
+=== Your First Compilation ===
 
- [[MokoMakefile]]現在已經很容易操作了，現在切換到 ${OMDIR} 目錄下，你會看到 <code>Makefile</code> 放置的地方。
-
+This is where the [[MokoMakefile]] comes in very very handy. Change to your ${OMDIR} directory, You'll know it by the fact that it is where <code>Makefile</code> resides.
  make build-package-myhelloworld
 
-(請確定你在建立你的軟體前至少執行了make  openmoko-devel-image 一次。)
+(make sure you run make openmoko-devel-image at least once before building your own packages)
 
-在沒有出現錯誤訊息的狀況下，最後會顯示出如下的訊息。
+This should all come back and not return any error messages, The output should end in something similar to
 <pre>
 NOTE: package myhelloworld-1.0: completed
 NOTE: build 200707291926: completed
@@ -250,22 +237,19 @@ Build statistics:
   Attempted builds: 1
 </pre>
 
-若沒有出現任何錯誤訊息的話，就大功告成囉！
+Now that no errors were thrown we are happily done!
 
-== 將開發的程式加入映像檔 ==
+== Adding Your Application to the Image ==
 
-現在，我們建立好了開發環境，也架構好了架構，更架設好了目錄樹，你現在要將程式放在映像檔裡，並且完成編譯後，現在你要做的事就是，將你開發的程式放到映像檔中。
+So you've had an idea, you've setup the build environment, you've setup your local overlay, you've laid out your application tree, you've put code into those fantastic files of yours and now it compiles.There's only one thing left to do. Add that application to your image.
 
-現在讓我們來看看要如何處理。首先，我們需要修改 <code>${OMDIR}/build/conf/local.conf</code>。將它加入變數，<code>DISTRO_EXTRA_RDEPENDS</code>，並且將它的值加入 <code>myhelloworld</code>。如果你想要在你自己的架構中或者是OM的架構下加入軟體，請將它們以空白分隔的方式加入。在將軟體變成套件(即Openmoko)的附加物後，現在我們必須重新建立 task-base 套裝軟體。它必須產生一個ipk檔案，能"整合裝置及套件選項來建立一個基本的套裝軟體。" 對於套件是否能運作良好，它會建立一個列有會被安裝的內容的安裝檔案。所以，接著你必須歷經製作 <code>openmoko-devel-image(映像檔)、 build-qemu(建立QUEM)、在本機上更新QUEM( flash-qemu-local)、並執行</code><code>qemu</code>。然後標準化你的觸控筆與螢幕的感度，並執行你的應用程式。
+Now lets go over in words and whys what we're about to do. First we need to make modify the <code>${OMDIR}/build/conf/local.conf</code>. We add in the variable <code>DISTRO_EXTRA_RDEPENDS</code> and set its value to include <code>myhelloworld</code>. If you'd like to include other packages from your own overlay or the OM tree just add them inseparated by spaces. After this gets added as a dependency to build the Distro (in this case OpenMoko). Now we have to re-build the task-base package. This essentially just generates an ipk file that will "Merge machine and distro options to create a basic machine task/package." It pretty much builds a file with a list of packages to be installed that are required for the distro to work correctly. So then you just go through and make <code>openmoko-devel-image, build-qemu, flash-qemu-local,</code> and <code>run-qemu</code>. Then calibrate your stylus, head over to the terminal, and run your application!
 
-
-=== 修改local.conf ===
-現在，切換到設定檔目錄下<code>${OMDIR}/build/conf/</code> ，並且編輯<code>local.conf</code>
-將下列內容放入你的 <code>local.conf</code>檔案中
-
+=== Modifying Your local.conf ===
+Now, go into your build config directory <code>${OMDIR}/build/conf/</code> and now you'll be editing <code>local.conf</code>
+Add this line to you <code>local.conf</code>
   DISTRO_EXTRA_RDEPENDS += "myhelloworld"
-
-在加入這行程式後，你也可以從OE目錄下將其它應用程式涵括到這裡。舉個例子來說，我的 <code>local.conf</code> 檔案內容如下：
+With this line you can also include other applications from the OE tree. For instance my <code>local.conf</code> looks like this.
 <pre>
 MACHINE = "fic-gta01"
 DISTRO = "openmoko"
@@ -274,48 +258,47 @@ SRCDATE_eds-dbus = "now"
 DISTRO_EXTRA_RDEPENDS += "lua dillo myhelloworld"
 </pre>
 
-現在，你可以修改你的 <code>local.conf</code> 檔案。現在，你可以開始進行將你的應用程式包裝到映像檔的必要的工作了。
+Now that you've fixed your <code>local.conf</code> it's time to go through all the necessary tasks to add and re-build you image and have your sweet package included.
 
-=== 建立映像檔 ===
-現在回到 [[MokoMakefile]]。 
+=== Building ===
+Now come the easy part thanks to [[MokoMakefile]]. 
 
   make rebuild-package-task-base
   make openmoko-devel-image
   make build-qemu
   make flash-qemu-local
 
-現在，你必須執行的是 qemu。
+Now all you have to do is run qemu.
   make run-qemu
 
-在你調整好你的觸控筆之後，你可以按下右上方的選單，點擊終端設備，並執行你的應用程式。
+From here after you calibrate your stylus, you click on the Menu in the top right, click down to terminal, then just run your program.
 <pre>
 root@fic-gta02:/$ myhelloworld
 Ello Poppet!
 </pre>
 
-==加入Python scripts做為執行的應用程式==
-這節是講解如何加入 [[python]] scripts/軟體 到你目前使用的映像檔當中。
-
-===第一步===
-首先，你必須依上述的方法修改 <code>local.conf</code> 檔案。你必須將
+==Adding Python scripts as applications==
+This is for adding [[python]] scripts/packages to the image for your own use.
+===First steps===
+First, you need to modify the <code>local.conf</code> file as described above. You need to modify 
   DISTRO_EXTRA_RDEPENDS += "myhelloworld"
-改為
+to
   DISTRO_EXTRA_RDEPENDS += "myhelloworld python"
 
 --[[User:Xkr47|xkr47]] 18:21, 11 August 2007 (CEST) Hmm surely the new line should be DISTRO_EXTRA_RDEPENDS += "pyhelloworld python" instead since the package we create below is pyhelloworld..
 
-這是因為python並不會被包含到預設的Openmoko映像檔中。或者，你也可以使用 <code>python-pygtk2</code>。
+This is because python is not included by default in the openmoko image. Or you can use <code>python-pygtk2</code> if you wish.
 
-接下來，你必須執行在<code>$OMDIR/local</code> 目錄下執行下列步驟。
+Next, you need to perform these actions from the <code>$OMDIR/local</code> directory.
+
   mkdir packages/pyhelloworld packages/pyhelloworld/files
 
   touch packages/pyhelloworld/files/pyhello packages/pyhelloworld/README.txt
 
   touch packages/pyhelloworld/pyhelloworld.bb
 
-===填入以下檔案===
-現在，編輯 <code>packages/pyhelloworld/files/pyhello</code>目錄，讓它包含：
-
+===Filling in the files===
+Now, edit <code>packages/pyhelloworld/files/pyhello</code> to contain:
 <pre>  
 #!/usr/bin/python
 
@@ -323,7 +306,7 @@ print "hello world!"
 print "shutting down now. Farewell oh cruel, cruel world!"
 </pre>
   
-接著，編輯<code>packages/pyhelloworld/files/README.txt</code> 寫入以下的說明：
+Next up, is editing <code>packages/pyhelloworld/files/README.txt</code> to say:
 
   This is the most awesome helloworld application ever. Know why? It has SNAKES!
 
@@ -356,17 +339,21 @@ do_install() {
 
 </pre>
 
-我會在這裡講解每一個操作部份，做為未來參考之用。
+I'll explain each of the parts right here, for future reference.
 
-====.bb 檔案內參數的涵意====
+====Meanings of variables in .bb files====
 
   $WORKDIR = $OMDIR/local/packages/<application directory>
   $bindir  = $OMDIR/build/tmp/work/armv4t-linux/<application directory>/image/usr/bin
   $docir   = $OMDIR/build/tmp/work/armv4t-linux/<application directory>/image/usr/share/doc
   $D       = $OMDIR/build/
 
-====最後的收尾動作====
-完成從<code>DISTRO_EXTRA_RDEPENDS</code>開始的所有操作動作。
+====Final steps====
+Complete the last steps as per the above instructions, from the point of altering <code>DISTRO_EXTRA_RDEPENDS</code>.
 
-[[Category:Application Developer/zh tw]]
-[[Category:System Developers/zh tw]]
+And you're done!
+
+[[Category:Software]]
+[[Category:Applications]]
+[[Category:Openmoko]]
+[[Category:Guides]]
