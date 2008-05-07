@@ -53,9 +53,9 @@
 should be greater than all the other <code>BBFILE_PRIORITY</code> 。
 請確認在名為BBFILE_COLLECTIONS內有BBFILE_PRIORITY_* 及BBFILE_PATTERN_* f。舉個例子來說，你只定義了上列的內容，即會減少 BBFILE_COLLECTIONS 到架構中。
 
-* Change your <code>BBPATH</code> environment variable to add the new tree ''before'' the two others in your <code>setup-env</code> file. Bitbake only seems to use the first site.conf file it finds. <code>setup-env</code> is created by [[MokoMakefile]] automatically and is located in your <code>${OMDIR}</code> directory.
+*變更 <code>BBPATH</code> 環境變數，加入新的架構樹到<code>setup-env</code> 檔案前。 Bitbake看起來只會使用它找到的第一個 site.conf 檔案。 <code>setup-env</code> 是由 [[MokoMakefile]] 自動建立的。而它位於 <code>${OMDIR}</code> 目錄下。
 
- export BBPATH="${OMDIR}/local:${OMDIR}/build:${OMDIR}/oe:${OMDIR}/openembedded"
+滙出 BBPATH="${OMDIR}/local:${OMDIR}/build:${OMDIR}/oe:${OMDIR}/openembedded"
 
 == 使用本機架構 ==
 
@@ -71,15 +71,15 @@ should be greater than all the other <code>BBFILE_PRIORITY</code> 。
 
 變更套件有點小小的複雜。你必須將它複製起來 (or symlink) 而不是只針對套件複製.bb的檔案，同時也必須複製 ''所有''  <code>require</code>及<code>FILESDIR</code> 目錄。(所有對應到 <code>FILESDIR</code>下的目錄，通常被命名為 ''package''-''version'' 或者是or <code>files</code>)。如果你忘記了他們其中的一個，build 會給你錯誤訊息(這也會發生在傳送<code>FILESDIR</code>時，或者當你試著建立 <code>FILESDIR</code> 目錄時發生)。
 
-=== Adding a new package ===
+=== 加入新套裝軟體 ===
 
-You can add a new package (or a recipe for a new version of a package) to the overlay tree simply by creating it on the overlay tree.
+你可以藉由在架構中建立它來加入新的套裝軟體 ( 或者為新版的套裝軟體加入 recipe )。
 
-=== Creating your own images ===
+=== 建立自己的影像檔 ===
 
-To create you own images we'll use the base openmoko .bb files and modify them to suit. Where you see ''scaredycat'' replace this with something to identify your own images.
+要建立你自己的映像檔的話，我們會使用 openmoko .bb 檔案，並且修改它。當你看到 ''scaredycat'' 用其它的東西取代掉它，以驗證你自己的映像檔。
 
-edit local/packages/images/scaredycat-openmoko-devel-image.bb and paste this:
+編輯local/packages/images/scaredycat-openmoko-devel-image.bb 並且貼入如下的內容：
 
 <pre>
 require scaredycat-openmoko-image.bb
@@ -88,7 +88,7 @@ IMAGE_INSTALL += "task-openmoko-debug"
 
 </pre>
 
-then edit local/packages/images/scaredycat-openmoko-image.bb
+然後編輯local/packages/images/scaredycat-openmoko-image.bb
 
 <pre>
 #------------------------------------------------------
@@ -119,7 +119,7 @@ ROOTFS_POSTPROCESS_COMMAND += 'date "+%m%d%H%M%Y" >${IMAGE_ROOTFS}/etc/timestamp
 </pre>
 
 
-edit local/packages/tasks/task-openmoko-scaredycat.bb - this is where we put the things we want to include in our image, above and beyond the standard image. This example includes '''[http://wiki.openmoko.org/wiki/Scummvm scummvm]''' and '''[http://www.handhelds.org/moin/moin.cgi/kbdd kbdd]'''. If you modify this file, make sure you update the '''PR''' by incrementing the number each time.
+編輯 local/packages/tasks/task-openmoko-scaredycat.bb - 這裡是我們想要在映像檔中放入想要的東西的目錄位置。這個範例包括了 '''[http://wiki.openmoko.org/wiki/Scummvm scummvm]'''及 '''[http://www.handhelds.org/moin/moin.cgi/kbdd kbdd]'''。如果你修改了這個檔案，請確定你藉由每次增加它的次數的方法，更新 '''PR''' 。
 
 <pre>
 DESCRIPTION = "OpenMoko: Scaredycat Additions"
@@ -136,7 +136,7 @@ RDEPENDS_task-openmoko-scaredycat = "\
 
 </pre>
 
-==== Actually building your image ====
+====實際的建立映像檔 ====
 
 To build you image, which will be located with your other images, do the following:
 
