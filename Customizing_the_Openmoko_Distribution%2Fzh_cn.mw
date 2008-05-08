@@ -1,0 +1,371 @@
+== 目标 ==
+本页内容主要是教您如何将你撰写的应用程序程序代码 (或者范例程序) 涵盖到你的rootf。这篇文章属于综合性的文章，这篇文章的内容是综合了[[MokoMakefile]]、[[User:CesarB/Using a local overlay|Using a local overlay]]、[[Building a hello world application|建立Hello World 应用程序]]及[[Create a package from existing sources|自目前的原始码中建立]]。
+因此，你可以看到本篇文章的目地是做一个最通透的介绍，它会为你带来应用程序的概念。
+
+== 设定Openmoko环境 ==
+
+{| border="1" cellspacing="0" cellpadding="5" 
+ |*如果你已经设定好了程序开发环境，那你必须进行的工作就是更新你的Makefile。你可以利用下面的指令进行更新：
+<pre>make update-makefile</pre>
+|}
+
+本份文件的内容相当的基本，我相当的喜爱[[MokoMakefile]]--它实在是很奇妙的工具。它的发明者目前仍为它进行很多维护的工作。我找不到任何一个不使用它的原因。我把我的Openmoko 开发环境目录放在 /home/bryce/mokodev/ 目录下，它目前运做的也相当良好。你也可以使用相同的方式，或者是你可以将它放在任何你喜欢的使用者目录之下(或者是系统下的任何地方)。
+
+要让你的环境建置完户，请依照[[MokoMakefile]]设定它。然而，如果你已经手动建立了一个开发环境，你必须确定你目前所进行的进度，并且继续接下来的工作。
+
+
+== 架构设定==
+如果你想要设定一个本机的架构，这表示你要进行下列的工作。首先，你必须有你想要在Openmoko平台下开发程序的想法。第二：你必须执行正确的工作，并且你不会做出任何像是将Openmoko套件包含在本身目录下的蠢事，最后让它自我覆艺掉，或者，你只暸解到它是一个不良的示范。
+
+如果你并不暸解本机的架构，那就让我花一点时间来解释。本机架构指的就是身为程序开发人员，将你的本机档案放在OE style安装下，让你可以能轻松的将更新的程序放进你的树状目录下。你可以将你的架构树(overlay tree)放进bitbake 安装，这样就可以在你呼叫bitbake时，它将会在进入OE或者是Openmoko树时，先行置入。这样可以让事情都保持组织完整及运做，并且允许使用[[MokoMakefile]]在你的应用程序中建立/rebuild/。
+感谢[[User:CesarB]]针对本页的付出。
+
+
+要建立本机架构：
+
+* 建立一个 "本机" 目录，及它的子目录，(在你的root moko 目录下，会出现$OMDIR 指示)
+
+ mkdir local local/conf local/classes local/packages local/packages/images local/packages/tasks -p
+
+* 从openmoko树状目录下复制 <code>site.conf</code> 到<code>local/conf</code>路径。
+
+ cp build/conf/site.conf local/conf/site.conf
+
+* 编辑你复制档案的local/conf/site.conf 路径，并且为bitbake recipes建立一源码目录。
+
+{{Note | 我必须编辑 build/conf/site.conf 档案，以避免 "no provider of build target" 录误发生。
+
+我想它会产生一个 '''export BBPATH'''的问题，在接下来的操作中-[[User:Flerchjj|Flerchjj]]}}
+
+将目前的<code>BBFILES</code> 修改为如下内容：
+ BBFILES := "${OMDIR}/openembedded/packages/*/*.bb ${OMDIR}/oe/packages/*/*.bb ${OMDIR}/local/packages/*/*.bb"
+
+将<code>BBFILE_COLLECTIONS</code> 这行内容修改为如下内容：
+ BBFILE_COLLECTIONS = "upstream local overlay"
+
+加入以下内容：
+ BBFILE_PATTERN_overlay = "^${OMDIR}/local/"
+
+加入以下内容：
+ BBFILE_PRIORITY_overlay = "20"
+
+<code>BBFILE_PRIORITY</code> 参数必须在档案中较其它的参数为重要。
+should be greater than all the other <code>BBFILE_PRIORITY</code> 。
+请确认在名为BBFILE_COLLECTIONS内有BBFILE_PRIORITY_* 及BBFILE_PATTERN_* f。举个例子来说，你只定义了上列的内容，即会减少 BBFILE_COLLECTIONS 到架构中。
+
+*变更 <code>BBPATH</code> 环境变量，加入新的架构树到<code>setup-env</code> 档案前。 Bitbake看起来只会使用它找到的第一个 site.conf 档案。 <code>setup-env</code> 是由 [[MokoMakefile]] 自动建立的。而它位于 <code>${OMDIR}</code> 目录下。
+
+汇出 BBPATH="${OMDIR}/local:${OMDIR}/build:${OMDIR}/oe:${OMDIR}/openembedded"
+
+== 使用本机架构 ==
+
+=== 变更 conf/ 档案 ===
+
+要变更 conf/ 中的档案，只要将档案复制到架构目录中(保留目录结构) 并且编辑它。
+
+=== 变更 classes/ 下的档案===
+
+要变更classes/，请将档案复制到架构树下，并且编辑它。
+
+=== 变更套件 ===
+
+变更套件有点小小的复杂。你必须将它复制起来 (or symlink) 而不是只针对套件复制.bb的档案，同时也必须复制 ''所有''  <code>require</code>及<code>FILESDIR</code> 目录。(所有对应到 <code>FILESDIR</code>下的目录，通常被命名为 ''package''-''version'' 或者是or <code>files</code>)。如果你忘记了他们其中的一个，build 会给你错误讯息(这也会发生在传送<code>FILESDIR</code>时，或者当你试着建立 <code>FILESDIR</code> 目录时发生)。
+
+=== 加入新软件包 ===
+
+你可以藉由在架构中建立它来加入新的软件包 ( 或者为新版的软件包加入 recipe )。
+
+=== 建立自己的影像文件 ===
+
+要建立你自己的映像档的话，我们会使用 openmoko .bb 档案，并且修改它。当你看到 ''scaredycat'' 用其它的东西取代掉它，以验证你自己的映像档。
+
+编辑local/packages/images/scaredycat-openmoko-devel-image.bb 并且贴入如下的内容：
+
+<pre>
+require scaredycat-openmoko-image.bb
+
+IMAGE_INSTALL += "task-openmoko-debug"
+
+</pre>
+
+然后编辑local/packages/images/scaredycat-openmoko-image.bb
+
+<pre>
+#------------------------------------------------------
+# OpenMoko Image Recipe
+#------------------------------------------------------
+
+export IMAGE_BASENAME = "${PN}"
+export IMAGE_LINGUAS = ""
+
+export IMAGE_INSTALL = "\
+  ${MACHINE_TASK_PROVIDER} \
+  task-openmoko-linux \
+  task-openmoko-net \
+  task-openmoko-ui \
+  task-openmoko-base \
+  task-openmoko-phone \
+  task-openmoko-games \
+  task-openmoko-pim \
+  task-openmoko-scaredycat \
+  "
+
+inherit image
+
+LICENSE = MIT
+
+ROOTFS_POSTPROCESS_COMMAND += 'date "+%m%d%H%M%Y" >${IMAGE_ROOTFS}/etc/timestamp'
+
+</pre>
+
+
+编辑 local/packages/tasks/task-openmoko-scaredycat.bb - 这里是我们想要在映像档中放入想要的东西的目录位置。这个范例包括了 '''[http://wiki.openmoko.org/wiki/Scummvm scummvm]'''及 '''[http://www.handhelds.org/moin/moin.cgi/kbdd kbdd]'''。如果你修改了这个档案，请确定你藉由每次增加它的次数的方法，更新 '''PR''' 。
+
+<pre>
+DESCRIPTION = "OpenMoko: Scaredycat Additions"
+SECTION = "openmoko/base"
+LICENSE = "original"
+PR = "r2"
+
+inherit task
+
+RDEPENDS_task-openmoko-scaredycat = "\
+  scummvm \
+  kbdd \
+"
+
+</pre>
+
+====实际的建立映像档 ====
+
+To build you image, which will be located with your other images, do the following:
+
+ # cd build ; . ../setup-env ; bitbake scaredycat-openmoko-devel-image
+
+== 你的第一支程序 ==
+
+我知道我己经说过我有一支 GDK 程序，但是，我希望能让这个课程完成，并且让各位可以先着手开始写程序，而不是看着我如何写程序。
+
+这是一支很简单的 CLI hello world。
+
+=== 在我们开始撰写程序之前 ===
+
+一个好的程序人员在写程序时，是会有明确的想法，并且知道自己是朝向对的开发方向。
+现在将目录变更到<code>local/packages</code> ，下方的指令会希望你是在这个目录下执行：
+你会希望用你的程序名称做为目录名称，及使用文件名称做为子目录的名称。
+
+  mkdir myhelloworld myhelloworld/files
+
+现在，你会想要在<code>files</code> 目录下建立两个档案。
+
+  touch myhelloworld/files/README.txt myhelloworld/files/myhelloworld.c
+
+最后，你会想要建立一个bitbake file。
+
+  touch myhelloworld/myhelloworld.bb
+
+好了，现在必要的档案都建立完成了，让我们速度快点。
+<pre>
+$HOME
+ +- $OMDIR (contains the official openmoko tree)
+ |  +- local/
+ |     +- packages/
+ |        +- myhelloworld/
+ |           +- myhelloworld.bb
+ |           +- files/
+ |              +- myhelloworld.c
+ |              +- README.txt
+</pre>
+
+你的目录结构会像上述结构，如果你的目录树并没有如上的型态，请修复你的目录树。
+===填入档案 ===
+
+所以，现在你己经放好了所有的档案，现在让我们实际的来做出一些东西。
+
+myhelloworld.c
+<pre>
+#include <stdio.h>
+
+int main(int argc, char** argv)
+{
+        printf("Ello Poppet!\n");
+        return 0;
+}
+</pre>
+
+README.txt
+<pre>
+This is a command line application. It prints a simple Hello World! To stdout.
+</pre>
+
+myhelloworld.bb
+<pre>
+DESCRIPTION = "A killer hello world application"
+AUTHOR = "Bryce Leo"
+HOMEPAGE = ""
+SECTION = "console/applications"
+PRIORITY = "optional"
+LICENSE = "MIT"
+#DEPENDS = ""
+#RDEPENDS = ""
+#RRECOMMENDS = ""
+#RCONFLICTS = ""
+#SRCDATE = "20070729"
+#PV = "0.1"
+#PR = "r0"
+SRC_URI = "file://myhelloworld.c \
+          file://README.txt "
+
+S = "${WORKDIR}/myhelloworld/"
+
+do_compile() {
+        ${CC} ${CFLAGS} ${LDFLAGS} ${WORKDIR}/myhelloworld.c -o myhelloworld
+}
+
+do_install() {
+        install -m 0755 -d ${D}${bindir} ${D}${docdir}/myhelloworld
+        install -m 0755 ${S}/myhelloworld ${D}${bindir}
+        install -m 0644 ${WORKDIR}/README.txt ${D}${docdir}/myhelloworld
+}
+
+</pre>
+
+=== 第一次执行编译===
+
+ [[MokoMakefile]]现在已经很容易操作了，现在切换到 ${OMDIR} 目录下，你会看到 <code>Makefile</code> 放置的地方。
+
+ make build-package-myhelloworld
+
+(请确定你在建立你的软件前至少执行了make  openmoko-devel-image 一次。)
+
+在没有出现错误讯息的状况下，最后会显示出如下的讯息。
+<pre>
+NOTE: package myhelloworld-1.0: completed
+NOTE: build 200707291926: completed
+Build statistics:
+  Attempted builds: 1
+</pre>
+
+若没有出现任何错误讯息的话，就大功告成啰！
+
+== 将开发的程序加入映像文件 ==
+
+现在，我们建立好了开发环境，也架构好了架构，更架设好了目录树，你现在要将程序放在映像文件里，并且完成编译后，现在你要做的事就是，将你开发的程序放到映像文件中。
+
+现在让我们来看看要如何处理。首先，我们需要修改 <code>${OMDIR}/build/conf/local.conf</code>。将它加入变量，<code>DISTRO_EXTRA_RDEPENDS</code>，并且将它的值加入 <code>myhelloworld</code>。如果你想要在你自己的架构中或者是OM的架构下加入软件，请将它们以空白分隔的方式加入。在将软件变成套件(即Openmoko)的附加物后，现在我们必须重新建立 task-base 软件包。它必须产生一个ipk档案，能"整合装置及套件选项来建立一个基本的软件包。" 对于套件是否能运作良好，它会建立一个列有会被安装的内容的安装档案。所以，接着你必须历经制作 <code>openmoko-devel-image(映像档)、 build-qemu(建立QUEM)、在本机上更新QUEM( flash-qemu-local)、并执行</code><code>qemu</code>。然后标准化你的触控笔与屏幕的感度，并执行你的应用程序。
+
+
+=== 修改local.conf ===
+现在，切换到设定文件目录下<code>${OMDIR}/build/conf/</code> ，并且编辑<code>local.conf</code>
+将下列内容放入你的 <code>local.conf</code>档案中
+
+  DISTRO_EXTRA_RDEPENDS += "myhelloworld"
+
+在加入这行程序后，你也可以从OE目录下将其它应用程序涵括到这里。举个例子来说，我的 <code>local.conf</code> 档案内容如下：
+<pre>
+MACHINE = "fic-gta01"
+DISTRO = "openmoko"
+BUILD_ARCH = "i686"
+SRCDATE_eds-dbus = "now"
+DISTRO_EXTRA_RDEPENDS += "lua dillo myhelloworld"
+</pre>
+
+现在，你可以修改你的 <code>local.conf</code> 档案。现在，你可以开始进行将你的应用程序包装到映像文件的必要的工作了。
+
+=== 建立映像档 ===
+现在回到 [[MokoMakefile]]。 
+
+  make rebuild-package-task-base
+  make openmoko-devel-image
+  make build-qemu
+  make flash-qemu-local
+
+现在，你必须执行的是 qemu。
+  make run-qemu
+
+在你调整好你的触控笔之后，你可以按下右上方的选单，点击终端设备，并执行你的应用程序。
+<pre>
+root@fic-gta02:/$ myhelloworld
+Ello Poppet!
+</pre>
+
+==加入Python scripts做为执行的应用程序==
+这节是讲解如何加入 [[python]] scripts/软件 到你目前使用的映像档当中。
+
+===第一步===
+首先，你必须依上述的方法修改 <code>local.conf</code> 档案。你必须将
+  DISTRO_EXTRA_RDEPENDS += "myhelloworld"
+改为
+  DISTRO_EXTRA_RDEPENDS += "myhelloworld python"
+
+--[[User:Xkr47|xkr47]] 18:21, 11 August 2007 (CEST) Hmm surely the new line should be DISTRO_EXTRA_RDEPENDS += "pyhelloworld python" instead since the package we create below is pyhelloworld..
+
+这是因为python并不会被包含到预设的Openmoko映像档中。或者，你也可以使用 <code>python-pygtk2</code>。
+
+接下来，你必须执行在<code>$OMDIR/local</code> 目录下执行下列步骤。
+  mkdir packages/pyhelloworld packages/pyhelloworld/files
+
+  touch packages/pyhelloworld/files/pyhello packages/pyhelloworld/README.txt
+
+  touch packages/pyhelloworld/pyhelloworld.bb
+
+===填入以下档案===
+现在，编辑 <code>packages/pyhelloworld/files/pyhello</code>目录，让它包含：
+
+<pre>  
+#!/usr/bin/python
+
+print "hello world!"
+print "shutting down now. Farewell oh cruel, cruel world!"
+</pre>
+  
+接着，编辑<code>packages/pyhelloworld/files/README.txt</code> 写入以下的说明：
+
+  This is the most awesome helloworld application ever. Know why? It has SNAKES!
+
+Kidding aside, next is the all important <code> packages/pyhelloworld/pyhelloworld.bb:</code>
+<pre>
+DESCRIPTION = "A pythonic hello world application"
+AUTHOR = "Tyler Laing"
+HOMEPAGE = ""
+SECTION = "console/applications"
+PRIORITY = "optional"
+LICENSE = "MIT"
+#DEPENDS = ""
+#RDEPENDS = ""
+#RRECOMMENDS = ""
+#RCONFLICTS = ""
+#SRCDATE = "20070729"
+#PV = "0.1"
+#PR = "r0"
+SRC_URI = "file://pyhello \
+          file://README.txt "
+
+S = "${WORKDIR}/pyhelloworld/"
+
+
+do_install() {
+        install -m 0755 -d ${D}${bindir} ${D}${docdir}/pyhelloworld
+        install -m 0755 ${WORKDIR}/pyhello ${D}${bindir}
+        install -m 0644 ${WORKDIR}/README.txt ${D}${docdir}/pyhelloworld
+}
+
+</pre>
+
+我会在这里讲解每一个操作部份，做为未来参考之用。
+
+====.bb 档案内参数的涵意====
+
+  $WORKDIR = $OMDIR/local/packages/<application directory>
+  $bindir  = $OMDIR/build/tmp/work/armv4t-linux/<application directory>/image/usr/bin
+  $docir   = $OMDIR/build/tmp/work/armv4t-linux/<application directory>/image/usr/share/doc
+  $D       = $OMDIR/build/
+
+====最后的收尾动作====
+完成从<code>DISTRO_EXTRA_RDEPENDS</code>开始的所有操作动作。
+
+
+[[Category:Software]]
+[[Category:Applications]]
+[[Category:Openmoko]]
+[[Category:Guides]]
