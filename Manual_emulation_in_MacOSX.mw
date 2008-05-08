@@ -1,0 +1,74 @@
+THIS IS FROM THE OLD Build on OS X page of OpenEmbedded.
+
+This page was last edited in of Aug 2006 for building OE on Mac OSX 10.4 (Tiger).  Where more than one version of a tool was available, the most recent was used unless otherwise noted.  The goal is to setup OpenEmbedded using binaries if at all possible and source compiled only if no suitable binary could be found.  So far, compiling source for setting up OE has not been necessary. 
+
+== Required Preparation: ==
+By default, Tiger HFS+ filesystem is not case senstive.  However, due to case insensitivity, some filenames in OE would appear as duplicates when in fact they are not.  The brute force approach would be to backup all user data, reinstall Tiger with filesystem case sensitivity, and then restore the data.  Fortunately, this is not necessary as one can create a read/write stretchable sparseimage via 
+
+$ hdiutil create /OE.sparseimage -volname OE -size 4g -layout NONE -stretch 8g 
+
+Then use ''Disk Utility.app'' to erase it (aka reformat it) as ''Mac OS Extended (Case-Sensitive, Journaled)'', and mount it.  (It can optionally be set to automount by dragging it to the user's login items under System Preferences).  I called my disk image "OE" and the last change needed before it can be used is to run  
+
+$ sudo vsdbutil -a /Volumes/OE 
+
+This enables permissions/ownership on the volume and prepares it for OpenEmbedded and all the required tools (including Fink).  Note that the Fink installer creates the symlink /sw mapped back to the volume where Fink is actually installed (/Volumes/OE/sw/ in my case). 
+
+==Mandatory Build Tools:==
+It is as easy as installing
+[[http://www.macports.org/install.php MacPorts]].  Then installing GNU sed and GNU getopt
+
+$sudo port install gsed getopt
+
+[[http://oe.linuxtogo.org/wiki/GettingStarted GettingStarted]] instructions. 
+
+ Of the GNU items above and standard [[http://oe.linuxtogo.org/wiki/RequiredSoftware RequiredSoftware]], most of them are available in binary form via Fink with some exceptions or notable cases: 
+
+<ul><li> GNU getopt binary is available from Fink (as getoptbin) 
+</li><li> Fink GNU make version 3.79.1 is fine 
+</li><li> <a href="http://www.venge.net/monotone/">monotone</a> for OSX is available on its own site (not available from Fink) and must be dumped into a binary directory that is included in $PATH and made executable using chmod command. 
+</li><li> Perl is already provided by OSX 
+</li></ul> 
+<h3>Unneeded Build Tools:</h3> 
+<p>So far it seems as if these items are not actually needed, in spite of being listed as <a href="/wiki/RequiredSoftware">RequiredSoftware</a>.  (So far, Psyco is the only one on this list that seems like it would be really nice to have as it would speed up python.): 
+</p> 
+<ul><li> Psyco is not available from Fink but src is available from <a href="http://darwinports.com/">DarwinPorts</a> as py-psyco but appears to require building python-2.4 src from Fink 
+</li><li> diffstat is not available from Fink but src is available from DarwinPorts 
+</li><li> sgmltools is not available from Fink or DarwinPorts 
+</li><li> glibc headers is not available from Fink or DarwinPorts 
+</li></ul> 
+<h3>Optional GUI Tools:</h3>  
+<p>There is often a need for doing and reconciling difference between files or directories and GUI makes this easier. 
+</p> 
+<ul><li> <a href="http://sourceforge.net/project/showfiles.php?group_id=58666">kdiff3</a> app is extremely capable with multiple colors for directory and file comparison while being listed as supported within monotone (and is preferred by poushag in this application) 
+</li><li> <a href="http://aquamacs.org/documentation.shtml">Aquamacs</a> is GNU emacs with an Aqua wrapper besides being maintained more regularly and having more documentation than emacs app below while being listed as supported within monotone (which simply supports emacs) 
+</li><li> <a href="http://sourceforge.net/project/showfiles.php?group_id=148174&package_id=163427&release_id=423235">emacs</a> is available as a Cocoa app, but with less documentation than Aquamacs, while being listed as supported within monotone 
+</li><li> xxdiff src is available from Fink and is very capable with multiple colors for directory and file comparison while being listed as supported within monotone 
+</li><li> autocutsel bin is available from Fink (and enhances xxdiff nicely) 
+</li><li> Apple Developer Tools has FileMerge.app included which supports file and directory comparison but it doesn't seem to have colors; requires a 3rd directory for merges; and is listed as supported within monotone  
+</li><li> TkDiff is available from Fink as part of TkCVS bin but only has file comparison where diffs are only lit in one color (blue) 
+</li><li> <a href="http://mac.softpedia.com/get/Utilities/DiffnPatch.shtml">DiffnPatch</a> is a carbon app that runs under OS9 and OSX but is thin on features much like FileMerge 
+</li><li> <a href="http://www.scootersoftware.com/en/shot7w.png">Beyond Compare</a> is a win32 executable that I wish will be ported to OS-X because I've never seen one that makes directory/file comparison and reconciliation clearer, simpler, and faster 
+</li></ul> 
+<h3>Optional monotone Build from Source:</h3> 
+<p>If one were to build monotone (presumably when a desired version is available but before a compiled binary is released) it would be done as follows: 
+</p><p>After getting the monotone src, it must be built using some additional tools.  Refer to monotone's <a href="http://www.venge.net/monotone/wiki/BuildingOnMac">general installation page</a> and <a href="http://www.venge.net/monotone/wiki/BuildingOnMac">OSX installation notes</a> 
+</p> 
+<pre>    * gettext is available from Fink (as part of default fink install apparently) 
+    * autoconf is available from Fink 
+    * automake is available from Fink 
+    * boost src is available from Fink 
+</pre> 
+<p>For support, see zecke or poushag on <a href="irc://freenode.net/#oe">irc://freenode.net/#oe</a> 
+</p><p>zecke has not needed any of the items that cannot be found on Fink other than monotone. 
+</p> 
+<h3>Installing dependencies with MacPorts</h3> 
+<pre>sudo port -v install subversion cogito py25-hashlib quilt coreutils ccache diffstat wget 
+</pre> 
+<p>MacPorts' Monotone build seems to be broken as of 2007-07-29, so download the package from<a href="/+http%3A/%252Fmonotone.ca/"> http://monotone.ca/</a>. 
+</p><p>Unfortunately, MacPorts tries not to conflict with existing shell utilities so it does things like install sha1sum as `gsha1sum`.&nbsp;:( I added /usr/local/bin to my $PATH and put a bunch of symlinks there to deal with that. Feel free to pick a different directory: 
+</p> 
+<pre>sudo ln -s /opt/local/bin/gsha1sum /usr/local/bin/sha1sum 
+sudo ln -s /opt/local/bin/gmd5sum /usr/local/bin/md5sum 
+sudo ln -s /opt/local/bin/python2.5 /usr/local/bin/python 
+sudo ln -s /opt/local/bin/gnused /usr/local/bin/sed 
+</pre>
