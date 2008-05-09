@@ -1,95 +1,26 @@
-Warning: this is draft!
-
-I try to put here my notes on setting up OpenMoko environment (Qemu and MokoMakefile) on [[Mac OS X]].
-
-= Introduction =
-
-Some time ago I ask if anyone has ever set up OpenMoko environment on MacOS X. No one has answered that he did but several people were interested. So I deceided to wrote some directions on how to do that. 
-
-As for now I was not successful but I am still trying ;)
-
-= Setting up environment =
-
-== Prequisites ==
-
-Install fink and darwinports (both have neccesary packages).
-
-Follow instructions on:
-<strike>http://www.openembedded.org/wiki/BuildOnOSX</strike>
-[[Manual_emulation_in_MacOSX]]
-to set up OE environment.
-
-It is neccessary to create new disk image, just as BuildOnOSX says. 
-
-If you're compiling something connected with X11 be sure to install X11devel package from your MacOS X CD1.
-
-You can get mentioned packages using darwinports:
-
-<pre>
-sudo port install quilt
-sudo port install py-psyco
-sudo port install cogito
-sudo port install gawk
-fink install sed
-</pre>
-
-Then get  Q[kju] project: http://www.kju-app.org/proj/wiki/CompilingQ into /Volumes/OE/Q but do not compile it yet (run only "prepare the sources"). This will be needed for compiling Neo1973 emulator.
-
-Set up environment as described in MokoMakefile:
-
-<pre>
-cd /Volumes/OE
-mkdir moko; cd moko
-wget http://www.rwhitby.net/files/openmoko/Makefile
-
-make setup
-</pre>
-
 = Making developers image =
+Optional: Install python2.5 and py25-psyco from MacPorts then create a symlink from /opt/local/bin/python2.5 to /usr/bin/python
 
 <pre>
 make openmoko-devel-image
 </pre>
 
-I had problems with bitbake - it does not run correctly with psyco (I got "Illegal instruction error" and make exited with error 132)  so I had to disable it: I run bitbake  -d openmoko-devel-image in MokoMakefile.
-
-Also, I ended up with: 
+I ended up with: 
 
 <pre>
 ERROR: Error in executing: /Volumes/OE/moko/openembedded/packages/quilt/quilt-native_0.45.bb
 ERROR: Exception:exceptions.UnboundLocalError Message:local variable 'md5data' referenced before assignment
 </pre>
 
-I found out that I did not have md5sum which is used by bitbake. I found it in testutils packages from fink. Installing it did not help... I got pissed and temporarily changed
-
-vim /Volumes/OE/moko/bitbake/lib/bb/fetch/wget.py +114
-
-so it look like this
-
+make a script named md5sum that lives in /bin containing
 <pre>
-#           supposedly complete.. write out md5sum
-            md5data = ""
-            if bb.which(data.getVar('PATH', d), 'md5sum'):
-                try:
-                    md5pipe = os.popen('md5sum ' + dl)
-                    md5data = (md5pipe.readline().split() or [ "" ])[0]
-                    md5pipe.close()
-                except OSError:
-                    md5data = ""
-
-            # verify the md5sum
-            #if not verify_md5sum(wanted_md5sum, md5data):
-            #    raise MD5SumError(uri)
+#!/bin/sh
+echo `/sbin/md5 $1` | awk {'print $4'}
 </pre>
 
-As you can see there I disabled md5sum verification.
-
-(Note: Mac OS X has md5, do 'locate md5' and enter the path to it to create a link as follows: ln -s <path to md5>/md5 /usr/bin/md5sum)
-
-If you have error like this
+Then I got
 
 <pre>
-
 | checking for sed... /usr/bin/sed
 | checking whether /usr/bin/sed understands (foo|bar)... no
 | configure: error:
@@ -99,8 +30,49 @@ If you have error like this
 | its path with the '--with-sed=' option.
 </pre>
 
+Install GNU sed from MacPorts
 
-Install GNU sed from fink.
+<pre>
+$ port install gsed
+</pre>
+
+If you get:
+
+<pre>
+| Making install in tests
+| make[3]: Nothing to be done for `install-exec-am'.
+| make[3]: Nothing to be done for `install-data-am'.
+| cp: illegal option -- t
+| usage: cp [-R [-H | -L | -P]] [-fi | -n] [-pvX] source_file target_file
+|        cp [-R [-H | -L | -P]] [-fi | -n] [-pvX] source_file ... target_directory
+</pre>
+
+Apply this patch:
+<pre>
+### Fix cp command ### 
+perl -pi -e 's,cp -fpPR -t "$to" "$from"/*,cp -fpPR "$from"/* "$to",g'
+</pre>
+
+I then got:
+<pre>
+</pre>
+
+I had to add:
+
+<pre>
+#ifndef HAVE_ENVIRON_DECL
+# ifdef __APPLE__
+# include <crt_externs.h>
+# define environ (*_NSGetEnviron())
+# else
+extern char **environ;
+# endif
+#endif
+</pre>
+
+to the following files build/tmp/work/i386-darwin/gettext-native-0.14.1-r8/gettext-0.14.1/gettext-tools/lib/execute.c , pipe-bidi.c, pipe-in.c, pipe-out.c
+
+Next I had to add information for i386-darwin to openembedded/classes/siteinfo.bbclass, I copied the powerpc-darwin info.
 
 Now you should have:
 
@@ -193,50 +165,3 @@ NOTE: package ipkg-native-0.99.163: failed
 ERROR: Build of openmoko-devel-image failed
 make: *** [openmoko-devel-image] Error 1
 </pre>
-
-= Patching qemu-neo1973 =
-
-The main idea is to get patches for gcc-4.x from Q project and apply it to qemu-neo1973 branch. I'm still working on it.
-
-= Building emulator =
-
-TODO
-
-= Building dfu-util =
-
-First install libusb: sudo port install libusb
-
-Get dfu-util: svn co http://svn.openmoko.org/trunk/src/host/dfu-util/
-
-run ./autogen.sh
-
-Then, for some reason, my libusb lib was not detected. I needed to set my paths by hand:
-
-comment out line 18 and 19 in configure ac:
-
-#PKG_CHECK_MODULES(USB, libusb >= 0.1.4,,
-#                 AC_MSG_ERROR([*** Required libusb >= 0.1.4 not installed ***]))
-
-and add libusb libs manually to line 20, so it looks like:
-
-LIBS="$LIBS -L/opt/local/lib -lusb -Wl,-framework -Wl,IOKit -Wl,-framework -Wl,CoreFoundation -Wl,-prebind -I/opt/local/include"
-
-run ./configure
-
-goto src and:
-
-comment out  dfu static because this is not supported on Mac:
-
-dfu_util_static_LDFLAGS = #-static
-
-add lib by hand:
-
-DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir) -I/opt/local/include -L/opt/local/lib -lusb -Wl,-framework -Wl,IOKit -Wl,-framework -Wl,CoreFoundation -Wl,-prebind -I/opt/local/include
-
-(I know that this is totaly unpure, dirty hack, yet it works).
-
-Run make in src dir. You should have working binary - I don't know if this works on the real phone because I do not have one yet. Can anyone confirm?
-
-[[Category:Application Developer]]
-[[Category:Guides]]
-[[Category:In_progress]]
