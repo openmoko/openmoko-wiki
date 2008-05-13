@@ -1,0 +1,167 @@
+''Note: This is the (ongoing) description of the new framework architecture that is '''in development'''. See [[OpenmokoOldFramework]] for the framework architecture of 2007.1 and 2007.2 and [[NeoSoftwareStack]] for the current status (which has nothing to do yet with this framework)''
+
+=Answering the #1 and #2 questions=
+* ''Question'': Is this a part of the current images yet?
+* ''Answer'': No.
+* ''Question'': When can I see this as part of an image?
+* ''Answer'': We expect a zhone-image (including all framework goodies) to turn up as alpha versions around June'08, beta in August'08, with a public stable release in September'08.
+
+=Purposes=
+* '''Give people the infrastructure to create solid and exciting software products based on the Openmoko platform'''
+* '''Support competing UIs while collaborating on developing services'''
+* '''Encourage framework users (e.g. application developers) to also contribute to the framework'''
+
+=Requirements=
+* Make it simple
+* Concentrate on core services
+* Be programming language agnostic
+* Be UI toolkit agnostic
+* Try to reuse existing technologies as much as possible, but not at the cost of a bad API
+
+=How to achieve that technically=
+* Chose [[Dbus]] as the collaboration line. Below dbus, we can work together. Above dbus, we can differentiate.
+* Expose features through dbus APIs implemented by UI-agnostic and language-agnostic services (daemons).
+* Optimize for Openmoko devices, but support multiple architectures and purposes through plugin interfaces and suitable hardware abstraction mechanisms.
+* Be not afraid of reinventing the wheel for a wheel-barrow if all the existing wheels are made for sports cars.
+
+=Mandatory Readings=
+* [http://adam.gomaa.us/blog/frameworks-exist-for-conceptual-integrity/ Frameworks exist for conceptual integrity]
+* [http://humanized.com/weblog/2007/10/05/make_oss_humane/ Ten ways to make more humane open source software]
+* [http://www.freesmartphone.org FreeSmartPhone.org Wiki]
+
+=What this is NOT about=
+This initiative does not cover low level services such as
+* Bootloader, Kernel, or System Init.
+
+This initiative does not cover high level services such as
+* X-Window-System, Window Manager, UI Toolkits,
+* Application Launchers, Applications, or Fancy UIs.
+
+=Architectural Overview=
+[[Image:OpenmokoFramework08.png |823px|left|frontside]]
+
+=Software Components=
+
+We differenciate between low-level and high-level services -- dbus will be used to communicate horizontally and vertically.
+
+===Low-Level Services===
+
+====Device Control====
+The low level device control service manages peripheral control, i.e. controlling power for individual subsystems such as
+* GSM, WiFi, Bluetooth, GPS, as well as
+* Backlight brightness and power,
+* turning LEDs on and off, etc.
+It also deals with
+* charging, suspend/resume,
+* accellerometers, and buttons.
+Last but not least, it sends notifications about the user's activity so that listeners have a chance to
+* change to powersaving modes, or
+* lock the device.
+We implement the following software for that:
+* [http://www.freesmartphone.org/mediawiki/index.php/Implementations/OpenDeviceDaemon odeviced]
+
+====Audio====
+The low level audio service relies on a working alsa device driver. On top of that, there are two components:
+# [http://gstreamer.freedesktop.org/ gstreamer]
+# [http://pulseaudio.org pulseaudio]
+
+'''Gstreamer''' is to be used for all kinds of event sounds where a) multiple audio formats need to be supported and b) a latency of about one second is acceptable. This goes for e.g. ring tones, welcome tones, plug indication.
+
+'''Pulseaudio''' is to be used for event sounds, where low-latency is necessary, e.g. touch click sounds and UI event acknowledge sounds. Pulseaudio is our general all-purpose mixer. Gstreamer will use the pulseaudio sink to feed audio through.
+
+====GSM====
+The low level GSM services expect a modem complying to GSM 07.07, GSM 07.05, and assorted GSM specifications, talking an AT-protocol over a serial line. If GSM 07.10 is supported, we use the multiplexing daemon
+* [http://www.freesmartphone.org/mediawiki/index.php/Implementations/gsm0710muxd gsm0710muxd]
+to export virtual serial lines over -- again -- AT-protocol can be spoken.
+
+====Bluetooth====
+The low level Bluetooth services rely on the official Linux Bluetooth subsystem:
+* [http://www.bluez.org BlueZ].
+
+====GPS====
+The low level GPS services assume a GPS device that talks NMEA over a device node. We rely on the following software:
+* [http://gypsy.freedesktop.org Gypsy]
+
+====Network====
+The low level networking service assumes network interfaces, such as USB, Ethernet, Wifi, etc. We rely on the following software here:
+* Network Manager or Intel Connection Manager (undecided yet)
+* ppp
+
+===High Level===
+
+====Usage====
+The Usage subsystem is coordinating application I/O requirements preventing. Applications are not supposed to turn on or off devices, since they do not have any knowledge about concurrent applications that may be also using the device -- think ''reference counting'' for I/O requirements.
+
+With this added layer, we could later think about monitoring subsystems, subsystem usage statistics, or accounting.
+
+See discussion page about PolicyKit.
+
+====Events====
+* signaling events via I/O (ringing, blinking, vibrating)
+* might use fd.o notification API
+
+====PIM====
+An intelligent storage database server. This is being carried out as a Google Summer of Code project. See complete description at [http://www.neo1973-germany.de/wiki/pyPimd|PyPimd]
+
+====Context====
+* Intelligent context API, integrating location as one -- among other -- sources
+TBD
+Reference Geoclue
+
+====Telephony====
+* Voice
+* Data
+
+===Preferences===
+* settings database
+
+====Network====
+* high level networking queries
+
+=Implementation=
+
+===Completion Status===
+
+====Low Level====
+* device control: 50%
+* audio: 80%
+* GSM: 80%
+* Bluetooth: 80%
+* GPS: 80%
+* Network: 50%
+
+====High Level====
+* Usage: 0%
+* Event: 0%
+* Preferences: 0%
+* Context: 0%
+* Telephony: 50%
+* Networking: 0%
+* PIM: 0%
+
+=The role of Python=
+
+Where we write new code, we will use Python to implement the dbus services. The reason for that being the rapid prototyping nature of Python and the emphasis on the Dbus APIs. Using Python, the turnaround times to experiment with APIs are incredibly faster than for using a compiled language such as C or C++.
+
+Once the APIs have been used by application programmers, we can start profiling and possibly reimplement some of the services with daemons written in Vala, ''if'' necessary. We might as well succeed in improving performance by using Pyrex/Cython/Ctypes to keep the benefits of Python.
+
+=Team & Roadmap=
+
+==Team==
+
+* [[User:Mickey|Michael 'Mickey' Lauer]]
+* Guillaume Chereau
+* [[User:Shoragan|Jan 'Shoragan' Luebbe]]
+* Holger 'Zecke' Freyther
+
+==Roadmap==
+
+Milestone 1:
+
+Milestone 2:
+
+Milestone 3:
+
+
+[[Category:Openmoko ]]
+[[Category:Categories| ]]
