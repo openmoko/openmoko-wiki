@@ -9,12 +9,12 @@ MokoMakefile 是在設立Openmoko Build 環境時儲存所有工作的Makefile�
 
 它不像是在[[Building Openmoko 2007.1 from scratch|Building Openmoko from scratch]]中所提到的手動設定過程。MokiMakefile並不會安裝任何程式到你的系統裡(即使是一般的使用者也可以使用)。
 
-MokoMakefile是一個可以將所有東西包裝起來，讓開發人員能透過Openmoko設定指引的過程完成的編譯，並在開發環境下易於設定及維護。
+MokoMakefile是一個可以將所有東西包裝起來，讓開發人員能透過Openmoko設定指引的過程，完成編譯，並且在開發環境下，它易於設定及維護。
 
 MokoMakefile是由[[User:RodWhitby|Rod Whitby]] 所開發--它並不是一個Openmoko正式的產品。 若它與[[OpenMoko2007.2#How_to_build|official OpenMoko build instructions]]及MokoMakefile有差異之處，你應該考慮用正式的操作來修正它。
 MokoMakefile 可以建立OM-2007.1 或OM-2007.2 影像檔。核心團隊選擇預設值，但是你可以選擇Makefile中的一些工具來使用。
 
-MokoMakefile也可以建立QEMU-based Neo1973 模擬器，將它視為安裝及執行Openmoko映像檔的目標裝置。這些指令也可以在沒有下載整個Openmoko OpenEmbedded套件的狀況下下載及建立映像檔。你可以在[[Using QEMU with MokoMakefile]]中找到這個部份的說明。
+MokoMakefile也可以建立 QEMU-based Neo1973 模擬器，將它視為安裝及執行Openmoko映像檔的目標裝置。這些指令也可以在沒有下載整個Openmoko OpenEmbedded套件的狀況下下載及建立映像檔。你可以在[[Using QEMU with MokoMakefile]]中找到這個部份的說明。
 
 == 建置Openmoko的需求 ==
 
@@ -31,13 +31,14 @@ MokoMakefile也可以建立QEMU-based Neo1973 模擬器，將它視為安裝及�
 OpenEmbedded 用來控制系統的版本是[http://monotone.ca monotone]，它並不是由MokoMakefile下載及安裝的。如果你的套件並沒有提供套裝軟體，你可以從http://monotone.ca 下載並安裝穩定的二進位檔。
 
 
-Some distribution specific hints on preparing your build host for building OpenEmbedded are on   http://www.openembedded.org/wiki/OEandYourDistro but they may be outdated, incomplete and do not cover everything which OpenMoko needs to build.
+在http://www.openembedded.org/wiki/OEandYourDistro 中，你可以看到有一些套件特別隱喻指出要準備給OpenEmbedded使用的build host，但它可能有點老舊，不完整，並且不包含Openmoko需要的內容。
 
 在[[Building OpenMoko from scratch#Build host prerequisites|the section on build host prerequisites]] in [[Building OpenMoko from scratch]]是很好的導引文章。
 
-如果你忘記了OE本身所必須使用的東西，OE將會在你開始build時出現提示，但是它並不會查看Openmoko的BUILD獨立性，所以，你必須在開始前先安裝它，或者在build失敗之後安裝它們。OpenEmbedded 會在你上次中斷build的地方重新開始。
+如果你忘記了OE本身所必須使用的東西，OE將會在你開始build 時出現提示，但是它並不會查看Openmoko的BUILD獨立性，所以，你必須在開始前先安裝它，或者在build失敗之後安裝它們。OpenEmbedded 會在你上次中斷build的地方重新開始。
 
 ==== 依套件而衍生的套裝軟體需求 ====
+
 你的套件必須能提供以下的指令，以便於OpenEmbedded開始建立build：
 
  subversion texi2html texinfo help2man
@@ -115,6 +116,7 @@ Openmoko須要開發套件(搭配header檔案、開發程式庫及工具) 以利
 一旦你做好了它，你可以選擇繼續使用MokoMakefile來啟始你拉下來的build，或者你可以進入build 目錄，並且手動執行bitbake指令。你可以自行選擇自己要的方法。
 
 ==更新環境==
+
 為了要更為容易的維護你所建立的環境，下面的指令是很有用的。
 
 1 - 將MokoMakefile更新到最近的版本：
@@ -125,7 +127,7 @@ Openmoko須要開發套件(搭配header檔案、開發程式庫及工具) 以利
 
    make setup 
 
-3 - 要更新Openmoko repository checkout 及MokoMakefile patches到最近的版本：
+3 - 要更新放置Openmoko原始碼及檔案的儲存位置及MokoMakefile patches到最近的版本：
 
    make update
 
@@ -191,7 +193,7 @@ Openmoko須要開發套件(搭配header檔案、開發程式庫及工具) 以利
 
 之後，你的BUILD可能必須重新運作一次。
 
-*針對擁有多個CPU的使用者(或者dual-core)而言，這個小的patch might be useful to build things faster.
+*針對擁有多個CPU的使用者(或者dual-core)而言，這個小的patch對於加速建立映像檔的工作，會有些作用。
 
 編輯local.conf 並且加入下列指令列：
  PARALLEL_MAKE = "-j 4"
@@ -203,16 +205,17 @@ Openmoko須要開發套件(搭配header檔案、開發程式庫及工具) 以利
 
 * 如果遇到與 qemu-native 軟體相關的錯誤，並且沒有從qemu編譯，你可以編輯 build/conf/local.conf 檔案，並且啟用ENABLE_BINARY_LOCALE_GENERATION = "0" 指令列來避免這個錯誤。
 
-* To prevent building tons of locales, add a line like this to local.conf:
+* 要避免locales過大，在local.conf中加入以下的指令：
+
  GLIBC_GENERATE_LOCALES = "en_US.UTF-8 nl_NL.UTF-8"
 
-* To not build any binary locales at all, add this to local.conf:
+* 為了不要建立二位元的locale，請加入以下的內容到local.conf:
  ENABLE_BINARY_LOCALE_GENERATION = "0"
 
-* If you want to rebuild the package indexes (for instance, after compiling a new version of a package) without building <code>openmoko-devel-image</code>, run <code>make build-package-package-index</code>.
+* 若你想要重建軟體的索引 (如，在編譯新版的軟體時)而不要建立 <code>openmoko-devel-image</code>，請執行run <code>make build-package-package-index</code>。
 
-[[User:Wurp]] will update this to be a little more comprehensible, but maybe it can help someone as-is in the meantime:
-* If MokoMakefile always fails on some fetch in zlib, just find the binary somewhere, add it to the downloads or sources directory manually (create the .md5 matching file if necessary), and retry.
+[[User:Wurp]] 將會更新它，讓它變為易於理解的，但也許它同時也可以幫忙很多人。
+* 如果MokoMakefile經常在zlib的部份失敗，請找出它的二位元檔案，將它下載或手動加到原始的目錄下(有必要的話，建立.md5)，並且重試。
 
 === 好用的指令列 ===
 以下是MokoMakefile中較有用的指令清單(actually make targets) 及針對這些指令的一些簡單的介紹。它應該在$OMDIR 中執行。
