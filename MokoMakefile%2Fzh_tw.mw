@@ -296,18 +296,22 @@ Explanation:
 * SECTION - 現在，我會使用username/mycoolpackage
 * PV - 套件版本
 * inherit autotools - 這個套件可以被'./configure && make && make install' 編譯，所以我們可以讓MokoMakefile用這個方法運作。
-* SRC_URI = ... - 這是軟體下載的位置，It's imperative that the tar.gz contains a directory called '''packagename-packageversion''' (in this case: mycoolpackage-1) so that MokoMakefile can find it automatically or the build will fail.
+* SRC_URI = ... - 這是軟體下載的位置，tar.gz包含了名為'''packagename-packageversion'''的目錄，(在這個案例中，為 mycoolpackage-1)，因此MokoMakefile可以自動找到它，或者這個build會失敗。
 
-This is not all. We also need to tell MokoMakfile that it needs to build and include the package in the image. To do this, do
+這並不是全部，我們也會需要告訴MokoMakfile它需要被建立，並且在映像檔中包含軟體套件。要完成這個工作，請執行下面的指令：
+
   $OMDIR/openmoko# quilt edit trunk/oe/packages/tasks/task-openmoko.bb
-Here, increase the value '''PR''' by one and add '''mycoolpackage \''' (with the backslash!) just before the line reading '''#  update-alternatives \'''.
 
-Now run
+在這裡，在讀入'''#  update-alternatives \'''.
+程式行前，加入 '''PR''' 及 '''mycoolpackage \''' (使用\符號)
+
+現在，執行
+
   quilt refresh
   cd ..
   make update openmoko-devel-image
 
-And if everything's alright you should now have an OpenMoko image to flash to your phone or run in qemu as described above.
+如果每一件事都順利的話，你應該建立好了可以更新到手機的Openmoko映像檔，並且可以在qemu 執行。
 
 === Hello World 應用程式範例 ===
 
