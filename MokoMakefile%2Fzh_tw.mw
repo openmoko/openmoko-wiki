@@ -252,15 +252,15 @@ Openmoko須要開發套件(搭配header檔案、開發程式庫及工具) 以利
   ...make the changes...
   quilt refresh # this creates a file in $OMDIR/patches/openmoko-HEAD/ and updates the quilt series file there
 
-Note:  '''不要''' 使用絕對路徑use absolute paths as this confuses quilt and will get you a diff of the file against /dev/null!
+Note:  Do'''NOT'''  absolute paths as this confuses quilt and will get you a diff of the file against /dev/null!
 
-To build the changes and have them used by qemu:
+要建立變更內容，並且 讓他們可以被qemu使用：
 
   make build-qemu
   make flash-qemu-local
   make run-qemu
 
-If you want to modify applications instead of the openmoko toolchain, this is what you have to do (example: openmoko-messages):
+如果你想要修改應用程式，而不是Openmoko toolchain，它是你必須做的工作(如：openmoko-messages):
 
   cd $OMDIR/build
   . ../setup-env
@@ -270,18 +270,19 @@ If you want to modify applications instead of the openmoko toolchain, this is wh
   cd -
   bitbake openmoko-messages
 
-Then continue with MokoMakefile usage.
+然後，繼續使用MokoMakefile。
 
-If you want to add an application to your openmoko distribution, do this:
-All file edits should be done using quilt as described above. That way a patch can easily be submitted to the openmoko project.
-First, create a directory that will correspond to your package and edit a '''.bb''' file in there:
+如果你想要在Openmoko套件中加入應用程式，請進行下列工作：
+所有的檔案編輯都應該使用quilt。這樣patch就可以輕鬆的送到openmoko專案當中。
+首先，建立一個與套件相對應的路徑，並且編輯這個路徑下的 '''.bb''' 檔案。
   cd $OMDIR/openmoko/
   quilt new mycoolpackage.patch
   mkdir trunk/oe/packages/mycoolpackage
   quilt add trunk/oe/packages/mycoolpackage/mycoolpackage_1.bb
   quilt edit trunk/oe/packages/mycoolpackage/mycoolpackage_1.bb
 
-The file should have the following content:
+這個檔案應該有下面的內容：
+
   DESCRIPTION = "This is a cool package"
   SECTION = "username/mycoolpackage"
   PV = "1"
@@ -291,7 +292,7 @@ The file should have the following content:
   SRC_URI = "http://www.example.com/download/mycoolpackage-1.tar.gz"
 
 Explanation:
-* DESCRIPTION - Just a short text explaining the package
+* DESCRIPTION - 解釋套件用途的簡短說明。
 * SECTION - I have no clue, but I'll use username/mycoolpackage for now
 * PV - Package Version
 * inherit autotools - The package can be compiled by './configure && make && make install' so we tell MokoMakefile to do it this way.
