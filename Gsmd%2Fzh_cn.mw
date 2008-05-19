@@ -1,0 +1,239 @@
+[[gsmd]] 是在Openmoko手机上执行的 [[GSM]]背景程序。它用来管理话机中传统的'通话' 领域 (声音/简讯/gprs 通讯连结)。
+
+你可以在[[Gsmd/document |这里]]找到进行中的进阶技术描述及API文件。
+
+
+== Usage ==
+
+=== On the phone ===
+当以/etc/init.d/gsmd script启动时，gsmd 通常会以背景程序执行，在这个案例当中gsmd会输出侦错讯息到 "/tmp/gsm.log"档案中 (stdout及stderr在这里则被重新导引).
+
+针对侦错目地，gsmd可以在前景模式下执行，可以被使用的选项如下：
+
+<pre>
+> gsmd --help
+gsmd - (C) 2006 by Harald Welte <laforge@gnumonks.org>
+This program is FREE SOFTWARE under the terms of GNU GPL
+
+Usage:
+        -v      --version       显示程序版本
+        -d      --daemon        Deamonize
+        -h      --help          显示辅助讯息
+        -p dev  --device dev    指定串行装置为作用中装置
+        -s spd  --speed spd     指定bps速度 (9600,38400,115200,...)
+        -F      --hwflow        硬件流量控制(RTS/CTS)
+        -L      --leak-report   Leak Report of talloc memory allocator
+        -l file --logfile file  Specify a logfile to log to
+</pre>
+
+如果你的GSM 调制解调器连接到ttySAC0 (如 [[:Category:Neo1973 Hardware | Neo1973]])， 使用如下指令启动它：
+ > gsmd -p /dev/ttySAC0 -s 115200 -F
+(baud rate可被modem自动侦测)
+
+=== 从host PC===
+使用最近的 [[uboot]] (svn > r2885)，gsm modem可以电源启动，并且从uboot本身连接到uboot的串行控制埠。然后，允许host PC直接与调制解调器互动。关于host pc执行gsmd 的文章，你可以在[[User:Miki/hosted_gsmd|这里]]找到。
+
+== libgsmd ==
+
+libgsmd 是C 语言API中的链接库。这个链接库的程序可以被用在手机上，如打电话、接收电话、注册为网络一员...等。
+
+== libgsmd-tool ==
+
+libgsmd-tool 是可以用来诠释libgsmd API的小型展示应用程序。
+
+== Usage ==
+
+libgsmd-tool 有多重模式。  
+
+=== Usage of shell mode ===
+
+Shell 模式针对语音通话提供一个简单的text-based 指令界面。
+
+shell 模式可以利用下面的指令启动
+
+ libgsmd-tool -m shell
+
+以下即为它的实做范例：
+
+<pre>
+> src/util/libgsmd-tool -m shell
+libgsm-tool - (C) 2006 by Harald Welte
+This program is Free Software and has ABSOLUTELY NO WARRANTY
+
+?
+        A       Answer incoming call
+        D       Dial outgoing number
+        H       Hangup call
+        O       Power On
+        o       Power Off
+        r       Register to network
+        R       Register to given operator (R=number)
+        U       Unregister from netowrk
+        P       Print current operator
+        L       Detect available operators
+        Q       Read signal quality
+        T       Send DTMF Tone
+        n       Print subscriber numbers
+        pd      PB Delete (pb=index)
+        pr      PB Read (pr=index)
+        prr     PB Read Range (prr=index1,index2)
+        pf      PB Find (pf=indtext)
+        pw      PB Write (pw=index,number,text)
+        ps      PB Support
+        pm      PB Memory
+        pp      PB Set Memory (pp=storage)
+        pRr     Retrieve Readrg Records
+        pRf     Retrieve Find Records
+        sd      SMS Delete (sd=index,delflg)
+        sl      SMS List (sl=stat)
+        sr      SMS Read (sr=index)
+        ss      SMS Send (ss=ask_ds,number,text|["text"])
+        sw      SMS Write (sw=stat,number,text)
+        sm      SMS Storage stats
+        sM      SMS Set preferred storage (sM=mem1,mem2,mem3)
+        sc      SMS Show Service Centre
+        sC      SMS Set Service Centre (sC=number)
+        q       Quit
+
+O
+# EVENT: PIN request (type=1) Please enter PIN: 6582
+r
+# EVENT: Netreg searching for network 
+EVENT: Netreg registered (home network) 
+
+D03024033902
+# Dial 03024033902
+EVENT: Call Progress: UNKNOWN
+EVENT: Call Progress: PROCEED
+EVENT: Call Progress: SYNC
+EVENT: Call Progress: ALERT
+H
+# Hangup
+EVENT: Call Progress: DISCONNECT
+EVENT: Call Progress: RELEASE
+
+EVENT: Incoming call type=2!
+EVENT: Incoming call clip=`"03024033902"'
+EVENT: Incoming call type=2!
+A
+# Answer
+RSTR=`OK'
+H
+# Hangup
+RSTR=`OK'
+</pre>
+
+=== atcmd 模式的用途mode ===
+
+atcmd模式是passthrough-mode。Passthrough指的是它接收 [[GSM 07.07]] 指令，透过背景程序将它传送到电话，并且传回你的响应。这对于侦除错误来讲，是很有用的一个方法。
+
+
+atcmd模式可以由使用下列指令来启用它
+
+ libgsmd-tool -m atcmd
+
+它的用途可以参考下面的范例：
+
+<pre>
+> src/util/libgsmd-tool -m atcmd
+libgsm-tool - (C) 2006 by Harald Welte
+This program is Free Software and has ABSOLUTELY NO WARRANTY
+
+AT+CPAS
+STR=`AT+CPAS'
+RSTR=`+CPAS: 0'
+AT+COPS=?
+STR=`AT+COPS=?'
+RSTR=`+COPS: (2,"E-Plus","E-Plus","26203"),(3,"o2 - de","o2 - de","26207"),(3,"Vodafone.de","Vodafone","26202"),(3,"T-Mobile D","TMO D","26201")'
+</pre>
+
+== 网络相关的功能 ==
+控制员的选择功能被合并到 SVN head[http://lists.openmoko.org/pipermail/gsmd-devel/2007-September/000216.html]：
+
+libgsmd-util 指令列如下：
+  R  -  Register to given operator (R=number)
+  P  -  Print current operator
+  L  -  Detect available operators
+  Q  -  Read signal quality
+
+它是由名为 "_opers_" 所执行。
+
+== 目前所欠缺的 ==
+
+(如果你遗失了某些功能，请将这些项目加下以下的清单)
+
+* 话机相关功能
+** 飞航模式/gsmd 暂停 (它将会在gsmd外被执行，透过使用runlevels / upstart)
+** 设定紧急呼叫，即使装置没有安装SIM卡
+** 取得制造商/型号/修订版/IMEI
+** 能通知使用者SIM卡未被锁住的功能 (或者能自动的反锁它)
+
+* 简讯相关的功能
+** 传送简讯
+** 接收简讯
+** 取得IMSI
+** 存取SIM卡，储存简讯到SIM卡 - ''不再有遗失的状况 - 参考辅助说明''
+
+* SIM 相关功能
+** 读取电话簿输入 - ''不再有遗失的状况 - 参考辅助说明'' 
+** 写入电话簿 - ''不再有遗失的状况 - 参考辅助说明''
+
+* GPRS相关功能
+** 设定GPRS连结，透过分散的TS07.10使用DLC of TS07.10 多路传输
+
+* gsmd内部基础架设
+** fine-grained event subscriptions (rather than wildcard-subscribe)
+** 从指令列上指定log-level 的可能性
+** 在SIGUSR1或SIGHUP重新开启日志文件 (logrotate)
+** 权限处理
+** d-bus 界面
+
+== Implementation Thoughts ==
+
+== 测试架构 ==
+
+模拟韧体、gsmd及libgsmd 可以在任何机器上被良好的测试。
+参考 [[User:Kero|Kero's page]]或者直接参考 [http://chmeee.dyndns.org/om/testing_gsmd.html (lib)gsmd 测试页].
+
+== 状态追踪 ==
+
+gsmd 需要在GSM硬件上进行适当的状态追踪。 针对很多传送状态，我们只能从GSM调制解调器上取得事件，但并没有适合的询问指令。不然，假设 gsmd 持续的执行，应用程序可以执行，但仍有与目前调制解调器状态的想法，即使他们遗失了启始的状态传送。
+
+同时，gsmd 状态追踪允许我们能安全的操作多个应用程序。如一个应用程序被"发话"所启始，gsmd可以侦测其它的想要干预它并拒绝存取的应用程序。
+
+
+=== 装置电源状态 ===
+
+* 调制解调器完全的关闭，不响应任何AT指令
+* 调制解调器响应AT指令，但未启动电源(CFUN=0)
+* 调制解调器响应AT指令，在省电模式下
+* 调制解调器响应AT指令，启动电源，并完全可被操控 (CFUN=1)
+
+=== 中断电源模式 ===
+
+它必须由调制解调器设定，以便于它可以由适当的事件，让系统从睡眠模式下被唤醒。
+
+=== 网络登录状态 ===
+
+* 未登录到入何网络，并且未尝试进行登录动作
+* 未登录到任何网络，搜寻/尝试登录
+* 登录到家庭网络(包括 cellID)
+* 登录漫游网络 (包含cellID)
+
+=== 加密指示状态 ===
+
+* 调制解调器不支持加密指示器
+* 支持加密指示，但SIM不支持加密指示
+* 支持加密指示，加密作用中
+* 支持加密指示，加密未作用
+=== 通话状态 ===
+
+* 无法接听
+* 忙线
+
+gsmd source被放置在src/target/gsm 目录下的[[OpenMoko svn]]。
+
+{{Languages | Gsmd}}
+[[Category:Software ]]
+[[Category:Application Developer]]
+[[Category:Implemented]]
