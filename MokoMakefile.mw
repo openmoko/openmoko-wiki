@@ -10,9 +10,9 @@ MokoMakefile is a wrapper around all that to make it easy to set up and maintain
 
 MokoMakefile is developed by [[User:RodWhitby|Rod Whitby]] - it is not an official product of OpenMoko (although I would be happy for them to pick it up and use it internally).  If there is any discrepancy between the [[OpenMoko2007.2#How_to_build|official OpenMoko build instructions]], and the operation of the MokoMakefile, then you should consider the official instructions to be correct.
 
-The MokoMakefile is able to build either OM-2007.1 or OM-2007.2 images.  The core team chooses the default, but you can select one or the other at the top of the Makefile.
+The MokoMakefile is able to build both OM-2007.2 and QTopia-X11 images.
 
-MokoMakefile also builds the QEMU-based Neo1973 emulator as part of the build process and has make targets to install the  OpenMoko images into it and run it. These commands can also be used without downloading and building the whole OpenMoko OpenEmbedded distribution. This part is described in [[Using QEMU with MokoMakefile]].
+MokoMakefile also builds the QEMU-based Neo1973 emulator as part of the build process and has make targets to install the OpenMoko images into it and run it. These commands can also be used without downloading and building the whole OpenMoko OpenEmbedded distribution. This part is described in [[Using QEMU with MokoMakefile]].
 
 == Requirements for building Openmoko ==
 Independent on whether MokoMakefile or a manual process is used to setup an OpenMoko build environment, there are several requirements which must be fulfilled in order for the OpenMoko build to succeed:
@@ -24,7 +24,6 @@ Independent on whether MokoMakefile or a manual process is used to setup an Open
 * Time: The initial build takes at least 5 hours (on 2GHz core2duo without multiprocessor optimization) and may take several days on slower machines.
 
 === Required software ===
-The version control system used by OpenEmbedded is [http://monotone.ca monotone], it is not downloaded and installed by MokoMakefile. If your distribution does not provide a package, you can download and install a static binary from http://monotone.ca
 
 Some distribution specific hints on preparing your build host for building OpenEmbedded are on   http://www.openembedded.org/wiki/OEandYourDistro but they may be outdated, incomplete and do not cover everything which OpenMoko needs to build.
 
@@ -42,7 +41,7 @@ OpenMoko needs the development packages (with header files, development librarie
 Because there are bugs in the interaction of QEMU and GCC-4, you'll need a copy of gcc-3.x installed as well.
 
 ===== Debian / Ubuntu =====
-  apt-get install subversion monotone build-essential help2man diffstat texi2html texinfo cvs gawk cogito
+  apt-get install subversion build-essential help2man diffstat texi2html texinfo cvs gawk cogito
 
   apt-get install libncurses5-dev zlib1g-dev libssl-dev libgtk2.0-dev 
   # To prevent errors in host validation
@@ -56,14 +55,14 @@ Because there are bugs in the interaction of QEMU and GCC-4, you'll need a copy 
 
 ===== SuSE =====
 For building Openmoko on 10.3, you need
- gcc-c++ ncurses-devel zlib-devel libopenssl-devel gtk2-devel subversion diffstat texinfo help2man and [http://download.opensuse.org/repositories/devel:/tools:/scm/openSUSE_Factory/repodata/repoview/Development.Tools.group.html monotone]
+ gcc-c++ ncurses-devel zlib-devel libopenssl-devel gtk2-devel subversion diffstat texinfo help2man
 For MokoMakefile to not fail on compiling qemu-user, you need to use gcc33:
  wget download.opensuse.org/repositories/devel:/tools:/gcc/openSUSE_Factory/i586/{cpp,gcc}33-3.3.3-41.8.i586.rpm
  rpm -Uhv {cpp,gcc}33-3.3.3-41.8.i586.rpm
 
 See also the [[Talk:MokoMakefile#Building_on_SuSE_Linux_10.3-AMD64|Talk page on Building on SuSE Linux 10.3-AMD64]]
 
-10.1 and 10.2: same packages as 10.3, but install <code>openssl-devel</code> instead of libopenssl-devel. Use monotone for [http://download.opensuse.org/repositories/devel:/tools:/scm/openSUSE_10.2/repodata/repoview/Development.Tools.group.html 10.2] or [http://download.opensuse.org/repositories/devel:/tools:/scm/SUSE_Linux_10.1/repodata/repoview/Development.Tools.group.html 10.1]
+10.1 and 10.2: same packages as 10.3, but install <code>openssl-devel</code> instead of libopenssl-devel.
 
 ==== For all distributions ====
 As the QEMU-based neo1973 emulator is also built as part of the build process started by MokoMakefile, so you need gcc-3.3 and other packages for building QEMU installed. See [[Using QEMU with MokoMakefile#Build requirements|the build requirements section]] in [[Using QEMU with MokoMakefile]] for information on the required software.
@@ -82,13 +81,7 @@ If that doesn't work, try
 
    wget http://svn.projects.openmoko.org/svnroot/mokomakefile/trunk/Makefile
 
-   note: If you want to compile for the old version 2007.1 instead of the new
-         version edit the top of the Makefile. Edit the lines at the top to 
-         look like this:
-             OPENMOKO_GENERATION = 2007.1
-             #OPENMOKO_GENERATION = 2007.2
-
-{{note|For building 2007.2, MokoMakefile uses BitBake 1.8.8 which requires python-sqlite2 and sqlite-3.3 or later. Users of SUSE Linux 10.1 can update to [http://download.opensuse.org/pub/opensuse/distribution/10.2/repo/oss/suse/i586/sqlite-3.3.8-14.i586.rpm the version of openSUSE 10.2]}}
+{{note|MokoMakefile uses BitBake 1.8.8 which requires python-sqlite2 and sqlite-3.3 or later. Users of SUSE Linux 10.1 can update to [http://download.opensuse.org/pub/opensuse/distribution/10.2/repo/oss/suse/i586/sqlite-3.3.8-14.i586.rpm the version of openSUSE 10.2]}}
 
 3 - Set up the environment:
    make setup
@@ -138,17 +131,6 @@ You can then [[Flashing openmoko||flash these.]]
 If not, and you can get the error to occur three times in a row after running that sequence of commands (including the update and setup steps) three times, then feel free to report it to rwhitby in #openmoko on [http://wiki.openmoko.org/wiki/Development_resources#IRC IRC].
 
 ===Known MokoMakefile errors ===
-If you experience the following after changing from OM-2007.1 to OM-2007.2:
-
- Patch bitbake-1.6.6-om3.patch does not apply (enforce with -f)
-
-then type "make clobber-patches" to fix it.  There was a period of 24 hours when there was a bug in the MokoMakefile which causes this problem.  Once the patches have been clobbered, they will re-download and the problem will not reoccur.
-
-If you see:
-
- ERROR: No providers of build target u-boot-openmoko (for [])
-
-then look back in the log to see if you encountered an earlier error while building the openmoko-devel-image target. The above error is a side-effect of MokoMakefile's logic to handle the re-naming of "uboot-openmoko" to "u-boot-openmoko".
 
 ===Fixes for distribution/environment-specific or isolated issues===
 
@@ -158,11 +140,6 @@ Work-arounds for temporary or isolated problems can be found and should be added
 *You can reduce the amount of consumed disk space significantly by adding
    INHERIT += "rm_work"
 in your local.conf (e.g. ~/moko/build/conf/local.conf). This will remove the contents of each build/tmp/work/*/<package> directory after the corresponding package builds correctly. As of 10/16/07, this appears to be present in local.conf by default.
-
-*If you an encounter an error with monotone similar to the following:
-   mtn: misuse: database /home/''username''/moko/OE.mtn is laid out according to an old schema
-Then you need to upgrade OE.mtn  Use the following command while in ~/moko:
-   # mtn --db OE.mtn db migrate
 
 *If a certain package does not build due to corrupted download or some such try to remove the sources and rebuild it.
  rm sources/<package>*
