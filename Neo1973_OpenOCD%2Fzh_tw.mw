@@ -1,85 +1,84 @@
-{{Languages|Neo1973 OpenOCD}}
+== About OpenOCD ==
 
+[http://openocd.berlios.de/ OpenOCD] is a 100% free software On-chip-debugger for commonly-found ARM JTAG probes such as [[wiggler]], chamaeleon, jtag-key and others, like the [[Debug Board]].
 
+It provides a human-readable telnet interface for manually halting/resuming the target device, reading/writing registers and memory, etc.
 
-== 關於 OpenOCD ==
-[http://openocd.berlios.de/ OpenOCD] 是完全免費的On-chip-debugger，類似Debug Board。 
+In addition, it provides a RDI (remote debugger interface) on a TCP port.  This interface can be used by gdb (the GNU Debugger).
 
-它提供human-readable telnet 界面做為手動halting/resuming目的地裝置。讀取/寫入registers 及記憶體。
+The GTA01 development team used OpenOCD with a [[wiggler]] compatible probe as their ICE solution in the very beginning, until they had designed their own [[Debug Board]].
 
-除此之外，它在TCP埠提供RDI (remote debugger interface)。這個界面可以被 gdb (the GNU Debugger)使用。
-
-GTA01開發團隊在最剛開始的時侯，使用與[[wiggler]]相容的 OpenOCD  probe 做為他們的ICE solution，直到被設計為他們 [[Debug Board︱除錯板 ]]。
-
-== 取得 OpenOCD ==
+== Getting OpenOCD ==
 
 === MokoMakefile ===
 
-[[MokoMakefile]] "make openmoko-devel-tools" 可以建立與openocd 及[[dfu-util]]二位元檔的連結。或者，你也可以使用"bitbake openocd-native" 指令。
+The [[MokoMakefile]] "make openmoko-devel-tools" target will build statically-linked openocd and [[dfu-util]] binaries. The "bitbake openocd-native" command may also be used.
 
+=== Debian Package ===
 
-=== Debian套件 ===
-
-我們現在擁有了Debian OpenOCD二進位檔套件，可以至 http://people.openmoko.org/laforge/dpkg取得。 安裝這個套件是將OpenOCD安裝到你開發軟體的裝置的優先好方法。
+We now have a Debian binary package of OpenOCD, available from http://people.openmoko.org/laforge/dpkg. Installing this package is the preferred method to install OpenOCD on your development machine like
 
  dpkg --install openocd_82-1_i386.deb
 
-[http://packages.debian.org/openocd Debian/Unstable]也包含了OpenOCD build。
+[http://packages.debian.org/openocd Debian/Unstable] also contains an OpenOCD build.
 
 === Gentoo Ebuild ===
-在[http://bugs.gentoo.org/show_bug.cgi?id=200689 gentoo bugzilla]有給Openocd使用的實驗性ebuild。
+There is an experimental ebuild for openocd in the [http://bugs.gentoo.org/show_bug.cgi?id=200689 gentoo bugzilla].
 
-=== 原始碼 ===
+=== Source Code ===
 
-OpenOCD Revision 82 及之後的版本已經證實可以在[[QT2410]]及[[Neo1973]] 裝置及wiggler及Amontect JTAGkey ,  JTAGkey tiny上良好的運作。你可以透過下面的方法在OpenOCD子版本外查看rev. 130 。
+OpenOCD Revision 82 and later have been proven to work with our [[QT2410]] and [[Neo1973]] target board and wiggler as well as Amontect JTAGkey and JTAGkey tiny.  You can e.g. check rev. 130 out of the OpenOCD subversion via
+
  svn co -r 130 http://svn.berlios.de/svnroot/repos/openocd/trunk
 
 === Windows Binaries ===
 
-[http://www.yagarto.de/ YAGARTO] 
-[http://www.freddiechopin.info/ OpenOCD Win32]
-[http://people.openmoko.org/laforge/misc/debug_board_v2/windows_drivers/ FDTI drivers available from]
+The [http://www.yagarto.de/ YAGARTO] Project provides a Win32 installer for OpenOCD. Details and download can be found at http://www.yagarto.de/howto/openocd/index.html. This will then work with the FDTI drivers available from http://people.openmoko.org/laforge/misc/debug_board_v2/windows_drivers/
 
-== 設定 ==
+== Configuration ==
 
-[[User:HaraldWelte]] 提供了 [http://people.gta01.hmw-consulting.de/laforge/misc/openocd.cfg openocd.cfg 設定檔] 做為利用OpenOCD及QT2410做為wiggler之用。
+[[User:HaraldWelte]] has provided a [http://people.gta01.hmw-consulting.de/laforge/misc/openocd.cfg openocd.cfg configuration file] for use of OpenOCD with wiggler and the QT2410 target board. 
 
-== 使用OpenOCD ==
-我們無法提供OpenOCD的完整使用手冊，但你可以參考[[Bootloader#Using_JTAG_to_boot_from_RAM]]及[[NAND bad blocks#JTAG_.2F_OpenOCD_.2F_u-boot_RAM_based]]及[[Neo1973 OpenOCD#Using OpenOCD telnet interface]]這些內容。
+== Using OpenOCD ==
 
-== 已知的臭蟲及問題排除 ==
+We cannot provide a full manual for OpenOCD, but please check 
+[[Bootloader#Using_JTAG_to_boot_from_RAM]] and [[NAND bad blocks#JTAG_.2F_OpenOCD_.2F_u-boot_RAM_based]], as well as the [[Neo1973 OpenOCD#Using OpenOCD telnet interface]] section below.
 
-=== CP15 register 讀取/寫入 ARM920T core 無法作用 ===
+== Known Bugs and Troubleshooting ==
 
-這個為已知的臭蟲，但除錯工作目前為停滯狀態。
+=== CP15 register read/write of ARM920T core not working ===
 
-=== 你啟動它了嗎? ===
+This has been reported upstream. Bugfix pending.
 
-最容易犯及最具破壞力的錯誤是忘記確實的啟動CPU。只把電源接上是不夠的！
-按住電源按鈕，直到 boot loader開始進行倒數，或者，在這個情況下，你可以讓cpu保持忙碌。
+=== Did you turn it on ? ===
 
-=== 已知的在JTAG chainn下無法與裝置設定切合的裝置 ===
+An easily made but devastating mistake is to forget to actually activate the CPU. Just connecting power is not enough !
+Press and hold the power button until the boot loader does its count-down, or, in case there is no runnable boot loader,
+the CPU keeps itself busy.
+
+=== number of discovered devices in JTAG chain doesn't match configuration ===
 
 You get something like:
  Error:   jtag.c:1224 jtag_examine_chain(): number of discovered devices in JTAG chain (51) doesn't match configuration (1)
 
-這看起來是libftdi啟動的臭蟲，有時，在FT2232下也無法取得在啟動OpenOCD時完全的重新定定。請重新自[[Amontec JTAGkey]] / [[Debug Board]] 上拔下USB裝置，再重新插回，就可以很快的重新啟動及使用。
+This seems like a libftdi initialization bug.  Sometimes the FT2232 doesn't get completely reset into a sane state at startup of OpenOCD.  Please unplug the USB cable from the [[Amontec JTAGkey]] / [[Debug Board]] and re-plug.  It should immediately work the next time.  Bugfix would be appreciated a lot!
 
-=== JTAG 通訊錯誤 ===
+=== JTAG communication failure ===
 
-其它常見的錯誤如下：
+Another common error is this one:
  JTAG communication failure, check connection, JTAG interface, target power etc.
 
-同時，它也可以藉由插、拔USB來修復。
+Also this one is fixed by unplugging and re-plugging USB.
 
-== OpenOCD及[[Debug Board|除錯版]] ==
+== OpenOCD and [[Debug Board]] ==
 
 === libftdi-0.8 ===
-如果你想要使用OpenOCD搭配Debug Board v2一起使用，並且想在OpenOCD下同時使用串列埠，你 '''需使用libftdi-0.8 或之後的版本'''。你的套件仍是使用之前的libftdi版本的機率很高，因此，你可以自下面的位址 http://www.intra2net.com/de/produkte/opensource/ftdi/ 下載，並且自行建置。
+
+If you want to use OpenOCD with our Debug Board v2, and want to use the serial port simultaneously with OpenOCD, you '''need libftdi-0.8 or later'''.  Chances are high that your distribution still ships an earlier version of libftdi, so you might want to download it from http://www.intra2net.com/de/produkte/opensource/ftdi/ and build yourself.
 
 === openocd.cfg ===
 
-openocd.cfg設定檔是可以與 [[Debug Board]] (v2/v3)、[[Neo1973 Hardware#GTA01Bv3]]及OpenOCD 130合用的版本：
+This is an openocd.cfg that is known to work with [[Debug Board]] (v2/v3), [[Neo1973 Hardware#GTA01Bv3]] and OpenOCD 130:
 <pre>
 telnet_port 4444
 gdb_port 3333
@@ -95,23 +94,22 @@ working_area 0 0x200000 0x4000 backup
 run_and_halt_time 0 5000
 </pre>
 
-對於OpenOCD之後的版本，你可能必須指定裝置描述。針對v2 Debug board ，你可以在你的openocd.cfg中加入這一行：
+For later versions of OpenOCD you may need to specify the device description. For the v2 Debug board add this line to your openocd.cfg:
 <pre>
 ft2232_device_desc "Debug Board for Neo1973 A"
 </pre>
 
-如果你使用Linux的libftdi 版本，並且你在lsusb output "Debug Board for Neo1973 看到iProduct string ，請加入以下的內容，而非上述的設定行：
+If you are using the libftdi version on Linux, and if you see this iProduct string in your lsusb output "Debug Board for Neo1973", please add this line instead.
 <pre>
 ft2232_device_desc "Debug Board for Neo1973"
 </pre>
 
-=== 使用OpenOCD telnet 界面 ===
+=== Using OpenOCD telnet interface ===
 
-telnet界面可以使用以下的指令存取
-
+The telnet interface can be accessed using
  telnet localhost 4444
 
-它提供很多除錯的功能。你可能會對下列的內容感到興趣。
+it provides a plethora of functions for debugging. You might be interested in
 <pre>
 reset
 reset halt
@@ -123,16 +121,15 @@ mdw
 mww
 </pre>
 
-=== 使用OpenOCD與gdb進行遠端偵錯 ===
-首先，你需要一個適合的跨gdb(在你的主架構上執行的gdb架構，如i386，但在arm上是與程式一起運作)。在OpenEmbedded中，你可以使用下面的指令建立cross-gdb：
+=== Using OpenOCD and gdb for remote debugging ===
 
+First, you will need a suitable cross-gdb (a gdb that runs on your host architecture, e.g. i386, but works with code for arm).  In OpenEmbedded, you can build such a cross-gdb by using
  bitbake  gdb-cross
 
-如果你想要對kernel進行除錯工作, you can then start this gdb with
-
+If you want to debug the kernel, you can then start this gdb with
  $ arm-linux-gdb vmlinux
 
-它會出現以下的內容：
+which will give you something like
 <pre>
 GNU gdb 6.6
 Copyright (C) 2006 Free Software Foundation, Inc.
@@ -144,7 +141,7 @@ This GDB was configured as "--host=i686-linux --target=arm-linux"...
 (gdb) 
 </pre>
 
-我們現在需要連接到OpenOCD daemon，你可以使用 '''target remote'''指令。在這個特定的案例中，我們已經使用在'''telnet'''指令列中使用'''halt''' 。
+We now need to connect to the OpenOCD daemon, which is done using the '''target remote''' command.  In this particular example, we did already halt the target by issuing '''halt''' on the '''telnet''' command line
 
 <pre>
 (gdb) target remote localhost:3333
@@ -155,10 +152,11 @@ warning: shared library handler failed to enable breakpoint
 (gdb)
 </pre>
 
-對於這項工作的中斷點，你可以使用以下的指令，啟用OpenOCD中的軟體中斷點。
-
+For breakpoints to work, you have to enable software breakpoints in OpenOCD, by issuing
  > arm7_9 sw_bkpts enable
 
-在'''telnet''' 指令列，並使用 '''hbreak''' 在gdb中設定中斷點。
-
-[[Category:System Developers/zh tw]]
+on the '''telnet''' command line, and use '''hbreak''' to set breakpoints in gdb.
+{{Languages}}
+[[Category:Software ]]
+[[Category:Application Developer]]
+[[Category:Guides]]
