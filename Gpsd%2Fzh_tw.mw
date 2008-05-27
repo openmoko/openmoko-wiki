@@ -1,0 +1,94 @@
+== What is GPS ==
+
+The Global Positioning System (GPS) is a a satellite positioning system, using a constellation of 31 satellites.
+
+GPS uses these as "man-made stars" to calculate positions to within a meter. With some forms of GPS. measurements accurate to  better than a centimeter can be made.
+
+With advancing technology, receivers have shrunk from several dozen ICs and hundreds of other components, to one, and a handfull. 
+
+This has drastically reduced costs.
+
+The reducing cost has enabled it to be easily integrated in phones, laptops, cameras, as well as more traditional apparatus such as farming equipment, navigation systems and construction equipment.
+
+(Another helpful overview [http://www.colorado.edu/geography/gcraft/notes/gps/gps_f.html Global Positioning System Overview])
+
+== [[Hardware:AGPS|AGPS]] ==
+is described on a [[Hardware:AGPS|page of its own]].
+
+== PMB 2520 Hammerhead ==
+The PMB 2520 Hammerhead is a one-chip solution for GPS that is produced by Infineon Technologies in cooperation with Global Locate. It allows the usage of assistance data by supporting A-GPS standards. 
+
+(all infomation is coming from the datasheet of PMB 2520)
+[http://www.infineon.com/upload/Document/cmc_upload/documents/011/4061/pmb2520-pb-200505.pdf short datasheet]
+=== Modules of the Hammerhead===
+
+The Hammerhead consists of the following modules:
+*RF front-end with on-chip, high gain and low noise, LNA, I/Q mixers, on-chip polyphase complex IF filter, digitally controlled AGC, and 3-bits ADC for the I and Q paths.
+*Sigma-Delta RF PLL with on-chip PCO and on-chip loop filter.
+*Embedded PLL and NCO for baseband clock generation.
+*Multiple channels digital mixers and parallel correlator engines to enable real time correlation of the PRN code for up to 14 satellites.
+*Post processor including peak detection logic
+*SRAM for storing correlation results
+
+=== Host Interface ===
+
+The Hammerhead integrates 3 serial interfaces:
+*UART
+*I2C
+*SPI
+
+The UART in the Hammerhead is a full-duplex UART interface. It is fixed in 8N1(8 data bits, no parity, 1 stop bit) mode. On the GTA01, the host processor connect with the Hammerhead through the UART. In all models of Neo1973, this is connected to a serial port.
+
+=== Host software Architecture ===
+
+The Hammerhead driver software will be delivered as a binary, which can be interfaced to [http://gpsd.davisnetworks.com/bin/view/Main/GpsdHome gpsd] as it outputs NMEA information, as many serial GPSs do.
+
+The gps driver is [[Gllin|now available]]. (There were some problems in the past getting a license to distribute the binary. [http://lists.openmoko.org/pipermail/community/2007-July/008466.html])
+
+The gpsd libraries provide the following infomation to the high level software:
+*Position data
+*Library status
+*Time-out and Packet Available
+
+The high level software sends the following messages to the plugin:
+*Assistance data
+*Positioning Commands
+*Configuration Commands
+
+Gpsd communicates with the system at the following part:
+*Communications Drivers
+*System Timer
+*NV storage
+*Log buffer
+
+== GPS on GTA01 ==
+
+At the GTA01, the host processor is a S3C2410.
+
+=== Hammerhead on the GTA01 ===
+
+On the GTA01, the Hammerhead are configured that connected with the host processor through the UART. The UART of data output/input is connected to the UART 1 of the SC2410. The UART of the hardware flow control is connected to the UART 2 of the SC2410.
+
+== Q & A ==
+
+
+====Q: Can gpsd support Differential GPS.====
+*While the neo does not have any means of receiving [http://en.wikipedia.org/wiki/Differential_GPS DGPS] or WAAS/SCCM directly, it can be streamed from an internet server. 
+*It may be possible to generate a global ionospheric model from stationary (charging?) neos that have GPS signal and cheap internet connections. This would enable very precise positions to be generated
+*This could generate positions accurate to well under a metre, compared to (probably) 2-3m without.
+*The gpsd plugin is the place that these corrections would need to be done, as they need to be performed on a per-satellite basis, before generating the position.
+*This is separate from AGPS - AGPS gives information on current satellite position, or computes your position for you. DGPS is a local minute by minute 'ionospheric weather' for your region.
+
+See also [[Server:A-GPS]].
+
+====Q: Can someone upload somewhere an strace of the interaction between gpsd, and the hammerhead chip?====
+*Ideally this would be requesting a GPS position every second, starting from 'cold', with no AGPS data, for at least half an hour, in an area where the reciever can see the sky.
+*To aid in reverse engineering efforts.
+*A reverse-engineering page has been created: [[Hammerhead/Protocol]]
+
+====Q: Can I get NMEA data from the GPS?====
+
+A: Not directly. However, the gpsd program 'gpspipe', with the -r switch will output NMEA data with the current position information. The right way to do it is to use libgpsd in your program if possible.
+
+{{Languages|Gpsd}}
+[[Category:GPS]]
