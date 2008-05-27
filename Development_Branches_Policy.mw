@@ -1,0 +1,62 @@
+This page is used to describe the policy we use for the different software development branches.
+
+[Please complete/correct this page]
+
+The git repository can be seen at this address :
+http://git.openmoko.org/?p=openmoko.git
+
+== Rational ==
+We want to release a product every few months. Every release will have a unique name (of course :-) )
+
+The git server is at this address : [http://git.openmoko.org/ git.openmoko.org]
+
+The current release name is ASU, so the current git branches for the release are :
+* org.openmoko.asu.dev
+* org.openmoko.asu.stable
+
+
+There are several phases of a software release. 
+* Design phase:
+** Designers release their design and create the software requirement specifications (SRSs).
+** Developers and Testing Team give technical feedbacks based on the SRS.
+** Designer and Test Team release the final SRS
+* Developing phase:
+** Developers start implementing the feature set (based on the SRS).
+** For developers writing Software design specifications (SDSs) are recommended. 
+** Test Team creates the test cases (TC) based on the SRS.
+** Designers collect feedback from all parties involved and adjust requirements (CRs) and issues CRs (This shall be done every carefully, the times of issuing CRs shall be limited. Less then three times is recommend.)
+* Feature locked phase:
+** Lock down all the features: No more feature are added or changed only removing of features is allowed. 
+** If there are some new ideas or features, leave them to the next release or use the general development branch.
+** Developers finish their features. 
+* Release phase:
+** Lock all the software versions. 
+** Only bug fixing is allowed here. 
+** Fully software testing of particular image (ST). 
+** Developers fix all the bugs from ST. 
+** When all fixable bugs are fixed, then release. 
+
+So every time we start developing a new release we branch from  '''openmoko.dev''' into two branches:
+
+* The stable branch, where every software package is only updated if it is considered to be sufficiently stable. It is up to the maintainer of that branch to make sure that the software meets these requirements. The name of that branch should be the name of the release. The auto image builder will generate ready to flash images whenever required to reflect the status of this branch. The name of this branch is '''org.openmoko.$(release_name).stable'''
+
+* The development branch, where we add features which are still needed for _this_ release. All other feature have to go into the '''openmoko.dev''' branch. The developers should make sure that the code is at least buildable before it is committed into that branch. The auto image builder will generate ready to flash images ''daily'' to let the designers track the latest development. The branch name should be '''org.openmoko.$(release_name).dev'''
+
+* The unstable branch is used to merge updates from upstream and to develop our OE modifications. All ideas / prototypes / unstable projects not included in the release will stay in the openmoko.dev branch and can be developed there independently from the release schedule.
+
+Every developer related to the current release will work on the dev branch before release phase, and then merge into the stable branch.
+
+In any case, all the project versions are specified on stable branch from the beginning to the end.
+
+At developing phase, all the project versions shall be locked, exception those projects highly related to our product on dev branch.
+
+At feature lock phase, all the projects version shall be locked, exception those projects that only controlled by Openmoko on dev branch. For our projects fixed version are recommend in this phase. 
+
+When entering releasing phase, every developers will switch to stable branch, and only bug fix is allowed here. Developers shall send out update request to distrobution team.
+
+After testing team confirm that all fixable bug or all bug need to be fixed are fixed, release the image from stable branch. 
+Merge the changes from stable branch to '''openmoko.dev''', after release. 
+
+Here is a little graph that can explain things. The horizontal axis represents the time, the red lines represent some possible operations.
+
+[[Image:Branches.png]]
