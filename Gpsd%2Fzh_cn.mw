@@ -1,0 +1,97 @@
+{{Languages|Gpsd}}
+
+
+
+
+== GPS的内容 ==
+
+GPS (Global Positioning System)是一个卫星定位系统，使用31个卫星。
+
+GPS 类似 "人造卫星" ，以公尺为计算单位。某些形态的GPS，可以较公分为佳的单位进行度量。
+
+利用先进的科技，从IC及其它的组件中接收讯号。
+
+它大量的降低了成本。
+
+因为它大量降低成本的特性，它可以轻松的被整合到手机、笔记型计算机及像是耕作用具、浏览系统及建筑物...等传统工具中。tion systems and construction equipment.
+
+(你可以在这个地址[http://www.colorado.edu/geography/gcraft/notes/gps/gps_f.html Global Positioning System Overview]取得其它的相关信息。)
+
+== [[Hardware:AGPS|AGPS]] ==
+这个分类中可以找到[[Hardware:AGPS|所有GPS的信息]].
+
+== PMB 2520 Hammerhead ==
+PMB 2520 Hammerhead是GPS的one-chip解决方案，它由全球定位公司的Infineon Technologies所制造。它允许支持A-GPS标准的数据存取。
+(相关的数据都可以在 PMB 2520 datasheet中找到)
+[http://www.infineon.com/upload/Document/cmc_upload/documents/011/4061/pmb2520-pb-200505.pdf short datasheet]
+
+=== Hammerhead模块===
+
+Hammerhead包含了以下的模块：
+*RF front-end with on-chip, high gain and low noise, LNA, I/Q mixers, on-chip polyphase complex IF filter, digitally controlled AGC, and 3-bits ADC for the I and Q paths.
+*包含on-chip PCO及on-chip loop filter。
+*Embedded PLL and NCO for baseband clock generation.
+*多频道数字混音器及平行相关引擎，做为至少提供给14个卫生使用的实时启动PRN程序。
+*包含流量侦测逻辑判断的Post processor
+*用来搜寻相关结果的SRAM
+
+=== 主要界面 ===
+
+Hammerhead整合了三个系列的接口：
+*UART
+*I2C
+*SPI
+
+在Hammerhead的UART是一个full-duplex UART 界面。它被固定在8N1(8 data bits, no parity, 1 stop bit)模式。在GTA01中，主要的处理器透过UART连接到这里。在Neo1973的所有产品当中，它连接到叙列埠。
+
+=== 主软件架构 ===
+
+Hammerhead 驱动程序将会以二进制文件的方法加载，它可以像其它的GPS串行端口般，做为 [http://gpsd.davisnetworks.com/bin/view/Main/GpsdHome gpsd]的接口，输入如NMEA 信息。
+
+gps驱动程序[[Gllin|目前已可以使用]]。(之前，它在取得套件二位文件授权时，有一些问题 [http://lists.openmoko.org/pipermail/community/2007-July/008466.html])
+
+gpsd链接库提供下列的信息，做为高阶软件：
+*Position data
+*Library status
+*Time-out and Packet Available
+
+高阶软件传送下列的讯息到plugin：
+*Assistance data
+*Positioning Commands
+*Configuration Commands
+
+Gpsd 利用以下的部份与系统进行沟通：
+*Communications Drivers
+*System Timer
+*NV storage
+*Log buffer
+
+== GTA01上的GPS ==
+
+在GTA01，主要的处理器是S3C2410。
+
+=== GTA01上的Hammerhead ===
+
+在GTA01上，Hammerhead被设定为透过UART连接到主处理器。UART 的数据输入/输出在SC2410上连接到UART 1。UART的硬件流量控制则连接到SC2410的UART 2。
+
+== Q & A ==
+
+
+====Q: gpsd支援不同的GPS吗====
+*在neo无法有其它方法直接接收[http://en.wikipedia.org/wiki/Differential_GPS DGPS] 或WAAS/SCCM时，它可以直接从因特网服务器上接收串流。 
+*它可能从有gps讯号及便宜的网络连接的neo上，产生global ionospheric model。因此，它可以非常精准的产生位置信息。
+*This could generate positions accurate to well under a metre, compared to (probably) 2-3m without.
+*gpsd plugin是用来放置必须修正的错误的地方，如在产生位置时，在每个卫星上，他们必须能执行工作。
+*它是与AGPS分开的 - AGPS在目前的卫星位置或者在计算机中发出信息。DGPS是区域性的一个本地端minute by minute 'ionospheric weather'。
+请参考[[Server:A-GPS]]。
+
+====Q: 我们能上传能在gpsd和hammerhead间互动的strace吗?====
+*理想的状况下，从没有AGPS资料的状况下，至少在一个半小时内，在收讯方为晴天的状况下，它可以在每秒内取得GPS 位置。
+*视工程状况而定。
+*[[Hammerhead/Protocol]]为reverse-engineering相关页面。
+
+====Q: 我可以自GPS上取得NMEA数据吗====
+
+A: 无法直接取得数据。然而，gpsd 程序的'gpspipe'，加入 -r 则可以目前的位置，输出NMEA数据。正确的方法是在程序里使用libgpsd。
+
+[[Category:GPS]]
