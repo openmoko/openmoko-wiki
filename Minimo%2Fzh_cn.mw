@@ -1,0 +1,85 @@
+{{Languages|Minimo}}
+
+
+[[Image:Minimo-slashdot.jpeg|thumb|minimo in QEMU displaying it.slashdot.org]]
+[[Image:GTA01-minimo.JPG|thumb|minimo on GTA01 displaying www.heise.de]]
+
+= 安装Minimo web 浏览器 =
+
+[http://www.mozilla.org/projects/minimo/develop.html Minimo] 是a Mozilla based web浏览器。它的特色在于完全支持[http://en.wikipedia.org/wiki/Ajax_%28programming%29 AJAX] 及其它组件。 目前的Openmoko build并不包含Minimo。以下是如何在Xephyr PC环境下如何执行minimo及如何使用其它third party软件的操作指引。
+
+* [http://bec-systems.com/web/content/view/79/9/ Instructions for including new OpenEmbedded packages to your project]
+
+这些操作指引应该更新到使用客制化的映像档，而不是 DISTRO_EXTRA_RDEPENDS -- 请参考以上的连结。
+
+== 设定build 环境 ==
+
+如果你已经使用MokoMAkefile建立了Openmoko ，那下面的操作你可能不会太熟悉。
+
+假设你的Openmoko root 位于 ~/workspace/moko
+
+首先设定build环境变量：
+<pre>
+moo@hacker:~/workspace/moko/build$ . ../setup-env 
+</pre>
+
+接着，从OpenEmbedded放置的位子查看minimo：
+<pre>
+moo@hacker:~/workspace/moko/build$ bitbake minimo
+</pre>
+
+编辑 local.conf ，并将minimo 加入build 附属清单中。
+
+<pre>
+MACHINE = "qemux86"
+DISTRO = "openmoko"
+BUILD_ARCH = "i686"
+INHERIT += " devshell"
+SRCDATE_eds-dbus = "now"
+DISTRO_EXTRA_RDEPENDS = "minimo"
+</pre>
+
+在local.conf 已加入新的套件之后，必须更新bitbake tasks。
+
+<pre>
+bitbake task-base -crebuild
+</pre>
+
+现在，你必须使用MokoMakefile重新更新root fs。
+
+<pre>
+make openmoko-devel-image
+</pre>
+
+== Tips ==
+
+预设的Openmoko 套件缺少了 ''/etc/resolv.conf''档案，它是用来设定DNSlook-up。没有这个档案的话，会无法找到网域，因此无法进行浏览网页的工作。修补这个问题的最好方法是，将主机系统上的 resolv.conf 复制到 rootfs。
+
+<pre>
+moo@hacker:~/workspace/moko$ cp /etc/resolv.conf rootfs/etc/resolv.conf
+</pre>
+
+
+若发生以下的错误 
+
+<pre>
+/usr/bin/ld: skipping incompatible $OMDIR/local/tmp/staging/arm-angstrom-linux-gnueabi/lib/libIDL-2.a when searching for -lIDL-2
+</pre>
+(在这里，minimo被安装在 [http://wiki.openmoko.org/wiki/Application_Development_Crash_Course#Setting_Up_a_Local_Overlay Local Overlay]，因此，你的路径也许会有些不同) 请试着在buildhost主机上安装libidl-dev 套件:
+
+<pre>
+sudo aptitude install libidl-dev
+</pre>
+
+== 在chroot'ed 环境下 ==
+
+在[[Getting OpenMoko working on host with Xephyr]] 的操作指引为你的Openmoko环境取得chroot'ed。启动Xephyr。你不需要启动Openmoko session，minimo 则可以像是启动了Openmoko session般执行。 
+
+<pre>
+/ $ minimo  
+</pre>
+
+
+[[Category:Software ]]
+[[Category:Applications]]
+[[Category:Guides]]
