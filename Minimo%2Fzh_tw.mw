@@ -10,25 +10,25 @@
 
 * [http://bec-systems.com/web/content/view/79/9/ Instructions for including new OpenEmbedded packages to your project]
 
-These instructions should be updated to use a custom image rather than DISTRO_EXTRA_RDEPENDS -- see link above.
+這些操作指引應該更新到使用客製化的映像檔，而不是 DISTRO_EXTRA_RDEPENDS -- 請參考以上的連結。
 
-== Setup build environment ==
+== 設定build 環境 ==
 
-If you have built your OpenMoko using MokoMakefile some of these steps might not be familiar to you.
+如果你已經使用MokoMAkefile建立了Openmoko ，那下面的操作你可能不會太熟悉。
 
-Assume your OpenMoko root is at ~/workspace/moko
+假設你的Openmoko root 位於 ~/workspace/moko
 
-First setup build environment variables:
+首先設定build環境變數：
 <pre>
 moo@hacker:~/workspace/moko/build$ . ../setup-env 
 </pre>
 
-Then checkout minimo from OpenEmbedded repository:
+接著，從OpenEmbedded放置的位子查看minimo：
 <pre>
 moo@hacker:~/workspace/moko/build$ bitbake minimo
 </pre>
 
-Edit local.conf and add minimo to build dependencies list.
+編輯 local.conf ，並將minimo 加入build 附屬清單中。
 
 <pre>
 MACHINE = "qemux86"
@@ -39,13 +39,13 @@ SRCDATE_eds-dbus = "now"
 DISTRO_EXTRA_RDEPENDS = "minimo"
 </pre>
 
-After local.conf has added new packages, one must refresh bitbake tasks.
+在local.conf 已加入新的套件之後，必須更新bitbake tasks。
 
 <pre>
 bitbake task-base -crebuild
 </pre>
 
-Now, you should be able to rebuild root fs using MokoMakefile.
+現在，你必須使用MokoMakefile重新更新root fs。
 
 <pre>
 make openmoko-devel-image
@@ -53,7 +53,7 @@ make openmoko-devel-image
 
 == Tips ==
 
-The default OpenMoko distribution lacks ''/etc/resolv.conf'' file which is used to configure system DNS look-up. Without this file, failing  domain name look-up prevents web browsing. The easiest way to fix is to copy the host system resolv.conf to the rootfs.
+預設的Openmoko 套件缺少了 ''/etc/resolv.conf''檔案，它是用來設定DNSlook-up。沒有這個檔案的話，會無法找到網域，因此無法進行瀏覽網頁的工作。修補這個問題的最好方法是，將主機系統上的 resolv.conf 複製到 rootfs。
 
 <pre>
 moo@hacker:~/workspace/moko$ cp /etc/resolv.conf rootfs/etc/resolv.conf
