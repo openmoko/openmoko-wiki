@@ -1,16 +1,16 @@
-[http://en.wikipedia.org/wiki/Qemu QEMU] 可以以三種模式在Openmoko上執行。依照你想要使用模擬器的目地，你應該決定目標平台。
+[http://en.wikipedia.org/wiki/Qemu QEMU] can be used in at least three ways to run [[Openmoko]]. Depending on the purpose that you are going to use the emulator for, you should decide on the target platform.
 
-*''PC'' - Openmoko可以建立在一般i386的硬體平台上，32- 或 64-bit，若想要暸解程式執行的狀況，這可能是讓Openmoko執行的最快方法。使用這種方法，QEMU只能用來隔離你所使用的一般系統上的Openmoko 安裝，或者，如果你並不是使用UNIX 系統，QEMU提供非導引式的方法，取得Linux。你可以在[[FAQ]]及[[Getting Openmoko working on host with Xoo|這裡]]找到更多的資訊。
+*''PC'' - Openmoko can be built to run on regular i386 hardware, 32- or 64-bit and this is probably the fastest way to get OpenMoko running if you want to get an impression of how it looks.  In this scenario QEMU would only serve for isolating your [[OpenMoko]] installation from your normal system, or, if you're not on a UNIX system, QEMU provides a non-intrusive way to get Linux up quickly. More information can be found in the [[FAQ]] and [[Getting Openmoko working on host with Xoo|here]].
 
-*''Integrator/CP'' - 這是著名的QEMU 預設的ARM-based 裝置。它的目地裝置以 MACHINE="qemuarm" 定義，並且它可以執行原始的Openmoko rootfs 映像檔，雖然除了CPU的核心外，它沒有模擬任何[[:Category:Neo1973 Hardware | Neo1973 硬體裝置]] 。
+*''Integrator/CP'' - this is the default ARM-based machine that QEMU knows about. This target is used with MACHINE="qemuarm" and it is sufficient to run the original OpenMoko rootfs image, although it doesn't emulate any of the [[:Category:Neo1973 Hardware | Neo1973 Hardware]] except the very CPU core. Read more in the [[FAQ#Q:_Is_there_an_emulator_available_for_OpenMoko.3F|FAQ]].
 
-*''Neo1973'' - 放置在Openmoko下的QEMU tree也可以模擬實際的[[Neo1973]] (GTA01)硬體，雖然它無法模擬每一種硬體。此外，Neo FreeRunner模擬目前也在進行當中。當所有的模擬器單元更成熟時，我們就會將程式碼放到主要的QEMU 開發目錄下。
+*''Neo1973'' - the QEMU tree available from OpenMoko repositories is also capable of emulating most of the actual [[Neo1973]] (GTA01) hardware, although not all of it. Additionally, Neo FreeRunner emulation is a work-in-progress. When all of the emulator parts are more mature our code is going to be submitted and merged to the main QEMU development tree.
 
-== Neo1973 模擬器 ==
+== Neo1973 emulation ==
 
-它的目標裝置主要是要執行Openmoko rootfs映像檔，但它也可以執行原始的u-boot及 kernel 映像檔，即Neo1973 (GTA01) 使用的映像檔。其它的差異是在 Integrator/CP 目標裝置下，你也可以取得正確的螢幕解析度，(不正確的) 電池存量及其它的資訊。目前GTA01模擬器上沒有的東西是[[Hardware:AGPS|AGPS]]及[[Bluetooth]]--這些東西將會繼續 these things will still be worked on, as well as general usability. Even with these things missing, QEMU should provide substantial help in debugging kernel and u-boot issues to developers.
+This target will (obviously) run original OpenMoko rootfs images, but then it should also be able to run the original u-boot and kernel images, the same ones that a real Neo1973 (GTA01) uses. Among other differences you will notice between this approach and the Integrator/CP target is you also get correct screen resolution, some (fake) battery readings, and other goodness. Currently missing parts of the GTA01 emulator are: [[Hardware:AGPS|AGPS]] and [[Bluetooth]] - these things will still be worked on, as well as general usability. Even with these things missing, QEMU should provide substantial help in debugging kernel and u-boot issues to developers.
 
-What QEMU can '''*not*''' be used for, and probably no other emulator can, is speed measures and getting the general feel of Openmoko performance. Code running in qemu runs with the maximum speed your host computer can provide with an overhead of translating target code to host code, and this overhead is not uniform across different instructions. This means that even if your virtual Neo reports near 100 BogoMIPS (which is the speed of a real Neo), different actions performed in the emulator will not run with the same speed. On most PCs you will notice the virtual Neo running faster than a real one (Audio related operations may be one of the exceptions).
+What QEMU can '''*not*''' be used for, and probably no other emulator can, is speed measures and getting the general feel of OpenMoko performance. Code running in qemu runs with the maximum speed your host computer can provide with an overhead of translating target code to host code, and this overhead is not uniform across different instructions. This means that even if your virtual Neo reports near 100 BogoMIPS (which is the speed of a real Neo), different actions performed in the emulator will not run with the same speed. On most PCs you will notice the virtual Neo running faster than a real one (Audio related operations may be one of the exceptions).
 
 === What hardware is supported ===
 
@@ -73,7 +73,7 @@ Current development is aiming for [[:Category:Neo1973_Hardware#GTA01Bv4 | GTA01B
 
 == Neo FreeRunner emulation ==
 
-The second line of Openmoko phones, the Neo FreeRunner (GTA02) saw various hardware changes and improvements since Neo1973 (GTA01).  QEMU has fullest support for the GTA01 (the first model), but partial GTA02 emulation is also planned.  This will only include the hardware components which were added in GTA02 and were not present in GTA01:
+The second line of OpenMoko phones, the Neo FreeRunner (GTA02) saw various hardware changes and improvements since Neo1973 (GTA01).  QEMU has fullest support for the GTA01 (the first model), but partial GTA02 emulation is also planned.  This will only include the hardware components which were added in GTA02 and were not present in GTA01:
 
 * The u-blox GPS chip (i.e. raw NMEA protocol).
 * The Atheros AR6001 WLAN / WiFi chip (and SDIO bus).
@@ -130,9 +130,9 @@ $ ./configure --target-list=arm-softmmu  # GCC 3.x will be required, see --cc=
 $ make
 </pre>
 See other available options for the configure script by appending "--help".
-Now you should have a working emulator under the name "arm-softmmu/qemu-system-arm". To run Openmoko you will also need to somehow install Openmoko on your virtual phone, which is totally clean of any software at this moment. There are several block devices to choose from, the best option is probably to do exactly what the Neo1973 manufacturer does before it ships the device to the final user. This process is described in [[Bootloader]], [[Kernel]], [[NAND bad blocks]] and [[Devirginator]] but you don't need to know all the details. Two scripts are provided to generate a firmware for your phone, as realistic as possible. First run
+Now you should have a working emulator under the name "arm-softmmu/qemu-system-arm". To run OpenMoko you will also need to somehow install OpenMoko on your virtual phone, which is totally clean of any software at this moment. There are several block devices to choose from, the best option is probably to do exactly what the Neo1973 manufacturer does before it ships the device to the final user. This process is described in [[Bootloader]], [[Kernel]], [[NAND bad blocks]] and [[Devirginator]] but you don't need to know all the details. Two scripts are provided to generate a firmware for your phone, as realistic as possible. First run
 <pre>$ openmoko/download.sh</pre>
-which will look up the list of latest available Openmoko snapshot builds from buildhost.openmoko.org and choose the most recent [[u-boot]], Kernel, and root filesystem images, and download the images (unless they are already found in the openmoko/ directory). These binaries will be used by the flash.sh script. First make sure you have the netpbm package installed for some graphics conversion utilities. On Ubuntu this can be done by:
+which will look up the list of latest available OpenMoko snapshot builds from buildhost.openmoko.org and choose the most recent [[u-boot]], Kernel, and root filesystem images, and download the images (unless they are already found in the openmoko/ directory). These binaries will be used by the flash.sh script. First make sure you have the netpbm package installed for some graphics conversion utilities. On Ubuntu this can be done by:
 <pre>sudo apt-get install netpbm</pre>
 Then run:
 <pre>$ openmoko/flash.sh</pre>
@@ -150,7 +150,7 @@ The instructions for running the emulator are the same for FreeRunner, but the f
 
 The kernel supporting GTA02 emulator is obtained by applying the ''openmoko/linux-gta02-pseudo.patch'' patch found in qemu-neo1973 sources, to the 2.6.24 openmoko kernel (vanilla linux-2.6.24 + the openmoko patchset from http://svn.openmoko.org/branches/src/target/kernel/2.6.24.x/patches/).  Since the GTA02 kernel support is still under heavy development, please refer to the openmoko/README file contained in qemu-neo1973 sources for the latest instructions on building the kernel.
 
-If a normal Openmoko kernel is used under Neo FreeRunner emulator, it will simply run as if the machine was a GTA01 and not detect any of the new peripherals.
+If a normal OpenMoko kernel is used under Neo FreeRunner emulator, it will simply run as if the machine was a GTA01 and not detect any of the new peripherals.
 
 == Convenient Scripts ==
 
@@ -160,7 +160,7 @@ launches qemu and opens a unix socket for communication. All additional paramete
 
 * openmoko/qemu-upload.sh <filename>
 
-produces a SD card image with one partition with the given file(s) on it (you can pass a list of files) and inserts it into the phone. The Openmoko kernel should detect the event and the automounter should mount the partition. openmoko/qemu-auto.sh must be running already. If you pass no parameters, it ejects the media (the OM kernel is too dumb to detect this unfortunately). This will only work with gta01 emulation because gta02 has no SD.
+produces a SD card image with one partition with the given file(s) on it (you can pass a list of files) and inserts it into the phone. The OpenMoko kernel should detect the event and the automounter should mount the partition. openmoko/qemu-auto.sh must be running already. If you pass no parameters, it ejects the media (the OM kernel is too dumb to detect this unfortunately). This will only work with gta01 emulation because gta02 has no SD.
 
 * openmoko/qemu-quit.sh
 
@@ -239,7 +239,7 @@ Thats it - now you can enjoy internet in qemu.
 
 == Setting up USB connection ==
 
-It is possible (although not very straight forward, probably about the complexity of tun-tap networking) to connect the virtual, emulated Neo1973 to the Linux PC on which the emulator is running, and work with it as if a real Neo1973 was plugged into the computer's USB port, but no twiddling with cables is needed. If you're testing your applications on the Neo, it may be worth setting up this kind of connection because it lets you enable normal [[USB_Networking|networking between the PC and the phone and ssh into it]] (which is much more comfortable than typing commands into the Openmoko's terminal emulator via on-screen keyboard). Here's what you will need in order to get this working:
+It is possible (although not very straight forward, probably about the complexity of tun-tap networking) to connect the virtual, emulated Neo1973 to the Linux PC on which the emulator is running, and work with it as if a real Neo1973 was plugged into the computer's USB port, but no twiddling with cables is needed. If you're testing your applications on the Neo, it may be worth setting up this kind of connection because it lets you enable normal [[USB_Networking|networking between the PC and the phone and ssh into it]] (which is much more comfortable than typing commands into the OpenMoko's terminal emulator via on-screen keyboard). Here's what you will need in order to get this working:
 
 A Linux host with a 2.6 series kernel. The following drivers compiled-in or in modules: dummy_hcd, gadgetfs, usbnet, cdc_ether. [[Building Gadget USB Module|A detailed guide to building the necessary modules is available (primarily Ubuntu focused).]] Generic instructions follow.
 
@@ -271,7 +271,7 @@ Make sure that the mountpoint /dev/gadget exists:
 <pre> # mkdir -p /dev/gadget</pre>
 After that the rest of the procedure can be performed from your regular user account. Mounting gadgetfs is done with:
 <pre> $ mount /dev/gadget</pre>
-The "default_uid" parameter changes the ownership on all files under /dev/gadget to your own and since the files there are created and destroyed dynamically, there's no easy way to have that performed by ''udev''. Now running qemu as you usually do but appending "-usb -usbgadget" (in the current version of the [[MokoMakefile]] this is not included) should enable the USB Slave functionality. The qemu monitor commands "info usbslave" and "usb_add gadget" will be useful. The former instruction asks the OS running under the emulator (Openmoko) to describe its slave features (that's what ''lsusb'' does after a Neo1973 is connected to a PC). You can see the available USB configurations in this command's output. Since gadgetfs allows only one configuration, we will need to choose the desired configuration - most device have only one such configuration, in which case you can use just "usb_add gadget" to connect to host; CDC ethernet devices however usually include a second configuration for RNDIS networking (i.e. Ms Windows compatibility) and so does Openmoko when using the g_ether driver. Hence, to get this right, wait for Openmoko to fully boot up and execute the following in QEMU monitor:
+The "default_uid" parameter changes the ownership on all files under /dev/gadget to your own and since the files there are created and destroyed dynamically, there's no easy way to have that performed by ''udev''. Now running qemu as you usually do but appending "-usb -usbgadget" (in the current version of the [[MokoMakefile]] this is not included) should enable the USB Slave functionality. The qemu monitor commands "info usbslave" and "usb_add gadget" will be useful. The former instruction asks the OS running under the emulator (OpenMoko) to describe its slave features (that's what ''lsusb'' does after a Neo1973 is connected to a PC). You can see the available USB configurations in this command's output. Since gadgetfs allows only one configuration, we will need to choose the desired configuration - most device have only one such configuration, in which case you can use just "usb_add gadget" to connect to host; CDC ethernet devices however usually include a second configuration for RNDIS networking (i.e. Ms Windows compatibility) and so does OpenMoko when using the g_ether driver. Hence, to get this right, wait for OpenMoko to fully boot up and execute the following in QEMU monitor:
 <pre>
 QEMU 0.9.0 monitor - type 'help' for more information
 (qemu) info usbslave 
@@ -285,7 +285,7 @@ Configuration 1: CDC Ethernet
 </pre>
 If qemu gives "couldn't add device gadget:1", double-check that it was built against gadgetfs - the file config-host.h must contain the line "#define CONFIG_GADGETFS 1".
 
-The "1" in "usb_add gadget:N" is the number of the USB configuration that we want to use. If everything went correctly - you can check that in dmesg - you should now have a new network interface called ''usb0'' on the PC, through which you can talk to the Openmoko running in QEMU:
+The "1" in "usb_add gadget:N" is the number of the USB configuration that we want to use. If everything went correctly - you can check that in dmesg - you should now have a new network interface called ''usb0'' on the PC, through which you can talk to the OpenMoko running in QEMU:
 <pre>
  $ dmesg | tail
 <6>gadgetfs: bound to dummy_udc driver
@@ -439,9 +439,10 @@ Please note that QEMU will wait for you to connect to the telnet server at port 
 
 == See also ==
 *[[Building Gadget USB Module]] - Helpful guide
-*[[Xephyr]] - Openmoko on i386
-*[[Xoo]] - Openmoko on i386
+*[[Xephyr]] - OpenMoko on i386
+*[[Xoo]] - OpenMoko on i386
 
-{{Languages|Openmoko_under_QEMU}}
+{{Languages|OpenMoko_under_QEMU}}
 
-[[Category:Emulation/zh tw]]
+[[Category:Application Developer]]
+[[Category:Guides]]
