@@ -1,0 +1,270 @@
+{{Dboard}}
+
+
+En este apartado encontrará información sobre la tarjeta de entrenamiento Neo1973 en su segunda versión.La tarjeta de entrenamiento -o tarjeta de desarrollo- sólo está incluída en la versión para desarrolladores del  Neo1973
+
+[[Image:Debugboard v2 diagram.png|left|500px|Arquitectura]]
+
+[[Image:Neo1973 debugboard v2 top annotated.jpg|left|500px|Circuito impreso]]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+== Visión general ==
+
+La [[Debug Board | Tarjeta de desarrollo]] contiene:
+
+* [[Debug Board#USB Hub | USB Hub]]
+* [[Debug Board#JTAG using FT2232 | JTAG sobre el chip FT2232]]
+* [[Debug Board#Serial Port |Puerto serial]]
+
+=== Esquemas o diagramas electrónicos ===
+
+Los diagramas pertenecientes al circuito impreso se pueden encontrar en: http://people.openmoko.org/laforge/doc/hardware/neo1973_debug_board/neo1973_debugboard_v2_schematics.pdf
+
+===''Hub'' USB ===
+
+Sistema USB  
+* Capacidad de usarse como origen de datos -maestro o hub- cuando se conecta al portátil.
+* attaches to the FT2232D for JTAG and serial console on downstream port 1
+* attaches to USB-A connectors using downstream ports 2 and 3
+
+Como ''hub'' USB se usa el circuito integrado TUSB2046B.
+
+Con un sólo cable USB se puede usar el ''hub'' para tener acceso al teléfono,al JTAG y al puerto serial de forma simultánea. También se puede usar como puerto de recarga de la pila (de carga lenta a 100mA ), usando el puerto como esclavo.
+
+Es recomendable no usar el ''hub'' USB si posee puertos USB libres de su computador para conectar la tarjeta de desarrollo. Esto permite al Neo1973 recargarse a una tasa de  500mA/h,permitiendo así conectar y desconectar la tarjeta de desarrollo sin afectar al teléfono Neo1973.
+
+=== JTAG usando el circuito integrado FT2232 ===
+
+Básicamente se ha integrado el adaptador USB y el JTAG de forma similar como lo hace[Amontec JTAGkey-tiny].La referencia usada para el diseño se puede encontrar en: (Agradecemos a Joern, por su colaboración)
+http://www.oocdlink.com
+
+JTAG provee todas las carácteristicas necesarias para la depuración. La velocidad  es 150 veces mayor a[[wiggler]]
+
+El puerto JTAG se conecta con:
+* El teléfono (a través del cable-flex)
+* Conector de viente (20) terminales usando el puerto ARM-JTAG. 
+** Permite al usuario conectar el adaptador JTAG a otros dispositidos basados sobre el sistema arm.
+
+=== Puerto serial ===
+
+Instead of replicating a true RS232 port, we wanted to use a USB serial converter chip,
+such as the FT232 or the PL2303.   
+
+As it turns out, we can even use the second port of the FT2232 simultaneously with the JTAG.  So no extra FT232 or PL2303 is required.
+
+==== Puerto serial tres estados ====
+
+The serial port needs a tri-state driver, since it is both connected to the GSM modem AND to the debug board.  We drive the tri-state driver by an inverted GSM_EN signal (pin 7 on FPC connector).
+
+== Instrucciones de uso ==
+
+=== Condiciones iniciales ===
+
+==== EEPROM FT2232D  ====
+
+Please see [[Neo1973 Debug Board v2/EEPROM]] if you have an "early adopter" board with USB ID 0403:0610. If your board shows up as USB ID 1457:5118 then you can ignore this step.
+
+==== Controladores -drivers- ====
+
+===== libftdi =====
+
+Please make sure you have libftdi-0.8 or later.  Earlier versions are known to cause problems. This should not be an issue if you are using statically-linked binaries.
+
+===== módulo ftdi_sio  =====
+
+This module must be loaded with parameters that identify the debug board:
+
+ rmmod ftdi_sio
+ modprobe ftdi_sio vendor=0x1457 product=0x5118
+
+or the equivalent in your modules.conf
+
+====== Reglas para udev  ======
+
+Please install the rules from http://people.openmoko.org/laforge/misc/debug_board_v2/udev_rules/
+
+====== Controlador para Driver ======
+
+Please use the driver from http://people.openmoko.org/laforge/misc/debug_board_v2/windows_drivers/
+
+==== Aplicaciones ====
+
+===== openocd =====
+
+[[openocd]] is required. It is recommended to use a statically-linked binary produced by the OpenMoko build system. Other versions may give "unrecognized command" errors while parsing the configuration file.
+
+====== openocd.cfg ======
+
+Openocd requires a configuration file in the directory from which you run the application. A typical example is shown below:
+
+<pre>
+telnet_port 4444
+gdb_port 3333
+interface ft2232
+jtag_speed 0
+ft2232_vid_pid 0x1457 0x5118
+ft2232_layout "jtagkey"
+reset_config trst_and_srst
+jtag_device 4 0x1 0xf 0xe
+daemon_startup attach
+target arm920t little reset_run 0 arm920t
+working_area 0 0x200000 0x4000 backup
+run_and_halt_time 0 5000
+ft2232_device_desc "Debug Board for Neo1973"
+</pre>
+
+===== dfu-util =====
+
+[[dfu-util]] is used to write images to the NAND flash once you have a functional u-boot. It is recommended to use a statically-linked binary produced by the OpenMoko build system.
+
+=== Conexión ===
+
+Refer to [[Connecting Neo1973 with Debug Board v2]]. The recommended connection sequence is:
+
+* Unplug both USB cables
+* Remove the Neo1973 battery
+* Connect the FPC between the Neo1973 and the debug board
+* Replace the Neo1973 battery
+* Plug the Neo1973 USB cable into your PC
+* If the Neo1973 does not turn on automatically at this point, hold the power button for 5 seconds
+* Plug the debug-board USB cable into your PC
+
+A Neo1973 with a working u-boot should power on when its USB cable is plugged in, but a "bricked" one will not. Note that there will be no visible feedback from the power-button press on a bricked device.
+
+==== Terminales ====
+
+The Debug Board v2 may be used for other embedded projects. It provides the following connectors:
+
+* J1 - is a regular 20 pin ARM JTAG at 3.3V level with 5V tolerance
+
+* J10 - is a 3.3V serial connected to portB of the FTDI2232D
+<pre>
+pin name
+1   TXD 
+2   RXD
+3   RTS
+4   CTS
+5   DSR
+6   DTR
+7   DCD
+8   RI
+9   GND
+10  VCC (3.3V)
+</pre>
+
+=== Actually using it ===
+
+==== Sobre Linux ====
+
+===== Puerto serial =====
+
+The Linux kernel of your host system will create virtual serial devices called '''/dev/ttyUSBx''' where 'x' is a sequentially assigned number.  If you don't have any other USB serial converters attached to your machine, the device name will be '''/dev/ttyUSB1''' for the serial port. A '''/dev/ttyUSB0''' will also be created initially, but will disappear once [[openocd]] connects to the JTAG port.
+
+You can use your favourite terminal emulator (screen, minicom, cu, zc, ...) just like for any other/real serial port. The baud rate should be set to 115200. You may use gdb as well (eg. target remote /dev/ttya).
+
+The /dev/ttyUSB1 device node will be removed if the debug-board USB cable is unplugged. You should exit your terminal program before unplugging the cable, and then re-run it after the cable is plugged back in.
+
+'''Nota'''
+
+After Neo's boot, this last line will be displayed at the console:
+
+ gta01-pm-gsm gta01-pm-gsm.0: powering up GSM, thus disconnecting serial console
+
+for reconnecting your serial console, please stop the gsmd daemon from ssh :
+
+ /etc/init.d/gsmd stop
+
+and respawn getty on ttySAC0. 
+
+For example, if getty is on tty1 (given by: '''ps -aux | grep getty''') then you could type:
+ cd /dev
+ mv tty1 tty10
+ ln -s ttySAC0 tty1
+ pkill getty
+
+if kernel messages on the console are too verbose, use klogd or dmesg (e.g. '''klogd -c 4''').
+
+===== JTAG =====
+
+Once you have connected the hardware as described above, run "openocd" from the diretory containing its configuration file. You should see output similar to the following:
+
+ linux$ ./openocd
+ Info:    openocd.c:93 main(): Open On-Chip Debugger 1.0 (2007-12-13-14:05) svn:226M
+ Info:    openocd.c:94 main(): $URL: svn://svn.berlios.de/openocd/trunk/src/openocd.c $
+ Info:    jtag.c:1291 jtag_examine_chain(): JTAG device found: 0x0032409d (Manufacturer: 0x04e, Part: 0x0324, Version: 0x0)
+
+Note that the Neo1973 must be powered on for this step to succeed. Otherwise, you will see:
+
+ Error:   jtag.c:1253 jtag_examine_chain(): JTAG communication failure, check connection, JTAG interface, target power etc.
+ Error:   jtag.c:1440 jtag_init(): trying to validate configured JTAG chain anyway...
+ Error:   jtag.c:1346 jtag_validate_chain(): Error validating JTAG scan chain, IR mismatch, scan returned 0x00
+
+Once openocd is running, open another terminal window and connect to its telnet port:
+
+ linux$ telnet localhost 4444
+ Trying 127.0.0.1...
+ Connected to localhost.
+ Escape character is '^]'.
+ Open On-Chip Debugger
+ >
+
+You may now reset the device, set breakpoints, upload images, etc. 
+
+===== Unbricking Procedure =====
+
+Refer to [[Neo1973 Debug Board v2/Unbricking]] for a manual procedure to re-flash a "bricked" phone (one with a damaged u-boot or environment, where the normal [[Flashing_openmoko]] update procedure cannot be used). 
+
+===== Further Reading =====
+
+The following Wiki pages contain useful information about what can be done with the debug board and the u-boot console. Note, however, that some of the information applies to earlier versions of the product and is not suitable for use with purchased GTA01Bv4 phones.
+
+- [[OpenOCD#OpenOCD_and_Debug_Board]]
+
+- [[Bootloader#Using_JTAG_to_boot_from_RAM]]
+
+- [[Devirginator]]
+
+- [[NAND_bad_blocks]]
+
+== History ==
+
+We previously had [[Neo1973 Debug Board v1]] (inherited from some weird engineers who must have seen Brazil too often).
+Version 1 was never shipped to phase-0 or phase-1, and not sold to anyone.
+
+=== Cambios de la  primera versión -v1- a la segunda versión -v2- ===
+
+* get rid of ethernet
+** we don't need it, and
+** we especially don't want a 40pin parallel 66MHz bus going between two pcb's
+* get rid of 7-segment LED displays
+** not really needed.  We have a serial port
+** could be replaced by one or two GPIO LEDs
+* get rid of built-in [[wiggler]]
+** nobody has a parallel port on the laptop these days
+* get rid of li-ion battery (including charger)
+** the device can be fully usb powered by the laptop
+
+<span id="bottom"></span>
+{{Languages|Debug_Board}}
+
+[[Category:Hardware ]]
+[[Category:Hardware ]]
+[[Category:Neo1973 Hardware]]
+[[Category:Neo1973 Hardware Debugging]]
