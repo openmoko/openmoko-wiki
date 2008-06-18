@@ -1,0 +1,66 @@
+== GTA02 GPS Hardware ==
+
+GTA02 using the u-blox 4 hardware and could use u-blox 4 Assist Online GPS A-GPS servces. GTA02 hardware design not comply with official Assist Offline service requirement. 
+
+== Assist Online/Offline comparsion ==
+
+th "A"GPS support could cut TTFF time from 40 secs to 10-20 seconds. And the valid time of assist now download is about 4 hours. You could also check the following address:
+
+http://embedded-system.net/assistnow-gps-services-boost-up-gps-receiver-performance-u-blox.html
+
+Due to the u-blox 4 need to have extra flash to storage up to 14 days of offline data (90 KBytes), GTA02 don't have it. I would very interested if there is another way to twist it around, but not likely, so far. 
+
+== Assist Online ==
+
+Each download package could have up to 4 hours vaild data to assist TTFF. For u-blox Assist Online, you have to provide approximate longitude/latitude and time to get the corresponds "almanac" and "ephemeris" package. This might be base on application design for how to provide the longitude/latitude. User could select the location area from list menu or world map, or better implementation using the GSM/wi-fi location technique/service. 
+
+=== u-blox Assist Online implementation ===
+
+For GTA02 default shipment image, there is no A-GPS/GPS supported software inside. You could find the u-blox A-GPS online implementation document here:
+
+* Documentation: http://people.openmoko.org/matt_hsu/ImplementationAssistNowServerAndClient(GPS.G4-SW-05017-C).pdf
+
+And implementation code in following address.
+
+* Source code: http://svn.openmoko.org/developers/matt_hsu/agps-online/
+
+Here is a brief script to run this application:
+
+#!/bin/sh
+
+echo 1 >/sys/bus/platform/drivers/neo1973-pm-gps/neo1973-pm-gps.0/pwron
+
+./agps-onlinec -c full -u youraccount -k yourpasswd -la 25.073270 -lo
+121.574805 -p 999999.00
+
+cat /dev/ttySAC1
+
+=== Assist Now account application ===
+
+And account application is send a mail to agps-account@u-blox.com
+
+without content and title. And not all mail account are accepted/could get reply. since the protocol is pretty straight forward, implement an extra proxy to scale up user should be easy.
+
+== Assist Offline ==
+
+Up to 14 days of assist TTFF data
+
+== u-blox Assist Offline implementation ==
+
+Due to the u-blox 4 need to have extra flash to storage up to 14 days of offline data (90 KBytes), GTA02 don't have it. I would very interested if there is another way to twist it around, but not likely, so far. Offline sample data you could find in the following addesss:
+
+http://alp.u-blox.com/
+
+And u-blox did provided source code of Assist offline server implementation and ubx header, you could find it here:
+
+http://people.openmoko.org/tony_tu/src/u-blox
+
+=== UBX protocol ===
+
+Sample header could be found here: [http://people.openmoko.org/tony_tu/src/u-blox/AssistNowOfflineServerSampleImplementation/ubx.h ubx.h]
+
+=== GPS test program ===
+
+Openmoko projects has a GPS test program called AGPS UI in following address:
+
+http://projects.openmoko.org/scm/?group_id=127
