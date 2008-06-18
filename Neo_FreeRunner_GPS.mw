@@ -1,148 +1,20 @@
-{{Warning|Most of this article is only relevant for [[Om 2008]]. The [[gpsd]] has been obsoleted by the [[ogpsd]] which offers a DBUS interface. Do not run these two daemons side by side. If backward compatibility is needed, use ogpsd with fso-gpsd.}}
+== GTA02 GPS Hardware ==
 
-{{Neo FreeRunner Menu}}
+GTA02 using the u-blox 4 hardware and could use u-blox 4 Assist Online GPS A-GPS servces. GTA02 hardware design not comply with official Assist Offline service requirement. 
 
-== Basic Setup ==
+== Assist Online/Offline comparsion ==
 
- # opkg install gpsd
- # echo "GPS_DEV=\"/dev/ttySAC1\"" > /etc/default/gpsd
-
-and restart gpsd, the gps daemon, with
-
- # /etc/init.d/gpsd restart
-
-Note that there is a known issue between the GPS and SD card slot which is discussed [[GPS_Problems|here]].
-
-== Testing  ==
-
-* [[Howto_Test_Your_GPS_with_agpsui| How to test your GPS with agpsui]]
-
-* Shell test script for raw data dump:
-
-<pre>
-echo 0 > /sys/class/i2c-adapter/i2c-0/0-0073/neo1973-pm-gps.0/pwron && 
-sleep 1s && echo 1 > /sys/class/i2c-adapter/i2c-0/0-0073/neo1973-pm-gps.0/pwron && stty -F /dev/ttySAC1 -echo && cat -u /dev/ttySAC1 | grep -v ^$
-</pre>
-
-Note that the /sys paths have changed during kernel development. If
-you can't find
-/sys/class/i2c-adapter/i2c-0/0-0073/neo1973-pm-gps.0
-you should try /sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/neo1973-pm-gps.0 instead.
-
-Very recent kernels (2.6.29-rc3 for example) use the following path:
-/sys/class/i2c-adapter/i2c-0/0-0073/pcf50633-regltr.7/neo1973-pm-gps.0
-
-== Low level access ==
-
-This section is for debugging and daemon development only. Applications should use a higher level interface (see next section).
-
-There is no userland driver required for the GTA02; the serial port driver is built into the kernel.
-
-To turn on the GPS, echo 1 to the sys file: 
-
- echo 1 > /sys/class/i2c-adapter/i2c-0/0-0073/neo1973-pm-gps.0/pwron
-
- Om 2009 newer kernels:
- echo 1 > /sys/class/i2c-adapter/i2c-0/0-0073/pcf50633-regltr.7/neo1973-pm-gps.0/power_on
-
-To read from the GPS, simply read /dev/ttySAC1. Enter the gpspipe command as follows:
-
- gpspipe -r 127.0.0.1 2947
-
-You will find gpspipe in the package gps-utils (gpsd-clients in debian). You can also just "cat /dev/ttySAC1", but it produces the unknown msg*58. This doesn't happen with gpspipe.
- 
-Before getting a fix, the GPS spits out lots of "$GPTXT,01,01,01,NMEA unknown msg*58", though these stop once a fix is obtained. 
-
-A position without a fix looks like this:
- $GPGGA,235946.99,,,,,00,00,5.0,,M,0.0001999,M,0.0020199,*57
-
-A position with a fix looks as follows:
- $GPGGA,065852.00,5613.022527,N,00306.725890,W,1,05,0.5,158.0,M,0.277000,M,-0.010 0515,*7A
-
-(The [http://openstreetmap.org/?lat=56.13&lon=-3.067&zoom=9&layers=B000TFF given position] is in central Scotland.)
-
---[[User:Speedevil|Speedevil]] 11:52, 7 April 2008 (CEST)
-
-If you are having GPS problems with your FreeRunner, please document them on the page [[GPS Problems]]. [[FreeRunner GPS antenna repair SOP]] documents a possible solution.
-
-In Openmoko projects, there is a GPS test program called '''agpsui''' that provides a graphical and text dump of GPS information. See [[Howto Test Your GPS with agpsui]]. The project is called [http://svn.projects.openmoko.org/svnroot/openmoko-agpsui Openmoko AGPS UI project].
-
-== Using GPS ==
-
-Aside from accessing the GPS data in applications programs running directly on the smartphone,
-you can also access the GPS data stream from another device such as a laptop.
-
-Here are a couple ways to do that. You can use a network connection to pull data from the gpsd daemon, or you can make the smartphone appear to be a generic Bluetooth-connected GPS receiver.
-
-Using gpsd requires a program that understands its protocol, such as GPSdrive.
-Using Bluetooth would allow using just about any program that understands the NMEA protocol.
-
-=== GPS Daemons ===
-
-The GPS uses a single serial connection for communication, and this cannot be shared directly by applications. To provide simultaneous access to GPS data for multiple applications, and to provide a consistent interface for the applications, we use a daemon as an intermediary. There are two daemons you are likely to meet on the Openmoko phones:
-
-==== gpsd ====
-{{Main|gpsd}}
-This is used on Om 2008.x and FDOM. It implements the widely used gpsd protocol and can share gps data over a network.
-
-==== ogpsd/fso-gpsd ====
-:''Primarily for Om 2009:''
-{{Main|ogpsd}}
-Ogpsd is used on FSO and SHR, and implements the Gypsy dbus protocol. For compatibility with applications needing the gpsd protocol there is a helper daemon, fso-gpsd, which translates ogpsd output to the gpsd protocol.
-
-{{Warning|Do not run more than one gps daemon at a time. They will both try to talk to the gps serial port, and neither will work properly.}}
-
-=== Using gpsd with a network connection ===
-
-This procedure depends upon being able to set up a network connection between your Neo and your laptop. The connection can be over either WiFi or USB cable.
-
-First be sure you have gpsd installed. Some Neo FreeRunner images don't have gpsd, they use a different GPS stack called gypsy.
-
-# On host type: '''nc -vvn -l -p 5000 > /tmp/nmeaNP''' (Host starts listening on port 5000 for GPS-signals and sends them to /tmp/nmeaNP)
-# On the Neo type:   '''nc 192.168.0.200 5000 < /dev/ttySAC1''' (Signals from device will be send to port 5000 on host.) If your host is connected to the neo via wifi, change the IP address in the command to the one of the host.
-# On the host PC install GPSD, your GPS is attached as /tmp/nmeaNP
-# start gpsd on host with: '''gpsd -p /tmp/nmeaNP'''
-# run your application! I used gpsdrive and it works better than my stand-alone GPS.
-
-''My installation of GPSD worked with "gpsd -b /tmp/nmeaNP" better.''
-
-
-Tested with RoadNav. Works great!
-
-Another way is to forward gpsd on the neo. If '192.168.0.202' is your neo, then run "ssh -L 2947:localhost:2947 root@192.168.0.202" on the host.
-
-Tested and works with roadnav, gpsdrive, and tangogps on the host computer. [[User:Sargas|Sargas]] 21:52, 16 August 2008 (UTC)
-
-If you have an unlimited [[GPRS]] data package you could make your gpsd service accessible over the Internet. This opens up many possibilities. For example, you could implemented AVL ([http://en.wikipedia.org/wiki/Automatic_Vehicle_Location Automatic Vehicle Location]) by having a web server somewhere query your gpsd server for your position and write it to a KML file which would then display your location on a Google map.
-
-=== Bluetooth GPS relay ===
-
-Here is how to make your smartphone appear to be a Bluetooth GPS.
-
-#Power up the bluetooth radio
-#Ensure [http://wiki.openmoko.org/wiki/Gpsd#GPS_on_GTA02 gpsd] is running and the gps-utils package is installed
-#Run '''sdptool add SP'''
-#Run '''rfcomm -r watch 0 1 sh -c "gpspipe -r >/dev/rfcomm0" &'''
-
-There are some scripts [http://handheldshell.com/software/bluetooth.php here] to simplify the process
-
-== GTA02 GPS Hardware Assist Feature ==
-
-GTA02 is using the [[u-blox ANTARIS 4 ATR0635]] hardware and could use [http://www.u-blox.com/services/assistnow_online.html u-blox AssistNow Online] GPS (A-GPS) services. GTA02 hardware design does not comply with official Assist Offline service requirement.
-
-=== Assist Online/Offline comparsion ===
-
-The "A"GPS support could cut TTFF time from 40 secs to 10-20 seconds. And the valid time of assist now download is about 4 hours. You could also check the following address:
+th "A"GPS support could cut TTFF time from 40 secs to 10-20 seconds. And the valid time of assist now download is about 4 hours. You could also check the following address:
 
 http://embedded-system.net/assistnow-gps-services-boost-up-gps-receiver-performance-u-blox.html
 
-Due to the [[u-blox ANTARIS 4 ATR0635]] need to have extra flash to storage up to 14 days of offline data (90 KBytes).
+Due to the u-blox 4 need to have extra flash to storage up to 14 days of offline data (90 KBytes), GTA02 don't have it. I would very interested if there is another way to twist it around, but not likely, so far. 
 
-=== Assist Online ===
+== Assist Online ==
 
 Each download package could have up to 4 hours vaild data to assist TTFF. For u-blox Assist Online, you have to provide approximate longitude/latitude and time to get the corresponds "almanac" and "ephemeris" package. This might be base on application design for how to provide the longitude/latitude. User could select the location area from list menu or world map, or better implementation using the GSM/wi-fi location technique/service. 
 
-==== u-blox Assist Online implementation ====
+=== u-blox Assist Online implementation ===
 
 For GTA02 default shipment image, there is no A-GPS/GPS supported software inside. You could find the u-blox A-GPS online implementation document here:
 
@@ -154,132 +26,26 @@ And implementation code in following address.
 
 Here is a brief script to run this application:
 
- #!/bin/sh
- 
- echo 1 >/sys/bus/platform/drivers/neo1973-pm-gps/neo1973-pm-gps.0/pwron
- 
- ./agps-onlinec -c full -u youraccount -k yourpasswd -la 25.073270 -lo
- 121.574805 -p 999999.00 
- 
- cat /dev/ttySAC1
+#!/bin/sh
 
--la 25.073270 -lo 121.574805 is reference latitude/longitude
+echo 1 >/sys/bus/platform/drivers/neo1973-pm-gps/neo1973-pm-gps.0/pwron
 
-Here is a simple perl script doing the same:
+./agps-onlinec -c full -u youraccount -k yourpasswd -la 25.073270 -lo
+121.574805 -p 999999.00
 
-<pre>
-#!/usr/bin/perl -wT
-#
-# ublox AssistNow Online almanac downloader for Neo FreeRunner
-#
-# v0.1
-#
-# Wilfried Klaebe <wk-openmoko@chaos.in-kiel.de>
-#
-# Usage:
-#
-# agps-alm.pl > /dev/ttySAC1
-#
+cat /dev/ttySAC1
 
-use strict;
-use IO::Socket::INET;
-use vars qw(%h);
+=== Assist Now account application ===
 
-my $user = 'user@somewhere.invalid';
-my $pass = 'pass-from-ublox';
+And account application is send a mail to agps-account@u-blox.com
 
-my $s = new IO::Socket::INET(PeerAddr => 'agps.u-blox.com', Proto => 'tcp', PeerPort => 46434);
+without content and title. And not all mail account are accepted/could get reply. since the protocol is pretty straight forward, implement an extra proxy to scale up user should be easy.
 
-$s->print('user='.$user.';pwd='.$pass.';cmd=alm;lat=0;lon=0;pacc=40000000;', "\n");
+== Assist Offline ==
 
-print STDERR $s->getline;
+Up to 14 days of assist TTFF data
 
-while(my $l = $s->getline) {
-        print STDERR $l;
-
-        $l =~ s/(\r\n|\n)+\Z//g;
-
-        if ($l eq "") {
-                if ($h{'content-length'} > 0 && $h{'content-type'} eq 'application/ubx') {
-                        $s->read($l,$h{'content-length'});
-                        print $l;
-                }
-                exit(0);
-        }
-
-        if ($l =~ m/\A(.+): (.+)\Z/) {
-                $h{lc($1)} = lc($2);
-        }
-}
-</pre>
-
-This also works with <tt>cmd=full</tt> and meaningful lat/lon/pacc values.
-
-Same in python:
-
-<pre>
-#!/usr/bin/python
-#
-# ublox AssistNow Online almanac downloader for Neo FreeRunner
-#
-# v0.1
-#
-# Wilfried Klaebe <wk-openmoko@chaos.in-kiel.de>
-#
-# Usage:
-#
-# agps-alm.py > /dev/ttySAC1
-#
-
-import sys
-import socket
-import re
-
-user='your@mail.address'
-pwd='pwdfromublox'
-
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect(('agps.u-blox.com',46434))
-
-s.send('user='+user+';pwd='+pwd+';cmd=alm;lat=0;lon=0;pacc=40000000;\n')
-
-buf = s.recv(4096)
-while 1:
-        b = s.recv(4096)
-        if not b:
-                break
-        buf += b
-
-h = {}
-
-while 1:
-        (l,s,buf) = buf.partition('\n')
-        l = l.rstrip('\r\n')
-        #
-        sys.stderr.write(l+'\n')
-        #
-        if l == "":
-                if 'content-length' in h and h['content-length'].isdigit() and 'content-type' in h and h['content-type'] == 'application/ubx':
-                        sys.stdout.write(buf[0:int(h['content-length'])])
-                sys.exit(0)
-        #
-        m = re.search('\\A(.+): (.+)\\Z',l)
-        if m:
-                h[m.group(1).lower()] = m.group(2).lower();
-</pre>
-
-==== u-blox Assist Now account application ====
-
-To apply for a free u-blox Assist Now account, please send an e-mail to:
-agps-account@u-blox.com
-
-Leave body and subject of the message empty. And not all mail accounts are accepted or will get reply. since the protocol is pretty straight forward, implement an extra proxy to scale up user should be easy.
-
-=== Assist Offline ===
-
-u-blox Assist Offline service could provide up to 14 days of valid assist GPS data in single download package. But Assist Offline service need an extra flash to storage Almanac data, and [[u-blox ANTARIS 4 ATR0635]] will automatically use these data while system start up. GTA02 don't support Assist Offline.
-
-==== u-blox Assist Offline implementation ====
+== u-blox Assist Offline implementation ==
 
 Due to the u-blox 4 need to have extra flash to storage up to 14 days of offline data (90 KBytes), GTA02 don't have it. I would very interested if there is another way to twist it around, but not likely, so far. Offline sample data you could find in the following addesss:
 
@@ -289,114 +55,12 @@ And u-blox did provided source code of Assist offline server implementation and 
 
 http://people.openmoko.org/tony_tu/src/u-blox
 
-==== Possible implementation mechanism ====
-
-We can use the same protocol as the online assist to provide the time, last location, almanac and ephemeris data that would be held in the extra flash storage when we power up the GPS. Time is available from the local clock, and we can save location, almanac and ephemeris when the GPS is shut down. We may be able to have a better guess at startup location based on GSM cell ID, WiFi access points, or by the user selecting an area on a map.
-
-Some Ruby tools already exist for downloading and uploading Almanac and Ephemeris. See http://docs.openmoko.org/trac/browser/developers/alphaone/u-blox
-
-==== UBX protocol ====
-Protocol specification (html-help format): http://www.u-blox.com/customersupport/gps.g3/ANTARIS_Protocol_Specification(GPS.G3-X-03002).chm
-
-Another protocol specification from a newer unit (pdf format):
-http://www.u-blox.com/customersupport/gps.g5/u-blox5_Protocol_Specifications(GPS.G5-X-07036).pdf
+=== UBX protocol ===
 
 Sample header could be found here: [http://people.openmoko.org/tony_tu/src/u-blox/AssistNowOfflineServerSampleImplementation/ubx.h ubx.h]
 
-Conversion between lat/ln and ECEF xyz coordinates:
-http://www.u-blox.com/customersupport/docs/GPS.G1-X-00006.pdf
+=== GPS test program ===
 
-Packet generator:
+Openmoko projects has a GPS test program called AGPS UI in following address:
 
-<pre>
-#!/usr/bin/python
-#
-# ubx packet generator
-#
-# v0.1
-#
-# Wilfried Klaebe <wk-openmoko@chaos.in-kiel.de>
-#
-# Usage:
-#
-# ubxgen.py 06 13 04 00 01 00 00 00 > packet.ubx
-#
-# prepends 0xb5 0x62 header,
-# appends checksum,
-# outputs binary packet to stdout
-#
-# you can send the packet to GPS chip like this:
-#
-# cat packet.ubx > /dev/ttySAC1
-
-import sys
-import binascii
-
-cs0=0
-cs1=0
-
-sys.stdout.write("\xb5\x62")
-
-for d in sys.argv[1:]:
-  c = binascii.unhexlify(d)
-  sys.stdout.write(c)
-  cs0 += ord(c)
-  cs0 &= 255
-  cs1 += cs0
-  cs1 &= 255
-
-sys.stdout.write(chr(cs0)+chr(cs1))
-</pre>
-
-----
-
-== Configuration for a higher sampling rate ==
-
-The GPS chip can be flexibly configured for more than one sample per second. Sometimes I need a good GPS log for experimental projects, and I configure my Neo Freerunner's GPS to take '''4 samples per second''' (the maximum it can do) and to send me nothing more than '''GPRMC (Date+Time+Lat+Lon+Speed+Direction) and GPGGA (...+Altitude+Sats+HDOP) messages''' - I disable the other ones because they are redundant.
-
-These configurations have to be done via the u-blox binary protocol. So I just build the messages using the above "ubxgen.py" script like this:
-<pre>
-
-# disable unnecessary messages:
-ubxgen.py 06 01 03 00 f0 01 00 > CFG-MSG-GPGLL-OFF.ubx
-ubxgen.py 06 01 03 00 f0 02 00 > CFG-MSG-GPGSA-OFF.ubx
-ubxgen.py 06 01 03 00 f0 03 00 > CFG-MSG-GPGSV-OFF.ubx
-ubxgen.py 06 01 03 00 f0 05 00 > CFG-MSG-GPVTG-OFF.ubx
-ubxgen.py 06 01 03 00 f0 08 00 > CFG-MSG-GPZDA-OFF.ubx
-cat CFG-MSG-GP*-OFF.ubx > /dev/ttySAC1
-
-# reduce measurement time and message cycle to 250ms (4Hz):
-ubxgen.py 06 08 06 00 fa 00 01 00 00 00 > CFG-RATE-4HZ.ubx
-cat CFG-RATE-4HZ.ubx > /dev/ttySAC1
-
-# alternatively:
-# reduce measurement time and message cycle to 500ms (2Hz):
-ubxgen.py 06 08 06 00 f4 01 01 00 00 00 > CFG-RATE-2HZ.ubx
-cat CFG-RATE-2HZ.ubx > /dev/ttySAC1
-
-</pre>
-
-Using this setup, the output of "gpspipe -r" will dump around 600 bytes per second (4 GPRMC + 4 GPGGA messages).
-
-To recover the default values, just turn off the GPS or let the FR suspend.
-
-----
-
-=== Improvements of GPS daemon by GSM network profiles  ===
-[[Cellhunter]] is game to map GPS locations to a GSM network cell profile of available GSM network cells the freerunner can connected to. The strength of the signal and the currectly used GSM network cell and its neigbours can be used to improve GPS daemon in areas where no GPS satellites are available (e.g. in building or in narrow road with high buildings or bad weather conditions).
-
-== GTA02 GPS/UBX tools ==
-
-To help time to first fix I (Gabrys) developed a program, to dump/load the AGPS data from the GPS chip. Also the program let's you put the chip into "standby" mode, which is consuming minimal energy, while giving you almost instant position fix after waking up. For more information consult the following URL:
-
-http://github.com/gabrys/gta02-agps/blob/master/c/README.md
-
-Note: part of what this program can do is implemented in ogpsd, so if you're using SHR you probably don't need my work. But for any other distribution it may be really helpful.
-
-Note2: you can compile the program statically (with gcc -static switch) and use it in Android distribution without modification (only the device file is different, /dev/s3...serial1)
-
-== GPS applications ==
-{{main|GPS applications}}
-
-[[Category:GPS]]
-[[Category:Neo FreeRunner Hardware]]
+http://projects.openmoko.org/scm/?group_id=127
