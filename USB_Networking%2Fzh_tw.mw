@@ -221,66 +221,67 @@ Its is possible to forward DNS requests with iptables using the DNAT target
 
 在這裡<tt>192.168.0.1</tt> 是你的gateway的IP。它是最簡單的方法，但是不建議這樣做。但假設你有像ISP DNS服務一樣直接連到網路，則建議這樣做，但它無法做到流量調節。
 
-= Connecting to phone =
+= 連接到電話 =
 
-Then <tt>ssh root@192.168.0.202</tt> with empty password to get into phone.
+接著以空白密碼連接到 <tt>ssh root@192.168.0.202</tt> 電話。
 
-NOTE: the ssh daemon (dropbear 0.49) on the OpenMoko appears to have a bug when sending the exit status back to the client. From time to time you receive an exit status of 255.
+注意： 在Openmoko上的ssh daemon (dropbear 0.49) 的程式在傳現及離開客端狀態有 bug。你會收到的離開狀態為255。
+
 
 ===SSH Extras===
 
-If you get fed up with typing root@192.168.0.202, on your PC edit /etc/hosts and add an entry for 'phone'
+I如果你在PC上鍵入root@192.168.0.202，編輯 /etc/hosts 並加入一個輸入'phone'
 
  192.168.0.202 phone
 
-then edit ~/.ssh/config (or create it) and add
+接著編輯 edit ~/.ssh/config (或建立它) 並加入
 
  host phone
  user root
 
-then all you need to do is type 
+你必須做的工作是 
 
  # ssh phone
 
-To avoid ssh added a new line for every ssh host-key to you known_hosts you can add the following to the phone section in ~/.ssh/config
+要避免 ssh 為每個已知的hostsssh host-key加入新的一行，你可以加下下列的內容到~/.ssh/config
 
   UserKnownHostsFile /dev/null
 
-You might want to use keys to bypass the login prompt too.
+你可能想要使用 key 跳過這個過程。
 
 ===SSH Keys===
-====From host to phone====
+====從主機到手機====
 
-To generate ssh keys for use as a login mechanism type
+要產生可以用的 ssh key 做為登入之用，請輸入：
 
  ssh-keygen -t rsa
 
-when prompted for a password either hit enter for no password (''not really a good idea'') or enter a password for this key. ssh into the phone and create ~/.ssh
+在出現鍵入密碼時，請鍵入ENTER(''雖然它不是個好主意'')或者是以這個KEY做為密碼輸入。ssh到手機，並且建立~/.ssh
 
  # mkdir ~/.ssh
 
-then from your PC copy the '''.pub''' file to the phone.
+接著，從你的電腦上複製 '''.pub'''檔案到手機上
 
  # scp ~/.ssh/id_rsa.pub phone:.ssh/authorized_keys
 
-You should now be able to ssh directly into the phone.
+你現在應該可以直接 ssh 到手機上
 
-To disable password logins ('''after setting up key access''') edit /etc/init.d/dropbear and change the following line:
+要停用登入密碼 ('''在設定完KEY存取之後''') 編輯 /etc/init.d/dropbear 並且變更下列的內容
 
  DROPBEAR_EXTRA_ARGS=
 
-to 
+為
 
  DROPBEAR_EXTRA_ARGS="-s"
 
-You will need to restart dropbear for this to take effect.
+你必須重新啟動，以讓設定生效。
 
-====From phone to host====
-Generate the key
+====從手機到主機====
+產生key
 
   dropbearkey -t rsa -f id_rsa
 
-The output will look something like this:
+輸出內容將如下：
 
   Will output 1024 bit rsa secret key to 'id_rsa'
   Generating key, this may take a while...
@@ -288,13 +289,13 @@ The output will look something like this:
   ssh-rsa AAAAB3Nza[...]
   Fingerprint: md5 ca:e8:f0:b7:f6:7b:c2:b6:b9:71:e4:45:86:a9:ff:b8
 
-Copy and paste the one line (in this example, starting with 'ssh-rsa' onto the end of the host's authorized_keys file (often in ~/.ssh/).
+複製並貼上以下的內容 (在這個範例當中，以'ssh-rsa' 開始，到主機的 authorized_keys 檔案為止 (通常是在 ~/.ssh/).
 
-From the phone, ssh with -i:
+從手機，ssh  -i:
 
   ssh -i id_rsa user@host
 
-This works for me.  I ripped off these instructions from: [[http://forum.openwrt.org/viewtopic.php?pid=53705]]
+對我來講，它是行的通的。  I ripped off these instructions from: [[http://forum.openwrt.org/viewtopic.php?pid=53705]]
 
 [[Category:Hardware]]
 [[Category:USB| ]]
