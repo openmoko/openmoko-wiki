@@ -41,31 +41,32 @@ example:  <code>up echo nameserver 4.2.2.2 >/etc/resolv.conf</code>
 
 = Desktop side =
 
-== Manual method ==
+== 手動 ==
 
-With the device connected, modprobe usbnet module and configure usb0 interface (as root):
+在連接上了裝置之後，modprobe usbnet 模組及設定 usb0 介面 (以root身份):
 <pre>
 ifconfig usb0 192.168.0.200 netmask 255.255.255.0
 </pre>
-If your eth0 interface is also in the same 'range' (e.g. 192.168.0.105) then you can do the following:
+如果你的 eth0 介面位於同一個 '範圍' (e.g. 192.168.0.105) 則你可以進行下面的工作：
 
-1. ping the Neo with
+1. 以下列指令ping Neo裝置
  # ping -I usb0 192.168.0.202
-2. add a route to your Neo:
+2. 為Neo加入route:
  # /sbin/route add -host 192.168.0.202/32 dev usb0
-3 log in to the Neo
+3 登入 Neo
  # ssh root@192.168.0.202
 
-If you don't have the necessary modules to get usb0 going, make sure you have the following kernel options enabled:
+若你沒有必要的模組可以讓usb0 運作，請確定你啟用了以下的kernel選項：
 * CONFIG_USB_USBNET
 * CONFIG_USB_NET_CDCETHER
-Both options are available in the Device Drivers -> USB support -> USB Network Adapters. For more info see the [http://www.linux-usb.org/usbnet/ usbnet driver homepage].
+二個選項都可以啟動 Device Drivers -> USB support -> USB Network Adapters. For more info see the [http://www.linux-usb.org/usbnet/ usbnet driver homepage].
 
-== Automatic method ==
+== 自動化方法 ==
 
-Took from [http://blog.haerwu.biz/2007/03/22/hotpluging-usbnet/ Hotplugging usbnet] post by Marcin 'Hrw' Juszkiewicz.
+自[http://blog.haerwu.biz/2007/03/22/hotpluging-usbnet/ Hotplugging usbnet] 取得，由 Marcin 'Hrw' Juszkiewicz張貼。
 
-=== Debian or similar ===
+
+=== Debian 或相似的系統 ===
 Edit /etc/network/interfaces:
 <pre>
 allow-hotplug usb0
@@ -78,7 +79,7 @@ iface usb0 inet static
         post-up iptables -P FORWARD ACCEPT
 </pre>
 
-=== Ubuntu (Tested with Feisty, Gutsy and Hardy) ===
+=== Ubuntu (由Feisty、Gutsy 與Hardy測試) ===
 Edit /etc/network/interfaces:
 <pre>
 auto usb0
