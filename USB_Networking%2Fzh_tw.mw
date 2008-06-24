@@ -161,16 +161,16 @@ ONBOOT=yes
  # Neo1973
  config_usb0=( "192.168.0.200 netmask 255.255.255.0" )
  routes_usb0=( "192.168.0.202/32 via 192.168.0.200" )
-* Create a new init script:
+* 建立一個新的init script:
  cd /etc/init.d
  ln -s net.lo net.usb0
-* Put iptables into use:
+* 將iptables放入使用：
  iptables -I INPUT 1 -s 192.168.0.202 -j ACCEPT
  iptables -I OUTPUT 1 -s 192.168.0.200 -j ACCEPT
  iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
-* Store them
+* 將它們存放在
  /etc/init.d/iptables save
-* If you want the routing by default:
+* I如果你希望在預設的情況下繞送：
  rc-update add iptables default
 * You must also inform the kernel, to start forwarding.  One way to automate this is to create /etc/conf.d/net.usb0 as follows
  
