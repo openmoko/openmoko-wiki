@@ -7,7 +7,14 @@ A FreeBSD port is only ready for kernel developers.
 === Required tools ===
 You will need mkimage from u-boot. It's available in Ports under devel/u-boot.
 
-You will also need Qemu-neo1973. Hints on building it are avaliable from [[Talk:OpenMoko under QEMU|this page.]]
+==== Qemu ====
+To build Qemu on FreeBSD to test and develop FreeBSD on the Neo's:
+# Use subversion to checkout https://svn.openmoko.org/trunk/src/host/qemu-neo1973
+# In gnokiigsm/device.h comment out the declaration for device_read and device_write, see [[Talk:OpenMoko under QEMU#FreeBSD_and_Qemu...]]
+# Edit Makefile.target, search for the line LIBS+=-lm and insert "-L/usr/lib" before "-lm"
+# If your running FreeBSD on an AMD64 edit x86_64.ld and remove all occurrences of ONLY_IF_RO and ONLY_IF_RW
+# Run ./configure --target-list=arm-softmmu and gmake
+# Edit openmoko/flash.sh to add kernel_image="/path/to/kernel.boot" between the calls to most_recent and where it prints the kernel image it will use
 
 === Building FreeBSD ===
 You will need to download http://fubar.geek.nz/files/freebsd/neo1973/neo1973-0.20070930.tar.bz2 and extract it over the FreeBSD src tree. Warning: It replaces sys/arm/arm/locore.S with its own version.
