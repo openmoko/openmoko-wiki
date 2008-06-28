@@ -20,11 +20,16 @@ To build Qemu on FreeBSD to test and develop FreeBSD on the Neo's:
 You will need to download http://fubar.geek.nz/files/freebsd/neo1973/neo1973-0.20070930.tar.bz2 and extract it over the FreeBSD src tree. Warning: It replaces sys/arm/arm/locore.S with its own version.
 
 From the FreeBSD src tree run:
- <code>
+<code>
  make buildworld TARGET=arm TARGET_ARCH=arm TARGET_CPUTYPE=arm920t
- make buildkernel TARGET=arm TARGET_ARCH=arm TARGET_CPUTYPE=arm920t KERNCONF=NEO1973 MFS_IMAGE=/path/to/root.ufs
+ make installworld TARGET=arm TARGET_ARCH=arm TARGET_CPUTYPE=arm920t DESTDIR=/path/to/root/fs
+</code>
+You will now need to trim down /path/to/root to remove things noot needed to test in single user mode
+<code>
+ makefs -B little /path/to/root.ufs /path/to/root/fs
+ make buildkernel TARGET=arm TARGET_ARCH=arm TARGET_CPUTYPE=arm920t KERNCONF=NEO1973 -DNO_MODULES MFS_IMAGE=/path/to/root.ufs
  /path/to/mkimage -A arm -O freebsd -T kernel -C none -a 30008000 -e 30008110 -n "Kernel Image" -d /usr/obj/path/to/kernel /usr/obj/same/path/kernel.boot
- </code>
+</code>
 
 You will now have a copy of FreeBSD that is able to be loaded by u-boot.
 
