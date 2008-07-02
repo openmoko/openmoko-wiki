@@ -32,7 +32,7 @@
 * Try to reuse existing technologies as much as possible, but not at the cost of a bad API
 
 =How to achieve that technically=
-* 选择[[D-Bus]]作为协同开发分界线。Dbus下层，我们合作开发，Dbus上层，我们使用不同的方式实现。
+* Chose [[Dbus]] as the collaboration line. Below dbus, we can work together. Above dbus, we can differentiate.
 * Expose features through dbus APIs implemented by UI-agnostic and language-agnostic services (daemons).
 * Optimize for Openmoko devices, but support multiple architectures and purposes through plugin interfaces and suitable hardware abstraction mechanisms.
 * Be not afraid of reinventing the wheel for a wheel-barrow if all the existing wheels are made for sports cars.
@@ -57,19 +57,20 @@ This initiative does not cover high level services such as
 
 We differenciate between low-level and high-level services -- dbus will be used to communicate horizontally and vertically.
 
-===底层服务===
+===Low-Level Services===
 
-====设备控制====
-底层设备控制服务管理周边外设, 例如: 控制每一个子系统的如
+====Device Control====
+The low level device control service manages peripheral control, i.e. controlling power for individual subsystems such as
 * GSM, WiFi, Bluetooth, GPS, as well as
-* 背景灯亮度和电源，
-* LED灯的开/关，
-* 充电, 待机/恢复,
+* Backlight brightness and power,
+* turning LEDs on and off, etc.
+It also deals with
+* charging, suspend/resume,
 * accellerometers, and buttons.
-监听用户的活动来实现
-* 进入到省电模式，或
-* 锁定设备.
-我们用下边的程序来实现：
+Last but not least, it sends notifications about the user's activity so that listeners have a chance to
+* change to powersaving modes, or
+* lock the device.
+We implement the following software for that:
 * [http://www.freesmartphone.org/index.php/Implementations/OpenDeviceDaemon odeviced]
 
 ====Audio====
@@ -86,16 +87,16 @@ The low level GSM services expect a modem complying to GSM 07.07, GSM 07.05, and
 * [http://www.freesmartphone.org/index.php/Implementations/gsm0710muxd gsm0710muxd]
 to export virtual serial lines over -- again -- AT-protocol can be spoken.
 
-====蓝牙====
-底层蓝牙实现依赖于linux核心实现的bluez蓝牙栈框架:
+====Bluetooth====
+The low level Bluetooth services rely on the official Linux Bluetooth subsystem:
 * [http://www.bluez.org BlueZ].
 
 ====GPS====
 The low level GPS services assume a GPS device that talks NMEA over a device node. We rely on the following software:
 * [http://gypsy.freedesktop.org Gypsy]
 
-====网络====
-底层网络服务实现网络接口，例如USB，以太网，Wifi等。We rely on the following software here:
+====Network====
+The low level networking service assumes network interfaces, such as USB, Ethernet, Wifi, etc. We rely on the following software here:
 * Network Manager or Intel Connection Manager (undecided yet)
 * ppp
 
@@ -108,52 +109,52 @@ With this added layer, we could later think about monitoring subsystems, subsyst
 
 See discussion page about PolicyKit.
 
-====事件====
-* 经由I/O的事件信号(掁铃, 闪烁, 掁动)
-* 可能使用 fd.o 通知 API
+====Events====
+* signaling events via I/O (ringing, blinking, vibrating)
+* might use fd.o notification API
 
 ====PIM====
-一个智能存储数据库. This is being carried out as a Google Summer of Code project. See complete description [http://www.neo1973-germany.de/wiki/pyPimd here]
+An intelligent storage database server. This is being carried out as a Google Summer of Code project. See complete description [http://www.neo1973-germany.de/wiki/pyPimd here]
 
 ====Context====
 * Intelligent context API, integrating location as one -- among other -- sources
 TBD
 Reference Geoclue
 
-====电信业务====
-* 语音
-* 数据
+====Telephony====
+* Voice
+* Data
 
 === [http://www.freesmartphone.org/index.php/Implementations/OpenPreferencesDaemon Preferences] ===
-* 配置数据库
+* settings database
 
-====网络====
-* 高级网络请求
+====Network====
+* high level networking queries
 
-=实现情况=
+=Implementation=
 
-===完成状态===
+===Completion Status===
 
-====底层====
-* 设备控制: 50%
-* 声音设备: 80%
+====Low Level====
+* device control: 50%
+* audio: 80%
 * GSM: 80%
-* 蓝牙: 80%
+* Bluetooth: 80%
 * GPS: 80%
-* 网络: 50%
+* Network: 50%
 
-====高层====
+====High Level====
 * Usage: 0%
 * Event: 0%
 * [http://www.freesmartphone.org/index.php/Implementations/OpenPreferencesDaemon Preferences]: 50%
 * Context: 0%
-* 电话业务: 50%
-* 联网: 0%
-* 个人信息管理(PIM): 0%
+* Telephony: 50%
+* Networking: 0%
+* PIM: 0%
 
 =The role of Python=
 
-在启用新代码时，我们使用Python脚本实现dbus服务。这么做可以快带原型实现 The reason for that being the rapid prototyping nature of Python and the emphasis on the Dbus APIs. Using Python, the turnaround times to experiment with APIs are incredibly faster than for using a compiled language such as C or C++.
+Where we write new code, we will use Python to implement the dbus services. The reason for that being the rapid prototyping nature of Python and the emphasis on the Dbus APIs. Using Python, the turnaround times to experiment with APIs are incredibly faster than for using a compiled language such as C or C++.
 
 Once the APIs have been used by application programmers, we can start profiling and possibly reimplement some of the services with daemons written in Vala, ''if'' necessary. We might as well succeed in improving performance by using Pyrex/Cython/Ctypes to keep the benefits of Python.
 
@@ -169,7 +170,7 @@ Once the APIs have been used by application programmers, we can start profiling 
 
 '''Subsystem Ownership'''
 
-''第一阶段子系统''
+''Phase 1 subsystems''
 
 * odeviced (mickey)
 * ophoned (mickey)
@@ -180,7 +181,7 @@ Once the APIs have been used by application programmers, we can start profiling 
 
 ''Phase 2 subsystems''
 
-* 网络 (to be defined)
+* network (to be defined)
 * pim (to be defined)
 
 ==Roadmap==
@@ -191,4 +192,5 @@ The milestone releases are combined Openmoko Framework and [[Zhone]] releases. R
 
 ----
 
-[[Category:Framework/zh cn|Framework/zh cn]]
+[[Category:Openmoko ]]
+[[Category:Framework ]]
