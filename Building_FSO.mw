@@ -3,3 +3,235 @@
 See [[OpenmokoFramework]] for more information.
 
 And [http://www.freesmartphone.org freesmartphone.org]
+
+The following is an essay in order to explain how to build FSO. Please mind the fact that it's a work in progress, done by someone fairly new to Open Embedded.
+
+This information is taken as is from [http://wiki.openembedded.net/index.php/OEandYourDistro#Using_OpenEmbedded_on_Linux_systems OpenEmbedded Wiki]. Some commentaries are voluntarily stripped in order to keep this page simple, please look on OE Wiki for more information.
+
+= Getting Open Embedded =
+
+== Mandatory Packages ==
+
+=== Deb-based distributions ===
+
+<pre><nowiki>
+ apt-get install ccache sed wget cvs subversion git-core monotone coreutils unzip texi2html texinfo libsdl1.2-dev docbook-utils gawk
+</nowiki></pre>
+
+=== rpm-based distributions ===
+
+<pre><nowiki>
+urpmi python python-devel python-psyco ccache patch m4 sed bison make wget bzip2 \
+cvs gawk glibc-devel gcc-c++ subversion sharutils coreutils docbook-utils openjade \
+quilt pcre-devel unzip
+</nowiki></pre>
+
+=== SuSE (9.1/9.2) instructions ===
+Install [http://linux01.gwdg.de/apt4rpm/ apt4rpm], then follow Debian instructions.
+
+python-dev and python-spyco are not in suse apt repository. python-spyco is not mandatory, so one can ignore it. 
+I suppose python-devel (suse) is python-dev (debian).
+
+=== Fedora ===
+
+==== Fedora Core 2/3  ====
+
+<pre><nowiki> yum install python patch m4 sed make docbook* openjade glibc-devel xmlto</nowiki></pre>
+
+
+=== Fedora Core 4  ===
+
+Apart from the usual (native) development packages like gcc and binutils, you should check that you have the following RPM's installed: 
+
+* bison
+* ccache (not required, but advised to speed up building)
+* docbook* packages
+* libpcre
+* m4
+* make
+* openjade
+* patch
+* PyQt
+* python
+* python-psyco
+* sed
+* xmlto
+* quilt (not required as OE builds it by itself, but install it if you want to use gquilt)
+
+Use apt, synaptic, up2date or yum to automagically retrieve these packages or download and install them manually (lots of work).
+
+=== Fedora Core 5/6  ===
+
+Commands I used to install OE pre-requisites on FC5/6
+
+This long command will ensure all pre-requisites are installed (patch is 2.5.4, not 2.5.9, but appears to work).
+
+<pre><nowiki>
+su -c "yum install python m4 make wget curl ftp cvs monotone subversion tar bzip2 gzip unzip python-psyco ccache perl texinfo texi2html diffstat openjade docbook-style-dsssl docbook-style-xsl docbook-dtds docbook-utils sed bison bc glibc-devel gcc binutils pcre pcre-devel git quilt groff linuxdoc-tools patch gcc gcc-c++ python-sqlite2 help2man"
+</nowiki></pre>
+
+or download the metapackage http://www.openembedded.org/dl/packages/rpm/openembedded-essential-1.1-1.noarch.rpm (may be out of date).
+
+then do
+
+<pre><nowiki>
+su -c "yum localinstall openembedded-essential-1.1-1.noarch.rpm"
+</nowiki></pre>
+
+== Fedora 7  ====
+
+This long command will ensure all pre-requisites are installed (patch is 2.5.4, not 2.5.9, but appears to work).
+
+<pre><nowiki>
+su -c "yum install python m4 make wget curl ftp cvs monotone subversion tar bzip2 gzip unzip python-psyco ccache perl texinfo texi2html diffstat openjade docbook-style-dsssl docbook-style-xsl docbook-dtds docbook-utils sed bison bc glibc-devel gcc binutils pcre pcre-devel git quilt groff linuxdoc-tools patch linuxdoc-tools gcc gcc-c++ help2man"
+</nowiki></pre>
+
+=== CentOS 4.4 / Red Hat Enterprise Linux 4  ===
+
+<pre><nowiki>
+# yum install bison ccache coreutils cvs docbook-utils gawk git-core monotone \
+  python quilt rpmlib sed subversion tetex texinfo unzip wget
+</nowiki></pre>
+
+=== Gentoo instructions ===
+
+<pre><nowiki>
+emerge -n bitbake psyco ccache patch make sed dev-lang/python  m4  bison  cvs  openjade  quilt  sgmltools-lite  docbook-xml-dtd  docbook-dsssl-stylesheets  xmlto  docbook-sgml-utils libpcre boost subversion monotone texi2html
+</nowiki></pre>
+
+=== Ark Linux 2007.1 ===
+
+<pre><nowiki>
+apt-get install devel-core diffstat texi2html cvs subversion git texinfo psyco monotone python-devel python-encodings python-sqlite
+</nowiki></pre>
+
+=== Arch Linux (Duke)  ===
+
+<pre><nowiki>
+sudo pacman -S psyco ccache patch make sed python m4 bison cvs quilt sgmltools-lite docbook-xml xmlto pcre boost monotone jade git texinfo
+</nowiki></pre>
+
+In Arch Linux the install command is in /bin/install. Since most of Linux distribution assume that install is located in /usr/bin/install, you have to create a symlink:
+
+<pre><nowiki>
+sudo ln -s /bin/install /usr/bin/install
+</nowiki></pre>
+
+You can build BitBake by using this PKGBUILD:
+<pre><nowiki>
+pkgname=bitbake
+pkgver=1.8.4
+pkgrel=1
+pkgdesc="A simple tool for task execution derived from Gentoo's portage"
+url="http://developer.berlios.de/projects/bitbake/"
+arch=('i686')
+license=('GPL' 'custom')
+depends=('python')
+source=(http://download.berlios.de/bitbake/${pkgname}-${pkgver}.tar.gz)
+md5sums=('508d9a61c635d469be8facc95151158b')
+
+build() {
+  cd ${startdir}/src/${pkgname}-${pkgver}
+  python setup.py install --root=${startdir}/pkg
+
+  # Install vim extensions
+  install -D -m644 ${startdir}/src/${pkgname}-${pkgver}/contrib/vim/ftdetect/bitbake.vim \
+                ${startdir}/pkg/usr/share/vim/ftplugin/bitbake.vim
+  install -D -m644 ${startdir}/src/${pkgname}-${pkgver}/contrib/vim/syntax/bitbake.vim \
+                ${startdir}/pkg/usr/share/vim/syntax/bitbake.vim
+
+  # Handle MIT license
+  install -D -m644 ${startdir}/src/${pkgname}-${pkgver}/doc/COPYING.MIT \
+                ${startdir}/pkg/usr/share/licenses/${pkgname}/COPYING.MIT
+}
+</nowiki></pre>
+
+= Repository Checkout =
+
+== Bitbake ==
+
+Go to the base directory of your [[OpenEmbedded]] environment and checkout bitbake:
+<pre><nowiki>
+$ cd /stuff/
+$ svn co svn://svn.berlios.de/bitbake/branches/bitbake-1.8/ bitbake</nowiki></pre>
+'''NOTE:''' for proxy handling, see [http://subversion.tigris.org/faq.html#proxy SVN FAQ]
+
+== Open Embedded ==
+
+=== Obtaining OpenEmbedded ===
+Next, you'll need to obtain the actual Openembedded database. The OE database store all the OE metadata: build classes, configuration files, and packages. Then you can extract from this database the development branch(es) you want.
+
+The Openembedded database is a [http://www.venge.net/monotone/ Monotone] database, which is the current SCM (Source Code Management) system for Openembedded. You can find monotone binaries and documentation at [http://www.venge.net/monotone/ Monotone official site].
+
+To obtain Openembedded:
+# Go to the base directory of your Openembedded environment
+ $ cd /stuff/
+# Download and bunzip2 the OE database snapshot. '''Note: Unfortunately some monotone versions differ in database format. Check [http://www.openembedded.org/snapshots Snapshots] and download the one matching your monotone version.'''
+ $ wget http://www.openembedded.org/snapshots/OE.mtn.bz2
+ $ bunzip2 -d OE.mtn.bz2
+This is the database you'll be using for all the work.
+
+If you run into a problem at this stage, check to make sure you have version 0.32 (or newer) of monotone installed.
+
+If you get further troubles in using monotone, there are two ways out:
+
+* use the [http://openembedded.org/snapshots/ latest OE snapshot]
+* use a static monotone image
+
+Then you can checkout your local copy of the Openembedded tree.
+ $ cd /stuff
+ $ mtn --db=/stuff/OE.mtn checkout --branch=org.openembedded.dev
+This extracts directories and files relating to the selected branch from the OE.mtn database and places them under <nowiki>/stuff/branchname</nowiki> (i.e. in <nowiki>/stuff/org.openembedded.dev</nowiki> in this guide)
+
+IMPORTANT NOTE ! If mtn complains about an outdated database, you can migrate it using the following command :
+
+<pre><nowiki>
+mtn db migrate --db=/stuff/OE.mtn
+</nowiki></pre>
+
+You'll then have to do the checkout.
+=== Create local configuration ===
+It's now time to create your local configuration.
+While you could copy the default local.conf.sample like that:
+
+<pre><nowiki>
+$ cd /stuff/
+$ cp org.openembedded.dev/conf/local.conf.sample build/conf/local.conf
+$ vi build/conf/local.conf
+</nowiki></pre>
+
+It is actually recommended to start smaller and keep local.conf.sample in the background and add entries from there step-by-step as you understand and need them. Please, do not just edit build/conf/local.conf.sample but actually READ it.
+
+For building a .dev branch, in your <nowiki>local.conf</nowiki> file, you should have at least the following three entries. Example for the Angstrom distribution and the Openmoko gta01 machine:
+<pre><nowiki>
+BBFILES = "/stuff/org.openembedded.dev/packages/*/*.bb"
+DISTRO = "angstrom-2008.1"
+MACHINE = "om-gta01"
+</nowiki></pre>
+
+=== Setup the environment ===
+One of the four command sets below will need to be run every time you open a terminal for development. (You can automate this in ~/.profile, /etc/profile, or perhaps use a script to set the necessary variables for using [[BitBake]].)
+
+If you followed the recommendation above to use an uninstalled [[BitBake]]:
+<pre><nowiki>
+$ export PATH=/stuff/bitbake/bin:$PATH
+$ export BBPATH=/stuff/build:/stuff/org.openembedded.dev
+</nowiki></pre>
+
+If you installed [[BitBake]]:
+<pre><nowiki>
+$ export BBPATH=/stuff/build:/stuff/org.openembedded.dev
+</nowiki></pre>
+
+Alternative syntax for those using the tcsh shell (e.g FreeBSD):
+ <pre><nowiki>
+$ setenv PATH "/stuff/bitbake/bin:"$PATH
+$ setenv BBPATH "/stuff/build:/stuff/org.openembedded.dev:"$BBPATH
+</nowiki></pre>
+
+
+= Start building =
+
+<pre><nowiki>
+cd /stuff/org.openembedded.dev && bitbake fso-image
+</pre></nowiki>
