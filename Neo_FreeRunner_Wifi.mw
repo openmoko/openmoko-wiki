@@ -1,11 +1,53 @@
-To get wlan working on your Freerunner, you can follow these steps:
+To get wlan working with your NeoFreerunner, you can follow these steps:
 
-1. create and edit a suitable /etc/wpa_supplicant/wpa_supplicant.conf   (use your favourite search engine to find the syntax)
+1. create and edit a suitable /etc/wpa_supplicant/wpa_supplicant.conf   (use your favourite search engine to get known the syntax)
 
 2. execute `ifup eth0`
 
-3. execute `wpa_supplicant -ieth0 -c/etc/wpa_supplicant/wpa_supplicant.conf` (Add an & to run in the background)
+3. execute `wpa_supplicant -ieth0 -c/etc/wpa_supplicant/wpa_supplicant.conf` (you can add a & for running in background)
 
 4. get a IP via dhcp: `udhcpc eth0`
 
-That's it, your wlan should now work!
+that's it, your wlan should work
+
+Sample wpa_supplicant.conf:
+
+ ctrl_interface=/var/run/wpa_supplicant
+ eapol_version=1
+ ap_scan=1
+ 
+ # WPA2:
+ network={
+        ssid="your ssid"
+        scan_ssid=1
+        proto=RSN
+        key_mgmt=WPA-PSK
+        pairwise=CCMP TKIP
+        group=TKIP CCMP
+        psk="secret key"
+ }
+ 
+ # WPA:                                        
+ network = {                                 
+       ssid="your_ssid"                     
+       scan_ssid=1                           
+       psk"secret key"                         
+       priority=10                           
+ }     
+ 
+ # WEP:                                        
+ network = {                                 
+      ssid="meine_ssid"                     
+      scan_ssid=1                           
+      key_mgmt=NONE                         
+      wep_tx_keyidx=0                       
+      wep_key0="mein key"                   
+      priority=8                            
+ }
+ 
+ # Open:                                       
+ network={                                    
+      ssid="massinger"                      
+      key_mgmt=NONE                         
+      priority=5                            
+ }
