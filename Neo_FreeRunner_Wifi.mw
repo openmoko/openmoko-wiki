@@ -52,3 +52,59 @@ Sample wpa_supplicant.conf:
       key_mgmt=NONE
       priority=5
  }
+
+A very ugly /etc/init.d/wlan startscript:
+ #!/bin/sh
+ #
+ # wlan	This shell script starts and stops wlan.
+ #
+ # processname: wlan
+ 
+ # Source function library.
+ #. /etc/rc.d/init.d/functions
+ # "written" by HdR (very ugly)
+ 
+ RETVAL=0
+ prog="wlan"
+ 
+ # test -f /etc/default/$prog && . /etc/default/$prog
+ 
+ start() {
+ 	echo -n "Starting $prog: "
+ 	ifconfig eth0 up
+ 	wpa_supplicant -ieth0 -c/etc/wpa_supplicant/wpa_supplicant.conf -B
+ 	sleep 10
+ 	udhcpc eth0
+ 	RETVAL=$?
+ 	return $RETVAL
+ }
+ 
+ stop() {
+ 	# Stop daemons.
+ 	echo -n "Shutting down $prog: "
+         killall wpa_supplicant
+ 	ifconfig eth0 down
+ #        killproc gpsd
+ 	RETVAL=$?
+ 	return $RETVAL
+ }
+ 
+ # See how we were called.
+ case "$1" in
+   start)
+ 	start
+ 	;;
+   stop)
+ 	stop
+ 	;;
+   restart|reload)
+ 	stop
+ 	start
+ 	RETVAL=$?
+ 	;;
+   *)
+ 	echo "Usage: $0 {start|stop|restart}"
+ 	exit 1
+ esac
+ 
+ exit $RETVAL
