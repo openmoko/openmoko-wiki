@@ -1,3 +1,58 @@
-hello nezza - now you are obligated to fill this page!
+== What is the FrogPad? ==
+The FrogPad is a 20-key keyboard with a special layout which enables you to write with only one hand at nearly normaly speed. After roundabout 20 hours of continuous training, you should be able to write a text without looking at the keypad at an average speed (this is my experience.. may vary from mind to mind ;-) ).
 
+== How can I use it on my neo? ==
+=== FrogPad on the GTK or qtopia image ===
+You can use the FrogPad like every normal Bluetooth Keyboard on your device. For more information take a look at [[Manually_using_Bluetooth#Being_able_to_use_HID_devices]].
+
+
+=== FrogPad with debian on the neo ===
+After following the steps in the link above, you won't be able to use your FrogPad as keyboard in the xserver. You have to follow these steps to get it working:
+
+The keyboard is wrapped by the evdev driver, so you have to create a new InputDevice entry in the /etc/X11/xorg.conf. Before you can do this, you first need the hardware adress of your FrogPad, which you will get by typing:
+
+ cat /proc/bus/input/devices
+
+This should give you something like this:
+
+ I: Bus=0005 Vendor=11c3 Product=0100 Version=0110
+ N: Name="FrogPad Bluetooth Keyboard"
+ P: Phys=''*PHYSICAL_ADDRESS*''
+ S: Sysfs=/devices/platform/s3c2410-ohci/usb1/1-1/1-1:1.0/hci0/acl000ADF0023D0/input/input4
+ U: Uniq=00:0A:DF:00:23:D0
+ H: Handlers=kbd event3 
+ B: EV=12001b
+ B: KEY=e080ffdf 1cfffff ffffffff fffffffe
+ B: ABS=300 0
+ B: MSC=10
+ B: LED=1f
+
+In this output you will find the physical address of your FrogPad, which you will need for the xorg.conf:
+
+
+ Section "InputDevice"
+        Identifier      "FrogPad"
+        Driver          "evdev"
+        #See output from cat /proc/bus/input/devices from above for the event handler.
+        #This should only be used if it doesn't work with the physical adress and the device name.
+        #Option          "Device"                "/dev/input/event3"        
+        Option          "Name"                  "FrogPad Bluetooth Keyboard"          
+        Option          "Phys"                  "PHYSICAL_ADDRESS"             
+        Option          "XkbRules"              "xorg"
+        Option          "XkbModel"              "en_US"
+        Option          "XkbLayout"             "us"
+ EndSection
+ .....
+ Section "ServerLayout"
+ ...
+       InputDevice     "FrogPad"
+ ...
+ EndSection
+
+After this, you have to kill your x-server and restart it with
+ start -- vt1
+
+Now your FrogPad should work :-) 
+
+A manual for using the bluetooth hcid daemon to auto-reconnect your FrogPad with your Neo will follow.
 [[Image:Debian+frogpad.jpg|thumb|480px|''Using irssi on [[Debian]] together with the frogpad to IRC on #neo1973-germany'']]
