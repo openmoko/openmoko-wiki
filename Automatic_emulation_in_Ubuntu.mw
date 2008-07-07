@@ -25,7 +25,12 @@ Now we will install Openmoko in a directory by downloading the MokoMakefile in i
     mkdir openmoko
     cd openmoko
 * Get the MokoMakefile:
-    wget <nowiki>http://www.rwhitby.net/files/openmoko/Makefile</nowiki>
+    wget http://www.rwhitby.net/files/openmoko/Makefile (Currently down due to fires in California. Use the link below instead)
+
+If that doesn't work, try 
+
+    wget http://svn.projects.openmoko.org/svnroot/mokomakefile/trunk/Makefile
+
 * Make the MokoMakefile and tell it, you want to install it for qemu:
     make qemu
 
@@ -161,6 +166,20 @@ Have any idea on how to get over it or to enable the automatic memory allocation
 I have compiled the Qemu source just fine on Ubuntu Hardy, but when the emulator started it showed up with an unusual QT theme. After the nice picture with the two boots there appeared a message line "No network" in the middle of the screen and 4 icons (cellphone, Q, star and lock). The buttons below the icons are unresponsive. They show a change in the background color when I click them with the mouse, but then nothing happens. Even if I press them for several seconds as noted above. Has the Openmoko theme been accidentally replaced by a non-working QT theme or did I configure something wrong on my end?
 
 Thomas
+
+--[[User:Xaos|Xaos]] 15:06, July 7th, 2008 (CST)
+Thomas, I got the same thing when I tried.  On the #openmoko IRC channel, lindi and I (with help) got this to work:
+
+1. After building qemu with "make qemu", close the emulator and:
+2. modify the file: build/qemu/openmoko/env as follows (you may need to adjust these values as time goes by for different images):
+    # rootfs_wildcard="Open?oko-openmoko-*image*-om-gta01.rootfs.jffs2"
+    rootfs_wildcard="Openmoko-openmoko-devel-image-glibc-ipk-P1-Snapshot-20080706-om-gta01.rootfs.jffs2"
+
+    #download_dir="http://buildhost.openmoko.org/daily/neo1973/deploy/glibc/images/neo1973/"
+    download_dir="http://buildhost.openmoko.org/daily/neo1973/200807/20080706/"
+3. Download the above .jffs2 file (build the URL with the download_dir and the rootfs_wildcard values) to images/openmoko/
+4. run "make flash-qemu-official"
+5. run "make run-qemu-snapshot"  or "make run-qemu"
 
 --[[User:Schafdog|schafdog]] 15:10, July 1th 2008 (CST)
 
