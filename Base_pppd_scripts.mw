@@ -1,0 +1,78 @@
+These scripts work for the german provider BASE (so might work for E-Plus too). 
+
+=== /etc/ppp/peers/base ===
+ # File: /etc/ppp/peers/base
+ #
+ dev/ttySAC0 115200
+ connect /etc/ppp/base-connect-chat
+ crtscts
+ lock
+ hide-password
+ defaultroute
+ usepeerdns
+ disconnect /etc/ppp/base-disconnect-chat
+ holdoff 3
+ ipcp-accept-local
+ lcp-echo-failure 8
+ lcp-echo-interval 3
+ noauth
+ noipdefault
+ novj
+ novjccomp
+ replacedefaultroute
+ persist
+ lcp-echo-interval 3
+ lcp-echo-failure 12
+ # username to use for authentication, should match "client" in /etc/ppp/chap-secrets
+ user "eplus"
+
+----
+
+=== /etc/ppp/base-connect-chat ===
+ #!/bin/sh -e
+ exec chat -v\
+        ABORT BUSY\
+        ABORT DELAYED\
+        ABORT "NO ANSWER"\
+        ABORT "NO DIALTONE"\
+        ABORT VOICE\
+        ABORT ERROR\
+        ABORT RINGING\
+        TIMEOUT 60\
+        "" +++\
+        AT ATZ\
+        OK ATE1\
+        OK AT+CFUN=1\
+        OK AT+COPS\
+        OK AT+CGDCONT=1,\"IP\",\"internet.eplus.de\"\
+        OK ATD*99#\
+        CONNECT /n/d
+
+----
+
+=== /etc/ppp/base-disconnect-chat ===
+ #!/bin/sh -e
+ /usr/sbin/chat -v\
+        ABORT OK\
+        ABORT BUSY\
+        ABORT DELAYED\
+        ABORT "NO ANSWER"\
+        ABORT "NO CARRIER"\
+        ABORT "NO DIALTONE"\
+        ABORT VOICE\
+        ABORT ERROR\
+        ABORT RINGING\
+        TIMEOUT 12\
+        "" \\k\\k\\k\\d+++ATH\
+        "NO CARRIER-AT-OK" ""
+
+----
+
+=== /etc/ppp/chap-secrets ===
+ #Secrets for authentication using CHAP
+ # client        server  secret                  IP addresses
+ "eplus"         *       "gprs"                  *
+
+----
+
+Modified from info found here: [http://wiki.openmoko.org/wiki/T-Mobile_pppd_scripts]
