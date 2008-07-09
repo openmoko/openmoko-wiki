@@ -5,37 +5,37 @@ MokoMakefile is a Makefile which saves lots of work when setting up an Openmoko 
 By automating the setup process of a new Openmoko build environment, it provides an environment which is configured the same for all the existing developers and should therefore be preferred over manual procedures or individual setup procedures.
 It brings the same repeatability to build environment creation and maintenance as that which the BitBake scripts bring to [[OpenEmbedded]] ease and standardize the process of building OpenEmbedded.
 
-Unlike the manual process described at [[Building OpenMoko from scratch]], MokoMakefile does not install anything into your system (it can and should be started as normal user).
+Unlike the manual process described at [[Building Openmoko from scratch]], MokoMakefile does not install anything into your system (it can and should be started as normal user).
 MokoMakefile is a wrapper around all that is required to make it easy to set up and maintain a development environment that fully complies with the setup instructions published by Openmoko.
 
-MokoMakefile is developed by [[User:RodWhitby|Rod Whitby]] - it is not an official product of OpenMoko (although I would be happy for them to pick it up and use it internally).  If there is any discrepancy between the [[OpenMoko2007.2#How_to_build|official OpenMoko build instructions]], and the operation of the MokoMakefile, then you should consider the official instructions to be correct.
+MokoMakefile is developed by [[User:RodWhitby|Rod Whitby]] - it is not an official product of Openmoko (although I would be happy for them to pick it up and use it internally).  If there is any discrepancy between the [[Openmoko2007.2#How_to_build|official Openmoko build instructions]], and the operation of the MokoMakefile, then you should consider the official instructions to be correct.
 
 The MokoMakefile is able to build both OM-2007.2 and QTopia-X11 images.
 
-MokoMakefile also builds the QEMU-based Neo1973 emulator as part of the build process and has make targets to install the OpenMoko images into it and run it. These commands can also be used without downloading and building the whole OpenMoko OpenEmbedded distribution. This part is described in [[Using QEMU with MokoMakefile]].
+MokoMakefile also builds the QEMU-based Neo1973 emulator as part of the build process and has make targets to install the Openmoko images into it and run it. These commands can also be used without downloading and building the whole Openmoko OpenEmbedded distribution. This part is described in [[Using QEMU with MokoMakefile]].
 
 == Requirements for building Openmoko ==
-Independent on whether MokoMakefile or a manual process is used to setup an OpenMoko build environment, there are several requirements which must be fulfilled in order for the OpenMoko build to succeed:
+Independent on whether MokoMakefile or a manual process is used to setup an Openmoko build environment, there are several requirements which must be fulfilled in order for the Openmoko build to succeed:
 
 * RAM: The build host needs to have at least 512MB of RAM, and about the same amount of swap. Some packages built by OpenEmbedded like busybox are built by compiling all source files into one binary which causes gcc to grow beyond 300MB of size and no part of this memory may be on swap for the compile to finish in predictable time. For busybox, this can be turned off, but turning this off means that busybox will not as well optimized by gcc.
 
-* Disk space: You need about 12 GB of available disk space for the OpenMoko build to succeed (see below for a tip on how to reduce this).
+* Disk space: You need about 12 GB of available disk space for the Openmoko build to succeed (see below for a tip on how to reduce this).
 
 * Time: The initial build takes at least 5 hours (on 2GHz core2duo without multiprocessor optimization) and may take several days on slower machines.
 
 === Required software ===
 
-Some distribution specific hints on preparing your build host for building OpenEmbedded are on   http://www.openembedded.org/wiki/OEandYourDistro but they may be outdated, incomplete and do not cover everything which OpenMoko needs to build.
+Some distribution specific hints on preparing your build host for building OpenEmbedded are on   http://www.openembedded.org/wiki/OEandYourDistro but they may be outdated, incomplete and do not cover everything which Openmoko needs to build.
 
-A good guide is [[Building OpenMoko from scratch#Build host prerequisites|the section on build host prerequisites]] in [[Building OpenMoko from scratch]]
+A good guide is [[Building Openmoko from scratch#Build host prerequisites|the section on build host prerequisites]] in [[Building Openmoko from scratch]]
 
-If you forgot anything which OE needs itself, OE will tell you shortly after you start building, but it does not check build dependencies of OpenMoko, so you either have to install them before starting or install them after the build failed. OpenEmbedded will continue where it stopped when you restart the build afterwards.
+If you forgot anything which OE needs itself, OE will tell you shortly after you start building, but it does not check build dependencies of Openmoko, so you either have to install them before starting or install them after the build failed. OpenEmbedded will continue where it stopped when you restart the build afterwards.
 
 ==== Package requirements by distribution ====
 Your distribution needs to provide these commands in order for OpenEmbedded to start building:
  subversion texi2html texinfo help2man
 
-OpenMoko needs the development packages (with header files, development libraries and tools) in order to finish building:
+Openmoko needs the development packages (with header files, development libraries and tools) in order to finish building:
  ncurses zlib (or libz) OpenSSL GTK++
 
 Because there are bugs in the interaction of QEMU and GCC-4, you'll need a copy of gcc-3.x installed as well.
@@ -46,7 +46,7 @@ Because there are bugs in the interaction of QEMU and GCC-4, you'll need a copy 
   apt-get install libncurses5-dev zlib1g-dev libssl-dev libgtk2.0-dev 
   # To prevent errors in host validation
   apt-get install ca-certificates
-  # For OpenMoko 2007.2 using BitBake-1.8.8:
+  # For Openmoko 2007.2 using BitBake-1.8.8:
   apt-get install python-pysqlite2 sqlite3 sqlite3-doc python-pysqlite2-dbg
   # For building faster
   apt-get install quilt python-psyco ccache
@@ -108,7 +108,7 @@ And, for the FSO use:
 
 ''Hint:'' The images build with this command can be found under {$OMDIR}/build/tmp/deploy/images/neo1973
 
-This will set up the recommended directory structure as described in [[Building OpenMoko from scratch]], will download all the required software (from the right places with the right versions), and will immediately start building an image.
+This will set up the recommended directory structure as described in [[Building Openmoko from scratch]], will download all the required software (from the right places with the right versions), and will immediately start building an image.
 
 Once you have done this, you can choose to continue using the MokoMakefile to initiate your subsequent builds, or you can go into the build directory and run bitbake commands manually.  The choice is yours.
 
@@ -121,7 +121,7 @@ For easy maintenance of your build environment the following commands are availa
 2 - To make sure that any recent changes to the build directory structure have been applied:
    make setup 
 
-3 - To update the OpenMoko repository checkout and the MokoMakefile patches to the latest version:
+3 - To update the Openmoko repository checkout and the MokoMakefile patches to the latest version:
    make update
 
 A quick way to rebuild a new image with the latest updates:
@@ -204,7 +204,7 @@ Here is the list (not complete) of useful MokoMakefile commands (actually make t
 
 ; make openmoko-toolchain : builds [[toolchain]]
 
-; make qemu : builds qemu, downloads flash images from official repository, flashes qemu emulated Neo1973 and runs emulator (see also [[OpenMoko under QEMU]]). 
+; make qemu : builds qemu, downloads flash images from official repository, flashes qemu emulated Neo1973 and runs emulator (see also [[Openmoko under QEMU]]). 
 
 ; make qemu-local : same as ''make qemu'', but uses locally built images instead of official ones.
 
@@ -218,7 +218,7 @@ Here is the list (not complete) of useful MokoMakefile commands (actually make t
 
 ; make setup : to make sure that any recent changes to the build directory structure have been applied
    
-; make update : to update the OpenMoko repository checkout and the MokoMakefile patches to the latest version
+; make update : to update the Openmoko repository checkout and the MokoMakefile patches to the latest version
 
 ==Developing with MokoMakefile==
 
