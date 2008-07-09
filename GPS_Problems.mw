@@ -1,76 +1,14 @@
-See GPS for details on how to evaluate the [[Neo FreeRunner GPS]] with command line utilities.
+See [[GPS]] for details on how to evaluate the Freerunner GPS with cat.
 
-=== Problem: it takes a long time (10min+) before the FreeRunner gets first GPS data ===
+Before reporting a problem here, please check that you've had the GPS out in the open air, preferably with the GPS antenna pointed up, for over 15 mins.
 
-It was found that the Openmoko FreeRunner GPS has a long Time To First Fix (TTFF) when there is an SD card in the phone. [http://lists.openmoko.org/pipermail/community/2008-July/021774.html This thread] indicates that there is interference from the SD card slot: TTFF is much shorter without an inserted SD card.
+This should get a lock in even the worst cases.
 
-::More specific: the GPS signal level drops by 20dB, i.e. a factor of 100. Signal strength of a GPS satellite above your head is around -127dBm. Needed strength for a first fix is -145dBm with a minimum of three satellites. Once the GPS chip has a fix, it can operate at signal levels of -157dBm, thus making it possible to operate while there is data transfer from/to the SD card.
-::''(From http://lists.openmoko.org/pipermail/community/2008-July/022202.html )''
+Also note if you've tried unpluging and repluging the internal GPS connector.
 
-=== Solutions ===
-
-{{Note|It seems that in the newer version of the hardware, a compensating capacitor is now present. So this problem should be fixed with newer devices. First noticed on 20080724 and confirmed on 20080830. You can check if it has the fix by looking for the capacitor beneath the SD card, as shown in [[Media:Gta02 gps 10pf rework sop.pdf|this PDF file]].}}
-{{Note|The capacitor also appeared on a 20080723 purchased from Pulster vendor.}}
-
-A [http://lists.openmoko.org/pipermail/openmoko-kernel/2008-July/003777.html software workaround] has been released as a kernel patch and may be acquired simply by doing an "opkg update" and "opkg upgrade" and then rebooting your FreeRunner. This workaround effectively turns off the SD card clock when the SD card is not being used. You can then use the SD card simultaneously with GPS, except for the first approximately 30 seconds.
-
-Openmoko is soliciting the assistance of the community to test the effectiveness of this software fix. The experiment consists of a series of measurements in different conditions, prior to applying the software fix and then after applying the software fix. Please visit [[FreeRunner GPS Software Fix TTFF Measurement Test]] for instructions to participate and to see the results so far of this test.
-
-Openmoko has examined a hardware solution: soldering a 10 pf capacitor between SD card pin 5 (clk) and pin 6 (Vss) [[Image:Gta02 gps 10pf rework sop.pdf]] and more detailed [[Image:SOP_for_GPS_capacitor_rework.pdf|GPS issue SD clcok pin capacitor rework guide]]. This effectively restores GPS performance to the levels obtained without the SD card inside. The rework is not suggested to end users without hardware soldering technique and equipment. This rework is done on all the new fabricated Neo FreeRunners
-
-==== Hardware mod related ====
-
-See:  
-* [[Shop:Speedevil|Speedevil's Shop]] for a UK service to perform this operation on your freerunner, or globally shipped 10pF capacitor. 
-
-*   [http://search.digikey.com/scripts/DkSearch/dksus.dll?Detail?name=490-1278-1-ND Digikey] for the capacitor.
-
-=== Discussion ===
-
-The following is based on [http://lists.openmoko.org/pipermail/community/2008-July/022180.html Alasal's post] to the community mailing list. 
-
-;What is TTFF?
-:TTFF means Time To First Fix of the GPS. This is the time the GPS needs to get the first clue on where you are on planet earth. So you have to do this only once. After you have a FF (first fix), you can get more fixes without any problems with the SD card in the phone.
-
-
-;So if we have a first fix, the SD card doesn't block the GPS anymore?
-:Yes, the SD card doesn't block the GPS if we have a first fix. (Some people even claim it's more stable)
-
-
-;Why do we need a first fix?
-: According to [http://lists.openmoko.org/pipermail/community/2008-July/020705.html Al Johnson], the Antares4 chip on the GTA02 doesn't have the memory needed to store almanac and ephemeris, last known position or time. This means that every start is a true cold start. It [http://lists.openmoko.org/pipermail/community/2008-July/020772.html is possible] to save location, almanac and ephemeris at GPS shut down, and restore these information at the next startup, but that does not seem implemented yet.
-
-
-;Does the lower signal also affect accuracy?
-:It is a good deal more jittery. However, if you drive around in a city you will get a lot more error from signal reflections than from the jitter.
-:''(From http://lists.openmoko.org/pipermail/community/2008-July/022209.html )''
-
-
-;Do they have a solution?
-:Yes. There is already a highly alpha software workaround. The software just turns off the SD card clock when the SD card is not being used. They are also examining a hardware solution.
-::The software fix is still in testing. Expect first results this noon (''Thursday, 17th July 2008'') (Taipeh time).
-::Also, the hardware fix needed is rather easy. No need to open the shielding or housing. We are working on a document which gives you detailed instructions.
-::''(From http://lists.openmoko.org/pipermail/community/2008-July/022242.html )''
-
-
-;Do we have to return our FreeRunners to Openmoko?
-:Probably not, because the software workaround should work too.
-
-;But we can't read from the SD card when the GPS is on?
-:Wrong, you will be able to read the SD card when the GPS is on.  The clock for the SD card used to run constantly.  Now the kernel turns it off when the SD card is not in use.  As long as you are not constantly reading from the SD card, you should see much better first fix times.  Obtaining a GPS fix does not affect SD performance.
-
-;Did Openmoko test the GPS with a SD card in it?
-:Yes.
-
-;Why didn't they find it while testing the FreeRunner?
-:Because they have to do the tests with a fake GPS signal and with that signal it worked (In a fab you don't have a decent GPS signal). They have already modified the test, so it corresponds to the GPS signal better.
-
-== Information about faulty antennas ==
-
-* If removing the SD card doesn't help and you suspect your antenna, try unplugging and replugging the internal GPS connector. (See [[Disassembling_Neo1973]] about 2/3 of the way down.  (this also applies to the Freerunner, since it's the same case)
-
-* Also note that there is a trac ticket for this issue: [http://docs.openmoko.org/trac/ticket/1542 #1542]
-
-* [[FreeRunner GPS antenna repair SOP]] indicates that some (rare?) units may have bad soldering, and includes a guide to fix. This will presumably void your warranty.
-
-[[Category:Neo FreeRunner solved GPS problems]]
+{|border="3"
+|+Problems I'm having with the GPS
+!Username||Checked outside?||External antenna?||Note
+|-
+|Dummy ||?|| ? ||
+|}
