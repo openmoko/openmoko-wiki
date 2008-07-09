@@ -210,27 +210,28 @@ $ route add default gw 192.168.68.1
 
 Edit /etc/resolv.conf:
 nameserver 192.168.0.1
+This will be your host-computer DNS server.
 
-On the host-computer type:
+On the host-computer type(as root , use sudo -i on ubuntu):
 
 <pre>
-$ echo 1 >> /proc/sys/net/ipv4/ip_forward
-$ echo 1 >> /proc/sys/net/ipv4/ip_dynaddr
+echo 1 >> /proc/sys/net/ipv4/ip_forward
+echo 1 >> /proc/sys/net/ipv4/ip_dynaddr
 
-$ modprobe ip_tables
-$ modprobe iptable_nat
-$ modprobe ipt_MASQUERADE
+modprobe ip_tables
+modprobe iptable_nat
+modprobe ipt_MASQUERADE
 
-$ iptables -t filter -F
-$ iptables -t nat    -F
+iptables -t filter -F
+iptables -t nat    -F
 
-$ iptables -t filter -P INPUT       ACCEPT
-$ iptables -t filter -P FORWARD     ACCEPT
-$ iptables -t filter -P OUTPUT      ACCEPT
-$ iptables -t nat    -P PREROUTING  ACCEPT
-$ iptables -t nat    -P POSTROUTING ACCEPT
+iptables -t filter -P INPUT       ACCEPT
+iptables -t filter -P FORWARD     ACCEPT
+iptables -t filter -P OUTPUT      ACCEPT
+iptables -t nat    -P PREROUTING  ACCEPT
+iptables -t nat    -P POSTROUTING ACCEPT
 
-$ iptables -t nat -A POSTROUTING -o eth0 -s 192.168.68.0/24 -j MASQUERADE
+iptables -t nat -A POSTROUTING -o eth0 -s 192.168.68.0/24 -j MASQUERADE
 </pre>
 
 (Where eth0 is your network interface connected to the router)
