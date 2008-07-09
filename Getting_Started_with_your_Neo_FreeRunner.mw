@@ -253,6 +253,31 @@ Now it should be possible to connect to your phone using the following command:
 
 The above only gets you a Secure Shell connection to the Openmoko device, it does not allow the Openmoko device to connect to the Internet.  If you are interested in connecting the device to the internet then check out the [[USB_Networking]] section.
 
+==Un-crippling the 2007.2 image==
+
+The stock 2007.2 image flashed onto the Neo FreeRunner after its production is really just the bare bones. For example, you don't have the clock and the quick-launch icons showing. Here's how you can change that:
+
+ # dbus-launch gconftool-2 -t boolean -s /desktop/poky/interface/reduced false
+ # /etc/init.d/xserver-nodm restart
+
+If you rather have a regular clock instead of the digital one, do this instead:
+
+ # dbus-launch gconftool-2 -t boolean -s /desktop/poky/interface/reduced false
+ # dbus-launch gconftool-2 -t boolean -s /desktop/poky/interface/digital_clock false
+ # /etc/init.d/xserver-nodm restart
+
+To test GPS, you can use agpsui:
+
+ # opkg install openmoko-agpsui
+
+And if you want the Media Player back:
+
+ # opkg install openmoko-mediaplayer2
+ # wget http://abraxa.dyndns.org:81/random/openmoko-mediaplayer-theme.tar.bz2
+ # tar xjf openmoko-mediaplayer-theme.tar.bz2 -C /usr/share/themes/Moko/gtk-2.0
+
+There are tons more apps you can install - check out the [[Repositories]] for a list of packages.
+
 ==Appendix==
 If you want to know more about the Neo FreeRunner then you can get more information in the following topics:
 * [[GTA02 Openness]]
