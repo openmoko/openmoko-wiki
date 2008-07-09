@@ -32,7 +32,7 @@
 * Try to reuse existing technologies as much as possible, but not at the cost of a bad API
 
 =How to achieve that technically=
-* Chose [[Dbus]] as the collaboration line. Below dbus, we can work together. Above dbus, we can differentiate.
+* 选择[[Dbus]]作为协同开发分界线。Dbus下层，我们合作开发，Dbus上层，我们使用不同的方式实现。
 * Expose features through dbus APIs implemented by UI-agnostic and language-agnostic services (daemons).
 * Optimize for Openmoko devices, but support multiple architectures and purposes through plugin interfaces and suitable hardware abstraction mechanisms.
 * Be not afraid of reinventing the wheel for a wheel-barrow if all the existing wheels are made for sports cars.
@@ -87,16 +87,16 @@ The low level GSM services expect a modem complying to GSM 07.07, GSM 07.05, and
 * [http://www.freesmartphone.org/index.php/Implementations/gsm0710muxd gsm0710muxd]
 to export virtual serial lines over -- again -- AT-protocol can be spoken.
 
-====Bluetooth====
-The low level Bluetooth services rely on the official Linux Bluetooth subsystem:
+====蓝牙====
+底层蓝牙实现依赖于linux核心实现的bluez蓝牙栈框架:
 * [http://www.bluez.org BlueZ].
 
 ====GPS====
 The low level GPS services assume a GPS device that talks NMEA over a device node. We rely on the following software:
 * [http://gypsy.freedesktop.org Gypsy]
 
-====Network====
-The low level networking service assumes network interfaces, such as USB, Ethernet, Wifi, etc. We rely on the following software here:
+====网络====
+底层网络服务实现网络接口，例如USB，以太网，Wifi等。We rely on the following software here:
 * Network Manager or Intel Connection Manager (undecided yet)
 * ppp
 
@@ -109,52 +109,52 @@ With this added layer, we could later think about monitoring subsystems, subsyst
 
 See discussion page about PolicyKit.
 
-====Events====
-* signaling events via I/O (ringing, blinking, vibrating)
-* might use fd.o notification API
+====事件====
+* 经由I/O的事件信号(掁铃, 闪烁, 掁动)
+* 可能使用 fd.o 通知 API
 
 ====PIM====
-An intelligent storage database server. This is being carried out as a Google Summer of Code project. See complete description [http://www.neo1973-germany.de/wiki/pyPimd here]
+一个智能存储数据库. This is being carried out as a Google Summer of Code project. See complete description [http://www.neo1973-germany.de/wiki/pyPimd here]
 
 ====Context====
 * Intelligent context API, integrating location as one -- among other -- sources
 TBD
 Reference Geoclue
 
-====Telephony====
-* Voice
-* Data
+====电信业务====
+* 语音
+* 数据
 
 === [http://www.freesmartphone.org/index.php/Implementations/OpenPreferencesDaemon Preferences] ===
-* settings database
+* 配置数据库
 
-====Network====
-* high level networking queries
+====网络====
+* 高级网络请求
 
-=Implementation=
+=实现情况=
 
-===Completion Status===
+===完成状态===
 
-====Low Level====
-* device control: 50%
-* audio: 80%
+====底层====
+* 设备控制: 50%
+* 声音设备: 80%
 * GSM: 80%
-* Bluetooth: 80%
+* 蓝牙: 80%
 * GPS: 80%
-* Network: 50%
+* 网络: 50%
 
-====High Level====
+====高层====
 * Usage: 0%
 * Event: 0%
 * [http://www.freesmartphone.org/index.php/Implementations/OpenPreferencesDaemon Preferences]: 50%
 * Context: 0%
-* Telephony: 50%
-* Networking: 0%
-* PIM: 0%
+* 电话业务: 50%
+* 联网: 0%
+* 个人信息管理(PIM): 0%
 
 =The role of Python=
 
-Where we write new code, we will use Python to implement the dbus services. The reason for that being the rapid prototyping nature of Python and the emphasis on the Dbus APIs. Using Python, the turnaround times to experiment with APIs are incredibly faster than for using a compiled language such as C or C++.
+在启用新代码时，我们使用Python脚本实现dbus服务。这么做可以快带原型实现 The reason for that being the rapid prototyping nature of Python and the emphasis on the Dbus APIs. Using Python, the turnaround times to experiment with APIs are incredibly faster than for using a compiled language such as C or C++.
 
 Once the APIs have been used by application programmers, we can start profiling and possibly reimplement some of the services with daemons written in Vala, ''if'' necessary. We might as well succeed in improving performance by using Pyrex/Cython/Ctypes to keep the benefits of Python.
 
@@ -170,7 +170,7 @@ Once the APIs have been used by application programmers, we can start profiling 
 
 '''Subsystem Ownership'''
 
-''Phase 1 subsystems''
+''第一阶段子系统''
 
 * odeviced (mickey)
 * ophoned (mickey)
@@ -181,7 +181,7 @@ Once the APIs have been used by application programmers, we can start profiling 
 
 ''Phase 2 subsystems''
 
-* network (to be defined)
+* 网络 (to be defined)
 * pim (to be defined)
 
 ==Roadmap==
