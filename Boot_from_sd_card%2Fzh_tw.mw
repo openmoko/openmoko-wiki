@@ -1,1 +1,118 @@
-#REDIRECT [[Booting from SD/zh tw]]
+{{Languages|Boot from sd card}}
+[[Category:Technical]]
+[[Category:Hardware]]
+[[Category:Documentation]]
+=NOR in GTA02 history=
+__NOTOC__
+__NOEDITSECTION__
+There is 2 MB NOR flash comes with GTA02. Before DVT4 units (2008 April arrived Taipei), GTA02 NOR comes without NOR protection in hardware. 
+
+All units after DVT4 and Mass production WITH NOR protection in hardware, MUST using debug board v3 or later with disable NOR write utility to disable write protection, then, could upgrade NOR in the GTA02.
+
+DVT4 units and PVT1 units will use "uImage" as kernel image file name, instaed "uImage.bin" in mass production units for kernel image in SD card. You could check the date of boot screen to know which version was in ypour device.
+
+*Utility for enable NOR write in debug board v3 could be found in [http://svn.openmoko.org/trunk/src/host/norwp/ Disable NOR write protect]
+
+*Script in user space could write NOR [http://svn.openmoko.org/trunk/src/host/devirginator/flashnor Flash NOR script]
+
+==Release History==
+
+* 20080226 initial release
+* 20080305 Fix DFU, and remove copy NOR to NAND function
+* 20080312 Fix boot from SD (from use the name uImage to uImage.bin)
+* 20080320 Fix u-boot direct drawing 500mA issue, smart charging after this version, mass production version
+
+=Create Bootable SD Card (GTA02)=
+
+Following is my step for boot from sd function, using ubuntu and clean 512 MB Sandisk microSD card (original FAT16 partition SD card):
+
+*Step 1, umount volume:
+   
+   sudo umount /media/disk-1
+
+Then re-partition the sd card into 2 partition, first one using vfat and have 8MB size for uImage.bin, second (rest of storage) using ext2 format for rootfs files/directory.  Both volume using primary partition type.
+
+*Step 2, fdisk:
+
+   sudo fdisk /dev/mmcblk0
+
+   Command (m for help): d
+   Selected partition 1
+   Command (m for help): n
+   Command action
+      e   extended
+      p   primary partition (1-4)
+   p
+   Partition number (1-4): 1
+   First cylinder (1-983, default 1):
+   Using default value 1
+   Last cylinder or +size or +sizeM or +sizeK (1-983, default 983): +8M
+   Command (m for help): n
+   Command action
+      e   extended
+      p   primary partition (1-4)
+   p
+   Partition number (1-4): 2
+   First cylinder (18-983, default 18):
+   Using default value 18
+   Last cylinder or +size or +sizeM or +sizeK (18-983, default 983):
+   Using default value 983
+   Command (m for help): w
+   The partition table has been altered!
+   Calling ioctl() to re-read partition table.
+   Syncing disks.
+
+*Step 3 Format:
+
+Format 2 volume with vfat (uImage.bin) and ext2 (rootfs files)
+
+   mkfs -t vfat /dev/mmcblk0p1
+
+   mkfs -t ext2 /dev/mmcblk0p2
+
+
+*Step 4 Copy kernel and rootfs files into 2 volume:
+
+uImage.bin as kernel name in mass production units. uImage was used in early production units (DVT4/PVT1). rootfs you have to tar xvzf rootfs.tar.gz to get all files
+
+   sudo cp -r /home/tony/Desktop/kernel/uImage.bin /media/disk-1
+
+   sudo cp -r /home/tony/Desktop/root_files/. /media/disk-2
+
+   sync
+
+*Step 5 Select the boot from SD from menu (with correct u-boot_env content)
+
+
+
+=Boot enviorment (GTA02)=
+
+There are 6 partition in the GTA02 NAND.
+
+* 1. u-boot.bin
+* 2. u-boot_env
+* 3. kernel (uImage.bin)
+* 4. splash.gz (splash screen)
+* 5. Factory (BT/WLAN/Serial...etc)
+* 6. rootfs
+
+Default env files with GTA02 initial release (2008/7) could be found in following address [http://people.openmoko.org/tony_tu/GTA02/images/20080424_gta02_release/env-5secs.env default env files]
+
+You could try following env.new file to add boot from sd function in boot screen  [http://people.openmoko.org/tony_tu/GTA02/images/env_files/env.new u-boot environment].
+
+* ./dfu-util -a u-boot_env -R -D env.new
+
+=Boot from NOR (GTA02)=
+
+If you want boot from NOR, and using NOR boot from SD, please use following steps:
+
+* Hold the AUX key
+* then Power Key together for power up GTA02
+* Release AUX key after 1 second
+
+Then you will enter default NOR boot menu. Then You could:
+
+* DFU under NOR boot
+* Boot from SD using NOR boot screen
+
+=Boot from NAND (GTA02)=
