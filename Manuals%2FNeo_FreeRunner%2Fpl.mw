@@ -252,39 +252,38 @@ Teraz powinno być możliwe połączenie z telefonem przez polecenie:
 Powyższa metoda łączy wyłącznie poprzez ssh. Żeby połączyć Openmoko do Internetu przeczytaj [[USB Networking]].
 
 =====Udostepnianie Internetu poprzez USB=====
-In Ubuntu:
+W Ubuntu: 
 
-Within /etc/network/interfaces, change your interface setup to this:
+Wyedytuj plik konfiguracyjny /etc/network/interfaces, i dodaj do niego następujący wpis: 
 
- auto usb0
- iface usb0 inet static
-    address 192.168.0.200
-    netmask 255.255.255.0
-    network 192.168.0.0
-    up iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24 &
-    up echo 1 > /proc/sys/net/ipv4/ip_forward &
-    up iptables -P FORWARD ACCEPT &
-    down iptables -D POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24 &
+  auto usb0
+  iface usb0 inet static
+     address 192.168.0.200
+     netmask 255.255.255.0
+     network 192.168.0.0
+     up iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24 &
+     up echo 1 > /proc/sys/net/ipv4/ip_forward &
+     up iptables -P FORWARD ACCEPT &
+     down iptables -D POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24 &
 
-Then, on your Freerunner, edit /etc/
-and modify the code from this:
+Następnie, w telefonie Neo FreeRunner, wedytuj /etc/ i zmień ustawienia...: 
 
- iface usb0 inet static
-        address 192.168.0.202
-        netmask 255.255.255.0
-        network 192.168.0.0
-        gateway 192.168.0.200
-        up echo nameserver 192.168.0.200 > /etc/resolv.conf
+  iface usb0 inet static
+       address 192.168.0.202
+       netmask 255.255.255.0
+       network 192.168.0.0
+       gateway 192.168.0.200
+       up echo nameserver 192.168.0.200 > /etc/resolv.conf
 
-to something that points to a real name server, like a public DNS system from OpenDNS, like this:
+...na takie które zawierają prawdziwe nazwy adresów serwerów, jak np. publiczne adresy DNS od OpenDNS: 
 
- iface usb0 inet static
-        address 192.168.0.202
-        netmask 255.255.255.0
-        network 192.168.0.0
-        gateway 192.168.0.200
-        up echo nameserver 208.67.222.222 > /etc/resolv.conf
-        up echo nameserver 208.67.220.220 >> /etc/resolv.conf
+  iface usb0 inet static
+       address 192.168.0.202
+       netmask 255.255.255.0
+       network 192.168.0.0
+       gateway 192.168.0.200
+       up echo nameserver 208.67.222.222 > /etc/resolv.conf
+       up echo nameserver 208.67.220.220 >> /etc/resolv.conf
 
 ==Upiększanie obrazu firmware 2007.02==
 
