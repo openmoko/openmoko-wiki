@@ -9,6 +9,22 @@ On my neo, for some reason I can't connect to dbus when running from an ssh sess
 
 It will import all of the contacts on your SIM into openmoko-contacts.  Unfortunately, my SIM doesn't seem to give a contact type, so I arbitrarily set the first phone number for a given name to Home, the next to Work, and any remaining to Cell numbers.  I figure it's far easier to click the drop-down & correct them as necessary than to type all your contact info in manually on the neo keyboard, which was my option before I wrote this :-)
 
+---
+
+Remark from blutsauger:
+The problem, why ssh won't work (you get a message like this one):
+
+  dbus.exceptions.DBusException: org.freedesktop.DBus.Error.Spawn.ExecFailed: dbus-launch failed to     
+  autolaunch D-Bus session: Autolaunch requested, but X11 support not compiled in.
+
+dbus could find its session address somehow through X11, but as said, it is not supported. But there is another solution:
+On the Neo type (or source a script):
+  set | grep DBUS > /home/root/x
+
+In your ssh session type:
+  export `cat /home/root/x`
+
+Then you have the dbus Id from the local X11 console in the ssh session and the addContact script should run fine.
 
 [[category:software]]
 [[category:Documentation]]
