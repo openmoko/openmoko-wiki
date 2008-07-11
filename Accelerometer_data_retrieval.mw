@@ -2,38 +2,35 @@
 
 This document describes a way to access the data provided by the
 accelerometers. Furthermore the format of the acquired datastream is explained
-in detail.
-
-This document does not cover the physical basics of acceleration or
+in detail. This document does not cover the physical basics of acceleration or
 the mathematical details on this subject.
 
-Consult the hardware specs at the STMsite for the [http://www.st.com/stonline/products/literature/ds/12726/lis302dl.htm LIS392DL]. It contains an interesting read how this unit functions.
 
 ==Axis orientation==
 
-To understand the values provided by the accelerometers it is crucial to
-understand how the sensors are oriented. In the following I will refer to the
+For understanding the values provided by the accelerometers it is crucial to
+understand how the sensors are oriented. In the following I will refer two the
 sensors as first and second sensor. The way to access the data sources of
 these two will be described later on in this document.
 
 The Z axis is pointing from the display downwards to to the back of the
 openmoko. This applies to both of the sensors.
-(Also see [http://wiki.openmoko.org/wiki/Talk:Technical:Accelerometer_Fundamentals Definition of gmeter readings as force rather than acceleration]) 
 
 
 ===Orientation of the first sensor===
 
 To explain the axis orientation I have created some images for easier
-understanding. Note that X and Y are in the same plane as the screen, while the Z arrow is pointing "into the screen", i.e. behind the  Neo. The device for the first sensor is ''/dev/input/event2''.
+understanding.
 
 [[Image:Accelerometer_orientation1.png|Axis orientation of the first accelerometer]]
+
 
 ===Orientation of the second sensor===
 
 In contrast to the first sensor the second one is turned 45 degrees around the
-Z axis. See the attached image to get a clue about its orientation. Note that X and Y are in the same plane as the screen, while the Z arrow is pointing "into the screen", i.e. behind the Neo. The device for the second sensor is ''/dev/input/event3''.
+Z axis. See the attached image to get a clue about its orientation.
 
-[[Image:Accelerometer_orientation2.png|Axis orientation of the second accelerometer]]
+[[Image:Accelerometer_orientation1.png|Axis orientation of the second accelerometer]]
 
 ==Data acquisition==
 
@@ -41,19 +38,12 @@ The information from both of the accelerometers is exported through two
 different input event based file mappings. These device nodes can be found at
 ''/dev/input/event2'' and ''/dev/input/event3''.
 
-'''NOTE''' : --[[User:MicVM|MicVM]] 19.43, 19 November 2010 (UTC) :
-On kernel SHR kernel 2.6.34.7 the device names changed to ''/dev/input/event3'' and ''/dev/input/event4'' respectively.
-
 The sensor I am refering to as the first one is ''event2''. Therefore the second
 one is accessible through the ''event3'' device.
 
-Hint: Adding /etc/udev/rules.d/55-freerunner-accelerometer.rules with
- SUBSYSTEM=="input", ATTRS{modalias}=="input:b0018v0000p0000e0000-e0,3,kra0,1,2,mlsfw", SYMLINK+="accelerometer-top"
- SUBSYSTEM=="input", ATTRS{modalias}=="input:b0018v0000p0000e0000-e0,3,kra0,1,2,mlsfw", SYMLINK+="accelerometer-bottom"
-will give you bit more meaningful device names. [[User:Lindi|Lindi]] 08:16, 15 July 2009 (UTC)
-
 These device nodes can be opened by the default filesystems calls for reading
-files. The data can be read from the stream as soon as the sensor measures it. Note that since the data is exported as normal files you can easily e.g. use netcat to stream the accelerometer data over bluetooth to your laptop to a control a game running on your laptop.
+files. The data can be read from the stream as soon as the sensor measures it.
+
 
 ==Data structure==
 
@@ -62,45 +52,29 @@ in which the data is provided.
 The structure of the given data is based on the kernel input event message
 system which exports the following data structure:
 
-<pre>
-struct input_event {
-struct timeval time;
-__u16 type;
-__u16 code;
-__s32 value;
-};
-</pre>
+ struct input_event {
+     struct timeval time;
+     __u16 type;
+     __u16 code;
+     __s32 value;
+ };
 
 The data is written to the stream message by message. Therefore the minimal
-used blocksize is 128 bit (16 byte).
+used blocksize is 128 bit (16 byte). 
 
 Lets have a look at an example readout of the accelerometer data, divided into
 the used sections.
 
-<pre>
-|----- time ------|  |type| |code|  |-value-|
-8c66 4819 721c 0006   0002   0002   03a8 0000
-8c66 4819 7222 0006   0000   0000   0000 0000
-8c66 4819 99e6 0006   0002   0000   0048 0000
-8c66 4819 9a36 0006   0002   0001   0024 0000
-8c66 4819 9a50 0006   0002   0002   0396 0000
-8c66 4819 9a57 0006   0000   0000   0000 0000
-</pre>
+ |----- time ------|  |type| |code|  |-value-|
+ 8c66 4819 721c 0006   0002   0002   03a8 0000
+ 8c66 4819 7222 0006   0000   0000   0000 0000
+ 8c66 4819 99e6 0006   0002   0000   0048 0000
+ 8c66 4819 9a36 0006   0002   0001   0024 0000
+ 8c66 4819 9a50 0006   0002   0002   0396 0000
+ 8c66 4819 9a57 0006   0000   0000   0000 0000
 
-Using recent kernels (>=2.6.29), you might see this instead, because accelerometers are now reporting
-absolute values instead of relative ones (more on that later) :
 
-<pre>
-|----- time ------|  |type| |code|  |-value-|
-8163 49da 6d62 000d   0000   0000   0000 0000
-8163 49da 91d8 000d   0003   0000   0048 0000
-8163 49da 9231 000d   0003   0001   0012 0000
-8163 49da 9251 000d   0003   0002   03ba 0000
-8163 49da 9270 000d   0000   0000   0000 0000
-8163 49da b6cf 000d   0003   0000   0036 0000
-</pre>
-
-I think the time structure does not need further explanation. A lot more
+I think the time structure does not need further explaination. A lot more
 interesting is the type, code and value part of every message. Lets take a
 closer look at these parts.
 
@@ -120,12 +94,7 @@ different message types are used.
 
 The definition should not be taken too seriously in this context, because the
 data values provided by the accelerometer always represent the absolute
-acceleration measured at the given time. So, in newer kernels, the proper
-''absolute movement'' notification is used instead :
-
-;0x03:
-:This event is called ''EV_ABS'' and signals ''absolute movement''. It replaces the ''EV_REL'' notifications in newer kernels, but
-the information (the event codes) is the same.
+acceleration measured at the given time.
 
 
 ===Event codes===
@@ -134,16 +103,16 @@ Both types of event may supply different codes. These codes can be understood
 as some kind of further specification about the specified data values
 
 
-====Synchronization event codes====
+====Syncronization event codes====
 
-The synchronization event may use quite a lot of codes, as ''linux/input.h''
+The syncronization event may use quite a lot of codes, as ''linux/input.h''
 shows. However the only used one seems to be the 0x00 code.
 
 ;0x00:
-:This code is referred to as SYN_REPORT. It means that the last dataset was completely transmitted. Therefore the before transmitted set of data values can be considered complete. This means if this message is received you may process the given data further.
+:This code is refered to as SYN_REPORT. It means that the last dataset was completely transmitted. Therefore the before transmitted set of data values can be considered complete. This means if this message is recieved you may process the given data further.
 
 
-===Relative movement event codes===
+====Relative movement event codes====
 
 The amount of possible codes for this event type is quite big. The only used
 ones are the following ones.
@@ -159,7 +128,7 @@ ones are the following ones.
 
 The X, Y and Z axis are to be understand as defined in the chapter about [[#Axis_orientation|Axis orientation]].
 
-====A typical message block====
+===A typical message block===
 
 A typical message block consists of 3 messages containing the acceleration
 data for every of the three axis followed by a syncronization message to
@@ -168,369 +137,18 @@ signal the end of the block.
 The following example is such a message block with detailed explanation of its
 different messages and data sections.
 
-<pre>
-8c66 4819 99e6 0006   0002   0000   0048 0000
-|------Time-------|  EV_REL  REL_X  |-Value-|
-(Measured acceleration in x axis direction of 72)
-
-8c66 4819 9a36 0006   0002   0001   0024 0000
-|------Time-------|  EV_REL  REL_Y  |-Value-|
-(Measured acceleration in y axis direction of 36)
-
-8c66 4819 9a50 0006   0002   0002   0396 0000
-|------Time-------|  EV_REL  REL_Z  |-Value-|
-(Measured acceleration in z axis direction of 918)
-
-8c66 4819 9a57 0006   0000   0000        0000 0000
-|------Time-------|  EV_SYN  SYN_REPORT  |-Value-|
-(The transmitted data block is complete you may process the given data)
-</pre>
-
-
-===Absolute movement event codes===
-
-More information about this change may be available here :
-
-http://git.openmoko.org/?p=kernel.git;a=commit;=b2ae84d8bd469fe81fa0a967fde9008416a78365
-
-Although the information is the same as before, the absolute interface differs from the relative one by the fact that
-only changed values are reported. So if the phone was completely idle, experiencing exactly the same acceleration from
-one sample to the next, you will read only synchronization events (this will not happen due to noise, though).
-
-So when you miss the value for an axis between two synchronization events, just assume the previous value still holds.
-
-==Test application==
-
-A simple test application written in ruby:
-<pre>
-#!/usr/bin/env ruby
-x = 0
-y = 0
-z = 0
-File.open("/dev/input/event3") do |f|
-  while true
-    event = f.read(16).unpack("llSSl")
-    time = event[0] + event[1] / 1000000.0
-    type = event[2]
-    code = event[3]
-    value = event[4]
-    if type == 2 || type == 3
-      x = value if code == 0
-      y = value if code == 1
-      z = value if code == 2
-    end
-    if type == 0 && code == 0
-      sum = Math::sqrt(x*x + y*y + z*z).to_i
-      printf("%5d %5d %5d %5d\n", x, y, z, sum)
-    end
-  end
-end
-
-
-</pre>
-
-Equivalent version in python:
-
-<pre>
-#!/usr/bin/python
-import struct
-from math import sqrt
-
-x = 0
-y = 0
-z = 0
-secondsensorfile = "/dev/input/event3"
-#int, int, short, short, int
-fmt = 'iihhi'
-#open file in binary mode
-in_file = open(secondsensorfile,"rb")
-event = in_file.read(16)
-while event:
-	(time1,time2, type, code, value) = \
-		struct.unpack(fmt,event)
-	time = time2 / 1000.0
-
-	if type == 2 or type == 3:
-		if code == 0:
-			x = value
-		if code == 1:
-			y = value
-		if code == 2:
-			z = value
-	if type == 0 and code == 0:
-		sum = int(sqrt(x*x + y*y + z*z))
-		print time, x, y, z, sum
-	event = in_file.read(16)
-in_file.close()
-
-
-</pre>
-
-Equivalent in Perl
-
-<pre>
-#!/usr/bin/perl
-
-$x = 0;
-$y = 0;
-$z = 0;
-
-$secondsensorfile = "/dev/input/event3";
-#open file in binary mode
-open FILE, $secondsensorfile;
-binmode FILE;
-
-while (read FILE, $buf,16) {
-    ($t1,$t2,$type,$code,$value)=unpack "iissi",$buf;
-    if ($type==2) {
-	if ($code==0) {$x=$value};
-	if ($code==1) {$y=$value};
-	if ($code==2) {$z=$value};
-    }
-    if (($type==0) && (code==0)) {
-        printf "%f %05d %05d %05d\n",$t1+$t2/1000000,$x,$y,$z;
-    }
-}
-
-</pre>
-
-A PHP absolute version
-
-<pre>
-<?php
-
-$x = 0;
-$y = 0;
-$z = 0;
-
-$secondsensorfile = "/dev/input/event3";
-#open file in binary mode
-$dfeed2 = fopen($secondsensorfile, "rb");
-
-while (!feof($dfeed2)) {
-  $contents = fread($dfeed2, 16);
-  $arr = unpack("s4time/S1data/S1code/l1value",$contents);
-  if ($arr[data]=3){
-	if ($arr[code]==0) $x=$arr[value];
-        if ($arr[code]==1) $y=$arr[value];
-        if ($arr[code]==2) $z=$arr[value];
-  }
- print "x= $x, y= $y, z=$z \n";
-}
-fclose($handle);
-?>
-
-</pre>
-
-Also, for the new absolute interface (Perl) :
-
-<pre>
-#!/usr/bin/perl
-
-$x = 0;
-$y = 0;
-$z = 0;
-
-$secondsensorfile = "/dev/input/event3";
-#open file in binary mode
-open FILE, $secondsensorfile;
-binmode FILE;
-
-while (read FILE, $buf,16) {
-    ($t1,$t2,$type,$code,$value)=unpack "iissi",$buf;
-    if ($type==3) {
-        if ($code==0) {$x=$value};
-        if ($code==1) {$y=$value};
-        if ($code==2) {$z=$value};
-    }
-    if (($type==0) && ($code==0)) {
-        printf "%f %05d %05d %05d\n",$t1+$t2/1000000,$x,$y,$z;
-    }
-}
-</pre>
-
-Read the data in C (FIXME: We're not printing times here).
-
-<pre>
-#include <stdio.h>
-#include <time.h>
-#include <sys/times.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <stdint.h>
-#include <assert.h>
-
-struct input_event {
-    struct timeval time;
-    uint16_t type;
-    uint16_t code;
-    int32_t value;
-};
-
-int read_all(int fd, char *buf, int count)
-{
-    int n_read = 0;
-    while (n_read != count) {
-        int result = read(fd, buf + n_read, count - n_read);
-        if (result < 0)
-            return result;
-        else if (result == 0)
-            return n_read;
-        n_read += result;
-    }
-    return n_read;
-}
-
-int main(int argc, char *argv[])
-{
-    int fd;
-    struct input_event ev;
-
-    assert(16 == sizeof(struct input_event));
-
-    if (argc != 2) {
-        fprintf(stderr, "missing /dev/input/XXX\n");
-        return 1;
-    }
-
-
-
-    while (1) {
-        if ((fd = open(argv[1], O_RDONLY)) == -1) {
-            perror("open");
-            return 1;
-        }
-        int ret = read_all(fd, (char *) &ev, sizeof(struct input_event));
-        if (ret != sizeof(struct input_event)) {
-            fprintf(stderr, "ret == %d\n", ret);
-            perror("read");
-            return 1;
-        }
-        close(fd);
-        printf("type:%u code:%u value:%d\n", ev.type, ev.code, ev.value);
-        usleep(500000);  /* 2 reads per second, you might want to read more */
-    }
-
-    return 0;
-}
-</pre>
-
-And in Guile Scheme.  (This one is a complete autorotation program.)
-
-<pre>
-;; Open device file for the second accelerometer (whose axes are
-;; aligned with the screen).  Must make Guile's internal buffer small
-;; (16), otherwise it reads too far ahead and this program gets mostly
-;; out of date data.
-(define e (open-file "/dev/input/event3"
-		     "r0"))
-(setvbuf e _IOFBF 16)
-
-;; Uniform vector for reading data from device file.  Must match
-;; sizeof(struct input_event), otherwise the read can get an 'invalid
-;; argument' error.
-(define v (make-u16vector 8))
-
-(define (current-acceleration)
-  (let loop ((x #f) (y #f) (z #f))
-    (uniform-vector-read! v e)
-    (let ((code (u16vector-ref v 4))
-	  (axis (u16vector-ref v 5))
-	  (meas (+ (u16vector-ref v 6)
-		   (* 65536 (u16vector-ref v 7)))))
-      (if (>= meas (expt 2 31))
-	  (set! meas (- meas (expt 2 32))))
-      (case code
-	((2 3)
-	 (case axis
-	   ((0) (loop meas y z))
-	   ((1) (loop x meas z))
-	   ((2) (loop x y meas))
-	   (else (loop x y z))))
-	(else
-	 (if (and x y z)
-	     (list x y z)
-	     (loop x y z)))))))
-
-(define (orientation x y z)
-  (cond ((and (< y -200)
-	      (> (- y) x y))
-	 0)
-	((and (> x 200)
-	      (< (- x) y x))
-	 1)
-	((and (> y 200)
-	      (< (- y) x y))
-	 2)
-	((and (< x -200)
-	      (> (- x) y x))
-	 3)
-	(else #f)))
-
-(define (main)
-  (let loop ((ori #f))
-    (let ((new-ori
-	   (apply orientation
-		  (current-acceleration))))
-      (and ori
-	   new-ori
-	   (not (= ori new-ori))
-	   (system* "xrandr"
-		    "-o"
-		    (number->string new-ori)))
-      (sleep 1)
-      (loop (or new-ori ori)))))
-
-(main)
-</pre>
-
-== The /sys interface ==
-
-To get the sampling rate of the first accelerometer ''lis302dl.1'' :
-
-# cat /sys/devices/platform/lis302dl.1/sample_rate
-100
-
-To set the sampling rate :
-
-# echo 400 > /sys/devices/platform/lis302dl.1/sample_rate
-# cat /sys/devices/platform/lis302dl.1/sample_rate
-400
-
-
-OM2008.12 has too big threshold for some games and applications (value=18).
-You can use sysfs to change it. Use command like this one:
-
-# echo 10 > /sys/devices/platform/lis302dl.1/threshold
-
-
-
-The other one is ''lis302dl.2''. See [[GTA02 sysfs#Accelerometers]] for the other options.
-
-
-'''NOTE''' : --[[User:Garthps|Garthps]] 15:38, 14 December 2010 (UTC) : the interface has changed in newer kernels. Now it is in :
-
-/sys/devices/platform/spi_s3c24xx_gpio.0/spi3.0/
-
-and 
-
-/sys/devices/platform/spi_s3c24xx_gpio.0/spi3.1/
-
-'''NOTE2''' : --[[User:Boudewijn|Boudewijn]] 10:42, 11 August 2011 (UTC): It might have changed once more; I could not find it using om-gta02 2.6.37.6 #1 Fri Jun 10 18:09:48 CEST 2011 armv4tl, but found it in:
- /sys/class/i2c-adapter/i2c-0/0-0073/lis302dl.1/sample_rate 
-(following the path suggested by [[GTA02_sysfs#new:_.2Fsys.2Fclass.2Fi2c-adapter.2Fi2c-0.2F0-0073.2Fspi_s3c24xx_gpio.0.2Fspi3..7B0.7C1.7D.2F|sysfs for 2.6.28]])
-
-==See also==
-* [[Accelerometer_Fundamentals]]
-* [[Gestures]], [http://code.google.com/p/accelges/source/browse/trunk/accelneo/src/accelneo.c code sample]
-
-==External Links==
-* [http://projects.openmoko.org/projects/gestures/ Openmoko Motion Gestures]
-* [http://en.wikipedia.org/wiki/Accelerometer Wikipedia - Accelerometer]
-* [http://dev.borza.ro/demo/Motion-based%20Gesture%20Recognition%20with%20an%20Accelerometer/Paper.pdf Motion-based Gesture Recognition with an Accelerometer - Paper]
-* [http://www.youtube.com/watch?v=s5QMW8k5nis YouTube video: Playing with Accelerometers]
-* [http://westhoffswelt.de/blog/my_first_openmoko_application.html Magic Eightball Application using the Accelerometers]
-* [http://www.st.com/stonline/products/literature/ds/12726/lis302dl.htm] The interesting hardware spec of the accellerometer built into the gta02, where you can learn how this device is actually functioning on the low-level side.
-
-[[Category:Accelerometer]]
+ 8c66 4819 99e6 0006   0002   0000   0048 0000
+ |------Time-------|  EV_REL  REL_X  |-Value-|
+ (Measured acceleration in x axis direction of 72)
+ 
+ 8c66 4819 9a36 0006   0002   0001   0024 0000
+ |------Time-------|  EV_REL  REL_Y  |-Value-|
+ (Measured acceleration in y axis direction of 36)
+ 
+ 8c66 4819 9a50 0006   0002   0002   0396 0000
+ |------Time-------|  EV_REL  REL_Z  |-Value-|
+ (Measured acceleration in z axis direction of 918)
+ 
+ 8c66 4819 9a57 0006   0000   0000        0000 0000
+ |------Time-------|  EV_SYN  SYN_REPORT  |-Value-|
+ (The transmitted data block is complete you may process the given data)
