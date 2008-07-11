@@ -1,0 +1,154 @@
+==Scope==
+
+This document describes a way to access the data provided by the
+accelerometers. Furthermore the format of the acquired datastream is explained
+in detail. This document does not cover the physical basics of acceleration or
+the mathematical details on this subject.
+
+
+==Axis orientation==
+
+For understanding the values provided by the accelerometers it is crucial to
+understand how the sensors are oriented. In the following I will refer two the
+sensors as first and second sensor. The way to access the data sources of
+these two will be described later on in this document.
+
+The Z axis is pointing from the display downwards to to the back of the
+openmoko. This applies to both of the sensors.
+
+
+===Orientation of the first sensor===
+
+To explain the axis orientation I have created some images for easier
+understanding.
+
+[[Image:Accelerometer_orientation1.png|Axis orientation of the first accelerometer]]
+
+
+===Orientation of the second sensor===
+
+In contrast to the first sensor the second one is turned 45 degrees around the
+Z axis. See the attached image to get a clue about its orientation.
+
+[[Image:Accelerometer_orientation1.png|Axis orientation of the second accelerometer]]
+
+==Data acquisition==
+
+The information from both of the accelerometers is exported through two
+different input event based file mappings. These device nodes can be found at
+''/dev/input/event2'' and ''/dev/input/event3''.
+
+The sensor I am refering to as the first one is ''event2''. Therefore the second
+one is accessible through the ''event3'' device.
+
+These device nodes can be opened by the default filesystems calls for reading
+files. The data can be read from the stream as soon as the sensor measures it.
+
+
+==Data structure==
+
+To be able to use the measured data it is important to understand the format
+in which the data is provided.
+The structure of the given data is based on the kernel input event message
+system which exports the following data structure:
+
+ struct input_event {
+     struct timeval time;
+     __u16 type;
+     __u16 code;
+     __s32 value;
+ };
+
+The data is written to the stream message by message. Therefore the minimal
+used blocksize is 128 bit (16 byte). 
+
+Lets have a look at an example readout of the accelerometer data, divided into
+the used sections.
+
+ |----- time ------|  |type| |code|  |-value-|
+ 8c66 4819 721c 0006   0002   0002   03a8 0000
+ 8c66 4819 7222 0006   0000   0000   0000 0000
+ 8c66 4819 99e6 0006   0002   0000   0048 0000
+ 8c66 4819 9a36 0006   0002   0001   0024 0000
+ 8c66 4819 9a50 0006   0002   0002   0396 0000
+ 8c66 4819 9a57 0006   0000   0000   0000 0000
+
+
+I think the time structure does not need further explaination. A lot more
+interesting is the type, code and value part of every message. Lets take a
+closer look at these parts.
+
+
+===Event types===
+
+The types categorize the incoming messages. All possible types can be found in
+the kernel sources or include files in ''INCLUDEDIR/linux/input.h''
+During the tests with the accelerometers I observed the fact that only two
+different message types are used.
+
+;0x00:
+:According to ''linux/input.h'' this event is called ''EV_SYN''. It signals the wish to ''syncronize''. Normally this event is used in combination with code 0x00 to mark the send data complete and therefore applyable.
+
+;0x02:
+:This event is called ''EV_REL'' and signals ''relative movement''. It is used to transmit the acceleration the sensors encounter.
+
+The definition should not be taken too seriously in this context, because the
+data values provided by the accelerometer always represent the absolute
+acceleration measured at the given time.
+
+
+===Event codes===
+
+Both types of event may supply different codes. These codes can be understood
+as some kind of further specification about the specified data values
+
+
+====Syncronization event codes====
+
+The syncronization event may use quite a lot of codes, as ''linux/input.h''
+shows. However the only used one seems to be the 0x00 code.
+
+;0x00:
+:This code is refered to as SYN_REPORT. It means that the last dataset was completely transmitted. Therefore the before transmitted set of data values can be considered complete. This means if this message is recieved you may process the given data further.
+
+
+====Relative movement event codes====
+
+The amount of possible codes for this event type is quite big. The only used
+ones are the following ones.
+
+;0x00:
+:REL_X - Acceleration in x direction
+
+;0x01:
+:REL_Y - Acceleration in y direction
+
+;0x02:
+:REL_Z - Acceleration in z direction
+
+The X, Y and Z axis are to be understand as defined in the chapter about [[#Axis_orientation|Axis orientation]].
+
+===A typical message block===
+
+A typical message block consists of 3 messages containing the acceleration
+data for every of the three axis followed by a syncronization message to
+signal the end of the block.
+
+The following example is such a message block with detailed explanation of its
+different messages and data sections.
+
+ 8c66 4819 99e6 0006   0002   0000   0048 0000
+ |------Time-------|  EV_REL  REL_X  |-Value-|
+ (Measured acceleration in x axis direction of 72)
+ 
+ 8c66 4819 9a36 0006   0002   0001   0024 0000
+ |------Time-------|  EV_REL  REL_Y  |-Value-|
+ (Measured acceleration in y axis direction of 36)
+ 
+ 8c66 4819 9a50 0006   0002   0002   0396 0000
+ |------Time-------|  EV_REL  REL_Z  |-Value-|
+ (Measured acceleration in z axis direction of 918)
+ 
+ 8c66 4819 9a57 0006   0000   0000        0000 0000
+ |------Time-------|  EV_SYN  SYN_REPORT  |-Value-|
+ (The transmitted data block is complete you may process the given data)
