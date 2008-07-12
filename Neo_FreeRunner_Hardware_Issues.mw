@@ -1,152 +1,57 @@
-{{Neo FreeRunner Menu}}
+This is a community-written page that discusses hardware issues with the Freerunner/GTA02 device. Information here is unofficial (and possibly incorrect) unless otherwise stated. Corrections and clarifications from Openmoko employees would be greatly appreciated.
 
-This is a community-written page that discusses '''hardware issues''' with the FreeRunner/[[GTA02]] device. Information here is unofficial (and possibly incorrect) unless otherwise stated. Corrections and clarifications from Openmoko employees would be greatly appreciated.
-
-Please '''DON'T PANIC''' when reading this page. Please give Openmoko employees time to investigate these issues and to develop a solution.  Some of the items may turn out to be non-issues, or may have software workarounds. The FreeRunner's software is still under heavily development and can help fix most of this problems.
-
-Please always file a bug report on the issues and mention the bug report number in this page. Otherwise it is impossible to check if a bug has been fixed or not.
+Also please '''DON'T PANIC''' when reading this page. Please give Openmoko employees time to investigate these issues and to develop a solution.  Some of the items may turn out to be non-issues, or may have software workarounds.
 
 === Active Issues ===
 
-==== Poor Audio Quality (FIXED) ====
-Please use http://docs.openmoko.org/trac/attachment/ticket/2121/gsmhandset.state.new
-for *all* Neo Freerunner. (2009-04-27 jOERG)
+==== GPS Antenna Connector ====
+
+Issue: Poor soldering and/or mechanical deformation of the internal GPS antenna connector means that the GPS signal can be degraded to the point where the unit cannot reliably get a "cold-start" fix. See [[GPS_Problems]] and [[FreeRunner_GPS_antenna_repair_SOP]]
+
+Affects: unknown percentage of devices
+
+Status: Under investigation. Openmoko has not yet made an official statement regarding this problem.
+
+Workarounds: Use an external GPS antenna. Supplying almanac data and approximate coordinates in software (so that the chip can perform a "warm" acquisition) may also help. 
+
+==== Poor Audio Quality ====
 
 Issue: The person on the other end of a GSM phone call may experience poor audio quality, to the point where he/she cannot carry on a normal conversation.
 
 There are three related aspects to this issue:
 * Call is too quiet (mixer settings for mic and/or earpiece are set too low)
 * Caller hears a loud echo of their own voice [http://docs.openmoko.org/trac/ticket/1267 #1267]
-* Buzzing noise caused by GSM radio interference [http://docs.openmoko.org/trac/ticket/883 #883] [http://docs.openmoko.org/trac/ticket/1352 #1352] See [[GSM buzz]].
-
+* Buzzing noise caused by GSM radio interference [http://docs.openmoko.org/trac/ticket/883 #883] [http://docs.openmoko.org/trac/ticket/1352 #1352]
 
 Affects: all devices but only some users (depending on many factors)
 
-The source of the GSM buzz has been [http://lists.openmoko.org/pipermail/hardware/2008-August/000415.html identified]. It's a mere hw-issue, depending on the way you hold the device, and the local situation created by network settings made by the GSM-provider (mainly 1800/1900 seems to be affected), as well as your position relative to basestation. There is no way to fix GSM buzz by mixer-setting modifications. So all suggested settings here may improve a little the volume of buzz during you're *not* speaking only, while relative ratio of buzz/voice level while speaking can't be changed by mixer settings.
+Status: Under investigation. There is a possibility that the quality can be made "good enough" through software (mixer settings). 
 
-Some [http://lists.openmoko.org/pipermail/hardware/2008-August/000451.html hidden Calypso commands] may help with the echo problem.
+Workarounds: Using a bluetooth headset is a possibility. 
 
-hexedit, ghex /opt/Qtopia/plugins/phonevendors/libficgta01vendor.so
-search "AT%N0125" and change to "AT%N0187"
+==== PMU/Charger Issues ====
 
-Workarounds:
+Issue: The device may fail to turn on if the battery is deeply discharged, or may fail to charge the battery properly. See for example this thread on the [http://lists.openmoko.org/pipermail/openmoko-kernel/2008-June/003326.html kernel list].
 
-# Using a bluetooth headset is a possibility.
-# Using external GSM-antenna will stop buzz.
+Affects: Unknown. Some discussions on the mailing list may refer to pre-production devices. 
 
+Status: Under investigation
 
-Due to the multiple factors influencing the result of a single test, it's nearly impossible to find a setup that lets you compare for a decent "before / after" result. If you ever took an old analog TV portable to a place where you had to fiddle around with the antenna to try and make the snow and shadows vanish off the picture, you might have gotten a slight idea of what it's like to reproduce the same situation for decent tests. So probably most of the suggested alsa-improvements are mere random results. Even if they worked for provider A evidently, this doesn't mean there's any improvement by using same settings for provider B.
-
-This being said, here they are:
-
-# Better mixer settings: One confirmed good settings are here: http://www.mail-archive.com/support@lists.openmoko.org/msg00564.html. Please change accordingly in /usr/share/openmoko/scenarios/gsmhandset.state. Should eliminate/lessen echo and buzz problems. [[Neo alsamixer]] is the main article for setting the mixer settings.
-
-===== Better set of mixer settings =====
-
-Regarding 2. in the previous paragraph, here are my further tweaked settings:
-
-[mic volume & buzz problem]
-* 'Mono Playback Volume'   (95)
-* 'Mono Sidetone Playback Volume'  (2)
-* 'Mic2 Capture Volume'     (3)
-[speaker volume & echo problem]
-* 'Speaker Playback Volume'  (112)
-* 'Bypass Playback Volume'    (5)
-
-Lowering Mono Sidetone eliminated the buzz problem better. Please try out and report if you have good success... --[[User:TimoJyrinki|TimoJyrinki]] 08:19, 16 October 2008 (UTC)
-
-==== Can't boot with discharged or missing battery (FIXED) ====
-
-Issue: Neo FreeRunner requires battery power to boot, because Neo FreeRunner consumes too much current while booting to boot with only a charger. Since charging isn't enabled until the Neo FreeRunner has booted, this means that a discharged battery can not be charged. Some versions of uBoot don't continue booting and just charge bat (red LED flashes constantly) when probing bat voltage shows it's too weak to start FR. Let the device sit and charge for an hour, then reboot.
-
-Affects: All A5, older A6. With change of Vsys buffer capacitor to 100uF this issue has been fixed for good.
-
-Fixed(?) with [http://lists.openmoko.org/pipermail/openmoko-kernel/2008-July/003799.html Werner Almesberger patches] - [http://lists.openmoko.org/pipermail/commitlog/2008-July/005403.html more here] [http://lists.openmoko.org/pipermail/community/2008-July/023392.html additional information]
-
-I think this patch finally fixes the problem:
-[http://www.abanet.ch/~hug/moko/uboot-battery/ Philipp Hugs patches]
-
-Workarounds:
-
-#First test if your FR starts with no bat inserted. If it does you can forget about this whole topic.
-# Make sure that the battery never discharges completely
-# Use [[:Image:Nokia-charging-stand.jpg|external stand-alone charger]] (compatible with the Nokia BL-5C battery)
-# Boot the FreeRunner with an [[Neo_FreeRunner_Battery#Compatible_Replacement_Batteries|alternative battery]], or with a spare GTA01 or GTA02 battery, plug USB power, then switch to the empty battery.
-# Boot the FreeRunner with a 4.5VDC external power source (steady hand and great care involved), plug USB power, then insert the empty battery.
-## Oscilloscope digital clip probes fit perfectly on the Freerunner's battery connectors.  Make sure polarity is correct!
-# Some users have reported that Neo FreeRunner '''is''' able to boot on USB power alone using the NOR u-boot, thus: press AUX, plug USB power, select boot. Reports of success would be appreciated.
-## Does work with sequence described. If after pressing boot it just turns off again (happened a few times), then: press AUX, plug in USB power, cycle through the menu a few times to keep it from turning off without booting, after a minute or so press boot.  [[User:Imrehg|Imrehg]] 08:34, 10 September 2008 (UTC)
-## This does indeed work with sequence described. After pressing boot, the screen went blank for a few seconds, but then the beast came to life again. That saved the day! [[User:Edictor|Edictor]]
-## Trifirmed. Neither USB connection nor wall charger was able to wake my phone. But in NOR u-boot it worked (connected to the computer). I think this trick hasn't failed to anyone. --[[User:Flamma|Flamma]] 12:11, 17 September 2008 (UTC)
-## Unfortunately this is not working for me.  My FreeRunner has been off for a few weeks and completely dead.  I tried various combinations of holding aux and plugging in to both wall and computer, no luck.  Tried with and without the battery in place, no luck.  Aux and power button / just power / aux then power.  No luck... --[[User:Safire|Safire]] 6 November 2008
-## This is working ! It has prevent me from buying an external power charger. My freerunner had its battery discharged for about 2 weeks now, and I was able to boot and charge it. --[[User:JRD|JRD]] 23:37, 12 November 2008 (UTC)
-## It has worked for me ! I have booted to 2008.9 Om with discharged battery (after connecting the FR to power supply and waiting a few minutes until AUX button red light stopped flashing) using the NOR boot menu. Tried the same with NAND boot menu and worked also !!! Then I could charge the battery. -- [[User:Emsyr|Emsyr]] 3:23, 20 November 2008 (UTC)
-## I can boot to 2008.9 without battery and with USB connection = plug USB power (FR <-> PC) + press power button. However I cannot shutdown correctly. --[[User:Cynan|Cynan]] 13:43, 9 December 2008 (UTC)
-## I can boot to 2008.9 without battery and with USB connection: press AUX button, then plug USB power, then press power button (keeping AUX pressed). NOTE that battery was fully charged. The problem wasn't battery but corrupted environment in NAND u-boot: with battery IN, no access to NOR u-boot
-## Both my friend's freerunner and mine was completely discharged. This trick failed. Finally booted the freerunner with a BL-5C battery from an old nokia n-gage. With the power connected I then switched the batteries. --[[User:Unlotto|Unlotto]] 14:27, 25 January 2009 (UTC)
-## Another confirmation that this works.  You may use the computer-USB cable or the AC adapter.  I held AUX, plugged in the USB, and the NOR boot menu started before I even hit the Power button.  For some reason, I have to cycle through the menu once before I choose boot, otherwise it will power off as soon as it loads the kernel.  I booted it, let it start up fully, and it continued charging.  After a minute or two, as a test I shut down and tried rebooting normally.  There was enough power in the battery at that point to boot normally from the AC adapter.  Note, I did not encounter this problem (using the AC adapter) until after I "upgraded" from the pre-installed May 2008 u-boot to the December 2008 u-boot; perhaps that is relevant. --Robolange 05:53, 1 February 2008 (UTC)
-## This did ''not'' work for me (with the 1.3.2-moko12 u-boot). However, I was able to "jumpstart" my Freerunner with a bench supply and some micro-clips, as suggested above. (Worried I would fry something, I tried at lower voltages first, but it didn't start up until I set the supply to 4.5v, with the OM USB charger also attached.) Once it was well into the Linux kernel boot sequence I removed the clips and put in the battery to charge. --[[User:Wiml|Wiml]] 05:30, 9 April 2009 (UTC)
-## This worked for me. Now I'm not afraid of letting my FreeRunner discharge. [[User:Cristianpark|Cristianpark]] 20:00, 30 August 2009 (GMT -5)
-See also:
-:[[Neo_FreeRunner_Battery|Neo FreeRunner Battery]]
-
-==== Suspend/resume corrupts SD card's partition table ====
-
-Issue: Suspend/resume corrupts the partition table of the SD card
-
-Affects: Unknown.
-
-Status:
-
-[[https://docs.openmoko.org/trac/ticket/1802#comment:6 Patched kernel]] might solve the problem
-
-Workarounds:
-
-# [[https://docs.openmoko.org/trac/ticket/1802#comment:5 Script]] as a temporary workaround
-
-See also:
-
-:[[https://docs.openmoko.org/trac/ticket/1802  trac ticket]]
-
-=== Known/Accepted Issues ===
-
-This section lists items that are acknowledged as being less than ideal, but are considered to be acceptable in the shipping product. They will not be discussed in detail on this page.
-
-* Poor performance + slow bus speed of the Glamo GPU - discussed to death on the mailing lists and IRC.
-** stable-2.6.26 branch of kernel has wait states lowered, core speed increased from 50MHz to 80MHz and memory speed from 80MHz to 90MHz (the latter is also in stable branch) - these lessen the problem a bit, though it's slow still
-* [http://lists.openmoko.org/pipermail/hardware/2008-April/000055.html GPS antenna switch] driven out-of-spec - does not appear to have a significant effect on device performance
-* Poor low-frequency audio response with low-impedance headphones, e.g. as discussed in this thread:   http://lists.openmoko.org/pipermail/openmoko-kernel/2008-March/001999.html  (NOTE - this thread refers to pre-mass-production devices)
-** Can be fixed to an semi-acceptable level (if not high fidelity most probably) by adjusting "Bass Volume" to full (15) and "Bass Filter" to "100Hz @ 8kHz" (bass will be boosted <= 600Hz when playing back at 48kHz) or "200Hz @ 8kHz" (<= 1200Hz @ 48kHz). The default is 130Hz @ 48kHz and does not help much with the more wider scope of low frequencies.
-** Ideally someone would record output and find out which setting produces best output, ie. compensating for the loss of low frequencies without boosting too high frequencies with this "bass" boost.
-** There exists a [[GTA02_bass_fix|hardware fix]].
-
-Actually with 16 Ohm headphones the cutoff frequency is more than 2kHz, so even 1200Hz @ 48kHz seems to be not appropriate.
-If you have 30 Ohm, it might be just correct setting.
-
-=== Resolved Issues ===
-
-These are issues that have been discussed in the past, but have been fixed (or turned out not to be a problem) for the mass-produced devices.
-
-* Excessive LED current - Some early units lacked a current-limiting resistor for the LEDs. This has been fixed for the production units.
-* Battery life - At this time it appears that the FreeRunner battery life will be acceptable once suspend/resume support has been implemented in software.
-* slow GPS TTFF - see [[GPS Problems]]
-
-==== Battery discharges when charging completes ====
-
-Issue: If the Neo FreeRunner has been charging, when charging completes, it seems to drain the battery and not turn on charging again. This seems to be bug of PMU-registers setup, that shows up when PMU has to handle bat autonomously (=suspend). There might be issues our current scheme relies on wake-interrupt at bat-full which doesn't succeed, or something like that.
-
-Affects: Unknown.
-
-Status:
-
-This has been fixed in linux. See
-http://docs.openmoko.org/trac/ticket/1158
+Workarounds: Unknown
 
 ==== Some SIMs Don't Work ====
 
-See [[FreeRunner unable to work with 3G SIM cards]]
+Issue: There are reports that some users cannot register with their GSM network when using certain SIM cards. See for example http://lists.openmoko.org/pipermail/community/2008-July/020370.html
 
-Status: Fixed in GSM firmware moko10-beta2 or later. See [[GSM/Flashing]] for instructions. 
+Note that there have also been a couple of reports where the failure to register was caused by an incorrectly-mounted SD card (which in turn prevented the SIM from making proper electrical contact).
+
+Note also that there was a related issue with certain AT&T SIMs in early Neo1973 devices. The Freerunner is shipping with a newer GSM firmware in which the original Neo1973 issue has been fixed.
+
+Affects: Only a subset of users (details unknown).
+
+Status: Under investigation
+
+Workarounds: It may be possible to obtain a different model of SIM from your GSM carrier. 
 
 ==== Empty NOR Flash ====
 
@@ -154,7 +59,7 @@ Issue: NOR flash (backup copy of u-boot) is not programmed. [http://docs.openmok
 
 Affects: Unknown - maybe only 1 or 2 devices? Also need to confirm that the bug report was from a mass-production unit rather than an earlier prototype.
 
-Status: Solved. The new devices are tested better if they have the NOR flashed programmed and aren't shipped if the test fail.
+Status: Unknown
 
 Workarounds: Use the NAND copy of u-boot and be careful not to brick the device unless a debug-board is available.
 
@@ -164,37 +69,21 @@ Issue: A debug board is not reporting the expected USB Vendor/Product ID.
 
 Affects: Only [http://lists.openmoko.org/pipermail/device-owners/2008-July/001775.html one report] has been seen so far.
 
-Status: Probably a single case scenario.
+Status: Unknown
 
-Workarounds: Edit configuration files (e.g. openocd.conf) to use the IDs that the board is reporting.
+Workarounds: Unknown
 
-== Possible hardware fixes on GTA02 ==
-* [[1024]]
-* [[Buzz_Fix]]
-* [[GTA02_bass_fix]]
+=== Known/Accepted Issues ===
 
-== List of "Current issues" Imported from the "Community update page" ==
-(to be sorted)
+This section lists items that are acknowledged as being less than ideal, but are considered to be acceptable in the shipping product. They will not be discussed in detail on this page.
 
-The information below has been collected from various sources, feel free to add questions and comments here.
+* Poor performance + slow bus speed of the Glamo GPU - discussed to death on the mailing lists and IRC.  
+* [http://lists.openmoko.org/pipermail/hardware/2008-April/000055.html GPS antenna switch] driven out-of-spec - does not appear to have a significant effect on device performance
+* Poor low-frequency audio response with low-impedance headphones, e.g. as discussed in this thread:   http://lists.openmoko.org/pipermail/openmoko-kernel/2008-March/001999.html  (NOTE - this thread refers to pre-mass-production devices)
 
-===GPS Performance of the FreeRunner===
-The poor GPS performance on the FreeRunner has been traced to an
-interaction between the microSD card and the GPS unit. A software
-and a hardware fixes are available, see [[GPS Problems]].
+=== Resolved Issues ===
 
-===GTA02 battery status===
-While writing a device driver for the new battery which provides an accurate counter of the charge state of the [[GTA02]], the driver developer discovered that the device driver does not get a reading of the charge state due to a very long response time with only one I/O signal when trying to read the charge state. To be able to read the battery status properly, it has been written that it will be necessary to re-design that part of the GTA02 for hardware version GTA02A5 to use two I/O signals to reduce the response time (one for transmitting commands, one for receiving data?). This was fixed (see [http://bugzilla.openmoko.org/cgi-bin/bugzilla/show_bug.cgi?id=957#c1 Bug 957]).
+These are issues that have been discussed in the past, but have been fixed (or turned out not to be a problem) for the mass-produced devices.
 
-=== SMedia 3362 Documentation & OpenGL ES Drivers ===
-There is an open source kdrive driver being written for the GTA02 which will use hardware to accelerate the XRender extension. While the chip is capable of 3D graphics, no OpenGL ES driver/library is avaliable and Openmoko developers will not be writing one in the near future (although they have not ruled it out in the long-term).
-
-Documentation for the SMedia 3362 has been promised ([http://lists.openmoko.org/pipermail/community/2007-September/010175.html see this post]). However, this refers to documentation Openmoko developers will be writing themselves, not the technical documentation SMedia have provided Openmoko with. The Openmoko developers had to sign an NDA with SMedia to obtain this documentation and are therefore unable to pass this information on to community developers. (See [http://lists.openmoko.org/pipermail/community/2007-November/011349.html this post] for details)
-
-=== Draws too much current from USB ===
-It may be that the Neo draws too much current from your USB host/hub, and that the USB host/hub switches off to prevent damages. 
-
-The behaviour is controlled by a complex interaction between soft- and hardware, see [[Forcing fast charge mode]] and [[USB host]]. It may be that the host negotiates more power than the Hub is willing to provide. In case of problems, try to limit the current to e.g. 400mA.
-
-[[Category:Neo FreeRunner Hardware]]
-[[Category:Power]]
+* Excessive LED current - Some early units lacked a current-limiting resistor for the LEDs. This has been fixed for the production units.
+* Battery life - At this time it appears that the Freerunner battery life will be acceptable once suspend/resume support has been implemented in software.
