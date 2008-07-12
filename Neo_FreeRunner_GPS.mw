@@ -1,20 +1,34 @@
-== GTA02 GPS Hardware ==
+== Basic Setup ==
 
-GTA02 using the u-blox 4 hardware and could use u-blox 4 Assist Online GPS A-GPS servces. GTA02 hardware design not comply with official Assist Offline service requirement. 
+For basic setup instructions, check the [[Getting_Started_with_your_Neo_FreeRunner#GPS|GPS getting started instructions]]
 
-== Assist Online/Offline comparsion ==
+== GPS test program ==
 
-th "A"GPS support could cut TTFF time from 40 secs to 10-20 seconds. And the valid time of assist now download is about 4 hours. You could also check the following address:
+Openmoko has a GPS test program called agpsui.  This is actually in the repositories now, so to install simply do:
+* opkg install openmoko-agpsui
+
+Or, if you prefer a pre-compilied ipkg file, that can be downloaded [http://people.openmoko.org/tony_tu/GTA02/util/gps/openmoko-agpsui_0.1+svnr7-r0_armv4t.ipk here]. Install package using:
+* root-omgta02# opkg install openmoko-agpsui_0.1+svnr7-r0_armv4t.ipk
+
+Additionally, here is the [http://projects.openmoko.org/scm/?group_id=127 project page].
+
+== GTA02 GPS Hardware Assist Feature ==
+
+GTA02 is using the u-blox 4 hardware and could use u-blox 4 Assist Online GPS (A-GPS) servces. GTA02 hardware design does not comply with official Assist Offline service requirement.
+
+=== Assist Online/Offline comparsion ===
+
+The "A"GPS support could cut TTFF time from 40 secs to 10-20 seconds. And the valid time of assist now download is about 4 hours. You could also check the following address:
 
 http://embedded-system.net/assistnow-gps-services-boost-up-gps-receiver-performance-u-blox.html
 
 Due to the u-blox 4 need to have extra flash to storage up to 14 days of offline data (90 KBytes).
 
-== Assist Online ==
+=== Assist Online ===
 
 Each download package could have up to 4 hours vaild data to assist TTFF. For u-blox Assist Online, you have to provide approximate longitude/latitude and time to get the corresponds "almanac" and "ephemeris" package. This might be base on application design for how to provide the longitude/latitude. User could select the location area from list menu or world map, or better implementation using the GSM/wi-fi location technique/service. 
 
-=== u-blox Assist Online implementation ===
+==== u-blox Assist Online implementation ====
 
 For GTA02 default shipment image, there is no A-GPS/GPS supported software inside. You could find the u-blox A-GPS online implementation document here:
 
@@ -26,34 +40,28 @@ And implementation code in following address.
 
 Here is a brief script to run this application:
 
-<pre>
-
-#!/bin/sh
-
-echo 1 >/sys/bus/platform/drivers/neo1973-pm-gps/neo1973-pm-gps.0/pwron
-
-./agps-onlinec -c full -u youraccount -k yourpasswd -la 25.073270 -lo
-121.574805 -p 999999.00
-
-cat /dev/ttySAC1
-
-</pre>
+ #!/bin/sh
+ 
+ echo 1 >/sys/bus/platform/drivers/neo1973-pm-gps/neo1973-pm-gps.0/pwron
+ 
+ ./agps-onlinec -c full -u youraccount -k yourpasswd -la 25.073270 -lo
+ 121.574805 -p 999999.00 
+ 
+ cat /dev/ttySAC1
 
 -la 25.073270 -lo 121.574805 is reference latitude/longtitude
 
-=== u-blox Assist Now account application ===
+==== u-blox Assist Now account application ====
 
 And account application is send a mail to agps-account@u-blox.com
 
 without content and title. And not all mail account are accepted/could get reply. since the protocol is pretty straight forward, implement an extra proxy to scale up user should be easy.
 
-
-
-== Assist Offline ==
+=== Assist Offline ===
 
 u-blox Assist Offline service could provide up to 14 days of valid assist GPS data in single download package. But Assist Offline service need an extra flash to storage Almanac data, and u-blox 4 will automatically use these data while system start up. GTA02 don't support Assist Offline.
 
-== u-blox Assist Offline implementation ==
+==== u-blox Assist Offline implementation ====
 
 Due to the u-blox 4 need to have extra flash to storage up to 14 days of offline data (90 KBytes), GTA02 don't have it. I would very interested if there is another way to twist it around, but not likely, so far. Offline sample data you could find in the following addesss:
 
@@ -63,12 +71,13 @@ And u-blox did provided source code of Assist offline server implementation and 
 
 http://people.openmoko.org/tony_tu/src/u-blox
 
-=== Possible implementation mechanism ===
+==== Possible implementation mechanism ====
+
 We can use the same protocol as the online assist to provide the time, last location, almanac and ephemeris data that would be held in the extra flash storage when we power up the GPS. Time is available from the local clock, and we can save location, almanac and ephemeris when the GPS is shut down. We may be able to have a better guess at startup location based on GSM cell ID, WiFi access points, or by the user selecting an area on a map.
 
 Some Ruby tools already exist for downloading and uploading Almanac and Ephemeris. See http://docs.openmoko.org/trac/browser/developers/alphaone/u-blox
 
-=== UBX protocol ===
+==== UBX protocol ====
 Protocol specification (html-help format): http://www.u-blox.com/customersupport/gps.g3/ANTARIS_Protocol_Specification(GPS.G3-X-03002).chm
 
 Sample header could be found here: [http://people.openmoko.org/tony_tu/src/u-blox/AssistNowOfflineServerSampleImplementation/ubx.h ubx.h]
@@ -76,23 +85,5 @@ Sample header could be found here: [http://people.openmoko.org/tony_tu/src/u-blo
 Conversion between lat/ln and ECEF xyz coordinates:
 http://www.u-blox.com/customersupport/docs/GPS.G1-X-00006.pdf
 
-=== GPS test program ===
-
-Openmoko projects has a GPS test program called AGPS UI in following address:
-
-http://projects.openmoko.org/scm/?group_id=127
-
-
-This is actually in the repositories now, simply do:
-* opkg install openmoko-agpsui
-
-Pre-compilied ipkg file, could download from here [http://people.openmoko.org/tony_tu/GTA02/util/gps/openmoko-agpsui_0.1+svnr7-r0_armv4t.ipk AGPSUI test program]
-
-Install package using:
-
-* root-omgta02# opkg install openmoko-agpsui_0.1+svnr7-r0_armv4t.ipk
-
-
-
-[[category:GTA02 Hardware]]
 [[category:GPS]]
+[[category:GTA02 Hardware]]
