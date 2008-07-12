@@ -1,4 +1,4 @@
-See [[GPS]] for details on how to evaluate the Freerunner GPS with cat.
+See [[GPS]] for details on how to evaluate the Freerunner GPS with command line utilities.
 
 
 {|border="3"
@@ -15,13 +15,31 @@ $GPGSA,A,1,,,,,,,,,,,,,99.99,99.99,99.99*30
 |Dummy ||?|| ? ||
 |}
 
-=== Solved problems ===
+== Solved problems ==
 
 ''Let's collect hints which could solve the above problems here. E.g.: How to get the best results with your internal antenna''
 
-* Before reporting a problem here, please check that you've had the GPS out in the open air, preferably with the GPS antenna pointed up, for over 15 mins. (the screen the right way up). This should get a lock in even the worst cases.
+=== Basic GPS debugging ===
 
-* Also note if you've tried unpluging and repluging the internal GPS connector. (See [[Disassembling_Neo1973]] about 2/3 of the way down.  (this may differ on freerunner, pictures appreciated)
+It could be that your GPS device is functioning properly, but needs to be "coaxed" into getting an initial fix.
+
+* Before reporting a problem here, please check that you've had the GPS out in the open air, preferably with the GPS antenna pointed up for over 15 mins. (the screen the right way up, with the top of the phone facing up, and the screen facing the horizon).  This should get a lock in even the worst cases.
+
+* However, you might not obtain a lock if the orientation or position of your phone continuously changes.  It needs to be stationary long enough to download a frame of data from one of the satellites.  Frames are 1500 bits and take 30 seconds to broadcast. The first 6 seconds of the frame contains clock data; the remainder describes the satellite position.  Downloading this data can take a surprisingly long time for two reasons.
+*# The GPS reception is sensitive to the orientation of the phone.  When you move the phone, it can corrupt part of the current frame.
+*# GPS signals reflect off buildings, interfering with reception in seemingly random ways.  If local objects cause signal reflections between you and the satellites, the data may repeatedly fail to download; try facing a different direction (and then holding still) after a few minutes without a lock.
+* Is your unit obtaining signal at all?  Check using the AGPS test program "Openmoko AGPS UI".  Click "Power On" to begin the test.  
+** The "ss" button lists satellites and signal strengths; pressing the "dBm" or "C/N0" button at the bottom of the screen cycles through different scales; a signal between 130dBM and 150dBm should be adequate for a lock, assuming the Neo obtains a consistent signal (lower numbers / taller bars are better).
+** It may take a few minutes for the first satellite to appear in this display.  You'll need multiple satellite signals to get a lock.
+** Before getting a lock, the "UTC" field in the "run" tab should start displaying the current time.  This value is obtained via the GPS antenna; it may take a few minutes for this field to become populated.
+
+Finally, there is probably room for improvement in the way GPS fixes are currently obtained.  GPS devices can obtain fixes at least three different ways.  The least sophisticated method downloads a set of current satellite orbits by downloading frames.  If part of a frame is corrupted, the GPS device must wait 30 seconds for it to be retransmitted.
+
+A slightly more sophisticated approach uses an initial estimate of the current time and your position to obtain a lock more quickly.  Finally, instead of downloading orbit and position data from the satellites, some modern GPS devices simply recalculate the information locally.  Some (or all?) of these optimizations are supported by the Freerunner's GPS device, though the software installed at the factory does not seem to make use of them.
+
+=== Information about faulty antennas ===
+
+* If you list your problems above, note if you've tried unplugging and replugging the internal GPS connector. (See [[Disassembling_Neo1973]] about 2/3 of the way down.  (this may differ on freerunner, pictures appreciated)
 
 [[FreeRunner_GPS_antenna_repair_SOP]] Indicates that the problem may be bad soldering, and includes a guide to fix. This will presumably void your warranty.
 
