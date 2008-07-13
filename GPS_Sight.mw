@@ -1,6 +1,6 @@
 [[Image:Gpv 0 0 screen shot.jpg|thumb|right|The summary tab]]
 [[Image:Image-Gpv 0 0 screen shot 2.jpg|thumb|right|The map tab (walking forward and back through the same street)]]
-[[Image:Gpssight train.jpg|thumb|right|Speed changes in the moving train (includes 3 intermediate stations and tunnel)]]
+[[Image:Gpssight train.jpg|thumb|right|Speed changes in the moving train (includes 3 intermediate stations and tunnel). This NMEA log is available in the project page]]
 The GPS Sight is a GTK based project to create a usable GUI tool with the simple output (no maps). It detects GPRMC and GPGGA messages and constantly shows the following data on the screen:
 
 * Location.
@@ -22,7 +22,7 @@ GPS Sight should automatically detect FreeRunner GPS pipe (/dev/ttySAC1) and use
 As FreeRunner is not currently available, it is difficult to test this piece of code. However we have tested by putting a file with NMEA content to /dev/ttySAC1, so the detection and switching works.
 
 == Inside the project ==
-The most interesting part of this project was to keep the external driver thread and GUI thread sufficiently happy together. We cannot just read from the pipe in a loop as this blocks the GUI repainting! Instead, the code schedules the GTK timer, and then it needs to check if any input from the pipe is available - again, without blocking the current thread for too long. This is done using select function which can check the given stream for the availability of input, passing the certain time-out duration. This time-out seems also tricky: if the value or 0.1 s or less is passed on the Neo, function never reports any input present. However too large values block GUI in the input check step. The code now has a kind of adaptation, gradually increasing the duration of this check if there is no input available for a while.
+The first version were trying to read from the NMEA pipe in periodic scheduled calls but this results "time travelling effect". Then 'select' function was involved that improved performance but created big loads on CPU. To reduce the loads, the incremental waiting time was introduced and finally we switched to using GTK built - in channel input library that can schedule call exactly when input from the pipe is available.
 
 The distance counter tries to track the curved distance, not the "bird flight" distance between two points. It adds the shifts in space, computing the length of the lat/long degrees into meters in accordance to the IERS 2003 goedetic reference - very new and not yet widely used in geography.
 
