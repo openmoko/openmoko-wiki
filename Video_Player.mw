@@ -1,11 +1,58 @@
-Not a proper 'app' page, just an overview of my understanding. 
---[[User:Speedevil|Speedevil]] 14:44, 1 July 2008 (UTC)
+Not a proper 'app' page, just an overview
 
-----
+=FreeRunner=
+It plays mpeg-4 320x240 stretched fullscreen, however other formats will require transcoding.
 
-Video is problematic on both [[GTA01]] and [[GTA02]] (freerunner) though for different reasons.
+==Playback==
+The default media player doesn't seem to handle video very well, but mplayer does OK.  It can be installed with the following command:
+ opkg install mplayer
 
-==GTA01/Neo1973==
+Create a script named 'vidplay' in your home directory with the following commands:
+ #!/bin/sh
+ xrandr --output default --mode 240x320
+ mplayer -vo fbdev "$1" > /dev/null
+ xrandr --output default --mode 480x640
+ reset
+
+Make the script executable:
+ chmod 755 /home/root/vidplay
+
+Known issues with this approach:
+*The output isn't in a proper window, so background stuff sometimes flickers through.
+*When done on the local terminal the keyboard is obscured so you can't exit.
+*240x320 mode has some quirks:
+**The gamma/brightness/contrast is weird.  Encoding adjustments into the media is a workaround.
+**Vertical banding (as seen in landscape position) is quite noticeable.
+
+Despite these issues, it proves that the horsepower is there and it can be done.
+
+==Example - Big Buck Bunny==
+===PC===
+Download the source (no need to start with the giant full resolution version)
+ cd /tmp
+ wget http://mirror.botux.net/pub/peach.blender/psp/big_buck_bunny_480p_AVC_FW33.mp4
+
+Transcode it
+ mencoder big_buck_bunny_480p_AVC_FW33.mp4 -ovc lavc -lavcopts vcodec=mpeg4:vhq:vbitrate=300 -vf crop=720:480:0:0,rotate=2,scale=-2:320,eq=1.2:0.5:-0.25 -oac mp3lame -lameopts br=64:cbr -o big_buck_bunny_320.avi
+
+=== FreeRunner===
+Transfer the resulting 27M file from the PC to the FreeRunner's MicroSD card
+ scp user@192.168.0.200:/tmp/big_buck_bunny_320.avi /media/card
+
+Play it
+ /home/root/vidplay /media/card/big_buck_bunny_320.avi
+
+Now go outside and play; you've been spending too much time at the computer.
+==Other Info==
+
+To rotate the screen:
+ xrandr -o 0
+ xrandr -o 1
+
+=Neo1973=
+
+Video is problematic on [[GTA01]].
+
 On the minus side.
 *The CPU is certainly not fast enough to decode 480*640 video.
 *The display is portrait, which means that an additional rotation step is needed for most landscape video, adding to CPU usage.
@@ -17,53 +64,12 @@ On the positive side.
 *Re-encoding video to rotate it, and scale to 320*240, and encoding with a low CPU use codec such as MPEG-1 may well make half-screen doubled videos playable at 25fps.
 *If not, then it almost certainly will be possible at 12fps.
 
-==GTA02/FreeRunner==
-On the positive side.
-* The CPU is twice as fast.
-* The Glamo chip can do scaling, rotation, this means that the CPU does not have to do this, and it's more flexible than simply setting the LCD to half resolution.
-* The Glamo can decode mpeg-4.
-
-===Negatives===
-Unfortunately, the Glamo brings huge negatives, which may in some cases outweigh these.
-
-* The bandwidth to it is only 7 megabytes/second, and this is shared with the SD.
-* It can only decode mpeg-4, any other format will need to be decoded on the CPU, and pushed over the very slow bus.
-* The 7 megabytes/second figure uses 100% of CPU. If you need 50% of CPU to decode video, then you only have 3.5 megabytes/second.
-** It's not even this good, as you need to subtract IO to the SD card from the total bandwidth.
-
-===Summary===
-It should play easily mpeg-4 (640*480*15fps and 320*240*30FPS), however other formats will require transcoding.
-
--In common-
-
-*Playing most very small - postage stamp - videos as are sent by many phones should be possible.
-*4G of storage should give many hours of mpeg4 video, as the quality can be reduced somewhat without being visible on the screen.
-
-=Reports of GTA01=
-From a conversation with XorA, in the [irc://freenode.com/#openmoko IRC channel].
-
-400kbps mpeg4 works on a 200Mhz neo (without sound) on prerotated 240*320 ffmpeg codec videos, at 25fps, using stock mplayer.
-
-With sound, this drops to 18fps.
-
-There are optimisations for mplayer that look promising to get 25fps with sound.
-
+==Mode Switching==
 For switching between QVGA and VGA mode do the following with a compatible kernel:
  chvt 4 && echo qvga-normal > /sys/devices/platform/s3c24xx-spi-gpio.1/spi0.0/state && fbset qvga
 vice versa:
  echo normal > /sys/devices/platform/s3c24xx-spi-gpio.1/spi0.0/state && fbset vga && chvt 3
 taken from http://lists.openmoko.org/pipermail/neo1973-hardware/2007-October/000267.html
-
-To make your videos/DVDs neo1973 compatible use mencoder like this:
-Find out the -vf cropping parameters with
- mplayer input.avi -vf cropdetect
-let it run a few seconds and insert the given cropping values into this command
- mencoder input.avi -ovc lavc -lavcopts vcodec=mpeg4:vhq:vbitrate=300 -vf crop=xx:xx:xx:xx,rotate=2,scale=-2:320 -oac mp3lame -lameopts br=64:cbr -o output2.avi
-To encode a DVD first find out the -vf cropping parameters with
- mplayer -dvd-device /path/to/dvd dvd:// -vf cropdetect -sb 50000000
-let it run a few seconds and insert the given cropping values into this command
- mencoder -dvd-device /path/to/dvd dvd:// -ovc lavc -lavcopts vcodec=mpeg4:vhq:vbitrate=300 -vf crop=xx:xx:xx:xx,rotate=2,scale=-2:320 -oac mp3lame -lameopts br=64:cbr -o output.avi
-This will rotate the video/DVD, scale it and encode it to mpeg4 with a bitrate of 300kBit/s. Works like a charm.
 
 To avoid console blanking type
  echo -e '\033[9;0]' > /dev/ttyX
@@ -72,7 +78,16 @@ where 'X' is your terminal number - for example if you did chvt 4 then /dev/tty4
 To avoid kernel output in vt do
  echo 0 > /proc/sys/kernel/printk
 
-== Playback using 480x640 / 640x480 ==
+==User Reports==
+From a conversation with XorA, in the [irc://freenode.com/#openmoko IRC channel].
+
+400kbps mpeg4 works on a 200Mhz neo (without sound) on prerotated 240*320 ffmpeg codec videos, at 25fps, using stock mplayer.
+
+With sound, this drops to 18fps.
+
+There are optimisations for mplayer that look promising to get 25fps with sound.
+
+==Playback using 480x640 / 640x480==
 
 To get best speed on GTA01 (best size-speed-resolution-codec trade-off I could find - doesn't mean it's perfect though) crosscode using:
  mencoder <sourcefile> -o <targetfile.avi> -ofps 13 -vf scale -zoom -xy 240 -af channels=1:0:0:1:0 -oac lavc -ovc lavc -lavcopts acodec=mp3:vcodec=h263p:autoaspect=1:vbitrate=300:abitrate=32
@@ -86,23 +101,16 @@ You can playback the file using:
 You may also want to use:
  -autosync 30 -vf scale -zoom -xy 640 -vf rotate=1
 
-=Mode switching at GTA02=
-For switching between QVGA and VGA mode do the following with a compatible kernel: 
- chvt 4 && echo qvga-normal > /sys/devices/platform/glamo3362.0/glamo-spi-gpio.0/spi2.0/state && fbset qvga
+=Transcoding=
+To make your videos/DVDs compatible use mencoder like this:
+Find out the -vf cropping parameters with
+ mplayer input.avi -vf cropdetect
+let it run a few seconds and insert the given cropping values into this command
+ mencoder input.avi -ovc lavc -lavcopts vcodec=mpeg4:vhq:vbitrate=300 -vf crop=xx:xx:xx:xx,rotate=2,scale=-2:320 -oac mp3lame -lameopts br=64:cbr -o output2.avi
+To encode a DVD first find out the -vf cropping parameters with
+ mplayer -dvd-device /path/to/dvd dvd:// -vf cropdetect -sb 50000000
+let it run a few seconds and insert the given cropping values into this command
+ mencoder -dvd-device /path/to/dvd dvd:// -ovc lavc -lavcopts vcodec=mpeg4:vhq:vbitrate=300 -vf crop=xx:xx:xx:xx,rotate=2,scale=-2:320 -oac mp3lame -lameopts br=64:cbr -o output.avi
+This will rotate the video/DVD, scale it and encode it to mpeg4 with a bitrate of 300kBit/s. Works like a charm.
 
-vice versa:
- echo normal > /sys/devices/platform/glamo3362.0/glamo-spi-gpio.0/spi2.0/state && fbset vga && chvt 2
-
-The playback with mplayer work for me with the options:
- mplayer -vo fbdev ....
-
--vo sdl just show crazy lines.
-
-Other method to switch between vga and qvga:
- xrandr --output default --mode 240x320
- xrandr --output default --mode 480x640
-To rotate the screen following commands work:
- xrandr -o 0
- xrandr -o 1
- ...
 [[Category:Openmoko]]
