@@ -9,9 +9,9 @@ The default media player doesn't seem to handle video very well, but mplayer doe
 
 Create a script named 'vidplay' in your home directory with the following commands:
  #!/bin/sh
- xrandr --output default --mode 240x320
+ xrandr -display :0 --output default --mode 240x320
  mplayer -vo fbdev "$1" > /dev/null
- xrandr --output default --mode 480x640
+ xrandr -display :0 --output default --mode 480x640
  reset
 
 Make the script executable:
@@ -19,10 +19,11 @@ Make the script executable:
 
 Known issues with this approach:
 *The output isn't in a proper window, so background stuff sometimes flickers through.
-*When done on the local terminal the keyboard is obscured so you can't exit.
+*When done on the local terminal the keyboard is obscured so you can't exit.  SSH works quite well.
 *240x320 mode has some quirks:
 **The gamma/brightness/contrast is weird.  Encoding adjustments into the media is a workaround.
 **Vertical banding (as seen in landscape position) is quite noticeable.
+*Using CTRL-C to exit vidplay doesn't reset the screen; use 'q' instead.
 
 Despite these issues, it proves that the horsepower is there and it can be done.
 
