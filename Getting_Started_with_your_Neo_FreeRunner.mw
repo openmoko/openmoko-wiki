@@ -165,8 +165,70 @@ Within /etc/network/interfaces, change your interface setup to this:
     up iptables -P FORWARD ACCEPT &
     down iptables -D POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24 &
 
-Then, on your Freerunner, edit /etc/network/interfaces
-and modify the code from this:
+In Fedora:
+
+Set /etc/sysconfig/network-scripts/ifcfg-usb0 to this:
+ DEVICE=usb0
+ IPADDR=192.168.0.200
+ NETMASK=255.255.255.0
+
+Set /etc/sysconfig/network-scripts/ifup-usb to this:
+ #!/bin/bash
+ 
+ . /etc/init.d/functions
+ 
+ cd /etc/sysconfig/network-scripts
+ . ./network-functions
+ 
+ [ -f ../network ] && . ../network
+ 
+ CONFIG=${1}
+ 
+ need_config ${CONFIG}
+ 
+ source_config
+ 
+ NETBITS=`ipcalc -p ${IPADDR} ${NETMASK} | awk -F'=' '{print $2;}'`
+ 
+ /sbin/ip addr flush dev ${DEVICE} 2>/dev/null
+ /sbin/ip link set dev ${DEVICE} up
+ /sbin/ip addr add dev ${DEVICE} ${IPADDR}/${NETBITS}
+ 
+ /sbin/iptables -I POSTROUTING -t nat -j MASQUERADE -s ${IPADDR}/${NETBITS}
+ /sbin/sysctl net.ipv4.ip_forward=1
+ /sbin/iptables -I FORWARD -s ${IPADDR}/${NETBITS} -j ACCEPT
+ /sbin/iptables -I FORWARD -d ${IPADDR}/${NETBITS} -j ACCEPT
+
+Set /etc/sysconfig/network-scripts/ifdown-usb to this:
+ #!/bin/bash
+ 
+ . /etc/init.d/functions
+ 
+ cd /etc/sysconfig/network-scripts
+ . ./network-functions
+ 
+ [ -f ../network ] && . ../network
+ 
+ CONFIG=${1}
+ 
+ need_config ${CONFIG}
+ 
+ source_config
+ 
+ NETBITS=`ipcalc -p ${IPADDR} ${NETMASK} | awk -F'=' '{print $2;}'`
+ 
+ /sbin/iptables -D FORWARD -d ${IPADDR}/${NETBITS} -j ACCEPT
+ /sbin/iptables -D FORWARD -s ${IPADDR}/${NETBITS} -j ACCEPT
+ /sbin/sysctl net.ipv4.ip_forward=0
+ /sbin/iptables -D POSTROUTING -t nat -j MASQUERADE -s ${IPADDR}/${NETBITS}
+ 
+ /sbin/ip link set dev ${DEVICE} down
+ /sbin/ip addr flush dev ${DEVICE} 2>/dev/null
+
+If you are using NetworkManager, restart it and enable the usb device from its menu, otherwise it will disable your connection shortly after you enable it.
+ /sbin/service NetowrkManager restart
+
+Once your PC is setup, then edit /etc/network/interfaces on your FreeRunner and modify the code from this:
 
  iface usb0 inet static
         address 192.168.0.202
