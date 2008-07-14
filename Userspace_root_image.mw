@@ -23,8 +23,9 @@ Once the build server is running, it will create root filesystem images for us.
 Check the [[Flashing openmoko]] page for pre-built root images. Please note that this image may take long to boot the first time, since this boot finishes the installation process.
 
 === Mounting the JFFS2 image on a loop back device (Block Memory MTD Emulation) ===
- losetup $(losetup -f) <rootfs.jffs2>
- modprobe block2mtd block2mtd=$(losetup -f),131072
+ export loop=$(losetup -f)
+ losetup $loop <rootfs.jffs2>
+ modprobe block2mtd block2mtd=$loop,131072
  modprobe jffs2
  modprobe mtdblock
  mkdir <mountpoint>
