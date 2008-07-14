@@ -22,7 +22,17 @@ Once the build server is running, it will create root filesystem images for us.
 
 Check the [[Flashing openmoko]] page for pre-built root images. Please note that this image may take long to boot the first time, since this boot finishes the installation process.
 
-=== Mounting the JFFS2 image on a loop back (MTD RAM) device ===
+=== Mounting the JFFS2 image on a loop back device (Block Memory MTD Emulation) ===
+ losetup $(losetup -f) <rootfs.jffs2>
+ modprobe block2mtd block2mtd=$(losetup -f),131072
+ modprobe jffs2
+ modprobe mtdblock
+ mkdir <mountpoint>
+ mount -t jffs2 -o ro /dev/mtdblock0 <mountpoint>
+
+Based on this [http://www.internettablettalk.com/forums/showthread.php?p=192475#post192475 script by fanoush].
+
+=== Mounting the JFFS2 image on a loop back device (Kernel Memory MTD Emulation) ===
 
 As mounting the JFFS2 image from /dev/loop0 device is not supported, use the mtdram device as described in http://www.handhelds.org/hypermail/familiar/62/6232.html
 
