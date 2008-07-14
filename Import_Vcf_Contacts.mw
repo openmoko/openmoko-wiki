@@ -1,26 +1,33 @@
-Neo FreeRunner uses Evolution data server (eds) for addressbook. However, the specific version used differs from what is probably used on your desktop (if you have Evolution installed), so you ''cannot'' just copy addressbook.db from your computer to Neo ([http://docs.openmoko.org/trac/ticket/1119 bug 1119]).
+== Basic Informations ==
 
-If you want to import your old Contacts to your Neo you could use this simple script:
+Neo FreeRunner uses Evolution data server (eds) to save contacts. 
+However, the specific version used differs from what is probably used on your desktop (if you have Evolution installed).
 
-[http://www.smurfy.de/files/neo/ac Simple vcf import script] (could the script be licensed under BSD or GPL?)
+You ''cannot'' copy your addressbook.db from your desktop to Neo ([http://docs.openmoko.org/trac/ticket/1119 bug 1119]).
 
-== Modification to the script ==
+== Import and Manage Scripts ==
 
-Al Johnson posted an extension to this script to handle vcf files with multiple contacts. There should not be blank lines between the vCards in the file. It should work as before if there's just one contact per file. Here's the modified bit:
+If you want to import your old contacts to the Neo you could use this script:
 
- for name in names:
-   print name
-   vcard = ""
-   f=open(name,'r')
-   for line in f:
-    vcard = vcard + line
-    if line[:9] == "END:VCARD":
-      getAddressBook().addContact(vcard)
-      vcard = ""
+[http://www.smurfy.de/files/neo/manage-contacts.py Manage Contacts script] [http://www.placard.fr.eu.org/~roland/tmp/manage-contacts.py mirror]
+
+If you first want to remove all existing contacts you could use this script.
+
+[http://www.smurfy.de/files/neo/remove_all_contacts.py remove all script]
+
+If you have all contacts in seperate vcf files and just want to import all at once:
+
+[http://www.smurfy.de/files/neo/ac Simple script]
+
+[http://www.smurfy.de/files/neo/import_contacts.py Simple script for one big contactsfile]
 
 == Exporting old contacts to VCard format ==
 
-Next step is to export your old contacts as vcf. I know its possible with Nokia phones and i used a Winmobile->activesync->Outlook export plugin to get my Contacts from my old Cell. In LG phones the backup function to memory card creates one file with multiple VCards. Etc.
+To use the manage Script you need your Contacts in VCF format.
+
+# on nokia phones i used the nokia phone manager (long time ago)
+# on windows mobile phones you could use active sync to sync with Outlook and then use a Outlook export plugin to export as vcf
+# on lg phones the backup function to memory card creates one file with multiple VCards.
 
 == Usage ==
 
@@ -31,6 +38,28 @@ You need Python to use this script so do a
  opkg install python-dbus
 
 to install python and the python dbus module
+
+=== Manage Contacts Script ===
+
+'''This script needs all contacts in one big file'''
+
+'''You also could run this script on a ssh session!'''
+
+# Copy your big contacts file (contacts.txt) to your Neo
+# Copy script to your Neo
+# Connect via ssh to your Neo
+# Fix special chars in your contacts file with you favorite text editor
+# To import the file run on the SSH shell:
+
+ python manage-contacts.py load < contacts.txt
+
+# For a backup your existing contacts on the Neo
+
+ python manage-contacts.py dump > contacts.txt
+
+=== Simple Script ===
+
+'''You must run the script in the OM Terminal, not over ssh'''
 
 The script does a listdir and imports ALL files it found in that dir. (i'm a bad python programmer)
 
@@ -49,8 +78,12 @@ The script does a listdir and imports ALL files it found in that dir. (i'm a bad
 * You must call the script in the OM terminal not via Bluetooth or USB. If you do so a dbus error occur
 
 
-Thanks to [[Import_Sim_Contacts]] for the original Python Script.
+== Authors ==
+* Simple script by smurfy - phil <openmoko at smurfy.de>
+* Manage Contacts script by Roland Mas <lolando at debian.org>
+* Remove all Contacts script / simple script for one big file by Andreas Dalsgaard <andreas.dalsgaard at gmail.com>
 
+Thanks to [[Import_Sim_Contacts]] for the original Python Script.
 
 [[category:software]]
 [[category:Documentation]]
