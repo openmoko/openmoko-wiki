@@ -1,0 +1,144 @@
+== How to test AGPS on the Neo Freerunner ==
+
+Apparently there are some questions regarding the GPS on some
+freerunners. There has been anecdotal evidence of time to first fix
+(TTFix) from between 40 seconds up to 30 minutes. Some owners have
+reported that they can't achieve TTFix and there are some Freerunners
+that appear to have bad solder joints between the GPS antenna
+connector and the Freerunner main PCB. There is a need for a proper
+method of testing and a howto describing how to test if a Freerunner
+has a abnormal TTFix or not.
+ 
+This guide will assume that people has either managed to 
+a. correctly configured usb-networking or 
+b. correctly configured wifi-networking or 
+c. is capable of downloading opkg packages from 
+buildhost.openmoko.org/daily-feed/ to a computer and then transfer
+them to the Freerunner with scp.
+
+First of all, what were trying to do is to get a estimate on how well
+the GPS works. This means that any numbers you aquire is _not_
+necessarily comparable with somebody else's. If Alice reports seeing 13
+satelites with an signal strength of ~ -140 dBm and got a FFix in 4
+minutes then Bob can't assume he has a broken GPS if he saw only 5
+satelites at a signal strength of ~ -145 dBm and it tok 45 minutes to
+get a FFix. If Charlie on the other hand saw only 2 satelites @ ~ -157
+dBm and didn't get a FFix after leaving the freerunner on a table for
+two hours in the midle of nowhere and the freerunner had a clear 360
+degrees view then Charlie can safely assume he indeed has a broken GPS.
+
+In fact, these are the number we want you to report:
+Serial number on your phone. This number is printed on both the black
+box packaging and under the battery of your freerunner. 
+All serialnumbers are 9 digits and they begin with S/N: 8A86<xxxxx>
+In adition, we would like you to report then number of satelites your
+phone managed to detect and a estimate on what the average
+signal strength in dBm for those satelites. (We don't need to know the
+average for each satelite, just the average for all satelites.)
+
+Now, on with the howto:
+
+1. Assuming you have a fresh-from-the-factory freerunner, first get some
+basic networking configured. this is beyond the scope of this howto.
+2. ssh to the freerunner :
+[ ssh root@192.168.0.202 ]
+3a. If you have a working wifi or usb network: 
+[ opkg update ]
+( Ignore all warnings about missing signature files, the
+openmoko repository haven't got any at the moment.)
+3b. Or if your doing this the basic way, download openmoko-agpsui and
+then transfer to your freerunner:
+[ wget
+http://buildhost.openmoko.org/daily-feed/armv4t/openmoko-agpsui_*.ipk ]
+[ scp openmoko-agpsui_*.ipk
+root@192.168.0.202:/home/root/. ]
+
+4. Install the package openmoko-agpsui:
+[ opkg install openmoko-agpsui ] or
+[ opkg install openmoko-agpsui_*.ipk ]
+
+5. After having completed all these steps sucessfully your ready to
+test your freerunner. 
+Charge your battery to full capacity (can't hurt), wait for a clear
+weather and then check out places you can visit. The ideal place is
+Charlie's midle of nowhere, but the next best thing is a area with
+clear view of the sky and no towering foliage or buildings nearby.
+Nice weather is a must have because you don't want your shiny
+freerunner to get soaked do you? 
+
+6. Find a place where your freerunner can sit on a stable surface or
+at least 30 minutes without being molested, fondled or even touched.
+Leave the freerunner with the screen facing upwards, preferably with
+the top of the freerunner facing northish. (Not a requirement, just
+trying to be scientific. ;) )
+
+7. on the freerunner Graphical User Interface you should find a program
+called "Openmoko AGPS UI". Run this program.
+The program has several interesting features. on the top left side of
+it's UI you can find the tabs: 
+"Run" "SS" "AZ" "plot" "Log"
+
+"Run" is the current picture, here you start and stop the GPS
+	testing software. Everything with the word "Reset" reset's the
+	sampling and/or the chipset. "Power on"/"Power off" powers up
+	(or down) the GPS chipset and starts logging. "One Fix" starts
+	the logging but powers automatically down after having managed
+	to get FFix from a single satelite.
+"SS" gives you signalstrength, calculates average
+	signalstrength, identifies the differnt satelites by number and
+	of course lets you count the number of satelites _IF_ it can
+	manage to find at least 1 satelite.
+"AZ" gives you the position of the different satelites _after_ it
+	get's a FFIX. Otherwise a satelite is "defaulted" to being
+	somewhere over the northpole. (on a _very_ thight polar orbital
+	indeed. ;) )
+"Plot" gives a estimate on where the different satelites say _you_ are,
+	usually with a margin of +-5 meters. (10 meters in difference.)
+"Log" gives you the NEMA output from the GPS chipset. Interesting for
+	those who can read NEMAish, not so interesting for the rest of
+	us.
+
+8. Now press "Power on" and then "SS", then leave the darn freerunner on
+the safe and flat surface for _at least 30 minutes without moving or
+touching it_. Do not stand over it either, your blocking those precious
+satelite signals! ( GPS runs at ~ 1,2-1,5 Ghz, this is a weak signal
+with a wavelength between millimeters and centimeters, now imagine
+godzilla (you) smashing them. )
+
+9. After having spent twidling your thumbs or reading a good book for
+30 minutes you get to press the "dBm" button to translate those nasty
+dB.Hz into goodness dBm signals. If you've gotten FFix some of the blue
+blue bars has a nice black thing on the bottom. And on top of screen
+above each bar there are two numbers, the top denoting the maximum
+signal you got from each satelite and the lower number the average
+signalstrength.
+
+10. If you haven't managed to get a FFIX your either doing something
+wrong or your one of those unlucky guys (gals) with a bad solder or
+something else that probably requires shipping the phone back to your
+supplier/openmoko. 
+If you got only 3-4 satelites and had a lousy reception (say -150 to
+-160 dBm) you /might/ have a faulty freerunner but you should try again
+somewhere else at another time of the day just to make sure. If you had
+a lousy reception but did get a FFix, try again somewhere else to se if
+you can improve your record.  If you on the other hand found several
+satelites( +5) and had quite a good reception (maybe > -145 dBm ? )
+the you probably has a working phone. 
+
+Now, I'm not a radio or wireless engineer, so any numbers in dBm should
+be taken with a grain of salt. But the main thing is that you followed
+the basic instruction and did a thorough scientific test! You did
+Science!
+
+11. Now report any anomalities to the mailinglist or the guys that told
+you to read this howto.
+
+== Recommended Reading ==
+http://wiki.openmoko.org/wiki/Getting_Started_with_your_Neo_FreeRunner
+http://wiki.openmoko.org/wiki/FreeRunner_GPS_antenna_repair_SOP
+http://wiki.openmoko.org/wiki/USB_Networking
+http://en.wikipedia.org/wiki/Global_Positioning_System
+
+[[category:GPS]]
+[[category:GTA02 Hardware]]
+[[Category:Hardware]]
