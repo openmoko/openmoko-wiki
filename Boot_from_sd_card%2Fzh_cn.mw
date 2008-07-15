@@ -21,15 +21,15 @@ DVT4 单元及PVT1组件都会使用 "uImage"做为它的kernel image 檔名，�
 * 20080312 修复自SD记忆卡启动功能 (从使用uImage 改为使用uImage.bin)
 * 20080320 修复u-boot direct drawing 500mA 、智慧充电、量产版本。
 
-=制作可开机的SD Card (GTA02)=
+=制作可引导的SD卡（GTA02)=
 
-以下为自SD中启动系统的操作步骤指引。它使用ubuntu 及一张干净的512 MB Sandisk microSD 卡(FAT16 分割区格式的SD card):
+以下为制作可引导的SD卡的操作步骤指引。它使用ubuntu 及一张干净的512MB Sandisk microSD 卡(缺省使用FAT16分区格式):
 
 *Step 1, 缷载磁盘:
    
    sudo umount /media/disk-1
 
-接着将磁盘分为二个分割区，第一个分割区使用vfat，预留 8MB空间给 uImage.bin，第二个扇区 (其余的磁盘空间) 使用ext2 格式，提供给rootfs 档案及目录使用。二个分割区都使用primary partition 类型。
+接着将磁盘分为二个分区，第一个分区使用vfat，预留8MB空间存放uImage.bin，第二个分区(剩余的磁盘空间)使用ext2格式，用于存放rootfs 及目录使用。二个分区都使用primary partition 类型。
 
 *Step 2, fdisk:
 
@@ -61,26 +61,26 @@ DVT4 单元及PVT1组件都会使用 "uImage"做为它的kernel image 檔名，�
    Calling ioctl() to re-read partition table.
    Syncing disks.
 
-*Step 3 Format:
+*Step 3 格式化:
 
-Format 2 volume with vfat (uImage.bin) and ext2 (rootfs files)
+分别用vfat和ext2格式化上述两个分区
 
    mkfs -t vfat /dev/mmcblk0p1
 
    mkfs -t ext2 /dev/mmcblk0p2
 
+*Step 4 拷贝内核以及rootfs到上述两个分区:
 
-*Step 4 Copy kernel and rootfs files into 2 volume:
+uImage.bin为量产版所使用的内核映像文件，而uImage则为较早期版本所使用的文件(DVT4/PVT1)。必须解压缩rootfs.tar.gz来获得uImage.bin和rootfs。
+   tar -zxvf rootfs.tar.gz
 
-uImage.bin 为量产所使用的映像档。uImage则为较早期所使用的组件(DVT4/PVT1)。你必须压缩 xvzf rootfs.tar.gz 以取得所有的档案。
+   sudo cp -r ./kernel/uImage.bin /media/disk-1
 
-   sudo cp -r /home/tony/Desktop/kernel/uImage.bin /media/disk-1
-
-   sudo cp -r /home/tony/Desktop/root_files/. /media/disk-2
+   sudo cp -r ./root_files/. /media/disk-2
 
    sync
 
-*Step 5 自Neo的选单中，选择 boot from SD (在正确的 u-boot_env 内容下)
+*Step 5 在Neo的菜单中，选择 boot from SD (在正确的 u-boot_env 内容下)
 
 =开机环境 (GTA02)=
 
