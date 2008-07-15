@@ -84,19 +84,19 @@ Quando lo schermo è bloccato, vedrai una grafica verde in stile Matrix con il s
 
 == Connettere il Neo Freerunner alla Rete via USB ==
 
-Connect the Neo FreeRunner to a GNU/Linux host with the USB cable. For Mac OS X please refer to [[MacOS_X]]. After booting into the Openmoko image there will be a new interface, usb0, on your GNU/Linux host.
+Connettere il Neo Freerunner a un computer GNU/Linux con il cavo USB. Per fare questo con Mac OS X, riferitevi a [[MacOS_X]]. Dopo il boot nell'immagine di Openmoko avrete una nuova interfaccia, usb0, sul vostro computer GNU/Linux.
 
 ===== Metodo Manuale =====
-Type in the following commands in the terminal of a GNU/Linux host:
+Digitare i seguenti comandi in un terminale GNU/Linux:
 
  ifconfig usb0 192.168.0.200 netmask 255.255.255.0
  ssh root@192.168.0.202
 
-Press Enter to get by the password.
+Premere Invio per inserire la password.
 
 ===== Metodo Automatico =====
-*Debian and derivatives (Ubuntu, Sidux etc.)
-Edit /etc/network/interfaces:
+*Debian e derivate (Ubuntu, Sidux etc.)
+Modificare il file /etc/network/interfaces:
 
  auto usb0
  iface usb0 inet static
@@ -104,36 +104,36 @@ Edit /etc/network/interfaces:
  netmask 255.255.255.0
 
 *Gentoo 
-Edit /etc/conf.d/net:
+Modificare il file /etc/conf.d/net:
 
  config_usb0="192.168.0.200/24"
 
-Restart the networking service ('/etc/init.d/networking restart' for Debian-based systems) and then type the following command in the terminal of the GNU/Linux host:
+Riavviare i servizi di rete('/etc/init.d/networking restart' per i sistemi basati su Debian) e quindi digitare i seguenti comandi in un terminale GNU/Linux:
 
  ssh root@192.168.0.202
 
-Press Enter to get by the password.
+Premere Invio per inserire la password.
 
 {{note|
-If your network device is using the ip range 192.168.0.x you may have to use the following command before you are able to connect
+Se il tuo dispositivo di rete sta usando un intervallo di ip 192.168.0.x dovrai usare il seguente comando prima di poterti connettere:
 
  route add -host 192.168.0.202 dev usb0 }}
 
 ===== Automatizzare ancora di più le operazioni =====
-If you don't want to remember the IP address of your phone then you can create an alias by adding the following line to your /etc/hosts:
+Se non vuoi doverti ricordare l'indirizzo ip del tuo telefono, puoi creare un alias aggiungerndo la seguente riga nel file /etc/hosts:
 
  192.168.0.202   openmoko
 
-Now it should be possible to connect to your phone using the following command:
+Ora sarà possibile connettersi al proprio telefono usando il seguente comando:
 
  ssh root@openmoko
 
-The above only gets you a Secure Shell connection to the Openmoko device, it does not allow the Openmoko device to connect to the Internet.  If you are interested in connecting the device to the internet then check out the [[USB_Networking]] section.
+Il comando precedente ti fornisce solamente una connessione con una Shell sicura con il tuo dispositivo Openmoko, non ti permette di collegare il tuo dispositivo a Internet. Se ti interessa collegare il tuo dispositivo a Internet leggi alla sezione [[USB_Networking]].
 
 ===== Condividere la tua connessione ad Internet via USB =====
 In Ubuntu:
 
-Within /etc/network/interfaces, change your interface setup to this:
+Dentro al file /etc/network/interfaces, la configurazione dell'interfaccia in questo modo:
 
  auto usb0
  iface usb0 inet static
@@ -145,8 +145,7 @@ Within /etc/network/interfaces, change your interface setup to this:
     up iptables -P FORWARD ACCEPT &
     down iptables -D POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24 &
 
-Then, on your Freerunner, edit /etc/
-and modify the code from this:
+Quindi, sul tuo Openmoko, modifica /etc/ e da così:
 
  iface usb0 inet static
         address 192.168.0.202
@@ -155,7 +154,7 @@ and modify the code from this:
         gateway 192.168.0.200
         up echo nameserver 192.168.0.200 > /etc/resolv.conf
 
-to something that points to a real name server, like a public DNS system from OpenDNS, like this:
+a qualcosa che punti al nome reale del server, come un sistema publico DNS da OpenDNS, come questo:
 
  iface usb0 inet static
         address 192.168.0.202
