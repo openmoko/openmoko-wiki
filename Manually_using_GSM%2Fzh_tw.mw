@@ -1,48 +1,44 @@
 '''When men were real men and typed their own AT commands...'''
+這篇文章簡單的為您介紹了如何使用手動的方式，使用GSM。
 
-Thankfully, this may now be partially obsolete.
-The [[Dialer|dialer]] now works!
+== 需求 ==
 
-This is a short guide how to manually get GSM going.
+* 安裝最新的u-boot boot-bootloader的GTA01Bv2 或 GTA01Bv3(透過USB)。
+* 不要連接任何debug board!
 
-== Requirements ==
+== 實際操作 ==
 
-* GTA01Bv2 or GTA01Bv3 with very recent u-boot bootloader, providing usbtty (serial over USB) support)
-* Do not connect any debug board!
+=== 啟動系統 ===
 
-== Walk-Through ==
-
-=== Booting the system ===
-
-* Make sure the rootfs you use has 'auto usb0' in /etc/network/interfaces
-* Configure the host's usb0 interface to 192.168.0.200 netmask 255.255.255.0 See [[USB_Networking]]
+* 確認你所使用的 rootfs在 /etc/network/interfaces 下包括 'auto usb0' 
+* 將主機的usb0介面設定為 192.168.0.200 netmask 255.255.255.0 See [[USB_Networking]]
 * ssh to root@192.168.0.201
 
-=== Disabling the getty ===
+=== 停用 getty ===
 
-Our default images all have a getty running on /dev/ttySAC0, please edit /etc/inittab and disable the getty on that port
+我們預設的映像檔在/dev/ttySAC0都包含了getty，請編輯/etc/inittab ，並且停用該通訊埠的getty。
 
-=== Reducing the loglevel ===
+=== 消除loglevel ===
 
 {{note|You don't need this in kernel builds with patchset &ge; 1288}}
 
-To keep the kernel from writing to /dev/ttySAC0, you need to use <code>dmesg -n1</code>.
+為了避免kernel寫入 /dev/ttySAC0，你必須使用 <code>dmesg -n1</code>.
 
-=== Powering up the GSM Modem ===
+=== 啟動GSM Modem ===
 
-* verify there is no getty or any other app running on /dev/ttySAC0 
+* 檢核 getty 是否存在，或者是其它的程式是否在 /dev/ttySAC0 上執行 
  root@fic-gta01:~$ lsof | grep ttySAC0
 
-* If gsmd is using the GSM modem, shut it down with
+* 若gsmd 目前使用 GSM modem，使用下列指令停用它：
 
 <pre>
 root@fic-gta01:~$ /etc/init.d/gsmd stop 
 </pre>
 
-* power-up the GSM Modem
+* 啟動GSM Modem
  root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/neo1973-pm-gsm.0/power_on
 
-=== Connecting to GSM Modem (using socat) ===
+=== 連接到GSM Modem (using socat) ===
 
 * If you have the command socat (built and installed):
  root@fic-gta01:~$ socat - file:/dev/ttySAC0,crtscts,crnl
