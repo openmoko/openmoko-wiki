@@ -25,9 +25,16 @@ Usage:
         -l file --logfile file  Specify a logfile to log to
 </pre>
 
+
+
 If your GSM modem is attached to ttySAC0 (like in the [[:Category:Neo1973 Hardware | Neo1973]]), invoke it as e.g.:
  > gsmd -p /dev/ttySAC0 -s 115200 -F
 (baud rate seems to be autodetected by the modem)
+
+In order to kill the actual gsmd process and then run gsmd with a separate logfile and in background, but not as daemon:
+ > kill -SIGTERM `pidof gsmd`
+and then to create a logfile with the date in the name
+ > gsmd -p /dev/ttySAC0 -s 115200 -F -l logs_gsmd-`date +%Y-%m-%d_%Hh%M` &
 
 === From host PC===
 With recent [[uboot]] (svn > r2885), the gsm modem can be powered on and connected to uboot's serial console from uboot itself. Thus allowing the host PC to interact directly with the modem. Some notes about getting gsmd running in this manner is [[User:Miki/hosted_gsmd|here]].
