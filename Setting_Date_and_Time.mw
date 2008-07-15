@@ -1,110 +1,18 @@
-Linux systems (such as the FreeRunner) prefer that the system clock be set to universal time (UTC). Then, you will need to configure the timezone to display the time adjusted to local time.
+== Setting date from the command prompt ==
 
-See [[Timezone]] for instructions on changing the time zone.
-
-For more information on Linux timekeeping, see [http://www.linuxsa.org.au/tips/time.html Linux, Clocks, and Time]. (But ignore mentions of ''/etc/sysconfig/clock''. That doesn't apply to the Openmoko environment.)
-
-== Setting the date/time using "date" ==
-
-To change the date on your FreeRunner, issue one of the following commands:
+To change the date on your Freerunner you have to give the command
 
  date -s ''MMDDhhmm''
+
+or
+
  date -s ''MMDDhhmmYYYY''
+
+or
+
  date -s ''MMDDhhmmYYYY.ss''
 
 where ''MM'' is the month, 01-12; ''DD'' is the day, 01-31; ''hhmm'' is the time, 0000-2359; ''YYYY'' is the optional year, and ''.ss'' is the optional seconds.
 
-=== Example ===
-
-If the date is: 07 Aug 2012 and the time is: 05:16, You can simply write:
-
- date 0807051612
-
-== Setting date/time from your linux box ==
-
-For busybox date (openmoko, shr and so on):
-<pre>
-ssh root@openmoko "date -u -s `date -u +%m%d%H%M%Y.%S`"
-</pre>
-
-To also copy your timezone file, add an echo command:
-<pre>
-ssh root@openmoko "date -u -s `date -u +%m%d%H%M%Y.%S`; echo `cat /etc/timezone` > /etc/timezone"
-</pre>
-
-Following method works independently of locale settings, but only for coreutils `date` on your freerunner (debian distibution):
-<pre>
-ssh root@openmoko "date -us @`date -u +%s`"
-</pre>
-
-To also copy your timezone file, add an echo command:
- ssh root@openmoko "date -us @`date -u +%s`; echo `cat /etc/timezone` > /etc/timezone"
-
-== Setting date/time with a python GUI ==
-
-Tested on Neo1973 (OM2007.2), the 'time-man' tool is at  
-
-   http://free-opensource.qvantel.net/mediawiki//index.php/Time-tool
-
-== Setting your local timezone ==
-
-To have your FreeRunner display time appropriate to your local timezone, update the /etc/localtime symlink to point to the file in /usr/share/zoneinfo that represents your timezone. For example, in an SSH session to the phone, or in a terminal running on the phone:
-
- # ls -l /etc/localtime
- lrwxrwxrwx 1 root root 27 Jul 10 23:05 /etc/localtime -> /usr/share/zoneinfo/PST8PDT
- # ln -s /usr/share/zoneinfo/CST6CDT /etc/localtime
-
-(Based on [http://n2.nabble.com/Date-%2B-NTP-tp675145p675163.html this post on the support mailing list])
-
-You may want to try this if the above returns something like "file exists".
- # ln -sf /usr/share/zoneinfo/CST6CDT /etc/localtime
-the -f (--force) removes existing destination files. (CQ).
-
-== Setting the date/time automatically with NTP ==
-
-If your FreeRunner is connected to the internet, you can instead set the time automatically:
-
- opkg install ntpclient
- ntpclient -s -h pool.ntp.org
-
-If your FreeRunner is connecting to the internet through a USB host, make sure you allow UDP traffic to pass through on port 123 (NTP) on your host machine or you may get a "no route to host" error from ntpclient.
-
-Have a look over [https://wiki.muc.ccc.de/openmoko#freerunner1 over here] where this process is automated whilst udhcpc is started, which happens automatically for wifi connections initiated by Mofi and friends.
-
-== Syncing the hardware clock ==
-
-No matter which method you used above, sync the hardware clock with the system time to make your change persist over reboots:
-
- hwclock --systohc
-
-Note:
-If you run the [[ASU]] or [[Qtopia / Qt Extended on FreeRunner|Qtopia]] image, hwclock will not work. The missing /dev/misc/rtc could be establish with
-
- mkdir /dev/misc
- ln -s /dev/rtc /dev/misc/rtc
-
-but the device is usually busy due to the atd daemon.
-Instead you can use this command causing atd to write the current time into the rtc:
-
- echo -e "W\n" > /var/spool/at/trigger
-
-Here is a link from the community mailing list for using hwclock with the [[ASU]] image:
-:http://lists.openmoko.org/nabble.html#nabble-td584362
-
-== Setting the date/time automatically with gps ==
-
-[http://projects.openmoko.org/projects/gpv/ GPS Sight] has a button to sync the hardware clock to the gps clock.
-
-First you have to make sure gps works on you neo. You can do that by following the steps in the [[Howto_Test_Your_GPS_with_agpsui]].
-
-The second step is to install GPS Sight:
-
- # opkg install http://projects.openmoko.org/frs/download.php/228/gpssight_0.8.4_armv4t.ipk
-
-The last step is the actual syncing of the clock. For this, simply run the GPS Sight program from the main menu, wait for it to find the gps time and click the button labeled "Sync clock".
-
-== Future Work ==
-
-Presumably it might also be possible to use gpspipe (or something else) to set the date once you have a gps fix automatically?  In addition, the phone stack should set the date, time, and timezone once connected to a network.
-
-[[Category:Middleware settings]]
+[[Category:Documentation]]
+[[Category:Guides]]
