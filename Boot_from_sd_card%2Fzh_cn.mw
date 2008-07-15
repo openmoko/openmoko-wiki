@@ -1,0 +1,114 @@
+{{Languages|Boot from sd card}}
+[[Category:Technical]]
+[[Category:Hardware]]
+[[Category:Documentation]]
+=NOR in GTA02 history=
+__NOTOC__
+
+GTA 02搭载了2MB的NOR flash。在DVT4 units (2008 April arrived Taipei)之前，GTA02 NOR 在硬件上并没有做NOR 保护控制。在dvt4之后的软件组件，及量产的产品，都包含了硬件的NOR保护。你必须使用debug board v3 或之后的版本，来停用NOR 写入组件，停用保护，之后就可以在gta02上更新NOR。
+
+DVT4 单元及PVT1组件都会使用 "uImage"做为它的kernel image 檔名，而不是使用"uImage.bin" 。你可以在启动画面上找到它的日期，暸解你的硬件装置上所使用的版本。
+
+*你可以在以下的位置找到启动NOR写入功能的组件：
+[http://svn.openmoko.org/trunk/src/host/norwp/ 停用NOR写入保护]
+
+*在user space中的Script可以写入NOR [http://svn.openmoko.org/trunk/src/host/devirginator/flashnor Flash NOR script]
+
+==历史版本==
+
+* 20080226 初版
+* 20080305 修复DFU，并且移除NOR版本，使用NAND功能
+* 20080312 修复自SD记忆卡启动功能 (从使用uImage 改为使用uImage.bin)
+* 20080320 修复u-boot direct drawing 500mA 、智慧充电、量产版本。
+
+=制作可开机的SD Card (GTA02)=
+
+以下为自SD中启动系统的操作步骤指引。它使用ubuntu 及一张干净的512 MB Sandisk microSD 卡(FAT16 分割区格式的SD card):
+
+*Step 1, 缷载磁盘:
+   
+   sudo umount /media/disk-1
+
+接着将磁盘分为二个分割区，第一个分割区使用vfat，预留 8MB空间给 uImage.bin，第二个扇区 (其余的磁盘空间) 使用ext2 格式，提供给rootfs 档案及目录使用。二个分割区都使用primary partition 类型。
+
+*Step 2, fdisk:
+
+   sudo fdisk /dev/mmcblk0
+
+   Command (m for help): d
+   Selected partition 1
+   Command (m for help): n
+   Command action
+      e   extended
+      p   primary partition (1-4)
+   p
+   Partition number (1-4): 1
+   First cylinder (1-983, default 1):
+   Using default value 1
+   Last cylinder or +size or +sizeM or +sizeK (1-983, default 983): +8M
+   Command (m for help): n
+   Command action
+      e   extended
+      p   primary partition (1-4)
+   p
+   Partition number (1-4): 2
+   First cylinder (18-983, default 18):
+   Using default value 18
+   Last cylinder or +size or +sizeM or +sizeK (18-983, default 983):
+   Using default value 983
+   Command (m for help): w
+   The partition table has been altered!
+   Calling ioctl() to re-read partition table.
+   Syncing disks.
+
+*Step 3 Format:
+
+Format 2 volume with vfat (uImage.bin) and ext2 (rootfs files)
+
+   mkfs -t vfat /dev/mmcblk0p1
+
+   mkfs -t ext2 /dev/mmcblk0p2
+
+
+*Step 4 Copy kernel and rootfs files into 2 volume:
+
+uImage.bin 为量产所使用的映像档。uImage则为较早期所使用的组件(DVT4/PVT1)。你必须压缩 xvzf rootfs.tar.gz 以取得所有的档案。
+
+   sudo cp -r /home/tony/Desktop/kernel/uImage.bin /media/disk-1
+
+   sudo cp -r /home/tony/Desktop/root_files/. /media/disk-2
+
+   sync
+
+*Step 5 自Neo的选单中，选择 boot from SD (在正确的 u-boot_env 内容下)
+
+=开机环境 (GTA02)=
+
+在GTA02 NAND下有六个分割区。
+
+* 1. u-boot.bin
+* 2. u-boot_env
+* 3. kernel (uImage.bin)
+* 4. splash.gz (splash screen)
+* 5. Factory (BT/WLAN/Serial...etc)
+* 6. rootfs
+
+预设的GTA02 env 档案最原始的版本(2008/7)可以在下面的地址找到 [http://people.openmoko.org/tony_tu/GTA02/images/20080424_gta02_release/env-5secs.env 预设env檔]
+
+你可以使用下面的 env.new 档案，在开机画面中加入 boot from sd 功能选项。  [http://people.openmoko.org/tony_tu/GTA02/images/env_files/env.new u-boot environment].
+
+* ./dfu-util -a u-boot_env -R -D env.new
+
+=自NOR (GTA02)下开机=
+
+如果你想要自NOR下开机，并且从SD卡中使用NOR，请使用下列的操作步骤。
+
+* 按下AUX key
+* 再按住Power，启动GTA02
+* 约一秒后放开AUX 
+
+接着，你可以进入预设的NOR开机选单，你可以：
+* 使用NOR开机，使用DFU
+* 使用NOR开机画面自SD卡开机
+
+=自NAND下开机 (GTA02)=
