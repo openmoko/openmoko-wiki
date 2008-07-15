@@ -1,0 +1,156 @@
+'''When men were real men and typed their own AT commands...'''
+
+Thankfully, this may now be partially obsolete.
+The [[Dialer|dialer]] now works!
+
+This is a short guide how to manually get GSM going.
+
+== Requirements ==
+
+* GTA01Bv2 or GTA01Bv3 with very recent u-boot bootloader, providing usbtty (serial over USB) support)
+* Do not connect any debug board!
+
+== Walk-Through ==
+
+=== Booting the system ===
+
+* Make sure the rootfs you use has 'auto usb0' in /etc/network/interfaces
+* Configure the host's usb0 interface to 192.168.0.200 netmask 255.255.255.0 See [[USB_Networking]]
+* ssh to root@192.168.0.201
+
+=== Disabling the getty ===
+
+Our default images all have a getty running on /dev/ttySAC0, please edit /etc/inittab and disable the getty on that port
+
+=== Reducing the loglevel ===
+
+{{note|You don't need this in kernel builds with patchset &ge; 1288}}
+
+To keep the kernel from writing to /dev/ttySAC0, you need to use <code>dmesg -n1</code>.
+
+=== Powering up the GSM Modem ===
+
+* verify there is no getty or any other app running on /dev/ttySAC0 
+ root@fic-gta01:~$ lsof | grep ttySAC0
+
+* If gsmd is using the GSM modem, shut it down with
+
+<pre>
+root@fic-gta01:~$ /etc/init.d/gsmd stop 
+</pre>
+
+* power-up the GSM Modem
+ root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/neo1973-pm-gsm.0/power_on
+
+=== Connecting to GSM Modem (using socat) ===
+
+* If you have the command socat (built and installed):
+ root@fic-gta01:~$ socat - file:/dev/ttySAC0,crtscts,crnl
+ AT-Command Interpreter ready
+
+=== Connecting to GSM Modem (using cu) ===
+
+If you don't have socat, you can use cu, although it has problems with file permissions and hardware flow control.
+
+* change permissions on ttySAC0
+ root@fic-gta01:~$ chown uucp.uucp /dev/ttySAC0
+* setup /usr/spool/uucp
+ root@fic-gta01:~$ mkdir -p /usr/spool/uucp
+ root@fic-gta01:~$ chown uucp.uucp /usr/spool/uucp
+* enable CTS/RTS flow control
+ root@fic-gta01:~$ stty -F /dev/ttySAC0 crtscts
+* access the GSM Modem UART
+ root@fic-gta01:~$ cu -l /dev/ttySAC0
+ Connected.
+ AT-Command Interpreter Ready
+ OK
+
+''If it hangs on "Connected" message then probably your device has a non-working GSM modem - check [http://bugzilla.openmoko.org/cgi-bin/bugzilla/show_bug.cgi?id=256 Bug #256], also you may want to try powering off the modem then on again as this worked for me''
+
+'''cu seems to have problems with the hardware flow control. The one way I always managed to get GSM working is to start cu first and then on a different console issue the stty command.'''
+--[[User:DanielWillmann|DanielWillmann]] 01:15, 20 March 2007 (CET)
+
+* close the connection with <Return>~~.<Return>
+ OK
+ ~[fic-gta01].
+ 
+ Disconnected.
+ root@fic-gta01:/$
+
+=== Using it manually ===
+==== Registering with the Network ====
+
+* enter the following [[Hardware:AT_Commands]]:
+<pre>
+ATE1
+OK
+AT+CFUN=1
+ERROR
+AT+CPIN="...."
+OK
+AT+COPS
+OK
+</pre>
+
+==== List available carriers ====
+
+This can take a few seconds to process but will list the available carriers
+<pre>
+AT+COPS=?
+</pre>
+
+==== Answering an incoming call ====
+<pre>
+RING
+ATA
+OK
+</pre>
+
+==== Dialling an outgoing call ====
+
+To actually be able to talk you have to configure your audio accordingly
+
+<pre>
+root@fic-gta01:~$ cd /etc/alsa/
+root@fic-gta01:/etc/alsa$ wget http://opensource.wolfsonmicro.com/~gg/neo1973/gsmheadset.working.state
+root@fic-gta01:/etc/alsa$ alsactl -f /etc/alsa/gsmheadset.working.state restore
+</pre>
+
+Up the "Amp right" volume to hear the speaker on both ears, then dial (note the ''';''' at the end of the dial string, this signifies a voice call, if you omit the ; it is regarded as a data call).
+
+<pre>
+ATD012340234;   
+</pre>
+
+If you get NO CARRIER, try...
+
+<pre>
+ATD+xxyzzzzzzz
+</pre>
+
+ie, ATD+<country_code><area_code><phone_number>
+
+==== Hanging up ====
+<pre>
+ATH
+OK
+</pre>
+
+=== Using [[gsmd]] ===
+
+You can use the [[gsmd]] and [[Gsmd#libgsmd-tool | libgsmd-tool]] programs to have a slightly more high-level interface to the GSM Modem.  It's still console based, though.
+
+For further instructions, see [[gsmd]]
+
+=== Using tui ===
+
+Tui (available from [http://www.sf.net/projects/tui sourceforge]) is able to do all this. It is still text-based, but input-rxvt can take data from touchscreen, so you can actually do the calls using your finger. It also plays wav file on incoming call, so it is theoretically usable. It even does caller id.
+
+=== Manually using GPRS ===
+
+See [[Manually using GPRS]]
+
+[[Category:Documentation]]
+[[Category:Application Developer]]
+[[Category:Technical]]
+[[Category:GSM]]
