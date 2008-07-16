@@ -1,11 +1,39 @@
 == Frequently Asked Questions ==
 ===Booting===
-'''Q:'''  I can't boot Neo with charger?  
+'''Q: I can't boot Neo with charger?'''  
 
 '''A:'''
 1. You can't boot GTA02 without a spare battery. You should boot Neo with spare battery and attach your charger, then you can boot into neo.
 2. Once your phone is booted, remove the spare battery. Freerunner will remain running, 
 3. Insert dead battery and let it charge.
+
+'''Q:Uable to flash FreeRunner after booting either into NAND or NOR.'''
+{{note|Please check [[Getting_Started_with_your_Neo_FreeRunner|Getting started wiht your Neo FreeRunner]] for more information about the flashing image.}}
+ 
+I can ssh into the phone via USB per the wiki instructions, but dfu-util does not find the phone. 
+
+This is what I need to run as root and the everything works fine:
+ root(eno,freerunner)# cat upom
+ #!/bin/sh
+ /sbin/ifconfig usb0 192.168.0.200 netmask 255.255.255.0
+ /sbin/route add -host 192.168.0.202/32 dev usb0
+
+ /bin/echo 1 > /proc/sys/net/ipv4/ip_forward
+ iptables -F
+ iptables -A INPUT -s 192.168.0.202 -i usb0  -d 192.168.0.200   -j ACCEPT
+ iptables -A INPUT  -s 192.168.0.200  -i eth+  -d 192.168.0.202  -j ACCEPT
+ iptables -A INPUT  -s 192.168.2.0/24  -i eth+  -d 192.168.0.202  -j ACCEPT
+ iptables -A INPUT  -s 192.168.2.0/24  -i eth+  -d 192.168.2.0/24  -j ACCEPT
+
+ iptables -A FORWARD -s 192.168.0.202 -i usb0 -d 192.168.2.0/24 -o eth+   -j 
+ ACCEPT
+ iptables -A FORWARD -s 192.168.2.0/24 -i eth+ -d 192.168.0.202 -o usb0  -j 
+ ACCEPT
+
+ iptables -A OUTPUT -d 192.168.2.0/24 -o eth+   -j ACCEPT
+ iptables -A OUTPUT -d 192.168.0.202 -o usb0  -j ACCEPT
+ iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
+ root(eno,freerunner)#
 
 === Battery ===
 ==== What is the expected battery life? ====
