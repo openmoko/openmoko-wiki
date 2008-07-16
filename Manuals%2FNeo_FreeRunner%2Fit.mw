@@ -133,21 +133,18 @@ Dovrai aggiornare i file di configurazione in /usr/share/openmoko/scenarios/ per
 
 Questa è montata in /media/card
 
-=== Importing contacts ===
+=== Importare i contatti===
 
-If you can export your contacts to VCard format, either multiple files or single file containing all of them, you may use the script on [[Import Vcf Contacts]] page to bring them to Neo.
+Se puoi esportare i tuoi contatti nel formato VCard, sia in file multipli, sia in un unico file che li contiene tutti, puoi usare lo script della schermata [[Import Vcf Contacts]] per portarli tutti sul Neo Freerunner.
 
-=== Where to go when things go wrong ===
+=== Dove andare quando le cosa vanno male ===
 
-You may ask for help on the support mailing list : more details at https://lists.openmoko.org/mailman/listinfo/support
+Puoi chiedere aiuto sulla mailing list di supporto: maggiori informazioni su https://lists.openmoko.org/mailman/listinfo/support
 
 [[Freerunner_Hardware_Issues]]
 
 == Connettere il Neo Freerunner alla Rete via USB ==
-Connettere il Neo Freerunner a un computer GNU/Linux con il cavo USB. Per fare questo con Mac OS X, riferitevi a [[MacOS_X]]. Dopo il boot nell'immagine di Openmoko avrete una nuova interfaccia, usb0, sul vostro computer GNU/Linux.
-[(TRAD)
-Connect the Neo FreeRunner to a GNU/Linux host with the USB cable. For Mac OS X please refer to [[MacOS_X]]. For Windows XP and Vista please refer to [[Neo1973_and_Windows]] (which also works for the FreeRunner). After booting into the Openmoko image there will be a new interface, usb0, on your GNU/Linux host.
-]
+Connettere il Neo Freerunner a un computer GNU/Linux con il cavo USB. Per fare questo con Mac OS X, riferitevi a [[MacOS_X]]; invece per fare ciò con Windows XP e Vista, riferitevi a [[Neo1973_and_Windows]] (che funziona anche per il Neo Freerunner). Dopo il boot nell'immagine di Openmoko avrete una nuova interfaccia, usb0, sul vostro computer GNU/Linux.
 
 ===== Metodo Manuale =====
 Digitare i seguenti comandi in un terminale GNU/Linux:
@@ -194,6 +191,8 @@ Ora sarà possibile connettersi al proprio telefono usando il seguente comando:
 Il comando precedente ti fornisce solamente una connessione con una Shell sicura con il tuo dispositivo Openmoko, non ti permette di collegare il tuo dispositivo a Internet. Se ti interessa collegare il tuo dispositivo a Internet leggi alla sezione [[USB_Networking]].
 
 ===== Condividere la tua connessione ad Internet via USB =====
+Per accedere a internet con il Neo Freerunner attraverso una connesione USB, avrai bisogno di fare alcune modifiche al PC attraverso cui ci si sta connettendo.
+
 In Ubuntu:
 
 Dentro al file /etc/network/interfaces, la configurazione dell'interfaccia in questo modo:
@@ -208,50 +207,14 @@ Dentro al file /etc/network/interfaces, la configurazione dell'interfaccia in qu
     up iptables -P FORWARD ACCEPT &
     down iptables -D POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24 &
 
-Quindi, sul tuo Openmoko, modifica /etc/ e da così:
-
- iface usb0 inet static
-        address 192.168.0.202
-        netmask 255.255.255.0
-        network 192.168.0.0
-        gateway 192.168.0.200
-        up echo nameserver 192.168.0.200 > /etc/resolv.conf
-
-a qualcosa che punti al nome reale del server, come un sistema publico DNS da OpenDNS, come questo:
-
- iface usb0 inet static
-        address 192.168.0.202
-        netmask 255.255.255.0
-        network 192.168.0.0
-        gateway 192.168.0.200
-        up echo nameserver 208.67.222.222 > /etc/resolv.conf
-        up echo nameserver 208.67.220.220 >> /etc/resolv.conf
-
-[(TRAD)
-For the FreeRunner to access the internet through the USB connection, you will also need to make modifications on the PC it is connecting through.
-
-In Ubuntu:
-
-Within /etc/network/interfaces, change your interface setup to this:
-
- auto usb0
- iface usb0 inet static
-    address 192.168.0.200
-    netmask 255.255.255.0
-    network 192.168.0.0
-    up iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24 &
-    up echo 1 > /proc/sys/net/ipv4/ip_forward &
-    up iptables -P FORWARD ACCEPT &
-    down iptables -D POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24 &
-
 In Fedora:
 
-Set /etc/sysconfig/network-scripts/ifcfg-usb0 to this:
+Setta /etc/sysconfig/network-scripts/ifcfg-usb0 così:
  DEVICE=usb0
  IPADDR=192.168.0.200
  NETMASK=255.255.255.0
 
-Set /etc/sysconfig/network-scripts/ifup-usb to this:
+Setta /etc/sysconfig/network-scripts/ifup-usb così:
  #!/bin/bash
  
  . /etc/init.d/functions
@@ -278,7 +241,7 @@ Set /etc/sysconfig/network-scripts/ifup-usb to this:
  /sbin/iptables -I FORWARD -s ${IPADDR}/${NETBITS} -j ACCEPT
  /sbin/iptables -I FORWARD -d ${IPADDR}/${NETBITS} -j ACCEPT
 
-Set /etc/sysconfig/network-scripts/ifdown-usb to this:
+Setta /etc/sysconfig/network-scripts/ifdown-usb così:
  #!/bin/bash
  
  . /etc/init.d/functions
@@ -304,14 +267,12 @@ Set /etc/sysconfig/network-scripts/ifdown-usb to this:
  /sbin/ip link set dev ${DEVICE} down
  /sbin/ip addr flush dev ${DEVICE} 2>/dev/null
 
-If you are using NetworkManager, restart it and enable the usb device from its menu, otherwise it will disable your connection shortly after you enable it.
+Se stai utilizzanto il NetworkManger, riavvialo e attiva il dispositivo USB dal suo menù, altrimentidisabiliterà la tua connessione dopo che l'avrai attivata.
  /sbin/service NetworkManager restart
-
-]
 
 =====Updating DNS=====
 
-Once your PC is setup, then edit /etc/network/interfaces on your FreeRunner and modify the code from this:
+Una volta che il tuo PC è configurato, modifica /etc/network/interfaces sul tuo Neo Freerunner e cambia il codice da così:
 
  iface usb0 inet static
         address 192.168.0.202
@@ -320,7 +281,7 @@ Once your PC is setup, then edit /etc/network/interfaces on your FreeRunner and 
         gateway 192.168.0.200
         up echo nameserver 192.168.0.200 > /etc/resolv.conf
 
-to something that points to a real name server, like a public DNS system from OpenDNS, like this:
+a qualcosa che punti al nome reale del server, come un sistema publico DNS da OpenDNS, come questo:
 
  iface usb0 inet static
         address 192.168.0.202
