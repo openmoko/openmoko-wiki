@@ -266,6 +266,43 @@ On the factory loaded OM2007.2 image, run the following to restart networking fo
 
 If you are still unable to get the freerunner access to the internet, and are using Mandriva and/or happen to have your LAN on 192.168.0.0/24, [[User:Linuxpaul|this page]] may help you.
 
+==The Architecture==
+
+There are three layers to the software on the FreeRunner:
+
+===uBoot===
+
+Think of u-boot as a combination of the BIOS and Grub on a PC.
+
+===Kernel===
+
+The Linux kernel.
+
+===Root Filesystem===
+
+The rest of the system
+
+==Updating the software==
+
+In order to keep the FreeRunner up-to-date with the latest features and bug-fixes, it is advisable update the software at regular intevals. There are two main methods of doing this.
+
+===opkg===
+
+Assuming that your FreeRunner can access the internet (see above), the kernel and other packages can be updated with
+
+ # opkg update
+ # opkg upgrade
+
+The first updates the repository information, telling opkg what packages are available. The second upgrades all packages for which a newer version is available. At the moment, some signature files are missing, which opkg complains about, but this is cosmetic.
+
+It will be possible in the future to update uboot with opkg, but this has not yet been implemented
+
+===Flashing===
+
+uboot, the kernel and the root filesystem can all be flashed to update them. See below for how. For uboot, this is the only possibility. The advantage of flashing the kernel, rather than using opkg seems to be speed.
+
+The disadvantage of flashing the root file system is that it wipes out all local modifications, including /home. If /home is moved to the SD disk, this is no longer a problem.
+
 ==Un-crippling the 2007.2 image==
 
 The stock [[Openmoko2007.2]] image flashed onto the Neo FreeRunner is really just the bare bones. For example, you don't have the clock and the quick-launch icons showing. Here's how you can change that:
@@ -284,10 +321,6 @@ More information about today screen customization at [[Today/2007.2]].
 With either clock, you may wish to set the correct [[Timezone]].
 
 Also, if you prefer having a full keyboard, see [http://www.ginguppin.de/node/15 these instructions].
-
-Finally, you might want to update your package list to know about the most recent versions:
-
- # opkg update
 
 ===GPS===
 
