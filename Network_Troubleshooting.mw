@@ -2,26 +2,26 @@
 
 ==USB Networking==
 
-If your Openmoko fails to download packages or package information, there is likely a problem connecting to the network.
+If your OpenMoko fails to download packages or package information, there is likely a problem connecting to the network.
 
-Assuming that you have successfully made a [[Getting_Started_with_your_Neo_FreeRunner#Connect_to_the_Neo_FreeRunner_By_USB_Networking|usb connection]] to your Openmoko, the problem probably lies in your /etc/resolv.conf file or in the host computer's failure to act as a gateway.
+Assuming that you have successfully made a [[Getting_Started_with_your_Neo_FreeRunner#Connect_to_the_Neo_FreeRunner_By_USB_Networking|usb connection]] to your OpenMoko, the problem probably lies in your /etc/resolv.conf file or in the host computer's failure to act as a gateway.
 
 ===resolv.conf===
 
 If resolv.conf is not set correctly, then your Openmoko won't be able to look up internet host names.
 
-Type <tt>ping openmoko.org</tt> on your Openmoko.  If the response is something like <tt>PING openmoko.org (88.198.58.17): 56 data bytes</tt>, then your resolv.conf file is fine.  If the result is something like
+Type <tt>ping openmoko.org</tt> on your OpenMoko.  If the response is something like <tt>PING openmoko.org (88.198.58.17): 56 data bytes</tt>, then your resolv.conf file is fine.  If the result is something like
 <tt>ping: bad address 'openmoko.org'</tt>, then the problem lies here.
 
 Take a quick look at /etc/resolv.conf.  The default contents are
  nameserver 192.168.0.200
-which means that Openmoko will look to your host computer for name lookups.  If your host computer is not configured to act as a DNS server, that will be your problem.
+which means that OpenMoko will look to your host computer for name lookups.  If your host computer is not configured to act as a DNS server, that will be your problem.
 
 To fix:  Examine the /etc/resolv.conf on your own host system.  You might typically see
  nameserver 192.168.1.1
 which will either point to the name server provided by your ISP, or (as in this example) another system on your local network, such as your NAT router.
 
-On your Openmoko, give the command (e.g.) <tt>ping 192.168.1.1</tt>.  If this command succeeds, then it's a simple matter of adding <tt>nameserver 192.168.1.1</tt> to the resolv.conf on your Openmoko device.  (Being certain, of course, to use the actual IP address you found on the host system.)
+On your OpenMoko, give the command (e.g.) <tt>ping 192.168.1.1</tt>.  If this command succeeds, then it's a simple matter of adding <tt>nameserver 192.168.1.1</tt> to the resolv.conf on your OpenMoko device.  (Being certain, of course, to use the actual IP address you found on the host system.)
  nameserver 192.168.1.1
  nameserver 192.168.0.200
 
@@ -29,22 +29,7 @@ If the ping command failed, then it is likely that your host system is not actin
 
 ===Gateway Failure===
 
-If your Openmoko is connected to a host computer via USB, then the host computer will need to provide
-internet connectivity to the Openmoko.  This is known as acting as a gateway.
+If your OpenMoko is connected to a host computer via USB, then the host computer will need to provide
+internet connectivity to the OpenMoko.  This is known as acting as a gateway.
 
 See [[Getting_Started_with_your_Neo_FreeRunner#Allow_FreeRunner_to_Connect_to_Internet_via_USB|Allow FreeRunner to Connect to Internet via USB]] on the Getting Started page for instructions on configuring this.
-
-===usb0 Not Found===
-If the usb0 interface is not created when you connect the (booted) phone to your Linux computer, you need to compile support for it into the kernel.  ie:
-  usb0: error fetching interface information: Device not found
-
-You need specifically the cdc_ether module.  To compile support, go to the kernel menuconfig and navigate to "Device Drivers" -> "Network Device Support" -> "USB Network Adapters"
-Ensure the following are enabled:
-  Multi-purpose USB Networking Framework
-  CDC Ethernet support (smart devices such as cable modems)
-  Simple USB Network Links (CDC Ethernet subset)
-  Embedded ARM Linux links (iPaq, ...)
-
-Compile the modules and install them, and then reconnect the USB cable.  The usb0 interface should now be present.
-
-[[Category:Networking]]
