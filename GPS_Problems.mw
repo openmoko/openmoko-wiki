@@ -1,98 +1,14 @@
 See [[GPS]] for details on how to evaluate the Freerunner GPS with command line utilities.
 
-{|border="3"
-|+'''Problems with the GPS'''
-!Username||Checked outside?||External antenna?||Note
-|-
-|Pthorin ||Yes|| No ||I tried for about 40 minutes outside, I'm running om-gta02 P1-Snapshot-20080622. Did get GPS time outside, but only got lines like: 
-$GPGSA,A,1,,,,,,,,,,,,,99.99,99.99,99.99*30
+== MicroSD Card Issue ==
 
---[[User:Pthorin|Pthorin]] 05:11, 11 July 2008 (UTC) I tried it out once again after removing the front cover and got a fix quite fast, less than five minutes. Could there be an issue with the case blocking the signals? Could the snap/latch above the antenna be a problem?
-|-
-|iandouglas ||Yes|| No ||Spent over a half hour outdoors, the NMEA port on my Samsung Blackjack 2 found my position just fine, but also got the same 99.99,99.99,99.99*30 line as Pthorin when powering on the GPS unit, starting gpsd, then running gpspipe at the command line
-|-
-| genki || Yes || Yes || Same here. Does not get a fix without external antenna. GPS output is 99.99,99.99,99.99*30 as well
-|-
-| Ole || Yes || Yes || Tried 15min outside w/o external antenna. Did not get any activity on the SS tab. With external antenna from my window TTFS 33s. ||
-|-
-| Adsllc  || Yes || No || Tried 15min outside one night.  Got UTC time and a couple of satellites on the SS tab, but no fix.  Reseated the GPS connector, still had no luck.  Later I set it outside, did other stuff for 30 mins or so, then came back to see a successful fix and all tabs in the OM AGPS UI app working.  Worked fine on a trip to the post office.  Tried again later, no joy.
+[http://lists.openmoko.org/pipermail/community/2008-July/021774.html This thread] indicates that the problem is interference from the SD card slot, and recommends trying without the SD card inserted. A [http://lists.openmoko.org/pipermail/openmoko-kernel/2008-July/003777.html software workaround] is under testing...
 
-Tried another day - left it outside propped upright against the luggage rack of the car for 15 minutes+; zero satellites on AGPS UI.  Picked it up, pressed "run" then "Cold reset".  BAM - it saw its first satellite about 10 seconds later.  It still took around 5 minutes to get a fix, but it's a lot better than nothing.
+== Information about faulty antennas ==
 
-I was doing a lot of screwing around before my first success (which did involve a Cold reset), so it's hard to assign causation.  The second time seemed to be pretty solid cause/effect.
-
-If anyone confirms this as a fix/workaround, please make it more prominent on this page.
-|-
-| Bumbl || Yes || No || Tried outside and never got to see a single satellite. I even went on the highest point nearby but it got no satellite although I tried for 45min.
-|-
-|Dummy ||?|| ? ||
-|-
-| Sitwon || Yes || No || Tried three different times in two different locations. Followed all the advice I could find on wiki & lists. Left it pointed up for 30-45min and have never gotten a single satellite to connect. :,(  
-
-Edit: Tried again w/ no MicroSD card, TTFF=21s indoors.
-|-
-| banahogg || Yes || No || Left pointed up in a mug as recommended. After ~30min, one satellite showed up in signal screen. Three after 60min, but no lock. Three other GPS systems locked on from the same location in at most 10 minutes.
-|}
-
-
-{|border="3"
-|+'''Success stories'''
-!Username||Checked outside?||External antenna?||Note
-|-
-|[[User:TimoJyrinki|timo]] || Yes || No || 11-07: Spent over a half hour outdoors in an open area without nearby buildings. Zero good fixes, no time gotten, GPS output scrolled along with same numbers for the whole time. When I played some more, very rarely I noticed that in the AZ tab a satellite blob had appeared, always at 0 degrees at the top of the picture. But still no fixes at all or anything. [postscript: I probably moved around a bit, ie. had Neo in my hand]
-''12-07 update'': Was able to get a fix in (completely) another location. Looks like the signal may be non-existent in many situations even in seemingly very open places, and together with the shaky software it may be sometimes really hard to say if there is a hw problem...
-
-''13-07 update'': Enabled the assistive data for the GPS, didn't touch to AGPS UI which always clears all data, got a fix in just a couple of minutes (maybe less, didn't look) and the fix stayed completely properly for the duration of my car trip. If someone codes also "agps daemon" to support Neo by saving data before gps chip is turned off, this'd be just great (considering the small antenna etc.).
-|}
-
-== Solved problems ==
-
-''Let's collect hints which could solve the above problems here. E.g.: How to get the best results with your internal antenna''
-
-=== Basic GPS debugging ===
-
-It could be that your GPS device is functioning properly, but needs to be "coaxed" into getting an initial fix.
-
-* Before reporting a problem here, please check that you've had the GPS out in the open air, preferably with the GPS antenna pointed up for over 15 mins. (the screen the right way up, with the top of the phone facing up, and the screen facing the horizon).  This should get a lock in even the worst cases.
-
-* However, you might not obtain a lock if the orientation or position of your phone continuously changes.  It needs to be stationary long enough to download a frame of data from one of the satellites.  Frames are 1500 bits and take 30 seconds to broadcast. The first 6 seconds of the frame contains clock data; the remainder describes the satellite position.  Downloading this data can take a surprisingly long time for two reasons.
-*# The GPS reception is sensitive to the orientation of the phone.  When you move the phone, it can corrupt part of the current frame.
-*# GPS signals reflect off buildings, interfering with reception in seemingly random ways.  If local objects cause signal reflections between you and the satellites, the data may repeatedly fail to download; try facing a different direction (and then holding still) after a few minutes without a lock.
-* Is your unit obtaining signal at all?  Check using the AGPS test program "Openmoko AGPS UI".  Click "Power On" to begin the test.  
-** The "ss" button lists satellites and signal strengths; pressing the "dBm" or "C/N0" button at the bottom of the screen cycles through different scales; a signal between 130dBM and 150dBm should be adequate for a lock, assuming the Neo obtains a consistent signal (lower numbers / taller bars are better).
-** It may take a few minutes for the first satellite to appear in this display.  You'll need multiple satellite signals to get a lock.
-** Before getting a lock, the "UTC" field in the "run" tab should start displaying the current time.  This value is obtained via the GPS antenna; it may take a few minutes for this field to become populated.
-
-Finally, there is probably room for improvement in the way GPS fixes are currently obtained.  GPS devices can obtain fixes at least three different ways.  The least sophisticated method downloads a set of current satellite orbits by downloading frames.  If part of a frame is corrupted, the GPS device must wait 30 seconds for it to be retransmitted.
-
-A slightly more sophisticated approach uses an initial estimate of the current time and your position to obtain a lock more quickly.  Finally, instead of downloading orbit and position data from the satellites, some modern GPS devices simply recalculate the information locally.  Some (or all?) of these optimizations are supported by the Freerunner's GPS device, though the software installed at the factory does not seem to make use of them.
-
-==== More Info to get a fix ====
-I'd like to stress what is written above, it really helped. I put my FR on a table outside, standing vertically with something to hold it upright, switched to the SS display, clicked the db button, waited about 2 mins to get a bar, then turned it around its vertical axis slowly watching the bar go up and down. When it was facing the right way for a maximum bar length I left it like this, without touching it for about 10 mins, and it was able to find the other satellites and get a fix. It is important to not touch it or move it once it gets the first satellite. However it did lock up solid after about 30 minutes, and power button did not reset, needed to remove the battery which of course lost the fix.
-
-==== Comment on possible software solution ====
-
-I tested the FR outside with internal antenna and did not see a single sat for
-15min. With external antenna I have a TTFS of 33s.
-If I plug out the external after the fix is stable,
-it almost instantly gets lost.
-I still see one to three sats but get no fix.
-
-So apparently the information obtain through the external antenna
-is not enough to assist the internal antenna in getting a fix.
-Orbit and positon data should be known to the device by then?
-If you download this data from the internet or recalculate it locally,
-in what way would this be superior to what I tested?
-
-=== Information about faulty antennas ===
-
-* If you list your problems above, note if you've tried unplugging and replugging the internal GPS connector. (See [[Disassembling_Neo1973]] about 2/3 of the way down.  (this may differ on freerunner, pictures appreciated)
+* If you removing the SD card doesn't help and you suspect your antenna, try unplugging and replugging the internal GPS connector. (See [[Disassembling_Neo1973]] about 2/3 of the way down.  (this may differ on freerunner, pictures appreciated)
 Also note that there is a trac ticket for this issue: [http://docs.openmoko.org/trac/ticket/1542 #1542]
 
-[[FreeRunner_GPS_antenna_repair_SOP]] Indicates that the problem may be bad soldering, and includes a guide to fix. This will presumably void your warranty.
-
-=== MicroSD Card Issue ===
-
-[http://lists.openmoko.org/pipermail/community/2008-July/021774.html This thread] indicates that the problem might be interference from the SD card slot, and recommends trying without the SD card inserted. A [http://lists.openmoko.org/pipermail/openmoko-kernel/2008-July/003777.html software workaround] is under testing...
+[[FreeRunner_GPS_antenna_repair_SOP]] Indicates that some (rare?) units may have bad soldering, and includes a guide to fix. This will presumably void your warranty.
 
 [[Category:GPS]]
