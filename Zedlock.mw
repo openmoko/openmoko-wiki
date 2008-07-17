@@ -1,0 +1,83 @@
+Screen locking program created by [[User:Quicksand]].  Currently in PROTOTYPE form.
+
+==== Download ====
+[http://wixonlaw.com/public/zedlock-0.0.1.tar.bz2 zedlock 0.0.1]
+
+==== Usage ====
+
+[[Image:Zedlock-screenshot-1.png]]
+
+This is a screen-lock program in prototype form.  To run it, just run zedlock.py from a terminal in the directory where it's installed.
+
+It's really simple.  To unlock, just trace a large 'Z' with a single stroke of your finger or stylus, anywhere on the screen.  It must be BIG ENOUGH (about half the smallest screen dimension in both height and width, approx. 2cm on the Neo), it must be drawn in the CORRECT SEQUENCE (from top-left to bottom-right), and it must be QUICK ENOUGH (completed in less than one second).  Within these parameters, a fair amount of variation (i.e., sloppiness) is tolerated.  (As a result, you can make some non-Z patterns that fool it.)
+
+Success:
+
+[[Image:Zedlock-screenshot-2.png]]
+
+If your stroke doesn't meet the criteria, you get a big red 'X' on the screen and a three-second lockout.
+
+Too small:
+
+[[Image:Zedlock-screenshot-3.png]]
+
+Wrong sequence:
+
+[[Image:Zedlock-screenshot-4.png]]
+
+With the iPhone and the Qtopia phone platform, you need to be looking at the touchscreen to unlock it.  Their sliders and animated keys are cool, but this is better.
+
+
+==== Installation ====
+'''Remember, this is a prototype'''
+
+To install it, copy zedlock.py and zedlock.png to your home directory (or a subdirectory), make sure zedlock.py is executable, and run it from the directory you installed it in.  The program depends on python-pygtk and python-pycairo.  Note that it doesn't actually do anything all that functional yet -- it is simply a demonstration program.  This prototype doesn't actually lock or unlock anything; it just clears the screen after each stroke (and the subsequent visual feedback) so you can try it again and again and again.
+
+The program should be more-or-less QVGA-friendly (well, almost, just change two global variables) and orientation-friendly already, but YMMV.
+
+Yes, it's slow, especially to start up.  But that's embedded python for ya.  Plus I had to do some weird hacky things in cairo to get it to render predictably.  This is my first cairo project and my first python program, SO DON'T GIVE ME ANY GRIEF!  There are probably terrible, ugly, spaghetti-code-monsters in there if you care to look.  They'll go away over time.  :)
+
+==== Future Plans ====
+After the featureset solidifies a bit more, I will rewrite it in C (which I'm much more comfortable with), optimize it (a lot!), and add some features:
+
+'''1)''' It will be rotationally insensitive so you don't need to look at it to determine portrait vs. landscape before you unlock.  This will be pretty easy to add.
+
+'''2)''' The text on there is statically-coded right now, and fixing that will be trivial, so don't complain about it now.  It doesn't actually tell you the GSM/GPRS status or even the real time of day.  Yes, wise guy, IT'S ALWAYS 5:35 pm HERE.
+
+'''3)''' Eventually it will get a battery/charging state icon, GSM signal strength bars, and a ringer volume indicator, so you can see those things while the screen remains locked.  I don't want to make the interface too cluttered, but those items seem essential.
+
+'''4)''' Ideally this will slip right into the OpenMoko power management scheme.  Preferably neod and/or the dialer will *lock* the screen and require an unlock program (such as zedlock) in the following circumstances:
+
+  * immediately after an incoming call is answered
+    (to prevent touchscreen input from the user's face or ear)
+
+  * immediately after an outgoing call is dialed
+    (ditto)
+
+  * on request
+    (via a lock button or menu, before you put it in your pocket)
+
+  * upon an automatic return-from-suspend
+    (e.g., a datebook alarm, incoming phone call, SMS, etc.)
+
+  * but *not* following a manual return-from-suspend
+
+Note that this concept of screen-lock is different from the power-management concept of screen blanking.  Screen LOCK should probably occur more often, and is intended primarily to prevent accidental user-interface manipulation while the touchscreen is against the user's face, in the user's pocket, or otherwise subject to spurious inputs.  It is not intended to save power.
+
+==== History ====
+'''Who's Zed?'''
+
+Zed's dead, baby, Zed's dead.
+
+'''No, really, why Zed?'''
+
+There are a bunch of things out there already called "zlock" or the like.  I selected the 'Z' glyph because it's fast and easy to make without looking, and its four points are easy to pull out of a stream of touchscreen data -- they are simply the maxima and minima of the functions (x+y) and (x-y).  I don't need to keep a linked list of intermediate points or anything like that; these points are updated on-the-fly.
+
+'''Why would I want this?'''
+
+You don't need to be looking at the screen to unlock it.  It is pretty unlikely to unlock accidentally (by your face while you are on the phone, in your pocket, etc.).  But it's simple and fast enough to perform frequently and easily, and to become second-nature.
+
+Plus it looks nice: gtk+ and cairo are used for fluid anti-aliased graphics.  Visual feedback is provided after a stroke is completed: an openmoko-orange line shows where you made your stroke, and if it finds the 'Z' pattern, it is highlighted in white for a moment. 
+
+
+[[Category:Applications]]
