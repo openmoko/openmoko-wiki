@@ -11,6 +11,10 @@ Igorance is probably the biggest issue. People just use the numbering schema hey
 
 Supporting a more sane approach directly in the phone absolutely helps to put and end to this.
 
+
+== VoIP ==
+VoIP also works best with international numbers.
+
 == Number Transformation (Perl Code)==
  sub canonicalForm {
          my $number  = shift;
@@ -76,8 +80,6 @@ The user might be anoyed or not able to answer this question right away. So we s
 
 == What to do with this? ==
 
-
-
 === Number matching against address book ===
 When a call comes in. Try to match it against our telephone book.
 
@@ -93,3 +95,54 @@ This should be done in some user visible way. So he sees what happens
 with his number.
 
 This is my personal favorite because, well non intenrational numbers on mibile networks are stupid...
+
+
+== Convert back to local number ==
+
+=== Code ===
+
+sub dialNumber {
+        my $number  = shift;
+        my $PAPrefix = publicAccessPrefix;
+        my $IDPrefix = internationalPrefix' };
+        my $LDPrefix = longDistancePrefix' };
+        my $Country = countryCode' };
+        my $Area    = areaCode' };
+        my $PBX     = pbxCode' };
+        $number =~ s/[^+0-9]+//g;                                        # strip syntactical sugar.
+        $number =~ s/^$PAPrefix$IDPrefix$Country$Area$PBX//;             # inhouse phone call
+        $number =~ s/^$PAPrefix$IDPrefix$Country$Area/$PAPrefix/;        # local phone call
+        $number =~ s/^$PAPrefix$LDPrefix$Area$PBX//;                     # inhouse phone call
+        $number =~ s/^$PAPrefix$LDPrefix$Area/$PAPrefix/;                # local phone call
+        $number =~ s/^$PAPrefix$IDPrefix$Country/$PAPrefix$LDPrefix/;    # long distance call
+        $number =~ s/^$PAPrefix$PBX//;                                   # inhouse call
+        $number =~ s/^[+]$Country$Area$PBX//;                            # inhouse phone call
+        $number =~ s/^[+]$Country$Area/$PAPrefix/;                       # local phone call
+        $number =~ s/^[+]$Country/$PAPrefix$LDPrefix/;                   # long distance call
+        $number =~ s/^[+]/$PAPrefix$IDPrefix/;                           # international call
+        return $number;
+}
+
+=== Usages ===
+Converting numbers back makes certainly no sense at all for dialling them on GSM.
+
+But two usages come to my mind.
+==== Number formatting ====
+We could present the user with a number in his local version.
+I really dislike this idea, because in my mind the only good number is a correct number. Good looking is secondary.
+But if someone likes this, go ahead...
+
+==== Non GSM/VoIP Dialling ====
+This is my favourite.
+
+Imagine you have all your numbers stored in your phone, as most of us have. But you somehow have the need to dial a number from you address book via a land line/POTS phone.
+Maybe because it is just much cheaper to use the land line.
+
+Answer. DTMF!
+
+Just play the number as DTMF on the phone speaker and hold in on the mouth piece of the phone handset.
+
+Problem. In this case you need to use the local dial plan. More important the local dial plan of this particular phone.
+So this is nothing that could work out of the box, but would work reasonable well if we present the user with the option to choose or change a special dial plan.
+
+This is not much related to the rest of this issue, but a rather cool idea anyway. I want this.
