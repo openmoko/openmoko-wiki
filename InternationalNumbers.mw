@@ -1,0 +1,95 @@
+I try to make comprehensive documentation on how to transform numbers in international form and how to use them.
+
+'''Request For Comments!'''
+
+In my opinion, [[Openmoko]] really needs to support this.
+
+For two reasons. First because using non international numbers on a mobile network is plain stupid and can only be excused by ignorance or lazyness. Numbers just stop to work when you take your phone in another country.
+And second, because we like to match numbers, whatever form they are in.
+
+Igorance is probably the biggest issue. People just use the numbering schema hey are used to and do not anticipate the problems they can get with this appoach.
+
+Supporting a more sane approach directly in the phone absolutely helps to put and end to this.
+
+== Number Transformation (Perl Code)==
+ sub canonicalForm {
+         my $number  = shift;
+         # my dial plan. I added some examples for a German dial plan in the comments
+         my $PAPrefix = publicAccessPrefix;  # No PBX. But usually 0
+         my $IDPrefix = internationalPrefix; # 00
+         my $LDPrefix = longDistancePrefix;  # 0
+         my $Country = countryCode; # 49
+         my $Area    = areaCode;    # 761
+         my $PBX     = pbxCode;     # external number of your PBX
+         $number =~ s/[^+0-9]*//g;    # strip white space etc.
+         if ( $number =~ m/^[^+]/ ) {
+                 $number =~ s/^$PAPrefix$IDPrefix/+/;    # replace int. dialing code
+                 if ( $number =~ m/^[^+]/ ) {
+                         $number =~ s/^$PAPrefix$LDPrefix/+$Country/;   # long distance number
+                         if ( $number =~ m/^[^+]/ ) {
+                                 $number =~ s/^$PAPrefix/+$Country$Area/;    # local number
+                                 if ( $number =~ m/^[^+]/ ) {
+                                         $number =~ s/^(.*)/+$Country$Area$PBX$1/;    # else cononicalize
+                                 }
+                         }
+                 }
+         }
+         return $number;
+}
+
+This is a perl method we use in our company for that purpose.
+
+Please note that publicAccessPrefix and pbxCode are superflous for our purpose. Because 
+we are not behind some PBX.
+
+This code is free.
+
+=== Assumptions ===
+For this to work, we need to know the users dialling habits when not using international form.
+This is usually called a [[Dial Plan]].
+
+How a [[Dial Plan]] works depends on the users location and or provider.
+
+=== How to find out the users Dial Plan ===
+Because the dial plan depends on the position or provider. We could probably make some automagic match.
+
+==== Automagic ====
+We could probably ask the network or SIM about our country or Number.
+Please submit ideas...
+
+Some crude location based approach might work too.
+But this has the problem that even when my location (country) changes, the numbering schema in my head does not change.
+And all my existing numbers i entered in local form relate to another dial plan.
+So switching dial rules depending wherever i go does not make sense.
+
+==== Ask the user ====
+If automagic fails or is not conclusive. We could just ask the user about his dialling habits.
+
+Two solutions.
+
+* Create a control panel where the user can enter his dial plan.
+Benefit from using a dial plan to normalize numbers only applies when the user actually entered something there.
+
+* Ask the user on the first non international form number he puts into his address book.
+The user might be anoyed or not able to answer this question right away. So we should give him a way to enter these information later. (previous approch)
+
+
+== What to do with this? ==
+
+
+
+=== Number matching against address book ===
+When a call comes in. Try to match it against our telephone book.
+
+Just transform every number before matching.
+
+=== Transform every number in international form when the user enters it ===
+Transform every number after user put it in his phone book.
+
+Only save internationalized numbers if possible.
+
+This would condition the user to use international form and acknowledge its existence and significance.
+This should be done in some user visible way. So he sees what happens 
+with his number.
+
+This is my personal favorite because, well non intenrational numbers on mibile networks are stupid...
