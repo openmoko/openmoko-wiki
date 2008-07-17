@@ -155,11 +155,21 @@ If not, and you can get the error to occur three times in a row after running th
 If you have chronic build problems, cleaning your environment variables and re-running the build from scratch may help.  The following script should remove all non-essential variables; you should also manually trim your path to the minimum.
   `env | grep -Ev '^SHELL=|^TERM=|^OLDPWD=|^USER=|^USERNAME=|^PATH=|^EDITOR=|^LANG=|^HOME=|^DISPLAY=|^_='  | sed 's/^\(.*\)=.*/unset \1/'`
 
-(you must include the backtics)
+(you must include the backtics).
+Note that on some boxes it is necessary to call "make" by typing "/usr/bin/make" afterwards.
+
+
+On current ubuntu boxes another trick is necessary:
+glibc_2.6.1 fails to build since it is unable to generate the necessary locales until you type in the following line:
+ sudo sysctl -w vm.mmap_min_addr=0
+Note that this temporarily disables a new security vulnerability check that has entered /etc/sysctrl - but that makes problems with loads of applications.
+To re-enable this check do the following:
+ sudo sysctl -w vm.mmap_min_addr=65536
+See the talk page of this article for more details on this solution.
 
 ===Known MokoMakefile errors ===
 
-===Fixes for distribution/environment-specific or isolated issues===
+===Fixes for distribution/environment-specific or isolated issues===>
 
 Work-arounds for temporary or isolated problems can be found and should be added to the [[Talk:MokoMakefile|Discussion page]] which is associated with this page.  As they are fixed, they will be removed from that page.
 
