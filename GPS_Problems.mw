@@ -1,11 +1,20 @@
 See [[GPS]] for details on how to evaluate the Freerunner GPS with command line utilities.
+=== Problem: it takes a long time (10min+) before the Freerunner gets first GPS data ===
 
-== MicroSD Card Issue ==
+It was found that the OpenMoko FreeRunner GPS has a long Time To First Fix (TTFF) with the SD card in the phone. [http://lists.openmoko.org/pipermail/community/2008-July/021774.html This thread] indicates that there is interference from the SD card slot, as without the SD card inserted it the TTFF are much shorter.
 
-[http://lists.openmoko.org/pipermail/community/2008-July/021774.html This thread] indicates that the problem is interference from the SD card slot, and recommends trying without the SD card inserted. A [http://lists.openmoko.org/pipermail/openmoko-kernel/2008-July/003777.html software workaround] is under testing...
+::More specific: the GPS signal level drops by -20dBm, i.e. factor 100. Signal strength of a GPS satellite above your head is around -127dBm. Needed strength for a first fix is -145dBm with a minimum of three satellites. Once the GPS chip has a fix, it can operate at signal levels of -157dBm, thus making it possible to operate while there is data transfer from/to the SD card.
+::''(From http://lists.openmoko.org/pipermail/community/2008-July/022202.html )''
 
-=== Summary ===
-Alasal posted a summary of the SD/GPS issue to the community mailing list (http://lists.openmoko.org/pipermail/community/2008-July/022180.html). The following is a wikified version of that summary, edited for clarity and to keep up with changing information.
+=== Solutions ===
+
+The people of OpenMoko know about the problem and are working on it. A [http://lists.openmoko.org/pipermail/openmoko-kernel/2008-July/003777.html software workaround] is under testing. It turns off the SD card clock when the SD card is not being used. One will be able to use the SD card at the same time as the GPS except for the first approximately 30 seconds.
+
+OpenMoko is also examining a hardware solution.
+
+=== Discussion ===
+
+The following is based on [http://lists.openmoko.org/pipermail/community/2008-July/022180.html Alasal's post] the community mailing list.
 
 
 ;Summary of the summary
@@ -32,6 +41,10 @@ Alasal posted a summary of the SD/GPS issue to the community mailing list (http:
 
 ;So if we have a first fix, the SD card doesn't block the GPS anymore?
 :Yes, the SD card doesn't block the GPS if we have a first fix. (Some people even claim it's more stable)
+
+
+;Why do we need a first fix?
+: According to [http://lists.openmoko.org/pipermail/community/2008-July/020705.html Al Johnson], the Antares4 chip on the GTA02 doesn't have the memory needed to store almanac and ephemeris, last known position or time. This means that every start is a true cold start. It [http://lists.openmoko.org/pipermail/community/2008-July/020772.html is possible] to save location, almanac and ephemeris at GPS shut down, and restore these information at the next startup, but that does not seem implemented yet.
 
 
 ;Does the lower signal also effect accuracy?
