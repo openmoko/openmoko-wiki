@@ -164,7 +164,69 @@ You may ask for help on the support mailing list : more details at https://lists
 
 ==Connect to the Neo FreeRunner By USB Networking==
 
-Check out the [[USB_Networking]] section.
+Connect the Neo FreeRunner to a GNU/Linux host with the USB cable. For Mac OS X please refer to [[MacOS_X]]. For Windows XP and Vista please refer to [[Neo1973_and_Windows]] (which also works for the FreeRunner). After booting into the Openmoko image there will be a new interface, usb0, on your GNU/Linux host.
+
+=====Kernel Configuration=====
+If you don't have the necessary modules to get usb0 going, make sure you have the following kernel options enabled:
+* CONFIG_USB_USBNET
+* CONFIG_USB_NET_CDCETHER
+Both options are available in the ''Device Drivers -> USB support -> USB Network Adapters'' or ''Device Drivers -> Network Device Support -> USB Network Adapters -> Multipurpose USB Networking Framework''. For more info see the [http://www.linux-usb.org/usbnet/ usbnet driver homepage].
+
+=====Firewall=====
+Do not forget to allow connection to the Freerunner through your firewall, if you have one.
+
+=====Manual Method=====
+Type in the following commands in the terminal of a GNU/Linux host:
+
+ ifconfig usb0 192.168.0.200 netmask 255.255.255.0
+ ssh root@192.168.0.202
+
+Press Enter to get by the password.
+
+{{note|
+If your network device is using the ip range 192.168.0.x you may have to use the following command before you are able to connect
+
+ route add -host 192.168.0.202 dev usb0 }}
+
+=====Automatic Method=====
+*Debian and derivatives (Ubuntu, Sidux etc.)
+Edit /etc/network/interfaces:
+
+ auto usb0
+ iface usb0 inet static
+ address 192.168.0.200
+ netmask 255.255.255.0
+
+*Gentoo 
+Edit /etc/conf.d/net:
+
+ config_usb0="192.168.0.200/24"
+
+Restart the networking service ('/etc/init.d/networking restart' for Debian-based systems) and then type the following command in the terminal of the GNU/Linux host:
+
+ ssh root@192.168.0.202
+
+Press Enter to get by the password.
+
+
+
+=====Making things even more automatic=====
+Put the following in your ''~/.ssh/config''
+
+ Host moko
+   HostName 192.168.0.202
+   StrictHostKeyChecking no
+   UserKnownHostsFile /dev/null
+   User root
+
+You can then connect with 
+ ssh moko
+
+This will also automatically deal with ''WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!'' errors that occur after reflashing the device.
+
+
+
+The above only gets you a Secure Shell connection to the Openmoko device, it does not allow the Openmoko device to connect to the Internet.  If you are interested in connecting the device to the internet then check out the [[USB_Networking]] section.
 
 ==The Architecture==
 
@@ -193,17 +255,7 @@ Assuming that your FreeRunner can access the internet (see above), the kernel an
  # opkg update
  # opkg upgrade
 
-The first updates the repository information, telling opkg what packages are available. The second upgrades all packages for which a newer version is available. '''At the moment, some signature files are missing (404 errors), which opkg complains about, but this is cosmetic.'''  The repositories will still update with the missing signature files.  
-
-Note that running opkg upgrade on a factory-fresh phone will upgrade dropbear (the ssh software) and various xserver packages, and neither upgrades elegantly while in use, so either upgrade dropbear from the FreeRunner's terminal and then upgrade the rest via ssh, or upgrade the xserver packages via ssh and then upgrade the rest from the FreeRunner's terminal.  For example, go to the FreeRunner terminal and type:
-
- # opkg install dropbear
-
-which will upgrade it to the latest version.  Then connect to the FreeRunner via ssh and type:
-
- # opkg upgrade
-
-If you do your first upgrade in two installments like this, it will go more smoothly.
+The first updates the repository information, telling opkg what packages are available. The second upgrades all packages for which a newer version is available. '''At the moment, some signature files are missing (404 errors), which opkg complains about, but this is cosmetic.'''  The repositories will still update with the missing signature files.
 
 It will be possible in the future to update uboot with opkg, but this has not yet been implemented
 
@@ -262,10 +314,6 @@ See [[Manually using GPRS]]. According to some [http://lists.openmoko.org/piperm
 See [[GTA02 WLAN]].
 
 ===Recommended software===
-
-The calendar can be installed with
-
- # opkg install openmoko-dates2
 
 For a Media Player:
 
