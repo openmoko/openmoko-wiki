@@ -8,10 +8,11 @@ Some versions of u-boot don't work properly for booting from SD card. [http://bu
 
 == Step 1: Change your kernel settings ==
 
-[[Note:]] The default kernel config as of 2008-02-10 includes the CONFIG_MMC_S3C=y line and also includes built-in support for the ext3 filesystem. The default 2.6.22.5 kernel (and higher) may therefore be used for SD-booting as long as your card is formatted as ext3 (not ext2).
+'''''Note:''''' The default kernel config as of 2008-02-10 includes the CONFIG_MMC_S3C=y line and also includes built-in support for the ext3 filesystem. The default 2.6.22.5 kernel (and higher) may therefore be used for SD-booting as long as your card is formatted as ext3 (not ext2).
 
 Kernel building is supposed to be done through OpenEmbedded. If you use the MokoMakefile open up $OMDIR/openmoko/trunk/oe/packages/linux/linux-gta01/defconfig-2.6.21.6-fic-gta01. If you are building OM-2007.2 open $OEDIR/openembedded/packages/linux/linux-openmoko/defconfig-2.6.22.5-fic-gta01.
-[[Note:]] That kernel version may change in future releases.
+
+'''''Note:''''' That kernel version may change in future releases.
 
 Now find the line saying:
 
@@ -80,7 +81,7 @@ This example shows how to do this using the fdisk utility. Feel free to use the 
 
  fdisk /dev/mmcblk0
 
-[[Note:]] The device bane might differ on your system. If you are not sure about it, you may check your kernel message log by calling ''dmesg'' to find the correct device. 
+'''''Note:''''' The device bane might differ on your system. If you are not sure about it, you may check your kernel message log by calling ''dmesg'' to find the correct device. 
 
 We will now create a 8 mb partition for our kernel and another one for the rootfs which will take up all the remaining space.
 
@@ -131,7 +132,7 @@ Mount the second partition of your SD card somewhere and put the image on it:
  mount /dev/mmcblk0p2 /mnt/moko
  tar -C /mnt/moko/ -xvf openmoko-devel-image-fic-gta01-20070313022035.rootfs.tar
 
-[[Note:]] As always in this guide the device name as well as the rootfs name needs to be adjusted to your device and filename structure
+'''''Note:''''' As always in this guide the device name as well as the rootfs name needs to be adjusted to your device and filename structure
 
 The next step is to mount the first partition of the sd card and install the kernel on it.
 
@@ -152,7 +153,7 @@ Unmount both the rootfs partition and the kernel partition and make sure all rem
 Dependent on the revision of the phone and the partition type (ext2/ext3) you are using it might be necessary to add an entry to the bootmenu, to be able to boot the system of your sd card.
 If you are using a Freerunner and have created an ext2 partition you should be able to boot from the card right out of the box, because a boot menu entry for this should already exist in the NAND boot menu.
 In any other case you should at least make sure the needed entry exists in your menu before proceeding.
-You will need to enter the uboot shell of the NAND boot menu for this. A description on how to connect to the uboot loader shell can be found in this article: [[Uboot#Boot_menu]]. Details on howto get into the NAND boot menu can be found in the appendix of this article [[Entering NAND bootmenu (GTA02)]].
+You will need to enter the uboot shell of the NAND boot menu for this. A description on how to connect to the uboot loader shell can be found in this article: [[Uboot#Boot_menu]]. Details on howto get into the NAND boot menu can be found in the appendix of this article [[#Entering NAND bootmenu (GTA02)]].
 
 After you read these two references you should be connected to your NAND uboot shell right now. The first thing to do is to set the boot menu timeout to a really high value. Unfortunately if you don't do this, the boot loader will continue booting after the default timeout (60 seconds) even if you are connected to the uboot shell. Just enter the following command to the menu prompt:
 
@@ -168,6 +169,7 @@ If it shows a line beginning with ''menu_'' followed by the commands which are j
 
 It is important to distinguish between ext2 and ext3 root partitions at this point. Please make sure you are using the correct configuration based on the decisions you made earlier.
 
+
 '''Boot entry for ext3 partitions:'''
 
  setenv menu_9 Boot from microSD (FAT+ext3): setenv bootargs \${bootargs_base} rootfstype=ext3 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
@@ -176,8 +178,9 @@ It is important to distinguish between ext2 and ext3 root partitions at this poi
 
  setenv menu_9 Boot from microSD (FAT+ext2): setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
 
-[[Note:]] The backslashes (\) are important for uboot to set the command as new environment variable (menu_9) instead of just executing them as soon as enter is pressed
-[[Note:]] Copy and paste may not work. At least it did not work for me as I tried. You will have to type in the commandline manually.
+'''''Note:''''' The backslashes (\) are important for uboot to set the command as new environment variable (menu_9) instead of just executing them as soon as enter is pressed
+
+'''''Note:''''' Copy and paste may not work. At least it did not work for me as I tried. You will have to type in the commandline manually.
 
 You are nearly done. Just issue a
 
@@ -197,6 +200,7 @@ Shutdown your neo with the following command:
 
 After you restarted the Neo and got back to the NAND boot menu you should be able to select your newly created menu entry and successfully boot into the rootfs from your sd card.
 
+
 == Appendix ==
 
 === Boot from SDHC ===
@@ -214,6 +218,7 @@ Instead of the setenv commands in Step 3 you have to enter the following:
 And that's it!
 Now you can use the newly created menu option "Boot from SDHC" to boot the internal kernel, using the root-filesystem on the microSDHC.
 
+
 === Autoboot from SDHC ===
 
 Maybe you want to Boot automatically from SDHC: 
@@ -229,11 +234,31 @@ then Power-off, and enter the Bootmenu to test the new Entry.If you can boot fro
 
 Now you boot from SDHC everytime you press the Power-Button or reboot and if you like to boot from NAND -just use the bootmenu.
 
+
 === Fixing udev automount ===
 
 Udev automatically mounts the SD Card in /media/mmcblk0p1/ you can disable this with
 
  echo /dev/mmcblk >> /etc/udev/mount.blacklist
+
+
+=== Entering NAND bootmenu (GTA02)===
+
+If you want boot from NAND, please follow these steps
+
+# Hold the Power key
+# After about 1 second hold the AUX key 
+# Hold both keys until the menu appears
+# Release both keys
+
+
+=== Entering NOR bootmenu (GTA02)===
+
+If you want boot from NOR, please follow these steps
+
+# Hold the AUX key
+# then Power Key together for power up GTA02
+# Release AUX key after about 1 second
 
 
 === Remarks on Kernel Parameters ===
@@ -250,23 +275,6 @@ debug messages like:
 
  s3c2410-sdi s3c2410-sdi: ......
  mmc0: ....
-
-=== Entering NAND bootmenu (GTA02)===
-
-If you want boot from NAND, please follow these steps
-
-# Hold the Power key
-# After about 1 second hold the AUX key 
-# Hold both keys until the menu appears
-# Release both keys
-
-=== Entering NOR bootmenu (GTA02)===
-
-If you want boot from NOR, please follow these steps
-
-# Hold the AUX key
-# then Power Key together for power up GTA02
-# Release AUX key after about 1 second
 
 {{Languages|Booting_from_SD}}
 
