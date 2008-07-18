@@ -126,7 +126,9 @@ the bug is that the LABEL="net_end" is at the wrong position
  IPADDR=192.168.0.200
  NETMASK=255.255.255.0
  STARTMODE=onboot
-=== Fedora (Tested with FC8) ===
+=== Fedora ===
+
+==== Option (A) (Tested with FC8) ====
 /etc/sysconfig/network-scripts/ifcfg-usb0
 <pre>
 # USB configuration for PDAs (openmoko)
@@ -137,6 +139,69 @@ IPADDR=192.168.0.200
 NETMASK=255.255.255.0
 ONBOOT=yes
 </pre>
+
+==== Option (B) ====
+
+Set /etc/sysconfig/network-scripts/ifcfg-usb0 to this:
+ DEVICE=usb0
+ IPADDR=192.168.0.200
+ NETMASK=255.255.255.0
+
+Set /etc/sysconfig/network-scripts/ifup-usb to this:
+ #!/bin/bash
+ 
+ . /etc/init.d/functions
+ 
+ cd /etc/sysconfig/network-scripts
+ . ./network-functions
+ 
+ [ -f ../network ] && . ../network
+ 
+ CONFIG=${1}
+ 
+ need_config ${CONFIG}
+ 
+ source_config
+ 
+ NETBITS=`ipcalc -p ${IPADDR} ${NETMASK} | awk -F'=' '{print $2;}'`
+ 
+ /sbin/ip addr flush dev ${DEVICE} 2>/dev/null
+ /sbin/ip link set dev ${DEVICE} up
+ /sbin/ip addr add dev ${DEVICE} ${IPADDR}/${NETBITS}
+ 
+ /sbin/iptables -I POSTROUTING -t nat -j MASQUERADE -s ${IPADDR}/${NETBITS}
+ /sbin/sysctl net.ipv4.ip_forward=1
+ /sbin/iptables -I FORWARD -s ${IPADDR}/${NETBITS} -j ACCEPT
+ /sbin/iptables -I FORWARD -d ${IPADDR}/${NETBITS} -j ACCEPT
+
+Set /etc/sysconfig/network-scripts/ifdown-usb to this:
+ #!/bin/bash
+ 
+ . /etc/init.d/functions
+ 
+ cd /etc/sysconfig/network-scripts
+ . ./network-functions
+ 
+ [ -f ../network ] && . ../network
+ 
+ CONFIG=${1}
+ 
+ need_config ${CONFIG}
+ 
+ source_config
+ 
+ NETBITS=`ipcalc -p ${IPADDR} ${NETMASK} | awk -F'=' '{print $2;}'`
+ 
+ /sbin/iptables -D FORWARD -d ${IPADDR}/${NETBITS} -j ACCEPT
+ /sbin/iptables -D FORWARD -s ${IPADDR}/${NETBITS} -j ACCEPT
+ /sbin/sysctl net.ipv4.ip_forward=0
+ /sbin/iptables -D POSTROUTING -t nat -j MASQUERADE -s ${IPADDR}/${NETBITS}
+ 
+ /sbin/ip link set dev ${DEVICE} down
+ /sbin/ip addr flush dev ${DEVICE} 2>/dev/null
+
+If you are using NetworkManager, restart it and enable the usb device from its menu, otherwise it will disable your connection shortly after you enable it.
+ /sbin/service NetworkManager restart
 
 === Red Hat or similar (tested with Workstation 5) ===
 Edit /etc/sysconfig/network-scripts/net.hotplug:
