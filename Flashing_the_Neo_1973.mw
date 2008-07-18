@@ -98,6 +98,36 @@ First determine what hardware revision you have [[finding hardware revision]], s
 
  ./dfu-util -a u-boot -R -D u-boot-gta01bv3-r8_70124c2602ae2d4c5d3dba05b482d91548242de8_0_2040.bin}}
 
+This is simple - even if I find it somehow scary to flash the bootloader of a device. Don't be too scared, though: Unlike any other device I know the Freerunner contains a second bootloader on a write protected chip - that is still there, even if flashing the original bootloader goes horribly wrong. You can always make the phone use this bootloader instead by pressing the power button whilst pressing the Aux button. In theory it should therefore be impossible to brick your phone completely enough by flashing the bootloader that a debug board is needed to unbrick it.
+* Download the newest uBoot binary from http://downloads.openmoko.org/releases/Freerunner/
+* start the cellular phone by pressing power whilst pressing the aux button.
+* Run the following command:  
+ dfu-util -a u-boot -R -D uboot-gta02v5-latest.bin
+* The device is now flashed: 
+ dfu-util - (C) 2007 by OpenMoko Inc.
+ This program is Free Software and has ABSOLUTELY NO WARRANTY
+ 
+ Opening USB Device 0x0000:0x0000...
+ Claiming USB DFU Runtime Interface...
+ Determining device status: state = appIDLE, status = 0
+ Device really in Runtime Mode, send DFU detach request...
+ Resetting USB...
+ Opening USB Device...
+ Found Runtime: [0x1d50:0x5119] devnum=9, cfg=0, intf=0, alt=1, name="u-boot"
+ Claiming USB DFU Interface...
+ Setting Alternate Setting ...
+ Determining device status: state = dfuIDLE, status = 0
+ dfuIDLE, continuing
+ Transfer Size = 0x1000
+ bytes_per_hash=4316
+ Starting download: [##################################################] finished!
+ state(2) = dfuIDLE, status(0) = No error condition is present 
+ Done!
+ Resetting USB to switch back to runtime mode
+* The last message (status(0)) tells us everything just worked fine - at the next boot the device will be started by the newest uboot loader.
+
+
+
 To update the kernel:
  ./dfu-util -a kernel -R -D ./uImage-2.6.21.1-moko10-r0_0_1883_0-fic-gta01.bin
 Flashing the kernel will probably take less than 1 minute. If you're having trouble, you may want to compare the output that you see to a "known good" [[Flashing openmoko/Known good kernel flash U-Boot output | U-Boot]]/[[Flashing openmoko/Known good kernel flash dmesg output | dmesg]]/[[Flashing openmoko/Known good kernel flash dfu-util output | dfu-util]] output. The phone display should show "Starting DFU DOWNLOAD to partition 'kernel'.
