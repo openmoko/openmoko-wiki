@@ -1,0 +1,45 @@
+== Building openmoko-dialer3 ==
+Currently this is the only package of any size being developed for SHR, and it's the only one with any instructions.  If you start another SHR project (please check with [[User:Wurp][Bobby]] before starting one), put instructions for working on the project here!
+
+=== Before beginning ===
+You must build openembedded before you can build SHR packages.  The easiest way is to go to http://wiki.openmoko.org/wiki/Mokomakefile and build using the instructions for FSO.
+
+The rest of these instructions are written assuming that you used Mokomakefile and that the directory you downloaded the base Makefile into (using wget) is $MOKO.
+
+You must also download the SHR code using subversion.  See http://projects.openmoko.org/projects/shr.  We will refer to the directory to which you downloaded the project as $SHRSVN.  (This directory should contain $SHRSVN/packages/openmoko-dialer3.bb)
+
+=== Set up your BBPATH ===
+
+  export BBPATH=.:$MOKO/openembedded/:$MOKO/
+
+
+=== Set up the CACHE ===
+
+  export CACHE=tmp/cache
+
+
+
+=== Set up your local.conf ===
+Cd to your selected build directory.
+
+Create a directory under your current directory called 'conf'.
+
+  cp $MOKO/openembedded/conf/local.conf conf/local.conf.
+
+Append the following lines to your local.conf:
+  BBFILES+="$SHRSVN/trunk/packages/*.bb"
+  SELECTED_OPTIMIZATION = "-Os -g"
+
+
+=== Add your cross-compiler to your PATH ===
+(I'm not sure if this stage is necessary, or even a good idea.)
+
+  export PATH=$MOKO/build/tmp/staging/*/usr/bin
+
+=== Run bitbake ===
+
+  bitbake -b $SHRSVN/trunk/packages/openmoko-dialer3.bb
+
+
+[[Category:SHR]]
+[[Category:SHR Devel]]
