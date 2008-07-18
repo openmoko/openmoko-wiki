@@ -158,31 +158,22 @@ You may ask for help on the support mailing list : more details at https://lists
 
 [[Freerunner_Hardware_Issues]]
 
-==Connect to the Neo FreeRunner By USB Networking==
-
-Check out the [[USB_Networking]] section.
-
-==The Architecture==
-
-There are three layers to the software on the FreeRunner:
-
-===uBoot===
-
-Think of u-boot as a combination of the BIOS and Grub on a PC.
-
-===Kernel===
-
-The Linux kernel.
-
-===Root Filesystem===
-
-The rest of the system
 
 ==Updating the software==
 
-In order to keep the FreeRunner up-to-date with the latest features and bug-fixes, it is advisable update the software at regular intevals. There are two main methods of doing this.
+=== Architecture===
 
-===opkg===
+There are three layers to the software on the FreeRunner:
+
+* uBoot: Think of u-boot as a combination of the BIOS and Grub on a PC.
+* Kernel: The Linux kernel
+* Root Filesystem: The rest of the system
+
+In order to keep the FreeRunner up-to-date with the latest features and bug-fixes, it is advisable update the software at regular intervals. There are two main methods of doing this: using the package manager opkg (discussed in this section) or flashing (discussed section 7 below).
+
+uboot, the kernel and the root filesystem can all be flashed to update them. For uboot, this is the only possibility. The advantage of flashing the kernel, rather than using opkg seems to be speed. The disadvantage of flashing the root file system is that it wipes out all local modifications, including /home. If /home is moved to the SD disk, this is no longer a problem.
+
+===Using the package manager===
 
 Assuming that your FreeRunner can access the internet (see above), the kernel and other packages can be updated with
 
@@ -202,60 +193,6 @@ which will upgrade it to the latest version.  Then connect to the FreeRunner via
 If you do your first upgrade in two installments like this, it will go more smoothly.
 
 It will be possible in the future to update uboot with opkg, but this has not yet been implemented
-
-===Flashing===
-
-uboot, the kernel and the root filesystem can all be flashed to update them. See below for how. For uboot, this is the only possibility. The advantage of flashing the kernel, rather than using opkg seems to be speed.
-
-The disadvantage of flashing the root file system is that it wipes out all local modifications, including /home. If /home is moved to the SD disk, this is no longer a problem.
-
-==Enabling advanced functionalities==
-
-The stock [[Openmoko2007.2]] image flashed onto the Neo FreeRunner is really just the bare bones. For example, you don't have the clock and the quick-launch icons showing. Here's how you can change that:
-
- # dbus-launch gconftool-2 -t boolean -s /desktop/poky/interface/reduced false
- # /etc/init.d/xserver-nodm restart
-
-If you rather have a regular clock instead of the digital one, do this instead:
-
- # dbus-launch gconftool-2 -t boolean -s /desktop/poky/interface/reduced false
- # dbus-launch gconftool-2 -t boolean -s /desktop/poky/interface/digital_clock false
- # /etc/init.d/xserver-nodm restart
-
-More information about today screen customization at [[Today/2007.2]].
-
-With either clock, you may wish to set the correct [[Date]] and [[Timezone]].
-
-Also, if you prefer having a full keyboard, see [http://www.ginguppin.de/node/15 these instructions].
-
-===GPS===
-
-Simple guide to get going with GPS:
-
- # opkg install gpsd
- # echo "GPS_DEV=\"/dev/ttySAC1\"" > /etc/default/gpsd
-
-and restart gpsd, the gps daemon, with
-
- # /etc/init.d/gpsd restart
-
-To test GPS, you can use agpsui:
-
- # opkg install openmoko-agpsui
-
-For a nice map, try tangoGPS:
-
- # opkg install http://www.tangogps.org/downloads/tangogps_0.9.2-r1_armv4t.ipk
-
-More information on [[GPS]] page.
-
-=== GPRS ===
-
-See [[Manually using GPRS]]. According to some [http://lists.openmoko.org/pipermail/support/2008-July/000003.html posts], GPRS might be broken currently (2007.2), though. Any updates welcome.
-
-=== WLAN ===
-
-See [[GTA02 WLAN]].
 
 === Multimedia, web browsing and other applications ===
 
@@ -291,6 +228,60 @@ Then on the FreeRunner:
  # opkg install /tmp/minimo_0.02\+cvs20070626-r0_armv4t.ipk
 
 There are tons more apps you can install - check out the [[Repositories]] for a list of packages.
+
+
+==Enabling advanced smartphone functionalities==
+
+The stock [[Openmoko2007.2]] image flashed onto the Neo FreeRunner is really just the bare bones. For example, you don't have the clock and the quick-launch icons showing. Here's how you can change that:
+
+ # dbus-launch gconftool-2 -t boolean -s /desktop/poky/interface/reduced false
+ # /etc/init.d/xserver-nodm restart
+
+If you rather have a regular clock instead of the digital one, do this instead:
+
+ # dbus-launch gconftool-2 -t boolean -s /desktop/poky/interface/reduced false
+ # dbus-launch gconftool-2 -t boolean -s /desktop/poky/interface/digital_clock false
+ # /etc/init.d/xserver-nodm restart
+
+More information about today screen customization at [[Today/2007.2]].
+
+With either clock, you may wish to set the correct [[Date]] and [[Timezone]].
+
+Also, if you prefer having a full keyboard, see [http://www.ginguppin.de/node/15 these instructions].
+
+===Connecting to the Neo FreeRunner By USB Networking===
+
+Check out the [[USB_Networking]] section.
+
+===GPS===
+
+Simple guide to get going with GPS:
+
+ # opkg install gpsd
+ # echo "GPS_DEV=\"/dev/ttySAC1\"" > /etc/default/gpsd
+
+and restart gpsd, the gps daemon, with
+
+ # /etc/init.d/gpsd restart
+
+To test GPS, you can use agpsui:
+
+ # opkg install openmoko-agpsui
+
+For a nice map, try tangoGPS:
+
+ # opkg install http://www.tangogps.org/downloads/tangogps_0.9.2-r1_armv4t.ipk
+
+More information on [[GPS]] page.
+
+=== GPRS ===
+
+See [[Manually using GPRS]]. According to some [http://lists.openmoko.org/pipermail/support/2008-July/000003.html posts], GPRS might be broken currently (2007.2), though. Any updates welcome.
+
+=== WLAN ===
+
+See [[GTA02 WLAN]].
+
 
 ==Booting the Neo Freerunner==
 
