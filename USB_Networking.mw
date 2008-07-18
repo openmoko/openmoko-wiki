@@ -121,6 +121,41 @@ ACTION=="remove",       RUN+="/sbin/start-stop-daemon --start --background --pid
 </pre>
 
 the bug is that the LABEL="net_end" is at the wrong position
+=== Mandriva ===
+Tested with Mandriva 2008.1
+
+This is the method that worked for me, YMMV. My network is on the 192.168.0.0 subnet so these instructions will have to be modified if you are on a different subnet.
+
+The idea here is that we will carve out a small (8 hosts) subnet from the main subnet. So our netmask will be 255.255.255.252
+
+This first file configures the network system for the usb0 interface. Any time you plug in the FreeRunner the interface will be configured. 
+
+/etc/sysconfig/network-scripts/ifcfg-usb0
+ DEVICE=usb0
+ BOOTPROTO=static
+ IPADDR=192.168.0.200
+ NETMASK=255.255.255.252
+ ONBOOT=yes
+ METRIC=10
+ MII_NOT_SUPPORTED=no
+ USERCTL=yes
+
+This next file configures the static routes that we need to communicate to the subnet. Since it has "usb0" in the name, the system will automatically apply these static routes any time that the usb0 interface is configured. (i.e. when you connect the FreeRunner)
+
+/etc/sysconfig/network-scripts/usb0-routes
+ ADDRESS0=192.168.0.200
+ NETMASK0=255.255.255.252
+
+Now we need to restart the network system to pick up the changes.
+
+ service network restart
+
+If you want to make your life a little easier by not having to type out the FreeRunners ip address each time add an alias by adding a line to your hosts file.
+
+/etc/hosts
+
+ <any existing lines>
+ 192.168.0.202       moko
 
 === SuSE ===
 /etc/sysconfig/network/ifcfg-usb0
