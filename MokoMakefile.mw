@@ -174,6 +174,35 @@ To re-enable this check do the following:
 See the talk page of this article for more details on this solution.
 
 ===Known MokoMakefile errors ===
+==== SVN Server Certificate Errors ====
+If you get an error like the following:
+<pre>
+NOTE: Fetch svn://svn.projects.openmoko.org/svnroot/;module=assassin;proto=https
+Error validating server certificate for 'https://svn.projects.openmoko.org:443':
+ - The certificate is not issued by a trusted authority. Use the
+   fingerprint to validate the certificate manually!
+Certificate information:
+ - Hostname: projects.openmoko.org
+ - Valid: from Thu, 05 Jun 2008 01:02:42 GMT until Tue, 02 Dec 2008 01:02:42 GMT
+ - Issuer: http://www.cacert.org, Root CA
+ - Fingerprint: a5:7d:4e:37:e8:94:ee:ba:c1:e8:e9:4b:33:cb:34:91:a9:6d:d3:84
+(R)eject, accept (t)emporarily or accept (p)ermanently? svn: OPTIONS of 'https://svn.projects.openmoko.org/svnroot/assassin': Server certificate verification failed: issuer is not trusted (https://svn.projects.openmoko.org)
+</pre>
+
+It means you haven't yet accepted the server certificate for the SVN server.  To remedy this, execute the following commands, and hit "p" (to permanently accept the certificate) when prompted:
+<pre>
+cd /tmp
+svn co https://svn.projects.openmoko.org/svnroot/assassin
+rm -rf assassin
+cd -
+</pre>
+
+
+Note for Gentoo users: I think Portage creates a ~/.subversion directory as root if you've even compiled a svn ebuild via "sudo emerge".  If this happens, certificates won't be saved, so you have to take back ownership of the directory:
+
+<pre>
+chown -R kelvie ~/.subversion
+</pre>
 
 ===Fixes for distribution/environment-specific or isolated issues===
 
