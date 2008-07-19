@@ -1,0 +1,264 @@
+{{Languages|Toolchain}}
+
+
+= Einführung =
+
+Die "toolchain" (Werkzeugkette) ist ist eine Sammlung von Werkzeugen, die es dem Nutzer erlauben Code zu compilieren. Im Fall von Openmoko müssen wir zwischen folgenden Anwendungsfällen unterscheiden:
+
+== Softwareentwicklung für das Betriebssystem ==
+
+In diesem Fall solltest/kannst Du eine bereits compilierte Toolchain vom Openmoko-Projekt verwenden. Im folgenden liegt eine Anleitung vor, die die ersten Schritte zum compilieren und ausführen eines Projektes auf dem Zielgerät beschreibt. Vielleicht hast Du schon etwas von [[OpenEmbedded/de|OpenEmbedded]] gehört, jedoch solltest Du als Applikationsentwickler '''nicht''' [[OpenEmbedded/de|OpenEmbedded]] nutzen, sondern auf die Toolchain zurückgreifen.
+
+== Systemintegration und Anpassung einer Distribution ==
+
+Für diese Aufgabe solltest Du [[OpenEmbedded/de|OpenEmbedded]] nutzen, das einen eigenen Cross-Compiler beim Einrichten produziert. Systemintegration und die Anpassung einer Distribution werden auf dieser Seite nicht behandelt.
+
+=Elementare Benutzung der Toolchain =
+
+==Bedingungen zur Nutzung der Toolchain==
+
+Du solltest dich halbwegs mit Linux auskennen und die grundlegenden Werkzeuge der Kommandozeile benutzen können. Weiterhin wird ein zur x86-Architektur kompatibler Computer benötigt mit mindestens 1GB freien Festplattenspeicher. Von Vorteil ist eine vorhandene Erfahrung mit dem compilieren von Programmen aus dem Quellcode an einem lokalen Computer. Im folgenden wird angenommen, dass du einen Schreibzugriff in Dein Home-Verzeichnis und in <tt>/usr/local/</tt> (evtl. sind dazu <tt>root</tt>-Rechte erforderlich). Bitte Deinen Systemadministrator um Unterstützung, falls diese Bedingungen nicht erfüllt sind.
+
+Weiterhin benötigst Du eine funktionierende Installation einer Reihe von Werkzeugen, die das automatische Erzeugen von Programmen ermöglicht ('''./configure, make, make install''').
+
+Eine (möglicherweise nicht vollständige) Liste von benötigten Paketen -- Bitte, falls nötig ergänzen
+
+* In den meisten Fällen sind lediglich folgende Pakete notwendig
+** autoconf, automake
+** binutils, gcc, gcc-c++ 
+** libtool
+** ccache
+** intltool
+
+* Bei Ubuntu 8.04 (Vorgänger unterstützen kein libmokoui2) wird folgendes Kommando die nötigen Pakete installieren
+ sudo apt-get install gcc g++ autoconf automake binutils libtool libglib2.0-dev \
+ ccache libxrender-dev intltool libmokoui2-dev libgconf2-dev mtools
+
+* Bie Fedora-Core muss  folgendes Kommando (mit <tt>root</tt>-Rechten ausführen) zur Installation verwendet:
+ yum install gcc gcc-c++ autoconf automake binutils libtool glib2-devel \
+ ccache libXrender-devel intltool GConf2-devel mtools
+Fedora-Core scheint das Paket <tt>libmokoui2</tt> nicht vorhanden zu sein.
+
+==Herunterladen und Installieren==
+
+Die vorkompilierte Toolchain kann unter [http://downloads.openmoko.org/toolchains downloads.openmoko.org] heruntergeladen werden:
+
+* Erstelle ein Verzeichnis z.B.
+  mkdir ~/sources
+  cd ~/sources
+
+* Je nach Architektur muss eins der beiden folgenden Archive heruntergeladen werden:
+  wget http://downloads.openmoko.org/toolchains/openmoko-x86_64-arm-linux-gnueabi-toolchain.tar.bz2
+ oder
+  wget http://downloads.openmoko.org/toolchains/openmoko-i686-arm-linux-gnueabi-toolchain.tar.bz2
+
+
+Als nächstes entpacken wir das Archiv, die Toolchain muss nach <tt>/usr/local/openmoko/</tt> installiert werden:
+Nun haben wir folgende Möglichkeiten:
+
+* die Datei sofort als root entpacken, mit dem Kommando <tt>su</tt> um <tt>root</tt>-Rechte zu erlangen, ( oder mit dem Präfix <tt>sudo</tt> bei Debian/Ubuntu ):
+
+   cd /
+   tar -xjvf ~/sources/openmoko-XYZ-arm-linux-gnueabi-toolchain.tar.bz2
+
+* Auf Debian basierenden Systemen kann man ein einfach-zu-entfernendes Paket aus dem .tar.bz2 mit <tt>alien</tt> und <tt>fakeroot</tt> erstellen, welches dann mit <tt> dpkg -i <package.deb></tt> installiert wird:
+
+   bunzip2 openmoko-x86_64-arm-linux-gnueabi-toolchain.tar.bz2
+   gzip openmoko-x86_64-arm-linux-gnueabi-toolchain.tar
+   fakeroot alien -d openmoko-x86_64-arm-linux-gnueabi-toolchain.tar.gz
+
+* Die vorkompilierte Toolchain wird für die Architekturen x86_64 oder i686 bereitgestellt, bei Bedarf kann die Toolchain mit OpenEmbedded folgendermaßen kompiliert werden:
+
+   bitbake meta-toolchain-openmoko
+
+
+Letzendlich müssen jedes mal, wenn Du die Toolchain benutzt, Umgebungsvariablen gesetzt oder geändert werden, damit die Werkzeuge gefunden werden. Die Toolchain stellt ein Script zur Verfügung, mit den dieser Vorgang automatisiert wird. (The toolchain provides a script to do that, so the only thing you need to do is to source it.). Beachte, dass du zunächst eine Bash oder sh starten musst, falls du keine der beiden benutzt (überprüfe dies mit <tt>echo $SHELL</tt>)
+
+ . /usr/local/openmoko/arm/setup-env
+
+* Zum Schluss musst du <tt>/usr/local/openmoko/arm/bin</tt> zur Umgebungsvariable <tt>$PATH</tt> hinzufügen, da sonst die kommenden Schritte nicht funktionieren werden.
+
+ export PATH=$PATH":/usr/local/openmoko/arm/bin"
+
+==Kompilieren eines Beispielprojektes==
+
+In a chosen destination directory (in this example ~/):
+
+* copy the downloaded sample application source:
+
+ cp -r /usr/local/openmoko/source/openmoko-sample2 ~/
+
+* Remember to set the proper environment variables (again with "sh" or "bash") for openmoko:
+
+ . /usr/local/openmoko/arm/setup-env
+
+* You need to create a build configuration for this application. This also checks if all needed libraries, tools, etc.. is available on your system. If this fails see the notes about the needed packages in the section "Prerequisites" mentioned earlier.
+
+ om-conf openmoko-sample2
+
+* Optionally now you can modify the source code in openmoko-sample2/src
+
+* To build the application from the source code, first you need to create a Makefile, then, you can just use "make":
+
+ cd openmoko-sample2
+
+* use the autogen.sh script to generate a Makefile {{Note|This didn't seem necessary for me -- is this out of date? --[[User:Walrustown|Walrustown]] 05:32, 18 July 2008 (UTC)}}
+
+ ./autogen.sh
+
+* if there are errors (i.e. "You need to install gnome-common from the GNOME CVS") deal with them, otherwise you can now type "make":
+
+ make
+
+If you want to install this project on host for staging usage later, a shared library, for example, you can do the following to install it into a given configured prefix.
+
+ om-conf --prefix=/usr/local/openmoko openmoko-sample2
+ cd openmoko-sample2
+ make install
+
+==How to modify the sample project==
+
+In order to build your own project by using openmoko-sample2 files, some changes are needed:
+
+* copy the downloaded sample application source
+
+ cp -r /usr/local/openmoko/source/openmoko-sample2 ~/
+ 
+* rename the folder with the name of your project (in this example your-project-name) and delete old sample files 
+
+ mv openmoko-sample2 your-project-name
+ cd your-project-name
+ cd src
+ rm *.c
+
+* copy your sources (in this example your-sources) into src/
+
+ cp your-sources .
+ cd ..
+
+* now in the main folder modify autogen.sh by updating the following lines
+
+ PKG_NAME="your-project-name"
+
+* modify configure.ac by updating the following lines ('main.c' should be the main file in your project)
+
+ AC_INIT(your-project-main, 0.0.1, http://www.openmoko.org/)    
+ AC_CONFIG_SRCDIR(src/main.c)
+
+* go into data/ folder and rename these files with the name of your project
+
+ cd data
+ mv openmoko-sample.png your-project-name.png
+ mv openmoko-sample.desktop your-project-name.desktop
+
+* modify Makefile.am inside data/ by updating the following lines
+
+ dist_desktop_DATA = your-project-name.desktop
+ dist_appicon_DATA = your-project-name.png
+
+* modify Makefile.in inside data/ by updating the following lines
+ 
+ dist_desktop_DATA = smart-search.desktop
+ dist_appicon_DATA = smart-search.png
+
+* modify your-project-name.desktop by updating the following lines
+
+ Name=your-project-name
+ Encoding=UTF-8
+ Version=0.0.1
+ Type=Application
+ Exec=your-project-name
+
+* and by adding the following line
+
+ Icon=your-project-name
+
+* move into src/ folder
+
+ cd ..
+ cd src
+
+* modify Makefile.am by updating the following lines
+
+ bin_PROGRAMS = your-project-name	
+ your_project_name_SOURCES = \				
+  		main.c 
+ your_project_name_LDADD  = @DEPENDENCIES_LIBS@
+
+* be sure to put instead of main.c all your .c and .h files and modify all the '-' characters with '_' in the variable names
+
+==Packaging your application==
+
+We have included a script to make an ipkg out of your application. Note that this is not needed to test your application on the Neo (for that you can just scp the resulting binary and data over), however it's very handy if you want to distribute your application to others.
+
+ om-make-ipkg openmoko-sample2
+
+Now you got openmoko-sample2_0.1_armv4t.ipk , you can `scp' it to your
+Neo and install it:
+
+ scp openmoko-sample2_0.1_armv4t.ipk root@192.168.0.202:
+ ssh root@192.168.0.202 ipkg install openmoko-sample2_0.1_armv4t.ipk
+
+Note that while you can redistribute the generated ipkg, be aware that this is a bare-bones ipk that contains no further information, i.e. you will lack library dependencies. See below how to fix this.
+
+You can also supply the version number, a description, and an author / contacts string in a control file:
+
+ om-make-ipkg myapp myapp_control
+
+A template of myapp_control:
+
+ Package: $appname
+ Version: 0.1
+ Description: package built by openmoko toolchain
+ Section: openmoko/applications
+ Priority: optional
+ Maintainer: $USER
+ Architecture: armv4t
+ Homepage: http://www.openmoko.org/
+ Depends: 
+ Source: ${SRC}
+
+==Where to go from here==
+
+Using the external toolchain is an easy way to build applications for your Neo. If you are familiar with this procedure, you might also want to look into
+* Using [[Qemu]] to test your applications in an emulated environment
+** Ubuntu users might prefer to look at [[Automatic_emulation_in_Ubuntu]]
+* Using [[Host-based_development_with_Xoo_and_Xephyr|host-based development]] to improve your efficiency
+* Using [[OpenEmbedded]] to customize your Openmoko distribution image
+
+=Advanced topics=
+==Using toolchain provided libraries==
+Add the necessary libraries to the _LDADD field in src/Makefile.am, for example:
+ openmoko_sample2_LDADD  = @DEPENDENCIES_LIBS@ -lmokogsmd2
+
+make sure to run om-conf again after this.
+
+==Installing additional libraries into the toolchain==
+
+Sooner or later you will want to compile an application that has dependencies which can't be fulfilled by the precompiled toolchain, e.g. some obscure libraries.
+
+In that case, feel free to request the inclusion of additional libraries into the next release of the OpenMoko toolchain. Until then, here is how you enhance your already installed toolchain. Say, we want to add the library called liburiparse:
+
+ cd ~/source
+ wget http://downloads.sourceforge.net/uriparser/uriparser-0.6.0.tar.bz2
+ ./configure --host=arm-angstrom-linux-gnueabi \
+ --prefix=/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/
+ make
+ make install
+
+That's it.
+
+==Getting your application packaged by OE==
+
+If you have written a cool application which you want to share with others, the best way to do that is to
+
+# upload your application source code to a public location
+# submit a [[BitBake]] recipe to [[OpenEmbedded]], preferably via the [http://bugzilla.openembedded.org OpenEmbedded bugtracker].
+
+See also [[Customizing the Openmoko Distribution]].
+
+==Troubleshooting==
+
+* Please use the [http://lists.openmoko.org/mailman/listinfo/openmoko-devel Openmoko-Devel] mailing list.
+
+[[Category:Application Developer]]
