@@ -1,411 +1,136 @@
-{{Languages|Qtopia_on_FreeRunner}}
+This page provides instructions on how to install Qtopia (proper, not the [[ASU]] or [[QtopiaOnX11]] efforts) on the GTA02 (Freerunner) phone.  It is similar to the [[Qtopia on Neo1973]] page.
 
-This page provides instructions on how to install Qtopia/Qt Extended (proper, not the [[ASU]] or [[QtopiaOnX11]] efforts) on the GTA02 (FreeRunner) phone.  It is similar to the [[Qtopia on Neo1973]] page.
-
-__TOC__
+{|align=right
+|__TOC__
+|}
 
 == Current status ==
+On 18 July 2008, Qtopia released the [http://www.qtopia.net/modules/mydownloads/singlefile.php?lid=72 latest flash image for the FIC Neo Freerunner (gta02)] containing the Qtopia 4.3.2 snapshot of 17 July 2008 (GPL version). 
 
-{{note| The most recent version is [[Qt Extended Improved]]. See [[Qt Extended Improved]] (named also QtEI or QTEi) page to get more information on this updated and improved version Distro based on Qtopia. }}
+This image can successfully make and receive calls and text messages.  It can read all contacts from the SIM card (which the updated 2007.2 does not appear to be able to do).  It contains apps that appear to be more stable than the ones found in the 2007.2 image.  It has multiple input methods that appear to be more mature.
 
-* On 3 March 2009 Qt software has discontinued Qt Extended. See http://www.qtsoftware.com/about/news/qt-software-discontinues-qt-extended for more details.
+== Dual-Booting between Qtopia and 2007.2 (Qtopia boots from MicroSD card) ==
 
-* Qt software announced that has discontinued QT Extended as a standalone product, integrating it into QT.
+Installation Requirements: 
+
+1) SSH shell access to 2007.2 based image of the FreeRunner through USB interface or WLAN.
+2) A Desktop Linux distro (to unpack the .jffs2 image, I ran Ubuntu under VMWare)
+
+=== Step 1: Prepare the SD card ===
+
+Booting from the microSD card requires that you repartition and reformat your MicroSD card.
+
+{{warning|The following steps will repartition and reformat your MicroSD card. After this, no data on the card will be accessible to you anymore, so create good backups of anything which you need before starting!}}
+
+SSH into the FreeRunner and run the following commands:
+
+==== Partioning the SD card ====
+
+These steps were taken from the [[Booting from SD]] page:
+
+Unfortunately the uboot loader can only read from FAT partitions. Therefore the kernel needs to be stored in a partition with this filesystem.
+Nevertheless we want to store our rootfs in an ext3 (or ext2) filesystem. To acomplish this the sd-card needs to be partitioned into to different parts. 
+This example shows how to do this using the fdisk utility. Feel free to use the partitioning utitlity of your likings for this task.
+
+ fdisk /dev/mmcblk0
+
+'''''Note:''''' The device bane might differ on your system. If you are not sure about it, you may check your kernel message log by calling ''dmesg'' to find the correct device. 
+
+We will now create a 8 mb partition for our kernel and another one for the rootfs which will take up all the remaining space.
+
+   Command (m for help): d
+   Selected partition 1
+   Command (m for help): n
+   Command action
+      e   extended
+      p   primary partition (1-4)
+   p
+   Partition number (1-4): 1
+   First cylinder (1-983, default 1):
+   Using default value 1
+   Last cylinder or +size or +sizeM or +sizeK (1-983, default 983): +8M
+   Command (m for help): n
+   Command action
+      e   extended
+      p   primary partition (1-4)
+   p
+   Partition number (1-4): 2
+   First cylinder (18-983, default 18):
+   Using default value 18
+   Last cylinder or +size or +sizeM or +sizeK (18-983, default 983):
+   Using default value 983
+   Command (m for help): w
+   The partition table has been altered!
+   Calling ioctl() to re-read partition table.
+   Syncing disks.
 
 
-Check [http://wiki.openmoko.org/wiki/Qt_Extended_4.4.3 QtExtended 4.4.3] for more info on the latest (and final) release.
+==== Formatting the SD card ====
 
-On 31 October 2008, Trolltech released the [http://qtextended.org/modules/mydownloads/visit.php?lid=98 Qtopia ROM flash image containing the rootfs] for the Openmoko Neo FreeRunner (gta02) containing the Qtopia 4.4.2 release (GPL version). This runs on the [http://qtextended.org/modules/mydownloads/visit.php?lid=91 mwebster ROM flash image containing the kernel]. At release time, 4.4.2 & current mwester's kernel mismatched, please clarify the previous sentence. Hypnotize has released [http://lists.openmoko.org/pipermail/community/2008-November/035245.html Qt Extended 4.4.2 images for the Neo FreeRunner] that work better.
+As already mentioned we need the first partition to be formatted with the FAT filesystem. Just issue the following command to create this fs:
 
-This image can successfully make and receive calls and text messages. It can read all contacts from the SIM card (which the updated 2007.2 does not appear to be able to do). It contains apps that appear to be more stable than the ones found in the 2007.2 image.  It has multiple input methods that appear to be more mature.  It does have a webkit based web browser and an GPS "Mapping Demo" application.
+'''''Note:''''' you may have to reboot after partitioning in order to see the new partitions in /dev
 
-There are other third-party GPS applications available:
-* [http://blog.wolfman.com/articles/2008/08/27/porting-xgps-to-qtopia-for-the-freerunner xgps] (/!\ non-compatible with 4.4.x --[[User:Xc8|Xc8]] 22:28, 6 February 2009 (UTC))
-* [http://www.linux4.be/fr/roadmap.html RoadMap (experimental)] (! Not working on 4.4.2 --[[User:AlecTBM|AlecTBM]] 20:00 GMT +01:00 10 February 2009)
+  mkfs.vfat /dev/mmcblk0p1
 
-([[TangoGPS]] does not work on QtExtended, because it depends upon an Xserver)
+'''''Note:''''' I could not find mkfs.vfat in any of the OpenMoko repositories, so I took my microSD card out, put it into the SD adapter, and formated the first partition with the Windows format utility.  Of course, you can stick it into your Linux box and do the same, (in fact, instead of partitioning and formatting from the FreeRunner, you could do all these steps on your Linux box).
 
-You can find all the Qtopia images [http://qtextended.org/modules/mydownloads/viewcat.php?cid=6 here] (including Qtextended/Qtopia 4.4 for FreeRunner and Neo1973!)
+The second partition is about to be formatted with ext3 (For ext2 to work you need to make sure you compiled the kernel with the correct configuration):
 
-'''What is in the latest release (QtExtended 4.4.2)?'''
+  mkfs.ext3 /dev/mmcblk0p2
 
-Qtopia 4.4 has been released with the name of [http://doc.trolltech.com/qtextended4.4/release-4-4-2.html QtExtended 4.4].
-* a [http://n2.nabble.com/qtopia-update-tp832851p832888.html browser] based on WebKit
-* [http://n2.nabble.com/-qtopia--rotate-screen--tp841805p841841.html screen rotation in the settings application] (so no automatic rotation)
-* [http://n2.nabble.com/Echo-issue-on-OM2008.08-potentially-solved-tp791642.html noise reduction]
-* GPS API
-* USB net/storage switching
-* GTalk support
-* [http://n2.nabble.com/forum/Permalink.jtp?root=841805&post=1083388&page=y better support for non-English languages in the keyboard]
+=== Step 2: Installing Qtopia ===
 
+==== Unpacking the Qtopia Root Filesystem Image ====
 
-[http://www.qtsoftware.com/about/news/qt-software-discontinues-qt-extended Qt Extended will be discontinued as a stand-alone product] March 2009 after the release of version 4.4.3
-and selected features will be migrated into the Qt framework.
+Download the Qtopia FLASH image from [http://www.qtopia.net/modules/mydownloads/singlefile.php?lid=72] to your Linux box and extract its contents:
 
-== Installation ==
+  tar xzf qtopia-4.3.2-gta02-flash-07172049.tgz
 
-=== Installation option 1: Flash Qtopia to FreeRunner ===
+You should now have two files: uImage-2.6.24+git18+9c058ff0d2641df3c36fc3300acb72078d2c41d4-r0-om-gta02.bin, and qtopia-4.3.2-gta02-rootfs-07172049.jffs2.  Now extract the root file system from the jffs2 using the following commands (these instructions come from [[Userspace root image]], and you may have to "sudo" these commands):
 
-Download the image mentioned above, then follow the instructions in the {{Main|Flashing the Neo FreeRunner}}
+  export loop=$(losetup -f)
+  losetup $loop <path>/qtopia-4.3.2-gta02-rootfs-07172049.jffs2
+  modprobe block2mtd block2mtd=$loop,131072
+  modprobe jffs2
+  modprobe mtdblock
+  mkdir <mountpoint>
+  mount -t jffs2 -o ro /dev/mtdblock0 <mountpoint>
+  
+Now, tar up the root filesystem:
 
-=== Installation option 2: Install Qtopia on a microSD card ===
+  tar czf qtopia-4.3.2-gta02-rootfs-07172049.tar.gz -C <mountpoint>
 
-Installation Requirements:
-
-# SSH shell access to the FreeRunner through USB interface or WLAN.
-# A Desktop Linux distro (to unpack the .jffs2 image, I ran Ubuntu under VMWare)
-
-==== Prepare the SD card ====
-
-See the [[Booting from SD#Prepare the SD card| Preparing the SD Card]] section of the [[Booting from SD]] page for partitioning and formatting instructions.  After you complete the "Formatting the SD Card" steps, return here and execute the following:
-
-<pre>
-mount /dev/mmcblk0p1 /media/card
-mkdir /media/card/boot
-
-mkdir /media/mmcblk0p2
-mount /dev/mmcblk0p2 /media/mmcblk0p2
-</pre>
-
-This will set you up properly for the installation of the root filesystem and the kernel in the steps below.
-
-==== Unpack the Qtopia Root Filesystem Image ====
-
-Download the [[Latest Images#Qtopia images|Qtopia Flash image]] to your Linux box and extract its contents:
-
- tar xzf qtopia-4.3.2-gta02-flash-*.tgz
-
-You should now have two files:
-#uImage-2.6.24+git18+9c058ff0d2641df3c36fc3300acb72078d2c41d4-r0-om-gta02.bin
-#qtopia-4.3.2-gta02-rootfs-07172049.jffs2
-Now, mount the root file system from the jffs2 using the commands found [[Userspace root image#Mounting the JFFS2 image on a loop back device (Block Memory MTD Emulation) |here]].  However, in the mount command, substitute the image filename for "/dev/mtdblock0".
-
-==== Create a compressed tarball ====
-
-Next, tar up the root filesystem:
-
-# tar czf qtopia-4.3.2-gta02-rootfs-07172049.tar.gz -C <mountpoint> .
-
-Where ''<mountpoint>'' is the location where the jff2 filesystem was mounted.  Note the space and the period after the mountpoint.
-
-==== Install the root filesystem ====
+==== Installing Root Filesystem ====
 
 Transfer this compressed tarball to the second partition of the MicroSD that is mounted on the FreeRunner:
 
-scp qtopia-4.3.2-gta02-rootfs-07172049.tar.gz root@192.168.0.202:/media/mmcblk0p2/
+  scp qtopia-4.3.2-gta02-rootfs-07172049.tar.gz root@192.168.0.202:/media/mmcblk0p2/
 
 Log in to your FreeRunner and unpack the root filesystem:
 
-<pre>
-cd /media/mmcblk0p2
-tar xzf qtopia-4.3.2-gta02-rootfs-07172049.tar.gz
-rm qtopia-4.3.2-gta02-rootfs-07172049.tar.gz
-rm -f /media/mmcblk0p2/boot/*
-</pre>
+  cd /media/mmcblk0p2
+  tar xzf qtopia-4.3.2-gta02-rootfs-07172049.tar.gz
+  rm qtopia-4.3.2-gta02-rootfs-07172049.tar.gz
 
-'''''Note:''''' the last step removes the kernel image from the second partition.  For some reason, U-Boot cannot find the uImage.bin file in the first partition if a kernel image exists in the second partition boot/ directory.
+==== Installing Kernel ====
 
-==== Install the kernel ====
+From your Linux box, rename uImage-2.6.24+git18+9c058ff0d2641df3c36fc3300acb72078d2c41d4-r0-om-gta02.bin to uImage.bin and copy it to the boot/ on the first partition of the MicroSD card.
 
-From your Linux box, rename <tt>uImage-2.6.24+git18+9c058ff0d2641df3c36fc3300acb72078d2c41d4-r0-om-gta02.bin</tt> to <tt>uImage.bin</tt> and copy it to the boot directory on the first partition of the MicroSD card.  Depending on the version of U-Boot you have installed, this may not work.  To prevent any possible issues, copy it to the <tt>/media/card</tt> directory as well. There is plenty of room on the first partition to have <tt>uImage.bin</tt> in both locations.
-
-Some versions of u-boot look for <B>uImage</B> and not <b>uImage.bin</b> you may have to remove the .bin extension to get it to boot.
-
-<pre>
-mv uImage-2.6.24+git18+9c058ff0d2641df3c36fc3300acb72078d2c41d4-r0-om-gta02.bin uImage.bin
-scp uImage.bin root@192.168.0.202:/media/card/boot/
-scp uImage.bin root@192.168.0.202:/media/card/
-</pre>
-
-==== Tell Qtopia it is running from the SD Card ====
-
-Lorn Potter on the mailing lists pointed this out:
-
-Qtopia was designed to be run from the root partition on a flash chip, not from a removable sd card.
-
-You would have to edit the etc/default/Trolltech/Storage.conf file to make it forget about the sd /dev node, to be able to run it this way
-
-Another user's solution to this is the following:
-
-Edit this file: /opt/Qtopia/etc/default/Trolltech/Storage.conf (the file path seems to have changed to /opt/Trolltech in newer versions)
-And change the [MountPoint0] section so it resembles this:
-<pre>
-[MountPoint0]
-Name[] = SD Card
-Path=/dev/mmcblk0p1
-Removable = 0
-Applications = 0
-Documents = 0
-ContentDatabase = 0
-</pre>
-
-=== Installation option 3: alternative procedure to install Qtopia on a microSD card ===
-
-As in option 2, the goal is to install Qtopia on a microSD card.
-We describe the complete procedure using:
-
-* Ubuntu 8.10
-* SanDisk microSD to USB adapter
-* Qt Extended 4.4.2 2008/10/31
-
-==== Format the microSD card ====
-
-The first step is to create an 8 MB partition for the kernel and use the remaining space for the root file system. Proceed as follows:
-
-Insert microSD card into adapter, and plug adapter into Ubuntu computer. If any partitions on the microSD card mount automatically, unmount them.
-
-CAUTION: Make sure you know which device your microSD card is. You don't want to perform these steps on your main hard disk!
-
-<pre>
-sudo umount /dev/sdb1
-
-sudo fdisk /dev/sdb
-</pre>
-
-I assume you know how to use fdisk. Delete any existing partitions, then create two new partitions, the first of size +8M, the second using all remaining space. Set the file system type of the first partition to FAT16 (type '6'). Your partition table should look like this:
-
-<pre>
-  /dev/sdb1               1           9        9040+   6  FAT16
-  /dev/sdb2              10         984      982800   83  Linux
-</pre>
-
-Save your partition table and quit fdisk. Format the partitions appropriately:
-
-<pre>
-sudo mkfs.vfat /dev/sdb1
-sudo mkfs.ext3 /dev/sdb2
-</pre>
-
-==== Download the latest Qt Extended ====
-
-Visit [http://qtextended.org/modules/mydownloads/viewcat.php?cid=6:Qtopia] and get the appropriate file. The Qtopia ROM flash images contain both the file system and the kernel image:
-
-<pre>
-wget http://qtextended.org/modules/mydownloads/visit.php?lid=98
-tar -zxvf qtextended-4.4.2-gta02-flash.tgz
-</pre>
-
-==== Copy the kernel image to the microSD card ====
-
-First mount the first partition, which is the boot partition, of the microSD card, and make a /boot subdirectory:
-
-<pre>
-sudo mkdir /media/card
-sudo mount /dev/sdb1 /media/card
-sudo mkdir /media/card/boot
-</pre>
-
-Depending on your version of U-Boot, the kernel image might be expected at the root of the boot partition, or in the /boot directory. Also, the image file name might be expected to have a .bin extension, or not. We create all four variations:
-
-<pre>
-sudo cp testing-om-gta02-20081029.uImage.bin /media/card/uImage.bin
-sudo cp testing-om-gta02-20081029.uImage.bin /media/card/uImage
-sudo cp testing-om-gta02-20081029.uImage.bin /media/card/boot/uImage.bin
-sudo cp testing-om-gta02-20081029.uImage.bin /media/card/boot/uImage
-</pre>
-
-Wait for data to be written to the microSD card and unmount the first partition:
-
-<pre>
-sync
-sudo umount /dev/sdb1
-</pre>
-
-==== Copy the jffs2 root file system to the microSD card ====
-
-That step is a bit complicated. First we need to make a fake MTD device in RAM so that we can mount the jffs2 root file system:
-
-<pre>
-sudo modprobe mtd 
-sudo modprobe jffs2  
-sudo modprobe mtdram total_size=59024 # default is 4 MByte - set to max.
-sudo modprobe mtdchar 
-sudo modprobe mtdblock
-</pre>
-
-Next we're going to copy onto this fake device. Make sure there are no other MTD devices on your computer and change the device numbers below as necessary:
-
-<pre>
-cat /proc/mtd
-  dev:    size   erasesize  name
-    mtd0: 039a4000 00020000 "mtdram test device"
-</pre>
-
-Now copy the jffs2 file system to the fake MTD device:
-
-<pre>
-sudo dd if=qtextended-4.4.2-gta02-rootfs-10302135.jffs2 of=/dev/mtd0
-</pre>
-
-Create a mount point, mount the fake MTD device, and check that the content seems right:
-
-<pre>
-sudo mkdir /mnt/tmp
-sudo mount -t jffs2 /dev/mtdblock0 /mnt/tmp
-ls /mnt/tmp
-  bin/   dev/  home/  media/  opt/   sbin/  tmp@	var/
-  boot/  etc/  lib/   mnt/    proc/  sys/   usr/
-</pre>
-
-Mount the second partition of the microSD card and copy the root file system to it:
-copy root file system to sd card using tar
-
-<pre>
-sudo mkdir /media/rootfs
-sudo mount /dev/sdb2 /media/rootfs
-cd /mnt/tmp
-sudo tar -cf - . | (cd /media/rootfs && sudo tar -xpvf -)
-</pre>
-
-Warnings about "implausibly old time stamp" don't seem to cause any trouble.
-
-Use "sync" to make sure that all data is written to the microSD card:
-
-<pre>
-sync
-</pre>
-
-Inspect contents of second partition:
-
-<pre>
-  ls /media/rootfs
-  bin/   dev/  home/  media/  opt/   sbin/  tmp@	var/
-  boot/  etc/  lib/   mnt/    proc/  sys/   usr/
-</pre>
-
-Note: There was a report that some versions of U-Boot cannot find the kernel image file in the first partition if a kernel image exists in the second partition boot/ directory. I have not confirmed this but there is no need for it so it seems safest to delete it now:
-
-<pre>
-sudo rm -f /media/rootfs/boot/*
-</pre>
-
-Wait for data to be written to the microSD card and unmount the second partition:
-
-<pre>
-sync
-sudo umount /dev/sdb2
-</pre>
-
-==== Test Qtopia ====
-
-Remove the microSD card from the USB adapter, install it in the Neo FreeRunner, boot into U-Boot, and select the option to boot from microSD card.
-
-=== Installation option 4: updating from source ===
-
-{{note|This will upgrade only opt/Qtopia directory, you should use opkg update/upgrade for the rest}}
-Original Qtopia images (the distribution released by Trolltech, not ASU) are rarely released as a rootfs image, but the source code is often updated. If you want to reflash your OM with the latest version of Qtopia you might build it from sources. This has been explained in [http://lists.openmoko.org/pipermail/community/2008-August/024785.html this thread] of the community mailing list. Summing up:
-
-==== Download files ====
-* get the latest toolchain released by trolltech: http://www.qtopia.net/modules/mydownloads/singlefile.php?lid=38 and unzip it on your PC (as root)
-<pre>
-cd /
-wget http://qtopia.net/downloads/neo/arm920t-eabi-ficgta01-toolchain.tgz
-tar xvzf arm920t-eabi-ficgta01-toolchain.tgz
-</pre>
-
-* get the latest snapshot from trolltech: ftp://ftp.trolltech.com/qtopia/snapshots/
-
-Since qtopia was renamed in qtextended you could find the snapshots on http://qtextended.org/downloads/snapshots/
-
-*  once dowloaded untar it
-<pre>tar xvzf qtopia-opensource-src-4.3.2-snapshot-20080806.tar.gz</pre>
-
-=== Download Updated Version of QtEI ===
-
-You can find sources and binary based on Qtopia, daily updated and improved, also in this semi-official Trac repo of [[Qt Extended Improved]] :
-
-* http://trac.karadog.net/qt-extended-improved
-
-Or in the '''GITHUB''' of [[Qt Extended Improved]] :
-
-* http://github.com/liedekef/qtmoko/commits/master
-
-==== Build Qtopia ====
-* make a "build" dir
-<pre>
-mkdir build
-cd build
-</pre>
-
-* configure and make:
-<pre>../qtopia-opensource-src-4.3.2-snapshot-20080806/configure -device ficgta01
-make
-</pre>
-This will take some time (couple hours). Note that the option "-device ficgta01" should work for both neo and freerunner. Then:
-<pre>
-make install
-</pre>
-will make a root directory into the ''build'' directory. There you can find an ''image'' that directory should be copied to /opt/Qtopia of your phone with scp. once done restart qpe or whole phone.
-
-For compiling qt-extended 4.4.2, you may need to use the following commands:
-<pre>
-* cd build
-* $QTOPIA_DEPOT_PATH/configure -device neo -verbose -build-qt -force-build-qt
-* bin/qbuild image
-</pre>
-
-This forces building qt as well which resolved problems with the qbuild test using all the system ram.
-
-==== Booting into Qtopia ====
+  mv uImage-2.6.24+git18+9c058ff0d2641df3c36fc3300acb72078d2c41d4-r0-om-gta02.bin uImage.bin
+  scp uImage.bin root@192.168.0.202:/media/card/boot/
+  
+=== Step 3: Booting into Qtopia ===
 
 Now shutdown the FreeRunner
 
-shutdown -h now
+  shutdown -h now
 
-Log into U-Boot in the NAND Flash to boot from the MicroSD card: (instructions from [[Booting the Neo FreeRunner]])
+Log into U-Boot in the NOR Flash to boot from the MicroSD card: (instructions from [[Booting the Neo FreeRunner]]
 
 * Press and hold Power button
-* Then while still pressing the Power button, press and hold AUX button for 5 to 8 seconds.
-* A boot menu will appear.
+* Then while still pressing the Power button, press and hold AUX button for 5 to 8 seconds. 
+* A boot menu will appear. 
 * Press the AUX button to select "[[Boot from sd card|Boot from MicroSD]]" and then press the Power button to execute.
 
 Qtopia should now boot.
-
-'''''Note:''''' you may get a kernel panic which says that "optional features not supported".  If this is the case, boot back into 2007.2 and run
-
-umount /dev/mmcblk0p2
-fsck.ext3.e2fsprogs /dev/mmcblk0p2
-
-This will clean up the file system and clear recovery flags in ext3 that ext2 does not support, then try booting from the MicroSD again.
-
-=== Internationalization ===
-
-Qtopia comes with support for German and American English, and users from other countries will find that Qtopia's predictive keyboard makes writing in another language near impossible. One way to disable the predictive keyboard is to simply replace /opt/Qtopia/etc/dict/en_US/common.dawg and words.dawg with empty files (after backing them up). Qtopia normally looks in these files for words to suggest, and if it doesn't find any words that fit, it simply shows what you actually wrote.
-
-Adding characters to the keyboard requires modifications to the source code, as described [http://www.qtopia.net/modules/newbb_plus/viewtopic.php?topic_id=512&forum=16 here].
-
-=== Software packages feeds ===
-
-Installation of more software packages with the package manager tool found the Settings folder needs servers, which offer these packages, like
-
-* http://qtextended.org/packages/feed/4.4.1/neo (default)
-* ...
-
-Install packages into Qt extended through the package manager, which only allows packages via web servers, seems to be the only way at the moment.
-(No way to download a package seperately and install the file.)
-
-== Bugs ==
-
-See [http://trolltech.org/developer/task-tracker/index_html?method=front Trolltech's tracker] ([http://trolltech.org/developer/task-tracker/index_html?method=advsearch&searchstr=&bugs=on&sugs=on&product=2&functionalarea=&versionfound=&versionfixed=&priority=-1&status=0&resolution=-1 Qtopia Tracker]).
-
-Bug reports should be sent to qt-bugs@trolltech.com or by web form at http://trolltech.com/bugreport-form.
-
-=== Suspend /Resume [Now Solved] ===
-It seems that suspend/resume only works when the FreeRunner has been connected to a powersource (only a few seconds if sufficient). If you boot from battery, it will never suspend until you have plugged it in at least for a couple of seconds.
-
-=== Bugs in 4.4.1 ===
-* Boot and Shutdown Splash will not work because splash-write was not compiled into Busybox
-* Timezone & time on latest Qt 4.4.1
-* The first item in a list is missing the top half
-
-=== Bugs in 4.4.2 ===
-* Cannot connect to a WPA protected WLAN, because wpa_supplicant of the previous connection is left running.  Try a [http://www.qtsoftware.com/developer/task-tracker/index_html?method=entry&id=241864 fixed /opt/Trolltech/Qtopia/bin/lan-network script].
-
-== Links ==
-
-* [http://qtextended.org/ Qtextended.org]
-* [http://doc.trolltech.com/qtextended4.4/ Qt Extended Developer Resources]
-* [http://trac.karadog.net/qt-extended-improved] Semi-Official QTEi Trac and Roadmap information on todo
-* [http://lists.openmoko.org/pipermail/community/2009-May/046982.html] QTEi Progress Edge on Mailing List by '''Franky Van Liedekerke'''. Update or install the QTEi with a nice sh script.
-
-[[Category:Qt based distributions]]
