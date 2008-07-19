@@ -163,7 +163,20 @@ One way to increase the volume of the microphone is to do the following:
 
 Connect the Neo FreeRunner to your Linux computer using the standard mini-USB to USB cable provided.
 
-TO BE DONE, Check out the [[USB_Networking]] section.
+With the device connected, modprobe usbnet module (if necessary) and configure usb0 interface (as root):
+<pre>
+ifconfig usb0 192.168.0.200 netmask 255.255.255.0
+</pre>
+If your eth0 interface is also in the same 'range' (e.g. 192.168.0.105) then you can do the following:
+
+1. ping the Neo with
+ # ping -I usb0 192.168.0.202
+2. add a route to your Neo (adjust your firewall if necessary):
+ # /sbin/route add -host 192.168.0.202/32 dev usb0
+3 log in to the Neo with empty password
+ # ssh root@192.168.0.202
+
+You will eventually want to setup your computer so that it automatically connects the Neo FreeRunner to the Internet when it is plugged in. This is discussed in the [[USB_Networking]] section, which you should see if the procedure above fails.
 
 ===Use the package manager===
 
