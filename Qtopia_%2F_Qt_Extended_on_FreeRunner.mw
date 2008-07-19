@@ -112,6 +112,9 @@ Log in to your FreeRunner and unpack the root filesystem:
   cd /media/mmcblk0p2
   tar xzf qtopia-4.3.2-gta02-rootfs-07172049.tar.gz
   rm qtopia-4.3.2-gta02-rootfs-07172049.tar.gz
+  rm -f /media/mmcblk0p2/boot/*
+
+'''''Note:''''' the last step removes the kernel image from the second partition.  For some reason, U-Boot cannot find the uImage.bin file in the first partition if a kernel image exists in the second partition boot/ directory.
 
 ==== Installing Kernel ====
 
@@ -134,3 +137,5 @@ Log into U-Boot in the NOR Flash to boot from the MicroSD card: (instructions fr
 * Press the AUX button to select "[[Boot from sd card|Boot from MicroSD]]" and then press the Power button to execute.
 
 Qtopia should now boot.
+
+Note that you may get a kernel panic which says that "optional features not supported".  If this is the case, boot back into 2007.2 and run "fsck.ext3.e2fsprogs /dev/mmcblk0p2".  This will clean up the file system and clear recovery flags in ext3 that ext2 does not support.
