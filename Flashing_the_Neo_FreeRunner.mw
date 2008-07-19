@@ -1,79 +1,64 @@
-{{Languages|Flashing_the_Neo_FreeRunner}}
-Most of the software on the Neo FreeRunner can be updated or changed. The root filesystem, the [[kernel]], and the [[Bootloader]] can be modified with the program [[dfu-util]] from a computer. This page does not describe flashing the [[NOR Flash]] which requires a [[debug board]]. See [[Flashing NOR]] for this procedure. 
+As Openmoko development continues, Openmoko regularly releases updated versions of the Openmoko root filesystem, the kernel, and the[[Bootloader| U-Boot]]. These may be programmed into the Flash memory of Neo FreeRunner. You can use the USB cable and Openmoko provided tool to flash Neo FreeRunner.
 
-The [[NAND Flash]] is divided into 3 partitions for the bootloader, kernel, and root filesystem. Each component can be flashed separately. 
+{{note|The Openmoko software team builds images daily. If you want to use the latest images, you can download the image from the daily build, but we recommend you download the most stable image from http://downloads.openmoko.org/releases/Freerunner/. Images here have been tested by the test team.
 
-The '''bootloader''' is a small program that runs first and starts everything else when the FreeRunner is powered on. The bootloader is independent of the distribution you use.
-The '''kernel''' and the '''root filesystem''' are provided by the distribution. 
+More about current Images: http://wiki.openmoko.org/wiki/Latest_Images}}
 
-'''Before you start: Erasing the root filesystem or flashing the bootloader are radical measures. Take the time to ponder the necessity. Sometimes problems can be fixed by only updating the kernel.'''
+===Step 1. Download the DFU-util===
 
-== Image files to flash into FreeRunner memory ==
+You can download the flashing tool from: 
+http://downloads.openmoko.org/releases/Freerunner/dfu-util
 
-There are separate image files for all 3 software components. In most cases you will need to install a Kernel (uImage) and a Root Filesystem (rootfs). In rare cases, when there is a bug you need fixed, you will also install a new bootloader.
+On the GNU/Linux host you can use the following command to download the dfu-util:
+ wget http://downloads.openmoko.org/releases/Freerunner/dfu-util
 
-Please read [[Distributions]] for choosing the distribution which fits your needs, and then see [[Download]] for downloading.
+Afterwards you have to change the rights on the file:
+ chmod a+x dfu-util
 
-== Do a backup ==
+===Step 2. Flashing the Kernel===
 
-If you have a working image that you're happy with but want to try something different, you should probably do a [[Backup]].
+{| class="wikitable" cellspacing="2" cellpadding="2" style="padding: 0%; margin:0em 0em 1em 0em; border:0px solid #ffffff; background:#ffffff; width:100%;floating="center";font-weight: normal; "
+! style="background:#ffffff;border-left:1px solid #ffffff;border-right:1px ; border-top:2px solid #ffffff; border:1px solid #ffffff; width:75%;font-weight: normal; " |  
+<div align="left">
+[[Image:menu15.jpg|thumb|Log into U-Boot in NOR Flash, connect your Neo with Linux Host via USB cable]]
 
-== Using dfu-util ==
+Before you execute the following command, please [[#Log_into_U-Boot_in_the_NOR_Flash|log into U-Boot in the NOR Flash]]. The Neo FreeRunner needs to be at the NOR boot menu for flashing.  You will then need to connect your Neo with the GNU/Linux host via USB cable.
 
-[[Dfu-util]] is a command-line tool to flash the FreeRunner. It is available for Linux, MacOS X, and Windows. DFU-util allows you to connect to the FreeRunner through the USB cable and control its bootloader. That connection uses a special protocol which addresses the bootloader's interface, and differs from USB networking. For more details, see the separate [[dfu-util]] page.
+You can download the kernel from 
+http://downloads.openmoko.org/releases/Freerunner/
 
-See [[Manuals/Dfu-util]]
+Type in the following command in the terminal on a GNU/Linux host. On some systems you need to be root before this will work and on Ubuntu you must preface the command with "sudo" or you will get the following error: "Cannot claim interface: could not claim interface 2: Operation not permitted"
 
-=== NeoTool (GUI) ===
+ ./dfu-util -a (partion name) -R -D (download image file name)
 
-Instead of the command-line-based DFU-util, you can use NeoTool, a graphical tool for flashing the FreeRunner: see the [[NeoTool]] page.
+ex:
 
-=== DFUScript - A command line script to simplify dfu-util ===
+ sudo ./dfu-util -a kernel -R -D uImage-2.6.24+git20080424-om-gta02.bin
 
-DFUScript was developed to assist users who have multiple devices in using dfu-util via the command line. Information on where to download and use DFUScript can be found on [[DFUScript]].
+Press Enter to execute the command.
 
-== Alternative: using nandwrite ==
+When flashing succeeds the following will be shown:
 
-This approach involves writing the '''rootfs''' into nand directly on the phone from a system already running on it, not necessarily via usb from a computer.
+ status(0) = No error condition is present
+ Done!
+</div>
+|}
 
-If you have a system running from a different partition that you intend to flash (for example sd card), you can use nandwrite to do the work, which is much faster (it takes about 30s to write a 59MB jffs2 image).
+{{note| The meaning of the parameters you specified:
+-a  --alt alt Specify the altsetting of the DFU interface by name or by number<br>
+-R  --reset Issue USB Reset signalling once we're finished<br>
+-D  --download file Write firmware from<file> into device <br>
+}}
 
-See [[Nandwrite]] for more information.
+===Step 3. Flashing the Root Filesystem ===
+You can download the root filesystem from:
+http://downloads.openmoko.org/releases/Freerunner/
 
-== Optional: Verifying boot-loader version ==
+Type the following command in the terminal of a GNU/Linux host. On some systems you will need to be root.
 
-<!-- The following should probably be moved to [[Bootloader_versions]], IMHO -->
+ ./dfu-util -a rootfs -R -D openmoko-devel-image-fic-gta02.jffs2
 
-<!-- Taken from posts by Mikael Berthe <mikael.berthe@lilotux.net> and Torfinn Ingolfsen <tingox@gmail.com> to Support list, subject: Re: Upgrading u-boot needed ? -->
-(Optional) After an upgrade, you may wish to check that the u-boot version matches the one you have just flashed. You can use 'grep  Bootloader /dev/mtdblock1' from a shell on the FreeRunner (and possibly the 1973 as well) to get the '''NAND''' u-boot version, like this:
-   root@om-gta02:~# grep Bootloader /dev/mtdblock1
-   Neo1973 Bootloader U-Boot 1.3.2+gitr18+64eb10cab8055084ae25ea4e73b66dd03cc1a0cb
+When flashing succeeds the following will be shown:
 
-You can grep for the same string in /dev/mtdblock0 to retrieve the '''NOR''' u-boot version:
-   root@om-gta02:~# grep  Bootloader /dev/mtdblock0
-   Neo1973 Bootloader U-Boot 1.3.2-moko12
-<!-- ENDS ... subject: Re: Upgrading u-boot needed ? -->
-
-== Troubleshooting ==
-
-Okay, so you just reflashed. The splash screen pops up, but uBoot fail to load the kernel, and return to boot menu. WTF?
-
-* It is likely that the wrong bits went to the wrong place. Try reflashing just the kernel, double checking that you select the uImage.bin kernel file, not the u-boot.bin bootloader file.
-* Try redownloading and reflashing the kernel, checking file integrity with the MD5 hash sums.
-
-== Quick Step-By-Step Summary ==
-
-# Press AUX button first, hold it and press Power button. Wait until NOR flash U-Boot menu appears. You recognize it from the orange Openmoko logo. On the top it should usually say "U-Boot 1.3.2-moko12 (May 9 2008 - 10:28:48)".
-# Attach USB cable
-# Type the following commands, before the Neo automatically powers down
-
-   # Flash u-boot
-   dfu-util -a u-boot -R -D /path/to/u-boot_image
-   # Flash the kernel
-   dfu-util -a kernel -R -D /path/to/uImage.bin
-   # Flash the rootfs
-   dfu-util -a rootfs -R -D /path/to/rootfs.jffs2
-
-If needed, specify extra device specifying parameter -d [[USB Product IDs|0x1d50:0x5119]] to the dfu-util.
-
-[[Category:Flashing Openmoko| ]]
+ status(0) = No error condition is present
+ Done!
