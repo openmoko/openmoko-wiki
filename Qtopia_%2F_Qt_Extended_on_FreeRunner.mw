@@ -1,0 +1,136 @@
+This page provides instructions on how to install Qtopia (proper, not the [[ASU]] or [[QtopiaOnX11]] efforts) on the GTA02 (Freerunner) phone.  It is similar to the [[Qtopia on Neo1973]] page.
+
+{|align=right
+|__TOC__
+|}
+
+== Current status ==
+On 18 July 2008, Qtopia released the [http://www.qtopia.net/modules/mydownloads/singlefile.php?lid=72 latest flash image for the FIC Neo Freerunner (gta02)] containing the Qtopia 4.3.2 snapshot of 17 July 2008 (GPL version). 
+
+This image can successfully make and receive calls and text messages.  It can read all contacts from the SIM card (which the updated 2007.2 does not appear to be able to do).  It contains apps that appear to be more stable than the ones found in the 2007.2 image.  It has multiple input methods that appear to be more mature.
+
+== Dual-Booting between Qtopia and 2007.2 (Qtopia boots from MicroSD card) ==
+
+Installation Requirements: 
+
+1) SSH shell access to 2007.2 based image of the FreeRunner through USB interface or WLAN.
+2) A Desktop Linux distro (to unpack the .jffs2 image, I ran Ubuntu under VMWare)
+
+=== Step 1: Prepare the SD card ===
+
+Booting from the microSD card requires that you repartition and reformat your MicroSD card.
+
+{{warning|The following steps will repartition and reformat your MicroSD card. After this, no data on the card will be accessible to you anymore, so create good backups of anything which you need before starting!}}
+
+SSH into the FreeRunner and run the following commands:
+
+==== Partioning the SD card ====
+
+These steps were taken from the [[Booting from SD]] page:
+
+Unfortunately the uboot loader can only read from FAT partitions. Therefore the kernel needs to be stored in a partition with this filesystem.
+Nevertheless we want to store our rootfs in an ext3 (or ext2) filesystem. To acomplish this the sd-card needs to be partitioned into to different parts. 
+This example shows how to do this using the fdisk utility. Feel free to use the partitioning utitlity of your likings for this task.
+
+ fdisk /dev/mmcblk0
+
+'''''Note:''''' The device bane might differ on your system. If you are not sure about it, you may check your kernel message log by calling ''dmesg'' to find the correct device. 
+
+We will now create a 8 mb partition for our kernel and another one for the rootfs which will take up all the remaining space.
+
+   Command (m for help): d
+   Selected partition 1
+   Command (m for help): n
+   Command action
+      e   extended
+      p   primary partition (1-4)
+   p
+   Partition number (1-4): 1
+   First cylinder (1-983, default 1):
+   Using default value 1
+   Last cylinder or +size or +sizeM or +sizeK (1-983, default 983): +8M
+   Command (m for help): n
+   Command action
+      e   extended
+      p   primary partition (1-4)
+   p
+   Partition number (1-4): 2
+   First cylinder (18-983, default 18):
+   Using default value 18
+   Last cylinder or +size or +sizeM or +sizeK (18-983, default 983):
+   Using default value 983
+   Command (m for help): w
+   The partition table has been altered!
+   Calling ioctl() to re-read partition table.
+   Syncing disks.
+
+
+==== Formatting the SD card ====
+
+As already mentioned we need the first partition to be formatted with the FAT filesystem. Just issue the following command to create this fs:
+
+'''''Note:''''' you may have to reboot after partitioning in order to see the new partitions in /dev
+
+  mkfs.vfat /dev/mmcblk0p1
+
+'''''Note:''''' I could not find mkfs.vfat in any of the OpenMoko repositories, so I took my microSD card out, put it into the SD adapter, and formated the first partition with the Windows format utility.  Of course, you can stick it into your Linux box and do the same, (in fact, instead of partitioning and formatting from the FreeRunner, you could do all these steps on your Linux box).
+
+The second partition is about to be formatted with ext3 (For ext2 to work you need to make sure you compiled the kernel with the correct configuration):
+
+  mkfs.ext3 /dev/mmcblk0p2
+
+=== Step 2: Installing Qtopia ===
+
+==== Unpacking the Qtopia Root Filesystem Image ====
+
+Download the Qtopia FLASH image from [http://www.qtopia.net/modules/mydownloads/singlefile.php?lid=72] to your Linux box and extract its contents:
+
+  tar xzf qtopia-4.3.2-gta02-flash-07172049.tgz
+
+You should now have two files: uImage-2.6.24+git18+9c058ff0d2641df3c36fc3300acb72078d2c41d4-r0-om-gta02.bin, and qtopia-4.3.2-gta02-rootfs-07172049.jffs2.  Now extract the root file system from the jffs2 using the following commands (these instructions come from [[Userspace root image]], and you may have to "sudo" these commands):
+
+  export loop=$(losetup -f)
+  losetup $loop <path>/qtopia-4.3.2-gta02-rootfs-07172049.jffs2
+  modprobe block2mtd block2mtd=$loop,131072
+  modprobe jffs2
+  modprobe mtdblock
+  mkdir <mountpoint>
+  mount -t jffs2 -o ro /dev/mtdblock0 <mountpoint>
+  
+Now, tar up the root filesystem:
+
+  tar czf qtopia-4.3.2-gta02-rootfs-07172049.tar.gz -C <mountpoint>
+
+==== Installing Root Filesystem ====
+
+Transfer this compressed tarball to the second partition of the MicroSD that is mounted on the FreeRunner:
+
+  scp qtopia-4.3.2-gta02-rootfs-07172049.tar.gz root@192.168.0.202:/media/mmcblk0p2/
+
+Log in to your FreeRunner and unpack the root filesystem:
+
+  cd /media/mmcblk0p2
+  tar xzf qtopia-4.3.2-gta02-rootfs-07172049.tar.gz
+  rm qtopia-4.3.2-gta02-rootfs-07172049.tar.gz
+
+==== Installing Kernel ====
+
+From your Linux box, rename uImage-2.6.24+git18+9c058ff0d2641df3c36fc3300acb72078d2c41d4-r0-om-gta02.bin to uImage.bin and copy it to the boot/ on the first partition of the MicroSD card.
+
+  mv uImage-2.6.24+git18+9c058ff0d2641df3c36fc3300acb72078d2c41d4-r0-om-gta02.bin uImage.bin
+  scp uImage.bin root@192.168.0.202:/media/card/boot/
+  
+=== Step 3: Booting into Qtopia ===
+
+Now shutdown the FreeRunner
+
+  shutdown -h now
+
+Log into U-Boot in the NOR Flash to boot from the MicroSD card: (instructions from [[Booting the Neo FreeRunner]]
+
+* Press and hold Power button
+* Then while still pressing the Power button, press and hold AUX button for 5 to 8 seconds. 
+* A boot menu will appear. 
+* Press the AUX button to select "[[Boot from sd card|Boot from MicroSD]]" and then press the Power button to execute.
+
+Qtopia should now boot.
