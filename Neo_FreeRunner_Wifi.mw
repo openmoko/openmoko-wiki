@@ -14,6 +14,34 @@ To get wlan working on your Freerunner, you can follow these steps:
 
 That's it, your wlan should now work!
 
+==Using /etc/network/interfaces==
+
+Another way is to use /etc/network/interfaces
+
+For instance, for WEP:
+
+* Using wireless tools:
+
+ iface eth0 inet dhcp
+    wireless-key my_wep_key
+    wireless-essid my_essid
+
+* Using wpa_supplicant (this allows more authentication methods).
+
+ iface eth0 inet dhcp
+    wpa-wep-key0 my_wep_key
+    wpa-key-mgmt NONE
+    wpa-ssid my_essid
+
+Using a wpa_supplicant.conf file:
+ iface eth0 inet dhcp
+    wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+
+Then just run:
+ ifup eth0
+
+You'll get a lot of messages, like <tt>ioctl[SIOCSIWENCODEEXT]: Operation not supported</tt> and <tt>sed: unrecognized option `--quiet'</tt>, they appear to be harmless. The "--quiet" error message can be avoided by replacing "sed --quiet" with "sed -n" in /etc/wpa_supplicant/*.sh
+
 == Known good wpa-supplicant version? ==
 
 Is the 0.6.3-r1 broken? I don't get anything to work with these instructions via usage of wpa_supplicant, but WEP works via direct interfaces changes (wireless-essid/wireless-key settings).
