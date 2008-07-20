@@ -1,0 +1,39 @@
+You will need the [[Dfu-util]] to make a backup of your existing image.
+
+As when [[Flashing_the_Neo_FreeRunner|flashing]], you will need to be in [[FreeRunner/Buttons_and_LEDs#Basic_Button_Usage|U-Boot in the NOR Flash]].
+
+<pre>
+./dfu-util -a kernel -B -U good-kernel.bin
+./dfu-util -a rootfs -R -U good-rootfs.jffs2
+</pre>
+
+Here is what my successful output looked like...
+
+on the host PC:
+<pre>
+$ sudo ./dfu-util -a kernel -R -U good-kernel.img
+dfu-util - (C) 2007 by OpenMoko Inc.
+This program is Free Software and has ABSOLUTELY NO WARRANTY
+
+Opening USB Device 0x0000:0x0000...
+Claiming USB DFU Runtime Interface...
+Determining device status: state = appIDLE, status = 0
+Device really in Runtime Mode, send DFU detach request...
+Resetting USB...
+Opening USB Device...
+Found Runtime: [0x1d50:0x5119] devnum=12, cfg=0, intf=0, alt=3, name="kernel"
+Claiming USB DFU Interface...
+Setting Alternate Setting ...
+Determining device status: state = dfuIDLE, status = 0
+dfuIDLE, continuing
+Transfer Size = 0x1000
+Resetting USB to switch back to runtime mode
+</pre>
+
+on the FreeRunner:
+<pre>
+DFU: Switching to DFU Mode
+DEVICE_CONFIGURED: 1
+Starting DFU Upload of partition 'kernel'
+DEVICE_CONFIGURED: 1
+</pre>
