@@ -23,27 +23,60 @@ To add/change the key layout on the default keypad (I added a > and a / to the 1
  KP_16 = T;U;V;8
  KP_17 = W;X;Y;Z;9[code]
 
-==Switch Keypad==
+==Matchbox keyboard==
 
-To switch from the multitap keyboard to the matchbox or Openmoko keyboard, do the following (from the terminal or an ssh session with DISPLAY=:0.0):
+Another keyboard is available: matchbox-keyboard. It is a full QWERTY keyboard. This howto is based on a blog entry which can be found [http://www.ginguppin.de/node/15 here]
+
+===What does the keyboard look like?===
+
+[[Image:Complete_QWERTY_Keyboard_On_The_Freerunner_screenshot.png|none|thumb|260px|Screenshot of the keyboard applet]]
+
+===Considerations===
+
+Pros:
+* All keys can be generated
+* Takes up less space than the keypad (multitap-pad), leaving more space for the application
+
+Cons:
+* You pretty much have to use a stylus.  With difficulty you can hit keys with the corner of a fingernail.
+
+
+===How to install it?===
+
+If you use a ScaredyCat release (http://buildhost.automated.it/OM2007.2/), use the following:
 
  opkg remove -force-depends multitap-pad
  opkg install matchbox-keyboard-inputmethod
  opkg install matchbox-keyboard-im
  opkg install matchbox-keyboard-applet
 
-This doesn't work on official OM 2007.2 repositories. However, if you use a ScaredyCat release (http://buildhost.automated.it/OM2007.2/) it should work fine.
-----
-The ipkg files can be found at http://www.ginguppin.de/node/15 .
-----
+Otherwise, you'll have to download the ipk files from [http://www.ginguppin.de/files/keyboard-ipk.tar.bz2 here]. Assuming you have a working internet connection on your Freerunner, you can do the following:
+
+ cd /tmp
+ mkdir matchbox-keyboard
+ wget http://www.ginguppin.de/files/keyboard-ipk.tar.bz2
+ tar -jxf keyboard-ipk.tar.bz2
+ opkg remove -force-depends multitap-pad
+ opkg install matchbox-keyboard-inputmethod*.ipk
+ opkg install matchbox-keyboard-im*.ipk
+ opkg install matchbox-keyboard-applet*.ipk
+ cd ..
+ rm -rf matchbox-keyboard
+
+===How to add a keyboard toggle button===
+
+To add a button to enable showing / hiding the keyboard, edit <tt>/etc/matchbox/session</tt>. In the list of applets after <tt>--end-applets</tt>, add <tt>keyboard</tt>, and restart your X server
+
+===How to switch between matchbox-keyboard and multitap-pad===
+
 If you want to keep the multitap keyboard, but also be able to start up the matchbox-keyboard, you can follow these ugly instructions:
 
 First you must install matchbox-keyboard.
- ipkg install matchbox-keyboard
+ opkg install matchbox-keyboard
 
 Do the following (from the terminal or an ssh session with DISPLAY=:0.0):
-# killall multitap-pad
-# matchbox-keyboard > /dev/null 2>&1 &
+ killall multitap-pad
+ matchbox-keyboard > /dev/null 2>&1 &
 
 (If you type the above commands with multitap, you have to leave off the redirection of matchbox-keyboard output, since several of the keys you need are missing.)
 
