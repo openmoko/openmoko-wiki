@@ -53,19 +53,79 @@ automake: no `Makefile.am' found or specified
 
 You can download autoconf 2.59 from [http://prdownloads.sf.net/mingw/msys-autoconf-2.59.tar.bz2?download http://prdownloads.sf.net/mingw/msys-autoconf-2.59.tar.bz2?download].  All you need to do to install it is to use a utility like [http://www.7-zip.org/ 7-Zip] to extract the files into your msys\1.0 directory.
 
-Once you get that going, you can do a ./configure && make
+Once you get that going, you can do a 
 
-Then you will get stuck at this point:
+  ./configure
+
+Then it will choke on PKG_CHECK_MODULES because pkg-config is not installed.  To install pkg-config, check out [http://www.mingw.org/MinGWiki/index.php/pkg-config http://www.mingw.org/MinGWiki/index.php/pkg-config]
+
+It says that you need the following package:
+
+  glib
+  glib-dev
+  libiconv
+  gettext
+  pkg-config
+
+You can get all of these from the GTK+ for Windows page at: [http://www.gtk.org/download-windows.html http://www.gtk.org/download-windows.html]
+
+Depending on how you installed MSys, you may have to copy the pkg.m4 file from the MinGW/share/aclocal directory into the MSys\1.0\share\aclocal directory.
+
+Then you will need to create a libusb.pc file in the MinGW\lib\pkgconfig directory.  I created the following:
+
+  prefix=c:/MinGW
+  exec_prefix=${prefix}
+  libdir=${exec_prefix}/lib
+  includedir=${prefix}/include
+  Name: LibUSB
+  Description: USB for Win32
+  Requires: 
+  Version: 0.1.12.1
+  Libs: -L${libdir} -lusb
+  Cflags: 
+
+Then, copy the libusb.a file from the LibUSB-Win32\lib\gcc directory into the MinGW\lib directory and the usb.h file from LibUSB-Win32\include into MinGW\include (or you can copy it into your dfu-util\src directory.
+
+Now try this again: 
+
+  ./configure
+
+It should be successful. Then you can try building:
+
+  ./make
+
+And you will get this:
 
   main.c:29:22: byteswap.h: No such file or directory
   main.c:30:20: endian.h: No such file or directory
 
 Unfortunately, both these files are missing in Gnulib for mingw as described here: [http://www.gnu.org/software/gnulib/manual/html_node/byteswap_002eh.html#byteswap_002eh http://www.gnu.org/software/gnulib/manual/html_node/byteswap_002eh.html#byteswap_002eh] and here: [http://www.gnu.org/software/gnulib/manual/html_node/endian_002eh.html#endian_002eh http://www.gnu.org/software/gnulib/manual/html_node/endian_002eh.html#endian_002eh]
 
+But, the default endianness assumed appears to be little endian, so you can comment out the #include's for those two files and just use the defaults.
+
+Once you get passed that, it will complain about the types u_int8_t, u_int16_t, and u_int32_t.  They might be defined somewhere, but it was easier to 
+
+  #define u_int8_t uint8_t
+  #define u_int16_t uint16_t
+  #define u_int32_t uint32_t
+
+to get passed that.
+
+Then it will complain about undefined references to sleep and usleep.  These were taken out of MinGW so you will have to define the following macros:
+
+  #define sleep(seconds) Sleep((seconds)*1000)
+  #define usleep(microseconds) Sleep((microseconds)/1000)
+
+Then you should be able to successfully compile.
+
 === Where to go from here ===
 
-Even if the autotools will work and create a Makefile, any potential porting work is just about to start. There is a libusb port for Win32, but we don't know yet if the API will be compatible with the Linux version and what other problems might arise.
+Once you get to that stage and run 
 
-Stay tuned. Or even better: Help out!
+  dfu-util --list
+
+it doesn't list any devices.  This could be because I don't have a Windows driver installed when the device is in U-Boot, or maybe there needs to be some code changes to make this work.
+
+Hopefully someone can pick it up from here and figure it out!
 
 [[Category:Flashing Openmoko]]
