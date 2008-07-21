@@ -1,1 +1,59 @@
-test
+script to Auto connect to Open wirelss 81102 AP's
+====iwscan====
+<pre>
+#!/usr/bin/perl
+# Tim Osburn - tim@osburn.com
+#
+# install perl
+
+$iwlist = "/sbin/iwlist eth0 scanning";
+
+open scan, "$iwlist |";
+while (<scan>) {
+  if (/^\s+Cell (\S+) - Address: (\S+)/) {
+    $CELL=$1;
+    $ADDRESS=$2;
+    # print "$1 $2";
+    $INLOOP=1;
+    }
+  if (/^\s+ESSID:(\S+)/) {
+    $ESSID=$1;
+    print " $1";
+    }
+  if (/^\s+Frequency:\S+ \S+ \(Channel (\S+)\)/) {
+    $CHAN=$1;
+    print " $1";
+    }
+  if (/^\s+Quality=\S+\s+Signal level=(\S+).*/) {
+    $SIGNAL=$1;
+    print " $1";
+    }
+  if (/^\s+Encryption key:(\S+)/) {
+    $ENCRYPTION=$1;
+    print " $1\n";
+    }
+  }
+close scan;
+</pre>
+
+====chknet====
+<pre>
+#!/bin/sh
+
+HOSTTT="google.com"
+for Hosts in $HOSTTT
+do
+  count=$(ping -c 1 $HOSTTT | grep 'received' | awk -F',' '{ print $2 }' | awk '{ print $1 }')
+  if [ $count -eq 0 ]; then
+    # 100% failed
+    echo "FAIL" 
+  fi
+  
+  if [ $count -eq 1 ]; then
+  
+	echo "w00t"
+  fi
+
+done
+
+</pre>
