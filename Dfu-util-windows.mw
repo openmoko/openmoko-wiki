@@ -1,6 +1,6 @@
 == Porting dfu-util to Windows ==
 
-Note: This is entirely work in progress and has not yet been successfully finished. Nevertheless hopefully the information on this page will serve as a starting point for anyone who find the time to take this further. After all, as many people still use Windows PCs as their every day computers, having a convenient way to re-flash a Neo from Windows would probably open up the user base.
+Note: This is entirely work in progress. Nevertheless hopefully the information on this page will serve as a starting point for anyone who find the time to take this further. After all, as many people still use Windows PCs as their every day computers, having a convenient way to re-flash a Neo from Windows would probably open up the user base.
 
 === Potential Approaches ===
 
@@ -13,7 +13,7 @@ Note: This is entirely work in progress and has not yet been successfully finish
 * LibUSB-Win32
 : Will only be able to be built on a Windows box
 
-=== MinGW/MSYS port: What has been done so far ===
+=== MinGW/MSYS port ===
 
 The preferred order of installation is:
 
@@ -33,33 +33,9 @@ That should give you an Icon in your Start menu in MinGW->MSYS with the name of 
 
 You can try to execute some commends such as gcc, make, etc. to make sure you installed everything correctly.
 
-=== Getting dfu-util sources ===
+Download autoconf 2.59 from [http://prdownloads.sf.net/mingw/msys-autoconf-2.59.tar.bz2?download http://prdownloads.sf.net/mingw/msys-autoconf-2.59.tar.bz2?download].  All you need to do to install it is to use a utility like [http://www.7-zip.org/ 7-Zip] to extract the files into your msys\1.0 directory.
 
-Your home directory in msys lives in the location where you installed MSYS in %MSYS_HOME%\home\%USERNAME. Check out the dfu-util sources there or copy them into that directory in case you checked them out somehwere else on your Windows filesystem.
-
-=== Where we're stuck ===
-
-configure.ac:4: error: Autoconf version 2.59 or higher is required
-configure.ac:4: the top level
-autom4te: /bin/m4 failed with exit status: 1
-configure.ac: `AM_INIT_AUTOMAKE' must be used
-automake: your implementation of AM_INIT_AUTOMAKE comes from an
-automake: old Automake version.  You should recreate aclocal.m4
-automake: with aclocal and run automake again.
-configure.ac: required file `./install-sh' not found
-configure.ac: required file `./mkinstalldirs' not found
-configure.ac: required file `./missing' not found
-automake: no `Makefile.am' found or specified
-
-You can download autoconf 2.59 from [http://prdownloads.sf.net/mingw/msys-autoconf-2.59.tar.bz2?download http://prdownloads.sf.net/mingw/msys-autoconf-2.59.tar.bz2?download].  All you need to do to install it is to use a utility like [http://www.7-zip.org/ 7-Zip] to extract the files into your msys\1.0 directory.
-
-Once you get that going, you can do a 
-
-  ./configure
-
-Then it will choke on PKG_CHECK_MODULES because pkg-config is not installed.  To install pkg-config, check out [http://www.mingw.org/MinGWiki/index.php/pkg-config http://www.mingw.org/MinGWiki/index.php/pkg-config]
-
-It says that you need the following package:
+You will also need pkg-config.  According to [http://www.mingw.org/MinGWiki/index.php/pkg-config http://www.mingw.org/MinGWiki/index.php/pkg-config], you need the following packages:
 
   glib
   glib-dev
@@ -67,13 +43,17 @@ It says that you need the following package:
   gettext
   pkg-config
 
-You can get all of these from the GTK+ for Windows page at: [http://www.gtk.org/download-windows.html http://www.gtk.org/download-windows.html]
+You can get all of these from the GTK+ for Windows page at: [http://www.gtk.org/download-windows.html http://www.gtk.org/download-windows.html].  Unzip them to your msys\1.0 directory.
 
-Depending on how you installed MSys, you may have to copy the pkg.m4 file from the MinGW/share/aclocal directory into the MSys\1.0\share\aclocal directory.
+Open the file /etc/profile (C:\msys\1.0\etc\profile) with your favorite editor (make sure it uses LF line endings) and add:
 
-Then you will need to create a libusb.pc file in the MinGW\lib\pkgconfig directory.  I created the following:
+  PKG_CONFIG_PATH="/msys/1.0/lib/pkgconfig"
 
-  prefix=c:/MinGW
+If you haven't installed LibUSB-Win32 yet, install it now.
+
+Then you will need to create a libusb.pc file in the msys\1.0\lib\pkgconfig directory.  I created the following:
+
+  prefix=c:/msys/1.0
   exec_prefix=${prefix}
   libdir=${exec_prefix}/lib
   includedir=${prefix}/include
@@ -86,51 +66,129 @@ Then you will need to create a libusb.pc file in the MinGW\lib\pkgconfig directo
 
 Then, copy the libusb.a file from the LibUSB-Win32\lib\gcc directory into the MinGW\lib directory and the usb.h file from LibUSB-Win32\include into MinGW\include (or you can copy it into your dfu-util\src directory.
 
-Now try this again: 
+=== Getting dfu-util sources ===
 
-  ./configure
+Use your favorite Subversion client to check out the dfu-util sources.  The dfu-util sources can be checked out from [https://svn.openmoko.org/trunk/src/host/dfu-util/ https://svn.openmoko.org/trunk/src/host/dfu-util/].
 
-It should be successful. Then you can try building:
+=== Apply patch to compile with MinGW ===
 
-  ./make
+Apply the following patch to the source code:
 
-And you will get this:
+<pre>
+Index: main.c
+===================================================================
+--- main.c	(revision 4544)
++++ main.c	(working copy)
+@@ -26,8 +26,10 @@
+ #include <getopt.h>
+ #include <usb.h>
+ #include <errno.h>
++#ifndef __MINGW32__
+ #include <byteswap.h>
+ #include <endian.h>
++#endif
+ 
+ #include "dfu.h"
+ #include "usb_dfu.h"
+@@ -37,6 +39,10 @@
+ #include "config.h"
+ #endif
+ 
++#ifdef __MINGW32__
++#define sleep(seconds) Sleep((seconds)*1000)
++#endif
++
+ #ifdef HAVE_USBPATH_H
+ #include <usbpath.h>
+ #endif
+@@ -579,6 +585,15 @@
+ 
+ 		/* FIXME: check if the selected device really has only one */
+ 
++#ifdef __MINGW32__
++		dif->configuration = 1;
++		printf("Setting Configuration %u...\n", dif->configuration);
++		if (usb_set_configuration(dif->dev_handle, dif->configuration) < 0) {
++			fprintf(stderr, "Cannot set configuration: %s\n", usb_strerror());
++			exit(1);
++		}
++#endif
++
+ 		printf("Claiming USB DFU Runtime Interface...\n");
+ 		if (usb_claim_interface(_rt_dif.dev_handle, _rt_dif.interface) < 0) {
+ 			fprintf(stderr, "Cannot claim interface: %s\n", usb_strerror());
+@@ -700,7 +715,8 @@
+ 		exit(1);
+ 	}
+ 
+-#if 0
++#ifdef __MINGW32__
++	dif->configuration = 1;
+ 	printf("Setting Configuration %u...\n", dif->configuration);
+ 	if (usb_set_configuration(dif->dev_handle, dif->configuration) < 0) {
+ 		fprintf(stderr, "Cannot set configuration: %s\n", usb_strerror());
+Index: sam7dfu.c
+===================================================================
+--- sam7dfu.c	(revision 4544)
++++ sam7dfu.c	(working copy)
+@@ -20,6 +20,11 @@
+ #define O_BINARY 0
+ #endif
+ 
++#ifdef __MINGW32__
++#define sleep(seconds) Sleep((seconds)*1000)
++#define usleep(microseconds) Sleep((microseconds)/1000)
++#endif
++
+ int sam7dfu_do_upload(struct usb_dev_handle *usb_handle, int interface, 
+ 		      int xfer_size, const char *fname)
+ {
+Index: usb_dfu.h
+===================================================================
+--- usb_dfu.h	(revision 4544)
++++ usb_dfu.h	(working copy)
+@@ -12,6 +12,13 @@
+ 
+ #include <sys/types.h>
+ 
++#ifdef __MINGW32__
++#include <stdint.h>
++#define u_int8_t uint8_t
++#define u_int16_t uint16_t
++#define u_int32_t uint32_t
++#endif
++
+ #define USB_DT_DFU			0x21
+ 
+ struct usb_dfu_func_descriptor {
+</pre>
 
-  main.c:29:22: byteswap.h: No such file or directory
-  main.c:30:20: endian.h: No such file or directory
+=== Build dfu-util ===
 
-Unfortunately, both these files are missing in Gnulib for mingw as described here: [http://www.gnu.org/software/gnulib/manual/html_node/byteswap_002eh.html#byteswap_002eh http://www.gnu.org/software/gnulib/manual/html_node/byteswap_002eh.html#byteswap_002eh] and here: [http://www.gnu.org/software/gnulib/manual/html_node/endian_002eh.html#endian_002eh http://www.gnu.org/software/gnulib/manual/html_node/endian_002eh.html#endian_002eh]
+In the Msys shell inside the dfu-util directory, run the following command:
 
-But, the default endianness assumed appears to be little endian, so you can comment out the #include's for those two files and just use the defaults.
+  ./configure && make
 
-Once you get passed that, it will complain about the types u_int8_t, u_int16_t, and u_int32_t.  They might be defined somewhere, but it was easier to 
+dfu-util should successfully compile and you should have the .exe files in the src directory.
 
-  #define u_int8_t uint8_t
-  #define u_int16_t uint16_t
-  #define u_int32_t uint32_t
+=== Preparing to use dfu-util ===
 
-to get passed that.
-
-Then it will complain about undefined references to sleep and usleep.  These were taken out of MinGW so you will have to define the following macros:
-
-  #define sleep(seconds) Sleep((seconds)*1000)
-  #define usleep(microseconds) Sleep((microseconds)/1000)
-
-Then you should be able to successfully compile.
-
-After this, a Windows driver needs to be installed when the device is in U-Boot and connected through the USB.  Windows does not come with a DFU class driver and Jungo seems to be the only one that has created a DFU class driver, but it is non-free.  You can use LibUSB-Win32 as the driver for the device by creating an INF file for it for this device.  Use in-wizard.exe that is part of the LibUSB-Win32 binaries distribution.  Run the wizard, select the following device:
+A Windows driver needs to be installed when the device is in U-Boot and connected through the USB.  Windows does not come with a DFU class driver and Jungo seems to be the only one that has created a DFU class driver, but it is non-free.  You can use LibUSB-Win32 as the driver for the device by creating an INF file for it for this device.  Use inf-wizard.exe, which is a part of the LibUSB-Win32 binaries distribution.  Run the wizard, select the following device:
 
   Vendor ID  Product ID  Description
   0x1D50      0x5119      USB Device
 
 Insert the Manufacturer name: OpenMoko, or FIC?
+
 Insert device description: Device Firmware Upgrade
 
 Then save the INF file along with the auto generated CAT files.
 
 When you get the New Device Wizard when plugging in the device in U-Boot mode into Windows, select this newly generated INF file.
 
-Once you get to that stage and run 
+=== Running dfu-util ===
+
+Once the Windows driver is successfully installed, you can try some commands:
 
   dfu-util --list
 
@@ -138,14 +196,18 @@ and you should be able to list the device.  Example:
 
   Found Runtime: [0x1d50:0x5119] devnum=7, cfg=0, intf=2, alt=0, name="USB Device Firmware Upgrade"  
 
-=== Where to go from here ===
+When you attempt to upload or download firmware, the first run will crash after the "Resetting USB..." and "Opening USB Device..." messages.  After it crashes, the device will be in DFU Mode instead of Runtime Mode.
 
-When trying to upload or download files, the following error is encountered:
+Simply run the same command again and the upload or download will proceed.
 
-  Opening USB Device 0x0000:0x0000...
-  Claiming USB DFU Runtime Interface...
-  Cannot claim interface: usb_claim_interface: could not claim interface 2, invalid configuration 0
+=== Binary ===
 
-Hopefully someone can pick this up and figure it out from here!
+The binary will be uploaded to projects.openmoko.org soon!
+
+=== Outstanding issues ===
+
+dfu-util crashes after resetting the USB device.  It sounds like this was an issue in the Cygwin port as well and sounds like it might be an issue with LibUSB-Win32 as discussed here: [http://lists.openmoko.org/pipermail/openmoko-uboot/2007-October/000135.html http://lists.openmoko.org/pipermail/openmoko-uboot/2007-October/000135.html].
+
+Had to call usb_set_configuration() with configuration set to 1 before attempting to claim the device instead of using configuration 0 that the device returns.  It sounds like DFU implementation in U-Boot might not be compliant with USB spec.  A similar issue and discussion can be found here: [http://thread.gmane.org/gmane.comp.lib.libusb.devel.windows/1546/focus=1554 http://thread.gmane.org/gmane.comp.lib.libusb.devel.windows/1546/focus=1554]
 
 [[Category:Flashing Openmoko]]
