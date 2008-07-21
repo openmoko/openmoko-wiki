@@ -66,6 +66,17 @@ Both options are available in the ''Device Drivers -> USB support -> USB Network
 
 Do not forget to adjust your firewall so that you can connect to the device.
 
+To manually enable iptables pass-through on the host for those using a distribution not listed in the Automatic method:
+ # echo 1 > /proc/sys/net/ipv4/ip_forward
+ # iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
+ # iptables -P FORWARD ACCEPT
+
+Manually disable nat pass-through using:
+ # iptables -t nat -F POSTROUTING
+ # echo 0 > /proc/sys/net/ipv4/ip_forward
+
+This could be put in a script to call on demand or more elegantly automated, otherwise follow the Automatic method for your distribution.
+
 == Automatic method ==
 
 Took from [http://blog.haerwu.biz/2007/03/22/hotpluging-usbnet/ Hotplugging usbnet] post by Marcin 'Hrw' Juszkiewicz.
