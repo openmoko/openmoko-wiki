@@ -27,5 +27,14 @@ In your ssh session type:
 
 Then you have the dbus Id from the local X11 console in the ssh session and the addContact script should run fine.
 
+Better still - add the following lines below the import section of the script:
+
+ ps = os.popen ('ps auxwwwwe | grep -m 1 DBUS_SESSION_BUS_ADDRESS')
+ l = ps.read ()
+ r = re.compile ('DBUS_SESSION_BUS_ADDRESS=(\S+)')
+ m = r.search (l)
+ a = m.expand ('\\1')
+ os.environ ['DBUS_SESSION_BUS_ADDRESS'] = a
+
 [[category:Openmoko]]
 [[category:Documentation]]
