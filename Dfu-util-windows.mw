@@ -118,14 +118,34 @@ Then it will complain about undefined references to sleep and usleep.  These wer
 
 Then you should be able to successfully compile.
 
-=== Where to go from here ===
+After this, a Windows driver needs to be installed when the device is in U-Boot and connected through the USB.  Windows does not come with a DFU class driver and Jungo seems to be the only one that has created a DFU class driver, but it is non-free.  You can use LibUSB-Win32 as the driver for the device by creating an INF file for it for this device.  Use in-wizard.exe that is part of the LibUSB-Win32 binaries distribution.  Run the wizard, select the following device:
+
+  Vendor ID  Product ID  Description
+  0x1D50      0x5119      USB Device
+
+Insert the Manufacturer name: OpenMoko, or FIC?
+Insert device description: Device Firmware Upgrade
+
+Then save the INF file along with the auto generated CAT files.
+
+When you get the New Device Wizard when plugging in the device in U-Boot mode into Windows, select this newly generated INF file.
 
 Once you get to that stage and run 
 
   dfu-util --list
 
-it doesn't list any devices.  This could be because I don't have a Windows driver installed when the device is in U-Boot, or maybe there needs to be some code changes to make this work.
+and you should be able to list the device.  Example:
 
-Hopefully someone can pick it up from here and figure it out!
+  Found Runtime: [0x1d50:0x5119] devnum=7, cfg=0, intf=2, alt=0, name="USB Device Firmware Upgrade"  
+
+=== Where to go from here ===
+
+When trying to upload or download files, the following error is encountered:
+
+  Opening USB Device 0x0000:0x0000...
+  Claiming USB DFU Runtime Interface...
+  Cannot claim interface: usb_claim_interface: could not claim interface 2, invalid configuration 0
+
+Hopefully someone can pick this up and figure it out from here!
 
 [[Category:Flashing Openmoko]]
