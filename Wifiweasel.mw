@@ -73,37 +73,52 @@ HOST=myspace.com
 #
 ## heh ping flood the noobs 
 #
-#  Func.iwlist.open
+#  Func_iwlist_open
 ########################## outputs the single highest signal open AP in quotes
-Func_iwlist_open(){
+Func_iwlist_open () {
 iwlist $IFACE scanning \
 | awk -F '[ :=]+' '/(ESS|Freq|Qual)/{ printf $3" " } /Encr { print $4 }' \
 |sort -k4 -k3nr \
 |grep off \
-|awk '{print $1}'	}
+|awk '{print $1}'	
+}
 ########################## set wireless essid 
-Func_ifconfig_up(){
-iwconfig $IFACE essid $Func_iwlist_open }
+Func_ifconfig_up () {
+iwconfig $IFACE essid Func_iwlist_open 
+}
 ########################## bring down interface for another try
-Func_ifconfig_down(){
+Func_ifconfig_down () {
 killall udhcpc 
-ifconfig $IFACE down	}
+ifconfig $IFACE down	
+}
 ########################## check connectivity
-Func_chk_net()	{
+Func_chk_net ()	{
 ping -w 2 -c 1 $HOST 
-if [ $=0 ];then ERROR=0; echo Online! ;sleep 30; $Func_chk_net fi  #W00T  
-if [ $=1 ] ;then ERROR=1 ;echo FAILING; $Func_Main fi #FAIL-retry
-done }
+if [ $=0 ];then ERROR=0; echo Online! ;sleep 30; Func_chk_net ; 
+fi  #W00T  
+if [ $=1 ] ; then ERROR=1 ;echo FAILING; Func_Main ;
+fi 
+ }
 
-### MAIN  ##BROKEN 
-Func_MAIN(){
-$Func.ifconfig.down
-$Func.ifconfig.up $Func_iwlist_open 
-udhcpc $IFACE 
-$Func_ch_net     }
+Func_MAIN () { while [ ERROR=1 ] ; do
+Func_ifconfig_down ;
+Func_ifconfig_up Func_iwlist_open;
+udhcpc $IFACE ;
+Func_ch_net 
+done; 
+} 
 
-done
-</pre>
+#### MAIN  ##BROKEN 
+Func.ifconfig.down ;
+Func.ifconfig.up $Func_iwlist_open ; 
+udhcpc $IFACE ; 
+Func_chk_net ; 
+
+#exit=0
+#fi
+echo Works you'll never see this line cause its an endless loop
+echo EOF go search teh web now!
+
 ====the end====
 (a new story) wont exec i suck
 
