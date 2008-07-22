@@ -45,10 +45,10 @@ ifconfig $IFACE down
 }
 #### Conn Funk #####
 Func_chk_net ()	{  
-ping -w 2 -c2  $gate 
-if [ $=0 ];then ERROR=0; echo Online!  go download some pr0n ;sleep $X; Func_chk_net ; 
+ping -w 2 -c1  $dns 
+if [ $=0 ];then ERROR=0; echo; echo Online!  go download some pr0n echo; ;sleep $X; Func_chk_net ; 
 fi  #W00T  
-if [ $=1 ] ; then ERROR=1 ;echo FAIL!\ 
+if [ $=1 ] ; then ERROR=1 ;echo ;echo FAIL!\ 
 ... Searching ; Func_Main ;
 fi 
  }
@@ -57,7 +57,7 @@ Func_MAIN () { while [ ERROR=1 ] ; do
 Func_ifconfig_down ;
 Func_iwlist_open Func_ifconfig_up ;
 timeout $DHCP udhcpc $IFACE |grep adding|awk '{print $3}' > /tmp/dns 
-export DNS=`cat /tmp/dns`
+export dns=`cat /etc/resolv.conf |grep name |awk '{print $2}'`
 Func_chk_net ;
 Func_MAIN ;
 done; 
@@ -66,6 +66,7 @@ done;
 Func_ifconfig_down ;
 Func_iwlist_open Func_ifconfig_up  ; 
 udhcpc $IFACE ; 
+export dns=`cat /etc/resolv.conf |grep name |awk '{print $2}'`
 Func_chk_net ; 
 Func_MAIN ;
 echo This is the end my only friend the end
