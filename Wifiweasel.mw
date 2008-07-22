@@ -1,52 +1,4 @@
 script to Auto connect to Open wirelss 81102 AP's
-
-
-
-=sandbox=
-====iwscan perl====
-<pre>
-#!/usr/bin/perl
-# Tim Osburn - tim@osburn.com
-#
-# install perl
-
-$iwlist = "/sbin/iwlist eth0 scanning";
-
-open scan, "$iwlist |";
-while (<scan>) {
-  if (/^\s+Cell (\S+) - Address: (\S+)/) {
-    $CELL=$1;
-    $ADDRESS=$2;
-    # print "$1 $2";
-    $INLOOP=1;
-    }
-  if (/^\s+ESSID:(\S+)/) {
-    $ESSID=$1;
-    print " $1";
-    }
-  if (/^\s+Frequency:\S+ \S+ \(Channel (\S+)\)/) {
-    $CHAN=$1;
-    print " $1";
-    }
-  if (/^\s+Quality=\S+\s+Signal level=(\S+).*/) {
-    $SIGNAL=$1;
-    print " $1";
-    }
-  if (/^\s+Encryption key:(\S+)/) {
-    $ENCRYPTION=$1;
-    print " $1\n";
-    }
-  }
-close scan;
-</pre>
-produces output in the form of
-"essid"  channel  signal_strength  encryption_status
-
-<br> "ESSID_NAME1" 1 -82 on
-<br> "ESSID_NAME2" 1 -49 off
-
-[[category:Technical ]]
-[[category:GTA02 Hardware]]
 ====wifiweasel====
 wifiweasel v1
 once run this script takes control of the wireless interface
@@ -127,3 +79,51 @@ to be implemented
 
 instead of pinging net hosts which could quickly start dropping pkts we will ping the router via
 ''ip route show to 0/0''
+
+
+
+=sandbox=
+====iwscan perl====
+<pre>
+#!/usr/bin/perl
+# Tim Osburn - tim@osburn.com
+#
+# install perl
+
+$iwlist = "/sbin/iwlist eth0 scanning";
+
+open scan, "$iwlist |";
+while (<scan>) {
+  if (/^\s+Cell (\S+) - Address: (\S+)/) {
+    $CELL=$1;
+    $ADDRESS=$2;
+    # print "$1 $2";
+    $INLOOP=1;
+    }
+  if (/^\s+ESSID:(\S+)/) {
+    $ESSID=$1;
+    print " $1";
+    }
+  if (/^\s+Frequency:\S+ \S+ \(Channel (\S+)\)/) {
+    $CHAN=$1;
+    print " $1";
+    }
+  if (/^\s+Quality=\S+\s+Signal level=(\S+).*/) {
+    $SIGNAL=$1;
+    print " $1";
+    }
+  if (/^\s+Encryption key:(\S+)/) {
+    $ENCRYPTION=$1;
+    print " $1\n";
+    }
+  }
+close scan;
+</pre>
+produces output in the form of
+"essid"  channel  signal_strength  encryption_status
+
+<br> "ESSID_NAME1" 1 -82 on
+<br> "ESSID_NAME2" 1 -49 off
+
+[[category:Technical ]]
+[[category:GTA02 Hardware]]
