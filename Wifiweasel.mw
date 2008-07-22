@@ -30,7 +30,7 @@ X=30
 #### Scan Funk ####
 Func_iwlist_open () {
 iwlist $IFACE scanning | awk -F '[ :=]+' '/(ESS|Freq|Qual)/{ printf $3" " } /Encr/{ print $4 }' \
-    | sort -k4 -k3nr |grep off \
+    | sort -k4 -k3nr |grep -m1 off \
 |awk '{print $1}' > /tmp/weasel
 sed /\"/s/\"//g /tmp/weasel > /tmp/ESSID
 }
@@ -46,7 +46,7 @@ ifconfig $IFACE down
 #### Conn Funk #####
 Func_chk_net ()	{
 ifconfig usb0 down
-export gate=`route |grep eth0 |awk '{print $1}'`| ping -w 2 -c2  $gate 
+export gate=`route |grep -m1 eth0 |awk '{print $1}'`| ping -w 2 -c2  $gate 
 if [ $=0 ];then ERROR=0; echo Online!  go download some pr0n ;sleep $X; Func_chk_net ; 
 fi  #W00T  
 if [ $=1 ] ; then ERROR=1 ;echo FAIL!\ 
