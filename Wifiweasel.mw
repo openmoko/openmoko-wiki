@@ -52,11 +52,14 @@ produces output in the form of
 [[category:Technical ]]
 [[category:GTA02 Hardware]]
 ====wifiweasel====
-this shell script requires nothing never ends pings a host every 30sec 
+wifiweasel v1
+once run this script takes control of the wireless interface
+detects and connects to strongest open wifi AP in the vicinity
+and checks connectivity every X seconds if connection fails the
+whole proccess repeats itself
 
 <pre> 
 #!/bin/sh
-
    #####################
 ###########################
 #/var/wifi/hacker/kd8ikt###
@@ -66,16 +69,21 @@ this shell script requires nothing never ends pings a host every 30sec
   #####################
         #KISS#
 
-######wireless interface
+# CONFIG
+#######interface################
 IFACE=eth0
 #
-####host to do ping test
+#####host
 HOST=myspace.com
 #
-## heh ping flood the noobs 
+###heh#ping#flood#the#net#poison 
 #
-#  Func_iwlist_open
-########################## outputs the single highest signal open AP in quotes
+#check connectivity every X sec
+X=30
+#
+# /CONFIG
+################################
+#### Scan Funk ####
 Func_iwlist_open () {
 iwlist $IFACE scanning \
 | awk -F '[ :=]+' '/(ESS|Freq|Qual)/{ printf $3" " } /Encr { print $4 }' \
@@ -83,24 +91,24 @@ iwlist $IFACE scanning \
 |grep off \
 |awk '{print $1}'	
 }
-########################## set wireless essid 
+#### iface up Funk ######## 
 Func_ifconfig_up () {
 iwconfig $IFACE essid Func_iwlist_open 
 }
-########################## bring down interface for another try
+#### iface down Funk #####
 Func_ifconfig_down () {
 killall udhcpc 
 ifconfig $IFACE down	
 }
-########################## check connectivity
+#### Conn Funk #####
 Func_chk_net ()	{
 ping -w 2 -c 1 $HOST 
-if [ $=0 ];then ERROR=0; echo Online! ;sleep 30; Func_chk_net ; 
+if [ $=0 ];then ERROR=0; echo Online! ;sleep $X; Func_chk_net ; 
 fi  #W00T  
 if [ $=1 ] ; then ERROR=1 ;echo FAILING; Func_Main ;
 fi 
  }
-
+#### Main Funk #########
 Func_MAIN () { while [ ERROR=1 ] ; do
 Func_ifconfig_down ;
 Func_ifconfig_up Func_iwlist_open;
@@ -108,16 +116,14 @@ udhcpc $IFACE ;
 Func_ch_net 
 done; 
 } 
-
-#### MAIN  ##BROKEN 
+#### MAIN #### 
 Func.ifconfig.down ;
 Func.ifconfig.up $Func_iwlist_open ; 
 udhcpc $IFACE ; 
 Func_chk_net ; 
-
-This is the end my only friend the end
-EOF
+echo This is the end my only friend the end
 Done;
+#####################EOF###############
 
 </pre>
 
