@@ -6,6 +6,7 @@ Currently, the images in development include:
 *The FSO (FreeSmartPhone.org) Image
 *Qtopia image from qtopia.net
 *The SHR (Stable Hybrid Release) Image
+*Copying a jffs2 image to ext2 to boot from microSD
 
 ;See [[Distributions]] for a chart comparing the features of the various images.
 
@@ -81,6 +82,29 @@ added.
 The SHR doesn't exist anywhere but in a few people's heads at the moment (2008-07-05).  Hopefully, all the work in it will be integrated back into one of the other releases, and it will cease to exist.  The point is to get us a release with stable calls & suspend/resume, plus access to all those other nifty apps we had on 2007.2 and the ASU.
 
 Learn more at its wiki page: [[Stable_Hybrid_Release]]
+----
+
+==Copying a jffs2 image to ext2 to boot from microSD==
+If you want to switch between firmwares using the AUX+Power button bootup method, you will need to convert one of these jffs2 rootfs images to an ext2fs image. You cannot mount jffs2 images using the normal mount -o loop procedure, instead do this:
+
+mknod /tmp/mtdblock0 b 31 0
+modprobe loop
+losetup /dev/loop0 yourrootfs.jffs2
+modprobe mtdblock
+modprobe jffs2
+mount -t jffs2 /tmp/mtdblock0 /mnt
+
+dd if=/dev/zero of=rootfs.ext2 bs=1024k count=256
+mke2fs -F rootfs.ext2 
+mkdir /mnt2
+mount -o loop rootfs.ext /mnt2
+cp -av /mnt/* /mnt2/
+sync
+umount /mnt2
+umount /mnt
+
+Or you can directly run mke2fs on the usb+microSD adapter (probably /dev/sdb or something, check dmesg)
+
 
 
 [[category:Openmoko]]
