@@ -56,15 +56,24 @@ produces output in the form of
 <pre> 
 #!/bin/sh
 #
-# Blind simple stupid OpenAP finder/connector
-
+# Kd8ikt 
+#
 #
 # grab a list of line seperated open AP's
-for AP in $(iwlist eth0 scanning | awk -F '[ :=]+' '/(ESS|Freq|Qual)/{ printf $3" " } /Encr/{ print $4 }' \
-    | sort -k4 -k3nr |grep off \
-    |awk ' iwlist eth0 scanning | awk -F '[ :=]+' '/(ESS|Freq|Qual)/{ printf $3" " } /Encr/{ print $4 }' \ 
-    | sort -k4 -k3nr |grep off |awk '{print $1}'{print $1}'); do
-
+for AP in $(
+iwlist eth0 scanning \
+| awk -F '[ :=]+' '/(ESS|Freq|Qual)/{ printf $3" " } /Encr/{ print $4 }' \
+|sort -k4 -k3nr \
+|grep off \
+|awk '{print $1}'
+); 
+   do 
+echo $AP
+break;
+done;
+# $AP is a line separated list of open (free) accesspoints 
+#
+#
 #needs more logic?  (connect)  while net works do nothing ifnot goto next $AP ? ideas?
 #	 ifconfig eth0 essid $AP
 #	 udhcpc eth0
