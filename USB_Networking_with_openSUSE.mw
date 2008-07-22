@@ -1,102 +1,31 @@
-= YaST in openSUSE 10.1 & 10.2 & 11.1 =
+= YaST in openSUSE 10.2 =
 
 == Set up USB interface ==
- (using 11.1/KDE3 and Knetworkmanager, I didn't have to setup  
- USB. It's configured automatically via DHCP-server of Neo.My 
- LAN/router lives on 192.169.1.xxx anyway)
 
 First, you must specify the characteristics of the USB connection as a network device. This can be done through YaST. Choose:
 
- YaST -> Network Devices -> Network Card
+<code> YaST -> Network Devices -> Network Card </code>
 
-The network configuration utility will ask you to choose between a setup based on the Network Manager app, or by using ifup. These instructions were written with the latter chosen, though it may very well work using the Network Manager (NOTE: in 10.3, it seems that Network Manager can only manage one interface at the time. Still needs to be confirmed. So use ifup for it to work). In the next menu, you will see a list of network devices. If YaST recognizes the connected FreeRunner, there will be one device with a name like "RNDIS ethernet gadget". You may select "Edit" to configure this device, or, if it is not present, "Add" it and continue. In 11.1 go to the Overview Tab. From here select the add or edit dialogues as for openSuSE 10.
+The network configuration utility will ask you to choose between a setup based on the Network Manager app, or by using ifup. These instructions were written with the latter chosen, though it may very well work using the Network Manager. In the next menu, you will see a list of network devices. If YaST recognizes the connected Freerunner, there will be one device with a name like "RNDIS ethernet gadget". You may select "Edit" to configure this device, or, if it is not present, "Add" it and continue.
 
+In the "Edit" dialog, under the "address" tab, choose "Static Address Setup" and set:
 
-In the "Edit" dialog, under the <i>Address</i> tab, choose "Static Address Setup" and set:
-
- IP Address = 192.168.0.200
+<code> IP Address = 192.168.0.200 </code>
 
 and
 
- Subnet Mask = 255.255.255.0
+<code> Subnet Mask = 255.255.255.0 </code>
 
-<b>Note:</b> If your network setup has the IP range 192.168.0.x already in use, there will be connectivity problems. Next, under the <i>General</i> tab for this device, set:
+<b>Note:</b> If your network setup has the IP range 192.168.0.x already in use, there will be connectivity problems. Next, under the "General" tab for this device, set:
 
- Firewall Zone -> Internal Zone (Unprotected)
+<code> Firewall Zone -> Internal Zone (Unprotected) </code>
 
-This will allow for the configuration of the firewall, which comes later. Click "Next" to finish configuring this device. (Your primary network  device, usually eth0, may be set to use DHCP for addressing, but must have its firewall zone set to "External Zone".) Choose "Finish" in the Configuration Overview to complete the setup and restart networking. In openSuSE 11.1 you must go to the Firewall setting under the Security tab of YaST and select interfaces. The Freerunner will currently have no zone assigned. Change this using the drop down menu to internal zone.
+This will allow for the configuration of the firewall, which comes later. Click "Next" to finish configuring this device. (Your primary network  device, usually eth0, may be set to use DHCP for addressing, but must have its firewall zone set to "External Zone".) Choose "Finish" in the Configuration Overview to complete the setup and restart networking.
+
 
 == Enable IP Forwarding ==
 
-To use your host PC as a router for the FreeRunner, you must implement IP forwarding. This is also done in YaST:
-
- YaST -> Network Services -> Routing
-
-At the bottom of the dialog, enable "IP Forwarding"; no default gateway is necessary. Choose "Finish" to end routing configuration. 
 
 == Configure Firewall ==
 
-The firewall must be configured to allow traffic to and from the FreeRunner. Start by:
-
- YaST -> Security and Users -> Firewall
-
-(1) Under the <i>Interfaces</i> tab, confirm that the network device that connects to the internet is in the "External Zone" and the USB device is in the "Internal Zone". (2) In the <i>Allowed Services</i> tab, there is a checkbox labeled "Protect Firewall from Internal Zone". Uncheck it. (3) In the <i>Masquerading</i> tab, check the "Masquerade Networks" box. (4) Clicking "Next" will get to  a firewall summary dialog, then clicking "Accept" will configure and restart the firewall.
-
-=== If you don't see usb0 (openSUSE 11.1) ===
-
-If usb0 doesn't appear in the firewall dialog, you may have to create a file for the interface.  Create the file /etc/sysconfig/network/ifcfg-usb0:
-
- # USB configuration for openmoko
- BOOTPROTO='static'
- IPADDR='192.168.0.200'
- NETMASK='255.255.255.0'
- NAME='OpenMoko'
- STARTMODE='hotplug'
- USERCONTROL='no'
-
-Adding this file and restarting the network may force the usb0 device to appear in YaST's firewall configuration tool.
-
 == Configure NAT ==
-
-After configuring and starting the USB interface, engaging the host PC as a router, and opening the firewall. You may add a route to  the FreeRunner and start network address translation (NAT). It may be best to write short scripts to perform these actions, so they may be invoked without remembering or typing them. In one script, <b>neoFRup.sh</b>, place the commands:
-
- #! /bin/sh
- /sbin/route add -host 192.168.0.202/32 dev usb0
- iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
- iptables -P FORWARD ACCEPT
-
-This script will add the FreeRunner to the route tables and enable NAT, so you should now be able to connect to your phone with:
-
- # ssh root@192.168.0.202
-
-You should make sure that there is a gateway set to 192.168.0.200 in the FR's /etc/network/interfaces file, and that the FR's /etc/resolv.conf file has appropriate nameservers listed. When you are finished using the route to your phone, you may undo the above with another script, <b>neoFRdown.sh</b>:
-
- #! /bin/sh
- /sbin/route del -host 192.168.0.202/32 dev usb0
- iptables -t nat -F POSTROUTING
-
-
-==Editing Resolv.conf==
-It may also be possible/feasible to directly edit the /etc/resolv.conf and /etc/network/interfaces directly on the freerunner. 
-
-Interfaces:
-
-# Wired or wireless interfaces
-iface eth0 inet dhcp
-iface eth1 inet dhcp
-
-# Ethernet/RNDIS gadget (g_ether)
-# ... or on host side, usbnet and random hwaddr
-auto usb0
-iface usb0 inet static
-        address 192.168.0.202
-        netmask 255.255.255.0
-        network 192.168.0.0
-        gateway 192.168.0.200
-
-Resolv.conf
-nameserver 192.168.0.202
-
-These should obviously match the values used earlier.
-
-[[Category:USB software]]
