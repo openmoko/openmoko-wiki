@@ -1,81 +1,30 @@
-{{Languages|Keyboard Toggle}}
-The [[Om 2008.8]] and [[Om 2007.2]] Openmoko [[distributions]] have been designed to bring up an on-screen keyboard which supplies keystroke information to applications.  However, this requires the cooperation of the application, which is a problem for software designed with another X11 based phone stack in mind, or software which has been quickly ported from Linux desktop systems, because it will never bring up a keyboard for (possibly important) keystroke information.  It is also possible that the keyboard could be brought or remain up by accident when you don't want it there, or even software specifically designed with this functionality in mind may occasionally fail or become confused when an on screen keyboard is supposed to be available.
-
-See [[Om2008.8 Keyboard]] for details of the Om 2008.8 keyboard's usage.
+The [[ASU]] and [[2007.2]] Openmoko [[distributions]] have been designed to bring up an on-screen keyboard which supplies keystroke information to applications.  However, this requires the cooperation of the application, which is a problem for software designed with another X11 based phone stack in mind, or software which has been quickly ported from Linux desktop systems, because it will never bring up a keyboard for (possibly important) keystroke information.  It is also possible that the keyboard could be brought or remain up by accident when you don't want it there, or even software specifically designed with this functionality in mind may occasionally fail or become confused when an on screen keyboard is supposed to be available.
 
 == Alternatives ==
-Alternatively, you can try connecting a [[Manually_using_Bluetooth#Being_able_to_use_HID_devices|bluetooth keyboard]] or [[Usb_keyboard|USB keyboard]] (Only available with a special cable, or an extra special cable in the case of the older unpowered USB units.)
+Alternatively, you can try connecting a [[Manually_using_Bluetooth#Being_able_to_use_HID_devices|bluetooth keyboard]] or USB keyboard (Only available with a special cable, or an extra special cable in the case of the older unpowered USB units.)
 
-== Reactivating the keyboard toggle under Om 2008.8 ==
-For advanced users using the [[Om 2008.8]] [[Distributions|distribution]], it may be worth your while to change the E17 theme information which prevents the 'qwerty' link in the upper left from showing.
+== Reactivating the keyboard toggle under ASU ==
+For advanced users using the [[ASU]] [[Distributions|distribution]], it may be worth your while to change the E17 theme information which prevents the 'qwerty' link in the upper left from showing.
 
 === On the phone ===
-
-==== Method 1 ====
-
-Simply install the illume-config theme:
-
-opkg install illume-config
-
-Attention: With a Om2008.8 you have then the qpe bug [http://docs.openmoko.org/trac/ticket/1691]. The 'new' Om2008.9-gta02-20081117.rootfs.tar.gz did not have this bug, so a 
- tar -zxf /media/mmcblk0p2/ in / 
-
-fix the bug, but then your settings are restored.
-
-==== Method 2 ====
 Install the tools required to decompile and recompile E17 theme code.
 
- opkg install libevas-saver-png edje-utils cpp cpp-symlinks libembryo-tests
+ opkg install libevas-saver-png edje-utils cpp
+ ln -s /lib/cpp /usr/bin/cpp
 
-Decompile the theme (asu or illume), and edit the edc file
+Decompile the theme, and edit the edc file
 
- cd /usr/share/enlightenment/data/themes
- edje_decc {THEME}.edj
- cd {THEME}
+ cd /usr/share/enlightenment/data/themes/illume
+ edje_decc illume.edj
+ cd illume
  vi freerunner.edc
 
-Search for the text 'qwerty'.  This should take you to the section which defines the small 'qwerty' button in the upper left.
+Search for the text 'qwerty'.  This should take you to the section which defines the small 'qwerty' button in the upper left, which has been disabled by the developers with a 'visible 0' entry.  Comment it out, and replace it with 'visible 1'.  Then rebuild the theme.
 
-* Under 'part { name: "kbd";' change 'visible 0;' to 'visible 1;', and change 'relative: 0.0 1.0; ' to 'relative: 1.0 1.0; '
-* Under 'part { name: "kbdtext";' change 'visible 0;' to 'visible 1;'
-
-And then recompile the .edj
-
- sh build.sh
- mv {THEME}.edj ../{THEME}.edj
-
-And finally restart X to take new theme in use
- /etc/init.d/xserver-nodm restart
+ ./build.sh 
 
 === Building a custom package ===
-If that doesn't work, follow the instructions on [[Mokomakefile|building Om 2008.8 from source]].  Unpack the source for the package 'illume-theme', edit its edc file using the same method described above, and then finish building the ipk.  You should be able to install this ipk, overiding the previous configuration.
+If that doesn't work, follow the instructions on [[Mokomakefile|building ASU from source]].  Unpack the source for the package 'illume-theme', edit its edc file using the same method described above, and then finish building the ipk.  You should be able to install this ipk, overiding the previous configuration.
 
 === Upgrading ===
 If you upgrade, such as with opkg upgrade, you may have to perform the modification again.
-
-=== In base-image (testing) ===
-
-The openmoko-base-image installs both ''illume'' and ''asu'' themes. You can change theme by editing E's profile. To get QWERTY and the wrench back in base-image, you have use the ''illume'' theme. So there are 3 steps to do:
-
-  sed -i -e s,asu,illume, /etc/enlightenment/default_profile
-
-And you have to restart the X to apply changes
-
- /etc/init.d/xserver-nodm restart
-
-after waiting for few seconds you get result
-
-[http://lists.openmoko.org/pipermail/devel/2008-September/001758.html Reference]
-
-{{note | this is not necessary, see page [[Enlightenment .cfg]], it will guide you to get Wrench & QWERTY button & Illume/Raster's keyboard in ASU theme}}
-
-=== Englightments segfaults with Illume theme too often? ===
-
-If after switching to ''illume'' theme, you experience plentiful of WDOD (white dialog of death) stating that you should recompile and gdb the Enlightenment, you have two choices:
-
-# Disable 'Dropshadow' module (go to illume config (Wrench) -> Modules). It still might segfault at some places but now phone becomes usable with illume theme
-# Switch to ''software_x'' from ''software_16'' (same illume config (Wrench) -> Engine). The side-effect is general slow down of graphics performance
-
-Relevant bug reports: [http://docs.openmoko.org/trac/ticket/1767 1767]
-
-[[Category:Keyboards]]
