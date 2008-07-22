@@ -89,24 +89,18 @@ Func_ifconfig_down(){
 killall udhcpc 
 ifconfig $IFACE down	}
 ########################## check connectivity
-Func.chk.net()	{
+Func_chk_net()	{
 ping -w 2 -c 1 $HOST 
-if [ $=0 ];then ERROR=0; echo Online! fi done #W00T  
-if [ $=1 ] ;then ERROR=1 ;echo FAILING fi #FAIL
+if [ $=0 ];then ERROR=0; echo Online! ;sleep 30; $Func_chk_net fi  #W00T  
+if [ $=1 ] ;then ERROR=1 ;echo FAILING; $Func_Main fi #FAIL-retry
 done }
 
-### MAIN  ##BROKEN
+### MAIN  ##BROKEN 
 Func_MAIN(){
-$Func.chk.net
-while [ ERROR=1 ]; do
 $Func.ifconfig.down
-$Func.ifconfig.up $Func.iwlist.open 
-udhcpc $IFACE
+$Func.ifconfig.up $Func_iwlist_open 
+udhcpc $IFACE 
+$Func_ch_net     }
 
-
-if [ ERROR=1 ];do $Func_MAIN ;fi
-if [ ERROR=0 ];do sleep 30 ; fi 
-
-done		}
-
+done
 </pre>
