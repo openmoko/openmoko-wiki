@@ -74,21 +74,21 @@ HOST=myspace.com
 ## heh ping flood the noobs 
 #
 #  Func.iwlist.open
-##########################
+########################## outputs the single highest signal open AP in quotes
 Func_iwlist_open(){
 iwlist $IFACE scanning \
 | awk -F '[ :=]+' '/(ESS|Freq|Qual)/{ printf $3" " } /Encr { print $4 }' \
 |sort -k4 -k3nr \
 |grep off \
 |awk '{print $1}'	}
-##########################
+########################## set wireless essid 
 Func_ifconfig_up(){
-ifconfig $IFACE essid $Func_iwlist_open }
-##########################
+iwconfig $IFACE essid $Func_iwlist_open }
+########################## bring down interface for another try
 Func_ifconfig_down(){
 killall udhcpc 
 ifconfig $IFACE down	}
-##########################
+########################## check connectivity
 Func.chk.net()	{
 ping -w 2 -c 1 $HOST 
 if [ $=0 ];then ERROR=0; echo Online! fi done #W00T  
