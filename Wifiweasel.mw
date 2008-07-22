@@ -54,6 +54,7 @@ produces output in the form of
 ====/bin/sh====
 (Not Finished)
 <pre> 
+
 #!/bin/sh
 
    #####################
@@ -75,29 +76,32 @@ HOST=myspace.com
 #
 #  Func.iwlist.open
 ##########################
-Func_iwlist_open()	{
+Func_iwlist_open(){
 iwlist $IFACE scanning \
-| awk -F '[ :=]+' '/(ESS|Freq|Qual)/{ printf $3" " } /Encr/{ print $4 }' \
+| awk -F '[ :=]+' '/(ESS|Freq|Qual)/{ printf $3" " } /Encr { print $4 }' \
 |sort -k4 -k3nr \
 |grep off \
 |awk '{print $1}'	}
-###########################
-#  /Func.iwlist.open
-###########################
-#   Func.chk.net (needs reworked) its bad code so speedevil tells me and i'm starting to see it
-###########################
-#  w00t=yes   FAIL=no
-HOSTTT="google.com"
-for Hosts in $HOSTTT
-do
-  count=$(ping -c 1 $HOSTTT | grep 'received' | awk -F',' '{ print $2 }' | awk '{ print $1 }')
-  if [ $count -eq 0 ]; then
-    # 100% failed
-    echo "FAIL" 
-  fi
-  
-  if [ $count -eq 1 ]; then
-  
-	echo "w00t"
-  fi
-#
+##########################
+Func_ifconfig_up(){
+ifconfig $IFACE essid $Func_iwlist_open
+udhcpc $IFACE		}
+##########################
+Func_ifconfig_down(){
+killall udhcpc 
+ifconfig $IFACE down	}
+##########################
+Func.chk.net()	{
+ping -c 1 $HOST 
+if [ $=0 ];then ERROR=0; echo Online! fi done #W00T
+ sleep 30;  
+if [ $=1 ] ;then ERROR=1 ;echo FAILING fi #FAIL
+done }
+
+#while true; do ls; done
+
+while [ ERROR=1 ]; do
+Func.iwlist.open
+
+
+</pre>
