@@ -41,4 +41,15 @@ The firewall must be configured to allow traffic to and from the Freerunner. Sta
 
 == Configure NAT ==
 
-After configuring and starting the USB interface, engaging the host PC as a router, and opening the firewall. You may add a route to  the Freerunner and start network address translation (NAT). It may be best to write short scripts to perform these actions, so they may be invoked without remembering or typing them. In one script, <b>neoFRup.sh</b>
+After configuring and starting the USB interface, engaging the host PC as a router, and opening the firewall. You may add a route to  the Freerunner and start network address translation (NAT). It may be best to write short scripts to perform these actions, so they may be invoked without remembering or typing them. In one script, <b>neoFRup.sh</b>, place the commands:
+
+ #! /bin/sh
+ /sbin/route add -host 192.168.0.202/32 dev usb0
+ iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
+ iptables -P FORWARD ACCEPT
+
+This script will add the Freerunner to the route tables and enable NAT. When you are finished using the route to your phone, you may undo the above with another script, <b>neoFRdown.sh</b>:
+
+ #! /bin/sh
+ /sbin/route del -host 192.168.0.202/32 dev usb0
+ iptables -t nat -F POSTROUTING
