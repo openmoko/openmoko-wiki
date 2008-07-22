@@ -187,25 +187,24 @@ Möchte man ein eigenes Projekt unter Verwendung der openmoko-sample2 Daten erst
 
 * Man muss sicher gehen, dass anstelle der main.c alle eigenen .c und h. Dateien eingesetzt werden und in den Variablennamen alle '-' Zeichen in '_' umgewandelt werden
 
-==Packaging your application==
+==ipkg Erstellen==
 
-We have included a script to make an ipkg out of your application. Note that this is not needed to test your application on the Neo (for that you can just scp the resulting binary and data over), however it's very handy if you want to distribute your application to others.
+In der Toolchain ist ein Script enthalten um aus der kompilierten Anwendung ein ipkg-Paket zu erstellen. Beachte, dass es nicht benötigt wird um die Anwendung zu testen (hierfür kannst du diese einfach per <tt>scp</tt> übertragen). Das ipkg-Paket ist sehr praktisch um es Anderen zur Verfügung zu stellen. 
 
  om-make-ipkg openmoko-sample2
 
-Now you got openmoko-sample2_0.1_armv4t.ipk , you can `scp' it to your
-Neo and install it:
+Damit erhältst man eine Datei mit dem Namen <tt>openmoko-sample2_0.1_armv4t.ipk</tt> welche wiederum per <tt>scp</tt> auf das Neo übertragen werden kann, um es dort zu installieren:
 
  scp openmoko-sample2_0.1_armv4t.ipk root@192.168.0.202:
  ssh root@192.168.0.202 ipkg install openmoko-sample2_0.1_armv4t.ipk
 
-Note that while you can redistribute the generated ipkg, be aware that this is a bare-bones ipk that contains no further information, i.e. you will lack library dependencies. See below how to fix this.
+Beachte, dass das erstellte Paket lediglich das Programm ohne weitere Informationen (z.B. Abhängigkeiten) enthält. Im folgenden fügen wir diese Informationen hinzu. 
 
-You can also supply the version number, a description, and an author / contacts string in a control file:
+Du kannst z.B. die Versionsnummer, eine Beschreibung, den Autor und/oder die Kontaktinformationen in eine Info-Datei einfügen:
 
  om-make-ipkg myapp myapp_control
 
-A template of myapp_control:
+Die Info-Datei <tt>myapp_control</tt> könnte folgendermaßen aussehen:
 
  Package: $appname
  Version: 0.1
