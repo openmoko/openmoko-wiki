@@ -55,6 +55,7 @@ produces output in the form of
 (Not Finished)
 <pre> 
 
+
 #!/bin/sh
 
    #####################
@@ -84,24 +85,26 @@ iwlist $IFACE scanning \
 |awk '{print $1}'	}
 ##########################
 Func_ifconfig_up(){
-ifconfig $IFACE essid $Func_iwlist_open
-udhcpc $IFACE		}
+ifconfig $IFACE essid $Func_iwlist_open }
 ##########################
 Func_ifconfig_down(){
 killall udhcpc 
 ifconfig $IFACE down	}
 ##########################
 Func.chk.net()	{
-ping -c 1 $HOST 
-if [ $=0 ];then ERROR=0; echo Online! fi done #W00T
- sleep 30;  
+ping -w 2 -c 1 $HOST 
+if [ $=0 ];then ERROR=0; echo Online! fi done #W00T  
 if [ $=1 ] ;then ERROR=1 ;echo FAILING fi #FAIL
 done }
 
-#while true; do ls; done
-
+### MAIN
+$Func.chk.net
 while [ ERROR=1 ]; do
-Func.iwlist.open
+$Func.ifconfig.down
+$Func.ifconfig.up $Func.iwlist.open 
+udhcpc $IFACE
+
+
 
 
 </pre>
