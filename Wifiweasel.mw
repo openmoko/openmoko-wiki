@@ -6,10 +6,6 @@ detects and connects to strongest open wifi AP in the vicinity.
 Subsequently it checks the connectivity every X seconds. If the connection fails, the
 whole process repeats itself; this requires the timeout script below 
 
-PROBLEMS
-*chknet isnt working right when pings show 100% loss
-its exit code doesnt change to 1 "technically it shouldnt" so i need a new way to chk netstatus 
-.
 <pre> 
 #!/bin/sh
 ####### WifiWeasel ###### Ver. 2
@@ -57,10 +53,10 @@ iwconfig $IFACE essid `cat $TEMPDIR/ESSID`
 Func_chk_net ()	{
 echo checking...   
 export dns=`cat /etc/resolv.conf |grep name |awk '{print $2}'`
-ping -w 2 -c1  $dns 
+timeout 1 nslookup  $dns 
 if [ $=0 ];then ERROR=0; echo; echo Online!  W00T ; echo ; sleep $CHECK_NET_TIMER ; Func_chk_net ; 
 fi  #W00T
-if [ $=1 ] ; then ERROR=1 ;echo ;echo FAIL!\ 
+if [ $=143 ] ; then ERROR=1 ;echo ;echo FAIL!\ 
 ... Searching ; echo ; Func_Main ;
 fi 
 }
