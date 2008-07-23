@@ -1,0 +1,116 @@
+==<font color=75d806>GTA02 Kernel sysfs highlights</font>==
+sysfs is a filesystem that is mounted on /sys which contains various fake "files" that are actually filled by a variety of drivers and other kernel subsystems.  You can often also write stuff into these "files" using
+
+echo 1 &gt; /sys/blah...
+
+to change settings and behaviours of the kernel and drivers dynamically.  (When doing this, take care you have a space before the redirection operator &gt; or the shell will do something completely different with your command.)
+
+===USB Host / Device===
+====/sys/devices/platform/neo1973-pm-host.0/hostmode====
+* Defaults to 0, GTA02 USB hardware is configured to be a device, no power is generated for USB, charging is enabled and host 15K pulldowns are removed from D+ and D-
+* Set to 1 to put the GTA02 USB hardware into host mode, so it starts to generate 5V power, disables charging from USB, and applies 15K pulldowns to USB D+ and D-
+====/sys/devices/platform/s3c2410-ohci/usb_mode====
+* Defaults to "device", it means the USB peripheral in the CPU is logically configured for device mode
+* Set to "host" to logically configure the peripheral to act like a host for other USB devices to be plugged into it
+
+Normally you set these two guys at the same time for the same mode, but there is a trick possible to select logical host mode but leave the power arrangements as if it was in device mode and apply external power.  You need to externally add 15K pulldowns on D+ and D- if you do this, because we did not enable them the normal way.  With this, you can have a USB device attached to GTA02, and use external power and charge the battery at the same time.
+
+===GSM Subsystem===
+====/sys/devices/platform/neo1973-pm-gsm.0/power_on====
+* Defaults to "0", GSM power OFF
+* Set to "1" to enable power to GSM logic
+====/sys/devices/platform/neo1973-pm-gsm.0/reset====
+* Defaults to "0", no reset
+* Set to "1" briefly after power applied to reset GSM logic
+====/sys/devices/platform/neo1973-pm-gsm.0/download====
+* Defaults to "0", no insane clicking sound
+* Set to "1" to drive yourself crazy and enable serial access to GSM chips down headphone socket / once a second loud clicks / chirps
+
+===Resume Reason===
+====/sys/devices/platform/neo1973-resume.0/resume_reason====
+If you cat this you get a list of possible resume sources in text with one or more * at the left of the active source that woke us.  You need a recent U-Boot to get the * set.
+
+===MEMCONFIG===
+====/sys/devices/platform/neo1973-memconfig.0/BANKCON0 .. 7====
+For extreme meddlers (I salute you), these let you control the wait states and other characteristics of the memory regions of the Freerunner.  Information and warnings about how to use these are here:
+
+http://git.openmoko.org/?p=kernel.git;a=commitdiff;h=fd25f90517322fc6c07bfb8d34752d3cb41cb4b6
+
+===FIQ and HDQ===
+====/sys/devices/platform/sc32440_fiq.0/fiq/count====
+FIQ is used to provide precision interrupt service in order to implement the HDQ protocol used to the battery couloumb counter.  This shows how many FIQ interrupts have been run since the kernel started.  It's turned off unless it is required.
+====/sys/devices/platform/gta02-hdq.0/hdq/dump====
+If you cat this, you will see the raw contents of HDQ device register space.  This is the bq27000 couloumb counter in our case.
+====/sys/devices/platform/gta02-hdq.0/hdq/write====
+This allows you to write to raw HDQ registers, using "<decimal register index> <decimal value>"
+
+===power_supply battery information===
+Most of these are coming from the coulomb counter over HDQ dynamically, but the bq27000 does not update a lot of its registers any more often than once per 4 seconds.  Therefore a lot of this info can be a bit stale or averaged over that period.
+====/sys/devices/platform/bq27000-battery.0/power_supply/bat/type====
+Just says "Battery"
+====/sys/devices/platform/bq27000-battery.0/power_supply/bat/status====
+This will summarize what goes on generally with the battery
+* "Not Charging" - there's a charger in, but right now it isn't charging us.  Normal if you are fully charged and still powered.
+* "Charging" - there's a charger in and it is charging the battery
+* "Discharging" - we are running on battery
+* "Full" - not normally given as a result (Not Charging used instead)
+====/sys/devices/platform/bq27000-battery.0/power_supply/bat/voltage_now====
+Battery voltage in uV, averaged.  Obviously this depends on load and place on discharge curve, etc.
+====/sys/devices/platform/bq27000-battery.0/power_supply/bat/current_now====
+Current being drawn from battery (+ve) or pushed into battery during charging (-ve) in uA
+====/sys/devices/platform/bq27000-battery.0/power_supply/bat/charge_full====
+Coulomb Counter's estimate of the capacity of the battery measured in uA/h.  It roughly means that if full, for one hour it could supply current at this rate.  I saw 1197913 reported on mine, so it estimates it can provide 1.2A for an hour.
+====/sys/devices/platform/bq27000-battery.0/power_supply/bat/temp====
+This is the battery temperature reported by the Coulomb Counter chip that is part of the physical battery.  It is in Celcius * 10, so 251 means 25.1 degrees.
+====/sys/devices/platform/bq27000-battery.0/power_supply/bat/technology====
+"Li-ion"
+====/sys/devices/platform/bq27000-battery.0/power_supply/bat/present====
+* "0" the battery is absent, or not one with a Coulomb Counter
+* "1" the smart battery is present
+====/sys/devices/platform/bq27000-battery.0/power_supply/bat/time_to_empty_now====
+At current rate of discharge, estimate of how long we can run for.  If battery is not discharging, it won't make an estimate and will return a magic value "3932100" meaning "no estimate".  The coulomb counter averages the load and adjusts this value slowly to be its estimate of when we will blow chunks.
+====/sys/devices/platform/bq27000-battery.0/power_supply/bat/time_to_full_now====
+This estimates how long until we are fully charged, at current rate of charging, in seconds.  If we are not charging, it gives the magic value "3932100" meaning "no estimate".
+====/sys/devices/platform/bq27000-battery.0/power_supply/bat/capacity====
+This is the remaining capacity of charge in the battery in percent. This is probably the most useful figure here.
+====/sys/devices/platform/bq27000-battery.0/power_supply/bat/online====
+* "0" no charger is present
+* "1" A powered charger is present
+
+===PMU info===
+====/sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/chgmode====
+* "enabled" means the charger is powered and willing to charge, although if you're full it might not be right now
+* "disabled" means there was no power or not enough power supplied to charge
+====/sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/charger_type====
+Shows the detected charger type followed by the mode it is running in.  So "charger 500mA mode 100mA" would be the case for non-enumerated USB connection, "charger 500mA mode 500mA" for after enumeration.
+====/sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/force_usb_limit_dangerous====
+This is added to allow the PMU to be told to take more current than the default rules allow.  Use it only if you know your charger source can handle it.  For example
+
+echo 500 > /sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/force_usb_limit_dangerous
+
+will allow PMU to draw 500mA even though you are connected to a dumb charger where the limit is normally held at 100mA, since it didn't enumerate the GTA02.  You can give 0, 100, 500 or 1000 here, but make sure your charger source can handle what you give here, otherwise it can exceed what is safe for your charging source to provide.
+====/sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/dump_regs====
+cat this to get a dump of the I2C registers for the PMU, useful for debugging power problems.
+
+===Bluetooth===
+====/sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/neo1973-pm-bt.0/power_on====
+* Default "0" no power to Bluetooth device
+* set to "1" to enable power to Bluetooth
+====/sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/neo1973-pm-bt.0/reset====
+* Default to "0", no reset
+* set to "1" to reset BT (needed after powerup)
+
+===GPS===
+====/sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/neo1973-pm-gps.0/pwron====
+* Default "0" GPS unpowered
+* set to "1" to power GPS section
+
+===Audio codec===
+====/sys/devices/platform/soc-audio/codec_reg====
+cat this to get a dump of codec registers.  Note they are 9-bit wide.
+====/sys/devices/platform/soc-audio/codec_reg_write====
+You can write to any codec register by echoing "<codec reg index in hex> <value in hex>" to here
+
+===Glamo===
+====/sys/devices/platform/glamo3362.0/regs====
+cat this to get a dump of selected Glamo regs.  You can write the regs by echoing "<glamo reg index in decimal> <value in decimal>" here.
