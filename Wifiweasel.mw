@@ -22,12 +22,13 @@ IFACE=eth0
 #Dhcp_timeout
 DHCP=4
 #check connectivity every X sec
-X=30
+X=15
 #
 # /CONFIG
 ################################
 #### Scan Funk ####
 Func_iwlist_open () {
+echo scanning wifi ;
 iwlist $IFACE scanning | awk -F '[ :=]+' '/(ESS|Freq|Qual)/{ printf $3" " } /Encr/{ print $4 }' \
     | sort -k4 -k3nr |grep -m1 off \
 |awk '{print $1}' > /tmp/weasel
@@ -36,15 +37,18 @@ sed /\"/s/\"//g /tmp/weasel_ > /tmp/ESSID
 }
 #### iface up Funk ######## 
 Func_ifconfig_up () {
+echo ; bring up interface
 iwconfig $IFACE essid `cat /tmp/ESSID` 
 }
 #### iface down Funk #####
 Func_ifconfig_down () {
+echo killing iface and udhcpc
 killall udhcpc 
 ifconfig $IFACE down	
 }
 #### Conn Funk #####
-Func_chk_net ()	{  
+Func_chk_net ()	{
+echo checking...   
 ping -w 2 -c1  $dns 
 if [ $=0 ];then ERROR=0; echo; echo Online!  go download some pr0n ; echo; sleep $X; Func_chk_net ; 
 fi  #W00T  
@@ -54,24 +58,26 @@ fi
  }
 #### Main Funk #########
 Func_MAIN () { while [ ERROR=1 ] ; do
+echo prime directive
 Func_ifconfig_down ;
 Func_iwlist_open Func_ifconfig_up ;
-timeout $DHCP udhcpc $IFACE |grep adding|awk '{print $3}' > /tmp/dns 
+timeout $DHCP udhcpc $IFACE ;
 export dns=`cat /etc/resolv.conf |grep name |awk '{print $2}'`
 Func_chk_net ;
 Func_MAIN ;
 done; 
 } 
 #### MAIN #### 
+echo 1st run
 Func_ifconfig_down ;
 Func_iwlist_open Func_ifconfig_up  ; 
 udhcpc $IFACE ; 
 export dns=`cat /etc/resolv.conf |grep name |awk '{print $2}'`
 Func_chk_net ; 
 Func_MAIN ;
-echo This is the end my only friend the end
-Done; #actually i dont think it ever ends
-#####################EOF##################
+echo This is the end, my only friend the end
+Done; #actually i dont think it ever ends but i'm done writing it
+#####################EOF#########################################
 </pre>
 
 ====timeout====
