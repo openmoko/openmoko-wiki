@@ -6,59 +6,63 @@ detects and connects to strongest open wifi AP in the vicinity.
 Subsequently it checks the connectivity every X seconds. If the connection fails, the
 whole process repeats itself; this requires the timeout script below (needs to be tested with multiple AP's - might have an iwconfig essid glitch).
 <pre> 
+
 #!/bin/sh
-   #####################
-###########################
+   ##### WifiWeasel ######   Ver. 2
+########################### 08-07-22
 #/var/wifi/hacker/kd8ikt###
 # OMG i'm programming now!#
 ###########################
 ###we.trekbeyond.org#######
   #####################
-        #KISS#
-
-# CONFIG
-#######interface################
-IFACE=eth0 
-#Dhcp_timeout
-DHCP=4
-#check connectivity every X sec
-X=15
+#TuperWare software inc #
 #
-# /CONFIG
-################################
-#### Scan Funk ####
+#Variables
+IFACE=eth0
+DHCP_TIMEOUT=3       # requires /usr/bin/timeout
+CHECK_NET_TIMER=15   #secs
+TEMPDIR=/mnt/wifiweasel/
+#
+#Functions
+#
+#(dont touch unless you 
+#know wtf your doing
+#
+#### Scan Funk
 Func_iwlist_open () {
-echo scanning wifi ;
 iwlist $IFACE scanning | awk -F '[ :=]+' '/(ESS|Freq|Qual)/{ printf $3" " } /Encr/{ print $4 }' \
     | sort -k4 -k3nr |grep -m1 off \
-|awk '{print $1}' > /tmp/weasel
-cat /tmp/weasel |grep '"' -m1 > /tmp/weasel_
-sed /\"/s/\"//g /tmp/weasel_ > /tmp/ESSID
+|awk '{print $1}' > /tmp/wifiweasel/scan
+cat $TEMPDIR/scan |grep '"' -m1 > $TEMPDIR/scan1
+sed /\"/s/\"//g $TEMPDIR/scan1 > $TEMPDIR/ESSID
+echo 
+echo Using ESSID
+cat $TEMPDIR/ESSID
+echo
 }
-#### iface up Funk ######## 
-Func_ifconfig_up () {
-echo ; bring up interface
-iwconfig $IFACE essid `cat /tmp/ESSID` 
-}
-#### iface down Funk #####
+#### interface down Funk
 Func_ifconfig_down () {
-echo killing iface and udhcpc
 killall udhcpc 
-ifconfig $IFACE down	
+ifconfig $IFACE down
 }
-#### Conn Funk #####
+#### iface up Funk
+Func_ifconfig_up () {
+iwconfig $IFACE essid `cat $TEMPDIR/ESSID` 
+}
+
+#### Connection check Funk
 Func_chk_net ()	{
 echo checking...   
 ping -w 2 -c1  $dns 
-if [ $=0 ];then ERROR=0; echo; echo Online!  go download some pr0n ; echo; sleep $X; Func_chk_net ; 
-fi  #W00T  
+if [ $=0 ];then ERROR=0; echo; echo Online!  W00T ; echo ; sleep $CHECK_NET_TIMER ; Func_chk_net ; 
+fi  #W00T
 if [ $=1 ] ; then ERROR=1 ;echo ;echo FAIL!\ 
-... Searching ; Func_Main ;
+... Searching ; echo ; Func_Main ;
 fi 
  }
-#### Main Funk #########
+
+#### Main loop Funk
 Func_MAIN () { while [ ERROR=1 ] ; do
-echo prime directive
 Func_ifconfig_down ;
 Func_iwlist_open Func_ifconfig_up ;
 timeout $DHCP udhcpc $IFACE ;
@@ -66,18 +70,25 @@ export dns=`cat /etc/resolv.conf |grep name |awk '{print $2}'`
 Func_chk_net ;
 Func_MAIN ;
 done; 
-} 
-#### MAIN #### 
-echo 1st run
-Func_ifconfig_down ;
-Func_iwlist_open Func_ifconfig_up  ; 
-udhcpc $IFACE ; 
+}
+#Prep 
+mkdir $TEMPDIR
+touch $TEMPDIR/scan
+touch $TEMPDIR/scan1
+touch $TEMPDIR/ESSID
+# RunProgram
+Func_ifconfig_down 
+Func_iwlist_open Func_ifconfig_up 
+timeout $DHCP udhcpc $IFACE 
 export dns=`cat /etc/resolv.conf |grep name |awk '{print $2}'`
-Func_chk_net ; 
-Func_MAIN ;
+Func_chk_net  
+Func_MAIN 
 echo This is the end, my only friend the end
 Done; #actually i dont think it ever ends but i'm done writing it
-#####################EOF#########################################
+#####################EOF#EOF#EOF#EOF#EOF#EOF#EOF#EOF#EOF#########
+
+
+
 </pre>
 
 ====timeout====
