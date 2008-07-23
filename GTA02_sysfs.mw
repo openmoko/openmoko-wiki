@@ -1,12 +1,9 @@
-'''NOTE: These only apply to Linux kernel 2.6.24, 2.6.28 has different paths''' (see below)
-
 ==<font color=75d806>GTA02 Kernel sysfs highlights</font>==
 sysfs is a filesystem that is mounted on /sys which contains various fake "files" that are actually filled by a variety of drivers and other kernel subsystems.  You can often also write stuff into these "files" using
 
 echo 1 &gt; /sys/blah...
 
 to change settings and behaviours of the kernel and drivers dynamically.  (When doing this, take care you have a space before the redirection operator &gt; or the shell will do something completely different with your command.)
-However[http://permalink.gmane.org/gmane.comp.hardware.smartphones.userland/165], one should use [[Dbus device API]]s!
 
 ===USB Host / Device===
 ====/sys/devices/platform/neo1973-pm-host.0/hostmode====
@@ -16,7 +13,7 @@ However[http://permalink.gmane.org/gmane.comp.hardware.smartphones.userland/165]
 * Defaults to "device", it means the USB peripheral in the CPU is logically configured for device mode
 * Set to "host" to logically configure the peripheral to act like a host for other USB devices to be plugged into it
 
-Normally you set these two guys at the same time for the same mode, but there is a trick possible to select logical host mode but leave the power arrangements as if it was in device mode and apply external power.  You need to [[Specialized USB cables|externally add]] 15K pulldowns on D+ and D- if you do this, because we did not enable them the normal way.  With this, you can have a USB device attached to GTA02, and use external power and charge the battery at the same time.
+Normally you set these two guys at the same time for the same mode, but there is a trick possible to select logical host mode but leave the power arrangements as if it was in device mode and apply external power.  You need to externally add 15K pulldowns on D+ and D- if you do this, because we did not enable them the normal way.  With this, you can have a USB device attached to GTA02, and use external power and charge the battery at the same time.
 
 ===GSM Subsystem===
 ====/sys/devices/platform/neo1973-pm-gsm.0/power_on====
@@ -35,7 +32,7 @@ If you cat this you get a list of possible resume sources in text with one or mo
 
 ===MEMCONFIG===
 ====/sys/devices/platform/neo1973-memconfig.0/BANKCON0 .. 7====
-For extreme meddlers (I salute you), these let you control the wait states and other characteristics of the memory regions of the FreeRunner.  Information and warnings about how to use these are here:
+For extreme meddlers (I salute you), these let you control the wait states and other characteristics of the memory regions of the Freerunner.  Information and warnings about how to use these are here:
 
 http://git.openmoko.org/?p=kernel.git;a=commitdiff;h=fd25f90517322fc6c07bfb8d34752d3cb41cb4b6
 
@@ -49,8 +46,6 @@ This allows you to write to raw HDQ registers, using "<decimal register index> <
 
 ===power_supply battery information===
 Most of these are coming from the coulomb counter over HDQ dynamically, but the bq27000 does not update a lot of its registers any more often than once per 4 seconds.  Therefore a lot of this info can be a bit stale or averaged over that period.
-====/sys/devices/platform/bq27000-battery.0/power_supply/bat/uevent====
-All informations about battery.
 ====/sys/devices/platform/bq27000-battery.0/power_supply/bat/type====
 Just says "Battery"
 ====/sys/devices/platform/bq27000-battery.0/power_supply/bat/status====
@@ -64,8 +59,7 @@ Battery voltage in uV, averaged.  Obviously this depends on load and place on di
 ====/sys/devices/platform/bq27000-battery.0/power_supply/bat/current_now====
 Current being drawn from battery (+ve) or pushed into battery during charging (-ve) in uA
 ====/sys/devices/platform/bq27000-battery.0/power_supply/bat/charge_full====
-Coulomb Counter's estimate of the capacity of the battery measured in uAh.  It roughly means that if full, for one hour it could supply current at this rate.  I saw 1197913 reported on mine, so it estimates it can provide 1.2A for an hour.
-
+Coulomb Counter's estimate of the capacity of the battery measured in uA/h.  It roughly means that if full, for one hour it could supply current at this rate.  I saw 1197913 reported on mine, so it estimates it can provide 1.2A for an hour.
 ====/sys/devices/platform/bq27000-battery.0/power_supply/bat/temp====
 This is the battery temperature reported by the Coulomb Counter chip that is part of the physical battery.  It is in Celcius * 10, so 251 means 25.1 degrees.
 ====/sys/devices/platform/bq27000-battery.0/power_supply/bat/technology====
@@ -87,21 +81,14 @@ This is the remaining capacity of charge in the battery in percent. This is prob
 ====/sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/chgmode====
 * "enabled" means the charger is powered and willing to charge, although if you're full it might not be right now
 * "disabled" means there was no power or not enough power supplied to charge
-
-Looks like it may also report "fast" here. [[User:OlivierBerger|OlivierBerger]] 07:47, 25 July 2008 (UTC)
-
 ====/sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/charger_type====
-Shows the detected charger type followed by the mode it is running in.  So "charger 500mA mode 100mA" would be the case for non-enumerated USB connection, "charger 500mA mode 500mA" for after enumeration (or "host/500mA usb mode 500mA" as here [[User:OlivierBerger|OlivierBerger]]).
-
+Shows the detected charger type followed by the mode it is running in.  So "charger 500mA mode 100mA" would be the case for non-enumerated USB connection, "charger 500mA mode 500mA" for after enumeration.
 ====/sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/force_usb_limit_dangerous====
 This is added to allow the PMU to be told to take more current than the default rules allow.  Use it only if you know your charger source can handle it.  For example
 
- echo 500 > /sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/force_usb_limit_dangerous
+echo 500 > /sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/force_usb_limit_dangerous
 
 will allow PMU to draw 500mA even though you are connected to a dumb charger where the limit is normally held at 100mA, since it didn't enumerate the GTA02.  You can give 0, 100, 500 or 1000 here, but make sure your charger source can handle what you give here, otherwise it can exceed what is safe for your charging source to provide.
-
-More details at [[Forcing_fast_charge_mode]].
-
 ====/sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/dump_regs====
 cat this to get a dump of the I2C registers for the PMU, useful for debugging power problems.
 
@@ -127,107 +114,3 @@ You can write to any codec register by echoing "<codec reg index in hex> <value 
 ===Glamo===
 ====/sys/devices/platform/glamo3362.0/regs====
 cat this to get a dump of selected Glamo regs.  You can write the regs by echoing "<glamo reg index in decimal> <value in decimal>" here.
-
-===LED & Vibrator===
-(per: Jeff Tickle)
-====/sys/devices/platform/neo1973-vibrator.0/leds/neo1973:vibrator/brightness====
-
-For the Vibration, my very limited testing indicates it will accept a
-range of 0-255, with 0 being off and 255 being full force.  So, you can
-actually set the strength of vibration.
-
-Keep in mind that the vibration will positively eat your battery, so
-use with caution!
-
-====/sys/devices/platform/gta02-led.0/leds/gta02-aux:red/brightness====
-====/sys/devices/platform/gta02-led.0/leds/gta02-power:blue/brightness====
-====/sys/devices/platform/gta02-led.0/leds/gta02-power:orange/brightness====
-
-For the LEDs, you can echo 1 for on or 0 for off to any of these files
-to control the state of the LEDs.
-
-===Accelerometers===
-====/sys/devices/platform/spi_s3c24xx_gpio.1/spi0.0/power/wakeup====
-====/sys/devices/platform/spi_s3c24xx_gpio.1/spi0.1/power/wakeup====
-Turns on accelerometers.
-
-====/sys/devices/platform/spi_s3c24xx_gpio.1/spi0.0/dump====
-====/sys/devices/platform/spi_s3c24xx_gpio.1/spi0.1/dump====
-Dumps accelerometers raw contents.
-
-====/sys/devices/platform/spi_s3c24xx_gpio.1/spi0.0/full_scale====
-====/sys/devices/platform/spi_s3c24xx_gpio.1/spi0.1/full_scale====
-Switches the accelerometers between 2G and 8G mode.  Echo "9.2" into it for 8G, any other value for 2G (default)[http://lists.openmoko.org/pipermail/openmoko-kernel/2008-July/004029.html]
-
-
-
-==<font color=75d806>GTA02 Kernel sysfs highlights for kernel 2.6.28</font>==
-(info from: [http://lists.openmoko.org/nabble.html#nabble-td1569863 http://lists.openmoko.org/nabble.html#nabble-td1569863]
-
-Warning: this is still a work in progress, and things might still change in the future.
-
-
-Here are the current /sys mappings for andy-tracking (which has Balaji's 
-regulator PMU stuff).  The reason virtually everything has changed is 
-mainly due to the device tree changes to fix suspend - resume, many more 
-things have a child relationship to the PMU now. 
-
-
-====old: /sys/devices/platform/neo1973-pm-host.0/hostmode ====
-====new: /sys/class/i2c-adapter/i2c-0/0-0073/neo1973-pm-host.0/hostmode ====
-
-====same: /sys/devices/platform/s3c2410-ohci/usb_mode ====
-(from 901d73fe51f33032b34b2ae5612eb863ec90532a moved to /sys/devices/platform/s3c-ohci/usb_mode)
-
-====old: /sys/devices/platform/neo1973-pm-gsm.0/power_on|reset|download ====
-====new: /sys/class/i2c-adapter/i2c-0/0-0073/neo1973-pm-gsm.0/... ====
-
-====old: /sys/devices/platform/neo1973-resume.0/resume_reason ====
-====new: /sys/class/i2c-adapter/i2c-0/0-0073/neo1973-resume.0/resume_reason ====
-     /sys/class/i2c-adapter/i2c-0/0-0073/resume_reason 
-     (split into CPU wake interrupt and secondly PMU-specific reason) 
-
-====old: /sys/devices/platform/sc32440_fiq.0/fiq/count|dump|write ====
-====new: /sys/devices/platform/sc32440_fiq.0/gta02-hdq.0/hdq/... ====
-
-====old: /sys/devices/platform/bq27000-battery.0/power_supply/bat/ ====
-     uevent|type|status|voltage_now|current_now|charge_full|temp| 
-     technology|present|time_to_empty_now|time_to_full_now|capacity| 
-     online 
-====new: /sys/class/power_supply/battery/... ====
-
-====old: /sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/ ====
-     chgmode|charger_type|force_usb_limit_dangerous|dump_regs 
-====new: /sys/class/i2c-adapter/i2c-0/0-0073/pcf50633-mbc/... ====
-
-====old: /sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/neo1973-pm-bt.0/ ====
-power_on|reset 
-====new: /sys/class/i2c-adapter/i2c-0/0-0073/pcf50633-regltr.6/neo1973-pm-bt.0/... ====
-
-====old: /sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/neo1973-pm-gps.0/pwron ====
-====new: /sys/class/i2c-adapter/i2c-0/0-0073/pcf50633-regltr.7/neo1973-pm-gps.0/power_on ====
-
-====same: /sys/devices/platform/soc-audio/codec_reg|codec_reg_write ====
-
-====old: /sys/devices/platform/glamo3362.0/regs ====
-====new: /sys/class/i2c-adapter/i2c-0/0-0073/pcf50633-regltr.9/glamo3362.0/regs ====
-
-====old: /sys/devices/platform/neo1973-vibrator.0/leds/neo1973:vibrator/brightness ====
-====new: /sys/class/leds/neo1973:vibrator/brightness ====
-
-====old: /sys/devices/platform/gta02-led.0/leds/gta02-aux:red/brightness ====
-====new: /sys/class/leds/gta02-aux:red/brightness ====
-
-====old: /sys/devices/platform/gta02-led.0/leds/gta02-power:blue/brightness ====
-====new: /sys/class/leds/gta02-power:blue/brightness ====
-
-====old: /sys/devices/platform/gta02-led.0/leds/gta02-power:orange/brightness ====
-====new: /sys/class/leds/gta02-power:orange/brightness ====
-
-====old: /sys/devices/platform/spi_s3c24xx_gpio.1/spi0.{0|1}/ ====
-power/wakeup|dump|full_scale... 
-====new: /sys/class/i2c-adapter/i2c-0/0-0073/spi_s3c24xx_gpio.0/spi3.{0|1}/ ====
-
-
-
-[[Category:Kernel]]
