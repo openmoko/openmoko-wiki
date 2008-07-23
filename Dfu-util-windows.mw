@@ -1,10 +1,10 @@
 == dfu-util for Win32 ==
 
-{{warning|This is very preliminary software.  It has not been tested outside of the developer's box and may not work for you.  Any feedback would be much appreciated!}}
+{{Note|This has only been tested on the developer's box and with the FreeRunner.}}
 
 In order to use dfu-util for Win32, you need to install a Windows driver when the device is in U-Boot.  The LibUSB-Win32 driver and accompanying INF file for the OpenMoko can be found in OpenMokoDFU.zip at the link below.  When the Windows New Device Wizard pops up, use this driver.
 
-Once the driver is installed, then you can proceed and use the instructions found at the main [[dfu-util]] page.  Note that the program will crash upon first attempt to upload or download new firmware after the device is switched from Runtime Mode to DFU Mode.  Simply run the same command again and the upload or download should proceed.
+Once the driver is installed, then you can proceed and use the instructions found at the main [[dfu-util]] page.  
 
 The above mentioned files can be downloaded at: [http://projects.openmoko.org/projects/dfu-util-win32/ http://projects.openmoko.org/projects/dfu-util-win32/]
 
@@ -89,7 +89,7 @@ Apply the following patch to the source code:
 <pre>
 Index: main.c
 ===================================================================
---- main.c	(revision 4544)
+--- main.c	(revision 4553)
 +++ main.c	(working copy)
 @@ -26,8 +26,10 @@
  #include <getopt.h>
@@ -113,7 +113,7 @@ Index: main.c
  #ifdef HAVE_USBPATH_H
  #include <usbpath.h>
  #endif
-@@ -579,6 +585,15 @@
+@@ -579,6 +585,16 @@
  
  		/* FIXME: check if the selected device really has only one */
  
@@ -124,12 +124,13 @@ Index: main.c
 +			fprintf(stderr, "Cannot set configuration: %s\n", usb_strerror());
 +			exit(1);
 +		}
++		dif->configuration = 0;
 +#endif
 +
  		printf("Claiming USB DFU Runtime Interface...\n");
  		if (usb_claim_interface(_rt_dif.dev_handle, _rt_dif.interface) < 0) {
  			fprintf(stderr, "Cannot claim interface: %s\n", usb_strerror());
-@@ -700,7 +715,8 @@
+@@ -700,12 +716,14 @@
  		exit(1);
  	}
  
@@ -139,9 +140,15 @@ Index: main.c
  	printf("Setting Configuration %u...\n", dif->configuration);
  	if (usb_set_configuration(dif->dev_handle, dif->configuration) < 0) {
  		fprintf(stderr, "Cannot set configuration: %s\n", usb_strerror());
+ 		exit(1);
+ 	}
++	dif->configuration = 0;
+ #endif
+ 	printf("Claiming USB DFU Interface...\n");
+ 	if (usb_claim_interface(dif->dev_handle, dif->interface) < 0) {
 Index: sam7dfu.c
 ===================================================================
---- sam7dfu.c	(revision 4544)
+--- sam7dfu.c	(revision 4553)
 +++ sam7dfu.c	(working copy)
 @@ -20,6 +20,11 @@
  #define O_BINARY 0
@@ -157,7 +164,7 @@ Index: sam7dfu.c
  {
 Index: usb_dfu.h
 ===================================================================
---- usb_dfu.h	(revision 4544)
+--- usb_dfu.h	(revision 4553)
 +++ usb_dfu.h	(working copy)
 @@ -12,6 +12,13 @@
  
@@ -210,17 +217,11 @@ and you should be able to list the device.  Example:
 
   Found Runtime: [0x1d50:0x5119] devnum=7, cfg=0, intf=2, alt=0, name="USB Device Firmware Upgrade"  
 
-When you attempt to upload or download firmware, the first run will crash after the "Resetting USB..." and "Opening USB Device..." messages.  After it crashes, the device will be in DFU Mode instead of Runtime Mode.
-
-Simply run the same command again and the upload or download will proceed.
-
 === Binary ===
 
 [http://projects.openmoko.org/projects/dfu-util-win32/ http://projects.openmoko.org/projects/dfu-util-win32/]
 
 === Outstanding issues ===
-
-dfu-util crashes after resetting the USB device.  It sounds like this was an issue in the Cygwin port as well and sounds like it might be an issue with LibUSB-Win32 as discussed here: [http://lists.openmoko.org/pipermail/openmoko-uboot/2007-October/000135.html http://lists.openmoko.org/pipermail/openmoko-uboot/2007-October/000135.html].
 
 Had to call usb_set_configuration() with configuration set to 1 before attempting to claim the device instead of using configuration 0 that the device returns.  It sounds like DFU implementation in U-Boot might not be compliant with USB spec.  A similar issue and discussion can be found here: [http://thread.gmane.org/gmane.comp.lib.libusb.devel.windows/1546/focus=1554 http://thread.gmane.org/gmane.comp.lib.libusb.devel.windows/1546/focus=1554]
 
