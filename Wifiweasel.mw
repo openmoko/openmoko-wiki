@@ -31,7 +31,8 @@ Func_iwlist_open () {
 iwlist $IFACE scanning | awk -F '[ :=]+' '/(ESS|Freq|Qual)/{ printf $3" " } /Encr/{ print $4 }' \
     | sort -k4 -k3nr |grep -m1 off \
 |awk '{print $1}' > /tmp/weasel
-sed /\"/s/\"//g /tmp/weasel > /tmp/ESSID
+cat /tmp/weasel |grep '"' -m1 > /tmp/weasel_
+sed /\"/s/\"//g /tmp/weasel_ > /tmp/ESSID
 }
 #### iface up Funk ######## 
 Func_ifconfig_up () {
