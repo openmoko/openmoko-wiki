@@ -72,3 +72,51 @@ Di seguito potete trovare alcune casistiche di possibile utilizzo:
 *'''6) Schermata Lancia Applicazioni''' -- Passa alla schermata Lancia Applicazioni.
 *'''7) Schermata Gestore delle Applicazioni in corso''' -- Schermata corrente.
 *'''8) Lista di tutte le applicazioni in corso'''
+
+== Adjust UI components at runtime ==
+
+*'''default''': this is from daily build default image
+[[Image:Todaypage_reduced_false.png|200px|]]
+ # gconftool-2 --type bool --set /desktop/poky/interface/reduced false
+
+*'''reduced''': remove the upper application icons, no clock, and no date
+[[Image:Todaypage_reduced_true.png|200px|]]
+ # gconftool-2 --type bool --set /desktop/poky/interface/reduced true
+
+*'''digital/analog clock''' : change the digital clock to analog clock
+[[Image:Todaypage_digitalclock_false.png|200px|]]
+ # gconftool-2 --type bool --set /desktop/poky/interface/digital_clock false
+
+*'''remove clock entirely''' 
+[[Image:Todaypage_noclock.png|200px|]]
+ # gconftool-2 --type bool --set /desktop/poky/interface/small_clock true
+
+*'''change wallpaper image''' 
+[[Image:Todaypage_changewallpaper.png|200px|]]
+ # gconftool-2 --type string --set /desktop/poky/interface/wallpaper /usr/share/pixmaps/wallpaper.png'''
+
+* '''gconf problem (the hard fix)'''
+ (gconftool-2:1366): GConf-WARNING **: Client failed to connect to the D-BUS daemon:
+ Failed to execute dbus-launch to autolaunch D-Bus session
+ Error setting value: No D-BUS daemon running
+
+ root@fic-gta02:/$ ps aux | grep today
+ root      1320  3.7 11.5  33556 14100 ?        S    23:00   0:09 openmoko-today
+ root      1369  0.0  0.4   2860   592 pts/0    S+   23:04   0:00 grep today
+ 
+ root@fic-gta02:/$ cat /proc/1320/environ 
+
+ root@fic-gta02:/$ export   DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-80gSL9Q6F4,
+ guid=6efed88183a7f6b9210cf40047ba0dfe
+
+Doing it with one single line :
+ cat /proc/`pidof openmoko-today`/environ |grep DBUS > exptmp && export `cat exptmp` && rm exptmp
+
+* '''gconf problem (the easy fix)''': Prefix the command with dbus-launch, see below example:
+ root@fic-gta02:/$ dbus-launch gconftool-2 --type string --set /desktop/poky/interface/wallpaper /usr/share/pixmaps/wallpaper.png'''
+
+The appearance of the display locker can be modified, as well, by following the instructions under [[Display_Locker]].
+ 
+{{Languages|Today/2007.2}}
+[[Category:Openmoko]]
+[[Category:Implemented]]
