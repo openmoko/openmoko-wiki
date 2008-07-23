@@ -51,6 +51,7 @@ iwconfig $IFACE essid `cat $TEMPDIR/ESSID`
 #### Connection check Funk
 Func_chk_net ()	{
 echo checking...   
+export dns=`cat /etc/resolv.conf |grep name |awk '{print $2}'`
 ping -w 2 -c1  $dns 
 if [ $=0 ];then ERROR=0; echo; echo Online!  W00T ; echo ; sleep $CHECK_NET_TIMER ; Func_chk_net ; 
 fi  #W00T
@@ -63,7 +64,6 @@ Func_MAIN () { while [ ERROR=1 ] ; do
 Func_ifconfig_down ;
 Func_iwlist_open Func_ifconfig_up ;
 timeout $DHCP_TIMEOUT udhcpc $IFACE ;
-export dns=`cat /etc/resolv.conf |grep name |awk '{print $2}'`
 Func_chk_net ;
 Func_MAIN ;
 done; 
@@ -77,7 +77,6 @@ touch $TEMPDIR/ESSID
 Func_ifconfig_down 
 Func_iwlist_open Func_ifconfig_up 
 timeout $DHCP_TIMEOUT udhcpc $IFACE 
-export dns=`cat /etc/resolv.conf |grep name |awk '{print $2}'`
 Func_chk_net  
 Func_MAIN 
 echo This is the end, my only friend the end
