@@ -23,6 +23,21 @@ Once the build server is running, it will create root filesystem images for us.
 Check the [[Flashing openmoko]] page for pre-built root images. Please note that this image may take long to boot the first time, since this boot finishes the installation process.
 
 === Mounting the JFFS2 image on a loop back device (Block Memory MTD Emulation) ===
+==== Configure the kernel for support ====
+For a 2.6.25 kernel:
+*Device Drivers
+**Block Devices
+***Loopback device support
+**Memory Technology Device (MTD) support
+***Caching block device access to MTD device (mtdblock module, required for block2mtd)
+***Self-contained MTD device drivers
+****MTD using block device (block2mtd)
+*File systems
+**Miscellaneous filesystems
+***Journalling Flash File System v2 (JFFS2) support
+****Advanced compression for JFFS2
+*****JFFS2 ZLIB compression support
+
  export loop=$(losetup -f)
  losetup $loop <rootfs.jffs2>
  modprobe block2mtd block2mtd=$loop,131072
