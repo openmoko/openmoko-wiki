@@ -1,73 +1,31 @@
 [[Image:Mokopedia_main.png|thumb|480px|''Mokopedia running on Openmoko'']]
 
-{{todo|Support this project by adding ideas and comments to the discussion page and edit this article}}
+for more info visit the official website: http://mokopedia.mister-muffin.de/
 
-Mokopedia makes wikipedia accessible on your openmoko phone even without being online because all articles will reside in a compressed filesystem (squashFS) on your SD Card.
+join our irc channel on freenode: #mokopedia
 
-You will have to install lighttpd to access a local perl cgi script with the web browser of your choice. This script will offer you a text box to easily search your stored articles.
+This project aims to provide software to create and use small size wikipedia dumps for embedded Linux devices.
 
-==Feature Ideas==
-Please feel free to add anything that comes to your mind.
-*it will have no pictures - not enough room on any storage media
-*tex forumlas could be generated with a local LaTeX install but this may be too big for the phone
-*all wikipedia versions except the english one will fit on a 1GB SDCard (tested with the second largest wikipedia (german)) - compressability tests with en-wiki in progress
-*
-*support for stripped down wikipedia versions (100MB, 500MB)
-** Add an option that would schedule article downloads based on previous searches that return no results on the Neo. Could be triggered when the Neo detects a Wifi connection or when it is connected via USB.
-** image with X of the most importand article (perhaps mostlinked?) [http://en.wikipedia.org/wiki/Special:Mostlinked Mostlinked]
-** image without Lonelypages [http://en.wikipedia.org/wiki/Special:Lonelypages Lonelypages]
-** image without Uncategorizedpages [http://en.wikipedia.org/w/index.php?title=Special:Uncategorizedpages Uncategorizedpages]
-*** squashfs is a read only filesystem - such additional articles would have to be stored elsewhere
+All Wikipedia pages will be stripped down html files compressed in a squashfs lzma image.
 
-==Development Status==
+It's the goal to make ALL the articles (except images) of Wikipedia (including formatting, linking, tables, formulas) fit on very little space.
 
-*I finished writing the perl and bash scripts for optimizing your wikipedia html dump. To obtain the dumps goto http://static.wikipedia.org. The scripts are in svn on the mokopedia project site http://projects.openmoko.org/plugins/scmsvn/viewcvs.php/?root=mokopedia
-*lighttpd is working on openmoko as a light webserver without too much overhead
-*cgi-script for searching and accessing articles is finished and downloadable via the SCM link above
-*english wikipedia with ALL ARTICLES is compressible to 3,2GB
-*there are to ready to download images of the german wikipedia
-** 946MB april 2007 http://www.rabenfrost.net/wikipedia_de_april_mini.img this one will fit on a 1GB microsd card with 953MB real space
-** 1,3GB august 2007 http://www.rabenfrost.net/wikipedia_de_august.img full version with, categories, special pages etc..
+Tests show that the German Wikipedia will be around 1.3GB and the English Wikipedia around 4GB so with flash storage prices dropping I will not bother removing certain articles - the dumps will include everything. 
 
-You can download the current code at http://projects.openmoko.org/projects/mokopedia/
+= development status =
 
-You can view a little demo here: http://www.rabenfrost.net/mokopedia_demo.ogg
-Newer version: http://www.rabenfrost.net/mokopedia_demo2.ogg
+some people are already running the new mokopedia on their freerunners but i wont announce any official info until enwiki isnt done so up to now there are only dewiki and others that are possible to use.
 
-==Requirements==
-===On the target (NEO)===
-*lighttpd
-*changes in /etc/lighttpd.conf
-<pre>enable server-module "mod_cgi", "mod_rewrite", "mod_redirect", "mod_access"</pre>
-<pre>#### CGI module
-cgi.assign                  = ( ".pl"  => "/usr/bin/perl",
-                                ".cgi" => "/usr/bin/perl" )
-</pre>
-<pre>#### url handling modules (rewrite, redirect, access)
-url.rewrite-once        = ( "^/wiki/(.*)"      => "/wiki/mokopedia.cgi?q=$1" )
-</pre>
-*perl
-*perl-module-encode
-*perl-module-encode-encoding
-*perl-module-bytes
-*perl-module-utf8
-*perl-module-utf8-heavy
-*squashfs-tools (optional)
-*kernel-module-squashfs
-*kernel-module-loop
-*[[Web Browser]]
+I you are interested to get it running on you freerunner join our irc channel and i will explain the few steps you have to take.
 
-===On the host===
-To build the squashFS image on your PC instead of downloading ready-to-use-images you additionally need mksquashfs-tools
+In the near feature there will be ipkgs for everything.
 
-==Credits==
-A big thank to the following people:
-* kahuna for bringing me back to the idea of mokopedia as served html to a browser of your choice
-* fgau for trying out everything I wrote on his neo
-* thomasg for suggesting the use of a compressed file system
-* Marcel_M for his great repository with squashfs and loop kernel modules http://celtune.morb-design.com/ipk/fic-gta01/
-* everyone on #neo1973-germany
-All you guys helped me a lot!!
+= to everybody thas was familiar with the old implementation =
+
+There is no lighty needed anymore - i now implement the server in a simple python script.
+
+Now we have FULLTEXT search - yeah you hear right. a fulltext search through 6.8 GB of dewiki is possible in mere 20 seconds on the neo1973.
+
+Now there are also a lot of things already implemented as ipkg - only the server is left but will follow soon.
 
 [[Category:Applications]]
-[[Category:Unimplemented]]
