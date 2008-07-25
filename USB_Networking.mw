@@ -94,6 +94,18 @@ iface usb0 inet static
         post-up iptables -P FORWARD ACCEPT
 </pre>
 
+I would even suggest to use the more refined one bellow, to adapt to existing home networks already using 192.168.0.x addresses (which would be between 192.168.0.1 and 192.168.0.191) -- [[User:OlivierBerger|OlivierBerger]] :
+<pre>
+allow-hotplug usb0
+iface usb0 inet static
+	address 192.168.0.200
+	netmask 255.255.255.192
+	post-up iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.192/26
+        post-up echo 1 > /proc/sys/net/ipv4/ip_forward
+        post-up iptables -P FORWARD ACCEPT
+	pre-down iptables -D POSTROUTING -t nat -j MASQUERADE -s 192.168.0.192/26
+</pre>
+
 === Ubuntu (Tested with Feisty, Gutsy and Hardy) ===
 Edit /etc/network/interfaces:
 <pre>
