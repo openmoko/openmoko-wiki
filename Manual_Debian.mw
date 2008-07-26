@@ -1,42 +1,64 @@
 [[Image:Debian.png|thumb|480px|''Debian on neo1973'']]
-This page is to explain how to run Debian armel port on neo1973. These instructions are likely to work on FreeRunner, too.
+This page is to explain how to run Debian armel port on OpenMoko devices.  You can do this from scratch, or download a prebuilt file system.
+The former will take some time, perhaps 2 hours, depending on your internet connection
 
-All the steps below take approximately 2h depending on your internet connection. Most of the time your system will work on its own (apt-getting xfce4 takes a loong time..).
+= Prebuilt Filesystem =
 
-If you do not have the time feel free to download a ready to use tar archive of the results of everything described below. Just extract the contents to your sd card!
+Download and extract to an ext2/ext3 formatted filesystem on your SD card:
+
  wget http://rabenfrost.net/debian/debian-armel-xfce.tar.bz2
-* root-pw: openmoko
-* 1st user: openmoko (pw: openmoko)
-Extract it directly to your sd card - have fun!
 
-= 1. (optional) install known good kernel =
-this kernel was build by Marcel_M and has some important patches in it such as removed sd debug symbols and build-in ext3 support.
+Note that the above is just a bit too big to fit on a 512MB SD card.  A smaller image will soon be provided.
+
+Access via SSH is much the same as under other images using [[USB Networking]], with the user accounts below:
+
+* root password: openmoko
+* First user and password: openmoko
+
+== (Optional) Install Known Good Kernel ==
+
+This kernel was build by Marcel_M and has some important patches in it such as removed sd debug symbols and build-in ext3 support.
+
  wget http://rabenfrost.net/celtune/uImage-2.6.24+svnr4194-r4165-r3-neo1973.bin
  ./dfu-util -d 0x1457:0x5119 -a kernel -R -D ./uImage-2.6.24+svnr4194-r4165-r3-neo1973.bin
 
-= 2. configure booting from sd/sdhc =
+== Configure booting from SD/SDHC ==
 
 Do as proposed here: [[Booting_from_SD]]
 
-= 3.1. (option #1) debootstrap your own armel rootfs =
-debootstrap your rootfs on Debian or Ubuntu
+Note that these instructions are in need a rewrite.
+
+= Build your own armel filesystem =
+
+== (Option 1) debootstrap your rootfs on Debian or Ubuntu host ==
+
  debootstrap --verbose --arch armel --foreign sid ./armel-chroot http://ftp.de.debian.org/debian/
-= 3.2. (option #2) download ready to use armel rootfs =
-if you don't have debootstrap on your system you can download the results here:
+
+== (option 2) download ready to use armel rootfs ==
+
+If you don't have debootstrap on your system you can download the results here:
+
  wget http://rabenfrost.net/debian/armel-chroot-first-stage.tar.gz
 
-= 4 prepare sd card =
-ssh to your neo and format your sd card appropriately. I'm using an 8GB sdhc card here.
+== Prepare SD card ==
+
+ssh to your neo and format your sd card appropriately. I'm using an 8GB SDHC card here.
+
  umount /media/card
  mkfs.ext3 /dev/mmcblk0p1
  mount /dev/mmcblk0p1 /media/card
+
 copy the armel chroot to your device by tar'ing it to circumvent symbolic link cycles (https://bugzilla.mindrot.org/show_bug.cgi?id=1059 <= WONTFIX)
+
  tar -C ./armel-chroot/ -c . | ssh root@192.168.0.202 tar -C /media/card -xv
 or if you downloaded the archive
+
  cat armel-chroot-first-stage.tar.gz | ssh root@192.168.0.202 tar -C /media/card -xzvf
 
-= 5. complete debootstrap process =
+== Complete debootstrap Process ==
+
 ssh to your device and execute the following commands (just copypaste everything below)
+
  echo "nameserver 192.168.0.200" > /media/card/etc/resolv.conf
  echo "fic-gta01" > /media/card/etc/hostname
  echo "127.0.0.1 localhost.localdomain localhost fic-gta01" > /media/card/etc/hosts
@@ -76,10 +98,13 @@ set a root password
 create a normal user
  adduser <yournamehere>
 
-= 6. get x running =
-now reboot and start your debian. you can login with ssh and start configuring xorg:
+== Get X Running ==
+Now reboot and start Debian. Login with ssh and start configuring xorg:
+
  aptitude install xorg
+
 configure /etc/X11/xorg.conf so that it looks like this:
+
  Section "InputDevice"
         Identifier      "Configured Mouse"
         Driver          "mouse"
@@ -101,16 +126,20 @@ configure /etc/X11/xorg.conf so that it looks like this:
         Screen          "Default Screen"
         InputDevice     "Configured Mouse"
  EndSection
-start x in the first vt:
+Start X in the first vt:
  startx -- vt1
 
-= 7. get touchscreen working =
-install the tslib driver:
+== Get touchscreen working ==
+Install the tslib driver:
+
  aptitude install xserver-xorg-input-tslib
-edit /etc/udev/udev.rules as the tslib device is hard-coded for now. search for the input devices section and make the first line look like this:
+
+Edit /etc/udev/udev.rules as the tslib device is hard-coded for now. search for the input devices section and make the first line look like this:
  # input devices
  KERNEL=="event1",               NAME="event0"
+
 and edit the InputDevice section in your xorg.conf
+
  Section "InputDevice"
         Identifier "Configured Mouse"
         Driver "tslib"
@@ -123,28 +152,31 @@ for gta01:
  echo -67 36365 -2733100 -48253 -310 45219816 65536 > /etc/pointercal
 calibration currently does not work for the gta02.
 
-start x and enjoy!!
+Start X and enjoy!
  startx -- vt1
-= 8. install gdm and xfce4 =
-simple...
+
+== Install GDM and xfce4 ==
+
  aptitude install gdm xfce4 xvkbd
-configure gdm so xkvbd will allow you to put in your username and password. simply add this to the end of /etc/gdm/Init/Default before exit 0 so that the three last lines look like this:
+
+Configure gdm so xkvbd will allow you to put in your username and password. simply add this to the end of /etc/gdm/Init/Default before exit 0 so that the three last lines look like this:
+
  fi
  sleep 20 && /usr/bin/xvkbd -xdm -compact -geometry 480x210+0+0 &
  exit 0
-simply click on the focus button of xvkbd and then on the input box of gdm to input your username and password there.
 
-on each boot gdm should start automatically now.
+Simply click on the focus button of xvkbd and then on the input box of GDM to input your user name and password there.  On each boot gdm should start automatically now.
 
-if you like you can also download a correctly sized debian wallpaper I generated from the svg source for 480x640:
+If you like you can also download a correctly sized Debian wallpaper I generated from the SVG source for 480x640:
+
  wget <nowiki>http://rabenfrost.net/debian/debian-blueish-wallpaper-480x640.png</nowiki> -O /usr/share/images/desktop-base/desktop-background
 
-= 9. clean up =
+== Clean Up ==
  aptitude clean
 
-= 10. load additional kernel modules =
+== Load Additional Kernel Modules ==
 
-These are for sound (!!), bluetooth and usb foo. Use the modules archive that fits to your kernel.
+These are for sound, bluetooth and USB. Use the modules archive that fits to your kernel.
 
  wget http://rabenfrost.net/celtune/modules-2.6.24+svnr4194-r4165-r3-neo1973.tgz
  tar -xf modules-2.6.24+svnr4194-r4165-r3-neo1973.tgz -C /
@@ -158,7 +190,7 @@ These are for sound (!!), bluetooth and usb foo. Use the modules archive that fi
  snd-soc-neo1973-wm8753" > /etc/modules
 
 [[Image:Sonata.png|thumb|480px|''Sonata on neo1973'']]
-= 11. enable sound =
+== Enable Sound ==
 
 Now we turn our Debian into a jukebox!
 
@@ -170,7 +202,7 @@ Now we turn our Debian into a jukebox!
 
 I currently use mpd+sonata - let me know if you know another nice lightweight gtk player. Unfortunately RhythmBox is way too much for the Neo to handle - the MP3 playing stops after 20secs.
 
-= 12. using a keyboard =
+= Using a keyboard =
 [[Image:Debian+frogpad.jpg|thumb|480px|''Using irssi on [[Debian]] together with the frogpad to IRC on #neo1973-germany'']]
 nezza prepared a nice guide for this here: [[Frogpad]]
 
