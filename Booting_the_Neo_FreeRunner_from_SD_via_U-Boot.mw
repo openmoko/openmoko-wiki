@@ -71,14 +71,15 @@ After the process finished there will be a ''OpenMoko-....tar'' in the deploy di
 
 === Partioning the SD card ===
 
-There needs to be at least one partition for our file system, whether that be ext2 or ext3.
-This example shows how to create one using the fdisk utility. Feel free to use the partitioning utility of your liking for this task.
+Unfortunately the uboot loader can only read from FAT partitions. Therefore the kernel needs to be stored in a partition with this filesystem.
+Nevertheless we want to store our rootfs in an ext3 (or ext2) filesystem. To acomplish this the sd-card needs to be partitioned into to different parts. 
+This example shows how to do this using the fdisk utility. Feel free to use the partitioning utility of your liking for this task.
 
  fdisk /dev/mmcblk0
 
 '''''Note:''''' The device file might differ on your system. If you are not sure about it, you may check your kernel message log by calling ''dmesg'' to find the correct device.
 
-The following is an example session from the previous command.
+We will now create a 8 mb partition for our kernel and another one for the rootfs which will take up all the remaining space.
 
    Command (m for help): d
    Selected partition 1
@@ -90,7 +91,16 @@ The following is an example session from the previous command.
    Partition number (1-4): 1
    First cylinder (1-983, default 1):
    Using default value 1
-   Last cylinder or +size or +sizeM or +sizeK (1-983, default 983):
+   Last cylinder or +size or +sizeM or +sizeK (1-983, default 983): +8M
+   Command (m for help): n
+   Command action
+      e   extended
+      p   primary partition (1-4)
+   p
+   Partition number (1-4): 2
+   First cylinder (18-983, default 18):
+   Using default value 18
+   Last cylinder or +size or +sizeM or +sizeK (18-983, default 983):
    Using default value 983
    Command (m for help): w
    The partition table has been altered!
@@ -99,9 +109,16 @@ The following is an example session from the previous command.
 
 === Formatting the SD card ===
 
-The following is the command for formatting a partition to ext3.
+As already mentioned we need the first partition to be formatted with the FAT filesystem. Just issue the following command to create this fs:
 
- mkfs.ext3 /dev/mmcblk0p1
+ mkfs.vfat /dev/mmcblk0p1
+
+Note: if you do not have mkfs.vfat get it at http://buildhost.openmoko.org/daily-feed/armv4t/ncurses_5.4-r15_armv4t.ipk and opg install it.
+
+
+The second partition is about to be formatted with ext3 (For ext2 to work you need to make sure you compiled the kernel with the correct configuration):
+
+ mkfs.ext3 /dev/mmcblk0p2
 
 == Populate SD card ==
 
