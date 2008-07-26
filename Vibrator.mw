@@ -7,6 +7,67 @@ The vibrator is controlled through:
   /sys/class/leds/neo1973\:vibrator/brightness
 When off, it will read 0.  Valid ranges appear to be 0-255, with 255 being the fastest.
 
+=== Simple Python Script For Playing Beats ===
+Reads beats from a file and plays them on the openmoko vibrator.
+ 
+File format is human readable text, consisting of a simple sequence of integer pairs.  The first number in the pair representing the intensity of the vibration from 0 to 255.  The second number represents the duration in milliseconds to hold that intensity.  Any non digit characters in the file count as a separators between numbers, but are otherwise ignored.
 
+ #!/usr/bin/python
+ """Vibrator Beat Player
+ 
+ Usage: python beatplay.py [filename]
+ """
+ import sys
+ import time
+ import re
+ 
+ def loadFromTextFile(filename):
+     infile = open(filename)
+     contents = infile.read()
+     return re.findall("(\d+)\D*(\d+)", contents)
+ 
+ def playNote(frequency, duration):
+     outfile.write(str(frequency) + "\n")
+     time.sleep(float(duration) / 1000.0)
+ 
+ def playNotes(notes):
+     for frequency, duration in notes:
+         #print frequency + ", " + duration
+         playNote(frequency, duration)
+ 
+ def playFile(filename):
+     global outfile
+     notes = loadFromTextFile(filename)
+     outfile = open("/sys/class/leds/neo1973:vibrator/brightness", "w", 1)
+     playNotes(notes)
+     playNote(0, 0)
+     outfile.close()
+ 
+ if __name__ == "__main__":
+     playFile(sys.argv[1])
+
+== Example Beat ==
+The following is an example "song" file that can be used to test the beat player.
+
+ 125 400
+ 0 200
+ 250 600
+ 0 400
+ 
+ 125 400
+ 0 200
+ 250 600
+ 0 400
+ 
+ 125 400
+ 0 200
+ 250 600
+ 0 400
+ 
+ 125 400
+ 0 200
+ 250 600
+ 0 400
+ 
 [[Category: Hardware]]
 [[Category: Vibrator]]
