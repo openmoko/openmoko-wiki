@@ -1,171 +1,130 @@
-=On the Openmoko device =
+= OpenMoko Networking Setup =
 
-== Name resolution ==
+In order to communicate via TCP/IP to your FreeRunner, a basic understanding of the networking expectations is required.  Each end of the USB connection forms a LAN (local area network) segment, with the FreeRunner's USB networking device at one end (default 192.168.0.202) and your laptop or desktop at the other end (192.168.0.200 in this guide).
 
-By default Openmoko's usb0 interface is available as the Ethernet gadget (g_ether) is compiled into the kernel.
+Normally, your desktop machine will know how to reach the Internet, having had its gateway (the IP address of the machine or device which knows how to send packets to machines beyond your subnet) configured via DHCP or statically (probably via a router).  For the FreeRunner to reach the Internet, your desktop will have to be configured to route and masquerade (NAT) packets from it.  
 
-On the Openmoko device, if you want to connect to the Internet using a fully qualified hostname, your DNS server should be defined. To achieve this, create a file /etc/resolv.conf with at least one line reading:
+Normally, none of this is an issue, but problems can arise when the subnet between the FreeRunner and your desktop overlap with the desktop to the router (which forms a second LAN), since your desktop might not know how to route traffic properly.
 
- nameserver xxx.xxx.xxx.xxx
+= DNS =
 
-e.g. nameserver 192.168.1.1
+In addition to routing issues, to be practical, DNS will need to work.  In some cases, you might already be running a DNS server on your desktop such as dnsmasq or bind9, which is the default assumption the FreeRunner makes.  In other cases, you'll need to configure DNS to that of your router, or a DNS server further out on the internet such as that provided by your ISP.
 
-(if you are unsure as to which nameserver IP address to use, a valid IP is typically available in the /etc/resolv.conf file of your host system)
+= Linux Kernel Support =
 
-It is also possible to update your 2007.2 OpenMoko package with the command "opkg update && opkg upgrade" on the phone.
-<br><br>
-A better approach is to edit: /etc/network/interfaces and modify the line:<br><br>
-<code>
-up echo nameserver 192.168.0.200 >/etc/resolv.conf
-</code><br>
-to specify your preferred DNS server instead of 192.168.0.200.
-<br><br>
-example:  <code>up echo nameserver 4.2.2.2 >/etc/resolv.conf</code>
+Your Linux desktop/laptop needs to have suitable support, in particular, you will need to have enabled full masquerading in the kernel and USB networking options:
 
-
-Another approach is to create a symlink  (NOW OBSOLETE?)
-
- ln -s /var/run/resolv.conf /etc/resolv.conf
-
-and fill the file at bootup with a script /etc/network/if-up.d/08setupdns containing:
-
- #!/bin/sh -e
- echo  nameserver 192.168.0.200 > /var/run/resolv.conf
-
-this way the file is correctly handled from the ppp package when dialing into gprs.
-
-== Routing ==
-
-You need an additional route for traffic to the internet. This traffic can be routed through your PC (see below) if the PC is the default route destination. This can be achieved by adding
-
- gateway 192.168.0.200
-
-to your /etc/network/interfaces in the usb0 section.
-
-= On the desktop computer =
-
-== Manual method ==
-
-With the device connected, modprobe usbnet module and configure usb0 interface (as root):
-<pre>
-ifconfig usb0 192.168.0.200 netmask 255.255.255.0
-</pre>
-If your eth0 interface is also in the same 'range' (e.g. 192.168.0.105) then you can do the following:
-
-1. ping the Neo with
- # ping -I usb0 192.168.0.202
-2. add a route to your Neo:
- # /sbin/route add -host 192.168.0.202/32 dev usb0
-3 log in to the Neo
- # ssh root@192.168.0.202
-
-If you don't have the necessary modules to get usb0 going, make sure you have the following kernel options enabled:
 * CONFIG_USB_USBNET
 * CONFIG_USB_NET_CDCETHER
-Both options are available in the ''Device Drivers -> USB support -> USB Network Adapters'' or ''Device Drivers -> Network Device Support -> USB Network Adapters -> Multipurpose USB Networking Framework''. For more info see the [http://www.linux-usb.org/usbnet/ usbnet driver homepage].
 
-Do not forget to adjust your firewall so that you can connect to the device.
+Both USB networking options are available in the ''Device Drivers -> USB support -> USB Network Adapters'' or ''Device Drivers -> Network Device Support -> USB Network Adapters -> Multipurpose USB Networking Framework''. For more info see the [http://www.linux-usb.org/usbnet/ usbnet driver homepage].
 
-To manually enable iptables pass-through on the host for those using a distribution not listed in the Automatic method:
- # echo 1 > /proc/sys/net/ipv4/ip_forward
- # iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
- # iptables -P FORWARD ACCEPT
+It can be complex to set all the correct options for masquerading in the kernel if they are not turned on.  This could be detailed further.
 
-Manually disable nat pass-through using:
- # iptables -t nat -F POSTROUTING
- # echo 0 > /proc/sys/net/ipv4/ip_forward
+= Simple Manual Linux Configuration =
 
-This could be put in a script to call on demand or more elegantly automated, otherwise follow the Automatic method for your distribution.
+Try this first.  If it works, then you can add permanent configuration or use more sophisticated setups below:
 
-== Automatic method ==
+(as root):
 
-Took from [http://blog.haerwu.biz/2007/03/22/hotpluging-usbnet/ Hotplugging usbnet] post by Marcin 'Hrw' Juszkiewicz.
+ iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
+ echo 1 > /proc/sys/net/ipv4/ip_forward
+ ifconfig usb0 192.168.0.200
 
-=== Debian or similar ===
-Edit /etc/network/interfaces:
+Then (ideally, not as root):
+
+ ssh root@192.168.0.202
+
+== Testing Your Connection ==
+
+Log in with a blank password (press enter).  Now, make sure you can ping back to your desktop:
+
+ ping 192.168.0.200
+
+This tests the basic network connection.
+
+(Note that some systems like Vista, don't respond to ICMP ping by default) 
+
+Or your router, for example (your IP will probably be different):
+
+ ping 192.168.1.99
+
+Or to a Google IP:
+
+ ping 74.125.19.147
+
+This demonstrates that masquerading is working - your desktop is sending/receiving packets to the wider internet.
+
+== Configure DNS ==
+
+Note that step won't help much if you don't have connectivity above.  DNS is configured in /etc/resolv.conf.  Note that manual changes to this file might get lost later if for example you use DHCP, especially for WiFi.  It should contain:
+
+ nameserver 192.168.0.200
+
+Which means it is expecting your desktop to have a DNS server.  If this isn't true, then probably your router will be - put 192.168.1.99 (for example, you value will probably be different), or an explicit IP given by your ISP.  If in doubt, look at /etc/resolv.conf on your desktop  machine.
+
+Test if it works:
+
+ ping www.google.com
+
+If so, then this is sufficient for most internet access, but may not be convenient to configure manually each time.
+
+== Firewall Issues == 
+
+On some systems, you may have firewall rules which prevent this working - such as added by the iptables service on Fedora.  You may care to stop these, and/or review any rules or policies you think might cause issues.
+
+= Make it Permanent =
+
+Based up [http://blog.haerwu.biz/2007/03/22/hotpluging-usbnet/ Hotplugging usbnet] by Marcin 'Hrw' Juszkiewicz.
+
+== Debian, Ubuntu and others ==
+
+Edit /etc/network/interfaces and add:
+
 <pre>
-allow-hotplug usb0
-iface usb0 inet static
+ allow-hotplug usb0
+ iface usb0 inet static
         address 192.168.0.200
-        netmask 255.255.255.0
-        network 192.168.0.0
-        post-up iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
+        netmask 255.255.255.192
+        post-up iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.192/26
         post-up echo 1 > /proc/sys/net/ipv4/ip_forward
         post-up iptables -P FORWARD ACCEPT
+        pre-down iptables -D POSTROUTING -t nat -j MASQUERADE -s 192.168.0.192/26
 </pre>
 
-I would even suggest to use the more refined one bellow, to adapt to existing home networks already using 192.168.0.x addresses (which would be between 192.168.0.1 and 192.168.0.191) -- [[User:OlivierBerger|OlivierBerger]] :
-<pre>
-allow-hotplug usb0
-iface usb0 inet static
-	address 192.168.0.200
-	netmask 255.255.255.192
-	post-up iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.192/26
-        post-up echo 1 > /proc/sys/net/ipv4/ip_forward
-        post-up iptables -P FORWARD ACCEPT
-	pre-down iptables -D POSTROUTING -t nat -j MASQUERADE -s 192.168.0.192/26
-</pre>
+This is more sophisticated than the manual setup.  The allow-hotplug stanza ties into Linux hotplug system so that when the device appears and vanishes, as happens when the FreeRunner's is connected via USB, this is run.  
 
-=== Ubuntu (Tested with Feisty, Gutsy and Hardy) ===
-Edit /etc/network/interfaces:
-<pre>
-auto usb0
-iface usb0 inet static
-        address 192.168.0.200
-        netmask 255.255.255.0
-        network 192.168.0.0
-        up iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24 &
-        up echo 1 > /proc/sys/net/ipv4/ip_forward &
-        up iptables -P FORWARD ACCEPT &
-        down iptables -D POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24 &
-</pre>
-?? What to do if your dhcp offers your eth0 is already in the 192.168.0.200 range? On ubuntu side it will work, but there is no editor on the openmoko to change on the device the bit in the ip number
+In addition, the desktop-side netmask is limited to a much smaller range, so that overlapping subnets are less of a problem - Linux will use more specific routes first when deciding where to send packets.
 
-If you are doing the echo 1 > /proc/... command manually, sudo may not be enough, then you will have to execute it from a sudo bash.
+=== Ubuntu Issues ===
 
-Ubuntu Feisty, Gutsy and Hardy appear to have a bug where ifdown is not run when the interface is unplugged, meaning this only works once after the system is booted. 
-
-This was reported to ubuntu a long time ago, so don't file a duplicate bug. Write a comment instead at https://bugs.launchpad.net/ubuntu/+source/ifupdown/+bug/130437 
+Ubuntu Feisty, Gutsy and Hardy reportedly have a bug where ifdown is not run when the interface is unplugged, meaning this only works once after the system is booted.  This is mentioned at https://bugs.launchpad.net/ubuntu/+source/ifupdown/+bug/130437 
 
 One can patch /etc/udev/rules.d/85-ifupdown.rules, editing the two lines at the end of the file:
-<pre>
-SUBSYSTEM=="net", DRIVERS=="?*", GOTO="net_start"
-GOTO="net_end"
 
-LABEL="net_start"
+ SUBSYSTEM=="net", DRIVERS=="?*", GOTO="net_start"
+ GOTO="net_end"
+ 
+ LABEL="net_start"
+ 
+ # Bring devices up and down only if they're marked auto.
+ # Use start-stop-daemon so we don't wait on dhcp
+ ACTION=="add",          RUN+="/sbin/start-stop-daemon --start --background --pidfile /var/run/network/bogus --startas /sbin/ifup -- --allow auto $env{INTERFACE}"
+ 
+ LABEL="net_end"
 
-# Bring devices up and down only if they're marked auto.
-# Use start-stop-daemon so we don't wait on dhcp
-ACTION=="add",          RUN+="/sbin/start-stop-daemon --start --background --pidfile /var/run/network/bogus --startas /sbin/ifup -- --allow auto $env{INTERFACE}"
+ ACTION=="remove",       RUN+="/sbin/start-stop-daemon --start --background --pidfile /var/run/network/bogus --startas /sbin/ifdown -- --allow auto $env{INTERFACE}"
 
-LABEL="net_end"
+The bug is that the LABEL="net_end" is at the wrong position
 
-ACTION=="remove",       RUN+="/sbin/start-stop-daemon --start --background --pidfile /var/run/network/bogus --startas /sbin/ifdown -- --allow auto $env{INTERFACE}"
-</pre>
+== Mandriva ==
 
-the bug is that the LABEL="net_end" is at the wrong position
-
-<pre>
-Once connected to usb0 through the terminal, you can click on: 
-Places > Connect to Server >
-
-Service Type: SSH
-Server 192.168.0.202
-User Name: root
-
-Allowing for a GUI interface for all your file transfers and editing.
-</pre>
-
-=== Mandriva ===
-Tested with Mandriva 2008.1
-
-This is the method that worked for me, YMMV. My network is on the 192.168.0.0 subnet so these instructions will have to be modified if you are on a different subnet.
-
-The idea here is that we will carve out a small (8 hosts) subnet from the main subnet. So our netmask will be 255.255.255.252
+Tested with Mandriva 2008.1. The idea here is that we will carve out a small (8 hosts) subnet from the main subnet. So our netmask will be 255.255.255.252
 
 This first file configures the network system for the usb0 interface. Any time you plug in the FreeRunner the interface will be configured. 
 
-/etc/sysconfig/network-scripts/ifcfg-usb0
+/etc/sysconfig/network-scripts/ifcfg-usb0:
+
  DEVICE=usb0
  BOOTPROTO=static
  IPADDR=192.168.0.200
@@ -177,7 +136,8 @@ This first file configures the network system for the usb0 interface. Any time y
 
 This next file configures the static routes that we need to communicate to the subnet. Since it has "usb0" in the name, the system will automatically apply these static routes any time that the usb0 interface is configured. (i.e. when you connect the FreeRunner)
 
-/etc/sysconfig/network-scripts/usb0-routes
+/etc/sysconfig/network-scripts/usb0-routes:
+
  ADDRESS0=192.168.0.200
  NETMASK0=255.255.255.252
 
@@ -185,44 +145,43 @@ Now we need to restart the network system to pick up the changes.
 
  service network restart
 
-If you want to make your life a little easier by not having to type out the FreeRunners ip address each time add an alias by adding a line to your hosts file.
+== SuSE ==
 
-/etc/hosts
+/etc/sysconfig/network/ifcfg-usb0:
 
- <any existing lines>
- 192.168.0.202       moko
-
-=== SuSE ===
-/etc/sysconfig/network/ifcfg-usb0
  # USB configuration for PDAs (openmoko)
  IPADDR=192.168.0.200
  NETMASK=255.255.255.0
  STARTMODE=onboot
 
-For more information on getting USB networking up using YaST, see [[USB_Networking_with_openSUSE]].
+For more information on getting USB networking up using YaST, see [[USB Networking with openSUSE]].
 
-=== Fedora ===
+== Fedora ==
 
-==== Option (A) (Tested with FC8) ====
-/etc/sysconfig/network-scripts/ifcfg-usb0
-<pre>
-# USB configuration for PDAs (openmoko)
-# from http://www.handhelds.org/moin/moin.cgi/UsbNet
-DEVICE=usb0
-BOOTPROTO=none
-IPADDR=192.168.0.200
-NETMASK=255.255.255.0
-ONBOOT=yes
-</pre>
+=== Option A - Tested with FC8 ===
 
-==== Option (B) ====
+/etc/sysconfig/network-scripts/ifcfg-usb0:
 
-Set /etc/sysconfig/network-scripts/ifcfg-usb0 to this:
+ # USB configuration for PDAs (openmoko)
+ # from http://www.handhelds.org/moin/moin.cgi/UsbNet
+ DEVICE=usb0
+ BOOTPROTO=none
+ IPADDR=192.168.0.200
+ NETMASK=255.255.255.0
+ ONBOOT=yes
+
+=== Option B ===
+
+This setup is probably over-complex:
+
+/etc/sysconfig/network-scripts/ifcfg-usb0:
+
  DEVICE=usb0
  IPADDR=192.168.0.200
  NETMASK=255.255.255.0
 
-Set /etc/sysconfig/network-scripts/ifup-usb to this:
+/etc/sysconfig/network-scripts/ifup-usb:
+
  #!/bin/bash
  
  . /etc/init.d/functions
@@ -249,7 +208,8 @@ Set /etc/sysconfig/network-scripts/ifup-usb to this:
  /sbin/iptables -I FORWARD -s ${IPADDR}/${NETBITS} -j ACCEPT
  /sbin/iptables -I FORWARD -d ${IPADDR}/${NETBITS} -j ACCEPT
 
-Set /etc/sysconfig/network-scripts/ifdown-usb to this:
+Set /etc/sysconfig/network-scripts/ifdown-usb:
+
  #!/bin/bash
  
  . /etc/init.d/functions
@@ -276,17 +236,22 @@ Set /etc/sysconfig/network-scripts/ifdown-usb to this:
  /sbin/ip addr flush dev ${DEVICE} 2>/dev/null
 
 If you are using NetworkManager, restart it and enable the usb device from its menu, otherwise it will disable your connection shortly after you enable it.
+
  /sbin/service NetworkManager restart
 
-=== Red Hat or similar (tested with Workstation 5) ===
+== Red Hat or Similar (tested with Workstation 5) ==
+
 Edit /etc/sysconfig/network-scripts/net.hotplug:
 
-After this command
+After this command:
+
 <pre>
     case $INTERFACE in
 	# interfaces that are registered after being "up" (?)
 </pre>
+
 add
+
 <pre>
 	usb0)
 		ifconfig usb0 192.168.0.200 netmask 255.255.255.0
@@ -299,26 +264,38 @@ add
 	;;
 </pre>
 
-=== Gentoo ===
-* Open /etc/conf.d/net and add:
+== Gentoo ==
+
+Open /etc/conf.d/net and add:
+
  # Neo
  config_usb0=( "192.168.0.200 netmask 255.255.255.0" )
  routes_usb0=( "192.168.0.202/32 via 192.168.0.200" )
-* Create a new init script:
+
+Create a new init script:
+
  cd /etc/init.d
  ln -s net.lo net.usb0
-* Put iptables into use:
+
+Put iptables into use:
+
  iptables -I INPUT 1 -s 192.168.0.202 -j ACCEPT
  iptables -I OUTPUT 1 -s 192.168.0.200 -j ACCEPT
  iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
-* Store them
+
+Store them:
+
  /etc/init.d/iptables save
-* If you want the routing by default:
+
+If you want the routing by default:
+
  rc-update add iptables default
-* You must also inform the kernel, to start forwarding.  
+
+You must also inform the kernel, to start forwarding.  
+
  echo 1 > /proc/sys/net/ipv4/ip_forward
 
-One way to automate all this is to create /etc/conf.d/net.usb0 as follows. It sets ip forwarding and the iptables rules all in one go. It removes the iptables rules and disables ip forwarding when the NEO is unplugged.
+One way to automate all this is to create /etc/conf.d/net.usb0 as follows. It sets IP forwarding and the iptables rules all in one go. It removes the iptables rules and disables ip forwarding when the FreeRunner is unplugged.
  
  preup() {
         echo 1 > /proc/sys/net/ipv4/ip_forward
@@ -336,65 +313,51 @@ One way to automate all this is to create /etc/conf.d/net.usb0 as follows. It se
         return 0
  }
 
-=== MacOS X ===
+== MacOS X ==
 See the [[MacOS_X#USB_Networking|USB Networking section in the MacOS X article]].
 
-=== Windows ===
+== Windows ==
 See the [[Neo1973_and_Windows#USB_Ethernet_emulation|USB Ethernet emulation section in the Neo1973 and Windows]] article.
 
-= Mobile development  =
 
-== Proxying DNS requests ==
+= More on DNS =
 
-If, like me, you move about quite a lot, connecting to various networks as you go and getting your ip via dhcp, you'll probably be annoyed at having to constantly update your resolv.conf on the Neo 1973.
+== Hostnames ==
 
-To get round this, as part of my setup script, I run a proxy dns on the ip address the neo comes in on at the usb0 port. This means that my Neo /etc/resolv.conf only contains:
+Instead of using the IP address, instead enter in your desktop's /etc/hosts:
 
- nameserver 192.168.0.200 
+ 192.168.0.200 openmoko
 
-and my laptop will proxy all dns requests based on it's own /etc/resolv.conf
+Then instead type:
 
-'''note that we only run the dns proxy on the usb0 interface so that we don't break any other networking'''
+ ssh root@openmoko
+
+== DNS proxying ==
+
+If you move about, making assumptions about the network may not be convenient, and it is possible to proxy DNS requests via your host laptop (which you are also taking with you).  There are a number of ways to do this:
 
 === Proxying with dnrd ===
 
-The script is designed to use [http://dnrd.sourceforge.net/ dnrd] as the dns proxy. The [http://buildhost.automated.it/gta01 script] and a copy of [http://buildhost.automated.it/dnrd-2.20.3.tar.gz dnrd] are available from my site. The script also performs the initial setup of the connection as per the [[USB_Networking#Manual_method]] above.
+The script is designed to use [http://dnrd.sourceforge.net/ dnrd] as the DNS proxy. The [http://buildhost.automated.it/gta01 script] and a copy of [http://buildhost.automated.it/dnrd-2.20.3.tar.gz dnrd] are available. The script also performs the initial setup of the connection as per the [[USB_Networking#Manual_method]] above.
 
 === Proxying with a UDP forwarder ===
-Another easy setup is using a udp forwarder like the one from http://www.tapor.com/udpf/ - is use it with the command
 
- udpf-elf\
-        -p=53\
-        -f=`cat /etc/resolv.conf|awk '$1 == "nameserver"{print $2; exit(0);}'`:53
+Another easy setup is using a UDP forwarder like the one from http://www.tapor.com/udpf/ - use it with the command"
+
+ udpf-elf -p=53-f=`cat /etc/resolv.conf|awk '$1 == "nameserver"{print $2; exit(0);}'`:53
 
 === Proxying with iptables ===
-Its is possible to forward DNS requests with iptables using the DNAT target
+
+It is possible to forward DNS requests with iptables using the DNAT target:
 
  iptables -t nat -A PREROUTING -p tcp -s 192.168.0.202 -d 192.168.0.200 --dport domain -j DNAT --to-destination 192.168.0.1
  iptables -t nat -A PREROUTING -p udp -s 192.168.0.202 -d 192.168.0.200 --dport domain -j DNAT --to-destination 192.168.0.1
 
-where <tt>192.168.0.1</tt> is the IP of your residential gateway (router). This is the easiest method, but its not recommended if you have a direct connection to the Internet as ISP DNS servers can change, and this does no load-balancing.
+Where <tt>192.168.0.1</tt> is the IP of your router. 
 
-= Connecting to phone =
+= SSH Extras =
 
-Then <tt>ssh root@192.168.0.202</tt> with empty password to get into phone.
-
-NOTE: the ssh daemon (dropbear 0.49) on the OpenMoko appears to have a bug when sending the exit status back to the client. From time to time you receive an exit status of 255.
-
-===SSH Extras===
-
-If you get fed up with typing root@192.168.0.202, on your PC edit /etc/hosts and add an entry for 'phone'
-
- 192.168.0.202 phone
-
-then edit ~/.ssh/config (or create it) and add
-
- host phone
- user root
-
-then all you need to do is type 
-
- # ssh phone
+Reportedly, the ssh daemon (dropbear 0.49) on the FreeRunner appears to have a bug when sending the exit status back to the client. From time to time you receive an exit status of 255.
 
 To avoid ssh added a new line for every ssh host-key to you known_hosts you can add the following to the phone section in ~/.ssh/config
 
@@ -402,22 +365,23 @@ To avoid ssh added a new line for every ssh host-key to you known_hosts you can 
 
 You might want to use keys to bypass the login prompt too.
 
-===SSH Keys===
-====From host to phone====
+== SSH Keys ==
 
-To generate ssh keys for use as a login mechanism type
+== From desktop to FreeRunner ==
+
+To generate ssh keys for use as a login mechanism type:
 
  ssh-keygen -t rsa
 
-when prompted for a password either hit enter for no password (''not really a good idea'') or enter a password for this key. ssh into the phone and create ~/.ssh
+When prompted for a password either hit enter for no password (''not really a good idea'') or enter a password for this key. ssh into the phone and create ~/.ssh:
 
  # mkdir ~/.ssh
 
-then from your PC copy the '''.pub''' file to the phone.
+Then from your desktop copy the '''.pub''' file to the phone.
 
  # scp ~/.ssh/id_rsa.pub phone:.ssh/authorized_keys
 
-You should now be able to ssh directly into the phone.
+You should now be able to ssh directly into the phone without a password prompt.
 
 To disable password logins ('''after setting up key access''') edit /etc/init.d/dropbear and change the following line:
 
@@ -429,8 +393,9 @@ to
 
 You will need to restart dropbear for this to take effect.
 
-====From phone to host====
-Generate the key
+=== From FreeRunner to Desktop ===
+
+Generate the key:
 
   dropbearkey -t rsa -f id_rsa
 
@@ -448,15 +413,9 @@ From the phone, ssh with -i:
 
   ssh -i id_rsa user@host
 
-This works for me.  I ripped off these instructions from: [[http://forum.openwrt.org/viewtopic.php?pid=53705]]
+=== Changing host keys ===
 
-====Changing host keys====
- From: Joachim Steiger <roh@openmoko.org>
- Date: Thu, Jul 17, 2008 at 2:21 PM
-	
-for people who often reflash 
-and thus have new host keys on their mokos 
-i can share this ~/.ssh/config snippet:
+If you reflash, your hosts keys will change.  Try this ~/.ssh/config snippet:
 
  Host moko
  HostName 192.168.0.202
@@ -464,29 +423,23 @@ i can share this ~/.ssh/config snippet:
  UserKnownHostsFile /dev/null
  User root
 
-the result is that one can just 'ssh moko' press return and be done
-(logged in) every time. but beware: it ignores changing host keys
-completely then. (one could tap your usb cable!!!!) ;)
+This is suggested because ssh on your desktop may complain if the key matching a certain IP changes (stored in .ssh/known_hosts).
 
+== GUI on desktop through SSH ==
 
-[[Category:Hardware]]
-[[Category:USB| ]]
-
-===GUI on desktop through SSH===
-
-If you need to get the GUI on the phone onto the desktop via usb, you can use ssh as follows
+To get the GUI on the FreeRunner onto the desktop via USB, you can use ssh as follows:
 
   ssh -l root -X -v 192.168.0.202
 
-Login, and run openmoko-finger-demo for example, and it will open up on the desktop. To get landscape view, just resize the GUI window on the desktop.
+Using this, run openmoko-finger-demo for example, and it will open up on the desktop. To get landscape view, just resize the GUI window on the desktop.
 
-===Remote apps on neo===
+==Remote apps on neo==
 
-To get desktop apps to show up on your neo, first log in to the phone
+To get desktop apps to show up on your FreeRunner, first log in:
 
   ssh -l root 192.168.0.202
 
-Then once inside, run:
+Then run:
 
   DISPLAY=:0 xhost +192.168.0.200
 
@@ -501,5 +454,6 @@ Note that the xhost command will allow remote applications on 192.168.0.200 to a
 <span id="bottom"></span> 
 {{Languages|USB Networking}}
 
+[[Category:USB]]
 [[Category:Hardware]]
 [[Category:Implemented]]
