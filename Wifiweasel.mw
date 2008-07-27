@@ -198,6 +198,120 @@ exec "$@"
 not sure but i think one has to make the /tmp/ files manually
 *fixed as of v2
 
+= Am Improved Version Of wifiweasel = 
+
+Looking carefully through the code there seemed to be logical errors in the control structure of the program. This version is supposed to be logically similar without the recursive function calls. I have made very limited use of it but am submitting it here in case its useful for others. I call it wifiweasel3.sh It also uses environment variables instead of temporary files, which may or may not be a good thing. 
+
+ 1) Copy it to your phone, 
+ 2) chmod +x wifiweasel3.sh 
+ 3) ensure that you have the timeout program above copied and executable. 
+ 4) Run it - At first you can try 
+   wifiweaselv3.sh -v 
+   which gives you a verbose account of what is happening. 
+   you can also do 
+   wifiweasel start
+   and wifiweasel stop
+  
+   which keeps it silently backgrounded. 
+
+Here is the code: 
+
+<pre>#!/bin/sh
+####### WifiWeasel ###### 
+# Ver. 2               ##
+#########################
+# 08-07-22             ##
+##        kd8ikt       ##
+##  we.trekbeyond.org  ##
+#########################
+# Ver 3 Mark Winder 27/7/8
+#########################
+#
+#install /usr/bin/wifiweasel
+#
+#Variables
+IFACE=eth0
+DHCP_TIMEOUT=5       # requires /usr/bin/timeout
+CHECK_NET_TIMER=15   #secs
+# call -v for debug to std out 
+PIDFILE=/tmp/wifiweasel.pid 
+[[ "$1" == '-v' ]] && debug=1 && shift
+if [[ "$1" == 'start' ]] 
+then 
+   shift 
+   wifiweasel3.sh "$@" & 
+   echo $! > $PIDFILE 
+   exit 
+fi 
+if [[ "$1" == 'stop' ]] 
+then 
+   if [[ -e $PIDFILE ]] 
+   then 
+     kill $(cat $PIDFILE) 
+     rm $PIDFILE 
+     echo "WiFiWeasel stopped"; 
+   fi 
+   exit 
+fi 
+
+#
+#Functions
+#
+#### Scan Funk
+Func_iwlist_open () 
+{
+  ESSID=$(iwlist $IFACE scanning | 
+      awk -F '[ :=]+' '/(ESS|Freq|Qual)/{ printf $3" " } /Encr/{ print $4 }'  | 
+      sort -k4 -k3nr |grep off | 
+      head -n1| sed 's/^"//;s/".*$//'
+    )
+  [[ $debug ]] && echo Using ESSID $ESSID 
+}
+#### interface down Funk
+Func_ifconfig_down () 
+{
+  killall udhcpc 
+  ifconfig $IFACE down
+}
+#### iface up Funk
+Func_ifconfig_up () 
+{
+  ifconfig $IFACE up
+  iwconfig $IFACE essid $ESSID
+}
+#### Connection check Funk
+# 
+Func_net_ok ()	
+{
+  [[ $debug ]] && echo checking...   
+  export dns=`cat /etc/resolv.conf |grep name |awk '{print $2}'`
+  if timeout 1 nslookup  $dns > /dev/null 2>&1 
+  then 
+    [[ $debug ]] && echo Online!  $ESSID 
+    return 0 # net is ok 
+  else
+    [[ $debug ]] && echo "FAIL! $?  ... Searching "
+    return 1 # net not ok 
+  fi 
+}
+# RunProgram
+while [[ 1 ]] 
+do 
+   if [[ -z $ESSID ]] # no essid ? 
+   then
+     Func_ifconfig_down
+     Func_iwlist_open
+     Func_ifconfig_up
+     timeout $DHCP_TIMEOUT udhcpc $IFACE > /dev/null 2>&1 
+   fi 
+   sleep $CHECK_NET_TIMER
+   Func_net_ok || ESSID="" 
+done 
+#####################EOF#EOF#EOF#EOF#EOF#EOF#EOF#EOF#EOF#########
+
+
+</pre>
+
 =sandbox=
 ====iwscan perl====
 <pre>
