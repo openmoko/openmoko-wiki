@@ -83,6 +83,34 @@ Create and edit a suitable [[GTA02_WLAN#Sample_wpa_supplicant.conf|/etc/wpa_supp
       priority=5
  }
 
+======wpa_supplicant.conf explained======
+highest priority tried first then falls back sequentially to the next highest number<br>
+priority=100  1st  <br>
+then<br>
+priority=99  <br> 
+<pre> 
+
+# Simple case: WPA-PSK, PSK as an ASCII passphrase, allow all valid ciphers
+network={
+	ssid="AP_ESSID"
+	psk="presharedkey"
+	priority=5
+}
+
+
+#try open AP regardless of its SSID.
+# change root password before you go roaming around it could prove dangerous
+network={
+	key_mgmt=NONE
+priority=1  #try any open AP last
+}
+</pre>
+more in depth explanation see<br> 
+http://hostap.epitest.fi/gitweb/gitweb.cgi?p=hostap.git;a=blob_plain;f=wpa_supplicant/wpa_supplicant.conf
+
+
+
+
 == A very ugly /etc/init.d/wlan startscript ==
  #!/bin/sh
  #
@@ -189,32 +217,6 @@ The following may be helpful in order to scan available networks :
 
 lint-wifi work in progress<br>
 http://wiki.openmoko.org/wiki/Lint-wifi
-
-======wpa_supplicant.conf tips======
-highest priority tried first then falls back sequentially to the next highest number<br>
-priority=100  1st  <br>
-then<br>
-priority=99  <br> 
-<pre> 
-
-# Simple case: WPA-PSK, PSK as an ASCII passphrase, allow all valid ciphers
-network={
-	ssid="AP_ESSID"
-	psk="presharedkey"
-	priority=5
-}
-
-
-#try open AP regardless of its SSID.
-# change root password before you go roaming around it could prove dangerous
-network={
-	key_mgmt=NONE
-priority=1  #try any open AP last
-}
-</pre>
-more in depth explanation see<br> 
-http://hostap.epitest.fi/gitweb/gitweb.cgi?p=hostap.git;a=blob_plain;f=wpa_supplicant/wpa_supplicant.conf
-
 
 
 
