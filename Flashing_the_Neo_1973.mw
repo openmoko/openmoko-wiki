@@ -97,15 +97,18 @@ Note: In case there are more than one available usb devices use -d 0x1457:0x5119
 
 To update u-boot:
 
-{{Warning|Do not update u-boot unless you have [[debug board]] or are really sure about what you are doing. Flashing a wrong u-boot image will brick your device! Note especially that image below is for GTA01B_v03, not GTA01B_v04
+{{Warning|Do not update u-boot unless you have [[debug board]] or are really sure about what you are doing. Flashing a wrong u-boot image will brick your device!}}
 
- ./dfu-util -a u-boot -R -D u-boot-gta01bv3-r8_70124c2602ae2d4c5d3dba05b482d91548242de8_0_2040.bin}}
-
-This is simple - even if I find it somehow scary to flash the bootloader of a device. Don't be too scared, though: Unlike any other device I know the Freerunner contains a second bootloader on a write protected chip - that is still there, even if flashing the original bootloader goes horribly wrong. You can always make the phone use this bootloader instead by pressing the power button whilst pressing the Aux button. In theory it should therefore be impossible to brick your phone completely enough by flashing the bootloader that a debug board is needed to unbrick it.
+I you own a FreeRunner don't be too scared, though: Unlike nearly any other deviceon the market the Freerunner contains a second bootloader on a write protected chip - that is still there, even if flashing the original bootloader goes horribly wrong. You can always make the phone use this bootloader instead by pressing the power button whilst pressing the Aux button - and get a second and any sucessive try to flash the u-boot loader the right way. In theory it should therefore be impossible to brick your phone completely enough by flashing the bootloader that a debug board is needed to unbrick it.
 * Download the newest uBoot binary from http://downloads.openmoko.org/releases/Freerunner/
 * start the cellular phone by pressing power whilst pressing the aux button.
-* Run the following command:  
+* Run the following command, but Note especially that the image used in the line below is for GTA02_v5.
+
  dfu-util -a u-boot -R -D uboot-gta02v5-latest.bin
+
+The u-boot of a GTA01B_v03 (And only of a GTA01B_V03, not for example a GTA01B_v04) can be flashed with the following image: 
+ ./dfu-util -a u-boot -R -D u-boot-gta01bv3-latest.bin
+
 * The device is now flashed: 
  dfu-util - (C) 2007 by OpenMoko Inc.
  This program is Free Software and has ABSOLUTELY NO WARRANTY
@@ -130,7 +133,6 @@ This is simple - even if I find it somehow scary to flash the bootloader of a de
 * The last message (status(0)) tells us everything just worked fine - at the next boot the device will be started by the newest uboot loader.
 
 
-
 To update the kernel:
  ./dfu-util -a kernel -R -D ./uImage-2.6.21.1-moko10-r0_0_1883_0-fic-gta01.bin
 Flashing the kernel will probably take less than 1 minute. If you're having trouble, you may want to compare the output that you see to a "known good" [[Flashing openmoko/Known good kernel flash U-Boot output | U-Boot]]/[[Flashing openmoko/Known good kernel flash dmesg output | dmesg]]/[[Flashing openmoko/Known good kernel flash dfu-util output | dfu-util]] output. The phone display should show "Starting DFU DOWNLOAD to partition 'kernel'.
@@ -148,14 +150,17 @@ Notice that it's not normally necessary to update the modules anymore. It's just
 
 ...now, you'll end up with system that boots, but does not see audio/SD card. You'll need to download corresponding modules.tgz and copy them over to openmoko.  - UPDATE:  GTA01 phones appear to not need this step, as long as you have installed a kernel that matches the version of the modules contained in the root image ('uname -r' will show the kernel version, and 'ls /lib/modules/' will show the modules that are present).
 
-VERY IMPORTANT NOTE (I would consider that as a design flaw - either dfu-util should do it automatically): If you upload rootfs image that is smaller that previous one it won't work - you need to attach to the u-boot bootloader, erase NAND first and then upload your rootfs:
+== IMPORTANT NOTEs FOR EARLY ADOPTERS: ==
+Some ols U-Boot versions are very buggy:
+ 
+For U-Boot versions until somewhere in 2007 if you uploaded your rootfs image that is smaller that previous one it wouldn't work - you needed to attach to the u-boot bootloader first, erase NAND partition that would contain the rootfs later and then upload your rootfs:
 
 <pre>
 cu -l /dev/ttyACM0
 GTA01Bv3 # nand erase rootfs
 </pre>
 
-Old versions of u-boot are buggy: You may have to press the AUX button every 25 seconds or so to prevent the phone from going to sleep while being flashed. It also does not erase rootfs before flashing it... to do that, do minicom /dev/ttyACM0, then nand erase rootfs.
+Also you may have to press the AUX button every 25 seconds or so to prevent the phone from going to sleep while being flashed. Very early versions also does not erase the  rootfs before flashing it... to do that, do minicom /dev/ttyACM0, then nand erase rootfs, like written above.
 
 Good luck!
 
