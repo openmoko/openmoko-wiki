@@ -1,271 +1,41 @@
-{{Languages|Om 2008.8 Locations}}
-{{Om 2008.8}}
 == Introduction ==
-'''Locations''' (codenamed ''Splinter'') is a location sharing application based on GPS and SMS.  It
-uses [http://www.openstreetmap.org OpenStreetMap] as its map source and allows users to manage and share saved locations.
+Splinter is an UI application in Diversity project.
+Splinter is a map-based application for user to browse map, see the fixed position, manage locations saved that also called tags. 
+Splinter uses OSM(OpenStreetMap) map.
 
-{| class="wikitable" cellspacing="2" cellpadding="2" style="padding: 0%; margin:0em 0em 1em 0em; border:1px solid #c0c0c0; background:#eeeeee; width:100%;floating="center"; "
-! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:1px solid #222222; width:25% " |  
-[[Image:Main.png|200px|center]]
-! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:1px solid #222222; width:25% " |
-[[Image:Edit1.png|200px|center]]
-! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:1px solid #222222; width:25% " |
-[[Image:Om locations4.png|200px|center]]
-! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:1px solid #222222; width:25% " |
-[[Image:List.png|200px|center]]
-|}
 
-== Usage ==
-In addition to downloading map images from the OSM server, '''Locations''' also supports local maps, which can be downloaded through the [[Installer]].  You can also create your own maps if your city is not available.  For more information, refer to the [[#Create Your Own Maps]] section below. 
-The map data is copyright and available through a Creative Commons Licence, which can be quickly described as "CCbySA www.openstreetmap.org"
+== Screenshots ==
 
-=== Map === 
-Use the '''MAP''' view to manage ''Tags'' with options to ''save'', ''edit'' or ''send''.  '''MAP''' view also allows users to browse maps with zoom in and zoom out for accurate locating.  If you get lost while browsing, simply tap the '''REFRESH''' button to return to your current position.  It's that easy.
 
-=== List  ===
-'''LIST''' view is a a centralized place to view all of your ''Tags''.  The '''LIST''' view is a combination of your own saved ''Tags'' and ''Tags'' received by friends.  
-Selecting a ''Tag'' takes you to the exact position of the Tag in the '''MAP''' view.
+== User Case ==
+Right now, Splinter has map view and tag list view.
 
-=== Save & Send Tags ===
-Once you are connected to GPS, saving and sending tags to friends is fun and simple.
+In addition to downloading map images from OSM server as needed, Splinter supports local maps. Users can download map packages using Assassin, an installer tool, to download maps for some local cities.
 
-* '''Save''' a Tag
-# Press the '''touch me''' bubble that hovers above your current position.
-# After the message box appears, tap directly into the text boxes under ''Edit Title'' and ''Edit Messages'' to add your ''Tag'' title or message.
-# After entering your title or message, press '''SAVE''', at which point your newly created ''Tag'' will appear in both '''MAP''' and '''LIST''' views.
-# In the '''MAP''' view, tapping on the text of your ''Tag'' provides further options to ''edit'' or ''send'' your your ''Tag'' to a friend.
+In map view, 
+the user can see his current fixed position, browse the map, including zoomin / zoomout, dragging the map and do tag management on map, like tag save, edit, delete, and share. 
 
-* '''Send''' a Tag
-# In the '''MAP''' view, tap on the text of your ''Tag'', launching the '''edit * send''' bubble.
-# Pressing on ''send'' will launch the ''Send a Tag'' message box
-# Tap directly within the text boxes to edit your ''Tag'' before sending, or press ''Send'' and your ''Tag'' will be on its way.
+In list view, the user can see all the tags and click a tag item to go back to map view with the tag shown centralized.
 
-== Maps ==
 
-A map (.eet) is a collection of tiles.  You can install maps through [[Installer]] or create your own maps.  When looking for tiles to use, '''Locations''' will first try downloaded (cached) tiles.  If it fails, it will look for them in the available maps.  If it still fails, it will ask '''diversity-daemon''' to download, and cache them.  The following subsections provide instructions and tricks you can apply.
+== Architecture ==
+Splinter is an UI application, communicating with diversity-daemon dbus interface to get all the data it needs.
 
-=== Installation ===
-Maps can be installed from [[Installer]].
+What Splinter does and shows is based on and through diversity-daemon, like tag management and sharing, map downloading, gps status, etc.
 
-{| class="wikitable" cellspacing="0" cellpadding="0" style="padding: 0%; margin:0em 0em 1em 0em; border:1px solid #c0c0c0; background:#eeeeee; floating="center";width:100%; "
-! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:25% " |  
-[[Image:Install.png|200px|thumb|catogory]]
-! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:25% " |
-[[Image:Install_maps2.png|200px|thumb|choose map]]
-! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:25% " |
-[[Image:Install_maps3.png|200px|thumb|install map]]
-|}
 
-=== Create Your Own Maps ===
-
-{{Note | om-locations-map-pack comes with Om2008.9 (and before) eats lots of memory to pack tiles and fails easily on NEO.}}
-
-'''Locations''' comes with a tool called '''om-locations-map-pack'''. It can be used to pack tile images downloaded from the OSM server into a map package:
-
-<pre>
-om-locations-map-pack -v /tmp/diversity-maps my_map.eet
-</pre>
-
-Place '''my_map.eet''' in either of the directories
-
-<pre>
-/usr/share/om-locations/maps
-/media/card/om-maps
-</pre>
-
-and '''Locations''' will find it automatically.
-
-=== Share Maps ===
-To share maps for other Neo users to install, see directions on how to [[Community Repository#How_to_release_packages_.3F | add a package to Openmoko Repository]].
-
-=== Use SD Card for Tile Storage (Om2008.9) ===
-By default, tiles downloaded from the OSM server are stored in '''/tmp/diversity-maps'''.  They disappear after rebooting.  This default path can be changed to, for example, use SD card by adding/editing one line
-<pre>
-tile_path = /media/card
-</pre>
-
-to '''~/.om-locations/config/om-locations.cfg'''.
-
-You can make tangoGPS use the same tile cache as om-locations by editing the option. Change the cache on the config tab of tangoGPS to read '''/media/card/osm/'''. after that, any maps downloaded with om-locations will show up in tangoGPS, and vise versa.
-
-=== Download Tiles of a Region (Om2008.9) ===
-You can download tiles of a region by specifying '''-d''' option in '''om-locations-map-pack'''.  The usage is
-
-<pre>
-om-locations-map-pack -d version,source,min_level,max_level,lon,lat,width,height <tile-path>
-</pre>
-
-'''version''' can be any integer and '''source''' should be "osm".
-
-The easiest way to generate the description is through [http://people.openmoko.org/olv/om-maps/desc-gen.html Description Generator].  But you can also specify it manually.  For example, to download tiles of Taipei and store them on the SD card, one can
-
-<pre>
-om-locations-map-pack -d `date "+%Y%m%d"`,osm,5,16,121.5,25.0,0.1,0.1 /media/card
-</pre>
-
-In this example, a region of longitude between '''121.5''' to '''121.6''' and of latitude bwtween '''25.0''' to '''25.1''' is specified.  Tiles in this region and of levels from '''5''' to '''16''' are downloaded to '''/media/card'''.  By instructing '''Locations''' to use '''/media/card''' as its tile path, one could pre-download tiles of any region and have '''Locations''' use them.
-
-It is furthur possible to compress our map directory by eliminating white tiles and making it sparse. The display shown by TangoGPS is anyway white, so we can avoid some wasteful tiles. The space saving it gives us is nearly 40%.
-
-Let us say that the directory that holds the map tiles is OSM/ , then we can run this script on OSM/ as:
-
- sparsemap /media/card/OSM/
-
-The sparsemap script is:
-
- #!/bin/sh
-  sparse_png="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAAA1BMVEXy7+kRCi+bAAAAH0lEQVRoge3BAQ0AAADCoPdPbQ43oAAAAAAAAAAAvg0hAAABmmDh1QAAAABJRU5ErkJggg=="
- mapdir=$1
+== Design ==
+Splinter used EFL library to implement the UI.
+Sync with Diversity-daemon, Splinter has objects, world, viewport concept. There is a dbus wrapper layer for diversity daemon. 
+In pure UI part, we have widgets like dialogs, menus, different objects like tags, map tilesets, etc.
  
- [ -z $mapdir ] && mapdir=.
- [ ! -d $mapdir ] && echo "$mapdir is not a directory." && exit 1
- 
- SRCFILE=/tmp/sparse.png
- echo $sparse_png | base64 -d > $SRCFILE
- 
- log=/tmp/sparse.lst
- echo -n >$log
- 
- CWD=`pwd`
- cd $mapdir
- 
- find . -type f -size 103c | while read pngfile ; do
-   if diff $SRCFILE $pngfile 2>&1 >/dev/null ; then
-     echo $pngfile >> $log
-     rm $pngfile
-   fi
- done 
- 
- cd $CWD
- 
- bzip2 --best $log && log=/tmp/sparse.lst.bz2
- mv $log $mapdir
- 
- rm -f $SRCFILE
+In control part, we have a nav object for controlling the navigation, showing the tileset.
 
-== GPS ==
 
-'''Locations''' relies on '''diversity-daemon''' to communicate with the GPS device.  By default, the GPS device (/dev/ttySAC1) is opened directly.  However, it is possible to configure '''diversity-daemon''' to talk to gpsd.
-
-=== Using gpsd (git only) ===
-
-After gpsd is installed and started, it listens on port 2947 by default.  To make '''diversity-daemon''' talk to gpsd, one could add/change:
-
-<pre>
-gps_device = 127.0.0.1:2947
-</pre>
-
-to ~/.om-locations/config/om-locations.cfg.
-
-=== Logging (git only) ===
-
-It is possible to turn on GPS logging by adding
-
-<pre>
-gps_log = /home/root/GPSLogs
-</pre>
-
-in ~/.om-locations/config/om-locations.cfg.
-
-== Development ==
-'''Locations''' is written in C and [http://enlightenment.org/p.php?p=about/efl EFL].  It talks to '''diversity-daemon''' through [http://www.freedesktop.org/wiki/Software/dbus D-Bus] to, for example, send tags and download tiles.
-
-To compile diversity-daemon,
-
-<pre>
-$ svn checkout svn://svn.projects.openmoko.org/svnroot/diversity/trunk/diversity-daemon
-$ cd diversity-daemon
-$ ./autogen.sh
-$ ./configure --enable-session-bus
-$ make
-$ sudo make install
-</pre>
-
-Please ensure that at least Control and OpenStreetMap backends are enabled.  If not, check that you have libdbus-glib-1-dev and libcurl4-gnutls-dev (on debian) or similar packages installed.
-
-To compile Locations,
-
-<pre>
-$ git clone git://git.openmoko.org/git/om-locations.git
-$ cd om-locations
-$ ./autogen.sh
-$ make
-$ sudo make install
-</pre>
-
-Locations depends directly on recent versions of eet, evas, ecore, edje, and etk from EFL.  Please consult its website for instructions to build them.
-
-=== Using Toolchain ===
-
-{{Note | More tests needed on a clean machine.  At least, edje_cc is missing in this setup.}}
-
-After the recent release of the [[Toolchain]], it is possible to cross-compile '''Locations''' by following some simple steps.
-
-First, one need to get the [[Toolchain]],
-
-<pre>
-$ wget http://downloads.openmoko.org/developer/toolchains/openmoko-i686-arm-linux-gnueabi-toolchain.tar.bz2    # for x86
-$ wget http://downloads.openmoko.org/developer/toolchains/openmoko-x86_64-arm-linux-gnueabi-toolchain.tar.bz2  # for x86_64
-$ tar -C /tmp -jxf openmoko-i686-arm-linux-gnueabi-toolchain.tar.bz2
-$ sudo mv /tmp/usr/local/openmoko /usr/local
-</pre>
-
-and install the dependencies,
-
-<pre>
-$ . /usr/local/openmoko/arm/environment-setup
-$ opkg-target install libdbus-glib-1-dev curl-dev            # requirements for diversity-daemon
-$ opkg-target install libetk-dev edbus-dev libts-dev         # requirements for om-locations
-</pre>
-
-You are ready to compile '''diversity-daemon''' and '''om-locations''' now.  To compile '''diversity-daemon''',
-
-<pre>
-$ . /usr/local/openmoko/arm/environment-setup
-$ svn checkout svn://svn.projects.openmoko.org/svnroot/diversity/trunk/diversity-daemon
-$ cd diversity-daemon
-$ ./autogen.sh
-$ ./configure --host=arm-angstrom-linux-gnueabi --enable-session-bus
-$ make
-</pre>
-
-The binary is available at src/diversity-daemon.  To compile '''om-locations''',
-
-<pre>
-$ . /usr/local/openmoko/arm/environment-setup
-$ git clone git://git.openmoko.org/git/om-locations.git
-$ cd om-locations
-$ ./autogen.sh --host=arm-angstrom-linux-gnueabi
-$ make
-</pre>
-
-The binary and theme could be found at src/om-locations and data/themes/default.edj.
-
-== Feedbacks ==
-'''Locations''' uses [https://docs.openmoko.org/trac/ Trac] for bug tracking.  When report bugs, please choose category Locations so that they go to the developers directly.  There is no mailing list specific for '''Locations'''.  Please use http://lists.openmoko.org/mailman/listinfo/ for discussion.
-
-== Translations ==
-'''Locations''' will be I18N-aware (support multi-languages) in the next release.  To have your language(s) in the supported list, one can take this [http://people.openmoko.org/olv/tmp/om-locations_0.2.pot POT file] and upload your translation to [https://docs.openmoko.org/trac/ Trac] by creating a new ticket.
 
 == Reference ==
-[1] git repository of Locations - http://git.openmoko.org/?p=om-locations.git;a=summary
+[1] Diversity project - http://diversity.projects.openmoko.org/
 
-[2] Diversity project - http://diversity.projects.openmoko.org/
+[2] OpenStreetMap - http://www.openstreetmap.org/
 
-[3] Assassin project - http://code.google.com/p/om-assassin/
-
-[4] OpenStreetMap - http://www.openstreetmap.org/
-
-<onlyinclude>
-{{ApplicationBox|
-  Name=[[Om 2008.8 Locations]]|
-  Description=Locations (codenamed Splinter) is a location sharing application based on GPS and SMS.|
-  Screenshot=Main.png|
-  Homepage=|
-  TestedOn=Om 2008.8|
-  PackageName=
-}}
-</onlyinclude>
-
-[[Category:GPS Applications]]
-[[Category:Om 2008.8]]
+[3] Assassin - http://assassin.projects.openmoko.org/
