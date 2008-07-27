@@ -39,6 +39,9 @@ For a 2.6.25 kernel:
 *****JFFS2 ZLIB compression support
 
 ==== Mount on loopback device ====
+
+losetup is an application to manage loop devices, if you have the "losetup -f" option (for instance debian etch do not has such option) you can use the following commands:
+
  export loop=$(losetup -f)
  losetup $loop <rootfs.jffs2>
  modprobe block2mtd block2mtd=$loop,131072
@@ -46,6 +49,13 @@ For a 2.6.25 kernel:
  modprobe mtdblock
  mkdir <mountpoint>
  mount -t jffs2 -o ro /dev/mtdblock0 <mountpoint>
+
+"losetup -f" just returns the first unused loop device, if your system do not comes with "loosetup -f" just chose the first /dev/loop* device that is unused and change the first line with:
+
+ export loop=/dev/loop0
+
+if loop0 is unused  
+
 
 Based on this [http://www.internettablettalk.com/forums/showthread.php?p=192475#post192475 script by fanoush].
 
