@@ -174,15 +174,17 @@ and [[Bootloader]] and [[Bootloader commands]].
 
 It is important to distinguish between FAT or ext2 kernel partitions and ext2 or ext3 root partitions at this point. 
 
-'''Boot entry for ext3 partitions:'''
+'''Boot entry for FAT kernel+ext3 rootfs partitions:'''
 
  setenv menu_9 Boot from microSD (FAT+ext3): setenv bootargs \${bootargs_base} rootfstype=ext3 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
 
-'''Boot entry for ext2 partitions:'''
+'''Boot entry for FAT kernel+ext2 rootfs partitions:'''
 
  setenv menu_9 Boot from microSD (FAT+ext2): setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
 
+'''Boot entry for ext2 kernel+ext2 rootfs partitions: (requires newer u-boot)'''
 
+setenv menu_2 Boot from microSD part2 (ext2+ext2): setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; ext2load mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
 You are nearly done. Just issue a
 
  printenv
@@ -199,7 +201,7 @@ Shutdown your neo with the following command:
 
  neo1973 power-off
 
-After you restarted the Neo and got back to the NAND boot menu you should be able to select your newly created menu entry and successfully boot into the rootfs from your sd card.
+After you restarted the Neo and got back to the NAND boot menu you should be able to select your newly created menu entry and successfully boot into the rootfs from your SD card.
 
 == Appendix ==
 
