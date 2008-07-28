@@ -334,6 +334,27 @@ GTA01Bv3 #
 
 :''See [[bootloader commands]].''
 
+=== What if I borked my bootloader environment and don't get a prompt anymore? ===
+Found a solution here:
+[[http://markmail.org/message/gqypwiohdet6x4am?q=almesberger+partition&page=1&refer=xbamkzwwsaobv7wa]]
+
+It works the following way:
+* Get the devirginator:
+ svn co http://svn.openmoko.org/trunk/src/host/devirginator
+ cd devirginator
+* Read the u-boot environment from the device:
+ dfu-util -a u-boot_env -R -U env.in
+* Create a file that contains everything you want to change in your u-boot environment or get it with the following command:
+ wget http://svn.openmoko.org/trunk/src/host/devirginator/environment.in
+* Now let devirginator generate a new u-boot_env partition for us, - that contains the partition table from our u-boot_env, - and all changes we wanted to make; Note that the -D GTA02 is needed for the neo Freeruner only.
+ ./envedit.pl -i env.in -f environment.in -o env.out -D GTA02
+* On my box the partition layout didn't seem to match the idea of envedit.pl, so it issued 2 warnings:
+ warning: environment is 262144 bytes, expected 16384
+ CRC error: expected 0xc33e35fc, got 0x93097bfb
+* In this case jut add a additional argument to the command line - that has to be the 1st argument, though, and that contains the size information we got from the warning:
+ ./envedit.pl -s 262144 -i env.in -D GTA02 -f environment.in  -o env.out
+* Now the perl script should no more output anything but write a new u-boot_env partition that we can upload to the device by:
+ dfu-util -a u-boot_env -R -D env.out
 
 == Device Firmware Upgrade ==
 
