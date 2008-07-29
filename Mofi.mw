@@ -1,96 +1,23 @@
-{{Application|Mofi}}
+== What is Mofi? ==
 
-Mofi allows phone users to search for and connect to available wireless access points (APs).
+Mofi is software for the OpenMoko platform allowing phone users to search for available wireless access points (APs)
 
 == Where can I download Mofi? ==
 
-Mofi is available on the Openmoko forge at http://projects.openmoko.org/projects/mofi/
-
-Download the latest '''package''' at http://projects.openmoko.org/frs/download.php/277/mofi_0.02_armv4t.ipk
-
-or alternatively, get the '''source''' from http://projects.openmoko.org/frs/download.php/271/mofi.0.02.tar.gz
-
-See [[ #Installation ]] for info on how to install Mofi..
+Mofi is available on the OpenMoko forge at http://projects.openmoko.org/projects/mofi/
 
 == More Information ==
 
-Mofi is written in Python and uses the PyGTK library to create the GUI. Mofi stores AP passwords in a configuration file, scans APs within range and generates a wpa_supplicant.conf from the information found. The system then uses the wpa_supplicant.conf to connect to the first accessible AP.
+Mofi is written in Python and leverages the PyGTK library. Mofi stores AP passwords in a configuration file, scans APs within range and generates a wpa_supplicant.conf from the information found. The system then uses the wpa_supplicant.conf to connect to the first accessible AP.
 
 The Gnome UI can be used to view available access points, and specify which access point is preferred.
 
 Information on the project can be found on the Moko forge at http://projects.openmoko.org/projects/mofi/ 
 
-An RSS feed is also available at http://feeds.feedburner.com/MofiProjectNewsOpenmokoProjects containing latest news for the project.
-
-== Using Mofi ==
-
-One change enables the disconnect functionality in 0.03 beta, which greatly increases the usability of Mofi.  Just add the following to the end of <code>/usr/lib/mofi/disconnect.sh</code>
-
- killall wpa_supplicant
- killall udhcpc
-
-This makes it possible to (I believe) shut down the wifi to conserve battery.  You should also be able to connect at home, use the wifi, then disconnect, take the phone to your local wifi hotspot, then connect again, without trouble (I'm using FSO, and have yet to test the hotspot theory, however).
-
-== Installation ==
-
-=== Through opkg ===
-
-just scp the [http://projects.openmoko.org/frs/download.php/277/mofi_0.02_armv4t.ipk ipk] to your FreeRunner, then install using opkg:
-
- scp mofi_0.02_armv4t.ipk  root@192.168.0.202:/tmp/
- 
- ssh root@192.168.0.202
-  > cd /tmp/
-  > opkg install mofi_0.02_armv4t.ipk
-
-Or install the ipk directly via opkg:
-
- opkg install http://projects.openmoko.org/frs/download.php/277/mofi_0.02_armv4t.ipk
-
-To run on your FreeRunner:
-
-from the main menu choose the Applications section then "Wifi Mofi". Alternatively, mofi can be run from the console by typing ''mofi''
-
-However, you may have the message " Cannot satisfy the following dependencies for mofi:
-	 python-pygtk python-subprocess python-threading python-core python-misc python-lang python-pygobject" 
-displayed instead.
-
-=== From source ===
-
-You'll have to add some dependencies:
-
- opkg install python-core python-misc python-lang python-subprocess python-threading python-pygtk python-pygobject
-
-there are some more, but when you try to run these will be indicated.. please post the additional dependencies to the project bug list, cheers:
-
-http://projects.openmoko.org/tracker/?atid=710&group_id=165&func=browse
-
-run ''./install.sh'' - this will set up the environment and move files to your freerunner. note you may have to change the value of FREERUNNER to point to the correct IP..
-
-
-then to run mofi open the console on your FreeRunner and type ''mofi.sh''
-
-
-You can also download the '''nightly SVN tree snapshot''' from https://projects.openmoko.org/snapshots.php?group_id=165
+An RSS feed is also available at http://feeds.feedburner.com/MofiProjectNewsOpenMokoProjects containing latest news for the project.
 
 == Screen Shots ==
 
 [[Image:mofi_pass.png]]
 
 [[Image:mofi_connect.png]]
-
-== If Mofi crahes ==
-Mofi sometimes crashes with:
-
- Traceback (most recent call last):
-  File "/usr/lib/mofi/mofi_gui.py", line 30, in <module>
-    import gtk
-  File "/usr/lib/python2.5/site-packages/gtk-2.0/gtk/__init__.py", line 82,
- in <module>
-    init()
- NameError: name 'init' is not defined
-
-If this happens, edit the file /usr/lib/python2.5/site-packages/gtk-2.0/gtk/__init__.py and change the call to init() on line 82 to _init().
-
-[[Category:Wlan software]]
-[[Category:Settings Applications]]
