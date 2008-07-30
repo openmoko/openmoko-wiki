@@ -60,6 +60,30 @@ Dieser Befehl lädt die benötigten Files direkt von den neuesten Quellen und er
 
 Jetzt lädt der Bootloader. Hier kannst du zwischen verschiedenen Optionen auswählen. Mit ENTER(=aux) kannst du auswählen und mit SPACE(=power) ausführen.
 
+==Installing ipk packages==
+First you need a xxx.ipk package, see [[toolchain]] on how to compile an application for the ARM CPU and create the package.
+
+Note that if at this point you have the Openmoko Qemu running, it is probably wise to terminate it first.
+Then you can install the xxx.ipk package for access by the Qemu emulator with:
+
+ cd openmoko
+ mkdir -p build/tmp/deploy/glibc/ipk/a
+ cp xxx.ipk build/tmp/deploy/glibc/ipk/a/xxx_a.ipk
+ make qemu-copy-package-xxx
+
+''Note: for some reason qemu-copy-package-xxx looks for above source file.
+Maybe this part can be improved, or a different command can overcome the problem of creating this directory.''
+
+When above make command was succesful the next time you start Openmoko Qemu,
+you still need to make the installed application available in the application list.
+For this you can select from within Openmoko the terminal application
+(Select icon that looks like "+" for the list of available applicaitons, select "Applications" and select the "Terminal").
+In this terminal double-click, so you can type in the commands:
+ opkg install /media/mmcblk0/xxx_a.ipk
+ exit
+After the "exit" command you should return to the Task list, in which the newly
+added application should be listed under a name which was choosen when building the ipk package.
+
 == Update Openmoko ==
 
 * Öffne dein Terminal (Applications->Accessories->Terminal).
