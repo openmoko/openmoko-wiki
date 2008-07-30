@@ -242,13 +242,17 @@ Assuming that your FreeRunner can access the internet (see above), the kernel an
 
 The first updates the repository information, telling opkg what packages are available. The second upgrades all packages for which a newer version is available. '''At the moment, some signature files are missing (404 errors), which opkg complains about, but this is cosmetic.'''  The repositories will still update with the missing signature files.  
 
-Note that running opkg upgrade on a factory-fresh phone will upgrade dropbear (the ssh software) and various xserver packages, and neither upgrades elegantly while in use, so either upgrade dropbear from the FreeRunner's terminal and then upgrade the rest via ssh, or upgrade the xserver packages via ssh and then upgrade the rest from the FreeRunner's terminal.  For example, go to the FreeRunner terminal and type:
-
+Note that running opkg upgrade on a factory-fresh phone will upgrade dropbear (the ssh software) and various xserver packages, and neither upgrades elegantly while in use.  Xserver must be updated over ssh to complete succesfully.  Dropbear can be updated over ssh with the proper command:
+ # nohup opkg upgrade dropbear & 
+Or upgrade it directly in the FreeRunner terminal.
  # opkg upgrade dropbear
 
-which will upgrade it to the latest version.  Then connect to the FreeRunner via ssh and type:
+When updating over ssh, the session will be interrupted, but the command should complete successfully(check nohup.out on your device to verify), and you should be able to reconnect within a few seconds.
 
+Then connect to the FreeRunner via ssh and type:
  # opkg upgrade
+
+Alternatively you can upgrade the xserver packages via ssh and then upgrade the rest from the FreeRunner's terminal.  
 
 If you do your first upgrade in two installments like this, it will go more smoothly.
 
