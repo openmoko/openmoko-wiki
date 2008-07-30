@@ -1,8 +1,8 @@
-'''mdbus''' is a dbus introspection and interaction utility.
+=A dbus introspection and interaction utility=
 
 ==Where to get==
 
-[http://git.freesmartphone.org git.freesmartphone.org] => python-helpers => mickeydbus
+[http://git.freesmartphone.org] => python-helpers => mickeydbus
 
 ==How to use==
 
@@ -50,7 +50,7 @@ org.freesmartphone.frameworkd /org/freesmartphone/Framework
 
 <pre>
 root@om-gta02:~# mdbus -s 
-org.freesmartphone.ogsmd /org/freesmartphone/GSM/Device
+org.freesmartphone.frameworkd /org/freesmartphone/GSM/Device
 [METHOD]    org.freesmartphone.GSM.Call.Activate( i:index )
 [METHOD]    org.freesmartphone.GSM.Call.ActivateConference( i:index )
 [METHOD]    org.freesmartphone.GSM.Call.HoldActive()
@@ -58,7 +58,8 @@ org.freesmartphone.ogsmd /org/freesmartphone/GSM/Device
 [METHOD]    org.freesmartphone.GSM.Call.Release( i:index )
 [METHOD]    org.freesmartphone.GSM.Call.ReleaseAll()
 [METHOD]    org.freesmartphone.GSM.Call.ReleaseHeld()
-[SIGNAL]    org.freesmartphone.GSM.Call.CallStatus( i:index, s:status, a{sv}:properties )
+[SIGNAL]    org.freesmartphone.GSM.Call.CallStatus( i:index, s:status, 
+a{sv}:properties )
 [METHOD]    org.freedesktop.DBus.Introspectable.Introspect()
 [METHOD]    org.freesmartphone.GSM.Device.CancelCommand()
 [METHOD]    org.freesmartphone.GSM.Device.GetAntennaPower()
@@ -123,21 +124,10 @@ dbus.Dictionary({dbus.String(u'imei'): dbus.String(u'354651011602234',
 variant_level=1), dbus.String(u'model'): dbus.String(u'Neo1973 Embedded GSM 
 Modem', variant_level=1), dbus.String(u'revision'): dbus.String(u'HW: GTA, 
 GSM: gsm_ac_gp_fd_pu_em_cph_ds_vc_cal35_ri_36_amd8_ts0-Moko9-beta1', 
-variant_level=1), dbus.String(u'manufacturer'): dbus.String(u'FIC/Openmoko', 
+variant_level=1), dbus.String(u'manufacturer'): dbus.String(u'FIC/OpenMoko', 
 variant_level=1)}, signature=dbus.Signature('sv'))
 
 root@om-gta02:~#                                          
-</pre>
-
-or rather
-
-<pre>
-root@om-gta02 ~ $ mdbus -s org.freesmartphone.ogsmd /org/freesmartphone/GSM/Device org.freesmartphone.GSM.Device.GetInfo
-{   'imei': '354651011234567',
-    'manufacturer': 'FIC/OpenMoko',
-    'model': '"Neo1973 GTA02 Embedded GSM Modem"',
-    'revision': '"HW: GTA02BV5, GSM: gsm_ac_gp_fd_pu_em_cph_ds_vc_cal35_ri_36_amd8_ts0-Moko8"'}
-root@om-gta02 ~ $
 </pre>
 
 5.) Use it in listening mode:
@@ -170,13 +160,3 @@ listening for signals on SystemBus from service 'all', object 'all'...
  [SIGNAL]    org.freesmartphone.GSM.SIM.ReadyStatus    from :1.28 /org/freesmartphone/GSM/Device
 (dbus.Boolean(True),)
 </pre>
-
-6.) Use it to gather ogsmd debug logs:
-
-<pre>
-root@om-gta02:# ./mdbus -s org.freesmartphone.frameworkd /org/freesmartphone/Framework org.freesmartphone.Framework.SetDebugLevel ogsmd DEBUG
-root@om-gta02:# ./mdbus -s org.freesmartphone.frameworkd /org/freesmartphone/Framework org.freesmartphone.Framework.SetDebugDestination syslog none
-</pre>
-
-[[Category:FSO]]
-[[Category:D-Bus]]
