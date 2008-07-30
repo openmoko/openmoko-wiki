@@ -1,0 +1,162 @@
+=A dbus introspection and interaction utility=
+
+==Where to get==
+
+[http://git.freesmartphone.org] => python-helpers => mickeydbus
+
+==How to use==
+
+1.) Find out which bus names are currently registered, -s means 'check for 
+system bus'. Without -s it's going to look on the session bus):
+
+<pre>
+root@om-gta02:~# mdbus -s
+:1.0
+:1.1
+:1.2
+:1.42
+:1.47
+:1.60
+:1.61
+org.bluez
+org.freedesktop.Avahi
+org.freedesktop.DBus
+org.freesmartphone.frameworkd
+org.freesmartphone.ogsmd
+org.pyneo.muxer
+</pre>
+
+2.) Find out which objects are served by a certain service:
+
+<pre>
+root@om-gta02:~# mdbus -s org.freesmartphone.frameworkd
+/
+/org
+/org/freesmartphone
+/org/freesmartphone/Framework
+/org/freesmartphone/GSM
+/org/freesmartphone/GSM/Device
+/org/freesmartphone/GSM/Server
+</pre>
+
+3.) Find out the interface of a certain object:
+
+<pre>
+root@om-gta02:~# mdbus -s 
+org.freesmartphone.frameworkd /org/freesmartphone/Framework
+[METHOD]    org.freedesktop.DBus.Introspectable.Introspect()
+[METHOD]    org.freesmartphone.Objects.ListObjectsByInterface( s:interface )
+</pre>
+
+<pre>
+root@om-gta02:~# mdbus -s 
+org.freesmartphone.frameworkd /org/freesmartphone/GSM/Device
+[METHOD]    org.freesmartphone.GSM.Call.Activate( i:index )
+[METHOD]    org.freesmartphone.GSM.Call.ActivateConference( i:index )
+[METHOD]    org.freesmartphone.GSM.Call.HoldActive()
+[METHOD]    org.freesmartphone.GSM.Call.Initiate( s:number, s:type_ )
+[METHOD]    org.freesmartphone.GSM.Call.Release( i:index )
+[METHOD]    org.freesmartphone.GSM.Call.ReleaseAll()
+[METHOD]    org.freesmartphone.GSM.Call.ReleaseHeld()
+[SIGNAL]    org.freesmartphone.GSM.Call.CallStatus( i:index, s:status, 
+a{sv}:properties )
+[METHOD]    org.freedesktop.DBus.Introspectable.Introspect()
+[METHOD]    org.freesmartphone.GSM.Device.CancelCommand()
+[METHOD]    org.freesmartphone.GSM.Device.GetAntennaPower()
+[METHOD]    org.freesmartphone.GSM.Device.GetFeatures()
+[METHOD]    org.freesmartphone.GSM.Device.GetInfo()
+[METHOD]    org.freesmartphone.GSM.Device.PrepareForSuspend()
+[METHOD]    org.freesmartphone.GSM.Device.RecoverFromSuspend()
+[METHOD]    org.freesmartphone.GSM.Device.SetAntennaPower( b:power )
+[METHOD]    org.freesmartphone.GSM.SIM.ChangeAuthCode( s:old_pin, s:new_pin )
+[METHOD]    org.freesmartphone.GSM.SIM.DeleteEntry( i:index )
+[METHOD]    org.freesmartphone.GSM.SIM.DeleteMessage( i:index )
+[METHOD]    org.freesmartphone.GSM.SIM.GetAuthStatus()
+[METHOD]    org.freesmartphone.GSM.SIM.GetImsi()
+[METHOD]    org.freesmartphone.GSM.SIM.GetMessagebookInfo()
+[METHOD]    org.freesmartphone.GSM.SIM.GetPhonebookInfo()
+[METHOD]    org.freesmartphone.GSM.SIM.GetServiceCenterNumber()
+[METHOD]    org.freesmartphone.GSM.SIM.GetSimCountryCode()
+[METHOD]    org.freesmartphone.GSM.SIM.GetSubscriberNumbers()
+[METHOD]    org.freesmartphone.GSM.SIM.RetrieveEntry( i:index )
+[METHOD]    org.freesmartphone.GSM.SIM.RetrieveMessage( i:index )
+[METHOD]    org.freesmartphone.GSM.SIM.RetrieveMessagebook( s:category )
+[METHOD]    org.freesmartphone.GSM.SIM.RetrievePhonebook()
+[METHOD]    org.freesmartphone.GSM.SIM.SendAuthCode( s:code )
+[METHOD]    org.freesmartphone.GSM.SIM.SetServiceCenterNumber( s:number )
+[METHOD]    org.freesmartphone.GSM.SIM.StoreEntry( i:index, s:name, s:number )
+[METHOD]    org.freesmartphone.GSM.SIM.StoreMessage( s:number, s:contents )
+[METHOD]    org.freesmartphone.GSM.SIM.Unlock( s:puk, s:new_pin )
+[SIGNAL]    org.freesmartphone.GSM.SIM.AuthStatus( s:status )
+[SIGNAL]    org.freesmartphone.GSM.SIM.NewMessage( i:index )
+[METHOD]    org.freesmartphone.GSM.Network.DisableCallForwarding( s:reason, s:class_ )
+[METHOD]    org.freesmartphone.GSM.Network.EnableCallForwarding( s:reason, s:class_, s:number, i:timeout )
+[METHOD]    org.freesmartphone.GSM.Network.GetCallForwarding( s:reason )
+[METHOD]    org.freesmartphone.GSM.Network.GetCallingIdentification()
+[METHOD]    org.freesmartphone.GSM.Network.GetNetworkCountryCode()
+[METHOD]    org.freesmartphone.GSM.Network.GetSignalStrength()
+[METHOD]    org.freesmartphone.GSM.Network.GetStatus()
+[METHOD]    org.freesmartphone.GSM.Network.ListProviders()
+[METHOD]    org.freesmartphone.GSM.Network.Register()
+[METHOD]    org.freesmartphone.GSM.Network.RegisterWithProvider( i:operator_code )
+[METHOD]    org.freesmartphone.GSM.Network.SetCallingIdentification( s:status )
+[METHOD]    org.freesmartphone.GSM.Network.Unregister()
+[SIGNAL]    org.freesmartphone.GSM.Network.SignalStrength( i:strength )
+[SIGNAL]    org.freesmartphone.GSM.Network.Status( a{sv}:status )
+[METHOD]    org.freesmartphone.GSM.PDP.ActivateContext( s:apn, s:user, s:password )
+[METHOD]    org.freesmartphone.GSM.PDP.DeactivateContext()
+[METHOD]    org.freesmartphone.GSM.PDP.GetCurrentGprsClass()
+[METHOD]    org.freesmartphone.GSM.PDP.ListAvailableGprsClasses()
+[METHOD]    org.freesmartphone.GSM.PDP.SetCurrentGprsClass( s:class_ )
+[SIGNAL]    org.freesmartphone.GSM.PDP.ContextStatus( i:index, s:status, a{sv}:properties )
+[METHOD]    org.freesmartphone.GSM.Test.Command( s:command )
+[METHOD]    org.freesmartphone.GSM.Test.Echo( s:echo )
+</pre>
+
+4.) Call a method on an interface:
+
+<pre>
+root@om-gta02:~# mdbus -s 
+org.freesmartphone.frameworkd /org/freesmartphone/GSM/Device 
+org.freesmartphone.GSM.Device.GetInfo
+/org/freesmartphone/GSM/Device: GetInfo ->  
+dbus.Dictionary({dbus.String(u'imei'): dbus.String(u'354651011602234', 
+variant_level=1), dbus.String(u'model'): dbus.String(u'Neo1973 Embedded GSM 
+Modem', variant_level=1), dbus.String(u'revision'): dbus.String(u'HW: GTA, 
+GSM: gsm_ac_gp_fd_pu_em_cph_ds_vc_cal35_ri_36_amd8_ts0-Moko9-beta1', 
+variant_level=1), dbus.String(u'manufacturer'): dbus.String(u'FIC/OpenMoko', 
+variant_level=1)}, signature=dbus.Signature('sv'))
+
+root@om-gta02:~#                                          
+</pre>
+
+5.) Use it in listening mode:
+
+<pre>
+root@om-gta02:/local/pkg/fso/framework/framework# mdbus -s -l
+listening for signals on SystemBus from service 'all', object 'all'...
+ [SIGNAL]    org.freedesktop.DBus.NameOwnerChanged    from org.freedesktop.DBus /org/freedesktop/DBus
+(dbus.String(u'org.pyneo.muxer'), dbus.String(u':1.6'), dbus.String(u''))
+ [SIGNAL]    org.freedesktop.DBus.NameOwnerChanged    from org.freedesktop.DBus /org/freedesktop/DBus
+(dbus.String(u':1.6'), dbus.String(u':1.6'), dbus.String(u''))
+ [SIGNAL]    org.freedesktop.DBus.NameOwnerChanged    from org.freedesktop.DBus /org/freedesktop/DBus
+(dbus.String(u':1.28'), dbus.String(u''), dbus.String(u':1.28'))
+ [SIGNAL]    org.freedesktop.DBus.NameOwnerChanged    from org.freedesktop.DBus /org/freedesktop/DBus
+(dbus.String(u'org.freesmartphone.frameworkd'), dbus.String(u''), dbus.String(u':1.28'))
+ [SIGNAL]    org.freedesktop.DBus.NameOwnerChanged    from org.freedesktop.DBus /org/freedesktop/DBus
+(dbus.String(u'org.freesmartphone.ogsmd'), dbus.String(u''), dbus.String(u':1.28'))
+ [SIGNAL]    org.freedesktop.DBus.NameOwnerChanged    from org.freedesktop.DBus /org/freedesktop/DBus
+(dbus.String(u':1.29'), dbus.String(u''), dbus.String(u':1.29'))
+ [SIGNAL]    org.freedesktop.DBus.NameOwnerChanged    from org.freedesktop.DBus /org/freedesktop/DBus
+(dbus.String(u'org.pyneo.muxer'), dbus.String(u''), dbus.String(u':1.29'))
+ [SIGNAL]    org.freedesktop.DBus.NameOwnerChanged    from org.freedesktop.DBus /org/freedesktop/DBus
+(dbus.String(u':1.30'), dbus.String(u''), dbus.String(u':1.30'))
+ [SIGNAL]    org.freesmartphone.GSM.SIM.ReadyStatus    from :1.28 /org/freesmartphone/GSM/Device
+(dbus.Boolean(False),)
+ [SIGNAL]    org.freesmartphone.GSM.SIM.AuthStatus    from :1.28 /org/freesmartphone/GSM/Device
+(dbus.String(u'SIM PIN'),)
+ [SIGNAL]    org.freesmartphone.GSM.SIM.AuthStatus    from :1.28 /org/freesmartphone/GSM/Device
+(dbus.String(u'READY'),)
+ [SIGNAL]    org.freesmartphone.GSM.SIM.ReadyStatus    from :1.28 /org/freesmartphone/GSM/Device
+(dbus.Boolean(True),)
+</pre>
