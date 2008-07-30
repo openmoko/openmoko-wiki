@@ -280,6 +280,43 @@ See also [[Customizing the Openmoko Distribution]].
 
 * Some Versions of the Toolchain have corrupt .la files. If you compile an application using the Toolchain and you receive a '/space/fic/openmoko-daily/neo1973/work/armv4t-angstrom-linux-gnueabi/pango-1.18.3-r0/pango-1.18.3/pango/libpangoft2-1.0.la' error, you are affected. To fix that you should go to your "/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/lib" directory and open the affected .la files and change "/space/fic..." to "/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/lib". You have to fix more than one .la file. For the pango error you have to change "libpangocairo-1.0.la", but there are more corrupt .la files.
 
+Attached is a beta fix for the .la problem. Untar the .tar.bz2 as root, and execute the following bash script as root:
+
+        #!/bin/sh
+        DIR=/usr/local/openmoko/arm
+        for la in `find $DIR -iname \*.la`; do
+         dependency_libs=
+         . $la
+         for lib in $dependency_libs ; do
+         delib=`echo $lib | grep -E .la$`
+         if [ -z $delib ] ; then
+          echo -n
+         elif [ -f $delib ]; then
+          echo -n
+         else
+          basedelib=`basename $delib`
+          replacedelibs=`find $DIR -iname $basedelib`
+          found=0
+          for replacedelib in $replacedelibs ; do
+          if [ $replacedelib == $delib ]; then
+           found=1
+          fi
+          done
+          if [ $found -gt 0 ] ; then
+           echo -n
+          else
+            sed_delib=`echo $delib | sed 's/\//\\\\\//g'`
+            sed_replacedelib=`echo $replacedelib | sed 's/\//\\\\\//g'`
+            # A bit slow, we could chain expressions for speed. :)
+            cp $la $la.old
+            cat $la | sed "s/$sed_delib/$sed_replacedelib/g" > $la.new
+            mv $la.new $la
+            rm $la.old
+          fi
+         fi
+         done
+        done
+
 * Please use the [http://lists.openmoko.org/mailman/listinfo/openmoko-devel Openmoko-Devel] mailing list.
 
 [[Category:Application Developer]]
