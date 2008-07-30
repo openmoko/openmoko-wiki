@@ -1,44 +1,58 @@
-Here are the steps described to boot your system from an SD card.  The SD card shares a bus with the GPU, so it may not perform as well, but it is another option.
+This page explains how to boot a Freerunner from the SD card rather than from the built-in NAND flash memory. The SD card shares a bus with the GPU, so it may not perform as well, but it is another option.
 
-{| cellspacing="5" cellpadding="0" style="padding: 2%; margin:0em 0em 1em 0em; border:1px solid #F9D163; background:#FCE9B4; width:100%" 
-| 
-Some versions of u-boot (including the one shipped on the first batch of Freerunners) may not work properly for booting from SD card. Daily images on [http://buildhost.openmoko.org/daily/freerunner/ buildhost] with a timestamp of "20080723" or newer should be OK.
+{{Warning | Booting from SDHC may cause problems at this time. }} See [http://thread.gmane.org/gmane.comp.handhelds.openmoko.community/19154/focus=19281| this thread.] 
 
-Be careful when flashing a new u-boot to a Neo1973 as there is a risk of bricking your device. This is not a concern for a Freerunner as it contains a backup copy of u-boot in NOR Flash.
-|}
+== How it Works ==
 
-{{Warning | Booting from SDHC may cause problems at this time.   }}See [http://thread.gmane.org/gmane.comp.handhelds.openmoko.community/19154/focus=19281| this thread.]
+On the Neo, [[u-boot]] performs a similar role to the 'grub' bootloader on a PC. U-boot loads a kernel image into memory and then passes a list of parameters to the kernel. These parameters specify, among other things, the device on which the root filesystem is located.
 
+As the kernel boots, it initializes the hardware and then mounts the root filesystem. The kernel then runs "/sbin/init", which handles the rest of the boot-up sequence (such as displaying the splash screen and progress bar).
 
-== Change your kernel settings ==
+This sequence is the same whether the device is booting from built-in Flash or from the SD card. The differences are how the kernel is loaded, and which device is mounted as the root filesystem.
 
-'''Note'''| Since [http://git.openmoko.org/?p=kernel.git;a=commit;h=642cbda5f3b7e7a61512426e1d30a41ab4691123| 2008-07-17] the kernel includes support for ext3 '''and ext2''' filesystems by default.  ext2 is recommended because of the finite write life of flash storage.  Prior to 2008-07-17, the kernel only came configured with support for ext3.  You can check the available filesystems with 
+The following sections provide additional details.
+
+=== Menu Entries ===
+
+U-boot menu entries are defined by environment variables named "menu_X" (where X is a number). The value of the environment variable is a string "<label>:<commands>", where <label> is the text shown on the screen, and <commands> is a sequence of u-boot commands (delimited by ';' characters) to be executed when the menu item is selected. When entering a string of commands, the ';' and '$' characters must be backslash-escaped ("\;" and "\$"). 
+
+=== Loading the Kernel ===
+
+A pair of u-boot commands must be used to load the kernel from SD. First is "mmcinit", which will cause u-boot to detect the card. Next is a command to load a file into memory - either "fatload" or "ext2load" depending on whether the kernel is on a FAT filesytem or an ext2/ext3 filesystem.
+
+The command syntax is:
+
+ fatload mmc 1:&lt;p&gt; 0x32000000 &lt;filepath&gt;
+ ext2load mmc 1:&lt;p&gt; 0x32000000 &lt;filepath&gt;
+
+where &lt;p&gt; is the partition number, and &lt;filepath&gt; is the path to the file that is to be loaded.
+
+{{Note| The "ext2load" command will work with a u-boot binary from "20080723" or newer. Earlier versions (including the one shipped with the first batch of Freerunners) may be affected by bug [http://docs.openmoko.org/trac/ticket/799 #799]. }}
+
+{{Warning | Be careful when updating u-boot on a Neo1973 as there is a risk of bricking the device (unless you have a debug board). This is not an issue for the Freerunner as it has a protected copy of u-boot in the NOR flash }}
+
+{{Note| On the Neo1973, u-boot is unable to access SDHC cards (4G or larger). The kernel does have SDHC support, so it is possible to have the root filesystem on SDHC and the kernel on NAND flash. }}
+
+=== Root Filesystem Parameters ===
+
+The contents of the "bootargs" environment variable are passed to the kernel. Bootargs is a space-delimited list of "name=value" definitions. The items relevant to SD-booting are "root", "rootfstype", and "rootdelay". 
+
+For example, the following parameters would tell the kernel to mount the third partition of the SD-card as an ext3 filesystem:
+
+  root=/dev/mmcblk0p3 rootfstype=ext3 rootdelay=5 
+
+The "rootdelay" parameter allows time for the card to be properly initialized before it is accessed. 
+
+Note that the kernel must have built-in support (i.e. not a module) for the filesystem specified in "rootfstype". The default Openmoko kernel configs as of [http://git.openmoko.org/?p=kernel.git;a=commit;h=642cbda5f3b7e7a61512426e1d30a41ab4691123| 2008-07-17] have built-in support for both ext2 and ext3. You can check the available filesystems with the Linux command
 
  less /proc/filesystems
 
-Kernel building is supposed to be done through OpenEmbedded. If you use the MokoMakefile open up $OMDIR/openmoko/trunk/oe/packages/linux/linux-gta01/defconfig-2.6.21.6-fic-gta01. If you are building OM-2007.2 open $OEDIR/openembedded/packages/linux/linux-openmoko/defconfig-2.6.22.5-fic-gta01.
+It is not possible to use VFAT for the root filesystem.
 
-'''''Note:''''' That kernel version may change in future releases.
+==== ext2 vs. ext3 ====
 
-Now find the line saying:
+Opinion is divided on whether it is better to use ext2 or ext3 for the root filesystem. Ext3 in general is a superior choice, because it is a journalled filesystem and so does not require a long 'fsck' (file system check) after an unclean shutdown. However, if used on a flash device that does not support wear-leveling then ext3 may cause premature wear on the blocks of the card where the journal is stored. SD cards are supposed to support wear leveling, but this can not be guaranteed for all vendors.
 
- CONFIG_MMC_S3C=m
-
-and change it to:
-
- CONFIG_MMC_S3C=y
-
-If you want to use an ext2 file system on the SD, also find the line saying:
-
- CONFIG_EXT2_FS=m
-
-and change it to:
-
- CONFIG_EXT2_FS=y
-
-If you're using MokoMakfile, you can clean out your last kernel build (forcing a new build) by running:
-
- make clean-package-linux-openmoko
 
 == Acquiring a tarfile rootfs ==
 
