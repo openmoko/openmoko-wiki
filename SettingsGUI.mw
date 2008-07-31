@@ -137,8 +137,29 @@ If you want to test this and do not have a build environment, you can 'ipkg inst
 
 == Installation / Execution ==
 
+=== FSO and ASU Users ===
 
-=== from package === 
+Use the latest Version from SVN for now.
+ svn co http://neo1973-germany.de/svn/SettingsGUI/trunk SettingsGUI-svn
+
+The following addidional packages have to be installed:
+ opkg install alsa-utils-amixer
+ opkg install bluez-utils
+ # opkg install gsmd
+ # opkg install gsmd-tools
+         
+==== GPRS / GSM Panel ====
+'''You may not want to use those with FSO/ASU! - It WILL break the phone applications (no calls / sms)!'''
+
+SettingsGUI is not yet supporting the new framework-stack, so you'll have to use gsmd for GSM/GPRS. Therefore you would have to install the packages and stop the gsmget daemon already running. Once you've installed gsmd it may start on every system boot, which may then prevent any other GSM daemon from starting. This may break your phone applications until you fix the problem again.
+
+===== Get GPRS working anyway =====
+1) Stop gsmget
+ killall gsmget
+2) Connect to your mobile carrier using the GSM Panel
+3) Connect to GPRS (answer "yes" when asked to kill the GSM daemon)
+
+=== From package === 
 * add Alessandros repository as a [[ipkg]] source
  
  vi /etc/ipkg/alessandro.conf
@@ -157,7 +178,7 @@ If you want to test this and do not have a build environment, you can 'ipkg inst
  ipkg install settingsgui
 
 
-=== from source ===
+=== From source ===
 * download file to Neo (e.g. using wget)
 * Uncompress tar.bz2 file (e.g. e.g. tar -xjvf file.tar.bz2)
 * install:
