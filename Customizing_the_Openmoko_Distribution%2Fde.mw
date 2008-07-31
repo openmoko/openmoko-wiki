@@ -1,10 +1,8 @@
-{{Languages|Customizing the Openmoko Distribution}}
+== What's the goal? ==
 
-== Was ist das Ziel? ==
+The goal of this page is to teach you how to take an application that you've coded (or the sample app) and properly get it included in your rootfs. This article is a bit of an aggregate page, it's going to take information from [[MokoMakefile]], [[User:CesarB/Using a local overlay|Using a local overlay]], [[Building a hello world application]], and [[Create a package from existing sources]]. So as you can see the goal is for it to be a very thorough introduction, and will take you from "Idea to Inclusion" of your application.
 
-Das Ziel dieser Seite ist es zu zeigen, wie man eine Anwendung die man programmiert hat (oder die Beispielanwendung) richtig in rootfs einbindet. Diese Seite ist ein bisschen die Summe verschiedener Artikel. Es werden Informationen bezogen aus [[MokoMakefile/de]], [[User:CesarB/Using a local overlay|Using a local overlay/de]], [[Building a hello world application/de]], and [[Create a package from existing sources/de]]. Wie man sehen kann ist das Ziel eine gründliche Einführung und führt von der Idee bis zur Einbindung der Anwendung.
-
-== Einrichten einer Openmoko-Umgebung ==
+== Setting Up the Openmoko Environment ==
 
 {| border="1" cellspacing="0" cellpadding="5" 
  |*If you already have the environment set up then it is imperative that you update your Makefile.
@@ -12,14 +10,14 @@ Do this by running:
 <pre>make update-makefile</pre>
 |}
 
-This part of the tutorial is going to be pretty basic. I absolutely love [[MokoMakefile]] -- it's fantastic. The creator has done and continues to do a fantastic job with this. I see absolutely no reason not to use it. I put my Openmoko development directory in /home/bryce/mokodev/ and it works great for me. You can feel free to do the same or put it anywhere else in your user directory (or anywhere on your system if you're feeling daring and a little nutty).
+This part of the tutorial is going to be pretty basic. I absolutely love [[MokoMakefile]] -- it's fantastic. The creator has done and continues to do a fantastic job with this. I see absolutely no reason not to use it. I put my OpenMoko development directory in /home/bryce/mokodev/ and it works great for me. You can feel free to do the same or put it anywhere else in your user directory (or anywhere on your system if you're feeling daring and a little nutty).
 
 To get your environment set up, please get it set up according to [[MokoMakefile]]. However, if you do have the build environment set up manually and you're sure you know what you're doing, then feel free to go forward with this.
 
 == Setting Up a Local Overlay ==
-If you're at the point of setting up a local overlay, this means a couple things. First: you've had a brilliant idea for an application that you just need to have on the Openmoko platform. Second: you realize that this killer app of yours needs to be done properly and you're not going to do anything silly like include it in the actual tree for the Openmoko distro because it would probably end up just getting overwritten eventually, or you just realize that it's bad practice!
+If you're at the point of setting up a local overlay, this means a couple things. First: you've had a brilliant idea for an application that you just need to have on the OpenMoko platform. Second: you realize that this killer app of yours needs to be done properly and you're not going to do anything silly like include it in the actual tree for the OpenMoko distro because it would probably end up just getting overwritten eventually, or you just realize that it's bad practice!
 
-If you're wondering why and what a local overlay is then let me take this time to explain it to you. A local overlay is where you, as a developer, keep your local files in an OE style setup so that you can simply pull your updated code into the tree. You add your overlay tree into the bitbake setup so that when you call bitbake it will pull your own or your customized packages before going to the OE or Openmoko trees. This keeps everything nice and organized for you and also allows you to build/rebuild/include your apps by using the [[MokoMakefile]]
+If you're wondering why and what a local overlay is then let me take this time to explain it to you. A local overlay is where you, as a developer, keep your local files in an OE style setup so that you can simply pull your updated code into the tree. You add your overlay tree into the bitbake setup so that when you call bitbake it will pull your own or your customized packages before going to the OE or OpenMoko trees. This keeps everything nice and organized for you and also allows you to build/rebuild/include your apps by using the [[MokoMakefile]]
 
 Thank you to [[User:CesarB]] for this part of the wiki.
 
@@ -89,7 +87,7 @@ then edit local/packages/images/scaredycat-openmoko-image.bb
 
 <pre>
 #------------------------------------------------------
-# Openmoko Image Recipe
+# OpenMoko Image Recipe
 #------------------------------------------------------
 
 export IMAGE_BASENAME = "${PN}"
@@ -119,7 +117,7 @@ ROOTFS_POSTPROCESS_COMMAND += 'date "+%m%d%H%M%Y" >${IMAGE_ROOTFS}/etc/timestamp
 edit local/packages/tasks/task-openmoko-scaredycat.bb - this is where we put the things we want to include in our image, above and beyond the standard image. This example includes '''[http://wiki.openmoko.org/wiki/Scummvm scummvm]''' and '''[http://www.handhelds.org/moin/moin.cgi/kbdd kbdd]'''. If you modify this file, make sure you update the '''PR''' by incrementing the number each time.
 
 <pre>
-DESCRIPTION = "Openmoko: Scaredycat Additions"
+DESCRIPTION = "OpenMoko: Scaredycat Additions"
 SECTION = "openmoko/base"
 LICENSE = "original"
 PR = "r2"
@@ -245,7 +243,7 @@ Now that no errors were thrown we are happily done!
 
 So you've had an idea, you've setup the build environment, you've setup your local overlay, you've laid out your application tree, you've put code into those fantastic files of yours and now it compiles.There's only one thing left to do. Add that application to your image.
 
-Now lets go over in words and whys what we're about to do. First we need to make modify the <code>${OMDIR}/build/conf/local.conf</code>. We add in the variable <code>DISTRO_EXTRA_RDEPENDS</code> and set its value to include <code>myhelloworld</code>. If you'd like to include other packages from your own overlay or the OM tree just add them inseparated by spaces. After this gets added as a dependency to build the Distro (in this case Openmoko). Now we have to re-build the task-base package. This essentially just generates an ipk file that will "Merge machine and distro options to create a basic machine task/package." It pretty much builds a file with a list of packages to be installed that are required for the distro to work correctly. So then you just go through and make <code>openmoko-devel-image, build-qemu, flash-qemu-local,</code> and <code>run-qemu</code>. Then calibrate your stylus, head over to the terminal, and run your application!
+Now lets go over in words and whys what we're about to do. First we need to make modify the <code>${OMDIR}/build/conf/local.conf</code>. We add in the variable <code>DISTRO_EXTRA_RDEPENDS</code> and set its value to include <code>myhelloworld</code>. If you'd like to include other packages from your own overlay or the OM tree just add them inseparated by spaces. After this gets added as a dependency to build the Distro (in this case OpenMoko). Now we have to re-build the task-base package. This essentially just generates an ipk file that will "Merge machine and distro options to create a basic machine task/package." It pretty much builds a file with a list of packages to be installed that are required for the distro to work correctly. So then you just go through and make <code>openmoko-devel-image, build-qemu, flash-qemu-local,</code> and <code>run-qemu</code>. Then calibrate your stylus, head over to the terminal, and run your application!
 
 === Modifying Your local.conf ===
 Now, go into your build config directory <code>${OMDIR}/build/conf/</code> and now you'll be editing <code>local.conf</code>
@@ -355,5 +353,6 @@ Complete the last steps as per the above instructions, from the point of alterin
 
 And you're done!
 
-[[Category:Application Developer/de]]
-[[Category:System Developers/de]]
+[[Category:Applications]]
+[[Category:Openmoko]]
+[[Category:Guides]]
