@@ -7,32 +7,62 @@ See [[Latest Images]] for more information about the different images available.
 
 == Overview ==
 
-We need an overview of what we are doing right here.
+All the components of the software in the FreeRunner are bundled together into binary images.
 
-Download the DFU utility
+The '''bootloader''' is a small program that runs first when the FreeRunner is powered on or reset.
+The '''kernel''' is the central component in the Linux operating system.
+The '''root filesystem''' contains all the files that make up the commands and applications that you can run.
 
-Download the images
+On a desktop computer when you want to replace the operating system, you would boot it from a CD-ROM drive, then copy files from the CD to the internal hard drive. 
 
-Flash the bootloader, kernel, and root filesystems.
+The FreeRunner does not have a CD-ROM drive but it does have two kinds of internal program storage: NOR flash and NAND flash. The NOR flash is small and stores only a special boot program used when you need to re-write the contents of the NAND flash.
 
-== Download the DFU-util ==
+The steps are
 
-=== GNU/Linux host ===
+# First collect everything you need together on your desktop computer.
+This includes the dfu-util program and the images you will load into the FreeRunner and a USB cable.
+# Boot the FreeRunner from NOR Flash.
+# Connect the FreeRunner to the desktop computer via the USB cable.
+# Use the dfu-util program to copy the images from the desktop into the FreeRunner.
+# Boot the FreeRunner from NAND Flash to use the new image(s).
 
+== Collect the things you need ==
+
+=== Download the DFU-util program ===
+
+There are versions of dfu-util for both Linux and Windows. It works the same way on both platforms.
+
+=== Download the image files that you will need ===
+
+== Boot the FreeRunner from NOR Flash ==
+
+[[Image:menu15.jpg|thumb|Booting from NOR Flash]]
+
+The Neo FreeRunner needs to be at the NOR uBoot menu for flashing. For more information on booting, see [[Booting the Neo FreeRunner| booting the Neo Freerunner]] (in short: press and hold aux down and then press power button). 
+
+Log into the NOR uBoot menu and just stay there, do not select or enter any item in menu. Now you will be able to flash, make backups of your Freerunner or query the Freerunner with dfu-util.
+
+'''Then''', connect your Neo to the GNU/Linux or Windows host via USB cable.
+
+'''Linux'''
 You can download the flashing tool for a GNU/Linux host from: 
 http://downloads.openmoko.org/releases/Freerunner/dfu-util
 
-On the GNU/Linux host you can use the following command to download the dfu-util:
- wget http://downloads.openmoko.org/releases/Freerunner/dfu-util
+Make sure it is executable by setting the permissions: 
 
-Afterwards you have to change the rights on the file:
  chmod a+x dfu-util
 
-=== Windows hosts ===
+'''Windows'''
+You can download the flashing tool for a Windows host from: 
+[http://projects.openmoko.org/frs/?group_id=166&release_id=162 http://projects.openmoko.org/frs/?group_id=166&release_id=162] 
 
-You can download the flashing tool for a Windows host from: [http://projects.openmoko.org/frs/?group_id=166&release_id=162 http://projects.openmoko.org/frs/?group_id=166&release_id=162] (see installation instructions at [[Dfu-util-windows]])
+See additional installation instructions for Windows at [[Dfu-util-windows]]
 
 == Using dfu-util ==
+
+On Linux, you run dfu-util from a command shell prompt. If you have not put it somewhere on your command path you probably need to prefix it with a "./" like this ./dfu-util.
+
+On Windows, you need to open a command window and run from a command line.
 
 Dfu-util will be used like this, to write an image file to a (predefined) "partition name" (referred to as ''Altsetting'' in dfu-util help/manual) :
 
@@ -45,15 +75,6 @@ Dfu-util will be used like this, to write an image file to a (predefined) "parti
 }}
 
 == Flashing the Kernel ==
-
-{| class="wikitable" cellspacing="2" cellpadding="2" style="padding: 0%; margin:0em 0em 1em 0em; border:0px solid #ffffff; background:#ffffff; width:100%;floating="center";font-weight: normal; "
-! style="background:#ffffff;border-left:1px solid #ffffff;border-right:1px ; border-top:2px solid #ffffff; border:1px solid #ffffff; width:75%;font-weight: normal; " |  
-<div align="left">
-[[Image:menu15.jpg|thumb|Log into U-Boot in NOR Flash, connect your Neo with Linux Host via USB cable]]
-
-The Neo FreeRunner needs to be at the NOR uBoot menu for flashing. For more information on booting, see [[Booting the Neo FreeRunner| booting the Neo Freerunner]] (in short: press and hold aux then power). Log into the NOR uBoot menu and just stay there, do not select or enter any item in menu. Now you will be able to flash, make backups of your Freerunner or query the Freerunner with dfu-util.
-
-'''Then''', connect your Neo to the GNU/Linux or Windows host via USB cable.
 
 You can download the kernel from 
 http://downloads.openmoko.org/releases/Freerunner/
