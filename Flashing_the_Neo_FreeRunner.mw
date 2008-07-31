@@ -1,12 +1,8 @@
-As Openmoko development continues, Openmoko regularly releases updated versions of the Openmoko root filesystem, the kernel, and the [[Bootloader| U-Boot]]. These may be programmed into the Flash memory of Neo FreeRunner. You can use the USB cable and Openmoko provided tool to flash Neo FreeRunner.
+Openmoko regularly releases updated versions of the Openmoko root filesystem, the [[kernel]], and the [[Bootloader| U-Boot]] as binary images. These may be programmed into the Flash memory of Neo FreeRunner. You can use the USB cable and Openmoko provided tool to flash Neo FreeRunner.
 
-{{note|The Openmoko software team builds images daily. If you want to use the latest images, you can download the image from the daily build, but we recommend you download the most stable image from http://downloads.openmoko.org/releases/Freerunner/. Images here have been tested by the test team.
-
-See [[Latest Images]] for more information about the different images available.}}
-{{note|If you have a working image that you're happy with but want to try something different, you should probably do a [[Pre-Flash Backup]], although it looks like the method on that page may not entirely work.}}
+{{note|The Openmoko software team builds images daily. If you want to use the latest images, you can download the image from the daily build, but we recommend you '''use the most stable image from http://downloads.openmoko.org/releases/Freerunner/.''' Images here have been tested by the test team.}}
 
 == Overview ==
-
 All the components of the software in the FreeRunner are bundled together into binary images.
 
 The '''bootloader''' is a small program that runs first when the FreeRunner is powered on or reset.
@@ -15,15 +11,22 @@ The '''root filesystem''' contains all the files that make up the commands and a
 
 On a desktop computer when you want to replace the operating system, you would boot it from a CD-ROM drive, then copy files from the CD to the internal hard drive. 
 
-The FreeRunner does not have a CD-ROM drive but it does have two kinds of internal program storage: NOR flash and NAND flash. The NOR flash is small and stores only a special boot program used when you need to re-write the contents of the NAND flash.
+The FreeRunner does not have a CD-ROM drive but it does have two kinds of internal program storage: NOR flash and NAND flash. The NOR flash is small and stores only a special boot program used when you need to re-write the contents of the NAND flash. NAND flash acts more like a hard drive.
 
-The steps are
+The NAND Flash is divided into 3 partitions so that you can flash each component separately.
+For example if you are trying to install a better kernel, you only have to follow the steps to flash the kernel image.
 
-# Erasing the root filesystem or flashing the uboot are radical measures. Take the time to ponder their necessity, sometimes problems can be fixed by updating only the kernel.
-# First collect everything you need together on your desktop computer. This includes the dfu-util program and the images you will load into the FreeRunner and a USB cable.
+The FreeRunner can also boot from an image in its micro SD card but that option is not covered here. See [[Booting from SD]] for more information.
+ 
+'''Before you start: Erasing the root filesystem or flashing the uboot are radical measures. Take the time to ponder the necessity. Sometimes problems can be fixed by updating only the kernel.'''
+
+The steps to reflash NAND are
+
+# Collect everything you need together on your desktop computer. This includes the dfu-util program and the images you will load into the FreeRunner and a USB cable.
 # Boot the FreeRunner from NOR Flash.
 # Connect the FreeRunner to the desktop computer via the USB cable.
-# Use the dfu-util program to copy the images from the desktop into the FreeRunner.
+# Use dfu-util to backup the current contents of the FreeRunner. 
+# Use dfu-util to copy the images from the desktop into the FreeRunner.
 # Boot the FreeRunner from NAND Flash to use the new image(s).
 
 == Collect the things you need ==
@@ -32,15 +35,33 @@ The steps are
 
 There are versions of dfu-util for both Linux and Windows. It works the same way on both platforms.
 
+'''Linux'''
+You can download the flashing tool for a GNU/Linux host from: 
+http://downloads.openmoko.org/releases/Freerunner/dfu-util
+
+Make sure it is executable by setting the permissions with this command: chmod a+x dfu-util
+
+'''Windows'''
+You can download the flashing tool for a Windows host from: 
+[http://projects.openmoko.org/frs/?group_id=166&release_id=162 http://projects.openmoko.org/frs/?group_id=166&release_id=162] 
+
+See additional installation instructions for Windows at [[Dfu-util-windows]]
+
 === Download the image files that you will need ===
 
 Exactly what files you need depends on what you are trying to install. Here are some pages you can refer to for more information.
 
+''Edit request -- Some comments on why you'd want to replace each component could go here. For example you probably don't want to replace the bootloader unless there are bug fixes you really need.''
+
 [[Bootloader]]
 
-[[Kernel]]
+[[Kernel]] You can download kernels from http://downloads.openmoko.org/releases/Freerunner/
 
-[[Distributions]] and [[Latest_Images]]
+You can download the standard Openmoko root filesystem from 
+http://downloads.openmoko.org/releases/Freerunner/
+or you can see more options at [[Distributions]] and [[Latest_Images]]
+
+If you download a Qtopia image, you will get a tarball file containing both the Qtopia root filesystem and a matching kernel. You can unpack them with the tar command, for example: tar xzvf ''qtopia.tgz''
 
 == Boot the FreeRunner from NOR Flash ==
 
@@ -50,88 +71,77 @@ The Neo FreeRunner needs to be at the NOR uBoot menu for flashing. For more info
 
 Log into the NOR uBoot menu and just stay there, do not select or enter any item in menu. Now you will be able to flash, make backups of your Freerunner or query the Freerunner with dfu-util.
 
-'''Then''', connect your Neo to the GNU/Linux or Windows host via USB cable.
+Once the FreeRunner is at the NOR boot menu, you can connect your Neo to the GNU/Linux or Windows host via USB cable.
 
-'''Linux'''
-You can download the flashing tool for a GNU/Linux host from: 
-http://downloads.openmoko.org/releases/Freerunner/dfu-util
+<br clear=all>
 
-Make sure it is executable by setting the permissions: 
+== Do a backup ==
 
- chmod a+x dfu-util
+If you have a working image that you're happy with but want to try something different, you should probably do a [[Pre-Flash Backup]], although it looks like the method on that page may not entirely work.
 
-'''Windows'''
-You can download the flashing tool for a Windows host from: 
-[http://projects.openmoko.org/frs/?group_id=166&release_id=162 http://projects.openmoko.org/frs/?group_id=166&release_id=162] 
-
-See additional installation instructions for Windows at [[Dfu-util-windows]]
+''Is this still true? 7/31/08??''
 
 == Using dfu-util ==
 
-On Linux, you run dfu-util from a command shell prompt. If you have not put it somewhere on your command path you probably need to prefix it with a "./" like this ./dfu-util.
+dfu-util can be used to read flash memory, write memory, and get information from the device.
 
-On Windows, you need to open a command window and run from a command line.
+This is the general command format to write an image file to a (predefined) "partition name" (referred to as ''altsetting'' in dfu-util help/manual) :
 
-Dfu-util will be used like this, to write an image file to a (predefined) "partition name" (referred to as ''Altsetting'' in dfu-util help/manual) :
+ dfu-util -a ''altsetting'' -R -D ''file name''
 
- ./dfu-util -a (partion name) -R -D (download image file name)
+where:<br>
+-a ''altsetting'' : Specify the altsetting of the DFU interface by name or by number<br>
+-R  : Issue USB Reset signalling once we're finished<br>
+-D  ''file name'' : Write firmware from ''file name'' into device
 
-{{note| The meaning of the parameters you specified:
--a  --alt alt : Specify the Altsetting of the DFU interface by name or by number<br>
--R  --reset : Issue USB Reset signalling once we're finished<br>
--D  --download file : Write firmware from<file> into device <br>
-}}
+On Linux, you run dfu-util from a command shell prompt. If you have not put it somewhere on your command path you probably need to prefix it with a "./" like this '''./dfu-util'''.
+On some systems you need to be root before this will work and on Ubuntu you must preface the command with "sudo" or you will get the following error: "Cannot claim interface: could not claim interface 2: Operation not permitted"
+
+On Windows, you need to open a command window and run from a command line. Use Start-Run Program and type "cmd" to open a Window.
 
 == Flashing the Kernel ==
 
-You can download the kernel from 
-http://downloads.openmoko.org/releases/Freerunner/
+The command format is 
 
-=== GNU/Linux hosts ===
-
-Type in the following command in the terminal on a GNU/Linux host. On some systems you need to be root before this will work and on Ubuntu you must preface the command with "sudo" or you will get the following error: "Cannot claim interface: could not claim interface 2: Operation not permitted"
-
- sudo ./dfu-util -a kernel -R -D uImage-2.6.24+git20080424-om-gta02.bin
-
-=== Windows hosts ===
-
-Type in the following command in the console on a Windows host:
-
- dfu-util -a kernel -R -D uImage-2.6.24+git20080424-om-gta02.bin
-
-Press Enter to execute the command.
+ dfu-util -a kernel -R -D ''kernel filename''
 
 When flashing succeeds the following will be shown:
 
  status(0) = No error condition is present
  Done!
-</div>
-|}
 
 == Flashing the Root Filesystem ==
-You can download the root filesystem from:
-http://downloads.openmoko.org/releases/Freerunner/
 
+''Caveat -- do you really need to do this? You will be losing any changes you have made. If you have added packages they will be gone and you will have to re-install them.''
 
-=== from GNU/Linux ===
+The root filesystem has to be an image in jffs2 format. If the file you downloaded is zipped or compressed (has a .gz or .zip extension) you have to uncompress it first.
 
-Type the following command in the terminal of a GNU/Linux host. On some systems you will need to be root.
+The command format is
 
- ./dfu-util -a rootfs -R -D openmoko-devel-image-fic-gta02.jffs2
+ dfu-util -a rootfs -R -D ''rootfs_filename.jffs2''
 
-=== from Windows ===
-
-Type the following command in the console of a Windows host.
-
- dfu-util -a rootfs -R -D openmoko-devel-image-fic-gta02.jffs2
+where ''rootfs_filename.jffs2'' is the name of the file containing the root filesystem.
 
 When flashing succeeds the following will be shown:
 
  status(0) = No error condition is present
  Done!
 
-== Flashing u-boot ==
+== Flashing the boot loader ==
 
- dfu-util -a u-boot -R -D uboot-gta02v5-latest.bin
+''Caveat - Do you really need to do this?''
+
+The boot loader (U-boot) file should have a .bin extension. As with the root filesystem, if the file you downloaded is zipped or compressed (has a .gz or .zip extension) you have to uncompress it first.
+
+The command format is 
+
+ dfu-util -a u-boot -R -D ''uboot.bin''
+
+where ''uboot.bin'' is the name of the boot loader binary image file.
+
+== Reboot the FreeRunner ==
+
+You should now be able to boot into the new images.
+
 
 [[Category:Flashing Openmoko| ]]
