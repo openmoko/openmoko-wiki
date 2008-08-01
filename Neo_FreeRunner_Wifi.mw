@@ -166,54 +166,6 @@ http://hostap.epitest.fi/gitweb/gitweb.cgi?p=hostap.git;a=blob_plain;f=wpa_suppl
  
  exit $RETVAL
 
-
-== Success stories ==
-
-=== July 23, 2008 ===
-
-wpa_supplicant 0.6.3-r1 works for me with WPA and WPA2 (with PSK) using the config file template on this page. Unlike the comment above, udhcpc is updating /etc/resolver.conf correctly for me (perhaps this is an old problem). 
-
-Bringing up wpa_supplicant manually or using "ifup eth0" with the wpa-conf option set in /etc/network/interfaces works for me. If usb0 was already up when running "ifup eth0" you'll end up with 2 default routes which can cause problems. To solve this either take usb0 down first or run "ip route del default dev usb0" to remove the default route to usb0.
-
-=== July 19, 2008 ===
-
-I've had repeated success with:
- # ifconfig eth0 up
- # iwconfig eth0 essid any
- # iwconfig eth0 key '...'
- # iwconfig eth0 essid '...'
- # udhcpc eth0
- # ifconfig usb0 down; ifconfig usb0 up
-
-Hope that helps someone. This is for WEP.
-
-=== July 26, 2008 ===
-
-I've been able to connect to a variety of networks including WPA2 without too much difficulty.
-Follow the above steps in configuring your wpa_supplicant.conf and adding the line to load the supplicant in /etc/network/interfaces.
-
-My sample WPA2 configuration is as follows:
-#WPA2
-network={
-  ssid="MY_SSID"
-  scan_ssid=1
-  proto=RSN
-  key_mgmt=WPA-PSK
-  pairwise=CCMP TKIP
-  group=CCMP TKIP
-  psk="PASSWORD_PRESHARED_KEY"
-  priority=50
-}
-
-That configuration will allow you to connect to a WPA2-Personal network with TKIP key encryption.
-
-The "ifup eth0" command will connect you via WiFi.  If you don't get a lease the first time, try again.  Sometimes the configuration is a little too slow and DHCP tries to get a lease before a successful connection to your access point has been established.
-
-
-
-The following may be helpful in order to scan available networks :
- # iwlist eth0 scan
-
 == Available Software ==
 
 Here are some applications available to aid in WiFi administration:
