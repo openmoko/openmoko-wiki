@@ -1,26 +1,9 @@
-== For the impatient ==
+Mixer settings for voice recording: It is required that DAI Mode (alsa control number 50) is "DAI 1" - only recording, or "DAI 2" - recording and playback simultaneously. "DAI 0" is only for playback. There's also "DAI 3", but I don't know what this is.
 
-In order to record audio you need a special alsa state file and we provide a link to one that works below (SHA1:55888a699e969c5e2c4690e6aff47ccad7ad0f3d). It can be used to put the device into voice recording mode. 
+Depending on the recording source, Mic1 for headset or Mic2 for handset have to be set accordingly via the Mic Selection Mux, which is alsa control number 53. Also, set Capture Left Mux and Capture Right Mux (65, 64) to PGA.
 
- alsactl -f [http://svn.arhuaco.org/svn/src/openmoko/misc-files/ALSA/voip-handset.state voip-handset.state] restore
- arecord -D hw -f cd  -v -t wav rec-$(date +%Y-%m-%d-%H-%M).wav
+Below is an alsa state file, which can be used to put the device into voice recording mode. It's advisable to have a programm connected to e.g. /dev/dsp, else the device might crash. Change settings via:
 
-With these commands you should get a file in Waveform audio format (WAV) in the local directory.
+  alsactl -f voice-recording.state restore
 
-== Applications that record audio ==
-
-In alphabetical order.
-
-* [[Monologue]]
-* [[Voicenote]]
-* [[Dictator]]
-
-== Information for developers ==
-
-Mixer settings for voice recording: It is required that DAI Mode (alsa control number 50) is "DAI 2". As of 23/Feb/2009 "DAI 1" mode is broken. Not all the DAI modes work and people are working on this.
-
-Here we have a list of relevant tickets that are open now:
-
-* [https://docs.openmoko.org/trac/ticket/2073 #2073]
-
-[[Category:Audio]]
+http://wildsau.enemy.org/~moko/voice-recording.state
