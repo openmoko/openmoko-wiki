@@ -25,11 +25,17 @@ It can be complex to set all the correct options for masquerading in the kernel 
 
 On some systems, you may have firewall rules which prevent this working - such as added by the iptables service on Fedora.  You may care to stop these, and/or review any rules or policies you think might cause issues.
 
-The most relevant table is the nat table:
+The most relevant table is the nat table, which controls translation of addresses:
 
  iptables -L -t nat -v -n
 
-Unless you have a special setup, you'll want to see only the MASQUERADE rule that you apply below, and ACCEPT as the default policy.
+Unless you have a special setup, you'll want to see only the MASQUERADE rule that you apply below, and ACCEPT as the default policy.  Also look at the filter table:
+
+ iptables -L -t filter -v -n
+
+If this contains anything in the FORWARD chain, then this may prevent passing packets.  It can be flushed with:
+
+ iptables -t filter -F FORWARD
 
 = Simple Manual Linux Configuration =
 
