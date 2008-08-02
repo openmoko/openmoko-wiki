@@ -83,6 +83,31 @@ exec chat -v\
         CONNECT /n/d
 </pre>
 
+Update: On my freerunner the first AT+CFUN=1 always generated ERROR. I managed to get gprs work by using the following script from http://lists.openmoko.org/pipermail/community/2008-July/023246.html:
+
+<pre>
+#!/bin/sh -e
+exec /usr/sbin/chat -v \
+        TIMEOUT 10 \
+        OK-AT-'' ''\
+        ABORT BUSY\
+        ABORT DELAYED\
+        ABORT "NO ANSWER"\
+        ABORT "NO DIALTONE"\
+        ABORT VOICE\
+        ABORT ERROR\
+        ABORT RINGING\
+        TIMEOUT 30 \
+        '' ATZ\
+        OK ATE1\
+        OK AT+CFUN=1\
+        ERROR AT+CPIN=\"XXXX\"\         << USE YOUR OWN
+        OK AT+COPS\
+        OK AT+CGDCONT=1,\"IP\",\"internet\"\
+        OK 'ATDT*99***1#'\
+        CONNECT ''
+</pre>
+
 You will need to adjust the APN name "internet" in at+cgdcont line and possibly the phone number in the ATD line to match what your network operator provides. See below in the table "Some APN names for reference" for the right settings for your operator.
 
 Also good to have is /etc/ppp/gprs-disconnect-chat (needs "chmod +x"):
