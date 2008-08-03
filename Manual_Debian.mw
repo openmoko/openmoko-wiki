@@ -51,10 +51,39 @@ ssh to your neo and format your sd card appropriately. I'm using an 8GB SDHC car
  system. One also will need a vfat or ext2 (only vfat worked for me with the stock u-boot for the freerunner. On  
  which to place the kernel to boot off. See the [[Booting_from_SD]] If you have not done so already.
  
- umount /media/card
+
+ fdisk /dev/mmcblk0
+ We will now create a 8 mb partition for our kernel and another one for the rootfs which will take up all the   
+ remaining space.
+  Command (m for help): d
+  Selected partition 1
+  Command (m for help): n
+  Command action
+     e   extended
+     p   primary partition (1-4)
+  p
+  Partition number (1-4): 1
+  First cylinder (1-983, default 1):
+  Using default value 1
+  Last cylinder or +size or +sizeM or +sizeK (1-983, default 983): +8M
+  Command (m for help): n
+  Command action
+     e   extended
+     p   primary partition (1-4)
+  p
+  Partition number (1-4): 2
+  First cylinder (18-983, default 18):
+  Using default value 18
+  Last cylinder or +size or +sizeM or +sizeK (18-983, default 983):
+  Using default value 983
+  Command (m for help): w
+  The partition table has been altered!
+  Calling ioctl() to re-read partition table.
+  Syncing disks.
+
  mkfs.vfat /dev/mmcblk0p1
  
- mkfs.ext3 /dev/mmcblk0p1
+ mkfs.ext3 /dev/mmcblk0p2
  mount /dev/mmcblk0p1 /media/card
 
 copy the armel chroot to your device by tar'ing it to circumvent symbolic link cycles (https://bugzilla.mindrot.org/show_bug.cgi?id=1059 <= WONTFIX)
