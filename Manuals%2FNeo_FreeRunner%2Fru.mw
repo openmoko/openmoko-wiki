@@ -206,154 +206,154 @@ R: Это может быть исправлено изменением файл
 
 [[Freerunner_Hardware_Issues]]
 
-=== Accessing the microSD card ===
+=== Доступ к карте памяти microSD ===
 
-Mounted at /media/card by default.
+Карта примнтирована в /media/card по умолчанию.
 
-If you have multiple partitions on the card, the first (/dev/mmcblk0p1) will be mounted at /media/card, the second at /media/mmcblk0p2, the third at /media/mmcblk0p3 etc.
+Если у вас несколько разделов на карте, первый (/dev/mmcblk0p1) будет примонтирован в /media/card, второй в /media/mmcblk0p2, третий в /media/mmcblk0p3 и т.д.
 
-== Set up USB-based networking and update ==
+== Настройка сети через USB  и обновлений ==
 
-===Connect with and log in the Neo FreeRunner===
+===Соединение с Neo FreeRunner и подклбчение к нему ===
 
-This is discussed in the [[USB_Networking|USB Networking]] section.
+Это обсуждается в секции [[USB_Networking|USB Networking]].
 
-===Use the package manager===
+===Использование программы управления пакетами===
 
-There are three layers to the software on the FreeRunner:
+Существует три слоя к програмному обеспечению на FreeRunner:
 
-* uBoot: Think of u-boot as a combination of the BIOS and Grub on a PC.
-* Kernel: The Linux kernel
-* Root Filesystem: The rest of the system
+* u-Загрузчик: Представьте u-загрузчик как комбинацию BIOS и Grub на обычном компьютере.
+* Ядро:  Ядро Linux
+* Корневая файловая система: Остальная часть системы
 
-In order to keep the FreeRunner up-to-date with the latest features and bug-fixes, it is advisable update the software at regular intervals. There are two main methods of doing this: using the package manager opkg (discussed in this section) or [[Flashing the Neo FreeRunner|flashing  the device]].
+Для того, чтобы состояние FreeRunner было актуально последним дополнениям и исправлениям ошибок, рекомендуется регулярно обновлять програмное обеспечение. Для этого существует два основных метода: использовать программу управления пакетами opkg (обсуждаемую ниже) или [[Flashing the Neo FreeRunner|flashing  the device]].
 
-uboot, the kernel and the root filesystem can all be flashed to update them. For uboot, this is the only possibility. The advantage of flashing the kernel, rather than using opkg seems to be speed. The disadvantage of flashing the root file system is that it wipes out all local modifications, including /home. If /home is moved to the SD disk, this is no longer a problem.
+u-загрузчик, ядро и корневая файловая система могут быть перепрошиты для их обновления. Перепрошивка - единственный способ если вы хотите обновить u-загрузчик. Преимуществом метода пререпрошивки ядра над обновлением через opkg, вероятно, вероятно является скорость. Недостатком прошивки корневой файловой системы является то, что таким образом стираются все модификации, включая каталог /home. Если каталог /home переместить на SD-карту, такой пролемы не будет.
 
-Assuming that your FreeRunner can access the internet (see above), the kernel and other packages can be updated with
+Предполагая, что FreeRunner имеет доступ в интернет (см. выше), Ядро и остальные пакеты могут быть обновлены так
 
  # opkg update
  # opkg upgrade
 
-The first updates the repository information, telling opkg what packages are available. The second upgrades all packages for which a newer version is available. '''At the moment, some signature files are missing (404 errors), which opkg complains about, but this is cosmetic.'''  The repositories will still update with the missing signature files.  
+Первая команда обновляет из хранилищ информацию о том, какие пакеты доступны для обновления. Вторая команда обновляет все пакеты, для которых доступны новые версии. '''На данный момент opkg сообщает о том, что некоторые файлы сигнатур отсутсвуют (ошибки 404), но это вам не помешает.'''  Вы всё равно можете обновиться из хранилищ при отсутсвиии файлов сигнатур.  
 
-Note that running opkg upgrade on a factory-fresh phone will upgrade dropbear (the ssh software) and various xserver packages, and neither upgrades elegantly while in use.  Xserver must be updated over ssh to complete succesfully.  Dropbear can be updated over ssh with the proper command:
+Обратите внимание, что запуск обновлений через opkg на чистой заводской системе приведёт к обновлению dropbear (ssh программа) и различных пакетов xserver, для успешного обновления которых необходимы дополнительные действия. Чтобы обновить программу xserver, необходимо делать это через ssh. Программа dropbear может быть обновлена через ssh следующей командой:
  # nohup opkg upgrade dropbear & 
-Or upgrade it directly in the FreeRunner terminal.
+Или из терминала FreeRunner командой
  # opkg upgrade dropbear
 
-When updating over ssh, the session will be interrupted, but the command should complete successfully(check nohup.out on your device to verify), and you should be able to reconnect within a few seconds.
+При обновлении через ssh будет прервано соединение, но команда должна будет выполниться успешно (проверьте файл check nohup.out на вашем устройстве), и спустя несколько секунд вы сможете переподсоединиться.
 
-Then connect to the FreeRunner via ssh and type:
+Потом подсединитесь к FreeRunner через ssh и введите:
  # opkg upgrade
 
-Alternatively you can upgrade the xserver packages via ssh and then upgrade the rest from the FreeRunner's terminal.  
+Или вы можете обновить пакеты xserver packages через ssh и обновить остальное из терминала FreeRunner.  
 
-If you do your first upgrade in two installments like this, it will go more smoothly.
+Если вы проведёте ваше первое обновление одним из способов описанных выше, обновление пройдёт более гладко.
 
-It will be possible in the future to update uboot with opkg, but this has not yet been implemented
+В будущем будет возможно обновить u-загрузчик через opkg, но эта функция пока не реализована.
 
-=== Installing multimedia, web browsing and other applications ===
+=== Установка приложений для мультимедиа, просмотра интернета и других целей ===
 
-There are many applications you can install - check out the [[Repositories]] for a list of packages, an example of how to add a repository using scaredy cat as an example can also be found here. A list of pre-installed and available packages with descriptions can be found here - [[Available Packages]].
+Вы можете установить множество приложений - для списка пакетов проверьте [[Repositories]], там также может быть найден способ добавления хранилищ на примере использования scaredy cat. Список предустановленных и доступных пакетов - здесь [[Available Packages]].
 
-The calendar can be installed with
+Программу-календать можно установить так
 
  opkg install openmoko-dates2
 
-For a Media Player:
+Для программы проигрывания видео и аудио введите:
 
  opkg install openmoko-mediaplayer2
  wget http://abraxa.dyndns.org:81/random/openmoko-mediaplayer-theme.tar.bz2
  tar xjf openmoko-mediaplayer-theme.tar.bz2 -C /usr/share/themes/Moko/gtk-2.0
  rm openmoko-mediaplayer-theme.tar.bz2
 
-If you want a basic image viewer, have a look at the one from the gpe suite:
+Если вы хотите простую программу для просмотра изображений, взгляните на группу програм gpe:
 
  opkg install gpe-icons 
  opkg install gpe-gallery
 
-To obtain the standard web browser, use:
+Чтобы получить стандартную программу просмотра интернета, используйте:
 
  opkg install openmoko-browser2
 
-An alternative browser, minimo, offers many more features.  
-First download and unpack it on your GNU/Linux host:
+Альтернативная программа, minimo, даёт гораздо больше возможностей.  
+Сначала скачайте и распакуйте её на вашем GNU/Linux компьютере:
 
  wget http://www.ginguppin.de/files/minimo.tar.bz2
  tar jvxf minimo.tar.bz2
 
-Copy it over to the FreeRunner:
+Скопируйте её на FreeRunner:
  scp minimo_* root@192.168.0.202:/tmp
 
-Then on the FreeRunner:
+Потом на FreeRunner:
  opkg install /tmp/minimo_0.02\+cvs20070626-r0_armv4t.ipk
 
-You'll probably also want to [[Switching Keyboards|change the keyboard]] including the [[Switching Keyboards#How_to_add_a_keyboard_toggle_button|keyboard toggle applet]]
+Возможно вам также понадобится [[Switching Keyboards|сменить раскладку клавиатуры]] в том числе и [[Switching Keyboards#How_to_add_a_keyboard_toggle_button|приложение переключения раскладки клавиатуры]]
 
-=== Importing contacts ===
+=== Импорт контактов ===
 
-If you can export your contacts to VCard format, either multiple files or single file containing all of them, you may use the script on [[Import Vcf Contacts]] page to bring them to Neo.
+Вы можете экспортировать ваши контакты в формат VCard, или в несколько файлов, или в один файл, содержащий все контакты. Для импорта их в Neo используйте сценарий [[Import Vcf Contacts]].
 
-==The next steps==
+==Шагаем дальше==
 
-Congratulations for setting up your Neo FreeRunner. There are many more ressources to help free your phone: 
+Плздравляем с первоначальной настройкой вашего Neo FreeRunner. Далее следуют другие сведения для того, чтобы помочь освободить ваш телефон: 
 
-===Customize the interface: clock, keyboard...===
+===Настройка интерфейса: часы, клавиатура...===
 
-The stock [[Openmoko2007.2]] image flashed onto the Neo FreeRunner is really just the bare bones. For example, you don't have the clock and the quick-launch icons showing. Here's how you can change that:
+Заводской образ [[Openmoko2007.2]] прошитый в Neo FreeRunner в действительности как "голые кости". Например там нет показа часов и иконок быстрого запуска. Далее о том как изменить это:
 
  # dbus-launch gconftool-2 -t boolean -s /desktop/poky/interface/reduced false
  # /etc/init.d/xserver-nodm restart
 
-If you rather have a regular clock instead of the digital one, do this instead:
+Хотя если вам нужны обычные часы вместо цифровых, используйте следующую команды:
 
  # dbus-launch gconftool-2 -t boolean -s /desktop/poky/interface/reduced false
  # dbus-launch gconftool-2 -t boolean -s /desktop/poky/interface/digital_clock false
  # /etc/init.d/xserver-nodm restart
 
-More information about today screen customization at [[Today/2007.2]].
+Вы получите больше информации о настройке домашней страницы [[Today/2007.2|здесь]].
 
-With either clock, you may wish to set the correct [[Date]] and [[Timezone]].
+С любыми часами вам, возможно, захочется установить правильную [[Date|дату]] и [[Timezone|временную зону]].
 
-Also, if you prefer having a full keyboard, using matchbox's qwerty keybord, see [[Switching_Keyboards#Matchbox_keyboard|these instructions]]. Then you may also see [http://lists.openmoko.org/pipermail/community/2008-July/021296.html these], which describe a way to add an applet allowing the showing/hiding of that keyboard.
+Так же, если вы предпочитаете использовать полную клавиатуру, с помощью программы matchbox's qwerty keybord, см. [[Switching_Keyboards#Matchbox_keyboard|эти инструкции]]. Далее вы можете посмотреть [http://lists.openmoko.org/pipermail/community/2008-July/021296.html это], где описан способ добавления апплета, позволяющего показывать/скрывать эту клавиатуру.
 
-===GPS, GPRS and WLAN===
+===GPS, GPRS и WLAN===
 
-See [[GTA02 WLAN]] about wifi. See [[Manually using GPRS]]. 
+См. [[GTA02 WLAN]] на тему wifi. См. [[Manually using GPRS]]. 
 
-Simple guide to get going with GPS:
+Простое руководство для работы с with GPS:
 
  # opkg install gpsd
  # echo "GPS_DEV=\"/dev/ttySAC1\"" > /etc/default/gpsd
 
-and restart gpsd, the gps daemon, with
+далее презапустить gpsd - демон gps, командой
 
  # /etc/init.d/gpsd restart
 
-To test GPS, you can use agpsui:
+Для проверки GPS, вы можете использовать agpsui:
 
  # opkg install openmoko-agpsui
 
-For a nice map, try tangoGPS:
+Для неплохой карты, попробуйте tangoGPS:
 
  # opkg install http://www.tangogps.org/downloads/tangogps_0.9.2-r1_armv4t.ipk
 
-More information on [[GPS]] page.
+Больше информации на странице [[GPS]].
 
-According to some [http://lists.openmoko.org/pipermail/support/2008-July/000003.html posts], GPRS might be broken currently (2007.2), though. There are also critical [[GPS Problems]]. To install the updates when they become available, you will probably want to learn about [[Booting the Neo FreeRunner]] and [[Flashing the Neo FreeRunner]].
+Тем не менее, как сообщается в некоторых [http://lists.openmoko.org/pipermail/support/2008-July/000003.html постах], GPRS может быть сейчас (2007.2) неработоспособным. Так же есть критические [[GPS Problems]]. Для установки обновлений, когда они станут доступны, вам возможно потребуется изучить [[Booting the Neo FreeRunner]] и [[Flashing the Neo FreeRunner]].
 
-=== The community ===
-==== Mailing lists ====
+=== Сообщество ===
+==== Списки рассылки ====
 
-There are several [[http://lists.openmoko.org/mailman/listinfo/ Mailing lists]]
+Существует несколько [[http://lists.openmoko.org/mailman/listinfo/ Списков рассылки]]
 
-There is an active community mailing list.
-You may ask for help on the support mailing list : more details at https://lists.openmoko.org/mailman/listinfo/support
+Существует так же активный список рассылки сообщества.
+Вы можете запрашивать поддержку в соответсвующем списке рассылки: более детально  на https://lists.openmoko.org/mailman/listinfo/support
 
-If you are more comfortable with a web-based approach, you can also read and post the lists with http://lists.openmoko.org/nabble.html
+Если вам более комфортно использовать основынный на web технологиях способ, вы можете читать и писать списки на http://lists.openmoko.org/nabble.html
 
-An excellent tool for searching all the openmoko mailing lists is http://openmoko.markmail.org/
+Отличный инструмент для поиска во всех списках рассылки openmoko на http://openmoko.markmail.org/
 
 
 ====The wiki====
@@ -366,15 +366,15 @@ An excellent tool for searching all the openmoko mailing lists is http://openmok
 * [[Distributions]]
 * [[GTA02_FAQ]]
 
-To search this wiki with Google, use the following search term:
+Для поиска на этой wiki с помощью Google, используйте следующий поисковый запрос:
 
- <search term> site:http://wiki.openmoko.org/wiki/
+ <предмет поиска> site:http://wiki.openmoko.org/wiki/
 
-==== Blogs ====
+==== Блоги ====
 
-The [http://planet.openmoko.org/ collection of blogs on OpenMoko].
+См. [http://planet.openmoko.org/ сборник блоговна OpenMoko].
 
-==== Other documents ====
+==== Другие документы ====
 
 * http://quickstart.openmoko.org/
 
