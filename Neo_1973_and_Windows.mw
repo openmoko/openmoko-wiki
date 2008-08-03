@@ -32,13 +32,41 @@ If you want to connect to the internet from your Neo via Windows XP, e.g. for do
 
 ==== Option 1, using Windows ICS ====
 
-An easy way to do this is to bridge the USB and Ethernet networks together (Win XP).
+An easy way to do this is to use Windows Internet Connection Sharing.
 
-To do this, you need to create a network bridge which contains the usb connection to the Neo and your normal Ethernet connection (the one you use to go on the internets).
+To do this, you need to create a network bridge which contains the usb connection to the Neo.
+
+Then you tell Windows to share the WAN connection (i.e. the network interface which connects your Windows system to the internet) with the new bridge.
+
+Then you manually set the IP address of the bridge to 192.168.0.200
+
+After you have done all this, the Neo will be able to route through the Windows machine out to the internet. DNS queries will also be proxied by the Windows machine. Of course, /etc/resolv.conf on the Neo needs to be set to your local DNS or a free DNS.
+
+'''New''' When you have LAN with network address 192.168.0.0 you have to do some hacking.
+1. Edit /etc/network/interfaces and set for usb0
+'' address 192.168.2.202
+   netmask 255.255.255.0
+   network 192.168.2.0
+   gateway 192.168.2.1
+''
+On Windows go to Network settings, ''pull out LAN cable'' (so there's no connection with local DHCP server which conflicts with IP 192.168.0.1), enable connection sharing for Neo-USB cable. Then edit Neo-usb interface settings and change it's IP address to 192.168.2.1 and set gateway for yours 192.168.0.x (other which you have). Apply changes with OK. Put in net cable. Enjoy net on NEO.
+
+'''Example: Setup for wifi only internet connection (windows xp and Neo FreeRunner)'''
+# Once the Network Connections window shows both "Wireless Network Connection Status:Connected" and "openmoko Status:Connected" Right click on Wireless Network Connection and goto Properties. Select Advanced tab, and turn on Internet Connection sharing. Choose the openmoko network.
+# If you get the error: the ip address is already in use. Change your wireless router address away from 192.168.0.2, to something like 192.168.1.2
+# Windows will change the ip address of openmoko network to 192.168.0.1 and the Network Connections window will show "Wireless Internet Connection Status: connected,shared" 
+# Right click on openmoko network and goto Properties. Change the ip address of openmoko network to 192.168.0.200
+# Login to openmoko using Putty (ssh client for windows) 192.168.0.202
+
+==== Option 1.5, using a Network Bridge ====
+
+Just bridge the USB and Ethernet networks together (Win XP).
+
+To do this, you need to create a network bridge which contains the usb connection to the Neo and your normal Ethernet (or WiFi) connection (the one you use to go on the internets).
 
 Then you set up the bridge like your Ethernet was (DHCP or static IP, e.g. 10.10.0.foo) and the Neo to be in the same subnet as the bridge (10.10.0.bar)
 
-After you have done all this, the Neo will be able to route through the Windows machine out to the internet. DNS queries will also be proxied by the Windows machine. Of course, /etc/resolv.conf on the Neo needs to be set to your local DNS or a free DNS.
+After you have done all this, the Neo will be able to route through the Windows machine out to the internet. DNS queries will also be proxied by the Windows machine. Of course, /etc/resolv.conf on the Neo needs to be set to your local DNS or a free DNS. 
 
 ==== Option 2, using AnalogX ====
 
