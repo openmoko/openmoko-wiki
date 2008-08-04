@@ -9,6 +9,7 @@ lock
 115200
 crtscts
 connect "/usr/sbin/chat -v -S -s -f /etc/chatscripts/wind"
+disconnect "/usr/sbin/chat -v -S -s -f /etc/chatscripts/disconnect"
 hide-password
 user "wind"
 remotename "wind"
@@ -29,7 +30,8 @@ holdoff 30
 <pre>
 # Modem initialization.
 TIMEOUT    15
-''         'ATZ'
+''         '\K\K\K\d+++ATH'
+OK-AT-OK   'ATZ'
 OK-AT-OK   'ATE1'
 #
 # Set full functionality mode with
@@ -51,6 +53,26 @@ OK-AT-OK   'ATD*99#'
 CONNECT    '\d\c'
 </pre>
 
+== /etc/chatscripts/disconnect ==
+
+<pre>
+# Abort strings
+ABORT 'OK'
+ABORT 'BUSY'
+ABORT 'DELAYED'
+ABORT 'NO ANSWER'
+ABORT 'NO CARRIER'
+ABORT 'NO DIALTONE'
+ABORT 'VOICE'
+ABORT 'ERROR'
+ABORT 'RINGING'
+#
+# Set the modem in command mode.
+TIMEOUT 12
+''                   '\K\K\K\d+++ATH'
+'NO CARRIER-AT-OK'   '\c'
+</pre>
+
 == /etc/ppp/chap-secrets ==
 
 <pre>
@@ -58,5 +80,3 @@ CONNECT    '\d\c'
 # client        server  secret                  IP addresses
 "wind"          *       "wind"                  *
 </pre>
-
-[[Category:GPRS]]
