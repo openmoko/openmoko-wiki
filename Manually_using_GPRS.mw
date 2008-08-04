@@ -6,34 +6,30 @@ The program that implements PPP on Linux is [[pppd]], which we need to configure
 
 You'll need /etc/ppp/peers/gprs:
 <pre>
-/dev/ttySAC0 115200
-connect /etc/ppp/gprs-connect-chat
-crtscts 
+# Uncomment the following if you want some debug.
+#debug
+#logfile /var/volatile/log/pppd.log
 lock
-hide-password
-defaultroute
-usepeerdns
+/dev/ttySAC0 115200
+crtscts 
+connect /etc/ppp/gprs-connect-chat
 disconnect /etc/ppp/gprs-disconnect-chat
-holdoff 3
+hide-password
+usepeerdns
 ipcp-accept-local
-lcp-echo-failure 8
-lcp-echo-interval 3
 noauth
 noipdefault
 novj
 novjccomp
+defaultroute
 replacedefaultroute
+# Reopen the connection if it fails, pausing for a while.
 persist
-lcp-echo-interval 3
-lcp-echo-failure 12
-</pre>
-
-These options were mentioned before with this strange comment. Mine worked fine for me without them.
-
-<pre>
-# very long timeouts (unwise?)
-lcp-echo-interval 300
-lcp-echo-failure 40000
+holdoff 15
+# Check the line every 20 seconds and presume
+# the peer is gone if no replay for 4 times.
+lcp-echo-interval 20
+lcp-echo-failure 4
 </pre>
 
 Depending on the APN, you may need password authentication using CHAP or PAP. In /etc/ppp/pap-secrets you can add the following default line for "password-less" connections:
@@ -64,7 +60,11 @@ And you'll need /etc/ppp/gprs-connect-chat (needs "chmod +x"):
 
 <pre>
 #!/bin/sh -e
-exec chat -v\
+exec chat -v -S -s\
+        TIMEOUT 15\
+        "" "\K\K\K\d+++ATH"\
+        OK-AT-OK ATZ\
+        OK ATE1\
         ABORT BUSY\
         ABORT DELAYED\
         ABORT "NO ANSWER"\
@@ -73,9 +73,6 @@ exec chat -v\
         ABORT ERROR\
         ABORT RINGING\
         TIMEOUT 60\
-        "" +++\
-        OK ATZ\
-        OK ATE1\
         OK AT+CFUN=1\
         OK AT+COPS\
         OK AT+CGDCONT=1,\"IP\",\"internet\"\
