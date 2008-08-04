@@ -1,38 +1,35 @@
-This page , we will introduce about , how to active your Neo bluetooth device via host. You can follow these step to learn how to transfer data between Neo and PC. 
+First you should modify this file in your desk-top computer
 
-==configure your setting of host ==
-First you should modify this bluetooth setting file in your desk-top computer:
 
  > sudo vi /etc/default/bluetooth
 
-then search for the keyword "/pand" to find  " PAND_ENABLED=0  "
 
-And now you should change the 0 into 1 
- 
- ("PAND_ENABLED=1")
+then press "/pand" to find  " PAND_ENABLED=0  "
+and now you should change the 0 into 1 ("PAND_ENABLED=1")
 
-After you modify the setting, use this command to restart bluetooth device.
 
  > sudo /etc/init.d/bluetooth restart
 
+  
+  
+Restart the bluetooth device.
 After restarting the bluetooth, you will see Bluetooth PAN daemon information.
 
-That means you wake up the '''PAN''' daemon successfully.
+That means you wake up the PAN daemon suscessfully:P
 
 After that,you should pass the argument to let PAN daemon know what it should do now.
 
  > sudo pand -s 
 
-this command lets a desk-top computer be a server to listen to other Linux-based devices connecting to it through Bluetooth.
+this command let desk-top computer  be a Server to listen  the other linux-based devices
 
-==On the Neo side==
+which is connecting it through the bluetooth.
+
 In the Neo:
 
  > echo "1" > /sys/bus/platform/devices/neo1973-pm-bt.0/power_on
  > echo "0" > /sys/bus/platform/devices/neo1973-pm-bt.0/reset
-
-this command will search nearly bluetooth device. 
-
+ 
  > hcitool scan
 
 Put the wanted  bluetooth's Mac (Address)  in this line
@@ -42,7 +39,7 @@ Put the wanted  bluetooth's Mac (Address)  in this line
 
  > ifconfig bnep0 10.0.0.2 netmask 255.255.255.0
 
-Switch back to the Desk-top computer :
+Switch to the Desk-top computer :
 
  >sudo ifconfig bnep0 10.0.0.1 netmask 255.255.255.0
 
@@ -54,22 +51,18 @@ Then, you can use the "ping" command to check whether the connection is build su
 
 // send the testing data to the Neo
 
-If it works ,you will receive following message:
+If it does work,you will receive following information.
 
 PING 10.0.0.2 (10.0.0.2) 56(84) bytes of data.
-
- 64 bytes from 10.0.0.2: icmp_seq=1 ttl=64 time=xx.x ms
- 64 bytes from 10.0.0.2: icmp_seq=2 ttl=64 time=xx.x ms
- 64 bytes from 10.0.0.2: icmp_seq=3 ttl=64 time=xx.x ms
+64 bytes from 10.0.0.2: icmp_seq=1 ttl=64 time=xx.x ms
+64 bytes from 10.0.0.2: icmp_seq=2 ttl=64 time=xx.x ms
+64 bytes from 10.0.0.2: icmp_seq=3 ttl=64 time=xx.x ms
 
 ........
 
-==Start to transfer data==
 Also,you can copy datas to the Neo.
 
  > scp XXX.X root@10.0.0.2:
 
 That's all.
 Enjoy:)
-
-[[Category:Bluetooth]]
