@@ -112,6 +112,60 @@ This is more sophisticated than the manual setup.  The allow-hotplug stanza ties
 
 In addition, the desktop-side netmask is limited to a much smaller range, so that overlapping subnets are less of a problem - Linux will use more specific routes first when deciding where to send packets.
 
+An other possible configuration that adds DNS forward and removes
+the iptable changes after the unplugg.
+
+in /etc/network/interfaces add
+<pre>
+ # freerunner
+ allow-hotplug usb0
+ iface usb0 inet static
+        address 192.168.0.200
+        netmask 255.255.255.192
+        post-up /etc/network/freerunner start
+        pre-down /etc/network/freerunner stop
+</pre>
+
+create file /etc/network/freerunner
+<pre>
+ #!/bin/sh
+ #
+ # configures the freerunner for internet
+ # 
+ # 
+
+ DEVICE=usb0
+ IPADDR=192.168.0.200
+ REMOTE_IPADDR=192.168.0.202
+ NETMASK=255.255.255.0
+
+ # get first ip for dns
+ DNSIP=$(cat /etc/resolv.conf | grep nameserver | awk '{ print $2 }' | head -n 1 )
+
+ case "$1" in
+  start)
+        iptables -A POSTROUTING -t nat -j MASQUERADE -s $REMOTE_IPADDR
+        iptables -A PREROUTING -t nat -p tcp -s $REMOTE_IPADDR -d $IPADDR --dport domain -j DNAT --to-destination $DNSIP
+        iptables -A PREROUTING -t nat -p udp -s $REMOTE_IPADDR -d $IPADDR --dport domain -j DNAT --to-destination $DNSIP
+        
+        if [ "$(cat /proc/sys/net/ipv4/ip_forward)" = "0" ]; then
+                echo "temoprarely allow ip_forward for openmoko" > /var/run/openmoko.ip_forward
+                echo 1 > /proc/sys/net/ipv4/ip_forward
+        fi
+        ;;
+  stop)
+        iptables -D POSTROUTING -t nat -j MASQUERADE -s $REMOTE_IPADDR
+        iptables -D PREROUTING -t nat -p tcp -s $REMOTE_IPADDR -d $IPADDR --dport domain -j DNAT --to-destination $DNSIP
+        iptables -D PREROUTING -t nat -p udp -s $REMOTE_IPADDR -d  $IPADDR --dport domain -j DNAT --to-destination $DNSIP
+
+        if [ -f /var/run/openmoko.ip_forward ]; then
+                rm /var/run/openmoko.ip_forward
+                echo 0 > /proc/sys/net/ipv4/ip_forward
+        fi
+        ;;
+ esac
+</pre>
+
 === Ubuntu Issues ===
 
 Ubuntu Feisty, Gutsy and Hardy reportedly have a bug where ifdown is not run when the interface is unplugged, meaning this only works once after the system is booted.  This is mentioned at https://bugs.launchpad.net/ubuntu/+source/ifupdown/+bug/130437 
