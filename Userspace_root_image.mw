@@ -59,6 +59,15 @@ if loop0 is unused
 
 Based on this [http://www.internettablettalk.com/forums/showthread.php?p=192475#post192475 script by fanoush].
 
+The following is an alternate way of doing the above.
+ modprobe mtdcore
+ modprobe jffs2
+ modprobe mtdram total_size=59024  # default is 4 MByte - set to max. available size
+ modprobe mtdchar
+ modprobe mtdblock
+ dd if=<rootfs.jffs2> of=/dev/mtd0
+ mount -t jffs2 /dev/mtdblock0 <mountpoint>
+
 === Mounting the JFFS2 image on a loop back device (Kernel Memory MTD Emulation) ===
 
 As mounting the JFFS2 image from /dev/loop0 device is not supported, use the mtdram device as described in http://www.handhelds.org/hypermail/familiar/62/6232.html
