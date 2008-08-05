@@ -6,9 +6,25 @@ Normally, your desktop machine will know how to reach the Internet, having had i
 
 Normally, none of this is an issue, but problems can arise when the subnet between the FreeRunner and your desktop overlap with the desktop to the router (which forms a second LAN), since your desktop might not know how to route traffic properly.
 
-= DNS =
+= Simple Manual Linux Configuration =
 
-In addition to routing issues, to be practical, DNS will need to work.  In some cases, you might already be running a DNS server on your desktop such as dnsmasq or bind9, which is the default assumption the FreeRunner makes.  In other cases, you'll need to configure DNS to that of your router, or a DNS server further out on the internet such as that provided by your ISP.
+Try this first.  If it works, then you can add permanent configuration or use more sophisticated setups below:
+
+(as root on your desktop):
+
+ iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
+ sysctl -w net.ipv4.ip_forward=1
+ ifconfig usb0 192.168.0.200
+
+If your Internet connection is also in the range 192.168.0.x then instead you might want to use:
+
+ ifconfig usb0 192.168.0.200 netmask 255.255.255.248
+
+Then (ideally, not as root):
+
+ ssh root@192.168.0.202
+
+The default password is blank.
 
 = Linux Kernel Support =
 
@@ -40,23 +56,10 @@ If this contains anything in the FORWARD chain, then this may prevent passing pa
 
  iptables -t filter -F FORWARD
 
-= Simple Manual Linux Configuration =
 
-Try this first.  If it works, then you can add permanent configuration or use more sophisticated setups below:
+= DNS =
 
-(as root on your desktop):
-
- iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
- sysctl -w net.ipv4.ip_forward=1
- ifconfig usb0 192.168.0.200
-
-If your Internet connection is also in the range 192.168.0.x then instead you might want to use:
-
- ifconfig usb0 192.168.0.200 netmask 255.255.255.248
-
-Then (ideally, not as root):
-
- ssh root@192.168.0.202
+In addition to routing issues, to be practical, DNS will need to work.  In some cases, you might already be running a DNS server on your desktop such as dnsmasq or bind9, which is the default assumption the FreeRunner makes.  In other cases, you'll need to configure DNS to that of your router, or a DNS server further out on the internet such as that provided by your ISP.
 
 == Testing Your Connection ==
 
