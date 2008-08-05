@@ -61,7 +61,21 @@ If this contains anything in the FORWARD chain, then this may prevent passing pa
 
 In addition to routing issues, to be practical, DNS will need to work.  In some cases, you might already be running a DNS server on your desktop such as dnsmasq or bind9, which is the default assumption the FreeRunner makes.  In other cases, you'll need to configure DNS to that of your router, or a DNS server further out on the internet such as that provided by your ISP.
 
-== Testing Your Connection ==
+== Configure DNS ==
+
+DNS is configured in /etc/resolv.conf on your FreeRunner.  It should contain:
+
+ nameserver 192.168.0.200
+
+Which means that by default it expects your desktop to have a DNS server.  On some Linux and Windows systems this is true, especially those configured as servers, but in general it is not.  You can install packages such as ''bind9'' or ''dnsmasq''.   See the section below on [[USB Networking#More on DNS|More on DNS]] for other solutions.    
+
+Test if it works:
+
+ ping www.google.com
+
+If so, then this is sufficient for most internet access. But manual changes to resolv.conf are usually lost later if for example one uses DHCP, especially for WiFi, and so may not be convenient to configure manually.
+
+= Testing Your Connection =
 
 Log in with a blank password (press enter).  Now, make sure you can ping back to your desktop:
 
@@ -80,20 +94,6 @@ Or to a Google IP:
  ping 74.125.19.147
 
 This demonstrates that masquerading is working - your desktop is sending/receiving packets to the wider internet.
-
-== Configure DNS ==
-
-Note that step won't help much if you don't have connectivity above.  DNS is configured in /etc/resolv.conf on your FreeRunner.  It should contain:
-
- nameserver 192.168.0.200
-
-Which means that by default it expects your desktop to have a DNS server.  On some Linux and Windows systems this is true, especially those configured as servers, but in general it is not.  You can install packages such as ''bind9'' or ''dnsmasq''.   See the section below on [[USB Networking#More on DNS|More on DNS]] for other solutions.    
-
-Test if it works:
-
- ping www.google.com
-
-If so, then this is sufficient for most internet access. But manual changes to resolv.conf are usually lost later if for example one uses DHCP, especially for WiFi, and so may not be convenient to configure manually.
 
 = Make it Permanent =
 
