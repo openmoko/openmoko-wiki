@@ -160,167 +160,113 @@ You may ask for help on the support mailing list : more details at https://lists
 
 [[Freerunner_Hardware_Issues]]
 
-==Connect to the Neo FreeRunner By USB Networking==
+== Nastavení sesíťování přes USB - Aktualizace ==
 
-Connect the Neo FreeRunner to a GNU/Linux host with the USB cable. For Mac OS X please refer to [[MacOS_X]]. For Windows XP and Vista please refer to [[Neo1973_and_Windows]] (which also works for the FreeRunner). After booting into the Openmoko image there will be a new interface, usb0, on your GNU/Linux host.
+===Připojte se s Neo FreeRunnerem===
 
-=====Manual Method=====
-Type in the following commands in the terminal of a GNU/Linux host:
+Toto je probíráno v sekci [[USB_Networking|USB Networking]].
 
- ifconfig usb0 192.168.0.200 netmask 255.255.255.0
- ssh root@192.168.0.202
+===Package manager - Aktualizace===
 
-Press Enter to get by the password.
+In order to keep the FreeRunner up-to-date with the latest features and bug-fixes, it is advisable update the software at regular intervals. 
 
-=====Automatic Method=====
-*Debian and derivatives (Ubuntu, Sidux etc.)
-Edit /etc/network/interfaces:
+There are two main methods of doing this: 
+* upgrading with the package manager '''opkg'''
+* or manually flashing the device (see [[Flashing the Neo FreeRunner]]).
 
- auto usb0
- iface usb0 inet static
- address 192.168.0.200
- netmask 255.255.255.0
+There are three layers to the software on the FreeRunner:
 
-*Gentoo 
-Edit /etc/conf.d/net:
+* [[uboot|uBoot]]: Think of u-boot as a combination of the BIOS and Grub on a PC.
+* Kernel: The Linux kernel
+* Root Filesystem: The rest of the system
 
- config_usb0="192.168.0.200/24"
+Note that ''uboot'', the ''kernel'' and the ''root filesystem'' may all be flashed to update them. For uboot, this is the only possibility (see [[Flashing_the_Neo_FreeRunner#Flashing_the_boot_loader]]). The advantage of flashing the kernel manually rather than using opkg seems to be speed. The disadvantage of flashing the root file system is that it wipes out all local modifications, including /home. If /home is moved to the SD disk, this is no longer a problem.
 
-Restart the networking service ('/etc/init.d/networking restart' for Debian-based systems) and then type the following command in the terminal of the GNU/Linux host:
+Warning: UPGRADING TO DAILY KERNELS FROM THE DEVELOPMENT BRANCH MAY BREAK THINGS. That said, assuming that your FreeRunner can access the internet (see above), the kernel and other packages can be updated with
 
- ssh root@192.168.0.202
+ # opkg update
+ # opkg -test upgrade
+ # opkg upgrade
 
-Press Enter to get by the password.
+The first updates the repository information, telling opkg what packages are available. The second allows you to see what the package manager wants to do. The third upgrades all packages for which a newer version is available. '''At the moment, some signature files are missing (404 errors), which opkg complains about, but this is cosmetic.'''  The repositories will still update with the missing signature files.
 
-{{note|
-If your network device is using the ip range 192.168.0.x you may have to use the following command before you are able to connect
+Note that running opkg upgrade on a factory-fresh phone will upgrade dropbear (the ssh software) and various xserver packages, and neither upgrades elegantly while in use.  Xserver must be updated over ssh to complete succesfully.  Dropbear can be updated over ssh with the proper command:
+ # nohup opkg upgrade dropbear & 
+Or upgrade it directly in the FreeRunner terminal.
+ # opkg upgrade dropbear
 
- route add -host 192.168.0.202 dev usb0 }}
+When updating over ssh, the session will be interrupted, but the command should complete successfully(check nohup.out on your device to verify), and you should be able to reconnect within a few seconds.
 
-=====Making things even more automatic=====
-If you don't want to remember the IP address of your phone then you can create an alias by adding the following line to your /etc/hosts:
+Another (better) option is to start a screen session before the upgrade with:
 
- 192.168.0.202   openmoko
+  # screen
 
-Now it should be possible to connect to your phone using the following command:
+After loosing the ssh connection and login in again via ssh reconnect to the running screen session with:
 
- ssh root@openmoko
+  # screen -x
 
-The above only gets you a Secure Shell connection to the Openmoko device, it does not allow the Openmoko device to connect to the Internet.  If you are interested in connecting the device to the internet then check out the [[USB_Networking]] section.
 
-=====Allow FreeRunner to Connect to Internet via USB=====
-For the FreeRunner to access the internet through the USB connection, you will also need to make modifications on the PC it is connecting through.
 
-In Ubuntu:
 
-Within /etc/network/interfaces, change your interface setup to this:
+Then connect to the FreeRunner via ssh and type:
+ # opkg upgrade
 
- auto usb0
- iface usb0 inet static
-    address 192.168.0.200
-    netmask 255.255.255.0
-    network 192.168.0.0
-    up iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24 &
-    up echo 1 > /proc/sys/net/ipv4/ip_forward &
-    up iptables -P FORWARD ACCEPT &
-    down iptables -D POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24 &
+Recent changes to the usb ethernet support require that you install these two modules, '''before''' you reboot, after updating.
+ # opkg install kernel-module-g-ether kernel-module-cdc-ether
 
-In Fedora:
+And run this command :
+ # depmod
 
-Set /etc/sysconfig/network-scripts/ifcfg-usb0 to this:
- DEVICE=usb0
- IPADDR=192.168.0.200
- NETMASK=255.255.255.0
+{{Note|http://lists.openmoko.org/pipermail/support/2008-August/thread.html#900}}
 
-Set /etc/sysconfig/network-scripts/ifup-usb to this:
- #!/bin/bash
- 
- . /etc/init.d/functions
- 
- cd /etc/sysconfig/network-scripts
- . ./network-functions
- 
- [ -f ../network ] && . ../network
- 
- CONFIG=${1}
- 
- need_config ${CONFIG}
- 
- source_config
- 
- NETBITS=`ipcalc -p ${IPADDR} ${NETMASK} | awk -F'=' '{print $2;}'`
- 
- /sbin/ip addr flush dev ${DEVICE} 2>/dev/null
- /sbin/ip link set dev ${DEVICE} up
- /sbin/ip addr add dev ${DEVICE} ${IPADDR}/${NETBITS}
- 
- /sbin/iptables -I POSTROUTING -t nat -j MASQUERADE -s ${IPADDR}/${NETBITS}
- /sbin/sysctl net.ipv4.ip_forward=1
- /sbin/iptables -I FORWARD -s ${IPADDR}/${NETBITS} -j ACCEPT
- /sbin/iptables -I FORWARD -d ${IPADDR}/${NETBITS} -j ACCEPT
 
-Set /etc/sysconfig/network-scripts/ifdown-usb to this:
- #!/bin/bash
- 
- . /etc/init.d/functions
- 
- cd /etc/sysconfig/network-scripts
- . ./network-functions
- 
- [ -f ../network ] && . ../network
- 
- CONFIG=${1}
- 
- need_config ${CONFIG}
- 
- source_config
- 
- NETBITS=`ipcalc -p ${IPADDR} ${NETMASK} | awk -F'=' '{print $2;}'`
- 
- /sbin/iptables -D FORWARD -d ${IPADDR}/${NETBITS} -j ACCEPT
- /sbin/iptables -D FORWARD -s ${IPADDR}/${NETBITS} -j ACCEPT
- /sbin/sysctl net.ipv4.ip_forward=0
- /sbin/iptables -D POSTROUTING -t nat -j MASQUERADE -s ${IPADDR}/${NETBITS}
- 
- /sbin/ip link set dev ${DEVICE} down
- /sbin/ip addr flush dev ${DEVICE} 2>/dev/null
+Alternatively you can upgrade the xserver packages via ssh and then upgrade the rest from the FreeRunner's terminal.  
 
-If you are using NetworkManager, restart it and enable the usb device from its menu, otherwise it will disable your connection shortly after you enable it.
- /sbin/service NetworkManager restart
+If you do your first upgrade in two installments like this, it will go more smoothly.
 
-=====Updating DNS=====
+It will be possible in the future to update uboot with opkg, but this has not yet been implemented.
 
-Once your PC is setup, then edit /etc/network/interfaces on your FreeRunner and modify the code from this:
+=== Installing multimedia, web browsing and other applications ===
 
- iface usb0 inet static
-        address 192.168.0.202
-        netmask 255.255.255.0
-        network 192.168.0.0
-        gateway 192.168.0.200
-        up echo nameserver 192.168.0.200 > /etc/resolv.conf
+There are many applications you can install - check out the [[Repositories]] for a list of packages, an example of how to add a repository using scaredy cat as an example can also be found here. A list of pre-installed and available packages with descriptions can be found here - [[Available Packages]].
 
-to something that points to a real name server, like a public DNS system from OpenDNS, like this:
+The calendar can be installed with
 
- iface usb0 inet static
-        address 192.168.0.202
-        netmask 255.255.255.0
-        network 192.168.0.0
-        gateway 192.168.0.200
-        up echo nameserver 208.67.222.222 > /etc/resolv.conf
-        up echo nameserver 208.67.220.220 >> /etc/resolv.conf
+ opkg install openmoko-dates2
 
-Note: vi appears to be the only text editor available by default.  See [http://www.cs.colostate.edu/helpdocs/vi.html basic vi commands] for help.
+For a Media Player:
 
-On the factory loaded OM2007.2 image, run the following to restart networking for the DNS changes to take effect:
+ opkg install openmoko-mediaplayer2
+ wget http://abraxa.dyndns.org:81/random/openmoko-mediaplayer-theme.tar.bz2
+ tar xjf openmoko-mediaplayer-theme.tar.bz2 -C /usr/share/themes/Moko/gtk-2.0
+ rm openmoko-mediaplayer-theme.tar.bz2
 
- /etc/rc0.d/K40networking restart
+If you want a basic image viewer, have a look at the one from the gpe suite:
 
-If your LAN also has the subnet 192.168.0.0/24, you will need to do the following on your PC, as root, in order to allow your PC to access both the FreeRunner and other hosts:
+ opkg install gpe-icons 
+ opkg install gpe-gallery
 
- route add -host 192.168.0.202 dev usb0
- route del -net 192.168.0.0 netmask 255.255.255.0 usb0
+To obtain the standard web browser, use:
 
-[[User:Linuxpaul|More information]] (includes more specific instructions for Mandriva)
+ opkg install openmoko-browser2
+
+An alternative browser, minimo, offers many more features.  
+First download and unpack it on your GNU/Linux host:
+
+ wget http://www.ginguppin.de/files/minimo.tar.bz2
+ tar jvxf minimo.tar.bz2
+
+Copy it over to the FreeRunner:
+ scp minimo_* root@192.168.0.202:/tmp
+
+Then on the FreeRunner:
+ opkg install /tmp/minimo_0.02\+cvs20070626-r0_armv4t.ipk
+
+You'll probably also want to [[Switching Keyboards|change the keyboard]] including the [[Switching Keyboards#How_to_add_a_keyboard_toggle_button|keyboard toggle applet]]
+
+=== Importing contacts ===
+
+If you can export your contacts to VCard format, either multiple files or single file containing all of them, you may use the script on [[Import Vcf Contacts]] page to bring them to Neo.
 
 ==The Architecture==
 
