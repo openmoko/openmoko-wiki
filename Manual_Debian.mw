@@ -247,6 +247,30 @@ I currently use mpd+sonata - let me know if you know another nice lightweight gt
 [[Image:Debian+frogpad.jpg|thumb|480px|''Using irssi on [[Debian]] together with the frogpad to IRC on #neo1973-germany'']]
 nezza prepared a nice guide for this here: [[Frogpad]]
 
+= Chroot installation =
+
+If you just want to run random debian programs without completely booting to debian you can use the following minimal steps:
+
+on desktop:
+
+ sudo debootstrap --arch armel --foreign sid sid
+ sudo tar cjf sid.tar.bz2 sid
+ nc -w3 -lp1234 < sid-arm.tar.bz2
+
+on neo:
+
+ cd /media/card
+ nc 192.168.0.200 1234 | tar -x -j -f -
+ mount -t none -o bind /dev /media/card/sid/dev
+ mount -t none -o bind /proc /media/card/sid/proc
+ mount -t none -o bind /sys /media/card/sid/sys
+ mount -t none -o bind /tmp /media/card/sid/tmp
+ chroot /media/card/sid /deboostrap/deboostrap --second-stage
+ cp /etc/resolv.conf /media/card/sid
+ chroot /media/card/sid apt-get update
+ chroot /media/card/sid apt-get install mplayer
+ chroot /media/card/sid mplayer http://relay.slayradio.org:8000/
+
 [[Category:Distributions]]
 [[Category:Software (non openmoko)]]
 [[category:Technical]]
