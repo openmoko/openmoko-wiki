@@ -51,8 +51,33 @@ For [http://code.google.com/p/comic-reader/source/browse/trunk/data/comic-reader
 * connect to your Neo with USB
  > sudo ifconfig usb0 192.168.0.200
  > scp community-repos.conf root@192.168.0.202:/etc/opkg/
+* Let your Neo connect to the Internet
+** For USB users:
+ > ssh root@192.168.0.202
+ > echo 1 | sudo tee  /proc/sys/net/ipv4/ip_forward
+ > sudo iptables -t nat -A POSTROUTING -s 192.168.0.0/24 -j MASQUERADE
+ > scp /etc/resolv.conf root@192.168.0.202:/etc/
+** For geek users:
+ > ssh root@192.168.0.202
+ > iwlist eth0 scan
+ Find a usable AP lets say OpenMind (Support it's an open AP)
+ > iwconfig eth0 essid OpenMind
+ > udhcpc eth0
+ Then pray, if successfull, remove default gw *twice*.
+ > route -n  # to see your gateway of eth0 say 192.168.1.1
+ > route del default
+ > route del default
+ > route add default gw 192.168.1.1 eth0
+ Then you can ping wiki.openmoko.org for testing :)
+** For GUI user:
+ Click Setting
+ Click WiFi
+ Find an AP
+ Click that AP
+ Input password if needed
+ pray
+
 * refresh the opkg metadata database
- > ssh root@192.168.0.202 
  after connecting to Neo
  > opkg update
 
