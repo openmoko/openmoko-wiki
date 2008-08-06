@@ -1,0 +1,41 @@
+Just for clarification freerunner do not support HSPA.
+
+Here i will describe a way to get a HSPA USB stick working with the Freerunner.
+( Tested with the Novatel MC950D )
+
+1. Install crosscompile environment
+http://wiki.openmoko.org/wiki/Toolchain
+
+2.
+on the phone:
+ opkg info kernel
+
+ Package: kernel
+ Version: 2.6.24+gitr0+7a1370a816b9348dd8f36a667905dd3533cefc9b-r4
+ Depends: kernel-2.6.24
+ Status: install ok installed
+ Architecture: om-gta02
+ Installed-Time: 1217369038
+
+copy the git serial number: 7a1370a816b9348dd8f36a667905dd3533cefc9b
+
+on host:
+ git clone git://git.openmoko.org/git/kernel.git 7a1370a816b9348dd8f36a667905dd3533cefc9b
+
+after download go to the directory created and execute following commands:
+
+Download .config file for installed kernel. (Hmm plz can someone add this info)
+search the line: CONFIG_UDF_FS=n
+and replace with: CONFIG_UDF_FS=m
+
+compile the kernel and modules
+ . /usr/local/openmoko/arm/setup-env
+ export CROSS_COMPILE=arm-angstrom-linux-gnueabi-
+ make -f synthesize-gta-module-configs.mak
+ make ARCH=arm
+ make ARCH=arm modules
+
+ 
+
+
+Turn USB into host mode: (http://wiki.openmoko.org/wiki/Neo_1973_USB_host)
