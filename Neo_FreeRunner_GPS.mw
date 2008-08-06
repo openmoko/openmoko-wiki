@@ -57,6 +57,44 @@ Here is a brief script to run this application:
 
 -la 25.073270 -lo 121.574805 is reference latitude/longtitude
 
+Here is a simple perl skript doing the same:
+
+<pre>
+#!/usr/bin/perl -wT
+use strict;
+use IO::Socket::INET;
+use vars qw(%h);
+
+my $user = 'user@somewhere.invalid';
+my $pass = 'pass-from-ublox';
+
+my $s = new IO::Socket::INET(PeerAddr => 'agps.u-blox.com', Proto => 'tcp', PeerPort => 46434);
+
+$s->print('user='.$user.';pwd='.$pass.';cmd=alm;lat=0;lon=0;pacc=40000000;', "\n");
+
+print STDERR $s->getline;
+
+while(my $l = $s->getline) {
+        print STDERR $l;
+
+        $l =~ s/(\r\n|\n)+\Z//g;
+
+        if ($l eq "") {
+                if ($h{'content-length'} > 0 && $h{'content-type'} eq 'application/ubx') {
+                        $s->read($l,$h{'content-length'});
+                        print $l;
+                }
+                exit(0);
+        }
+
+        if ($l =~ m/\A(.+): (.+)\Z/) {
+                $h{lc($1)} = lc($2);
+        }
+}
+</pre>
+
+This also works with <tt><cmd=full/tt> and meaningful lat/lon/pacc values.
+
 ==== u-blox Assist Now account application ====
 
 And account application is send a mail to agps-account@u-blox.com
