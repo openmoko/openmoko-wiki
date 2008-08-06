@@ -22,13 +22,18 @@ Three-headed cables are required if you want to power the FreeRunner / USB devic
 * A cable of whatever type to go to your USB device.
 * A cable going to a +5V voltage source with enough power for your device and to charge the Neo. This could be a wall charger or even another USB plug.
 
-You just connect the Data+ and Data- wires of the Neo and the device, and connect all of the ground wires together and all of the +5V wires together. This powers the Neo and the device, while letting the neo talk to the device.
+You connect the Data+ and Data- wires of the Neo and the device, and connect all of the ground wires together and all of the +5V wires together. This powers the Neo and the device, while letting the neo talk to the device.
+You have to connect 2pcs  15kOhm resistors, one from D+ to ground, and one from D- to ground, to comply with USB-spec for hostmode, as Freerunner is switching off the internal resistors when you enable charging/powering over USB by asserting EN_USBHOST.
+See schematics, LOCATION:49XX
 
 Just for reference, the USB wires from left to right are:
 *Black: Power -
 *Green: Data -
 *White: Data +
 *Red: Power +
+
+The Mini_USB-B connector has a fifth pin, the ID-pin.
+This pin is supposed to be short to ground to signal Freerunner to enter hostmode. For the Y-cable and enabling external power while in hostmode, you may connect a 47kOhm resistor from ID-pin to ground. This is the same trick the OM-wallcharger uses to signal to Freerunner it can charge with 1A. Future kernels should switch to hostmode + external power when seeing this 47k resistor.
 
 === Power Concerns ===
 You'll need to force the Neo to go into fast charge mode, since it can't do its usual power negotiation over USB.
