@@ -240,22 +240,24 @@ Hay tres capas de software en el FreeRunner:
 * Kernel: El kernel Linux
 * Sistema de archivos raíz (rootfs): El resto del sistema
 
-Para mantener el FreeRunner actualizado con las ultimas funcionalidades y reparaciones de errores, se recomineda actualizar el software de manera regular. Hay principalmente hay dos maneras de realizar la actualizacion: a traves del Gestor de paquetes opkg o flasheando manualmente el dispositivo. De momento usar el gestor de paquetes es suficiente, no necesitas aprender   [[Booting the Neo FreeRunner|Metodos de arranque del Neo Freerunner]] y [[Flashing the Neo FreeRunner| Flashear el Neo FreeRunner]] todavía, aunque deberías tener en cuenta lo siguiente:
+Para mantener el FreeRunner actualizado con las ultimas funcionalidades y reparaciones de errores, se recomineda actualizar el software de manera regular. Hay principalmente hay dos maneras de realizar la actualizacion: a traves del Gestor de paquetes opkg o flasheando manualmente el dispositivo. De momento usar el gestor de paquetes es suficiente, no necesitas aprender   [[Booting the Neo FreeRunner|Métodos de arranque del Neo Freerunner]] y [[Flashing the Neo FreeRunner| Flashear el Neo FreeRunner]] todavía, aunque deberías tener en cuenta lo siguiente:
 
-uBoot, el kernel y el rootfs pueden ser flasheados para actualizarlos.Para uBoot es la única manera. La ventaja de actualizar el kernel a través de flashear manualmente respecto a utilizar opkg parece ser la velocidad. La principal desventaja de actualizar el rootfs a traves del flasheo es que elimina todas las modificaciones que hayas hecho al teléfono previamente, incluyendo los contenidos del /home. Deberas realizar un backup de todo lo que quieras conservar y tengas en la NAND a por ejemplo la tarjeta microSD, otro consejo útil es mover el directorio /home a la micro SD.
+uBoot, el kernel y el rootfs pueden ser flasheados para actualizarlos.Para uBoot es la única manera. La ventaja de actualizar el kernel a través de flashear manualmente respecto a utilizar opkg parece ser la velocidad. La principal desventaja de actualizar el rootfs a través del flasheo es que elimina todas las modificaciones que hayas hecho al teléfono previamente, incluyendo los contenidos del /home. Deberás realizar un backup de todo lo que quieras conservar y tengas en la NAND a por ejemplo la tarjeta microSD, otro consejo útil es mover el directorio /home a la micro SD.
 
-Warning: UPGRADING TO DAILY KERNELS FROM THE DEVELOPMENT BRANCH MAY BREAK THINGS. That said, assuming that your FreeRunner can access the internet (see above), the kernel and other packages can be updated with
+Atención:ACTUALIZAR A LOS DAYLY KERNELS DE LA RAMA DE DESARROLLO PUEDE ROMPER COSAS. Una vez dicho esto, y asumiendo que el FreeRunner tenga acceso a Internet, el kernel y otros paquetes pueden ser actualizados con
 
  # opkg update
  # opkg -test upgrade
  # opkg upgrade
 
-The first updates the repository information, telling opkg what packages are available. The second allows you to see what the package manager wants to do. The third upgrades all packages for which a newer version is available. '''At the moment, some signature files are missing (404 errors), which opkg complains about, but this is cosmetic.'''  The repositories will still update with the missing signature files.
+La primera instrucción actualiza el la lista de paquetes disponibles (aka repositorio). La segunda te permite ver que paquetes se van a actualizar sin llegar a hacerlo. La tercera actualiza todos los paquetes a la ultima versión disponible. '''Actualmente algunos firmas de paquetes no existen (errores 404) de los que opkg se queja, pero no afecta al funcionamiento del programa.''' Los repositorios se irán actualizando incluyendo esas firmas que faltan.
 
-Note that running opkg upgrade on a factory-fresh phone will upgrade dropbear (the ssh software) and various xserver packages, and neither upgrades elegantly while in use.  Xserver must be updated over ssh to complete succesfully.  Dropbear can be updated over ssh with the proper command:
+Tened en cuenta que realizar un opkg uprade a un telefono recién salido de fabrica actualizara dropbear (el software de ssh) y varios paquetes relacionados con el xserver, ninguno de ellos se actualiza correctamente si están en uso. El Xserver debe actualizarse a través de ssh para que el proceso se complete satisfactoriamente.
+Dropbear puede ser actualizado a través de ssh con los comando adecuados:
  # nohup opkg upgrade dropbear & 
-Or upgrade it directly in the FreeRunner terminal.
+o actualizarlo directamente desde el terminal del teléfono.
  # opkg upgrade dropbear
+
 
 When updating over ssh, the session will be interrupted, but the command should complete successfully(check nohup.out on your device to verify), and you should be able to reconnect within a few seconds.
 
