@@ -1,10 +1,10 @@
-== FreeRunner backup kernel ==
+== Freerunner backup kernel ==
 
-The FreeRunner NAND partition for the monolithic kernel is set to be 8MBytes, but currently kernels are around 2MBytes in size.  This allows us to stash a second, backup kernel in that partition for use in an emergency.  If your USB network connection is unavailable was knocked out for some reason, or the modules in the rootfs are bad and crash on every boot, this can be highly useful to have alongside DFU as a boot menu option eventually.
+The Freerunner NAND partition for the monolithic kernel is set to be 8MBytes, but currently kernels are around 2MBytes in size.  This allows us to stash a second, backup kernel in that partition for use in an emergency.  If your USB network connection is unavailable was knocked out for some reason, or the modules in the rootfs are bad and crash on every boot, this can be highly useful to have alongside DFU as a boot menu option eventually.
 
 [[Image:Recovery-kernel.png]]
 
-Since this was only implemented after production, factory FreeRunners do not currently have a recovery kernel, but it's possible to add as described here.
+Since this was only implemented after production, factory Freerunners do not currently have a recovery kernel, but it's possible to add as described here.
 
 Once you installed the recovery kernel, it won't get overwritten by subsequent DFU kernel updates because DFU only erases as far as it writes, which is no more than 2MBytes for normal kernel update.
 
@@ -24,6 +24,3 @@ Just DFU it in normally to the kernel partition.  When the issue about packaged 
 This one-liner at the U-Boot prompt will boot you into the backup kernel.  (FIXME: integrate into boot menu to make all this actually useful)
 
 <blockquote>setenv bootcmd  nand read.e 0x32000000 kernel \; setenv bootargs \${mtdparts} rootfstype=jffs2 root=/dev/mtdblock6 console=tty0 console=ttySAC2,115200 loglevel=3 init=/sbin/init \; bootm 0x32400000 ; boot</blockquote>
-
-[[Category:Kernel]]
-[[Category:Flashing Openmoko]]
