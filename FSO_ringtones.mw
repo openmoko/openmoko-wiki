@@ -1,83 +1,34 @@
-{{FSO}}
-==The milestone 4.1 way==
-Same as Milestone 3 way below.
-Install gst-plugin-mad to use mp3 files as ringtones.
-
-==The milestone 3 way==
-FSO milestone 3 introduces some configuration files for Zhone. It is now possible to define as many ringtone profiles as we want. Each profile is a YAML configuration file located in :
-/etc/freesmartphone/opreferences/conf/phone
-
-After adding another profile to /etc/freesmartphone/opreferences/conf/phone you have to add it to /etc/freesmartphone/opreferences/conf/profiles/default.yaml
-
-The default profile is defined in the default.yaml file :
-ring-tone: "Arkanoid_PSID.sid"
-ring-volume: 10
-
-To change this default ringtone :
-# copy the sound file into /usr/share/sounds/
-# edit the "ring-tone" field to match your sound filename.
-
-====<font color=crimson>Note for Debian users</font>====
-Depending on the '''fso-frameworkd''' package version (<= 0.2.0-git20080909-2) you may have to use [http://lists.alioth.debian.org/pipermail/pkg-fso-commits/2008-September/000158.html this patch].
-
-==The milestone 2 way==
 The ringtone in milestone 2 is stored here:
 
- /usr/share/sounds/Arkanoid_PSID.sid
-
-Fun fact : according to the gstreamer documentation, .sid files are in fact small Commodore 64 programs that are executed on an emulated 6502 CPU and a MOS 6581 sound chip. 
+/usr/share/sounds/Arkanoid_PSID.sid
 
 Now to change it is a little bit of fun.
 
-first change directory to
+first in
 
- /usr/lib/python2.5/site-packages/framework/subsystems/oeventd/
+/usr/lib/python2.5/site-packages/framework/subsystems/oeventd/receiver.py
 
-and open the file parser.py
+Change the line that reads:
 
-#this will be /var/lib/python-support/python2.5/framework/subsystems/oeventd/parser.py if you are using FSO under Debian
+decoder = gst.element_factory_make( "siddec", "decoder" )
 
-Search for PlaySound. Edit the 2 lines to point to your wav or mp3 file.
+to
 
-There does seem to be a lag of a few vibrations before the sound starts but that might desirable. (I didn't compare against the original code).  The code to specifically handle formats, (oggs for example) can be a little complicated and makes things messy.
-Since, it seems like this code is changing in FSO, I'm leaving it for the moment.
+decoder = gst.element_factory_make( "mad", "decoder" )
+
+
+and change the line that reads:
+
+filesrc.set_property( "location", "/usr/share/sounds/Arkanoid_PSID.sid" )
+
+to
+
+filesrc.set_property( "location", "/usr/share/sounds/ringtone" )
 
 Then
 
- mv receiver.pyo /home/root 
+mv /usr/lib/python2.5/site-packages/framework/subsystems/oeventd/receiver.pyo /home/root
 
-#receiver.pyo will be receiver.pyc in FSO under Debian
+then reboot the phone ( I'm sure there's a better way to regenerate receiver.pyo but I don't know it )
 
- python
-  >>> import py_compile
-  >>> py_compile.compile("parser.py")
-  >>> quit()
-#You may not have the py_compile module. You can install them like this:
- opkg install python-compile
-
- /etc/init.d/fso-frameworkd restart && /etc/init.d/zhone-session stop && sleep 2 && /etc/init.d/zhone-session start
-#I've only run the above restart commands in Debian so I'm not sure if they are the same in the default FSO image
-#the default zhone-session file doesn't have a working restart command, hence the stop->sleep 2->start
-
-zhone for FSO seems to be launched by Xsession.d so maybe try:
- /etc/init.d/xserver-nodm restart
-
-Now you can link /usr/share/sounds/ringtone to any mp3 (or other sound file if you took the second option) and that will be your ringtone
-
-== Different ringtones by caller ID==
-
- Am Mittwoch, den 24.09.2008, 17:38 +0200 schrieb joakim@verona.se:
- > Is there some simple way to get fso-frameworkd play different sid tunes
- > when different people call? If not, where do I hack apropriately?
-
- First, have a look at ./etc/freesmartphone/oevents/rules.yaml. This is
- our rules file, where we define that a ringtone should play once a call
- comes in. Now you probably have to enhance the RingTone atom to make it
- aware of the 'peer' entry in the dbus signal CallStatus. Once you have
- that, you should be able to add numbers to the rules that trigger
- different ringtones.
-
-
-[[Category:Middleware settings]]
-[[Category:Audio]]
-[[Category:FSO]]
+Now you can link /usr/share/sounds/ringtone to any mp3 and that will be your ringtone
