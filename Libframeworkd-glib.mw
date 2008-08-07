@@ -1,0 +1,59 @@
+= Purpose =
+
+libframeworkd-glib is a library conceived to help users develop with frameworkd without bothering about the dbus calls/marshalling/etc... while building a C glib software.
+
+= Integration with other software =
+
+As for now, libframeworkd-glib is used mostly in [[SHR]] in order to be able to port openmoko-dialer2, openmoko-messages2, openmoko-panel-gsm, etc.
+
+= Current status =
+
+As for now, libframeworkd-glib implements almost the whole GSM stack from frameworkd.
+
+= Sources =
+
+You can find the sources on the [https://projects.openmoko.org/projects/shr/ SHR project page].
+
+= Example =
+
+ophonekitd is a simple example on how to use libframeworkd-glib to listen to events on frameworkd, and then launch the appropriate UI. It handles, in SHR, the whole "call" UI.
+<pre>
+int main(int argc, char ** argv) {
+        GMainLoop *mainloop = NULL;
+        FrameworkdHandlers fwHandler;
+        g_type_init();
+        mainloop = g_main_loop_new (NULL, FALSE);
+
+        fwHandler.networkStatus = NULL;
+        fwHandler.simAuthStatus = ophonekitd_sim_auth_status_handler;
+        fwHandler.callCallStatus = NULL;
+        fwHandler.smsMessageSent = NULL;
+        fwHandler.smsIncomingMessage = NULL;
+        fwHandler.networkSignalStrength = NULL;
+        dbus_connect_to_bus(&fwHandler);
+        g_timeout_add(5000, power_up_antenna, NULL);
+        g_main_loop_run (mainloop);
+
+        exit(EXIT_SUCCESS);
+}
+
+boolean power_up_antenna() {
+        device_set_antenna_power(TRUE, power_up_antenna_callback, NULL);
+
+        return false; // End timeout
+}
+
+void power_up_antenna_callback(GError *error, gpointer userdata) {
+        if(error != NULL) {
+            if(IS_SIM_ERROR(error, SIM_ERROR_AUTH_FAILED)) {
+                sim_display_code_UI();
+            }
+        }
+}
+</pre>
+
+This example, built with the appropriate headers, listen for events on SIM authentication. It powers up the antenna, and presents the SIM "code" UI, that is to say the UI prompting the user for its PIN.
+
+[[Category:Implemented]]
+[[Category:Software]]
+[[Category:Framework]]
