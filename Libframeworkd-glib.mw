@@ -2,6 +2,8 @@
 
 libframeworkd-glib is a library conceived to help users develop with frameworkd without bothering about the dbus calls/marshalling/etc... while building a C glib software.
 
+It uses dbus-glib to bind to frameworkd, then calls the asynchronous methods of the interfaces. Thus, in order to use one method, you have to implement a callback.
+
 = Integration with other software =
 
 As for now, libframeworkd-glib is used mostly in [[SHR]] in order to be able to port openmoko-dialer2, openmoko-messages2, openmoko-panel-gsm, etc.
@@ -17,6 +19,44 @@ You can find the sources on the [https://projects.openmoko.org/projects/shr/ SHR
 = Example =
 
 ophonekitd is a simple example on how to use libframeworkd-glib to listen to events on frameworkd, and then launch the appropriate UI. It handles, in SHR, the whole "call" UI.
+
+== Connecting to the bus ==
+
+To connect to the bus, you have to explicitly ask for it. You also have to give to libframeworkd-glib a list of handlers for the events you want to listen to.
+
+<pre>
+        FrameworkdHandlers fwHandler;
+        fwHandler.networkStatus = NULL;
+        fwHandler.simAuthStatus = ophonekitd_sim_auth_status_handler;
+        fwHandler.callCallStatus = NULL;
+        fwHandler.smsMessageSent = NULL;
+        fwHandler.smsIncomingMessage = NULL;
+        fwHandler.networkSignalStrength = NULL;
+        dbus_connect_to_bus(&fwHandler);
+</pre>
+
+== Calling a method ==
+
+In order to call a method you have to provide a callback which will give you the information you asked for, or some other stuff (errors as an example).
+
+<pre>
+boolean power_up_antenna() {
+        device_set_antenna_power(TRUE, power_up_antenna_callback, NULL);
+
+        return false; // End timeout
+}
+
+void power_up_antenna_callback(GError *error, gpointer userdata) {
+        if(error != NULL) {
+            if(IS_SIM_ERROR(error, SIM_ERROR_AUTH_FAILED)) {
+                sim_display_code_UI();
+            }
+        }
+}
+</pre>
+
+== Source code ==
+
 <pre>
 int main(int argc, char ** argv) {
         GMainLoop *mainloop = NULL;
