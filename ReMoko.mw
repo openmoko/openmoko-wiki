@@ -10,7 +10,17 @@
 
 *'''Pre-requisites'''
 ** Remoko depends on the Openmoko framework;
-** The FSO images built before 20080807 have a bug in the framework bluetooth system, to use remoko it a older FSO image you will need to copy this file to ... after that you will need to restart the framework (kill the process and start it again or simply restart the device).
+** The FSO images built before 20080807 have a bug in the framework bluetooth system, to use remoko in a older FSO image you will need to change this lines in ....:
+
+98
+-        proxy = self.bus.get_object( "org.freesmartphone.Device", "/org/freesmartphone/Device/PowerControl/" + self.name )
++        proxy = self.bus.get_object( "org.freesmartphone.odeviced", "/org/freesmartphone/Device/PowerControl/" + self.name )
+
+209
+-    genericUsageControl.addResource( DummyResource( genericUsageControl, "Bluetooth" ) )
++    genericUsageControl.addResource( ODeviceDResource( genericUsageControl, "Bluetooth" ) )
+
+after that you will need to restart the framework (kill the process and start it again or simply restart the device).
 
 ===Features===
 *'''Connection'''
