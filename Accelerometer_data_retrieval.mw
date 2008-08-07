@@ -180,6 +180,41 @@ A simple test application written in ruby:
    end
  end
 
+Equivalent version in python:
+
+<pre>
+#!/bin/python
+import struct
+from math import sqrt
+
+x = 0
+y = 0
+z = 0
+secondsensorfile = "/dev/input/event3"
+#int, int, short, short, int
+fmt = 'iihhi'
+#open file in binary mode
+in_file = open(secondsensorfile,"rb")
+event = in_file.read(16)
+while event:
+	(time1,time2, type, code, value) = \
+		struct.unpack(fmt,event)
+	time = time1 + time2 / 1000000
+
+	if type == 2:
+		if code == 0:
+			x = value
+		if code == 1:
+			y = value
+		if code == 2:
+			z = value
+	if type == 0 and code == 0:
+		sum = int(sqrt(x*x + y*y + z*z))
+		print x, y, z, sum
+	event = in_file.read(16)
+in_file.close()
+
+</pre>
 
 ==External Links==
 [[Accelerometer_Fundamentals]]
