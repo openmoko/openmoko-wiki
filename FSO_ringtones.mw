@@ -1,0 +1,34 @@
+The ringtone in milestone 2 is stored here:
+
+/usr/share/sounds/Arkanoid_PSID.sid
+
+Now to change it is a little bit of fun.
+
+first in
+
+/usr/lib/python2.5/site-packages/framework/subsystems/oeventd/receiver.py
+
+Change the line that reads:
+
+decoder = gst.element_factory_make( "siddec", "decoder" )
+
+to
+
+decoder = gst.element_factory_make( "mad", "decoder" )
+
+
+and change the line that reads:
+
+filesrc.set_property( "location", "/usr/share/sounds/Arkanoid_PSID.sid" )
+
+to
+
+filesrc.set_property( "location", "/usr/share/sounds/ringtone" )
+
+Then
+
+mv /usr/lib/python2.5/site-packages/framework/subsystems/oeventd/receiver.pyo /home/root
+
+then reboot the phone ( I'm sure there's a better way to regenerate receiver.pyo but I don't know it )
+
+Now you can link /usr/share/sounds/ringtone to any mp3 and that will be your ringtone
