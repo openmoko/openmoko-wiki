@@ -56,7 +56,9 @@ For this you need the following options in /etc/ppp/peers/gprs:
 user "user"
 </pre>
 
-And you'll need /etc/ppp/gprs-connect-chat (needs "chmod +x"):
+== gprs-connect-chat, version 1 ==
+
+You'll also need /etc/ppp/gprs-connect-chat (needs "chmod +x"):
 
 <pre>
 #!/bin/sh -e
@@ -79,6 +81,8 @@ exec chat -v -S -s\
         OK ATD*99#\
         CONNECT /n/d
 </pre>
+
+== gprs-connect-chat, version 2 ==
 
 Update: On my freerunner the first AT+CFUN=1 always generated ERROR. I managed to get gprs work by using the following script from http://lists.openmoko.org/pipermail/community/2008-July/023246.html:
 
@@ -105,7 +109,11 @@ exec /usr/sbin/chat -v \
         CONNECT ''
 </pre>
 
+The error seems to vary a bit, sometimes it's before AT+COPS, sometimes as above. I have two versions of the gprs-connect-chat, which I vary between depending on which is needed. Or is there a way to specify two acceptable answers like {OK,ERROR}?
+
 You will need to adjust the APN name "internet" in at+cgdcont line and possibly the phone number in the ATD line to match what your network operator provides. See below in the table "Some APN names for reference" for the right settings for your operator.
+
+== gprs-disconnect-chat ==
 
 Also good to have is /etc/ppp/gprs-disconnect-chat (needs "chmod +x"):
 
@@ -125,6 +133,8 @@ Also good to have is /etc/ppp/gprs-disconnect-chat (needs "chmod +x"):
 	"" "\K\K\K\d+++ATH"\
 	"NO CARRIER-AT-OK" "\c"
 </pre>
+
+== Starting PPP connection ==
 
 The following script can be used to start the ppp connection. First it stops gsmd because gsmd may put the phone in a unknown state. It then turns on the power to the phone, modifies the ownership, and then creates a tty connection. Finally it starts [[pppd]] with the gprs settings.
  
