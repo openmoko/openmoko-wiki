@@ -128,7 +128,9 @@ If you have nothing better to do, you can now pinpoint my office :-).
 
 === Networking ===
 
-==== Bluetooth networking with a Linux system ====
+==== Using PC's connection from Neo ====
+
+===== Bluetooth networking with a Linux system =====
 
 Bluetooth should behave just like our usbnet and provide full TCP/IP access to the phone.  BNEP has to be used.
 
@@ -170,13 +172,13 @@ Bluetooth should behave just like our usbnet and provide full TCP/IP access to t
  ip l set bnep0 up
 * Enjoy
 
-==== Bluetooth networking with a MacOS X system ====
+===== Bluetooth networking with a MacOS X system =====
 
 Please refer to [[MacOS_X#Bluetooth_2]]
 
 For using the Neo as a dialup Bluetooth server and the Mac as the client, please see below at [[Manually_using_Bluetooth#PPP_Networking]]
 
-==== Bluetooth networking with a Windows XP system ====
+===== Bluetooth networking with a Windows XP system =====
 
 This was tested with a Windows XP SP2 on a IBM Thinkpad T41 with the Widcomm BT stack
 
@@ -218,7 +220,7 @@ If this does not work, the IP stacks may have auto-assigned network addresses to
 * You should now be able to ssh/putty from Windows to your Neo. Enjoy!
 By setting up the Windows Bluetooth connection properly, it should also be possible to share the Internet Connection of the Windows box with the Neo.
 
-==== PPP Networking ====
+===== PPP Networking =====
 
 If you are unable to use the 'BNEP' method described above, you may be able to use [[PPP]] and a DUN (dialup-networking) emulation mode. On the Neo:
 
@@ -257,6 +259,68 @@ To connect from a MacOS 10.3 client:
 * Select "Null Modem 115200" from the list of available devices. Uncheck "Wait for dial tone" and "Enable error correction and compression in modem". Optionally check "Show modem status in menu bar". 
 
 * Click "Connect". If everything worked, you will end up with a 'ppp0' device on your Mac with a local address of 192.168.2.200 and you will be able to access your Neo at 192.168.2.202.
+
+===== Bluetooth networking with a Linux system - More secure way =====
+
+''Check this, probably needs some corrections''
+
+Bluetooth should behave just like our usbnet and provide full TCP/IP access to the phone.  BNEP has to be used.
+
+On the laptop
+
+* check these options in /etc/bluetooth/hcid.conf
+ security auto;
+ passkey "your pin";
+ lm master;
+
+* Start bluetooth
+ # /etc/init.d/bluetooth start
+
+* Start pand as server
+  pand --listen --role NAP --encrypt
+
+* Add in /etc/network/interfaces (see [[USB_Networking]])
+ auto bnep0
+ iface bnep0 inet static
+ address 192.168.1.1
+ netmask 255.255.255.0
+ network 192.168.1.0
+        post-up iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.1.0/24
+        post-up echo 1 > /proc/sys/net/ipv4/ip_forward
+        post-up iptables -P FORWARD ACCEPT
+
+On the Neo
+
+* Power on bluetooth (see above)
+
+* Scan for the laptop
+ root@fic-gta01:~$ hcitool scan
+ Scanning ...
+         00:20:E0:5A:FE:C8       laptop
+
+* Set pin
+ root@fic-gta01:~$ passkey-agent 'your pin' 00:20:E0:5A:FE:C8 &
+
+* Connect to the laptop pand
+ root@fic-gta01:~$ pand -c 00:20:E0:5A:FE:C8
+
+* Configure your IP address
+ root@fic-gta01:~$ ifconfig bnep0 192.168.1.2
+ root@fic-gta01:~$ route add default gateway 192.168.1.1
+
+* Enjoy
+
+==== Using Neo's connection from PC ====
+
+This section not written yet. Has someone set it up?
+
+===== Calling Neo's GPRS modem via Bluetooth =====
+
+In this mode, Neo would behave like any other phone which can be used from a PC to get a network connection.
+
+===== Sharing existing Neo's connection =====
+
+In this mode, Neo would already have a network connection (GPRS, WLAN, ...), and it should get shared to the PC.
 
 === A2DP quickie ===
 
@@ -352,57 +416,6 @@ You may also be able to listen to system audio given the right state file:
 
  alsactl -f /etc/systembluetooth.state restore
  madplay song.mp3
-
-=== Bluetooth networking with a Linux system - More secure way ===
-
-''Check this, probably needs some corrections''
-
-Bluetooth should behave just like our usbnet and provide full TCP/IP access to the phone.  BNEP has to be used.
-
-On the laptop
-
-* check these options in /etc/bluetooth/hcid.conf
- security auto;
- passkey "your pin";
- lm master;
-
-* Start bluetooth
- # /etc/init.d/bluetooth start
-
-* Start pand as server
-  pand --listen --role NAP --encrypt
-
-* Add in /etc/network/interfaces (see [[USB_Networking]])
- auto bnep0
- iface bnep0 inet static
- address 192.168.1.1
- netmask 255.255.255.0
- network 192.168.1.0
-        post-up iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.1.0/24
-        post-up echo 1 > /proc/sys/net/ipv4/ip_forward
-        post-up iptables -P FORWARD ACCEPT
-
-On the Neo
-
-* Power on bluetooth (see above)
-
-* Scan for the laptop
- root@fic-gta01:~$ hcitool scan
- Scanning ...
-         00:20:E0:5A:FE:C8       laptop
-
-* Set pin
- root@fic-gta01:~$ passkey-agent 'your pin' 00:20:E0:5A:FE:C8 &
-
-* Connect to the laptop pand
- root@fic-gta01:~$ pand -c 00:20:E0:5A:FE:C8
-
-* Configure your IP address
- root@fic-gta01:~$ ifconfig bnep0 192.168.1.2
- root@fic-gta01:~$ route add default gateway 192.168.1.1
-
-* Enjoy
-
 
 == Further reading ==
 
