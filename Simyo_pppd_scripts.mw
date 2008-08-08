@@ -1,0 +1,70 @@
+These scripts work for the german provider simyo which is the pre-paid brand of E-Plus.
+
+Beware that these scripts sometimes fail, I usually need 2-4 tries to get a connection. 
+
+These scripts were taken and modified from a forum post about getting gprs to work with simyo.
+
+=== /etc/ppp/peers/simyo ===
+<pre>/dev/ttySAC0
+115200
+connect '/usr/sbin/chat -v -s -f /etc/ppp/simyo-connect-chat'
+show-password
+defaultroute
+local
+ipcp-accept-local
+lcp-echo-failure 8
+lcp-echo-interval 3
+noauth
+noipdefault
+novj
+novjccomp
+replacedefaultroute
+usepeerdns
+user "simyo"
+disconnect '/usr/sbin/chat -v -s -f /etc/ppp/simyo-disconnect-chat'
+</pre>
+----
+
+=== /etc/ppp/simyo-connect-chat ===
+<pre>TIMEOUT 10  
+ABORT BUSY
+ABORT DELAYED
+ABORT "NO ANSWER"
+ABORT "NO DIALTONE"
+ABORT VOICE
+ABORT ERROR
+ABORT RINGING
+TIMEOUT 10
+'' ATZ
+OK ATE1
+OK AT+CFUN=1
+OK AT+CGDCONT=1,"IP","internet.eplus.de"
+OK "ATD*99***1#"
+CONNECT ''</pre>
+
+----
+
+=== /etc/ppp/simyo-disconnect-chat ===
+<pre>ABORT OK
+ABORT BUSY
+ABORT DELAYED
+ABORT "NO ANSWER"
+ABORT "NO CARRIER"
+ABORT "NO DIALTONE"
+ABORT VOICE
+ABORT ERROR
+ABORT RINGING
+TIMEOUT 12
+"" \\k\\k\\k\\d+++ATH\
+"NO CARRIER-AT-OK" ""</pre>
+
+----
+
+=== /etc/ppp/chap-secrets ===
+<pre># Secrets for authentication using CHAP
+# client        server  secret                  IP addresses
+"simyo"               *       "simyo"                 *
+</pre>
+----
+
+[[Category:Application Developer]]
