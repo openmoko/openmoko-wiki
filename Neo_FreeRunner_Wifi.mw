@@ -85,6 +85,46 @@ Create and edit a suitable [[GTA02_WLAN#Sample_wpa_supplicant.conf|/etc/wpa_supp
  root@om-gta02:~# wpa_supplicant -ieth0 -c/etc/wpa_supplicant/wpa_supplicant.conf -B
  root@om-gta02:~# udhcpc eth0
 
+== Wake up from wireless (wow)==
+
+Wi-Fi module constantly drain currents after module power up, for wi-fi SIP phone or some application need long standby time, will need wake up from wireless function for power saving. There is a sleep mode that Ar6k supported for wake up from wireless.
+
+ http://svn.openmoko.org/trunk/src/target/AR6kSDK.build_sw.18/host/tools/wmiconfig
+
+ export ATH_CROSS_COMPILE_TYPE=arm-angstrom-linux-gnueabi-
+ make
+
+Basically, it's achieved via wmiconfig tool to issue IOCTL if we want
+ar6k wifi module to generate interrupt to host controller. The procedure
+to enable wakeup-on-wireless(wow) is listed here:
+
+ 1. wmiconfig --sethostmode asleep /* to tell ar6k what host's current is */
+
+ 2. wmiconfig --setwowmode enable /* enable wow function */
+
+ 3. wmiconfig --addpattern 0 1 33 01 ff /* add packet filter pattern, this is the ICMP filter pattern */
+
+ 4. apm -s
+
+ 5. ping IP_of_Neo
+
+ 6. The GPIO1 pin would be pulled up. The system would resume then.
+
+ 7. wmiconfig --sethostmode awake /* The firmware of ar6k will pull low the GPIO1 pin */
+
+--addwowpattern <list-id> <pattern-size> <pattern-offset> <pattern> <pattern-mask>
+
+Here are some addwowpattern commands:
+
+ Protocol type=IP=0800
+ Protocol type in IP header=ICMP=01
+
+ - To filter for IP packets(offset 22)
+ wmiconfig --addwowpattern 0 2 22 0800 ffff
+
+ - To filter for ICMP packets (offset 33)
+ wmiconfig --addwowpattern 0 1 33 01 ff
+
 == Sample wpa_supplicant.conf ==
 
  ctrl_interface=/var/run/wpa_supplicant
