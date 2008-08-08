@@ -1,0 +1,48 @@
+This page documents the GSM networking solutions (commonly known as GPRS) using the [[OpenmokoFramework|FreeSmartphone.Org]] framework (FSO).
+
+There are other ways to enable wireless communications on the smartphone, including [[Bluetooth]] and [[Wireless_Networking|WLAN]].
+
+== Current state ==
+
+Since milestone 2 the system dbus has been extended with methods that enables connectivity using GPRS. The functionality is available under <code>org.freesmartphone.frameworkd</code> at <code>/org/freesmartphone/GSM/Device</code>.
+
+The implementation should not interfer with other phone functionality, such as placing calls. In other words: you can use GPRS while talking on the phone without hanging up.
+
+Currently, there's no GUI available but it's fairly easy to use the methods available using any dbus tool.
+
+== Until there's a GUI ==
+
+While we wait for the preferences part of FSO to be completed (and a GUI), we can use two shell scripts. You need to know three things to successfully connect via GPRS (your carrier should provide this information to you):
+* the APN to use,
+* the username, and
+* the password.
+
+To connect, put the following in a file and make it executable (<code>chmod +x gprs-on.sh</code>):
+
+  #!/bin/sh
+  APN="internet.parlino.se"
+  USERNAME="x"
+  PASSWORD="x"
+  BUSNAME="org.freesmartphone.frameworkd"
+  OBJECTPATH="/org/freesmartphone/GSM/Device"
+  METHODNAME="org.freesmartphone.GSM.PDP.ActivateContext"
+  mdbus -s $BUSNAME $OBJECTPATH $METHODNAME $APN $USERNAME $PASSWORD
+
+To disconnect, use the following method instead (<code>chmod +x gprs-off.sh</code>):
+
+  #!/bin/sh
+  BUSNAME="org.freesmartphone.frameworkd"
+  OBJECTPATH="/org/freesmartphone/GSM/Device"
+  METHODNAME="org.freesmartphone.GSM.PDP.DeactivateContext"
+  mdbus -s $BUSNAME $OBJECTPATH $METHODNAME
+
+The ''on'' script, using the ActivateContext method, will:
+* setup a ppp interface (normally ppp0) (and assign IP address)
+* sutup (replace) the default route
+* setup DNS
+with settings received from the ISP.
+
+For a list of known APN:s, see the [[GPRS#Some_APN_names_for_reference|main GPRS page]].
+
+[[Category:FSO]]
+[[Category:Networking]]
