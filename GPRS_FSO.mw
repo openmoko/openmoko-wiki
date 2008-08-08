@@ -1,245 +1,48 @@
-{{FSO}}
 This page documents the GSM networking solutions (commonly known as GPRS) using the [[OpenmokoFramework|FreeSmartphone.Org]] framework (FSO).
 
 There are other ways to enable wireless communications on the smartphone, including [[Bluetooth]] and [[Wireless_Networking|WLAN]].
 
 == Current state ==
 
-Since milestone 2 the system dbus has been extended with methods that enables connectivity using GPRS. The functionality is available under <code>org.freesmartphone.ogsmd</code> at <code>/org/freesmartphone/GSM/Device</code>.
+Since milestone 2 the system dbus has been extended with methods that enables connectivity using GPRS. The functionality is available under <code>org.freesmartphone.frameworkd</code> at <code>/org/freesmartphone/GSM/Device</code>.
 
-The implementation should not interfere with other phone functionality, such as placing calls. In other words: you can use GPRS while talking on the phone without hanging up. Note though that depending on hardware and networking, simultaneous data transmission and voice call alerting (let alone performing calls) might not be possible.
+The implementation should not interfer with other phone functionality, such as placing calls. In other words: you can use GPRS while talking on the phone without hanging up.
 
-Since FSO is a middleware it offers no GUI, however it's fairly easy to use the methods available using any dbus tool.
+Currently, there's no GUI available but it's fairly easy to use the methods available using any dbus tool.
 
-The methods available:
- [METHOD]    org.freesmartphone.GSM.PDP.ActivateContext() -> ()
- [METHOD]    org.freesmartphone.GSM.PDP.DeactivateContext() -> ()
- [METHOD]    org.freesmartphone.GSM.PDP.GetContextStatus() -> ( s:status, a{sv}:properties )
- [METHOD]    org.freesmartphone.GSM.PDP.GetCredentials() -> ( s:apn, s:username, s:password )
- [METHOD]    org.freesmartphone.GSM.PDP.InternalStatusUpdate( s:status, a{sv}:properties ) -> ()
- [METHOD]    org.freesmartphone.GSM.PDP.SetCredentials( s:apn, s:username, s:password ) -> ()
- [SIGNAL]    org.freesmartphone.GSM.PDP.ContextStatus( s:status, a{sv}:properties )
-
-Use ''mdbus -s -l'' to monitor the emitted signals.  Signals will look roughly like this:
-
-:ActivateContext
-<pre>
-[SIGNAL]    org.freesmartphone.GSM.PDP.ContextStatus 
- from :1.3 /org/freesmartphone/GSM/Device
- (dbus.Int32(1), dbus.String(u'outgoing'), 
-  dbus.Dictionary({}, signature=dbus.Signature('sv')))
-</pre>
-:Once the connection is established (takes 3-4 seconds for me) a new signal is emitted
-<pre>
-[SIGNAL]    org.freesmartphone.GSM.PDP.ContextStatus    
- from :1.3 /org/freesmartphone/GSM/Device
- (dbus.Int32(1), dbus.String(u'active'), 
-  dbus.Dictionary({}, signature=dbus.Signature('sv')))
-</pre>
-:DeactivateContext
-<pre>
-[SIGNAL]    org.freesmartphone.GSM.PDP.ContextStatus    
- from :1.3 /org/freesmartphone/GSM/Device
- (dbus.Int32(1), dbus.String(u'release'), 
-  dbus.Dictionary({}, signature=dbus.Signature('sv')))
-</pre>
-
-== Using scripts ==
+== Until there's a GUI ==
 
 While we wait for the preferences part of FSO to be completed (and a GUI), we can use two shell scripts. You need to know three things to successfully connect via GPRS (your carrier should provide this information to you):
 * the APN to use,
 * the username, and
 * the password.
-If your APN has no username or password, you must still provide a string to satisfy the framework's input requirements.  Entering bogus data, such as the "x" above, will suffice.
 
 To connect, put the following in a file and make it executable (<code>chmod +x gprs-on.sh</code>):
-<pre>
-#!/bin/sh
-APN="internet.parlino.se"
-USERNAME="x"
-PASSWORD="x"
-BUSNAME="org.freesmartphone.ogsmd"
-OBJECTPATH="/org/freesmartphone/GSM/Device"
-SETMETHODNAME="org.freesmartphone.GSM.PDP.SetCredentials"
-ACTMETHODNAME="org.freesmartphone.GSM.PDP.ActivateContext"
-mdbus2 -s $BUSNAME $OBJECTPATH $SETMETHODNAME $APN "$USERNAME" "$PASSWORD"
-mdbus2 -s $BUSNAME $OBJECTPATH $ACTMETHODNAME
-</pre>
+
+  #!/bin/sh
+  APN="internet.parlino.se"
+  USERNAME="x"
+  PASSWORD="x"
+  BUSNAME="org.freesmartphone.frameworkd"
+  OBJECTPATH="/org/freesmartphone/GSM/Device"
+  METHODNAME="org.freesmartphone.GSM.PDP.ActivateContext"
+  mdbus -s $BUSNAME $OBJECTPATH $METHODNAME $APN $USERNAME $PASSWORD
+
 To disconnect, use the following method instead (<code>chmod +x gprs-off.sh</code>):
-<pre>
-#!/bin/sh
-BUSNAME="org.freesmartphone.ogsmd"
-OBJECTPATH="/org/freesmartphone/GSM/Device"
-METHODNAME="org.freesmartphone.GSM.PDP.DeactivateContext"
-mdbus2 -s $BUSNAME $OBJECTPATH $METHODNAME
-</pre>
+
+  #!/bin/sh
+  BUSNAME="org.freesmartphone.frameworkd"
+  OBJECTPATH="/org/freesmartphone/GSM/Device"
+  METHODNAME="org.freesmartphone.GSM.PDP.DeactivateContext"
+  mdbus -s $BUSNAME $OBJECTPATH $METHODNAME
+
 The ''on'' script, using the ActivateContext method, will:
 * setup a ppp interface (normally ppp0) (and assign IP address)
-* setup (replace) the default route
+* sutup (replace) the default route
 * setup DNS
 with settings received from the ISP.
 
-For a list of known APN:s, see the [[GPRS APN table]].
-
-== Troubleshooting ==
-
-* When a something like '''org.freedesktop.DBus.Error.UnknownMethod''' appears make sure that: 
-** frameworkd is started of course
-** That the method did not hide in an other place than expected follow the white [[D-Bus|Rabbit]]
-* Online script runs without error but pppd did not start
-** use '''logread''' to debug.... 
-** Maybe the kernel module ppp-generic is not loaded, try modprobe.  ( you can do '''echo ppp-generic > /etc/modutils/ppp-generic''' and then '''update-modules''' to load the module at boot time )
-** Maybe you have to do a '''mknod /dev/ppp c 108 0'''
-* No MUX Channels available
-** Means that the frameworkd has no free channel available to connect to the GSM Modem. 
-** Restart the frameworkd and the phone Application (aka ophoned or zhone). Works fine for me. 
-* LCP ProtRej id=0x* 80 fd 01 01 00 15 12 06 00 00 00 00 1a 04 78 00 18 04 78 00 15 03 2f
-** Means CHAP authentication is not acceptable with this provider and must be disabled
-** Append refuse-chap,refuse-mschap,refuse-mschap-v2,refuse-eap,receive-all to /etc/ppp/options with each option on a new line 
-* MISC Troubleshooting
-** Switch the frameworkd  loglevel to DEBUG (/etc/frameworkd.conf) 
-** use the source!
-
-== Using a GUI ==
-[[Framework-settings]]
-
-== SHR (Unstable??) ==
-SHR is based on FSO, so I think its GPRS settings should be found here. Shr has its native setting manager which has Connectivity sub-panel which in turn has settings for GPRS. Its very intutive and your GPRS/FR should be up and running in no time.
-
-To enable gprs on-demand you need to do some manual changes in framework code.
-Alter, /usr/lib/python2.6/site-packages/framework/subsystems/ogsmd/modems/abstract/modem.py
-as:
- --- orig.modem.py       Sat Jul 18 02:13:29 2009
- +++ modem.py    Sat Jul 18 02:13:06 2009
- @@ -76,6 +76,8 @@
-             'proxyarp',
-             'replacedefaultroute',
-             'usepeerdns',
- +            'demand',
- +            'idle', '20',
-         ]
- 
-         self._data["pppd-does-setup-and-teardown"] = True # default
- is using connect and disconnect scripts
-
-Alter, /usr/lib/python2.6/site-packages/framework/subsystems/ogsmd/modems/abstract/pdp.py
-as:
- --- orig.pdp.py Sat Jul 18 04:20:13 2009
- +++ pdp.py      Sat Jul 18 04:19:03 2009
- @@ -219,7 +219,8 @@
-  """
- 
-      PPP_DAEMON_SETUP["/etc/ppp/ip-down.d/92removedns"] = """#!/bin/sh -e
- -echo nameserver 127.0.0.1 > /etc/resolv.conf
- +echo nameserver 208.67.222.222 > /etc/resolv.conf
- +echo nameserver 208.67.220.220 >> /etc/resolv.conf
-  """
- 
-      PPP_DAEMON_SETUP[PPP_PAP_SECRETS_FILENAME] = '* * "%s" *\n' % ''
-
-modem.py needs to be updated to setup idle timeout and auto reconnect. While pdp.py needs to be updated so ppp idle timeout resets /etc/resolv.conf to OpenDNS servers
-
-Now, just fire up settings panel (need to be done once per boot) and in connectivity click connect for Gprs...for me it doesn't show connected anymore...but then I don't really care about that as long as the connection works :). To do this on bootup automatically check out the next section.
-=== Enable on-demand GPRS at boot ===
-* Put init-gprs.py and kill-init-gprs.py in /usr/bin and make them executable.
-* Put bootup-gprs in /etc/init.d and make that executable too.
-* Next execute 'update-rc.d bootup-gprs defaults 99 01' to install the init script on bootup and shutdown
-
-init-gprs.py
- #!/usr/bin/env python
- import dbus
- from dbus.exceptions import DBusException
- 
- from dbus.mainloop.glib import DBusGMainLoop
- import gobject
- DBusGMainLoop(set_as_default=True)
- loop = gobject.MainLoop()
- 
- bus = dbus.SystemBus()
- 
- def activate_gprs():
-         print "Activating GPRS"
-         local_gsm_obj = bus.get_object("org.freesmartphone.ogsmd", "/org/freesmartphone/GSM/Device")
-         pdpIFace = dbus.Interface(local_gsm_obj, "org.freesmartphone.GSM.PDP");
-         pdpIFace.ActivateContext("airtelgprs.com", "x", "x")
- 
- def on_sim_ready(ready):
-         print "On ready received: " + str(ready)
-         if not ready:
-                 print "Waiting for SIM to get ready...its still not up"
-                 return
-         if loop.is_running():
-                 loop.quit()
-         activate_gprs()
- 
- needLoop = True
- try:
-         gsm_device_obj = bus.get_object("org.freesmartphone.ogsmd", "/org/freesmartphone/GSM/Device")
-         simIFace = dbus.Interface(gsm_device_obj, "org.freesmartphone.GSM.SIM")
- 
-         if simIFace.GetSimReady():
-                 print "Sim was already up"
-                 needLoop = False
-                 activate_gprs()
-         else:
-                 print "Sim is not ready...need to wait"
-                 simIFace.connect_to_signal("ReadyStatus", on_sim_ready)
- except DBusException:
-         print "caught the exception->"
-         bus.add_signal_receiver(on_sim_ready, signal_name='ReadyStatus', \
-                                         dbus_interface='org.freesmartphone.GSM.SIM', \
-                                         bus_name='org.freesmartphone.ogsmd')
- 
- if needLoop:
-         loop.run()
-
-kill-init-gprs.py
- #!/usr/bin/env python
- import dbus
- 
- bus = dbus.SystemBus()
- gsm_device_obj = bus.get_object("org.freesmartphone.ogsmd", "/org/freesmartphone/GSM/Device")
- pdpIFace = dbus.Interface(gsm_device_obj, "org.freesmartphone.GSM.PDP")
- pdpIFace.DeactivateContext()
-
-bootup-gprs
- #! /bin/sh
- 
- NAME=bootup-gprs
- PATH=/bin:/usr/bin:/sbin:/usr/sbin
- 
- echo "1::$1::/var/run/${NAME}"
- case "$1" in
-     start)
-         if [ -f /var/run/${NAME} ]; then
-                 echo "Initial gprs connection is already running. If you think its not then delete /var/run/${NAME}"
-         else
-                 echo "Starting initial gprs connection"
-                 init-gprs.py > /var/run/${NAME} &
-         fi
-         ;;
-     stop)
-         echo "Stopping initial gprs connection"
-         kill-init-gprs.py
-         rm -f /var/run/${NAME}
-         ;;
-     restart|force-reload)
-         $0 stop
-         $0 start
-         ;;
-     *)
-         echo "Usage: /etc/init.d/bootup-gprs {start|stop|restart|force-reload}"
-         exit 1
-         ;;
- esac
- 
- exit 0
-
-Note: We are updating the framework file which can be updated by any of the frameword update and one need to repeat the update (well..until a nifty setting comes into setting panel somewhere :)
-
-== See also ==
-* [[GPRS]]
-* [[OpenmokoFramework/mdbus]]
+For a list of known APN:s, see the [[GPRS#Some_APN_names_for_reference|main GPRS page]].
 
 [[Category:FSO]]
-[[Category:GPRS]]
+[[Category:Networking]]
