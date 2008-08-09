@@ -92,5 +92,76 @@ LEDs are very useful in broadcasting valuable basic status information to the us
 * EVENT will stop to blink once all events have been acknowledged.
 
 
+== Python Script For Blinking Leds By Beats ==
+Reads beats from a file and blinks Freerunners leds.
+ 
+File format is human readable text, consisting of a simple sequence of integer quartet (4 numbers).  The first number representing status of blue power-led, second means status of orange power-led and third means status of red aux-led. 0=OFF, 1=ON. (If blue=1 and orange=1 then power=lila. This has nothing to do with this python script or this file format.) The last number represents the duration in milliseconds to hold that situation of leds.  Any non digit characters in the file count as a separators between numbers, but are otherwise ignored.
+
+It requires packages python-core and python-re from opkg.
+ #!/usr/bin/python
+ """Leds Beat Player
+ 
+ Usage: python leds.py [filename]
+ """
+ import sys
+ import time
+ import re
+ 
+ def loadFromTextFile(filename):
+    infile = open(filename)
+    contents = infile.read()
+    return re.findall("(\d+)\D*(\d+)\D*(\d+)\D*(\d+)", contents)
+ 
+ def playNote(blue_value, orange_value, red_value, duration):
+    blue.write(str(blue_value) + "\n")
+    orange.write(str(orange_value) + "\n")
+    red.write(str(red_value) + "\n")
+    time.sleep(float(duration) / 1000.0)
+ 
+ def playFile(filename):
+    global blue, orange, red 
+    notes = loadFromTextFile(filename)
+    blue = open("/sys/class/leds/gta02-power:blue/brightness", "w", 1)
+    orange = open("/sys/class/leds/gta02-power:orange/brightness", "w", 1)
+    red = open("/sys/class/leds/gta02-aux:red/brightness", "w", 1)
+ 
+    for first,second,third, duration in notes:
+        playNote(first,second,third,duration)
+ 
+    playNote(0, 0, 0, 0)
+    blue.close()
+    orange.close()
+    red.close()
+ 
+ if __name__ == "__main__":
+    playFile(sys.argv[1])
+
+
+
+==== Example Beat ====
+The following is an example "fireworks"-file that can be used to test the led blinker.
+
+ 1 0 0 100
+ 1 0 1 100
+ 1 1 0 100
+ 0 1 0 100
+ 0 1 1 100
+ 0 0 1 100
+ 1 1 1 100
+ 1 0 0 100
+ 1 0 1 100
+ 1 1 0 100
+ 0 1 0 100
+ 0 1 1 100
+ 0 0 1 100
+ 1 1 1 100
+ 1 0 0 100
+ 1 0 1 100
+ 1 1 0 100
+ 0 1 0 100
+ 0 1 1 100
+ 0 0 1 100
+ 1 1 1 100
+
 
 [[Category:GTA02 Hardware]]
