@@ -20,22 +20,21 @@ If you want to check what is in the backup, run the following, replacing the fil
 
 You will need the [[Dfu-util]] to make a backup of your existing image.
 
-As when [[Flashing_the_Neo_FreeRunner|flashing]], you will need to be in [[Booting_the_Neo_FreeRunner#Log_into_U-Boot_in_the_NOR_Flash|U-Boot in the NOR Flash]]. Log into the NOR uBoot menu and select ''Set console to USB'' (for NRF just stay in NOR uBoot menu, do not select or enter anything). Now you will be able to flash, make backups of your Freerunner or query the Freerunner with [[Dfu-util|dfu-util]].
+As when [[Flashing_the_Neo_FreeRunner|flashing]], you will need to be in [[Booting_the_Neo_FreeRunner#Log_into_U-Boot_in_the_NOR_Flash|U-Boot in the NOR Flash]]. Log into the NOR uBoot menu and select ''Set console to USB'' (for NRF just stay in NOR uBoot menu, do not select or enter anything). Now you will be able to flash, make backups of your Freerunner or query the Freerunner with [[Dfu-util|dfu-util]].  Backup is fairly slow; it took over ten minutes to back up a 247 MB rootfs.
+
+It is important that you connect the USB cable directly from your computer to your phone.  If there is a hub between them, backup (and flashing) will mostly likely fail.
 
 {{note|On a Windows host, omit the "./" or "sudo ./" that precedes the commands listed on this page}}
 
-THIS WILL TAKE AWHILE.  The rootfs will take significantly longer than the kernel.
-
 <pre>
-./dfu-util -a kernel -R -U good-kernel.bin
-./dfu-util -a rootfs -R -U good-rootfs.jffs2
-./dfu-util -a u-boot_env -R -U good-u-boot_env.bin
-./dfu-util -a splash -R -U good-splash.bin
-./dfu-util -a u-boot -R -U good-u-boot.bin
-
+sudo ./dfu-util -a kernel -R -U good-kernel.bin
+sudo ./dfu-util -a rootfs -R -U good-rootfs.jffs2
+sudo ./dfu-util -a splash -R -U good-splash.bin
+sudo ./dfu-util -a u-boot -R -U good-u-boot.bin
+sudo ./dfu-util -a u-boot_env -R -U good-u-boot_env.bin
 </pre>
 
-Here is what my successful output looked like...
+Here is what a successful dfu-util backup run looks like:
 
 on the host PC:
 <pre>
@@ -56,34 +55,36 @@ Determining device status: state = dfuIDLE, status = 0
 dfuIDLE, continuing
 Transfer Size = 0x1000
 Resetting USB to switch back to runtime mode
-$ sudo ./dfu-util -a rootfs -R -U good-rootfs.jffs2
-dfu-util - (C) 2007 by OpenMoko Inc.
-This program is Free Software and has ABSOLUTELY NO WARRANTY
-
-Opening USB Device 0x0000:0x0000...
-Found Runtime: [0x1d50:0x5119] devnum=16, cfg=0, intf=0, alt=6, name="rootfs"
-Claiming USB DFU Interface...
-Setting Alternate Setting ...
-Determining device status: state = dfuERROR, status = 14
-dfuERROR, clearing status
-Determining device status: state = dfuIDLE, status = 0
-dfuIDLE, continuing
-Transfer Size = 0x1000
-Resetting USB to switch back to runtime mode
 </pre>
-
-Despite the fact that there was a device status with state=dfuERROR, everything seems to have worked.
 
 on the FreeRunner:
 <pre>
 DFU: Switching to DFU Mode
 DEVICE_CONFIGURED: 1
 Starting DFU Upload of partition 'kernel'
-DEVICE_CONFIGURED: 1
-Starting DFU Upload of partition 'rootfs'
 </pre>
 
-I could backup the kernel of my GTA02  but trying to use this method to backup the rootfs failed several times....
+If you plan on backing up frequently, this script will simplify the process:
+
+<pre>
+#!/bin/sh
+#
+# Back up all partitions of the phone to a backup directory,
+# adding today's date to the saved filenames.
+
+DATE=`date +%Y-%m-%d`
+DFU=./dfu-util
+BACKUP_DIR=bak/
+
+${DFU} -a kernel -R -U ${BACKUP_DIR}kernel-${DATE}.bin
+${DFU} -a rootfs -R -U ${BACKUP_DIR}rootfs-${DATE}.jffs2
+${DFU} -a splash -R -U ${BACKUP_DIR}splash-${DATE}.bin
+${DFU} -a u-boot -R -U ${BACKUP_DIR}u-boot-${DATE}.bin
+${DFU} -a u-boot_env -R -U ${BACKUP_DIR}u-boot_env-${DATE}.bin
+</pre>
+
+A failed run of dfu-util looks like this:
+
  dfu-util - (C) 2007 by OpenMoko Inc.
  This program is Free Software and has ABSOLUTELY NO WARRANTY
  
@@ -101,16 +102,8 @@ I could backup the kernel of my GTA02  but trying to use this method to backup t
  Transfer Size = 0x1000
  dfu_upload error -110
 
-I have not been able to backup rootfs using this method.
-
-In demsg I get this error
+And shows errors demsg like this:
  usb 5-2: usbfs: USBDEVFS_CONTROL failed cmd dfu-util rqt 161 rq 2 len 4096 ret -110
-
-Failed for me as well with (I didn't have patience to do it multiple times)
- usb 5-2: reset full speed USB device using uhci_hcd and address 81
- usb 5-2: usbfs: USBDEVFS_CONTROL failed cmd dfu-util rqt 161 rq 2 len 4096 ret -71
-...and the last line from dfu_util was <pre>dfu_upload error -71</pre>
-But, I can mount the jffs2 image and things that I want are alright. So, I guess it can be ignored.
 
 [[category:Guides]]
 [[category:Technical]]
