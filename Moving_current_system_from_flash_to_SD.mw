@@ -1,0 +1,29 @@
+This is an attempt at describing how one can "backup" or move an existing current system running in the FR flash NAND to the micro SD card, in order to boot from it.
+
+Typical scenario :
+* running 2007.2 from flash
+* want to install OM 2008.8 without loosing the "backup" 2007.7 in cas of need, to be booted from SD
+
+Necessary steps (to be confirmed, don't try this unless you know what you're doing !) :
+# Establish a running system on SD (see [[Booting from SD]])
+# reboot from that alternate system on SD
+# from that system on SD, transfer content of flash to a backup dir on SD (provided SD is big enough to hold 2 systems)
+# flash with new system
+# reboot under newly flashed system
+# remove old system from SD's root (the one which was booted in before to do the backup)
+# move the backup from the backup dir of the SD to the root of the SD
+# change what's necessary in the backup (/etc/fstab ?) so that it will work when booted on SD
+# similarly adjust kernels available on SD
+# test the dual-booting from flash or SD
+
+More details about each steps needed.
+
+== Backup of system in flash to a backup dir on SD == 
+Assuming one has booted from a system on SD already, this would create a copy of the root partition in the freerunner's flash to a "/backup-dir" directory, on the SD.
+
+ # mkdir /mnt/memroot/
+ # mkdir /backup-dir
+ # mount -t jffs2 -o ro /dev/mtdblock6 /mnt/memroot/ # this for a freerunner
+ # cp -a /mnt/memroot/. /backup-dir/.
+
+See [[Partitions]] for details of the partitions in flash (hence the /dev/mtdblock6).
