@@ -1,8 +1,8 @@
-This is an attempt at describing how one can "backup" or move an existing current system running in the FR flash NAND to the micro SD card, in order to boot from it. See associate thread [http://lists.openmoko.org/pipermail/community/2008-August/025786.html here].
+This is an attempt at describing how one can "backup" or move an existing current system running in the FR flash NAND to the micro SD card, in order to boot from it.
 
 Typical scenario :
 * running 2007.2 from flash
-* want to install OM 2008.8 without loosing the "backup" 2007.7 in case of need, to be booted from SD
+* want to install OM 2008.8 without loosing the "backup" 2007.7 in cas of need, to be booted from SD
 
 Necessary steps (to be confirmed, don't try this unless you know what you're doing !) :
 # Establish a running system on SD (see [[Booting from SD]])
@@ -24,26 +24,6 @@ Assuming one has booted from a system on SD already, this would create a copy of
  # mkdir /mnt/memroot/
  # mkdir /backup-dir
  # mount -t jffs2 -o ro /dev/mtdblock6 /mnt/memroot/ # this for a freerunner
- # cd /mnt/memroot; rsync -avx --progress . /backup-dir/
-
-You can leave away the --progress rsync option if you don't want to see a progress report (xfer#x, to-check y/z) while copying. See [[Partitions]] for details of the partitions in flash (hence the /dev/mtdblock6).
-
-Instead of using rsync you could also use one of the following ways to perform copying (please correct if not working)
-
- # cd /mnt/memroot; find . -depth | cpio -pdmv /backup-dir/
- # cd /mnt/memroot; tar cpf - . | tar xvpf - -C /backup-dir/
-The following may also work, but is not recommended, as there are [http://lists.openmoko.org/pipermail/community/2008-August/026027.html problems copying certain files with cp -a]: then be sure to check that your backup and original are identical!
  # cp -a /mnt/memroot/. /backup-dir/.
 
-== Verify that backup directory is identical to source partition ==
-To verify that you copied everything, you can use rsync (again), but now additionally with the -n option
- # cd /mnt/memroot; rsync -avxn . /backup-dir/
-
-== Transfer kernel to FAT partition ==
-
-See inside /boot, where you should find a "/boot/uImage-2.6.24" image, ready to be put on the FAT partition to be used by u-boot.
-
-You should verify it's a "u-boot/PPCBoot image" with the command "file"
-
-[[category:Flashing Openmoko]]
-[[Category:MicroSD]]
+See [[Partitions]] for details of the partitions in flash (hence the /dev/mtdblock6).
