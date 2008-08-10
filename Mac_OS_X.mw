@@ -89,6 +89,31 @@ MacOS X 10.4.10 and later includes a driver for RNDIS/Ethernet Gadget devices. L
 
 <b>Note</b>: this is not a problem to blame MacOSX for because it tries to make network configuration simpler based on the assumption of stable Ethernet addresses.
 
+=== Apple CDC Ethernet driver 10.5.x ===
+
+<b>Issue</b>:10.5 (Leopard) doesn't show a new ethernet interface for a Neo1973 running 2007.11. You'll only get the serial port, which is detected as a modem. The Ethernet device will show up in ifconfig though.
+
+It turns out that the AppleUSBCDC driver prefers to use the CDC-ACM interface of USB networking devices instead of CDC-ECM with the exception of a broadcom network card. You can download a patched AppleUSBCDC driver that will recognize the usb id/vendor pair of g_ether and force it to use CDC-ECM. You can obtain the OS X 10.5.X patched driver from: http://bugcommunity.com/downloads/usbcdc-g_ether.zip. Source code: http://bugcommunity.com/downloads/files/AppleUSBCDCDriver-g_ether.326.4.1.zip
+
+The issue of multiple network interfaces showing up whenever the device is rebooted/power-cycled is due to the g_ether driver randomly setting the host and device mac addresses. This problem is remedied by passing the same host and device mac addresses during the modprobe of g_ether.
+
+For example:
+
+ modprobe g_ether host_addr=46:0d:9e:67:69:eb dev_addr=46:0d:9e:67:69:ec
+
+=== AJZaurusUSB driver ===
+
+You can also use the open source driver from [http://www.dsitri.de/wiki.php?page=AJZaurusUSB]. It was developed for handheld devices like iPAQ, Sharp Zaurus and Motorola A760, but works for Openmoko as well. Download and install according to the manual found inside the package. The code is GPL'd (source available) and runs on both Intel and PPC Macs with 10.3, 10.4 and 10.5.
+
+After rebooting or loading the kernel extension by hand, you should have a new Ethernet interface in your System Preferences/Network.
+
+<b>Note</b>: This driver does not have the same problem as the Apple driver does, where it constantly adds to the list of interfaces each time you reboot the neo, because the driver provides a constant ethernet address independently what the Neo says. Only flashing a new kernel might force you to update.
+
+<b>Issue</b>: This driver is sometimes a bit flaky, and a reboot of the Mac seems to bring it back. It is especially critical about hot unplugging the OM and sleep modes of MacBooks. This may even result in a Kernel Panic.
+
+=== Network Settings ===
+Open System Preferences and go to Network and you should see "new interface detected enXX".  In the Show list box select the new interface - Ethernet Adapter enXX.
+
 Use this configuration on the new interface:
 <pre>
 IP-V4: manual
@@ -97,7 +122,7 @@ Subnet:   255.255.255.0 (should be the default - see tip below if have issue wit
 Router:   192.168.0.202 (not actually needed, OS X can figure this out for itself, unless you have other conflicting configurations)
 </pre>
 
-<b>Tip</b>: If your Internet connection is also in the range 192.168.0.x then instead you might want to use:
+<b>Tip</b>: If your Internet connection is also in the range 192.168.0.x then instead you might want/need to use:
 <pre>
 Subnet:   255.255.255.248
 </pre>
@@ -123,28 +148,6 @@ Lastly, verify that DNS is correctly configured between the Neo & Network:
  ping www.google.com
 
 Congordulations Elizagreth!!! The Neo is networked together with the Mac and sharing the Mac's interweb connection.
-
-=== Apple CDC Ethernet driver 10.5.x ===
-
-<b>Issue</b>:10.5 (Leopard) doesn't show a new ethernet interface for a Neo1973 running 2007.11. You'll only get the serial port, which is detected as a modem. The Ethernet device will show up in ifconfig though.
-
-It turns out that the AppleUSBCDC driver prefers to use the CDC-ACM interface of USB networking devices instead of CDC-ECM with the exception of a broadcom network card. You can download a patched AppleUSBCDC driver that will recognize the usb id/vendor pair of g_ether and force it to use CDC-ECM. You can obtain the OS X 10.5.X patched driver from: http://bugcommunity.com/downloads/usbcdc-g_ether.zip. Source code: http://bugcommunity.com/downloads/files/AppleUSBCDCDriver-g_ether.326.4.1.zip
-
-The issue of multiple network interfaces showing up whenever the device is rebooted/power-cycled is due to the g_ether driver randomly setting the host and device mac addresses. This problem is remedied by passing the same host and device mac addresses during the modprobe of g_ether.
-
-For example:
-
- modprobe g_ether host_addr=46:0d:9e:67:69:eb dev_addr=46:0d:9e:67:69:ec
-
-=== AJZaurusUSB driver ===
-
-You can also use the open source driver from [http://www.dsitri.de/wiki.php?page=AJZaurusUSB]. It was developed for handheld devices like iPAQ, Sharp Zaurus and Motorola A760, but works for Openmoko as well. Download and install according to the manual found inside the package. The code is GPL'd (source available) and runs on both Intel and PPC Macs with 10.3, 10.4 and 10.5.
-
-After rebooting or loading the kernel extension by hand, you should have a new Ethernet interface in your System Preferences/Network.
-
-<b>Note</b>: This driver does not have the same problem as the Apple driver does, where it constantly adds to the list of interfaces each time you reboot the neo, because the driver provides a constant ethernet address independently what the Neo says. Only flashing a new kernel might force you to update.
-
-<b>Issue</b>: This driver is sometimes a bit flaky, and a reboot of the Mac seems to bring it back. It is especially critical about hot unplugging the OM and sleep modes of MacBooks. This may even result in a Kernel Panic.
 
 == Bluetooth Networking ==
 {{InProgress}}
