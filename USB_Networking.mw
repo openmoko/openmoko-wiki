@@ -61,21 +61,45 @@ If this contains anything in the FORWARD chain, then this may prevent passing pa
 
 In addition to routing issues, to be practical, DNS will need to work.  In some cases, you might already be running a DNS server on your desktop such as dnsmasq or bind9, which is the default assumption the FreeRunner makes.  In other cases, you'll need to configure DNS to that of your router, or a DNS server further out on the internet such as that provided by your ISP.
 
-== Configure DNS ==
+== Configure Default Neo DNS ==
 
 DNS is configured in /etc/resolv.conf on your FreeRunner.  It should contain:
 
- nameserver 192.168.0.200 or just put in another DNS Server for example "nameserver 212.147.10.10"
+If Desktop/Laptop has a DNS server or is proxying DNS:
+ nameserver 192.168.0.200 
+or just put in another DNS Server - for example: 
+ nameserver 212.147.10.10
 
-Which means that by default it expects your desktop to have a DNS server.  On some Linux and Windows systems this is true, especially those configured as servers, but in general it is not.  You can install packages such as ''bind9'' or ''dnsmasq''.   See the section below on [[USB Networking#More on DNS|More on DNS]] for other solutions.    
+Some Linux and Windows systems have DNS servers, especially those configured as servers, but in general they do not.  You can install packages such as ''bind9'' or ''dnsmasq'' to run your own DNS server.  If you have a DNS server then Test Your Connection.  Otherwise you may want to proxy DNS from your Desktop/Laptop.
+
+== Proxying DNS from Desktop/Laptop ==
+
+If you move about, making assumptions about the network may not be convenient, and it is possible to proxy DNS requests via your host laptop (which you are also taking with you), without running or installing a DNS server.  There are a number of ways to do this:
+
+=== Proxying with dnrd ===
+
+The script is designed to use [http://dnrd.sourceforge.net/ dnrd] as the DNS proxy. The [http://buildhost.automated.it/gta01 script] and a copy of [http://buildhost.automated.it/dnrd-2.20.3.tar.gz dnrd] are available. The script also performs the initial setup of the connection as per the [[USB_Networking#Manual_method]] above.
+
+=== Proxying with a UDP forwarder ===
+
+Another easy setup is using a UDP forwarder like the one from http://www.tapor.com/udpf/ - use it with the command"
+
+ udpf-elf -p=53-f=`cat /etc/resolv.conf|awk '$1 == "nameserver"{print $2; exit(0);}'`:53
+
+=== Proxying with iptables ===
+
+It is possible to forward DNS requests with iptables using the DNAT target:
+
+ iptables -t nat -A PREROUTING -p tcp -s 192.168.0.202 -d 192.168.0.200 --dport domain -j DNAT --to-destination 192.168.0.1
+ iptables -t nat -A PREROUTING -p udp -s 192.168.0.202 -d 192.168.0.200 --dport domain -j DNAT --to-destination 192.168.0.1
+
+Where <tt>192.168.0.1</tt> is the IP of your router.
 
 Test if it works:
-
  ping www.google.com
-
 If so, then this is sufficient for most internet access. But manual changes to resolv.conf are usually lost later if for example one uses DHCP, especially for WiFi, and so may not be convenient to configure manually.
 
-=== Testing Your Connection ===
+= Testing Your Connection =
 You should be able to connect to your Neo! Make sure you can ping your Neo to be sure.
  ping 192.168.0.202
 
