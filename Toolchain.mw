@@ -86,22 +86,6 @@ to start "sh" or "bash" first.
 
 * At least, you should add /usr/local/openmoko/arm/bin to your $PATH variable, otherwise the next steps won't work (om-conf and make).
 
-==Building OpenMoko Kernel from git repo using Toolchain==
-
- git clone git://git.openmoko.org/git/kernel.git linux-2.6
- cd linux-2.6
- git checkout origin/stable
- cp defconfig-gta02 .config
- ./build
-
-Will fail with error message "arm-angstrom-linux-gnueabi-ld: unrecognized option '-Wl,-rpath-link,/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/lib'" until /usr/local/openmoko/arm/setup-env is modified. LDFLAGS should be changed from:
-
- export LDFLAGS="-L${OMTOOL_DIR}/arm/arm-angstrom-linux-gnueabi/lib -Wl,-rpath-link,${OMTOOL_DIR}/arm/arm-angstrom-linux-gnueabi/lib -Wl,-O1"
-
-to:
-
- export LDFLAGS="-L${OMTOOL_DIR}/arm/arm-angstrom-linux-gnueabi/lib -rpath-link ${OMTOOL_DIR}/arm/arm-angstrom-linux-gnueabi/lib -O1"
-
 
 ==Building a sample project==
 
@@ -246,6 +230,22 @@ Using the external toolchain is an easy way to build applications for your Neo. 
 * Using [[OpenEmbedded]] to customize your Openmoko distribution image
 
 =Advanced topics=
+==Building OpenMoko Kernel from git repo using Toolchain==
+
+ git clone git://git.openmoko.org/git/kernel.git linux-2.6
+ cd linux-2.6
+ git checkout origin/stable
+ cp defconfig-gta02 .config
+ ./build
+
+Will fail with error message "arm-angstrom-linux-gnueabi-ld: unrecognized option '-Wl,-rpath-link,/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/lib'" until /usr/local/openmoko/arm/setup-env is modified. LDFLAGS should be changed from:
+
+ export LDFLAGS="-L${OMTOOL_DIR}/arm/arm-angstrom-linux-gnueabi/lib -Wl,-rpath-link,${OMTOOL_DIR}/arm/arm-angstrom-linux-gnueabi/lib -Wl,-O1"
+
+to:
+
+ export LDFLAGS="-L${OMTOOL_DIR}/arm/arm-angstrom-linux-gnueabi/lib -rpath-link ${OMTOOL_DIR}/arm/arm-angstrom-linux-gnueabi/lib -O1"
+
 ==Using toolchain provided libraries==
 Add the necessary libraries to the _LDADD field in src/Makefile.am, for example:
  openmoko_sample2_LDADD  = @DEPENDENCIES_LIBS@ -lmokogsmd2
