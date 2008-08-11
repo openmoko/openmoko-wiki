@@ -1,165 +1,20 @@
-This page is about changing windows decoration and behavior. For [[CustomizeApplicationIcons|changing application icons]] on the home screen, simply change ''.desktop'' files ''/usr/share/applications'' directory. For more general pimping, see the [[Themes]] page.
-
-= Introduction: What is Edje ? =
-
-In most Openmoko FreeRunner distributions, the graphical environment is the Illume module of the [http://www.enlightenment.org/ Enlightenment 17] window manager. Under this environment, the windows decorations and behavior are managed by a graphical library called ''Edge''. Accordingly, the theme is defined in a ''.edj'' file.
-
-On the FreeRunner, Edje themes are stored at ''/usr/share/enlightenment/data/themes''. Which theme gets loaded by default is defined via the symlink ''/usr/share/enlightenment/data/themes/illume.edj''. To use a custom theme, simply put a '''.edj'' file to ''~/.e/e/themes/illume.edj''.
-
-A ''.edj'' file is a collection of possibly several files, including images and even fonts in some cases (see [http://web.enlightenment.org/p.php?p=docs&l=en E17 documentation]). It allows to change the background image (see the example below) but is much more powerful than that. Along with the visual definitions and elements, it includes programmatic statements controlling interaction between GUI elements and between GUI and application.  For instance, the dialer may have three 'program' triggers written into the edje for each button - change GUI to 'pressed', change GUI to 'released', and add digit to number.  Unlike traditional ideas about theming, this interaction is defined in the 'theme' instead of the application itself.  This allows for unprecedented flexibility insofar as 'theming' - you can change button layouts, graphics, even add some features like 'delete last digit' all within the .edj.
-
-If you want to play around with edje themes here are two approaches:
-
-1. Use ''edje-editor''.  Keep in mind that the editor works, quite nicely in some regards, but has some flaws and some distinctly missing features like it can't remove a no-longer-used background image from the .edj file. See [http://lists.openmoko.org/pipermail/community/2008-October/034477.html this message].
-
-2. Alternatively, use ''edje-decc'' to decompile the theme back to config files and images and what-not, manually edit the aforementioned parts, and recompile with ''edje-cc''.  These two tools should be available in your friendly package feed for your Freerunner as ''edje-tools'', and possibly for your desktop linux. This is the method explained below.
+= Edje =
+Is a configuration-file format which origins of [http://www.enlightenment.org/ enlighment 17]. It is used by Openmoko and Illume for configuring a lot of the look of OpenMoko and its applications.
 
 Edje uses *.edj Files as binary-configuration files and *.edc as the source of such an *.edj file.
 
-= Installing the Edge compiler/decompiler =
+For compiling an *.edc file to an *.edj file you need: edje_cc
+For decompilin an *.edj file to an *.edc file you need: edje_decc (you might want to do this to learn about how such a file has to look like)
 
-== Installation on Ubuntu ==
+= Installation =
 You can install edje_cc and edje_decc for Ubuntu by adding this source to your /etc/apt/sources.lst:
-<pre>
-deb http://e17.dunnewind.net/ubuntu hardy e17
+ deb http://e17.dunnewind.net/ubuntu hardy e17
 or
-deb http://e17.dunnewind.net/ubuntu gutsy e17
+ deb http://e17.dunnewind.net/ubuntu gutsy e17
 or
-deb http://e17.dunnewind.net/ubuntu feisty e17
-
-Note: The sources above didn't work for me. Instead, I used: deb http://cz.archive.ubuntu.com/ubuntu karmic main universe
-</pre>
+ deb http://e17.dunnewind.net/ubuntu feisty e17
 After that you can install the needed tools with:
-<pre>sudo apt-get update && sudo apt-get install libedje-bin</pre>
-
-'''Note''': I couldn't find the edje-utils library (used later in this tutorial). I looked around and found that these instructions work: http://dev.openbossa.org/trac/qedje/wiki/EdjeUtils
-
-Note: It appears only packages for hardy exist there at this point.
-
-== Installation on Debian ==
-The packages for Ubuntu look like they are compatible with debian.
-Verified is: feisty<->lenny
-
-Unfortunately, something seems to be broken in recompiling the edjefiles. edje_cc reports syntax errors in fso.edj file; but that comes maybe from the file itself. Maybe edje_cc from ubuntu is just outdated?
-
-
-It looks like edje is available in [http://packages.debian.org/libedje-bin debian] unstable.
-
-== Installation on Freerunner ==
-To compile/decompile Edje files directly at your freerunner, you first need to install several packages.
-You need at least ''edje-utils'' which provides the compiler and decompiler tools.
-Depending on the contents of the theme, you need additional modules which are provided by ''libevas-*'' packages.
-For example, to be able to load and save JPG files, you need both the ''libevas-loader-jpeg'' and ''libevas-saver-jpg'' packages.
-
-To successfully compile .edj files, you also need a C++ compiler and the embryo_cc scripting language compiler installed.
-
-This line should get you started:
-<pre>
-opkg install edje-utils libevas-loader-jpeg libevas-loader-png libevas-saver-jpeg libevas-saver-png
-</pre>
-
-To decompile an theme, just type:
-<pre>
-root@om-gta02:/usr/share/enlightenment/data/themes# edje_decc illume.edj
-</pre>
-
-To recompile, you can use edje_cc, but most theme files have a build.sh bundled that provides the neccessary parameters:
-<pre>
-root@om-gta02:/usr/share/enlightenment/data/themes/illume# ./build.sh
-</pre>
-
-= Example: changing wallpaper =
-
-This walkthrough example is divided into two sections. The first one describes how to get a background image if one has not set one before. In this case, also the second section must be performed, which describes, how you can exchange an already set background image if you followed this tutorial.
-
-== First time to set a background image ==
-* ssh to your freerunner
-* Install edje-utils:
-<pre>
-opkg install edje-utils evas-loader-jpeg evas-loader-png evas-saver-jpeg evas-saver-png
-</pre>
-* cd to the theme directory and decompile the default theme with edje_dcc:
-
-<pre>
-root@om-gta02:~# cd /usr/share/enlightenment/data/themes
-root@om-gta02:/usr/share/enlightenment/data/themes# edje_decc illume.edj
-</pre>
-
-* now you have a new directory "illume". Edit the file ''freerunner.edc'' inside it.
-* there, add the following code (Please note, that this works for an image with 480x640 pixels. If you have other sizes, adjust min/max/align/aspect):
-<pre>
-/*** DEFAULT WALLPAPER ***/
-group { name: "e/desktop/background";
-images{
-image: "background.png" COMP;
-}
-parts {
-part {
-name: "base";
-description {
-state: "default" 0.0;
-color: 238 238 236 255;
-image.normal: "background.png";
-min: 480 640;
-max: 480 640;
-align: 0.0 1.0;
-aspect: 1.0 1.0;
-}
-}
-}
-}
-</pre>
-* prepare a symlink so updating is more easy if you want to change again later:
-root@om-gta02:/usr/share/enlightenment/data/themes# ln -s illume/illume.edj illume_mytheme.edj
-* replace the theme symlink to point to your one:
-root@om-gta02:/usr/share/enlightenment/data/themes# rm illume.edj; ln -s illume_mytheme.edj illume.edj
-
-== Exchanging background again ==
-* scp your ''background.png'' image from host-pc to freerunner:
-<pre>
-scp background.png moko:/usr/share/enlightenment/data/themes/illume/
-</pre>
-* on freerunner, recompile the theme
-<pre>
-root@om-gta02:/usr/share/enlightenment/data/themes/illume# ./build.sh
-</pre>
-* To enjoy your new background, restart enlightenment using the following command: 
-<pre>killall -HUP enlightenment</pre>
-
-* If restarting E does not work, the next thing to try is restarting/reloading X. This is overkill:
-<pre>
-root@om-gta02:~# /etc/init.d/xserver-nodm restart
-</pre>
-
-* If you want to change the background again, you only need to copy over the new image, recompile the Edje file and reload E.
-
-= Example: hiding the "Install" Bar =
-<pre>
->>   I have removed the assassin installer so it doesn't show up any more
->>   (I do everything command line while ssh'd in) and I want to get rid
->>   of the bottom thing with the little pluses.  Is this a possibility?
->>
-> It should be quite easy. Just decompile the edj file, edit the
-> proper section (compare to the tango freerunner.edc file) and recompile
-> it back.
->
-Not so simple, but it seems to be the right place... check for "*" or
-"+", they are in the .edc In place, I've added the value "Bar;" in the Categories of
-"qtopia-clock.desktop" and "qtopia-ringtones.desktop" to get these two
-appli accessible from the bottom bar.
-</pre>
-Reference: http://lists.openmoko.org/pipermail/community/2008-September/031188.html
-
-= Troubleshooting =
-If something goes wrong at compiling time, there is most certainly something wrong in your freerunner.edc file. The problem is, that edjecc will complain with cryptical text.
-Check if all files referenced are really there and if no syntax errors are present.
-
-In order to install the new theme, it must be referenced (see above) and illume must be restarted.
+ sudo apt-get update && sudo apt-get install libedje-bin
 
 = Links =
-* [http://docs.enlightenment.org/api/edje/edje-reference.pdf docs.enlightenment.org] - offical edje documentation
-* [http://52grad.de/.stuff/freerunner/ 52grad.de] - example on using edj files
-* [http://trac.enlightenment.org/e/export/36203/trunk/THEMES/b_and_w/theme.edc example theme file] - with LOTS of comments
-* [[Edje examples]]
-
-[[Category:Middleware settings]]
+* [http://docs.enlightenment.org/api/edje/html/ docs.enlightment.org] - offical edje documentation
