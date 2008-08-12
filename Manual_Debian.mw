@@ -239,6 +239,7 @@ These are for sound, bluetooth and USB. Use the modules archive that fits to you
  snd-pcm-oss\n\
  snd-soc-neo1973-wm8753" > /etc/modules
 
+Note: On the Freerunner, the sound module (on the last line) is called snd-soc-neo1973-gta02-wm8753
 [[Image:Sonata.png|480px|''Sonata on neo1973'']]
 == Enable Sound ==
 
@@ -281,14 +282,18 @@ on neo:
  chroot /media/card/sid mplayer http://relay.slayradio.org:8000/
 
 
-=For X applications / xserver.=
+=For X applications / xserver on the Freerunner=
 
-Just copy /usr/bin/Xglamo (./Xfbdev) to  /usr/bin in debian.
-Then. add this to your .bashrc  export TSLIB_TSDEVICE=/dev/input/event1
+Copy /usr/bin/Xglamo (and /usr/bin/Xfbdev) to  /usr/bin in Debian from FSO/ASU/2007.2/2008.8.
+Add this to your .bashrc (to tell tslib to use the correct input device):
+ export TSLIB_TSDEVICE=/dev/input/event1
 
-Then as root go ln -s /usr/lib/libts-0.0.so.0 /usr/lib/libts-1.0.so.0
-Also, do the following:  cd /usr/bin && mv X X.orig && ln -s Xfbdev X
-This should make X a symlink to Xfbdev.
+The X server binaries are linked against version 1 of tslib, for some reason Debian calls its version 0, even though it actually is version 1. Symlink the library to the alternative name by running (as root):
+ ln -s /usr/lib/libts-0.0.so.0 /usr/lib/libts-1.0.so.0
+
+We also need to change the symlink for the X server to either Xfbdev or Xglamo (this should better be handled by update-alternatives!):
+ cd /usr/bin && mv X X.orig && ln -s Xfbdev X
+(replace Xfbdev by Xglamo if you want to use that, Xglamo is faster, but rotation still does not work correctly as of 2008-08-12).
 
 =Official Debian Port=
 
