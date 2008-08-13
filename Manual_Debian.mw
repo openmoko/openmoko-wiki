@@ -202,6 +202,21 @@ for gta01:
 calibration for the gta02
  echo  -67 38667 -4954632 -51172 121 46965312 65536 > /etc/pointercal
 
+Note from Tkrahn:
+
+First the above calibration for gta02 worked fine for me, but after a 
+apt-get update && apt-get upgrade the pointer didn't follow the stylo
+anymore. I needed to overwrite /etc/udev/rules.d/50-udev.rules with 
+/etc/udev/udev.rules.dpkg-bak and a restart of the X server to get it 
+moving again. But then the pointer was very far off from the tip of 
+the stylo. Obviously the mode how the calculation of the position worked
+has changed with the upgrade. I changed the calibration empirically. 
+The following /etc/pointercal parameters worked for me:
+
+ 0 80000 -8000000 -80500 0 74500000 65536
+
+(On GATA02v5 after the upgrade!)
+
 
 Start X and enjoy!
  startx -- vt1
@@ -296,6 +311,30 @@ The X server binaries are linked against version 1 of tslib, for some reason Deb
 We also need to change the symlink for the X server to either Xfbdev or Xglamo (this should better be handled by update-alternatives!):
  cd /usr/bin && mv X X.orig && ln -s Xfbdev X
 (replace Xfbdev by Xglamo if you want to use that, Xglamo is faster, but rotation still does not work correctly as of 2008-08-12).
+
+=GPS=
+
+Install gpsd and an application like tangogps on Debian:
+
+ (as root)
+ apt-get install gpsd
+ apt get install tangogps
+
+Unlike on OM 2008.8 the serial port for gps is not /dev/ttySAC1 but /dev/s3c2410_serial1. 
+The best way to set up gpsd on Debian is to use dpkg-reconfigure:
+ dpkg-reconfigure gpsd
+Now use the parameters:
+ Start gpsd automatically on boot? Yes
+ Device the GPS receiver is attached to: /dev/s3c2410_serial1
+ Should gpsd handle attached USB GPS receivers automatically? No
+ Options to gpsd: (leave empty, just hit return)
+
+Test the serial connection to the GPS chip:
+ echo 0 > /sys/class/i2c-adapter/i2c-0/0-0073/neo1973-pm-gps.0/pwron &&  sleep 1s && echo 1 > /sys/class/i2c-adapter/i2c-0/0-0073/neo1973-pm-gps.0/pwron && stty -F /dev/s3c2410_serial1 -echo && cat -u /dev/s3c2410_serial1 | grep -v ^$
+ (Finish testing with ctrl-c)
+Now you should be able to start tangogps from the X-mouse start menu:
+ Start > other > GPS & Map
+
 
 =Official Debian Port=
 
