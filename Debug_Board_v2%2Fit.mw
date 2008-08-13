@@ -5,7 +5,7 @@ La [[Debug Board/it | pagina Debug Board]] fornisce informazioni sull'architettu
 [[Image:Neo1973 debugboard v2 top annotated.jpg|left|500px|Annotated PCB Photograph]]
 
 
-== Overview ==
+== Panoramica ==
 
 La [[Debug Board/it | debug board]] fornisce i seguenti componenti chiave.
 
@@ -21,19 +21,19 @@ Questo hub alimentato dal bus
 * si connette ad una porta USB-A libera usando la porta di downstream 2
 * si connette al telefono usando la porta di downstream 3
 
-Usando l'hub, e' possibile avere accesso al telefono, alla JTAG ed alla seriale simultaneamente, attraverso un unico cavo USB.
+Usando l'hub, è possibile avere accesso al telefono, alla JTAG ed alla seriale simultaneamente, attraverso un unico cavo USB.
 
-E' anche possibile ricaricare il telefono (carica lenta a 100mA) usando la porta di downstream.
+È possibile ricaricare il telefono (carica lenta a 100mA) anche usando la porta di downstream.
 
-Per le funzionalita' ISB hub, viene utilizzato l'integrato TUSB2046B.
+Per le funzionalità ISB hub, viene utilizzato l'integrato TUSB2046B.
 
 === JTAG attraverso l'FT2232 ===
 
-Fondamentalmente, abbiamo integrato un adattatore USB-JTAG simile a quello [Amontec JTAGkey-tiny].  Il reference design che abbiamo utilizzato (Grazie a Joern!) puo' essere trovato su http://www.oocdlink.com
+Fondamentalmente, abbiamo integrato un adattatore USB-JTAG simile a quello [Amontec JTAGkey-tiny].  Il design di riferimento utilizzato (Grazie a Joern!) si può trovare su http://www.oocdlink.com
 
-In questo modo abbiamo ottenuto la possibilita' di debugging tramite JTAG, a circa 150 volte la velocita' della [[wiggler/it | wiggler]]
+In questo modo abbiamo ottenuto la possibilità di debugging tramite JTAG, circa 150 volte più veloce della [[wiggler/it | wiggler]]
 
-La porta JTAG e' attaccata con
+La porta JTAG è attaccata con
 * il telefono (attraverso il cavo flessibile di debug)
 * Un connettore a 20-pin usando il pinout ARM-JTAG standard
 ** questo permette all'utente di utilizzare questo dispositivo come un adattatore JTAG anche con altri dispositivi basati su ARM
@@ -63,24 +63,24 @@ Solo se la tua scheda possiede l'USB ID 0403:6010, allora occorre riprogrammare 
 
 ===== Riprogrammarla con Linux =====
 
-{{note|FIC lo ha gia' fatto per te, nel caso in cui ti sia stata ufficialmente fornita la scheda.  In ogni caso, se sei uno dei primi sviluppatori, le configurazioni dell'USB vendorID / productID potrebbero non essere state configurate correttamente.}}
+{{note|FIC lo ha già fatto per te, nel caso in cui ti sia stata ufficialmente fornita la scheda.  In ogni caso, se sei uno dei primi sviluppatori, le configurazioni dell'USB vendorID / productID potrebbero non essere state configurate correttamente.}}
 
-Per effettuare tale operazione, e' possibile usare il programma ftdi_eeprom  scaricabile dal sito 
+Per effettuare tale operazione, è possibile usare il programma ftdi_eeprom scaricabile dal sito 
 http://www.intra2net.com/de/produkte/opensource/ftdi/. Sfortunatamente, l'ultima versione (0.2) sembra non supportare ancora la nostra  FT2232D, pertanto dovrai prima applicare la patch scaricabile dal sito http://people.openmoko.org/laforge/misc/debug_board_v2/ftdi_eeprom/ftdi_eeprom-0.2-moko.patch
 
 Potrebbe inoltre essere necessario applicare la seguente patch alla libreria libftdi:
 http://people.openmoko.org/werner/libftdi-c56-strings-dirty-hack.patch
 (Vedi http://bugzilla.openmoko.org/cgi-bin/bugzilla/show_bug.cgi?id=321 per ulteriori dettagli.)
 
-Inoltre, si avra' bisogno della configurazione  dell'EEPROM:
+Inoltre, si avrà bisogno della configurazione  dell'EEPROM:
 http://people.openmoko.org/laforge/misc/debug_board_v2/ftdi_eeprom/neo1973_debug_board_v2.ftdi
 
-Dopo che si e' compilato ftdi_eeprom, e' possibile eseguire
+Dopo che si è compilato ftdi_eeprom, è possibile eseguire
  ftdi_eeprom --flash-eeprom neo1973_debug_board_v2.ftdi
 
 {{warning|Assicurarsi di non avere altri dispositivi basati sull'FTDI FT232 / FT2232 connessi all'USB mentre si esegue ftdi_eeprom.  Potrebbe essere saggio disconnettere tutti i dispositivi tranne la debug board}}
 
-Si dovrebbe ottenere qualcosa di simile se tutto e' andato a buon fine:
+Se tutto è andato a buon fine, si dovrebbe ottenere qualcosa di simile a:
 <pre>
 FTDI eeprom generator v0.2
 (c) Intra2net AG <opensource@intra2net.com>
@@ -93,7 +93,7 @@ Writing to file: neo1973_debug_board_v2.eeprom
 FTDI close: 0
 </pre>
 
-Una volta che la procedura di riprogrammazione e' terminata, semplicemente disconnettete e riconnettete la scheda, e dovreste vedere
+Una volta che la procedura di riprogrammazione è terminata, semplicemente disconnettete e riconnettete la scheda, e dovreste vedere
 <pre>
 $ lsusb -v -d 0x1457:                                                                                                                                                                                               
 Bus 005 Device 009: ID 1457:5118  
@@ -116,20 +116,20 @@ Device Descriptor:
 </pre>
 
 ===== Riprogrammarla con Windows =====
-{{note|FIC lo ha gia' fatto per te, nel caso in cui ti sia stata ufficialmente fornita la scheda.  In ogni caso, se sei uno dei primi sviluppatori, le configurazioni dell'USB vendorID / productID potrebbero non essere state configurate correttamente.}}
+{{note|FIC lo ha già fatto per te, nel caso in cui ti sia stata ufficialmente fornita la scheda.  In ogni caso, se sei uno dei primi sviluppatori, le configurazioni dell'USB vendorID / productID potrebbero non essere state configurate correttamente.}}
 
-Per effettuare questa operazione, e' possibile usare il programma FTDI Mprog scaricabile da http://www.ftdichip.com/Resources/Utilities/MProg3.0_Setup.exe
+Per effettuare questa operazione, è possibile usare il programma FTDI Mprog scaricabile da http://www.ftdichip.com/Resources/Utilities/MProg3.0_Setup.exe
  
-Avrai bisogni del
+Avrai bisogno del
 * Template della EEPROM: http://people.openmoko.org/laforge/misc/debug_board_v2/mprog_template/neo1973_debugboard_v2.ept
 
 ==== Drivers ====
 
 ===== Linux =====
 
-Assicurarsi di avere la libreria libftdi-0.8 o superiore.  E' noto che versioni antecedenti creano incompatibilita'.
+Assicurarsi di avere la libreria libftdi-0.8 o superiore. È noto che versioni antecedenti creano incompatibilità.
 
-Inoltre, dovrai fare :
+Inoltre, dovrai fare:
 
 ====== opzione sul modulo ftdi_sio ======
 
@@ -140,7 +140,7 @@ o analogamente nel tuo modules.conf
 
 ====== regola udev ======
 
-E' necessario installare le seguenti regole da http://people.openmoko.org/laforge/misc/debug_board_v2/udev_rules/
+È necessario installare le seguenti regole da http://people.openmoko.org/laforge/misc/debug_board_v2/udev_rules/
 
 ===== Windows =====
 
@@ -155,7 +155,7 @@ Utilizzare i driver da http://people.openmoko.org/laforge/misc/debug_board_v2/wi
 ==== Su Linux ====
 
 ===== Porta Seriale =====
-Il kernel di Linux della tua macchina host creera' un dispositivo seriale virtuale  chiamato '''/dev/ttyUSBx''' dove 'x' e' un numero assegnato in modo sequenziale.  Se non avete nessun altro convertitore USB seriale connesso alla vostra macchina, til nome del dispositivo sra' '''/dev/ttyUSB0'''.
+Il kernel di Linux della tua macchina host creerà un dispositivo seriale virtuale  chiamato '''/dev/ttyUSBx''' dove 'x' e' un numero assegnato in modo sequenziale.  Se non avete nessun altro convertitore USB seriale connesso alla vostra macchina, il nome del dispositivo sarà '''/dev/ttyUSB0'''.
 
 Potete utilizzare il vostro emulatore di terminale preferito (minicom, cu, zc, ...) proprio come qualsiasi altra vera porta seriale.
 
@@ -163,9 +163,9 @@ Potete utilizzare il vostro emulatore di terminale preferito (minicom, cu, zc, .
 
 Una volta installata la libreria libftdi >= 0.8 e configurata [[OpenOCD/it | OpenOCD]] con il corretto openocd.cfg scaricato da [[OpenOCD/it#openocd.cfg | OpenOCD#openocd.cfg]], dovrebbe funzionare immediatamente.
 
-Riferirsi a [[OpenOCD/it#OpenOCD_e_la_Debug_Board | OpenOCD#OpenOCD e la Debug Board]] per ulteriori informazioni.
+Per ulteriori informazioni fare riferimento a [[OpenOCD/it#OpenOCD_e_la_Debug_Board | OpenOCD#OpenOCD e la Debug Board]] .
 
-== History ==
+== Cronologia ==
 
 Prima utilizzavamo la [[Debug Board v1/it | Debug Board v1]]
 
@@ -175,12 +175,12 @@ Prima utilizzavamo la [[Debug Board v1/it | Debug Board v1]]
 ** non ne abbiamo bisogno, e
 ** non vogliamo proprio un bus parallelo a 40pin a 66MHz tra due PCB
 * ci siamo sbarazzati del display a sette segmenti
-** non c'era veramente bisogno.  Abbiamo una porta seriale
-** puo' essere sostituito da uno o due LED GPIO (General Purpose I/O)
+** non ce n'era veramente bisogno.  Abbiamo una porta seriale e
+** può essere sostituito da uno o due LED GPIO (General Purpose I/O)
 * ci siamo sbarazzati della [[wiggler/it | wiggler]] integrata
-** nessuno ha una porta parallela sul proprio portatile oggi giorno
+** quasi nessuno oggigiorno ha una porta parallela sul proprio portatile 
 * ci siamo sbarazzati della batteria a ioni di litio (insieme al caricatore)
-** il dispositivo puo' essere completamente alimentato dall'usb del portatile
+** il dispositivo può essere completamente alimentato dall'usb del portatile
 
 <span id="bottom"></span>
 {{Languages|Debug_Board}}
