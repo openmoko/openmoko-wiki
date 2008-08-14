@@ -40,7 +40,38 @@ Press "remove" to close currently focused application.
 
 *'''"shutdown -r now"''' or  '''"reboot"'''- Reboots your phone.
 
+''' Configuring Om 2008.8 '''
+
+Follow this [[http://support.microsoft.com/kb/306126 guide (Windows Users)]]to share your internet with your phone.
+*If you are also behind a router you may have to change your LAN IP range in your router to avoid using 192.168.0.* as this is the same IP range as what your phone and ICS uses. (If you don't there will be an IP conflict)
+
+After you install and run [[http://wiki.openmoko.org/wiki/Om2008.8#Download Om 2008.8 ]] for the first time you have to restart to get the USB working. Once you have done that you have to ssh into your phone (192.168.0.202) to edit your /etc/network/interfaces so you can access the internet through USB to install software and updates.
+
+Edit the USB section to look like this:
+
+ # Ethernet/RNDIS gadget (g_ether)
+ # ... or on host side, usbnet and random hwaddr
+ auto usb0
+ iface usb0 inet static
+ 	address 192.168.0.202
+ 	netmask 255.255.255.0
+ 	network 192.168.0.0
+ 	gateway 192.168.0.1
+ 	up echo nameserver 208.67.222.222 >/etc/resolv.conf 
+ 	up echo nameserver 208.67.220.220 >/etc/resolv.conf 
+ 	#up echo nameserver 192.168.0.200 >/etc/resolv.conf
+
+After you have made those changes restart your phone.
+
+Now that you are able to install software, It is a good time to install "illume-config" to can gain access to more advanced power management features and to change the look of the GUI through the wrench that will now appear in the top bar. (Restart your phone)
+
+
+
 ''' Bugs/Fixes '''
+
+*Battery meter always says its charging. Installing a terminal and running "apm" will display the proper battery status.
+
+*Your phone will go into standby after 30 seconds EVEN when connected to your computer or wall charger. (Disable this under the settings menu)
 
 *The wifi doesn't work too well right now.
 
