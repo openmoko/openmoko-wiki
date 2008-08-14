@@ -1,6 +1,175 @@
-Read more on how the project is going [http://www.borza.ro/index.php/category/accelerometer-based-gestures/ here]. The gesture recognition library that is used on the Neo FreeRunner is the same one that is used in my [http://www.youtube.com/watch?v=MX50lXuJ28Q video on YouTube] with the Nintendo Wii.
+=Alpha 2 Release (14 Aug 2008) for Neo Freerunner=
 
-== Applications ==
+==Video Demo==
+[http://www.youtube.com/watch?v=K2S2rQUETwc Openmoko Neo Freerunner does Accelerometer-based Gestures, and Screen Orientation]
+
+''Remark: Please watch the video, so that you'd know what to expect out of the Alpha 2 Release.
+
+==Alpha 2 Release: The Quick Way==
+SSH Neo Freerunner:
+ wget http://accelges.googlecode.com/files/accelges_0.1.0-svnr204-r2_armv4t.ipk
+ opkg install accelges_0.1.0-svnr204-r2_armv4t.ipk
+On The Neo Freerunner (''don't use SSH here, as screen orientation won't work if you use SSH''):
+ /etc/init.d/gesl start
+You're ready: make a gesture, make Neo change its screen orientation (''if you did watch the video, you'll know what to do'').
+
+==Alpha 2 Release Details==
+
+===Prerequisites===
+* You can use any distribution you like; I would suggest using the 2008.8 for now. You'll need these dependencies:
+ dbus, dbus-glib, libxrandr, libnotify, notification-daemon, libcurl, and gtk+
+* On the 2008.8, you'll be missing:
+ libnotify, notification-daemon, libsexy2, libwnck-1-18, libstartup-notification-1-0, and libglade-2
+''Remark: On the 2008.8, your missing dependencies will be downloaded automatically by the installer.''
+
+===Preparing 2008.8 for Gestures===
+* Turn off Suspend:
+  Home > Settings > Suspend > off
+* Make sure Neo has Web Access (use SSH):
+ echo "nameserver xxx.xxx.xxx.xxx" > /etc/resolv.conf
+* Install Terminal:
+ Home > Installer > Development > openmoko-terminal2
+* Create a shell script that will start the gesture listener daemon (use SSH):
+ echo "exec /etc/init.d/gesl start" > /usr/bin/gesl-begin
+ chmod +x /usr/bin/gesl-begin
+* '''Restart Neo!'''
+
+===Installing Gestures===
+* Download the [http://accelges.googlecode.com/files/accelges_0.1.0-svnr204-r2_armv4t.ipk Alpha 2 Release Package], or (use SSH):
+ echo "nameserver xxx.xxx.xxx.xxx" > /etc/resolv.conf
+ wget http://accelges.googlecode.com/files/accelges_0.1.0-svnr204-r2_armv4t.ipk
+* Install:
+ opkg install accelges_0.1.0-svnr204-r2_armv4t.ipk
+
+===Training Gestures===
+* Launch the Gesture Manager:
+ Home > Gestures
+* Select a gesture and click the first icon on the toolbar; Follow the instructions. Do the same for all the gestures!
+
+* Restart the Gesture Recognizer (use SSH):
+ /etc/init.d/gesd-neo2 restart
+
+''Remark: You have to restart the Gesture Recognizer, so that it will re-read the newly trained gestures. Every time you train one or more gestures, restart the recognizer!''
+
+===Running Gestures===
+* Use the script you have created before; '''be sure to run the script from the Neo, no SSH or VNC''':
+ gesl-begin
+
+''Remark: If you don't start the Gesture Listener from the Neo, screen orientation won't work''
+
+===How To Improve Recognition Accuracy===
+* Check to see which gesture gets recognized most often. Try training those gestures again.
+* Determine which gestures don't get recognized at all. Try training those gestures again.
+
+==Alpha 2 Development Details==
+===DBUS===
+
+===Configuration Files===
+The configuration file for Neo is:
+ /etc/accelges/neo2/neo2.cfg
+<pre>
+# Paul-Valentin Borza <paul@borza.ro>
+
+# gestures configuration file for Neo/Wii
+
+# classes and probabilities for classifier
+#    sclass\tFILE	static acceleration class
+#    dclass\tFILE	dynamic acceleration class
+#    sclassp\tVALUE	probability for static acceleration class
+#    dclassp\tVALUE	probability for dynamic acceleration class
+sclass	s.class
+dclass	d.class
+sclassp	0.4
+dclassp	0.6
+
+# classes for recognizer (add more than one)
+#    class\tid\tFILE	static acceleration class
+class	screen_zzp	screen_zzp.class
+class	screen_zzn	screen_zzn.class
+class	screen_zpz	screen_zpz.class
+class	screen_znz	screen_znz.class
+class	screen_pzz	screen_pzz.class
+class	screen_nzz	screen_nzz.class
+class	screen_npp	screen_npp.class
+class	screen_nnp	screen_nnp.class
+class	screen_pnp	screen_pnp.class
+class	screen_ppp	screen_ppp.class
+
+# models for recognizer (add more than one)
+#    model\tid\tFILE	dynamic acceleration model
+model	left	left.model
+model	left, and return	left-and-right.model
+model	right	right.model
+model	right, and return	right-and-left.model
+model	up	up.model
+model	up, and return	up-and-down.model
+model	down	down.model
+model	down, and return	down-and-up.model
+model	shake, shake	shake-shake.model
+model	horizontal circle	horizontal-circle.model
+model	forward, backward	forward-backward.model
+model	z	z.model
+</pre>
+# Paul-Valentin Borza <paul@borza.ro>
+
+# gestures configuration file for Neo/Wii
+
+# classes and probabilities for classifier
+#    sclass\tFILE	static acceleration class
+#    dclass\tFILE	dynamic acceleration class
+#    sclassp\tVALUE	probability for static acceleration class
+#    dclassp\tVALUE	probability for dynamic acceleration class
+sclass	s.class
+dclass	d.class
+sclassp	0.4
+dclassp	0.6
+
+# classes for recognizer (add more than one)
+#    class\tid\tFILE	static acceleration class
+class	screen_zzp	screen_zzp.class
+class	screen_zzn	screen_zzn.class
+class	screen_zpz	screen_zpz.class
+class	screen_znz	screen_znz.class
+class	screen_pzz	screen_pzz.class
+class	screen_nzz	screen_nzz.class
+class	screen_npp	screen_npp.class
+class	screen_nnp	screen_nnp.class
+class	screen_pnp	screen_pnp.class
+class	screen_ppp	screen_ppp.class
+
+# models for recognizer (add more than one)
+#    model\tid\tFILE	dynamic acceleration model
+model	left	left.model
+model	left, and return	left-and-right.model
+model	right	right.model
+model	right, and return	right-and-left.model
+model	up	up.model
+model	up, and return	up-and-down.model
+model	down	down.model
+model	down, and return	down-and-up.model
+model	shake, shake	shake-shake.model
+model	horizontal circle	horizontal-circle.model
+model	forward, backward	forward-backward.model
+model	z	z.model
+
+===Daemons===
+Gesture Recognizer that uses the top accelerometer (/dev/input/event2):
+ /etc/init.d/gesd-neo2 start|stop|restart
+Gesture Listener that switches screen orientation, and notifies the user of recognized gestures on the screen:
+ /etc/init.d/gesl start|stop|restart
+''Remark: Start the recognizer first, and after that the listener (obvious, but important)''
+
+=Known Issues=
+* One, or both accelerometers might not work. Try:
+ hexdump /dev/input/event2 (for top accelerometer)
+ hexdump /dev/input/event3 (for bottom accelerometer)
+''Remark: The Alpha 2 Release uses the TOP accelerometer''
+* After a while, the accelerometers might stop working.
+ Restart your Neo!
+* After a while, the accelerometer send bogus values (values that are lower than what they should be). If this happens, the classifier won't be able to classify dynamic/static acceleration, and nothing will work - nor the gesture training, nor the gesture recognition.
+ Restart your Neo!
+
+=Applications=
 * Mute audio or suspend when screen is facing down; (NO SUPPORT FOR MUTE/UNMUTE AUDIO IN NEO FOR NOW)
 * Go to main menu when shaken; (NO SUPPORT YET)
 * Volume up/down during call when tilting left/right (still unclear); (NO SUPPORT YET)
