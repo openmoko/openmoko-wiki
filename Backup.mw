@@ -70,25 +70,6 @@ DEVICE_CONFIGURED: 1
 Starting DFU Upload of partition 'kernel'
 </pre>
 
-If you plan on backing up frequently, this script will simplify the process:
-
-<pre>
-#!/bin/sh
-#
-# Back up all partitions of the phone to a backup directory,
-# adding today's date to the saved filenames.
-
-DATE=`date +%Y-%m-%d`
-DFU=./dfu-util
-BACKUP_DIR=bak/
-
-${DFU} -a kernel -R -U ${BACKUP_DIR}kernel-${DATE}.bin
-${DFU} -a rootfs -R -U ${BACKUP_DIR}rootfs-${DATE}.jffs2
-${DFU} -a splash -R -U ${BACKUP_DIR}splash-${DATE}.bin
-${DFU} -a u-boot -R -U ${BACKUP_DIR}u-boot-${DATE}.bin
-${DFU} -a u-boot_env -R -U ${BACKUP_DIR}u-boot_env-${DATE}.bin
-</pre>
-
 A failed run of dfu-util looks like this:
 
  dfu-util - (C) 2007 by OpenMoko Inc.
@@ -111,5 +92,158 @@ A failed run of dfu-util looks like this:
 And shows errors demsg like this:
  usb 5-2: usbfs: USBDEVFS_CONTROL failed cmd dfu-util rqt 161 rq 2 len 4096 ret -110
 
+==Backup Scripts==
+
+If you plan on backing up frequently, using a script will simplify the process:
+
+===Simple backup script===
+
+This script works well if you want to configure it to backup always the same device.
+
+<pre>
+#!/bin/sh
+#
+# Back up all partitions of the phone to a backup directory,
+# adding today's date to the saved filenames.
+
+DATE=`date +%Y-%m-%d`
+DFU=./dfu-util
+BACKUP_DIR=bak/
+
+${DFU} -a kernel -R -U ${BACKUP_DIR}kernel-${DATE}.bin
+${DFU} -a rootfs -R -U ${BACKUP_DIR}rootfs-${DATE}.jffs2
+${DFU} -a splash -R -U ${BACKUP_DIR}splash-${DATE}.bin
+${DFU} -a u-boot -R -U ${BACKUP_DIR}u-boot-${DATE}.bin
+${DFU} -a u-boot_env -R -U ${BACKUP_DIR}u-boot_env-${DATE}.bin
+</pre>
+
+===Interactive script based on the previous one===
+
+This script is based on the above "Simple backup script" (by unknown). It does the backup of what you want and choose promting you for choices. Enjoy it! test it! contribute! You can find us at /server irc.freenode.net /j #openmoko and we'll be pleased to accept you help (ideas || code).                                
+
+<pre>
+#!/bin/bash
+
+#############################################################################################################
+##                                                                                                         ##
+## This script is Free Software is licensed under the GPLv3 and has ABSOLUTELY NO WARRANTY                 ##
+## you can find and read the complete version of the GPLv3 @ http://www.gnu.org/licenses/gpl.html          ##
+##                                                                                                         ##
+## Q: what does this script do?                                                                            ##
+## A: the script back up all partitions of the phone to a backup directory, interactively,                 ## 
+##    adding today's date to the saved filenames.                                                          ##
+##                                                                                                         ##
+## IMPORTANT:!!! REMEMBER TO RUN THIS SCRIPT AS ROOT SINCE dfu-util HAS TO BE USED AS ROOT!!!              ##
+##                                                                                                         ##
+## based on the orginal simple backup script at http://wiki.openmoko.org/wiki/Pre-Flash_Backup             ##
+##                                                                                                         ##
+## this version has been conceived and written by cga, x77686d, Infoport, jomat at /server irc.freenode.net##
+## /j #openmoko,#bash and my collegue aubba @ work.                                                        ##
+##                                                                                                         ##
+## for any suggestions and contributions contact cga (or one of the above) in the #openmoko channel        ##
+##                                                                                                         ##
+#############################################################################################################
+
+## let's roll!!
+
+## sets the date format for the date in the backup file, change accordingly to your local custom if you need
+DATE=`date +%d-%m-%Y`
+
+## here the scripts try to find the dfu-util binary and set it as the DFU var:
+if which dfu-util >/dev/null ; then
+	echo
+	echo "dfu-util found in your path"
+	echo
+	## 1 the function use this if you placed/linked dfu-util in your $PATH
+	DFU=dfu-util
+
+elif ls dfu-util >/dev/null ; then
+	echo
+	echo "dfu-util found in current directory" 
+	echo
+	## or 2 use following line if dfu-util is placed in the same directory where you run the script
+	DFU=./dfu-util
+	 
+else
+	## or 3 if the script doesn't find dfu-util shows the link for installing it and exit
+	echo
+	echo "dfu-util NOT found! install and use howto @ http://wiki.openmoko.org/wiki/Dfu-util"
+	echo
+	exit 1
+fi
+
+## here we get the hex code for devices found with dfu-util --list 
+## the hex code is grabbed and the name of the device is shown accordingly and you are prompetd to chose the right one:
+echo
+echo 'these are the devices i found:' 
+echo
+for device in `${DFU} --list | grep 0x | cut -f3 -d' ' | tr -d '[]'` ; do
+	if [ "$device" == '0x1457:0x5119' ] ; then
+		echo 'Neo 1973'
+	elif [ "$device" == '0x1d50:0x5119' ] ;	then
+		echo "Neo Freerunner"
+	else
+		echo 'other device found, DO NOT use dfu-util on this!!! it might bork it...'
+		exit 1
+	fi
+done | nl
+echo
+echo 'choose the device to backup:' 
+echo
+read selection
+HEX=$(${DFU} --list | grep 0x | head -n $selection | tail -1 | cut -f3 -d' ' | tr -d '[]') 
+
+## use the built-in read command to ask you and use the directory for the backup
+while [ -z "$BACKUP_DIR" ] ; do
+	echo
+	read -e -p $"enter the directory for the backup:" BACKUP_DIR
+	echo
+
+	## chek wether the dir exist and proceed, else create it and proceed.
+	if [ ! -d "$BACKUP_DIR" ] ; then
+		echo
+		echo -n "$BACKUP_DIR does not exist, create it? [Y/n] "
+		echo
+		read CREATE_DIR
+		if [ x"$CREATE_DIR" = xy -o x"$CREATE_DIR" = xY -o -z "$CREATE_DIR" ] ; then
+			mkdir -p -v "${BACKUP_DIR}"
+		else
+			BACKUP_DIR=
+		fi
+	fi
+done
+
+## here you get prompted to chose the backup you want, you can backup single files or all of them.
+echo
+echo 'choose the component to backup from the list:'
+echo
+
+select howto in kernel splash u-boot u-boot_env rootfs all quit; do
+	if [ "$howto" == "kernel" -o "$howto" == "all" ] ; then
+		${DFU} -d ${HEX} -a kernel -R -U ${BACKUP_DIR}/kernel-${DATE}.bin
+	fi
+	if [ "$howto" == "splash" -o "$howto" == "all" ] ; then
+		${DFU} -d ${HEX} -a splash -R -U ${BACKUP_DIR}/splash-${DATE}.bin
+	fi
+	if [ "$howto" == "u-boot" -o "$howto" == "all" ] ; then
+		${DFU} -d ${HEX} -a u-boot -R -U ${BACKUP_DIR}/u-boot-${DATE}.bin
+	fi
+	if [ "$howto" == "u-boot_env" -o "$howto" == "all" ] ; then
+		${DFU} -d ${HEX} -a u-boot_env -R -U ${BACKUP_DIR}/u-boot_env-${DATE}.bin
+	fi
+	if [ "$howto" == "rootfs" -o "$howto" == "all" ] ; then
+		${DFU} -d ${HEX} -a rootfs -R -U ${BACKUP_DIR}/rootfs-${DATE}.jffs2
+	fi
+	if [ "$howto" == "quit" ] ; then
+		exit 0
+	fi
+	echo
+	echo 'the component(s) has/have been backed up, what next? (press enter for menu)'
+	echo
+done
+
+exit 0
+
+</pre>
 [[category:Guides]]
 [[category:Technical]]
