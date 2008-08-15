@@ -1,5 +1,33 @@
 The GPRS connection is made using the PPP protocol to a server identified by an "APN" at the network operator. 
 
+= Option 1: With GSM Multiplexing =
+
+{{note|The following does not appear to work if you have a SIM PIN.  The dialog to enter your SIM PIN never pops up and the GSM multiplexing daemon continuous loops and runs into a SIM PIN error.}}
+
+GSM multiplexing allows both a GPRS connection and a phone call to be handled at the same time.  By default, [[Om 2008.8]] does not multiplex the GSM device.  The [[FSO]] distribution, however, introduces GSM multiplexing with a new service and a DBus API to that service.  The instructions to modify the OM2008.8 distribution to make use of GSM multiplexing and allow you to start GPRS from a GUI can be found here: http://freeyourphone.de/portal_v1/viewtopic.php?f=21&t=295
+
+However, using those instructions, you will encounter a few hurdles.  Do not use the gsm0710muxd that is found in the OM2008.8 repository.  It will not work, instead, use the one found here:
+
+http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/gsm0710muxd_0.9.1+gitr6fecc78198dd821bbe29efd096bd8fecd855179d-r0_armv4t.ipk
+
+In order to install that version of gsm0710muxd, however, you will also have to install a bunch of missing dependencies.  Those can be found by clicking on the dependencies found here:
+
+http://www.angstrom-distribution.org/repo/?action=details&pnm=gsm0710muxd
+
+Make sure that you install the armv4t versions of all packages.
+
+The [[#Some APN names for reference|APN Reference]] table may come in handy when you are looking for the required network specific information.
+
+Once you follow through with all the instructions, you will notice that the "Services" GUI will crash.  This has to do with this bug: http://docs.openmoko.org/trac/ticket/1718
+
+The fix is to change the "init()" call on line 82 of /usr/lib/python2.5/site-packages/gtk-2.0/gtk/_init_.py  to "_init()" (add an underscore).
+
+You may also have to modify your /etc/resolv.conf file and add the nameserver (DNS Server) of your service provider if you have DNS resolution problems.
+
+Then, hopefully, you should be up in running with GPRS and a GUI to turn it on and off.
+
+= Option 2: Without GSM Multiplexing =
+
 The program that implements PPP on Linux is [[pppd]], which we need to configure and run to get a connection. When that is working, we can configure pppd to wait until it's needed before it connects, and to disconnect if the connection becomes idle. Further, we can start pppd in the background during the boot process.
 
 == Configuring pppd for manual connections ==
