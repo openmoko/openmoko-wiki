@@ -145,6 +145,61 @@ added application should be listed under a name which was choosen when building 
 == Problems ==
 If you have any problems, just add it here
 
+OS: Ubuntu 8.05
+I run the following sequence of commands to run my QEMU 
+
+$ svn checkout https://svn.openmoko.org/trunk/src/host/qemu-neo1973
+$ cd qemu-neo1973
+$ sudo aptitude install gcc-3.4 libsdl1.2-dev lynx netpbm
+$ ./configure --target-list=arm-softmmu --cc=/usr/bin/gcc-3.4
+$ make
+$ openmoko/download.sh
+$ openmoko/flash.sh
+$ arm-softmmu/qemu-system-arm -M gta01 -m 130 -mtdblock openmoko/openmoko-flash.image -kernel openmoko/openmoko-kernel.bin -usb -show-cursor
+
+Emulator appears with Boot menu.
+While Booting it get hanged out with the following errors
+_______________________Errors or Emulator Screen_______________
+sc32410-sdi sc32410-sdi : CMD[FAIL(-100)] #2 op:CMD8
+error: command timeout
+...
+...
+...
+Freeing init memory: 128kb
+/bin/sh: can't access tty; Job Control Tunned off
+/ #JFFS2 notice: (227) check_node_data: wrong data CRC in data node at 0x00899b4c: read d5ebdb50 calculated 0x880615c2
+JFFS2 warning: (227) jffs2_do_read_inode_internal: Truncating into #1111 to 71415
+56 bytes failed because it only had 2510848 bytes to start with 
+
+_______________Errors on Terminal_______________
+qasim@qasim-desktop:~/openmoko/qemu-neo1973$ arm-softmmu/qemu-system-arm -M gta01 -m 130 -mtdblock openmoko/openmoko-flash.image -kernel openmoko/openmoko-kernel.bin -usb -show-cursor
+neo_gsm_switch: GSM disabled.
+pcf_write: charging in Qualification Mode.
+pcf_write: charge voltage 4.20V.
+neo_lcd_rst_switch: LCD reset.
+jbt6k74_command: Display on.
+neo_vib_switch: Buzz, buzz.
+neo_vib_switch: Vibrator stopped.
+neo_bl_switch: LCD Backlight now on.
+s3c_timers_write: Bad register 0x40
+neo_bl_intensity: LCD Backlight now at 20/64.
+s3c_adc_write: Bad register 0x8
+s3c_mmci_writew: Bad register 0x38
+s3c_mmci_writew: Bad register 0x38
+s3c_mmci_writew: Bad register 0x38
+s3c_mmci_writew: Bad register 0x38
+s3c_mmci_writew: Bad register 0x38
+s3c_mmci_writew: Bad register 0x38
+s3c_mmci_writew: Bad register 0x38
+s3c_mmci_writew: Bad register 0x38
+s3c_mmci_writew: Bad register 0x38
+s3c_mmci_writew: Bad register 0x38
+neo_bl_intensity: LCD Backlight now at 0/64.
+________________________________________________________________
+Does anyone has any idea how to fix this up?
+
+
+
 After issuing the command 'make qemu' in Gutsy, the installation eventually borks with
 
     make[2]: Leaving directory `/usr/local/src/openmoko/build/qemu/arm-softmmu'
