@@ -95,6 +95,59 @@ while(my $l = $s->getline) {
 
 This also works with <tt>cmd=full</tt> and meaningful lat/lon/pacc values.
 
+Same in python:
+
+<pre>
+#!/usr/bin/python
+#
+# ublox AssistNow Online almanach downloader for Neo Freerunner
+#
+# v0.1
+#
+# Wilfried Klaebe <wk-openmoko@chaos.in-kiel.de>
+#
+# Usage:
+#
+# agps-alm.py > /dev/ttySAC1
+#
+
+import sys
+import socket
+import re
+
+user='your@mail.address'
+pwd='pwdfromublox'
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect(('agps.u-blox.com',46434))
+
+s.send('user='+user+';pwd='+pwd+';cmd=alm;lat=0;lon=0;pacc=40000000;\n')
+
+buf = s.recv(4096)
+while 1:
+        b = s.recv(4096)
+        if not b:
+                break
+        buf += b
+
+h = {}
+
+while 1:
+        (l,s,buf) = buf.partition('\n')
+        l = l.rstrip('\r\n')
+        #
+        sys.stderr.write(l+'\n')
+        #
+        if (l == ""):
+                if h.has_key('content-length') and h['content-length'].isdigit() and h.has_key('content-type') and h['content-type'] == 'application/ubx':
+                        sys.stdout.write(buf[0:int(h['content-length'])])
+                sys.exit(0)
+        #
+        m = re.search('\\A(.+): (.+)\\Z',l)
+        if m:
+                h[m.group(1).lower()] = m.group(2).lower();
+</pre>
+
 ==== u-blox Assist Now account application ====
 
 And account application is send a mail to agps-account@u-blox.com
