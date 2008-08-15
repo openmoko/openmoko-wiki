@@ -58,6 +58,51 @@ If you are having GPS problems with your Freerunner, please document them on the
 
 In Openmoko projects, there is a GPS test program called '''agpsui''' that provides graphical and text dump of GPS information. See [[Howto Test Your GPS with agpsui]]. The project is called [http://svn.projects.openmoko.org/svnroot/openmoko-agpsui Openmoko AGPS UI project].
 
+== Using GPS ==
+
+Aside from accessing the GPS data in applications programs running directly on the smartphone,
+you can also access the GPS data stream from another gadget such as a laptop.
+
+Here are a couple ways to do that. You can use a network connection to pull data from the gpsd daemon, or you can make the smartphone appear to be a generic Bluetooth-connected GPS receiver.
+
+Using gpsd requires a program that understands its protocol, such as GPSdrive.
+Using Bluetooth would allow using just about any program that understands the NMEA protocol.
+ 
+=== Using gpsd with a network connection ===
+
+This procedure depends upon being able to set up a network connection between your Neo and your laptop. The connection can be over either WiFi or USB cable.
+
+First be sure you have gllin (on Neo 1973) and gpsd installed. Some Neo Freerunner images don't have gpsd, they use a different GPS stack called gypsy. 
+
+# On host type: '''nc -vvn -l -p 5000 > /tmp/nmeaNP''' (Host starts listening on port 5000 for GPS-signals and sends them to /tmp/nmeaNP)
+# On the Neo type:   '''nc 192.168.0.200 5000 < /dev/ttySAC1''' (Signals from device will be send to port 5000 on host.) If your host is connected to the neo via wifi, change the IP address in the command to the one of the host. 
+# On the host PC install GPSD, your GPS is attached as /tmp/nmeaNP 
+# start gpsd on host with: '''gpsd -p /tmp/nmeaNP'''
+# run your application! I used gpsdrive and it works better than my stand-alone GPS. 
+
+Tested with RoadNav. Works great!
+
+If you have an unlimited [[GPRS]] data package you could make your gpsd service accessible over the Internet. This opens up many possibilities. For example, you could implemented AVL (Automatic Vehicle Location) by having a web server somewhere query your gpsd server for your position and write it to a KML file which would then display your location on a Google map.
+
+=== Bluetooth GPS relay ===
+
+Here is how to make your smartphone appear to be a Bluetooth GPS.
+
+==== GTA01 ====
+
+#Power up the bluetooth radio
+#Run the gllin script
+#Run '''sdptool add SP'''
+#Run '''rfcomm watch 0 1 sh -c "cat /tmp/nmeaNP >/dev/rfcomm0" &'''
+
+==== GTA02 ====
+
+#Power up the bluetooth radio
+#Ensure [http://wiki.openmoko.org/wiki/Gpsd#GPS_on_GTA02 gpsd] is running and the gps-utils package is installed
+#Run '''sdptool add SP'''
+#Run '''rfcomm -r watch 0 1 sh -c "gpspipe -r >/dev/rfcomm0" &'''
+
+
 == Possible GPS applications ==
 
 As people develop more sophisticated GPS applications, please note them here.
@@ -65,11 +110,15 @@ As people develop more sophisticated GPS applications, please note them here.
 === Use cases ===
 
 * I want to look at maps. 
-* I want to go somewhere, tell me how to get there. Routing.
+* I want to be able to prepare data and load my own maps.
+* I want to load map data in a WKB (well known binary) format such as shapefiles.
+* I want to go somewhere; please tell me how to get there. Routing.
 * I want to help with the [[Openstreetmap]] project by collecting data.
 * I want to use [[Openstreetmap]] data in a map viewer.
 * I want to use the smartphone GPS to go [[Geocaching]]
 * I want the GPS to update profile settings based on my location. Example, mute the phone ringer when I am at work.
+* I want to log GPS data for later analysis.
+* I want to collect GPS data for scientific field work (forestry, biology, etc)
 
 See [http://lists.openmoko.org/pipermail/community/2007-July/007252.html for another collection of ideas.
 
@@ -90,38 +139,6 @@ See [http://lists.openmoko.org/pipermail/community/2007-July/007252.html for ano
 * [[QMapControl]] Qtopia based mapping widget. Displays maps and custom data, also other widgets can be bound to coordinates. GPS parser for the gllin output included.
 [http://projects.openmoko.org/projects/openvario/ here].
 * [http://www.tangogps.org TangoGPS] mapping program. Downloads maps on demand and caches them, very efficient. '''Works very well.'''
-
-== Using the Neo's GPS on a Laptop ==
-
-This procedure depends upon being able to set up a network connection between your Neo and your laptop. The connection can be over either WiFi or USB cable.
-
-First be sure you have gllin (on Neo 1973) and gpsd installed. Some Neo Freerunner images don't have gpsd, they use a different GPS stack called gypsy. 
-
-# On host type: '''nc -vvn -l -p 5000 > /tmp/nmeaNP''' (Host starts listening on port 5000 for GPS-signals and sends them to /tmp/nmeaNP)
-# On the Neo type:   '''nc 192.168.0.200 5000 < /dev/ttySAC1''' (Signals from device will be send to port 5000 on host.) If your host is connected to the neo via wifi, change the IP address in the command to the one of the host. 
-# On the host PC install GPSD, your GPS is attached as /tmp/nmeaNP 
-# start gpsd on host with: '''gpsd -p /tmp/nmeaNP'''
-# run your application! I used gpsdrive and it works better than my stand-alone GPS. 
-
-Tested with RoadNav. Works great!
-
-If you have an unlimited [[GPRS]] data package you could make your gpsd service accessible over the Internet. This opens up many possibilities. For example, you could implemented AVL (Automatic Vehicle Location) by having a web server somewhere query your gpsd server for your position and write it to a KML file which would then display your location on a Google map.
-
-== Bluetooth GPS relay ==
-
-To make your Neo appear like a regular Bluetooth GPS:
-
-=== GTA01 ===
-*Power up the bluetooth radio
-*Run the gllin script
-*run '''sdptool add SP'''
-*run '''rfcomm watch 0 1 sh -c "cat /tmp/nmeaNP >/dev/rfcomm0" &'''
-
-=== GTA02 ===
-*Power up the bluetooth radio
-*Ensure [http://wiki.openmoko.org/wiki/Gpsd#GPS_on_GTA02 gpsd] is running and the gps-utils package is installed
-*run '''sdptool add SP'''
-*run '''rfcomm -r watch 0 1 sh -c "gpspipe -r >/dev/rfcomm0" &'''
 
 [[Category:GPS]]
 [[category:Documentation]]
