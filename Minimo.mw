@@ -6,7 +6,41 @@
 
 = Installing Minimo web browser =
 
-[http://www.mozilla.org/projects/minimo/develop.html Minimo] is a Mozilla based web browser. It features full [http://en.wikipedia.org/wiki/Ajax_%28programming%29 AJAX] support and other goodies. Currently stock Openmoko build doesn't include Minimo. Here are instructions on how to run minimo in Xephyr PC environment and how to use other third party packages too. 
+[http://www.mozilla.org/projects/minimo/develop.html Minimo] is a Mozilla based web browser. It features full [http://en.wikipedia.org/wiki/Ajax_%28programming%29 AJAX] support and other goodies. Currently stock Openmoko build doesn't include Minimo. 
+
+== Running on Om2008.8 ==
+
+From the Neo, download the minimo package:
+
+  wget http://www.ginguppin.de/files/minimo.tar.bz2
+
+Then install it:
+
+  opkg install /tmp/minimo_0.02\+cvs20070626-r0_armv4t.ipk
+
+If you get the following error:
+
+  * ERROR: Cannot satisfy the following dependencies for minimo:
+        *  libfreetype6 (>= 2.3.6) *
+
+First try:
+
+  opkg install libfreetype6
+
+If this does not install a libfreetype6 version > 2.3.6, you can download a newer libfreetype6 from the Angstrom repository at this location: http://www.angstrom-distribution.org/repo/?action=details&pnm=libfreetype6
+
+Ex:
+
+  wget http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libfreetype6_2.3.6-r0_armv4t.ipk
+  opkg install minimo_0.02\+cvs20070626-r0_armv4t.ipk
+
+Using Minimo with the stock Om2008.8 gets annoying because the keyboard always takes up half the screen.  I recommend reactivating the [[Keyboard_Toggle#Reactivating_the_keyboard_toggle_under_Om2008.8|Keyboard Toggle]] so that you can hide the keyboard while browsing.
+
+
+
+== Running in Xephyr PC environment ==
+
+Here are instructions on how to run minimo in Xephyr PC environment and how to use other third party packages too. 
 
 * [http://bec-systems.com/web/content/view/79/9/ Instructions for including new OpenEmbedded packages to your project]
 
@@ -14,7 +48,7 @@ These instructions should be updated to use a custom image rather than DISTRO_EX
 
 Alternatively, a binary ipkg was posted here[[http://www.ginguppin.de/files/minimo.tar.bz2]]
 
-== Setup build environment ==
+=== Setup build environment ===
 
 If you have built your Openmoko using MokoMakefile some of these steps might not be familiar to you.
 
@@ -53,7 +87,7 @@ Now, you should be able to rebuild root fs using MokoMakefile.
 make openmoko-devel-image
 </pre>
 
-== Tips ==
+=== Tips ===
 
 The default Openmoko distribution lacks ''/etc/resolv.conf'' file which is used to configure system DNS look-up. Without this file, failing  domain name look-up prevents web browsing. The easiest way to fix is to copy the host system resolv.conf to the rootfs.
 
@@ -73,7 +107,7 @@ If build fails with
 sudo aptitude install libidl-dev
 </pre>
 
-== In chroot'ed environment ==
+=== In chroot'ed environment ===
 
 Following instructions in [[Getting Openmoko working on host with Xephyr]] to get yourself chroot'ed into OpenMoko environment. 
 
