@@ -152,14 +152,16 @@ See [[Neo1973_and_Windows#USB_Ethernet_emulation|Windows USB Ethernet emulation 
 Edit /etc/network/interfaces and add:
 
 <pre>
- allow-hotplug usb0
+ auto usb0
  iface usb0 inet static
         address 192.168.0.200
-        netmask 255.255.255.192
-        post-up iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.192/26
-        post-up echo 1 > /proc/sys/net/ipv4/ip_forward
-        post-up iptables -P FORWARD ACCEPT
-        pre-down iptables -D POSTROUTING -t nat -j MASQUERADE -s 192.168.0.192/26
+        netmask 255.255.255.0
+        network 192.168.0.0
+        up iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24 &
+        up echo 1 > /proc/sys/net/ipv4/ip_forward &
+        up iptables -P FORWARD ACCEPT &
+        down iptables -D POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24 &
+
 </pre>
 
 This is more sophisticated than the manual setup.  The allow-hotplug stanza ties into Linux hotplug system so that when the device appears and vanishes, as happens when the FreeRunner's is connected via USB, this is run.  
