@@ -1,0 +1,88 @@
+This gives you an overview of all different stages the hardware team needed, before the [[Neo FreeRunner]] was born. The internal codename of the [[Neo FreeRunner]] was GTA02.
+
+== GTA02v1 ==
+First generation of prototypes that was given to internal Openmoko software developers. Total 30 pcs fabricated.
+
+*It is working just fine, but still based on 2440, with external NAND/SDRAM and no NOR flash
+*Using the PCF50633 05 N3 due to 04 N3 not available, re-work power for basic schematics verification
+*Using GTA01 SIM socket
+*Add external debug port
+*Still using Global locate A-GPS
+* ATAG_REVISION: 0310
+
+== GTA02v2 ==
+Second generation of prototypes, Total 50 pcs run at Taipei SMT factory MOUNT
+
+*Ideal is have 256 MB NAND on Samsung package, Due to chip availability Start using S3C2442 B43
+*Using correct PMU PCF50633 04 N3
+*Change new SIM socket
+*Change to u-blox A-GPS
+*Change LCM power from 3.3v to 1.8v
+*USB power switch layout/pin assignment mistake, could not verify USB host supply 5v function
+*GPS function verified ok with good sensitivity
+* ATAG_REVISION: 0320
+
+== GTA02v3 ==
+Production verification version, 2007/10/11 28 pcs fabricate at FIC SuZhou
+
+*Still using S3C2442 B43 for hardware verification
+*Using control pilot run to verify S3C2442 B54 chips<br>
+* ATAG_REVISION: 0330
+
+== GTA02v4 ==
+Mass production release candidate version 1
+
+2 weeks after v3 gerber out, release the v4 gerber, and 2007/10/20 20 pcs fabricate at FIC SuZhou 
+
+*Change LCM power from 1.8v to 3.3v for display stability issue
+*fabricate another 200 pcs for yield rate/production verification
+*fabricate 50 pcs with S3C2442 B43 (128 MB NAND) for quality comparsion
+*USB host power chip have some output voltage stability issues with Vb/Vcc comes from different power source, need layout change to fix the issue
+*Battery Coulomb design not working on A4
+* ATAG_REVISION: 0340
+
+== GTA02v5 ==
+Mass production candidate version 2/Mass production version
+
+* First batch fabricate 2008/1/14 at FIC SuZhou
+* Mass production A5 trial run start from 2008 March, including some resistor/capacitor change compare with inital 100 pcs prototypes A5, and prototypes for GTA02 developers was tracked in the [[Prototypes| Prototypes Page]]
+* Coulomb counter issue fixed
+* USB host power switch fixed
+* Need add capacitor for PMU Vbat input for stability issue, this could be done by direct SMT or hand rework
+* Need rework (still using SMT in production) add capacitor for PMU Vbat input for PMU stability issue.
+* Need manual rework GSM IR UART path a 100k pull down for better GSM deep sleep
+* ATAG_REVISION: 0350
+
+===GTA02 mass Production version change list===
+*PMU's LED power error: PMU potential damage issue
+*NOR FLASH enable WP: User can write data into NOR FLASH.
+*CE CS/RS fine tune: Audio's background noise too high
+*I2C pull high resistor: The resistor is too high and signal is distorted 
+*GSM leakage current: TX_MODEM has a pull high resistor on IO_3V3
+*Power consumption: Disable keep active function
+*SDIO clock and esd protect resistor
+*Refer to Datasheet: R1526 to 33K
+*GSM modem on pin: The R1018 is too small and has some leakage current
+*LED driving transistor: When GPIO is on, the transistor will be draw more current on LED. This is component change fix, do not need change PCB or re-work.
+
+== GTA02v6 ==
+Mass production candidate version 3/Mass production version<br>
+
+A6 will be fine tune version of A5, only minor schematic change for better product quality and version control. Capacitor and resistor change A6 also on mass production A5<br>
+
+*First 100 pcs start from 2008 mid April, and factory make component placement mistake on GSM, second 100 pcs PCB arrive time TBD. 
+*Add capacitor space for Vbat, reduce the SMT effort
+*Add GSM IR resistor for better GSM deep sleep
+*Reserve 3 GPIO for hardware version control
+*Fixed LEDs power usage (from about 150mW of v5 to about 25mW)
+* ATAG_REVISION: 0360
+
+=== GTA02 A5 to A6 changes ===
+*Power Glitch on VB_SYS: Add capacitor on layout, Mass production A5 also apply this change.
+*G-sensor separate these interrupt pins: At A5, each accelerometer INT1/INT2 connected to same line, at A6 only INT1 was connected.
+*GSM_modem power source  Reduce power's ripple when the phone is talking
+*Keep active 	Disable keep active function, just fine tune
+*GPIO for version control	
+*GSM RX_IR has some noise  Add resistor and reduce GSM RX_IR noise and gsm can't enter suspend mode easily, apply on mass production A5.
+*LED driving transistor	apply on mass production A5.
+*LCM's VDDIO	We can totally power off LCM's power, save about extra 1mA.
