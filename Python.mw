@@ -8,7 +8,10 @@ Source packages for Python contained in [[OpenEmbedded]] include:
 Binary packages for Python are not officially built yet but at least ScaredyCat's [[repositories]] provide them: 
  python-core python-misc python-lang python-subprocess python-threading etc.
 
-Graphical applications need the following binary packages too: 
+ETK/EFL applications need the following binary packages too: 
+ python-etk python-efl
+
+GTK applications need the following binary packages too: 
  python-pygtk python-pycairo python-pygobject
 
 {{note|These packages take up a considerable amount of space (several megabytes). Make sure that you have enough free space or install the packages to the media card as explained in [[package management]].}}
@@ -24,6 +27,29 @@ is at [http://bugs.openembedded.org/show_bug.cgi?id=3028 OpenEmbedded bug #3028]
 * [[Wishlist:BuiltInScriptingLanguage]]
 * [[Pexpect]] a pure Python module for spawning child applications
 == Simple Example Scripts ==
+=== Minimal ETK gui ===
+ import etk
+ 
+ #create a button (not yet on any window)
+ b = etk.Button(label="Hello")
+ 
+ #create a (nonvisible) window and put the button on the window
+ w = etk.Window(title="Hello", child=b)
+ 
+ #create a silly callback function
+ def hello(target):
+     print 'Hello World'
+     etk.main_quit()
+ 
+ #make the button call the callback when pressed
+ b.on_clicked(hello)
+ 
+ #make the window display
+ w.show_all()
+ 
+ #start processing screen events
+ etk.main()
+
 === Minimal GTK gui ===
  import gtk
  
@@ -38,8 +64,8 @@ is at [http://bugs.openembedded.org/show_bug.cgi?id=3028 OpenEmbedded bug #3028]
  
  #create a silly callback function
  def hello(target):
-   print 'Hello world'
-   exit()
+     print 'Hello world'
+     exit()
  
  #make the button call the callback when pressed
  b.connect('clicked', hello)
