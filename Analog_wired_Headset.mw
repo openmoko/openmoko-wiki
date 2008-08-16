@@ -1,86 +1,10 @@
+
 There's a four-ring 2.5mm stereo jack which provides connectivity to old-fashioned wired headsets.
 
 The headsets used by Motorola smartphones (A780,A1200, ...) and the V-360 have a compatible configuration.
 
-The headsets used by some Nokia phones (N95, ...) have the same jack but they are incompatible. For technical information about rewiring them visit [[Analog wired Headset Nokia]]
-
-The same is true for Headsets delivered with Sony Ericsson. Here is a short rewiring guide: [[Analog wired Headset Sony Ericsson]].
-
-The headsets (4-Pole) used by Sanyo phones (MVP ESPN,SCP 8400,SCP 2400,SCP 3100,MM-7500 ...) have a matching 2.5mm jack and compatible configuration. 
-
-
-== Neo FreeRunner ==
 ring<br>
 1(base): GND<br>
-2: left out<br>
-3: right out<br>
+2: right out<br>
+3: left out<br>
 4(tip): mic + HOLD-button(press:short to GND)
-
-== Neo 1973 ==
-
-Pinout: [http://lists.openmoko.org/pipermail/community/2008-March/013792.html]
-
-<pre><nowiki>
-base = ground 
-speaker left  (internal impedance 33R) to ground. (+jackinsert detection)
-speaker right (internal impedance 33R) to ground.
-tip = mic electret condenser type, to ground. 
-      bias (power for mic) 2K2 from +3.3v(wolfson codec) 
-      (+HoldButton shortcircuit to ground)
-</nowiki></pre>
-
-[[Image:AudioConnector.jpeg]]
-(a handmade drawing based on above description)
-
-== Software support ==
-
-Dylan proposed a [http://lists.openmoko.org/pipermail/community/2008-September/029599.html proof of concept scripts] to fix something about the headset insertion/removal being incorrectly acted upon.
-
-== Related alsa controls ==
-
-Controls affecting bluetooth mic volume for GSM:
-* Control 13: "Mono Voice Playback Volume"
-* Control 5: "Mono Playback Volume"
-
-Controls affecting handset earpiece volume for GSM:
-* Control 6: "Bypass Playback Volume"
-* Control 4: "Speaker Playback Volume"
-
-Controls affecting wired headset earpiece volume for GSM:
-* Control 6: "Bypass Playback Volume"
-* Control 3: "Headphone Playback Volume"
-
-Controls affecting handset mic volume for GSM:
-* Control 48: "Mic2 Capture Volume"
-* Control 12: "Mono Sidetone Playback Volume"
-* Control 5: "Mono Playback Volume"
-
-Controls affecting wired headset mic volume for GSM:
-* Control 49: "Mic1 Capture Volume"
-* Control 12: "Mono Sidetone Playback Volume"
-* Control 5: "Mono Playback Volume"
-
-== Python mixer to control mic volumes ==
-
-Posted on the Community list Sep 17, 2008; 08:45pm
-
-Angus has written a python mixer to control the mic volumes for the various headsets: "The speaker volumes will be added when I trace their path through the wolfson. It'll currently control handset, wired headset and bluetooth volumes. You currently need to tell it which to control as I have not found any dbus signals to tell what alsa state you are currently in. The displayed volumes may be wrong if you start the volume control before the alsa state change. One you use a control to set its volume it will reflect the state of the underlying hardware."
-
-You'll need these 3 files
-
- http://handheldshell.com/python-pyalsaaudio_0.3-ml0_armv4t.ipk
- http://handheldshell.com/pymixer.py
- http://handheldshell.com/volume.desktop
-
-install pyalsaausdio and pygtk
-
- copy pymxer /usr/bin
- copy volume.desktop /usr/share/applications
-
-You can now control mic volume.
-
-Angus Ainslie
-
-Note that this program assumes it can write new alsa scenarios to /usr which needs root access or permissions that allow this. For example in debian these files are not modifiable by normal users.
-
-[[Category:Headsets]]
