@@ -1,50 +1,33 @@
 {{Languages|Qtopia_on_FreeRunner}}
 
-Questa pagina fornisce le istruzioni per installare Qtopia (la versione standard, non le varianti della [[ASU]] o della [[QtopiaOnX11]]) sul telefono GTA02 (FreeRunner). È simile alla pagina [[Qtopia on Neo1973]].
+This page provides instructions on how to install Qtopia (proper, not the [[ASU]] or [[QtopiaOnX11]] efforts) on the GTA02 (Freerunner) phone.  It is similar to the [[Qtopia on Neo1973]] page.
 
 {|align=right
 |__TOC__
 |}
 
-== Stato attuale ==
-Il 31 ottobre 2008 Trolltech ha rilasciato l'ultima immagine di Qtextended per il Neo1973 e Neo FreeRunner contentente QtExtended 4.4.2 (versione GPL).
+== Current status ==
+On 08 August 2008, Qtopia released the [http://www.qtopia.net/modules/mydownloads/singlefile.php?lid=77 latest flash image for the FIC Neo Freerunner (gta02)] containing the Qtopia 4.3.2 snapshot (Version: 4.3.2-080808) of 08 August 2008 (GPL version). 
 
-Questa immagine può realmente fare e ricevere chiamate e messaggi di testo. Riesce a leggere tutti i contatti dalla scheda SIM (cosa che l'aggiornamento della 2007.2 sembra non sia in grado di fare). Contiene applicazioni che sembrano più stabili di quelle che si trovano sull'immagine della 2007.2. Fornisce diversi metodi per l'inserimento dei caratteri che sembrano più maturi. Non ha, però, né un browser Web, né alcuna applicazione per il GPS. Esistono comunque almeno due applicazioni sviluppata da terze parti:
-*[http://blog.wolfman.com/articles/2008/08/27/porting-xgps-to-qtopia-for-the-freerunner Qtgps]
-*[http://www.linux4.be/fr/roadmap.html RoadMap(sperimentale)]
+This image can successfully make and receive calls and text messages.  It can read all contacts from the SIM card (which the updated 2007.2 does not appear to be able to do).  It contains apps that appear to be more stable than the ones found in the 2007.2 image.  It has multiple input methods that appear to be more mature.  It does not, however, have a web browser or a GPS application.
 
-Il 16 ottobre 2008 Trolltech ha anche rilasciato Qtopia 4.3.3 che risolve alcuni problemi delle verione 4.3.2:
-*messaggi sms non ritrovati dopo il resume;
-*Qtopia confusa tra due chiamate;
-*abbassato il volume delle telefonate e alzato quello del microfono;
-*aggiunta soluzione anti-eco.
+You can find all the Qtopia images [http://www.qtopia.net/modules/mydownloads/viewcat.php?cid=6 here]
 
-Puoi trovare tutte le immagini di Qtopia/QtExtended [http://www.qtopia.net/modules/mydownloads/viewcat.php?cid=6 qui].
+== Option 1: Flashing Qtopia to FreeRunner ==
 
-=== Cosa c'è nell'ultimo rilascio QtExtended 4.4? ===
-L'ultima versione di Qtopia 4.4 è stata rilasciata con nome di [http://doc.trolltech.com/qtextended4.4/release-4-4-2.html QtExtended 4.4.2]. Un immagine per il FreeRunner è disponibile [http://qtextended.org/modules/mydownloads/visit.php?lid=98 qui]. L'immagine contiene:
-* un [http://n2.nabble.com/qtopia-update-tp832851p832888.html browser] webkit
-* [http://n2.nabble.com/-qtopia--rotate-screen--tp841805p841841.html rotazione dello schermo nelle impostazioni dell'applicazione] (quindi niente rotazione automatica)
-* [http://n2.nabble.com/Echo-issue-on-OM2008.08-potentially-solved-tp791642.html riduzione del rumore]
-* api GPS
-* gestione rete/archiviazione USB
-* supporto a Gtalk
-* [http://n2.nabble.com/forum/Permalink.jtp?root=841805&post=1083388&page=y supporto migliorato per l'input in lingue non anglosassoni]
-* cuffie correttamente funzionanti (niente più audio riprodotto dallo speaker esterno quando le cuffie sono inserite)
+Download the image mentioned above and follow the instructions here: [[Flashing the Neo FreeRunner]]
 
-Sono anche disponibili i sorgenti [http://qtextended.org/modules/mydownloads/visit.php?lid=97 qui].
+== Option 2: Dual-Booting between Qtopia and 2007.2 (Qtopia boots from MicroSD card) ==
 
-== Opzione 1: Flashare Qtopia sul FreeRunner ==
-Scarica l'immagine sopra indicata e segui queste istruzioni: [[Flashing the Neo FreeRunner]]
+Installation Requirements: 
 
-== Opzione 2: Dual-Boot tra Qtopia e la 2007.2 (Qtopia caricato dalla scheda MicroSD) ==
-Requisiti d'istallazione: 
+# SSH shell access to 2007.2 based image of the FreeRunner through USB interface or WLAN.
+# A Desktop Linux distro (to unpack the .jffs2 image, I ran Ubuntu under VMWare)
 
-# Accesso tramite shell SSH all'immagine 2007.2 del FreeRunner tramite interfaccia USB o WLAN.
-# Una distribuzione anche desktop Linux (per scompattare l'immagine .jffs2, è funzionato anche usando una Ubuntu  virtualizzata con VMWare)
 
-=== Preparare la scheda SD ===
-Controlla la [[Booting from SD#Prepare the SD card| Preparing the SD Card]] sezione della pagina [[Booting from SD]] per le istruzioni sul partizionamento e la formattazione. Dopo che avrai completato i passi per la "Formattazione della scheda SD", ritorna qui ed esegui i seguenti comandi:
+=== Preparing the SD card ===
+
+See the [[Booting from SD#Prepare the SD card| Preparing the SD Card]] section of the [[Booting from SD]] page for partitioning and formatting instructions.  After you complete the "Formatting the SD Card" steps, return here and execute the following:
 
   mount /dev/mmcblk0p1 /media/card
   mkdir /media/card/boot
@@ -52,98 +35,78 @@ Controlla la [[Booting from SD#Prepare the SD card| Preparing the SD Card]] sezi
   mkdir /media/mmcblk0p2
   mount /dev/mmcblk0p2 /media/mmcblk0p2
 
-Questi ti forniranno correttamente i requisiti per l'installazione del root filesystem e del kernel come di seguito indicato.
+This will set you up properly for the installation of the root filesystem and the kernel in the steps below.
 
-=== Istallare Qtopia ===
-==== Estrarre l'immagine del root filesystem di Qtopia ====
-Scarica l'immagine FLASH di Qtopia da [[Latest Images#Qtopia image from qtopia.net]] sul tuo computer Linux ed estrai il suo contenuto:
+=== Installing Qtopia ===
+
+==== Unpacking the Qtopia Root Filesystem Image ====
+
+Download the Qtopia FLASH image from [[Latest Images#Qtopia image from qtopia.net]] to your Linux box and extract its contents:
 
   tar xzf qtopia-4.3.2-gta02-flash-*.tgz
 
-Dovresti trovarti con due files: 
+You should now have two files: 
 #uImage-2.6.24+git18+9c058ff0d2641df3c36fc3300acb72078d2c41d4-r0-om-gta02.bin
 #qtopia-4.3.2-gta02-rootfs-07172049.jffs2  
-Ora estrai il root filesystem dal file jffs2 usando il comando che trovi [[Userspace root image#Mounting the JFFS2 image on a loop back device (Block Memory MTD Emulation) |qui]].
+Now extract the root file system from the jffs2 using the commands found [[Userspace root image#Mounting the JFFS2 image on a loop back device (Block Memory MTD Emulation) |here]].
 
-==== Creare un tarball compresso ====
-Ora archivia e comprimi il root filesystem:
+  
+Now, tar up the root filesystem:
 
-  # tar czf qtopia-4.3.2-gta02-rootfs-07172049.tar.gz <mountpoint> .
+  tar czf qtopia-4.3.2-gta02-rootfs-07172049.tar.gz -C <mountpoint> .
 
-Dove ''<mountpoint>'' è la directory dove il filesystem jffs2 è stato montato.
+Where ''<mountpoint>'' is the location where the jff2 filesystem was mounted.
 
-==== Installare il Filesystem Root ====
-Trasferisci il tarball compressed sulla seconda partizione della MicroSD che è montata sul FreeRunner:
+==== Installing Root Filesystem ====
+
+Transfer this compressed tarball to the second partition of the MicroSD that is mounted on the FreeRunner:
 
   scp qtopia-4.3.2-gta02-rootfs-07172049.tar.gz root@192.168.0.202:/media/mmcblk0p2/
 
-Loggati sul tuo FreeRunner e spacchetta il filesystem root:
+Log in to your FreeRunner and unpack the root filesystem:
 
   cd /media/mmcblk0p2
   tar xzf qtopia-4.3.2-gta02-rootfs-07172049.tar.gz
   rm qtopia-4.3.2-gta02-rootfs-07172049.tar.gz
   rm -f /media/mmcblk0p2/boot/*
 
-'''''Nota:''''' l'ultimo passaggio rimuove l'immagine del kernel dalla seconda partizione. Infatti U-Boot non può trovare il file uImage.bin nella prima partizione se un'immagine del kernel esiste nella directory boot/ sulla seconda partizione.
+'''''Note:''''' the last step removes the kernel image from the second partition.  For some reason, U-Boot cannot find the uImage.bin file in the first partition if a kernel image exists in the second partition boot/ directory.
 
-==== Installare il Kernel ====
-Dalla tua Linux box rinomina il file <tt>uImage-2.6.24+git18+9c058ff0d2641df3c36fc3300acb72078d2c41d4-r0-om-gta02.bin</tt> come <tt>uImage.bin</tt> e copialo nella directory di boot sulla prima partizione della MicroSD. Dipendendo dalla versione di U-Boot che hai installato, questo potrebbe non funzionare. Per supportare ogni possibile versione, mettine una copia anche nella directory <tt>/media/card</tt>. C'è abbastanza spazio nella prima partizione da permetterci di acere <tt>uImage.bin</tt> in entrambi i posti.
+==== Installing Kernel ====
+
+From your Linux box, rename uImage-2.6.24+git18+9c058ff0d2641df3c36fc3300acb72078d2c41d4-r0-om-gta02.bin to uImage.bin and copy it to the boot directory on the first partition of the MicroSD card.  Depending on the version of U-Boot you have installed, this may not work.  To prevent any possible issues, copy it to the /media/card directory as well. There is plenty of room on the first partition to have uImage.bin in both locations.
 
   mv uImage-2.6.24+git18+9c058ff0d2641df3c36fc3300acb72078d2c41d4-r0-om-gta02.bin uImage.bin
   scp uImage.bin root@192.168.0.202:/media/card/boot/
   scp uImage.bin root@192.168.0.202:/media/card/
 
-== Opzione 3: aggiornamento dai sorgenti ==
+=== Option 3: updating from source ===
 
-{{note|Questa procedura aggiornerà solo la cartella opt/Nokia/Qtopia, bisognerà usare opkg update/upgrade per il resto}}
-Le immagini originali di Qtopia (la distribuzione rilasciata da Trolltech, non 2008.8) sono rilasciate raramente come immagini rootfs, ma il codice sorgente è spesso aggiornato. Se vuoi fare il reflash con l'ultima versione di Qtopia dovrai compilarla dai sorgenti. Riassumendo:
+{{note|This will upgrade only opt/Qtopia directory, you should use opkg update/upgrade for the rest}}
+Original Qtopia images (the distribution released by Trolltech, not ASU) are rarely released as a rootfs image, but the source code is often updated. If you want to reflash your OM with the latest version of Qtopia you might build it from sources. This has been explained in [http://lists.openmoko.org/pipermail/community/2008-August/024785.html this thread] of the community mailing list. Summing up:
 
-* procurati l'ultima toolchain rilasciata da trolltech [http://www.qtopia.net/modules/mydownloads/singlefile.php?lid=38 qui] ed estraila sul tuo pc (come root)
+* get the latest toolchain released by trolltech: http://www.qtopia.net/modules/mydownloads/singlefile.php?lid=38 and unzip it on your PC (as root)
   cd /
   wget http://qtopia.net/downloads/neo/arm920t-eabi-ficgta01-toolchain.tgz
-  tar -xvzf arm920t-eabi-ficgta01-toolchain.tgz
-* procurati l'ultimo snapshot da trolltech: [ftp://ftp.trolltech.com/qtopia/snapshots/ qui]
-* una volta scaricato estrai il contenuto
-   tar xvzf qtopia-opensource-src-4.3.2-snapshot-20080911.tar.gz
-* imposta la variabile QTOPIA_DEPOT_PATH alla cartella in cui si trovano i sorgenti
-   export QTOPIA_DEPOT_PATH=PERCORSODELLACARTELLA/qtopia-opensource-src-4.3.2-snapshot-20080911
-* crea una cartella di build
+  tar xvzf arm920t-eabi-ficgta01-toolchain.tgz
+* get the latest snapshot from trolltech: ftp://ftp.trolltech.com/qtopia/snapshots/
+*  once dowloaded untar it
+   tar xvzf qtopia-opensource-src-4.3.2-snapshot-20080806.tar.gz
+* make a "build" dir 
    mkdir build
-* imposta la variabile QPEDIR al percorso della cartella build
-   export QPEDIR=PERCORSODELLACARTELLA/build
-* configure e make:
-   cd $QPEDIR
-   $QTOPIA_DEPOT_PATH/configure -device ficgta01
-   make 
-* per Qtextended:
    cd build
-   $QTOPIA_DEPOT_PATH/configure -device neo -verbose -build-qt -force-build-qt
-   bin/qbuild image 
-
-Questi passaggi richiederanno parecchio tempo (un paio d'ore). 
-
-{{note|Per Qtopia nota che l'opzione "-device ficgta01" dovrebbe funzionare sia per il Neo1973 che per il NeoFreerunner.}} 
-
-Quindi:
+* configure and make:
+   ../qtopia-opensource-src-4.3.2-snapshot-20080806/configure -device ficgta01
+   make 
+This will take some time (couple hours). Note that the option "-device ficgta01" should work for both neo and freerunner. Then:
 
   make install
 
-Questo creerà una cartella root dentro $QPEDIR.
+will make a root directory into build directory. That directory should be copied to /opt/Qtopia of your phone with scp. once done restart qpe or whole phone.
 
-Lo script seguente trovato [http://blog.wolfman.com/articles/2008/08/27/porting-xgps-to-qtopia-for-the-freerunner qui] dovrebbe copiare l'immagine così creata nella cartella corretta e automaticamente riavviare Qtopia.
-{{note|Questa procedura modificherà solo la cartella opt/Nokia/Qtopia, le impostazioni personali non dovrebbero essere modificate, né perse}}
+=== Booting into Qtopia ===
 
- #!/bin/sh
- QTOPIA_DIR=$QPEDIR/image
- QTOPIA_IMAGE=qtopia.tar.gz
- PHONEIP='''l'indirizzo IP del FreeRunner (generalmente 192.168.0.202)'''
- # sudo ifconfig usb0 '''l'indirizzo IP del FreeRunner (generalmente 192.168.0.202)'''
- 
- tar -C $QTOPIA_DIR czvf $QTOPIA_IMAGE
- cat $QTOPIA_IMAGE | ssh "root@$PHONEIP" '(set -x;rm -f /tmp/restart-qtopia;killall qpe; mkdir -p /opt/Nokia/Qtopia;rm -rf /opt/Nokia/Qtopia/*; cd /opt/Nokia/Qtopia;gunzip |tar xvf -;/etc/init.d/qpe start &)'
-
-== Lanciare Qtopia ==
-Ora spegni il FreeRunner
+Now shutdown the FreeRunner
 
   shutdown -h now
 
@@ -163,23 +126,11 @@ Qtopia should now boot.
 
 This will clean up the file system and clear recovery flags in ext3 that ext2 does not support, then try booting from the MicroSD again.
 
-== Internationalization ==
+=== Internationalization ===
 
 Qtopia comes with support for German and American English, and users from other countries will find that Qtopia's predictive keyboard makes writing in another language near impossible. One way to disable the predictive keyboard is to simply replace /opt/Qtopia/etc/dict/en_US/common.dawg and words.dawg with empty files (after backing them up). Qtopia normally looks in these files for words to suggest, and if it doesn't find any words that fit, it simply shows what you actually wrote.
 
 Adding characters to the keyboard requires modifications to the source code, as described [http://www.qtopia.net/modules/newbb_plus/viewtopic.php?topic_id=512&forum=16 here].
 
-== Sospensione/Resume ==	
-Sembra che la sospensione/resume funzioni solo quando il FreeRunner è stato collegato alla corrente (anche solo qualche secondo dovrebbe essere sufficiente). Se si fa boot dalla batteria, non andrà mai in sospensione finché non sarà stato collegato alla presa di corrente o al computer per qualche secondo..	
-	
-== Bugs ==
-	
-Vedi il [http://trolltech.org/developer/task-tracker/index_html?method=front tracker di Trolltech] ([http://trolltech.org/developer/task-tracker/index_html?method=advsearch&searchstr=&bugs=on&sugs=on&product=2&functionalarea=&versionfound=&versionfixed=&priority=-1&status=0&resolution=-1 Qtopia Tracker]).
-
-I bug reports dovrebbero essere inviati a qt-bugs@trolltech.com.
-	
-=== in 4.3.2 release ===
-* Le note vocali sembrano non funzionare, viene creato soltanto un file di 44 bytes, che non contiene alcuna voce.
-
-[[Category:Distributions/it]]
-[[Category:Qtopia/it]]
+[[Category:Distributions]]
+[[Category:Qtopia]]
