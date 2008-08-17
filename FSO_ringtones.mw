@@ -2,13 +2,15 @@
 
 The ringtone in milestone 2 is stored here:
 
-/usr/share/sounds/Arkanoid_PSID.sid
+ /usr/share/sounds/Arkanoid_PSID.sid
 
 Now to change it is a little bit of fun.
 
 first in
 
-/usr/lib/python2.5/site-packages/framework/subsystems/oeventd/receiver.py
+ /usr/lib/python2.5/site-packages/framework/subsystems/oeventd/receiver.py
+
+#this will be /var/lib/python-support/python2.5/framework/subsystems/oeventd/receiver.py if you are using FSO under Debian
 
 Change the line that reads:
 
@@ -29,9 +31,18 @@ filesrc.set_property( "location", "/usr/share/sounds/ringtone" )
 
 Then
 
-mv /usr/lib/python2.5/site-packages/framework/subsystems/oeventd/receiver.pyo /home/root
+ mv /usr/lib/python2.5/site-packages/framework/subsystems/oeventd/receiver.pyo /home/root 
+#receiver.pyo will be receiver.pyc in FSO under Debian
+ cd /usr/lib/python2.5/site-packages/framework/subsystems/oeventd/
+# or /var/lib/python-support/python2.5/framework/subsystems/oeventd as mentioned above
+ python
+  >>> import py_compile
+  >>> py_compile.compile("receiver.py")
+  >>> quit()
 
-then reboot the phone ( I'm sure there's a better way to regenerate receiver.pyo but I don't know it )
+ /etc/init.d/fso-frameworkd restart && /etc/init.d/zhone-session stop && sleep 2 && /etc/init.d/zhone-session start
+#I've only run the above restart commands in Debian so I'm not sure if they are the same in the default FSO image
+#the default zhone-session file doesn't have a working restart command, hence the stop->sleep 2->start
 
 Now you can link /usr/share/sounds/ringtone to any mp3 and that will be your ringtone
 
