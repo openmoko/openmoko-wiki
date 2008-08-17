@@ -9,6 +9,35 @@ As with the standard OpenMoko distribution, you can ssh into the device over USB
 The password is blank.  You should change it right away
  # passwd
 
+== wireless ==
+
+You can set up the wireless connection to your home router.
+Assuming your wireless router uses WPA security and DHCP:
+ # apt-get install wireless-tools wpasupplicant dhcp3-client
+
+Edit <code>/etc/network/interfaces</code> to include a section like this:
+<pre>
+auto eth0
+iface eth0 inet dhcp
+       wpa-driver wext
+       wpa-ssid "MyWirelessName"
+       wpa-psk "MyWirelessPassword"
+</pre>
+Where, of course, you're using the name of your wireless network and it's password
+instead of ''MyWirelessName'' and ''MyWirelessPassword''.
+
+You can test by running
+ # ifup eth0
+
+You can determine your IP address by running
+ # ifconfig eth0
+
+
+Issues:
+* only works if in presence of wireless network on boot, or when manually running <code>ifup eth0</code>
+* does not reestablish connection when leaving wireless area and then returning
+* does not support multiple wireless networks or open hotspots that you may travel between
+
 == Suspend ==
 To make suspend available you have to install apmd:
  apt-get install apmd
