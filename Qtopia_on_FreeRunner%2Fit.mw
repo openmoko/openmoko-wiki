@@ -1,0 +1,136 @@
+{{Languages|Qtopia_on_FreeRunner}}
+
+This page provides instructions on how to install Qtopia (proper, not the [[ASU]] or [[QtopiaOnX11]] efforts) on the GTA02 (Freerunner) phone.  It is similar to the [[Qtopia on Neo1973]] page.
+
+{|align=right
+|__TOC__
+|}
+
+== Current status ==
+On 08 August 2008, Qtopia released the [http://www.qtopia.net/modules/mydownloads/singlefile.php?lid=77 latest flash image for the FIC Neo Freerunner (gta02)] containing the Qtopia 4.3.2 snapshot (Version: 4.3.2-080808) of 08 August 2008 (GPL version). 
+
+This image can successfully make and receive calls and text messages.  It can read all contacts from the SIM card (which the updated 2007.2 does not appear to be able to do).  It contains apps that appear to be more stable than the ones found in the 2007.2 image.  It has multiple input methods that appear to be more mature.  It does not, however, have a web browser or a GPS application.
+
+You can find all the Qtopia images [http://www.qtopia.net/modules/mydownloads/viewcat.php?cid=6 here]
+
+== Option 1: Flashing Qtopia to FreeRunner ==
+
+Download the image mentioned above and follow the instructions here: [[Flashing the Neo FreeRunner]]
+
+== Option 2: Dual-Booting between Qtopia and 2007.2 (Qtopia boots from MicroSD card) ==
+
+Installation Requirements: 
+
+# SSH shell access to 2007.2 based image of the FreeRunner through USB interface or WLAN.
+# A Desktop Linux distro (to unpack the .jffs2 image, I ran Ubuntu under VMWare)
+
+
+=== Preparing the SD card ===
+
+See the [[Booting from SD#Prepare the SD card| Preparing the SD Card]] section of the [[Booting from SD]] page for partitioning and formatting instructions.  After you complete the "Formatting the SD Card" steps, return here and execute the following:
+
+  mount /dev/mmcblk0p1 /media/card
+  mkdir /media/card/boot
+
+  mkdir /media/mmcblk0p2
+  mount /dev/mmcblk0p2 /media/mmcblk0p2
+
+This will set you up properly for the installation of the root filesystem and the kernel in the steps below.
+
+=== Installing Qtopia ===
+
+==== Unpacking the Qtopia Root Filesystem Image ====
+
+Download the Qtopia FLASH image from [[Latest Images#Qtopia image from qtopia.net]] to your Linux box and extract its contents:
+
+  tar xzf qtopia-4.3.2-gta02-flash-*.tgz
+
+You should now have two files: 
+#uImage-2.6.24+git18+9c058ff0d2641df3c36fc3300acb72078d2c41d4-r0-om-gta02.bin
+#qtopia-4.3.2-gta02-rootfs-07172049.jffs2  
+Now extract the root file system from the jffs2 using the commands found [[Userspace root image#Mounting the JFFS2 image on a loop back device (Block Memory MTD Emulation) |here]].
+
+  
+Now, tar up the root filesystem:
+
+  tar czf qtopia-4.3.2-gta02-rootfs-07172049.tar.gz -C <mountpoint> .
+
+Where ''<mountpoint>'' is the location where the jff2 filesystem was mounted.
+
+==== Installing Root Filesystem ====
+
+Transfer this compressed tarball to the second partition of the MicroSD that is mounted on the FreeRunner:
+
+  scp qtopia-4.3.2-gta02-rootfs-07172049.tar.gz root@192.168.0.202:/media/mmcblk0p2/
+
+Log in to your FreeRunner and unpack the root filesystem:
+
+  cd /media/mmcblk0p2
+  tar xzf qtopia-4.3.2-gta02-rootfs-07172049.tar.gz
+  rm qtopia-4.3.2-gta02-rootfs-07172049.tar.gz
+  rm -f /media/mmcblk0p2/boot/*
+
+'''''Note:''''' the last step removes the kernel image from the second partition.  For some reason, U-Boot cannot find the uImage.bin file in the first partition if a kernel image exists in the second partition boot/ directory.
+
+==== Installing Kernel ====
+
+From your Linux box, rename uImage-2.6.24+git18+9c058ff0d2641df3c36fc3300acb72078d2c41d4-r0-om-gta02.bin to uImage.bin and copy it to the boot directory on the first partition of the MicroSD card.  Depending on the version of U-Boot you have installed, this may not work.  To prevent any possible issues, copy it to the /media/card directory as well. There is plenty of room on the first partition to have uImage.bin in both locations.
+
+  mv uImage-2.6.24+git18+9c058ff0d2641df3c36fc3300acb72078d2c41d4-r0-om-gta02.bin uImage.bin
+  scp uImage.bin root@192.168.0.202:/media/card/boot/
+  scp uImage.bin root@192.168.0.202:/media/card/
+
+=== Option 3: updating from source ===
+
+{{note|This will upgrade only opt/Qtopia directory, you should use opkg update/upgrade for the rest}}
+Original Qtopia images (the distribution released by Trolltech, not ASU) are rarely released as a rootfs image, but the source code is often updated. If you want to reflash your OM with the latest version of Qtopia you might build it from sources. This has been explained in [http://lists.openmoko.org/pipermail/community/2008-August/024785.html this thread] of the community mailing list. Summing up:
+
+* get the latest toolchain released by trolltech: http://www.qtopia.net/modules/mydownloads/singlefile.php?lid=38 and unzip it on your PC (as root)
+  cd /
+  wget http://qtopia.net/downloads/neo/arm920t-eabi-ficgta01-toolchain.tgz
+  tar xvzf arm920t-eabi-ficgta01-toolchain.tgz
+* get the latest snapshot from trolltech: ftp://ftp.trolltech.com/qtopia/snapshots/
+*  once dowloaded untar it
+   tar xvzf qtopia-opensource-src-4.3.2-snapshot-20080806.tar.gz
+* make a "build" dir 
+   mkdir build
+   cd build
+* configure and make:
+   ../qtopia-opensource-src-4.3.2-snapshot-20080806/configure -device ficgta01
+   make 
+This will take some time (couple hours). Note that the option "-device ficgta01" should work for both neo and freerunner. Then:
+
+  make install
+
+will make a root directory into build directory. That directory should be copied to /opt/Qtopia of your phone with scp. once done restart qpe or whole phone.
+
+=== Booting into Qtopia ===
+
+Now shutdown the FreeRunner
+
+  shutdown -h now
+
+Log into U-Boot in the NOR Flash to boot from the MicroSD card: (instructions from [[Booting the Neo FreeRunner]])
+
+* Press and hold Power button
+* Then while still pressing the Power button, press and hold AUX button for 5 to 8 seconds. 
+* A boot menu will appear. 
+* Press the AUX button to select "[[Boot from sd card|Boot from MicroSD]]" and then press the Power button to execute.
+
+Qtopia should now boot.
+
+'''''Note:''''' you may get a kernel panic which says that "optional features not supported".  If this is the case, boot back into 2007.2 and run
+
+  umount /dev/mmcblk0p2
+  fsck.ext3.e2fsprogs /dev/mmcblk0p2
+
+This will clean up the file system and clear recovery flags in ext3 that ext2 does not support, then try booting from the MicroSD again.
+
+=== Internationalization ===
+
+Qtopia comes with support for German and American English, and users from other countries will find that Qtopia's predictive keyboard makes writing in another language near impossible. One way to disable the predictive keyboard is to simply replace /opt/Qtopia/etc/dict/en_US/common.dawg and words.dawg with empty files (after backing them up). Qtopia normally looks in these files for words to suggest, and if it doesn't find any words that fit, it simply shows what you actually wrote.
+
+Adding characters to the keyboard requires modifications to the source code, as described [http://www.qtopia.net/modules/newbb_plus/viewtopic.php?topic_id=512&forum=16 here].
+
+[[Category:Distributions]]
+[[Category:Qtopia]]
