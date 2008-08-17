@@ -78,3 +78,24 @@ Issues:
 Tangogps is a very nice GPS mapping application.  The latest version is available in Debian.
 
 Unfortunately it depends on gpsd which conflicts with frameworkd in fso-frameworkd.
+
+ # apt-get install gpsd
+  
+Edit <code>/etc/frameworkd.conf</code>.  In the section <code>[ogpsd]<code>, edit to read:
+<pre>
+# path = /dev/ttySAC1
+path = /dev/null
+</pre>
+
+ # gpsd-reconfigure gpsd
+
+* Start gpsd automatically no boot? Yes.
+* Device the GPS receiver is attached to: /dev/ttySAC1
+* Should gpsd handle attached USB GPS receivers automatically? Yes
+** not certain what this answer should be
+* Options to gpsd: none
+
+Start tangogps like this:
+
+ # dbus-send --system --dest=org.freesmartphone.odeviced /org/freesmartphone/Device/PowerControl/GPS org.freesmartphone.Device.PowerControl.SetPower boolean:true
+ # DISPLAY=:0 tangogps
