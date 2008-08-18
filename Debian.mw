@@ -1,24 +1,36 @@
-== Installation ==
+= Installation =
 There are official instructions on how to install Debian on http://wiki.debian.org/DebianOnFreeRunner, and the [http://lists.linuxtogo.org/pipermail/smartphones-standards/2008-August/000232.html announcement].
 
 Previous, partly now outdated information on how to install Debian manually has been moved to [[Manual Debian]].
-== ssh ==
 
-As with the standard Openmoko distribution, you can ssh into the device over USB using
- $ ssh root@192.168.0.202
-The password is blank.  You should change it right away
- # passwd
+= System =
 
-For testing programs running on the Openmoko's display but invoked remotely, you need to specify the display.  E.g.
- # DISPLAY=:0 tangogps
+== Suspend ==
+To make suspend available you have to install apmd:
+ apt-get install apmd
+After that you can suspend your phone with:
+ apm -s
+and make it wake up again with pressing the power button.
 
-For debugging, you may want to have some programs run on the Openmoko but display on your remote display.  To do that, install:
- # apt-get install xauth
 
-And connect using:
- $ ssh -X root@192.168.0.202
+Issues:
+* [[User:Wuth|Wuth]] 06:28, 17 August 2008 (UTC): I found that apmd was already installed by using the official debian installation procedure, but that the kernel didn't support apm.  I haven't yet resolved this issue.
 
-== wifi ==
+== Time ==
+
+The default time zone is UTC.  Reconfigure it by running
+
+ # dpkg-reconfigure tzdata
+
+Set the clock manual using, e.g.
+
+ # date -s 00:33
+
+
+Issues:
+* That's probably not sufficient to keep the clock accurate.  It might be worth configuring some form of NTP.
+
+== WLAN ==
 
 You can set up the wireless connection to your home router.
 Assuming your wireless router uses WPA security and DHCP:
@@ -48,31 +60,7 @@ Issues:
 * does not reestablish connection when leaving wireless area and then returning
 * does not support multiple wireless networks or open hotspots that you may travel between
 
-== Suspend ==
-To make suspend available you have to install apmd:
- apt-get install apmd
-After that you can suspend your phone with:
- apm -s
-and make it wake up again with pressing the power button.
-
-
-Issues:
-* [[User:Wuth|Wuth]] 06:28, 17 August 2008 (UTC): I found that apmd was already installed by using the official debian installation procedure, but that the kernel didn't support apm.  I haven't yet resolved this issue.
-
-== Time ==
-
-The default time zone is UTC.  Reconfigure it by running
-
- # dpkg-reconfigure tzdata
-
-Set the clock manual using, e.g.
-
- # date -s 00:33
-
-
-Issues:
-* That's probably not sufficient to keep the clock accurate.  It might be worth configuring some form of NTP.
-
+= Software =
 == Tangogps ==
 
 Tangogps is a very nice GPS mapping application.  The latest version is available in Debian.
@@ -113,3 +101,16 @@ Turns the GPS on.
 *** gpsd or the framework could implement the other's interface (along with their own).
 *** the framework could have an option to read data from gpsd.
 *** tangogps could be extended to read data from the framework.
+
+= Miscellaneous =
+== Making the cursor invisible ==
+To make the cursor invisible create a file called empty.cursor with this content:
+ #define empty.cursor_width 16
+ #define empty.cursor_height 16
+ static unsigned char empty.cursor_bits[] = {
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+Now you can execute:
+ xsetroot -cursor empty.cursor empty.cursor
+and the cursor will be invisible. To make this permanent, execute this within xsession or kind of that. It must be executed with something after the Xserver has started.
