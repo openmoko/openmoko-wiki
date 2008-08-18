@@ -20,175 +20,108 @@ User experiences - drops onto concrete - ... [[Neo1973 Robustness]]
 * A Useful size comparison between the Neo1973, iPhone, Motorola A1200 and the SEM600i can be seen at [http://www.sizeasy.com/page/size_comparison/5512-Neo1973-vs-Apple-iPhone-vs-M600i-2-vs-A-1200 sizeasy]
 
 == Main components ==
-=== Processor ===
-The main Processor (CPU) of the Neo1973 is a Samsung S3C2410AL-26 (Capable of running up to 266 MHz)
 
-* Product Homepage: [http://www.samsung.com/global/business/semiconductor/productInfo.do?fmly_id=229&partnum=S3C2410 S3C2410.htm]
-* User Manual: [http://www.samsung.com/global/business/semiconductor/productRightMenuDown.do?doc_file=26537 2410UserManual.pdf]
-* Core: ARM920T
-* Instruction Set: ARMv4
-* BSDL File: [http://www.samsung.com/global/business/semiconductor/productRightMenuDown.do?doc_file=26554 S3C2410_BGA_BSDLJTAGFILE.bsd]
-* GPIO Assignments: https://svn.openmoko.org/trunk/doc/hardware/GTA01Bv4/gpio.txt
-
-=== Flash ===
-64MB Samsung NAND flash (K9F1208U0B) attached to S3C2410 NAND controller.
-
-* Product Homepage: [http://www.samsung.com/global/business/semiconductor/productInfo.do?fmly_id=158&partnum=K9F1208U0B]
-* Data Sheet: [http://www.samsung.com/global/system/business/semiconductor/product/2007/6/11/NANDFlash/SLC_SmallBlock/512Mbit/K9F1208U0B/ds_k9f1208x0b_rev03.pdf]
-* Connected to: S3C2410 NAND controller
-
-This is the only flash memory in the device.  The S3C2410 boots directly from nand, using the [[S3C2410 Steppingstone]].
-
-We only use free software, no proprietary flash file systems.  For a full description of how it is used, see [[NAND bad blocks]]
-
-=== RAM ===
-128MB SDRAM (2x Samsung K4M511633C) attached to S3C2410 SDRAM controller
-* Product Homepage: [http://www.samsung.com/global/business/semiconductor/productInfo.do?fmly_id=136&partnum=K4M511633C]
-* Data Sheet: [http://www.samsung.com/global/system/business/semiconductor/product/2007/6/11/MobileSDRAM/MobileSDRSDRAM/512Mbit/K4M511633C/ds_k4m511633c.pdf]
-* Connected to: S3C2410 
-
-=== GSM/GPRS ===
-The [[GSM]] (including GPRS) modem is Texas Instruments Calypso based.
-
-* Connected to: S3C2410 UART1 (full-uart, RxD, TxD, CTS, RTS), /dev/ttySAC0 in userspace
-* PM Driver: https://svn.openmoko.org/trunk/src/target/kernel/patches/gta01-power_control.patch
-* Accessible GSM/GPRS antenna jack (if battery cover is removed)
-
-==== CALYPSO digital baseband ====
-Unfortunately we cannot provide many details on the GSM chipset due to very tight NDAs.  However, this is not neccessarily required, since it interfaces using a standard UART serial line with the S3C2410.  On that interface, [http://www.3gpp.org/ftp/Specs/archive/07_series/07.05/ GSM 07.05], [http://www.3gpp.org/ftp/Specs/archive/07_series/07.10/ GSM 07.10] and other standardized protocols are used.
-
-==== TWL3014 analog baseband ====
-Product Homepage: [http://focus.ti.com/general/docs/wtbu/wtbuproductcontent.tsp?templateId=6123&navigationId=12295&contentId=4703 TWL3014]
-
-==== TRF6151 RF Transceiver ====
-Product Homepage: [http://focus.ti.com/general/docs/wtbu/wtbuproductcontent.tsp?templateId=6123&navigationId=12296&contentId=4701 TRF6151] <br>
-GPRS Class12/CS4 <br>
-
-=== [[Hardware:AGPS|AGPS]] ===
-Hammerhead PMB 2520 AGPS from Global Locate.
-
-* Product Homepage: [http://www.globalocate.com/SEMICONDUCTORS/SEMI_HAMMER_Frameset.htm Hammerhead]
-* Connected to: S3C2410 UART2 (full-uart, RxD, TxD, CTS, RTS) /dev/ttySAC1 in userspace
-* Driver: Implemented as a binary with NMEA output suitable for the gpsd daemon ([[gpsd]])
-* PM Driver: https://svn.openmoko.org/trunk/src/target/kernel/patches/gta01-power_control.patch
-* Externally-accessible GPS antenna connector of type MMCX
-
-A binary (closed source) driver is available - see [[gllin]]. 
-Efforts to reverse engineer the protocol are partially detailed in [[Hammerhead/Protocol]], these have stalled since the announcement that the Neo FreeRunner will use a different GPS.
-
-=== microSD-Card ===
-The Neo1973 has one microSD aka Transflash slot.
-It supports SDHC.  MicroSD slot is [[Disassembling_Neo1973#Opening_back_cover|under battery]].
-* Connected to: S3C2410 MMC/SD controller
-* Mounted to: /media/card
-* Driver: https://svn.openmoko.org/trunk/src/target/kernel/patches/s3c_mci.patch
-* [[Supported microSD cards]]
-* Specifications: [http://www.sdcard.org/confirm/confirm_memorycard.aspx SD Simplified Specification], [http://www.mmca.org/compliance/buy_spec/AN_MMCA050419.pdf MMC (partial)], [http://www.sandisk.com/Assets/File/OEM/Manuals/manual-rs-mmcv1.0.pdf MMC (product manual)]
-
-=== LCD Module (LCM) ===
-This is a 2.8" diagonal (1.7" x 2.27" - 43mm x 58mm) 480x640 toppoly (tpo) TD028TTEC1 module (283 DPI), using a Toshiba JBT6K74 TFT LCD Driver Chipset.
-* Homepage: [http://www.tpo.biz/ENG/business-eng/Activer-Matrix-VGA.htm Activer-Matrix-VGA.htm]
-* Driver: https://svn.openmoko.org/trunk/src/target/kernel/patches/gta01-jbt6k74.patch
-* Backlight Driver: https://svn.openmoko.org/trunk/src/target/kernel/patches/gta01-backlight.patch
-* Connected to: S3C2410 Display Controller and S3C2410 SPI Interface channel 1
-* Backlight controllable via /sys/class/backlight/gta01-bl
-
-==== Touch Screen ====
-* Connected to: S3C2410 TS controller
-* Driver: https://svn.openmoko.org/trunk/src/target/kernel/patches/s3c2410_touchscreen.patch
-
-==== Stylus ====
-
-Seemingly identical to [http://cgi.ebay.com/4in1-PDA-Stylus-LED-Light-Torch-Laser-Pointer-Pen-h7_W0QQitemZ280089656134QQihZ018QQcategoryZ48677QQrdZ1QQcmdZViewItem this one on ebay]
-
-=== Bluetooth ===
-Delta DFBM-CS320 Class2 Module, using CSR BlueCore4 (V2.0+EDR).
-
-* Data Sheet: [http://www.delta.com.tw/product/cp/vco/BT/download/pdf/CS/2.DFBM-CS320.pdf 2.DFBM-CS320.pdf]
-* CSR Data Sheet: [http://www.csrsupport.com/download/2302/CS-101564-DSP10%20BlueCore4-ROM%20Product%20Data%20Sheet.pdf CS-101564-DSP10 BlueCore4-ROM Product Data Sheet.pdf]
-* Driver: Stock Linux Kernel BlueZ
-* Connected to: S3C2410 USB Host controller (OHCI)
-* PM Driver: https://svn.openmoko.org/trunk/src/target/kernel/patches/gta01-power_control.patch
-
-=== Vibrator ===
+{|
+|-
+! style="width:250px" | Component 
+! Chip or Info
+|-
+| ''' Main Components '''
+|
+|- 
+| Processor
+| Samsung S3C2410
+|-
+| Flash
+| 
+|-
+| &nbsp;&nbsp; NAND Flash
+| 64MB into [[Samsung K9F1208U0B]]
+|-
+| &nbsp;&nbsp; SDRAM
+| 128MB from the 2 [[Samsung K4M511633C]]
+|-
+| [[GSM]]/[[GPRS]]
+| Texas Instruments Calypso based, probably [[TI Calypso D751992AZHH]]
+|-
+| [[GPS]]/[[AGPS]]
+| [[Hammerhead PMB 2520]].
+|-
+| microSD-Card
+| Supported trought the [[Samsung_S3C2410]]
+|-
+| LCD
+|
+|-
+| &nbsp;&nbsp; LCD Module (LCM)
+| [[TPO TD028TTEC1]] module 
+|-
+| style='vertical-align:top' | &nbsp;&nbsp;  Touch Screen
+| More info, see [[TPO TD028TTEC1]]
+|-
+| Stylus
+| Seemingly identical to [http://cgi.ebay.com/4in1-PDA-Stylus-LED-Light-Torch-Laser-Pointer-Pen-h7_W0QQitemZ280089656134QQihZ018QQcategoryZ48677QQrdZ1QQcmdZViewItem this one on ebay]
+|-
+| Bluetooth
+|
+|-
+| &nbsp;&nbsp; Bluetooth module
+| [[Delta DFBM-CS320 Class2 Module]]
+|-
+| Bluetooth Headset
+| This one is wired via PCM bus from the CSR Bluetooth chip to the Wolfson codec.
+|-
+| style='vertical-align:top' | Vibrator
+|
 * Driver: https://svn.openmoko.org/trunk/src/target/kernel/patches/gta01-vibrator.patch
 * Connected to: S3C2410 GPIO
 * Controllable via /sys/class/leds/gta01:vibrator
-
-=== USB Host ===
-The USB Host controller is inside the S3C2410
-* Driver: Stock Linux kernel ohci_hcd
-
-=== USB Device ===
-The USB Device controller is inside the S3C2410 
-* Driver: https://svn.openmoko.org/trunk/src/target/kernel/patches/s3c2410_udc.patch
-* Please see [[USB Product IDs]] on information about which Vendor/Product IDs we use
-* 1200mAh lithium battery charges when connected to powered host.
-* Mini-B connector [http://www.cypressindustries.com/enlarge.asp?Img=products/images/ccmusbb-32005-601.gif this one].
-* This can be used as a USB host: [[Neo1973_USB_host]]
-
-=== I2C Devices ===
-The I2C is a simple communication standard intended to move small amounts of data a few inches between chips.
+|-
+| USB Host 
+| inside the [[Samsung S3C2410]]
+|-
+| USB Device 
+| inside the [[Samsung S3C2410]]
+|-
+| style='vertical-align:top' | I2C Devices
+| The I2C is a simple communication standard intended to move small amounts of data a few inches between chips.
 Please see [[I2C | Neo I2C Devices]] for more information & a list of devices & the addresses currently in use & documented for the Neo1973.
+|-
+| Audio
+| See also: [[Neo1973 Audio Subsystem]]
+|-
+| &nbsp;&nbsp; Wolfson Codec 
+| [[WM8753]]
+|-
+| &nbsp;&nbsp; Stereo Amplifier 
+| [[LM4857]]
+|-
+| &nbsp;&nbsp; Analog wired Headset
+| [[Analog wired Headset]]
+|-
+| [[Neo_1973_GTA01_Power_Management|Power Management]]
+| [[Philips PCF50606]]
+|-
+| Battery 
+| [[Neo1973 Battery]]
+|-
+| style='vertical-align:top' | Buttons
+|
+* [[Neo1973 Power Button|The Power Button]]
+* [[Neo1973 AUX Button|The "Aux" button]]
+|-
+| Case
+| [[Neo1973 case schematics]]
+|}
 
-=== Audio ===
-See also: [[Neo1973 Audio Subsystem]]
+<!--
+Todo for [[User:dolfje]] (please do not remove): 
+* Add info of sdcard slot (=Transflash slot)
+* Add info of the vibrators to a new wikipage
+-->
 
-==== Wolfson Codec ====
-
-''Main article: [[WM8753]]''
-
-There's a [[WM8753]] Wolfson Microelectronics ''codec'' (This is not a "smart" codec that can interpret MP3/... it is a simple dumb "sound card".
-
-==== Stereo Amplifier ====
-There's a National Semiconductor [[LM4857]] Stereo Amplifier at the analog audio output of the WM8753
-
-* Product Homepage: [http://www.national.com/pf/LM/LM4857.html LM4857.html]
-* Data Sheet: [http://www.national.com/ds.cgi/LM/LM4857.pdf LM4857.pdf]
-* Connects to: S3C2410 I2C (Control)
-
-==== Analog wired Headset ====
-There's a four-ring 2.5mm stereo jack which provides connectivity to old-fashioned wired headsets.
-
-The headsets used by Motorola smartphones (A780,A1200, ...) and the V-360 have a compatible configuration.
-
-Pinout: [http://lists.openmoko.org/pipermail/community/2008-March/013791.html]
-
-<pre><nowiki>
-base = ground 
-speaker left  (internal impedance 33R) to ground. (+jackinsert detection)
-speaker right (internal impedance 33R) to ground.
-tip = mic electret condenser type, to ground. 
-      bias (power for mic) 2K2 from +3.3v(wolfson codec) 
-      (+HoldButton shortcircuit to ground)
-</nowiki></pre>
-
-==== Bluetooth Headset ====
-This one is wired via PCM bus from the CSR Bluetooth chip to the Wolfson codec.
-
-=== Power Management ===
-A Philips PCF50606 is used for [[Neo1973_Power_Management|power management]].
-
-* Data Sheet: [http://www.nxp.com/acrobat/literature/9397/75009763.pdf PCF50606/605]
-* User Manual: [http://www.rockbox.org/twiki/pub/Main/DataSheets/pcf50606.pdf pcf50606.pdf]
-* Connected to: S3C2410 via I2C, client address is 0x08. 
-* Driver Source: https://svn.openmoko.org/trunk/src/target/kernel/patches/gta01-pcf50606.patch
-
-=== Battery ===
-The [[Neo1973 Battery]] is compatible with a Nokia BL5C battery.
-According to [http://lists.openmoko.org/pipermail/community/2007-February/003758.html this] post on the mailinglist.
-[http://wiki.openmoko.org/index.php?title=Image:Neo1973-with-BL5C-battery.png Photo] of the battery inside the Neo1973.
-
-=== Buttons ===
-The Neo1973 features two buttons:
-# [[Neo1973 Power Button|The Power Button]]
-# [[Neo1973 AUX Button|The "Aux" button]]
-
-=== Alternate cases ===
+== Alternate cases ==
 A number of alternate case designs have been suggested and requested.
-
-[[Neo1973 case schematics]]
-
 [[Alternate Neo1973 case designs]]
 
 == Hardware revisions==
