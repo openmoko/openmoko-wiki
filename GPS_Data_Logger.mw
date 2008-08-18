@@ -1,12 +1,70 @@
-This page addresses the use cases mentioned in [[GTA02 GPS]], including
+This page was created to address the use cases mentioned in [[GTA02 GPS]], including
 
+* I want to log GPS data for later analysis.
+* I want to collect GPS data for scientific field work (forestry, biology, etc)
 
+The page was started on 17 August 2008 mostly as a thought exercise.
+Please jump in and add to it.
 
+== Overview ==
 
+The typical commercial approach is to create one big application that does everything well. Unfortunately everyone has a different idea of what "doing everything well" means. One person might want to use GPS to log and analyze bicycle rides while another does weed mapping and another might be doing asset management. One application cannot do all this well.
 
+A better approach is to break it up into a set of components. Each component can be a standalone application. This relies on some kind of multiplexer such as gpsd (does gypsy support this?) so that each app has access to the GPS data stream.
 
+Initially the main functions could be broken out these components.
 
+# A '''GPS multiplexer''' that talks to the GPS receiver and feeds data to many applications.
+# A '''GPS Controller''' to that can talk to the mulitplexer (and hence the GPS receiver) to display status and adjust settings.
+# A '''Data Logger''' that can run all the time and record GPS data.
+# A '''Field Collection Tool''' that allows doing specific operations such as averaging GPS data while waiting at a point for increased accuracy and entering attributes for a point.
 
+== Main components ==
+
+=== GPS multiplexer ===
+
+Look at gpsd and gypsy (and the related religious wars) and either use one of them or use them for inspiration. 
+
+Partial list of requirements for the multiplexer
+* Control internal GPS receiver
+* Control external GPS connected via serial port (USB or bluetooth)
+* Feed data from the selected GPS receiver to multiple applications.
+* Handle a RTCM stream to allow realtime DGPS postprocessing.
+* Supply all attributes to applications, including such things as PDOP and satellites in use. (Not just time and position)
+
+==== External GPS ====
+
+There is no reason we are limited to using the built-in GPS receiver. For applications requiring more accuracy (for example sub-meter), the GPS multiplexer should be able to accept data via USB or bluetooth and feed it to our applications. The controller program should be able to handle this situation.
+
+=== Support for postprocessing? ===
+
+Real-time DGPS correction possibilities include receiving an RTCM stream from an external device, receiving RTCM over an IP connection, and WAAS. Does the Ublox receiver support RTCM? Most receivers that support it just accept a stream of data from a serial line. You don't have to reverse engineer it, you just accept data from some source such as a DGPS Beacon Receiver and feed the output to the GPS receiver and you get something approaching 1 meter accuracy.
+
+Postprocessed DGPS correction requires recording pseudorange data and running an application later. In the open source world this means [http://en.wikipedia.org/wiki/RINEX RINEX]. Anyone with more knowledge of RINEX should jump in and edit this section.
+
+=== GPS controller ===
+
+''I think OM gps test program (what's it called) does much of this.''
+
+Some GPS receivers include a feature to stop logging or to issue warnings if data quality goes too low for any reason. Where should this be handled? In the multiplexer or in the applications? Maybe the settings should be applied to the multiplexer and it should issue warnings to the applications which would then decide what to do.
+
+=== Data Logger ===
+
+The basic concept of the logger is to create a bread crumb trail as you move about. 
+It has its own preference settings to determine if points are plotted based on change in position or on a time basis or both. 
+
+It should also be possible to set what is logged. Possibilities include time, position, bearing, velocity, elevation, pseudo-range data, HDOP, PDOP, satellites used, type of GPS, type of antenna, DGPS on/off, type of DGPS.
+
+The data logger would be one crucial component in an application of GPS for bicyclists (and outdoor enthusiasts like hikers and runners.) Other requirements would be a good display (to substitute for a speedometer) and a good mapping program. 
+Should we expand on that on this page? I'd like something that interoperates with the GPS multiplexer and  the data logger so maybe we should? [[User:Brian H Wilson|Brian H Wilson]] 19:34, 18 August 2008 (UTC)
+
+=== Field Collection Tool ===
+
+'''Attributes''' Mission planning should include setting up a file to be used for data collection, and that file should define attributes to be included. The data collector should be configurable to facilitate easy entry of the attribute data. For example, if you define a field to have a finite list of values, the values could be available as a drop down list.
+
+'''Point averaging''' Stand in one place and collect points until you are happy. The display should show current PDOP/HDOP and expected accuracy and number of readings used to create tehe point. Preferences should include storing all data used to create the averaged point.
+
+'''Points, lines and polygons.''' You should be able to collect all three. A typical use for polygons is to walk around a space while collecting GPS points to create a polygon showing the location of some physical object such as a wetland.
 
 
 [[Category: GPS]]
