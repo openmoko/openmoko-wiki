@@ -252,14 +252,35 @@ Currently GTK is not well supported in the FSO build. To use GTK applications yo
 
 '''Step 2) Enable Theme'''
  
- ln -s /usr/share/themes/Moko/gtk-2.0/gtkrc /etc/gtk-2.0/gtkrc
+ vi /etc/gtk-2.0/gtkrc
 
-'''Step 3) Adjust fontsize and set icon theme'''
+Add this line to the top:
+
+ include "/usr/share/themes/Moko/gtk-2.0/gtkrc"
+
+'''Step 3) Set icon theme'''
 
  vi /etc/gtk-2.0/gtkrc
 
-Add the two lines:
- gtk-font-name = "Sans 5"
+Add the line:
  gtk-icon-theme-name="openmoko-standard"
 
-(Thanks to [[User:Jtickle | Jtickle]] for pointing out how to set the font size on the [[Getting_Started_FAQ]]-Page)
+'''Step 4) Third party themes (optional)'''
+
+Add one line per 'third-party' gtk theme you've installed.  For example, openmoko-mediaplayer is not packaged with FSO:
+
+ include "openmoko-mediaplayer"
+
+'''Step 5) Other tweaks
+
+To get "2007.2-style" icons (no text, smaller), so that all the terminal buttons fit on the screen at once:
+
+ gtk-toolbar-style = GTK_TOOLBAR_ICONS
+ gtk-icon-sizes = "gtk-button=32,32:gtk-small-toolbar=16,16:gtk-large-toolbar=24,24"
+
+And make any other changes you like.  I don't like double arrows on the tops and bottoms of sliders:
+
+ GtkScrollbar::has_secondary_backward_stepper = 0
+ GtkScrollbar::has_secondary_forward_stepper = 0
+
+Look at existing gtkrc files for more options (if you find the manual, add a link).
