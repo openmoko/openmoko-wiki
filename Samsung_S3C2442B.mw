@@ -1,10 +1,15 @@
-The Samsung S3C2442B is the CPU of the [[Neo1973 GTA02 Hardware|Neo FreeRunner GTA02]]. It is based on an ARM920T core.
+* Feature: Processor + 64MB SDRAM + 256MB NAND + USB Host + USB Device
+* Product Homepage: [http://www.samsung.com/global/business/semiconductor/productInfo.do?fmly_id=229&partnum=SC32442 Samsung SC32442B]
+* User Manual: [http://210.118.57.197/Products/Semiconductor/MobileSoC/ApplicationProcessor/ARM9Series/SC32442/um_s3c2442b_rev12.pdf Samsung SC32442B]
+* Datasheet: [http://www.opatnet.cz/elektronika/datasheet/U/um_s3c2442b_rev12.pdf Samsung SC2442B]
+* Core: ARM920T
+* Instruction Set: ARMv4
+* Built-in 64MB SDRAM
+* Built-in 256 MB NAND connected to the S3C2442 NAND controller
+* Evaluation board: [http://www.meritech.co.kr/products/product_view.php?num=52 S3C2442 EVB]
 
-The datasheet for this is at [http://www.opatnet.cz/elektronika/datasheet/U/um_s3c2442b_rev12.pdf this link].
-
-One difference is that the CPU voltage limits are specified variably from 400MHz (1.5V) to 50MHz (1V) the current at these speeds is not mentioned. The FreeRunner includes a variant that can be clocked up to 500MHz, however a) current consumption is insane at this frequency and b) various other components can't cope with the peripheral clock at this speed. It is therefore safe to assume that the highest frequency for the [[Neo FreeRunner]] is 400MHz.
-
-[[User:HaraldWelte|Harald Welte]] wrote in [http://lists.openmoko.org/pipermail/neo1973-hardware/2007-September/000235.html  an e-mail] to the neo1973-hardware mailing list:
+[[User:HaraldWelte|Harald Welte]] wrote in [http://lists.openmoko.org/pipermail/neo1973-hardware/2007-September/000235.html  an e-mail] 
+to the neo1973-hardware mailing list:
 
  [...]
  apart from two differences, [the S3C2442B] is software/register-wise exactly
@@ -19,5 +24,45 @@ One difference is that the CPU voltage limits are specified variably from 400MHz
  [...]
 
 The data sheet for the S3C2440A seems to be available at [http://www.tranzistoare.ro/datasheets/restul/259649_DS.pdf]. Samsung's page with more superficial information on the S3C2440 is at [http://www.samsung.com/global/business/semiconductor/productInfo.do?fmly_id=229&partnum=S3C2440&&ppmi=PartnoSearch].
-[[Category:Hardware ]]
-[[Category:Chip| ]]
+
+
+== Neo FreeRunner ==
+{{Main|Neo_FreeRunner_GTA02_Hardware}}
+* Running at 400 MHz
+* GPIO Assignments: https://svn.openmoko.org/trunk/doc/hardware/GTA02v4/gpio.txt
+
+One difference is that the CPU voltage limits are specified variably from 400MHz (1.5V) to 50MHz (1V) the current 
+at these speeds is not mentioned. 
+The FreeRunner includes a variant that can be clocked up to 500MHz, 
+however a) current consumption is insane at this frequency and b) various other components can't cope 
+with the peripheral clock at this speed. It is therefore safe to assume that the highest frequency 
+for the [[Neo FreeRunner]] is 400MHz.
+
+
+=== USB Host ===
+* Driver: Stock Linux kernel ohci_hcd
+* USB version 1.1
+* Supply USB 5v in Host mode using usb power switch AAT1275IRN-5.0-T1
+** http://www.analogictech.com/products/digitalfiles/AAT1275.pdf
+* A net EN_USBHOST is controlled by PMU GPIO "GPO", this one signal when asserted (high)
+** enables generation of 5V for external device using a charge pump
+** enables connection of 15K pulldowns to D+ and D- to allow device insertion and removal detection for host mode
+** DISABLES the path for USB power to charge the battery
+
+It should also be possible to use host mode with externally-provided power. This will allow the FreeRunner to be connected to a USB device and be powered and charging the battery if present at the same time.
+
+* Connect 0V, d+, d-, +5 to your USB device
+* Connect a 15k ohm resistor between d+ and ground
+* Connect a 15k ohm resistor between d- and ground
+* Connect 0V, +5 to your >1A power source
+** If your power source was not the Openmoko 1A charger, additionally connect a 47K ohm 5% resistor between the ID pin and ground to pretend to be the 1A charger.
+
+In addition you need to make sure EN_USBHOST signal that enables the physical Host mode power generation and disables the USB -> PMU charging path is deasserted.  This may be taken care of automatically shortly by detection of the 48K resistor on a USB insertion leading to forcing EN_USBHOST deasserted.  The charge pump that generates the 5V in host mode doesn't seem to mind getting external 5V given to it, but the real issue is that the battery will not be charged at all if we leave EN_USBHOST asserted since one of its jobs is to stop that happening.
+
+=== USB Device ===
+* Driver: https://svn.openmoko.org/trunk/src/target/kernel/patches/s3c2410_udc.patch
+* Please see [[USB Product IDs]] on information about which Vendor/Product IDs we use
+* 1200mAh lithium battery charges when connected to powered host.
+* Mini-AB connector similar to [http://www.cypressindustries.com/shoponline/proddetail.asp?prod=CCMUSBAB-32005-700&cat=34 this one].
+
+[[Category:Chip]]
