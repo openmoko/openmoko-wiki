@@ -118,5 +118,21 @@ To make the cursor invisible create a file called empty.cursor with this content
 Now you can execute:
  xsetroot -cursor empty.cursor empty.cursor
 and the cursor will be invisible. To make this permanent you have to invent something ;) It must be executed after zhone has finished starting up.
+
+== Using the mouse and keyboard from your desktop on the OM device ==
+If you are running Linux (or a similar xorg capable operating system) on your Desktop, you can export your xsession to the openmoko device and use your mouse and keyboard on the Neo screen. A little program called x2x makes it even possible to do this simultaneously on the fly. When activated you just move your mouse to the edge of your monitor and then the mouse cursor continues on the screen of your openmoko device. If you select a window on the OM, the input of your keyboard is automatically entered in that window. You can even use the clipboard to copy data from tour desktop to OM and in the reverse direction.
+
+Configure your desktop computer to export your xsession:
+ On your desktop (with root permissions):
+ Make sure that sshd is installed and in /etc/ssh/sshd_config you have set
+ X11Forwarding yes
+On your OM device install x2x (with root permissions)
+ apt-get install x2x
+Now open a new X terminal on your desktop computer. You MUST be the same user that is running the xsession on your desktop (i.e. do not su to root or another user in your x terminal!). On your OM device you should be running an xsession as the user openmoko. Assuming that you have a usb networking connection to OM (with standard configuration) on the user prompt of your desktop type:
+ user@desktop:~$ ssh -X openmoko@192.168.0.202 "/usr/bin/x2x -east -to :0.0"
+Hit return and enter your password. The xterm window will be unresponsive after that, but keep it open until you disconnect your OM device.
+
+Now move your mouse cursor across the right edge of your monitor. It should enter the screen of your OM device from the left. Of course you can also use -west, -north or -south, depending on your preference where you place your OM.
+
 [[Category:Distributions| ]]
 [[Category:Documentation]]
