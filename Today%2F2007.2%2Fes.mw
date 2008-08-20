@@ -1,0 +1,148 @@
+{{Languages|Today/2007.2}}
+{{OM2007.2}}
+
+== Introducción ==
+Este artículo corresponde a la segunda revisión de la aplicación Today, una aplicación diseñada para la plataforma OpenMoko.
+
+La aplicación Today es el punto de entrada del usuario. Por lo tanto se encuentra en el 'Escritorio' del teléfono, y sus usos son:
+1) Acceso rápido al estado del teléfono y eventos del calendario.
+2) Arrancar una nueva aplicación.
+3) Manejo de aplicaciones en ejecución i.e. pasar a o cerrar una aplicación en ejecución.
+
+== Casos de uso ==
+A continuación se exponen algunos casos:
+* Quiero echar un vistazo a los eventos de hoy en el calendario o a la lista de tareas.
+* Quiero arrancar una aplicación.
+* Quiero pasar a una aplicación que se esta ejecutando.
+
+== Funcionalidades del nucleo ==
+
+(Italicas = Hechas, Negrita = En proceso)
+
+* '''Ver servidores de red disponibles'''
+* ''Revisar llamadas perdidas o mensajes no leidos''
+* '''Opciones/modificaciones del UI (Interface de Usuario)'''
+* ''Revisar eventos futuros, tareas o alarmas''
+* '''Bloquear el teléfono para evitar eventos no deseados al tocar sin querer la pantalla.'''
+* ''Arrancar aplicaciones del nucleo''
+* ''Realizar llamadas y ver llamadas perdidas''
+* ''Crear mensajes y ver mensajes no leidos''
+
+* ''Ver todas las aplicaciones disponibles y sus descripciones''
+* ''Arrancar aplicaciones seleccionadas''
+* ''Filtrar las aplicaciones por categorias''
+* ''Filtrar las aplicaciones por nombre y descripción realizando una búsqueda por texto''
+
+* ''Ver las aplicaciones en ejecución''
+* ''Pasar a una aplicación en ejecución''
+* ''Cerrar una aplicación que se está ejecutando''
+* ''Cerrar todas las aplicaciones en ejecución''
+
+== Componentes del entorno ==
+
+=== Área de aplicación ===
+==== Página Today ====
+
+[[Image:today-main-arrows.png]]
+
+*'''1) Title''' -- Se trata de un panel global que muestra el título de la aplicación que se está utilizando en ese momento. Facilita el acceso a las aplicaciones que se encuentran en ejecución.
+*'''2) Phone Group''' -- Muestra el operador en el título y el número de llamadas perdidas y mensajes no leidos.
+*'''3) Callendar Group''' -- Muestra la hora y fecha en el título y tiene una lista de los eventos pendientes,  tareas a realizar y recordatorios.
+*'''4) Main Page''' -- Página actual.
+*'''5) Launch Task Page''' -- Pasar a la página de ejecución de tareas, donde el usuario puede buscar y ejecutar aplicaciones.
+*'''6) Running Tasks Page''' -- Pasar a la página de tareas en ejecución, donde el usuario puede cambiar de aplicación o cerrar aplicaciones en ejecución.
+*'''7) Quick Launch''' -- Una barra de herramientas donde residen las aplicaciones más utilizadas.
+
+==== Launch Task Page ====
+
+[[Image:today-new-arrows.png]]
+
+*'''1) Title''' 
+*'''2) Application List''' -- Lista de aplicaciones disponibles.
+*'''3) Today Page''' -- Cambiar a la página Today.
+*'''4) Launch Task Page''' -- Página actual.
+*'''5) Running Tasks Page''' -- Pasar a la página de tareas en ejecución, donde el usuario puede cambiar de aplicación o cerrar aplicaciones en ejecución.
+*'''6) Search/Filter Menu''' -- Es utilizado para filtrar las aplicaciones, This is used to filter the applications, clicando  el icono de búsqueda y escribiendo el texto a buscar, o clicando en el menú de filtro y seleccionando un grupo de aplicaciones.
+
+==== Running Tasks Page ====
+
+[[Image:today-running-arrows.png]]
+
+*'''1) Title''' 
+*'''2) Switch To''' -- Cambiar a la aplicación seleccionada.
+*'''3) Close''' -- Cierra la aplicación seleccionada.
+*'''4) Close All''' -- Cierra todas las aplicaciones en ejecución.
+*'''5) Today Page''' -- Pasa a la página Today.
+*'''6) Launch Task Page''' -- Pasa a la página de ejecución de aplicaciones.
+*'''7) Running Tasks Page''' -- Página actual.
+*'''8) Lista de aplicaciones en ejecución'''
+
+== Ajuste de los componentes del UI en el entorno de trabajo ==
+
+*'''Por defecto''': Muestra el acceso a las aplicaciones y el reloj
+[[Image:Todaypage_reduced_false.png|200px|]]
+ # gconftool-2 --type bool --set /desktop/poky/interface/reduced false
+
+*'''Reducida''': No muestra los iconos superiores de aplicaciones, la fecha ni el reloj
+[[Image:Todaypage_reduced_true.png|200px|]]
+ # gconftool-2 --type bool --set /desktop/poky/interface/reduced true
+
+*'''Digital/reloj analógico''' : Muestra un reloj analógico en vez de uno digital
+[[Image:Todaypage_digitalclock_false.png|200px|]]
+ # gconftool-2 --type bool --set /desktop/poky/interface/digital_clock false
+
+*'''No muestra el reloj''' 
+[[Image:Todaypage_noclock.png|200px|]]
+ # gconftool-2 --type bool --set /desktop/poky/interface/small_clock true
+
+*'''Cambia el fondo de pantalla''' 
+[[Image:Todaypage_changewallpaper.png|200px|]]
+ # gconftool-2 --type string --set /desktop/poky/interface/wallpaper /usr/share/pixmaps/wallpaper.png'''
+
+*'''Otras opciones''': Las mostradas anterormente son algunas de las opciones que se pueden cambiar, a continuación se listan las demás:
+ # gconftool-2 -a /desktop/poky/interface 
+    toolbar_style = icons
+    gtk-im-status-style = callback
+    gtk_key_theme = Default
+    theme = Moko
+    font_name = Sans 5
+    gtk-color-palette = (no value set)
+    cursor_blink_time = 1200
+    cursor_blink = true
+    gtk-scrolled-window-placement = GTK_CORNER_TOP_LEFT
+    small_clock = true
+    menus_have_icons = false
+    toolbar_icon_size = (no value set)
+    touchscreen = true
+    can_change_accels = false
+    digital_clock = false
+    file_chooser_backend = (no value set)
+    gtk-im-preedit-style = callback
+    wallpaper = /usr/share/pixmaps/wallpaper.png
+    icon_theme = openmoko-standard
+
+ 
+* ''' problema de gconf (la solución difícil)'''
+ (gconftool-2:1366): GConf-WARNING **: Client failed to connect to the D-BUS daemon:
+ Failed to execute dbus-launch to autolaunch D-Bus session
+ Error setting value: No D-BUS daemon running
+
+ root@fic-gta02:/$ ps aux | grep today
+ root      1320  3.7 11.5  33556 14100 ?        S    23:00   0:09 openmoko-today
+ root      1369  0.0  0.4   2860   592 pts/0    S+   23:04   0:00 grep today
+ 
+ root@fic-gta02:/$ cat /proc/1320/environ 
+
+ root@fic-gta02:/$ export   DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-80gSL9Q6F4,
+ guid=6efed88183a7f6b9210cf40047ba0dfe
+
+Haciendolo con una sola línea :
+ cat /proc/`pidof openmoko-today`/environ |grep DBUS > exptmp && export `cat exptmp` && rm exptmp
+
+* '''problema de gconf (la solución fácil)''': Utilizar el prefijo ''dbus-launch'' con el comando, ver el ejemplo siguiente:
+ root@fic-gta02:/$ dbus-launch gconftool-2 --type string --set /desktop/poky/interface/wallpaper /usr/share/pixmaps/wallpaper.png'''
+
+La apariencia del b loqueo de pantalla tambien puede ser modificada siguiendo las instrucciones de [[Display Locker]].
+ 
+[[Category:Openmoko]]
+[[Category:Implemented]]
