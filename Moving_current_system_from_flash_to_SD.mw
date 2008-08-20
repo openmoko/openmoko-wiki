@@ -24,16 +24,20 @@ Assuming one has booted from a system on SD already, this would create a copy of
  # mkdir /mnt/memroot/
  # mkdir /backup-dir
  # mount -t jffs2 -o ro /dev/mtdblock6 /mnt/memroot/ # this for a freerunner
- # cp -a /mnt/memroot/. /backup-dir/.
+ # cd /mnt/memroot; rsync -avx --progress . /backup-dir/
 
-See [[Partitions]] for details of the partitions in flash (hence the /dev/mtdblock6).
+You can leave away the --progress rsync option if you don't want to see a progress report (xfer#x, to-check y/z) while copying. See [[Partitions]] for details of the partitions in flash (hence the /dev/mtdblock6).
 
-'''Attention : there are [http://lists.openmoko.org/pipermail/community/2008-August/026027.html problems copying certain files with cp -a] : check that your backup and original are identical !'''
-
-You might better off using one of the following ways to perform copying (please correct if not working)
+Instead of using rsync you could also use one of the following ways to perform copying (please correct if not working)
 
  # cd /mnt/memroot; find . -depth | cpio -pdmv /backup-dir/
- # cd /mnt/memroot; tar clf - . | tar xvlpf - -C /backup-dir/
+ # cd /mnt/memroot; tar cpf - . | tar xvpf - -C /backup-dir/
+The following may also work, but is not recommended, as there are [http://lists.openmoko.org/pipermail/community/2008-August/026027.html problems copying certain files with cp -a]: then be sure to check that your backup and original are identical!
+ # cp -a /mnt/memroot/. /backup-dir/.
+
+== Verify that backup directory is identical to source partition ==
+To verify that you copied everything, you can use rsync (again), but now additionally with the -n option
+ # cd /mnt/memroot; rsync -avxn . /backup-dir/
 
 == Transfer kernel to FAT partition ==
 
