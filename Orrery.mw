@@ -1,13 +1,124 @@
-{| style="background-color:#EFEFFF;color:#000;border:1px solid #9F9FFF;margin:1em 5% 1em 5%;"
-| style="padding:0.5em 0.5em;" |
-| style="padding:0.5em 0.5em;" | <b>In progress:</b> This {{{1|article or section}}} documents one or more features whose implementation are <i>in progress</i>.
-|}<includeonly>
-[[Category:In progress]]
-</includeonly>
+== Overview ==
+The orrery is a simple open-source application for the Openmoko platform
+which displays the night sky. It is nowhere near as elaborate as, for
+example Google Sky or xephem. It is intended to be a small application
+that will have a storage footprint comparable to a ringtone, or one of
+the games bundled with the openmoko rootfs. It requires no network connection,
+but does use the GPS information, by querying gpsd.   
+It will be converted to work with Gypsy once the dbus based software stack
+becomes available.
 
-[[Category:Applications]]
+The star database was extracted from the Hipparcos catalog.   To ease the
+computational load, the coordinates are not precessed or nutated before
+being displayed.   Orbital elements are used,
+rather than ephemerides, to calculate planet positions.   Although
+this is less accurate, it drastically reduces the memory
+footprint.   The planet positions are accurate to a few arc
+minutes, from 3000 BC to 3000 AD.
 
-'''NEWS'''
+Although the screen grabs shown on this page are from the OM 2007.2
+stack, the program definitely works for both 2007.2 and 2008.8, and
+probably works for FSO.   It works on both the gta01 and gta02.  It
+is gtk based.
+
+== The Display ==
+
+[[Image:OrreryWithMenuTabs.png|Orrery with Menu Tabs]]
+
+The image above shows the default display - all stars visible to the unaided
+eye, with colors for the brightest ones.   It's displayed with a 
+Transverse Mercator projection (similar to Norton's Star Atlas) which works
+well with the VGA aspect ratio in portrait mode.   
+It's a conformal transformation, so the
+constellations have about the right shapes.  The Sun, Moon and planets are
+plotted, and the Moon is shown with the proper phase.   The Sun and Moon are
+plotted with a size much larger than their true angular size on
+the sky.
+
+There are two display screens defined.   By default, one of them shows
+the display shown above, and the other shows the constellations, and
+symbolic representations of the solar system objects.
+
+[[Image:OrreryFullScreenConstellations.png|Orrery Full Screen Constellation]]
+
+In addition to constellation names and figures, the Celestial Equator 
+(light yellow), Ecliptic (red) and Galactic Plane (blue-green) are shown.  
+Solar system objects are shown symbolically (see Mars, the Moon and the Sun
+in the above image).
+
+== Control Modes ==
+The orrery has two control modes, "finger mode" and "stylus mode".
+By default the program is in finger mode. In "finger mode", the image 
+can be panned by tapping your finger in
+the bottom 1/5 of the display (excluding menus).   The size of
+the panning step is controlled by how close your finger is
+to the edge of the display.   If you tap in the center, it pans
+by 0 degrees, and nothing happens.   If you tap near the 
+left or right edges, it
+pans by the maximum allowed amount, +-45 degrees.   Pan steps are
+quantized in increments of 5 degrees.   You may exit fullscreen mode
+by tapping anywhere in the upper 1/5 of the display area.
+Tapping anywhere else toggles between the two screens.
+
+If you are in stylus  mode, the view can be panned around the sky by 
+tapping the green arrows at the bottom, or the green azimuth values.
+In stylus mode, to exit from fullscreen you must tap in the area
+above the upper blue line, in the region where the time and location
+are displayed.   Tapping anywhere else toggles between the two screens.
+
+There is a check box in the display menu which allows you to turn finger
+mode on and off.
+
+One may enter fullscreen mode by tapping the fullscreen button at the
+bottom left of the display.
+
+== Menus ==
+When not in fullscreen mode, three menus are displayed at the bottom of
+the screen.
+
+The time menu allows you to specify an
+explicit time between 3000 BC and 3000 AD, or the current
+time.   If current time is selected, the display updates
+automatically once per minute.   If a specific time is selected,
+it is shown in red, to remind you that the display is not
+going to update automatically as time passes.
+
+The place menu allows you to select the GPS-derived location,
+a user specified latitude and longitude, or a city or
+astronomical observatory selected from a menu.   The lists of
+locations are stored in ASCII text files under the menus subdirectory
+of the program installation area on your phone.   You may
+save your selected location, so you need not reset it the
+next time you start the orrery.   If you would like
+to add additional cities etc to one of the menus, you may simply
+edit one of the menu files, and add the name, latitude and longitude
+of the location.   You will need to restart the orrery program for
+your new locations to become available.
+
+The display menu allows you to configure the display, selecting
+such things as the lowest magnitude displayed, constellation
+lines, whether or not star names are displayed, etc.
+
+== Symbols ==
+The solar system symbols, used by default on the constellation
+page (screen two), are the standard astronomical symbols for these
+objects.   They are explained here:
+[http://en.wikipedia.org/wiki/Planet_symbols]
+
+The dotted yellow line is the Celestial Equator, the intersection of
+the Earth's equatorial plane with the celestial sphere.   The red
+dotted line is the Ecliptic.   The Ecliptic is the intersection
+of the Earth's orbital plane with the celestial sphere.   The
+Ecliptic is also the path of the Sun across the sky, and the intersection
+points between the Celestial Equator and the Ecliptic are where the
+Sun is at the time of an equinox.   Constellations lying along the
+Ecliptic plane are zodiac constellations.   The planets and the Moon 
+are always near, but usually not exactly on, the Ecliptic.
+The blue-green dotted line is
+the Galactic Plane, the intersection of the plane of the Milky Way's
+disk and the celestial sphere.
+
+== Installing this Program ==
 
 .ipk files for this program are now available for both the 2007.2
 and 2008.8 stacks, at the gForge site.   It is much easier to install
@@ -17,7 +128,22 @@ type:
 
 '''opkg install orrery'''
 
-Version 1.1 Released:
+If you are running the 2007.2 stack, it is better (you get
+a better launch icon) if you download and install via
+opkg the latest .ipk file with 2007.2 in its name from here:
+[http://projects.openmoko.org/projects/orrery/].
+
+== Known Bugs ==
+The first time you tap the display
+to go into constellation mode, it takes several
+seconds to show the constellations.   This only
+happens the first time - subsequent switches
+are pretty fast (< 1 second).
+
+'''Send more bug reports!'''
+
+== Revision(ist) History ==
+Version 1.1 Changes:
     New user features:
         1) Added "finger mode", which allows
            orrery to be used without a stylus.
@@ -43,81 +169,10 @@ Version 1.1 Released:
            rather than at the bottom, where
            it belongs.
 
-
-Note - although the screenshots shown here were
-taken with the 2007.2 stack, this application
-works under 2007.2 or 2008.8 (ASU).
-
-The orrery is a simple open-source application for the Openmoko platform which displays the night sky. It is nowhere near as elaborate as, for example Google Sky or xephem. It is intended to be a small application that will have a storage footprint comparable to a ringtone, or one of the games bundled with the
-openmoko rootfs. It requires no network connection, but does use the GPS information, by querying gpsd.   It will be converted
-to work with Gypsy once the dbus based software stack becomes
-available.
-
-[[Image:OrreryWithMenuTabs.png|Orrery with Menu Tabs]]
-
-The image above shows the default display - all stars visible to the unaided eye, with colors for the brightest ones.   It's displayed with a Transverse Mercator projection (similar to Norton's Star Atlas) which works well with the VGA aspect ratio.  It's a conformal transformation, so the constellations have about the right shapes.  The sun, moon and planets are plotted, and the moon is shown with the proper phase.   The sun and moon are
-plotted with a size much larger than their true angular size on
-the sky.
-
-In "finger mode" The image can be panned by tapping your finger in
-the bottom 1/5 of the display (excluding menus).   The size of
-the panning step is controlled by how close your finger is
-to the edge of the display.   If you tap in the center, it pans
-by 0 degrees, and nothing happens.   If you tap near the 
-left or right edges, it
-pans by the maximum allowed amount, +-45 degrees.   Pan steps are
-quantized in increments of 5 degrees.
-
-If you are not in finger mode,
-the view can be panned around the sky by tapping the green arrows at the bottom, or the green azimuth values.
-
-[[Image:OrreryFullScreenSky.png|Orrery Full Screen Sky]]
-
-If one taps the main display area, the program toggles into constellation mode, as shown below.   
-
-[[Image:OrreryFullScreenConstellations.png|Orrery Full Screen Constellation]]
-
-In addition to constellation names and figures, the celestial equator (light yellow), ecliptic (red) and galactic plane (blue-green) are shown.  Solar system objects are shown symbolically (see Mars, the Moon and the Sun in the above image).
-
-The star database was extracted from the Hipparcos catalog.   To ease the computational load, the coordinates are not precessed or nutated before being displayed.   Orbital elements are used,
-rather than ephemerides, to calculate planet positions.   Although
-this is less accurate, it drastically reduces the memory
-footprint.   The planet positions are accurate to a few arc
-minutes, from 3000 BC to 3000 AD.
-
-There are three menus.
-
-The time menu allows you to specify an
-explicit time between 3000 BC and 3000 AD, or the current
-time.   If current time is selected, the display updates
-automatically once per minute.
-
-The place menu allows you to select the GPS-derived location,
-a user specified latitude and longitude, or a city or
-astronomical observatory selected from a menu.
-
-The display menu allows you to configure the display, selecting
-such things as the lowest magnitude displayed, constellation
-lines, etc.
-
-When in fullscreen-mode you have to tap the area near the top of the display to quit fullscreen-mode.   In finger mode, you
-may tap anywhere in the top 1/5 of the display.   If you
-are not in finger mode, you must tap above the top
-blue line, in the region
-where the GMT, LST and location are shown, to quit fullscreen.
-
-An opkg package, and/or source code and executables can be downloaded from
-
-https://projects.openmoko.org/projects/orrery/
-
-Known Bugs:  The first time you tap the display
-to go into constellation mode, it takes several
-seconds to show the constellations.   This only
-happens the first time - subsequent switches
-are pretty fast (< 1 second).
-
+== Contact Information ==
 Please send comments, suggestions, questions and/or
 abuse to orrery.moko@gmail.com
 
 [[category:Openmoko]]
+[[category:Applications]]
 [[category:GPS]]
