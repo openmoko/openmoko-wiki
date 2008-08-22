@@ -1,1 +1,122 @@
-Here is an example of how to run your own code on the bare metal, without any operating system.
+Here is an example of how to run your own C code on the bare metal, without any operating system.  Since I don't yet have a physical device, this has only been tested using [[Qemu]].
+
+== Example program ==
+
+The example program does nothing but blink the LCD backlight on and off.  A simple first exercise might be to change it to blink out "hello world" in morse code.
+
+=== C code (app.c) ===
+
+<pre>
+#define GPBDAT *((volatile unsigned long*)0x56000014)
+
+void cstart(void)
+{
+	int i;
+	while (1) {
+		GPBDAT ^= 1; /* toggle the backlight */
+		for (i = 0; i < 50000000; i++); /* delay a little bit */
+	}
+}
+</pre>
+
+=== Assembler head (app.S) ===
+
+<pre>
+.text
+.globl _start
+_start:
+	mov	sp, #0x30000000    @ start of RAM
+	add	sp, sp, #0xa00000  @ 10mb in, should be a safe place to put our stack
+	b	cstart             @ call C code
+</pre>
+
+=== Linker script (app.lds) ===
+
+<pre>
+SECTIONS
+{
+  . = 0x35000000;
+}
+</pre>
+
+=== Makefile ===
+
+<pre>
+CROSS=/mnt/oe/openmoko/build/tmp/cross/arm-angstrom-linux-gnueabi/bin/
+CC=${CROSS}gcc
+OBJCOPY=${CROSS}objcopy
+
+app.bin: app.elf
+	${OBJCOPY} -O binary $^ $@ 
+
+app.elf: app.S app.c
+	${CC} -Wall -nostdlib $^ -o $@ -T app.lds
+</pre>
+
+== Using with qemu ==
+
+Terminal 1:
+<pre>
+~/tmp % wget http://meshy.org/~ato/upload/bare-metal-moko.tar.gz
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  3322  100  3322    0     0   4156      0 --:--:-- --:--:-- --:--:--  8384
+~/tmp % tar -zxf bare-metal-moko.tar.gz 
+~/tmp % cd bare-metal-moko 
+~/tmp/bare-metal-moko % make
+/mnt/oe/openmoko/build/tmp/cross/arm-angstrom-linux-gnueabi/bin/gcc -Wall -nostdlib app.S app.c -o app.elf -T app.lds
+/mnt/oe/openmoko/build/tmp/cross/arm-angstrom-linux-gnueabi/bin/objcopy -O binary app.elf app.bin 
+</pre>
+
+Terminal 2:
+<pre>
+/mnt/oe/openmoko/build/qemu % cp ~/tmp/bare-metal-moko/qemu-telnet.sh openmoko
+/mnt/oe/openmoko/build/qemu % ./openmoko/qemu-telnet.sh 
+QEMU waiting for connection on: localhost:1200,server
+</pre>
+
+Terminal 1:
+<pre>
+~/tmp/bare-metal-moko % kermit -y download.kerm
+ DNS Lookup...  Trying 127.0.0.1...  Reverse DNS Lookup... (OK)
+ localhost.localdomain connected on port 1200
+ÿûÿûÿûÿý
+        
+U-Boot 1.3.2-rc2 (May 22 2008 - 01:06:44)
+                                         
+I2C:   ready
+DRAM:  128 MB
+NAND:  64 MiB
+Found Environment offset in OOB..
+Video: 640x480x8 31kHz 59Hz      
+                           
+NAND read: device 0 offset 0x244000, size 0x5000
+                                                
+Reading data from 0x248e00 -- 100% complete.
+ 20480 bytes read: OK                       
+USB:   S3C2410 USB Deviced
+In:    serial             
+Out:   serial
+Err:   serial
+GTA01Bv4 # loadb 35000000
+## Ready for binary (kermit) download to 0x35000000 at 115200 bps...
+#                                                
+
+# Total Size      = 0x00000064 = 100 Bytes
+## Start Addr      = 0x35000000           
+GTA01Bv4 # go 35000000         
+## Starting application at 0x35000000 ...
+</pre>
+
+Terminal 2:
+<pre>
+...
+neo_bl_switch: LCD Backlight now on.
+neo_bl_switch: LCD Backlight now off.
+neo_bl_switch: LCD Backlight now on.
+neo_bl_switch: LCD Backlight now off.
+neo_bl_switch: LCD Backlight now on.
+neo_bl_switch: LCD Backlight now off.
+neo_bl_switch: LCD Backlight now on.
+...
+</pre>
