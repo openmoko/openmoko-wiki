@@ -71,7 +71,7 @@ This is only a subset. See [http://docs.openmoko.org/trac/search?q=2008.8 all ti
 '''WiFi'''
  
 * [http://docs.openmoko.org/trac/ticket/1625 WiFi can only connect once]
-* [http://docs.openmoko.org/trac/ticket/1734 WiFi --- unknown] is caused by hald not running, which can be fixed by removing <tt>/etc/volatile.cache</tt> and rebooting
+* [http://docs.openmoko.org/trac/ticket/1734 WiFi shows up unknown] is caused by hald not running, which can be fixed by removing <tt>/etc/volatile.cache</tt> and rebooting
 
 '''Audio quality'''
 
@@ -86,18 +86,17 @@ This is only a subset. See [http://docs.openmoko.org/trac/search?q=2008.8 all ti
 * [http://docs.openmoko.org/trac/ticket/1682 Neo turns off before reaching x]
 
 '''Networking'''
-* No Updates/Installation are possible or pings to domains because dns is not working. This problem occurs because the /etc/resolv.conf is empty by default.
-Add this line in /etc/network/interfaces:
+* No Updates/Installation are possible or pings to domains because DNS is not working. This problem occurs because the /etc/resolv.conf is empty by default.
+Add these lines in /etc/network/interfaces:
 
- up echo nameserver 208.67.222.222 >/etc/resolv.conf
- up echo nameserver 208.67.220.220 >>/etc/resolv.conf
-This is to be inserted below gateway address and above the bluetooth networking. After this a reboot is required.
+ up echo nameserver 208.67.222.222 > /etc/resolv.conf
+ up echo nameserver 208.67.220.220 >> /etc/resolv.conf
+This is to be inserted below gateway address and above the bluetooth networking. After this it will be set on every reboot.
 
-For resolving DNS without restarting edit /etc/resolv.conf and fill it manually by adding the following line:
+For resolving DNS without restarting, run the following command:
 
- nameserver 208.67.222.222
- nameserver 208.67.220.220
-This should solve most off your moko side networking issues. If you need any other help please refer to [[USB Networking]]
+ echo -e "nameserver 208.67.222.222\nnameserver 208.67.220.220" > /etc/resolv.conf
+This should solve most of your moko side networking issues. If you need any other help please refer to [[USB Networking]]
 
 {{note| [http://en.wikipedia.org/wiki/Resolvconf resolvconf] is installed so should probably be used 
 
