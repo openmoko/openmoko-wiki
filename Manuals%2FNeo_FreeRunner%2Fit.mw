@@ -510,16 +510,35 @@ Su un sistema GNU/Linux puoi usare i seguenti programmi per scaricare ''dfu-util
 Successivamente dovete cambiare i permessi al file:
  chmod a+x dfu-util
 
-=== Step 2. Aggiornare il Kernel ===
+=== Step 2. Preparare il Neo FreeRunner===
+
+Spegnere il FreeRunner se è acceso ed entrare nell'U-Boot della NOR Flash. Per svolgere l'aggiornamento il Neo Freerunner ha bisogno di essere dentro l'U-Boot.
+
+Collegarlo al PC tramite cavo USB e dare il comando ./dfu-util -l
+
+Il comando restituirà una stringa simile a questa:
+
+dfu-util - (C) 2007 by OpenMoko Inc.                
+This program is Free Software and has ABSOLUTELY NO WARRANTY
+
+Found Runtime: [0x1d50:0x5119] devnum=0, cfg=0, intf=2, alt=0, name="UNDEFINED"
+
+Annotare il valore compreso fra le parentesi quadre, qualcosa del tipo ??????:??????
+
+
+=== Step 3. Aggiornare il Kernel ===
 Puoi scaricare il kernel da http://downloads.openmoko.org/releases/
 
+I file del kernel sono quelli che contengono la dicitura <b>uImage</b>
+
 Digita i seguenti comandi su un sistema GNU/Linux. In alcuni sistemi bisogna essere l'utente root prima di fare questo lavoro.
- ./dfu-util -a (partion name) -R -D (download image file name)
+ 
+ ./dfu-util -d (valore annotato precedentemente) -a kernel -R -D (nome del file dell'immagine scaricato precedentemente).
 
 
 esempio:
 
- ./dfu-util -a kernel -R -D uImage-2.6.24+svnr4082-r4055-r3-neo1973.bin
+ ./dfu-util -d 0x1d50:0x5119 -a kernel -R -D Om2008.8.uImage.bin
 
 {| class="wikitable" cellspacing="2" cellpadding="2" style="padding: 0%; margin:0em 0em 1em 0em; border:0px solid #ffffff; background:#ffffff; width:100%;floating="center"; "
 ! style="background:#ffffff;border-left:1px solid #ffffff;border-right:1px ; border-top:2px solid ffffff; border:1px solid #ffffff; width:75% " |  
@@ -527,7 +546,9 @@ esempio:
 [[Image:menu15.jpg|thumb|Entra nell'U-Boot della NOR Flash, connetti il tuo Neo con il sistema Linux attraverso il cavo USB]]
 Prima di eseguire il comando, entrare nell'U-Boot della NOR Flash. Il Neo Freerunner ha bisogno di essere entrato dentro l'U-Boot prima di fare l'aggiornamento.
 
-Ti servirà connettere il tuo Neo con il sistema GNU/Linuxcon il cavo USB. Premere Invio per eseguire il comando. Quando l'aggiornamento si concluderà verrà esposto il seguente messagio:
+Ti servirà connettere il tuo Neo con il sistema GNU/Linux con il cavo USB. Premere Invio per eseguire il comando. 
+
+Quando l'aggiornamento sarà completo, sul terminale del vostro PC verrà esposto il seguente messaggio:
 
 status(0) = No error condition is present<br>
 Done!
@@ -535,20 +556,27 @@ Done!
 |}
 
 {{note| Il significato dei parametri che avete dato è:
+-d  Specifica quale dispositivo collegato al PC è il Neo FreeRunner
 -a  --alt alt Specifica ''l'altsetting'' dell'interfaccia DFU da un nome o da un numero<br>
 -R  --reset Resetta i problemi dell'USB segnalandoli una volta che abbiamo finito<br>
 -D  --download file Scrive il firmware specificato da <file> nel dispositivo<br>
 }}
 
-=== Step 3. Aggiornare il Filesystem Root ===
+=== Step 4. Aggiornare il Filesystem Root ===
 Puoi scaricare il filesystem root da:
 http://downloads.openmoko.org/releases/
 
+I file contenenti il filesystem root sono quelli contenenti la dicitura <b>rootfs</b>
+
 Digita i seguenti comandi in un sistema GNU/Linux. Su alcuni sistemi bisogna essere l'utente root (amministratore).
 
- ./dfu-util -a rootfs -R -D openmoko-devel-image-fic-gta02.jffs2
+ ./dfu-util -d (valore annotato precedentemente) -a rootfs -R -D (nome del file contenente il filesystem root)
 
-Quando l'aggiornamento sarà completa sarà mostrato il seguente messaggio:
+esempio:
+
+ ./dfu-util -d 0x1d50:0x5119 -a rootfs -R -D Om2008.8.rootfs.jffs2 
+
+Quando l'aggiornamento sarà completo, sul terminale del vostro PC sarà mostrato il seguente messaggio:
 
  status(0) = No error condition is present<br>
  Done!
