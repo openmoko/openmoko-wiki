@@ -26,7 +26,66 @@ You may also have to modify your /etc/resolv.conf file and add the nameserver (D
 
 Then, hopefully, you should be up in running with GPRS and a GUI to turn it on and off.
 
-= Option 2: Without GSM multiplexing and without a GUI =
+= Option 2: With GSM multiplexing and without a GUI =
+
+'''1) In /etc/rc5.d start gsm0710muxd before gsmd:'''
+* S34gsm0710muxd -> ../init.d/gsm0710muxd
+* S35gsmd -> ../init.d/gsmd
+
+'''2) Modify S35gsmd so it can start either with or without gsm0710muxd:'''
+<pre>
+...
+case "$1" in
+    start)
+        if [ "$(pidof gsm0710muxd)" ] ; then
+                id=$(date +%s)
+                GSM_DEV=$(dbus-send --system --print-reply --type=method_call --dest=org.pyneo.muxer /org/pyneo/Muxer org.freesmartphone.GSM.MUX.AllocChannel string:$id | grep string | cut -d \" -f 2)
+        else
+                [ -n "$GSM_POW" ] && ( echo "0" >$GSM_POW; sleep 1 )
+                [ -n "$GSM_POW" ] && ( echo "1" >$GSM_POW; sleep 1 )
+                [ -n "$GSM_RES" ] && ( echo "1" >$GSM_RES; sleep 1 )
+                [ -n "$GSM_RES" ] && ( echo "0" >$GSM_RES; sleep 2 )
+        fi
+
+        if [ ! "$GSM_DEV" ] ; then
+                echo "GSM_DEV was not set"
+                exit 1
+        fi
+
+        echo -n "Starting GSM daemon: "
+        start-stop-daemon -S -x /usr/sbin/gsmd -- gsmd -p $GSM_DEV $GSMD_OPTS -d -l /var/log/gsmd
+
+        if [ $? = 0 ]; then
+            echo "gsmd."
+        else
+            echo "(failed.)"
+        fi
+        ;;
+    stop)
+        if [ ! "$(pidof gsm0710muxd)" ] ; then
+                [ -n "$GSM_POW" ] && echo "0" >$GSM_POW
+        fi
+
+        echo -n "Stopping GSM daemon: "
+        ...
+</pre>
+
+'''3) Remove the tty from /etc/ppp/peers/simyo''' (replace simyo with your provider).
+
+'''4) Use a ppp start script like this:'''
+<pre>
+$ cat /usr/local/bin/ppp-start
+#!/bin/sh
+
+id=$(date +%s)
+TTY=$(dbus-send --system --print-reply --type=method_call --dest=org.pyneo.muxer /org/pyneo/Muxer org.freesmartphone.GSM.MUX.AllocChannel string:$id | grep string | cut -d \" -f 2)
+logger -t ppp-start "using tty $TTY"
+pppd $TTY call simyo
+</pre>
+
+'''5) Use "killall pppd" to terminate the PPP connection.'''
+
+= Option 3: Without GSM multiplexing and without a GUI =
 
 The program that implements PPP on Linux is [[pppd]], which we need to configure and run to get a connection. When that is working, we can configure pppd to wait until it's needed before it connects, and to disconnect if the connection becomes idle. Further, we can start pppd in the background during the boot process.
 
