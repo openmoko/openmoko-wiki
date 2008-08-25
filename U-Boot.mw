@@ -70,26 +70,14 @@ To do so, you need to edit the u-boot/include/configs/qt2410.h file, and change 
 
 The resulting "u-boot.bin" is _NOT SUITABLE_ for NAND flash, but only for direct execution from within ram, e.g. by using the [[s3c2410_boot_usb]] program.
 
-=== GTA01 ===
+=== Neo 1973 ===
 
-Doing bootloader development on the GTA01 is a bit more tricky.  first, we don't have any NOR flash.  Second, there is no other way to boot _but_ from NAND.  Therefore, we also don't have a USB downloader like the QT2410.
+Doing bootloader development on the [[Neo 1973]] is a bit more tricky.  first, we don't have any NOR flash.  Second, there is no other way to boot _but_ from NAND.  Therefore, we also don't have a USB downloader like the QT2410.
 
 The main problem is:  The [[S3C2410 Steppingstone]] unconditionally copies the first 4k of flash into its internal SRAM.   That SRAM segment stays unconditionally mapped at physical address zero. How do we get around this
 
-=== GTA02 ===
-
-The first block holds a little 4KByte RAM buffer that is auto-filled
-from NAND by CPU hardware, called "steppingstone" when we boot from
-NAND, or the NOR is mapped in there.
-
-nCS0: 00000000 07FFFFFF  4K steppingstone or NOR (Aux held down) <br>
-nCS1: 08000000 0FFFFFFF  Glamo  <br>
-nCS2: 10000000 17FFFFFF  nothing mapped <br>
-nCS3: 18000000 1FFFFFFF  NOR <br>
-nCS4: 20000000 17FFFFFF  nothing mapped <br>
-nCS5: 28000000 2FFFFFFF  nothing mapped <br>
-nCS6: 30000000 37FFFFFF  on-MCP SDRAM 128MB <br>
-nCS7: 38000000 3FFFFFFF  external SDRAM 128MB <br>
+=== Neo FreeRunner ===
+{{main|Neo_FreeRunner_Memory_Mapping}}
 
 ==== Using JTAG to boot from RAM ====
 
