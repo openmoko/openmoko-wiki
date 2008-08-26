@@ -15,9 +15,9 @@ Note: You may want to run <code>ifconfig usb0 down</code> prior to switching to 
 
 Normally, USB host ports provide power to any connected USB device. In the case of portable handheld devices, this power may be limited. (Usually the battery is sized to power the handheld device alone, and to maximize standby time.) 
 
-Available power in host mode is limited to 100mA on the Neo FreeRunner, and no power is available in host mode on the Neo 1973. If your USB devices consumes less than 100mA, you may connect it directly to your Neo FreeRunner.
+Available power in host mode is limited to 500mA on the Neo FreeRunner, and no power is available in host mode on the Neo 1973. If your USB devices consumes less than 500mA, you may connect it directly to your Neo FreeRunner.
 
-If your USB device consumes more than 100mA, or if your Neo is a Neo 1973, you can provide power  by using a powered USB hub (see below), or by manually injecting power into the attached USB device via a modified USB cable (described further below).
+To power USB-host-mode on Neo 1973, or if you want to apply external power to Neo FreeRunner while in host-mode, you can provide power  by using a powered USB hub (see below), or by manually injecting power into the attached USB device (and Neo FreeRunner) via a modified USB cable (Y-cable (C)jr, described further below).
 
 === Powered USB hubs known to work with the Neo ===
 
@@ -25,7 +25,7 @@ If your USB device consumes more than 100mA, or if your Neo is a Neo 1973, you c
 
 === Providing power to run and charge the Neo while in host mode ===
 
-A slightly separate issue is power to run and charge the Neo itself. When the USB port is in device mode, the Neo can be powered and recharged via the USB port, but when in standard host mode, the Neo FreeRunner is set to provide power and does not charge. Fortunately, control of the direction of power (in or out) is independent of the personality of the USB port (host or device):
+A slightly separate issue is power to run and charge the Neo (both types) itself. When the USB port is in device mode, the Neo FreeRunner/1973 can be powered and recharged via the USB port, but when in standard host mode, the Neo FreeRunner is set to provide power and does not charge. Fortunately, control of the direction of power (in or out) is independent of the personality of the USB port (host or device):
 
 To recap, the direction of power can be controlled:
 
@@ -33,11 +33,13 @@ Set to 0 (default), no power is provided at the USB port, charging is enabled, a
 
  echo "0" > /sys/devices/platform/neo1973-pm-host.0/hostmode
 
-Set to 1, provides up to 100mA USB power at the USB port (FreeRunner only), disables charging from USB, and applies 15K pulldowns to USB D+ and D-:
+Set to 1, provides up to 500mA USB power at the USB port (FreeRunner only), disables charging from USB, and applies 15K pulldowns to USB D+ and D-:
 
  echo "1" > /sys/devices/platform/neo1973-pm-host.0/hostmode
 
-Next, power must somehow be injected. A powered USB hub only provides power to the connected devices, but not to the connected host, so the only solution here is to create a custom cable which will inject power into the host.
+Next, power must somehow be injected. An unmodified powered USB hub only provides power to the connected devices, but not to the connected host, so the only solution here is to modify a USB-hub¹) or to create a custom cable which will inject power into the host.
+
+¹) often it's sufficient to short a diode in USB-hub to feed power to the host-connector too.
 
 === Modified USB cable to inject power while in host mode ===
 
@@ -45,10 +47,10 @@ Three-headed cables are required if you want to power the FreeRunner / USB devic
 
 * A mini-USB type B cable for the Neo itself
 * A cable of whatever type to go to your USB device.
-* A cable going to a +5V voltage source with enough power for your device and to charge the Neo. This could be a wall charger or even another USB plug.
+* A cable going to a +5V +/-10%(max!) power supply with enough power for your device and to charge the Neo. This could be a wall charger or even another USB plug.
 
 You connect the Data+ and Data- wires of the Neo and the device, and connect all of the ground wires together and all of the +5V wires together. This powers the Neo and the device, while letting the neo talk to the device.
-You have to connect 2pcs  15kOhm resistors, one from D+ to ground, and one from D- to ground, to comply with USB-spec for hostmode, as Freerunner is switching off the internal resistors when you enable charging/powering over USB by asserting EN_USBHOST.
+You have to connect 2pcs  15kOhm resistors, one from D+ to ground, and one from D- to ground, to comply with USB-spec for hostmode, as Neo is switching off the internal resistors when you enable charging/powering over USB by asserting EN_USBHOST.
 See schematics, LOCATION:49XX
 
 Just for reference, the USB wires from left to right are:
@@ -65,23 +67,25 @@ You'll need to force the Neo to go into fast charge mode, since it can't do its 
 
  echo -n "fast_cccv" >  /sys/devices/platform/s3c2410-i2c/i2c-adapter/i2c-0/0-0008/chgmode
 
+(Also this should be done by kernel when seeing 47K at ID-pin)
+
 == DIY USB host adapter ==
 
 Note that these instructions are provided in the hope that they are useful but without any warranty!
 
 [[Image:2-usb-receptables.jpg]]
 
-:#Find an old motherboard with a set of two USB receptables as shown above.
-:#Desolder this set of receptables from the motherboard. This can be bit tricky but it is doable at least with a desoldering gun.
-:#Each receptable has four pins. Use a multimeter to verify that you have no short circuits between the pins or the shield.
+:#Find an old motherboard with a set of two USB receptacles as shown above.
+:#Desolder this set of receptacles from the motherboard. This can be bit tricky but it is doable at least with a desoldering gun.
+:#Each receptacle has four pins. Use a multimeter to verify that you have no short circuits between the pins or the shield.
 :#Solder adjacent pins together (GND to GND, D- to D-, D+ to D+, VCC to VCC).
-:#(Optional) Build a test cable. Cut an USB cable with A plug into half, connect it a receptable and again measure that you have no short circuits. Then connect the test cable to PC and verify that you see
+:#(Optional) Build a test cable. Cut an USB cable with A plug into half, connect it a receptacle and again measure that you have no short circuits. Then connect the test cable to PC and verify that you see
  black GND
  green 0V
  white 0V
  red +5V
-:#Freerunner is shipped with a mini-B-to-A-plug cable. Connect this to a receptable.
-:#(Optional)Connect test cable to another receptable and verify that you see
+:#Freerunner is shipped with a mini-B-to-A-plug cable. Connect this to a receptacle.
+:#(Optional)Connect test cable to the other receptacle and verify that you see
  black GND
  green 0V
  white 0V
@@ -92,14 +96,14 @@ when freerunner acts as a device and
  white 0V
  red +5V
 when it acts as a host.
-:#At your own risk, switch freerunner to USB host mode and connect an USB device to a receptable. Here's how the setup should look like:
+:#At your own risk, switch freerunner to USB host mode and connect an USB device to the other receptacle of the adapter. Here's how the setup should look like:
 
 [[Image:Usb-gender-changer1.jpg]]
 [[Image:Usb-gender-changer2.jpg]]
 
 === Compatibility ===
 
-The adapter works with kingston data traveller 4G memory stick and aiptec pencam webcam. However, for some reason it did not work with any of the tested USB keyboards or mice:
+The adapter works with kingston data traveller 4G memory stick and aiptec pencam webcam. However, for some reason (probably the missing 15k resistors at D+ and D-) it did not work with any of the tested USB keyboards or mice:
  usb 1-2: new full speed USB device using s3c2410-ohci and address 24
  usb 1-2: device descriptor read/64, error -62
  usb 1-2: device descriptor read/64, error -62
