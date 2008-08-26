@@ -1,24 +1,49 @@
-== The Neo1973 as a USB host ==
-The Neo1973's mini-USB port can be configured to act as a usb host instead of a usb device. This opens up a range of possibilities, such as USB cameras and usb input devices.
+== USB host ==
+The mini-USB port on both the Neo 1973 and the Neo FreeRunner supports both USB host and USB device. This opens up a range of possibilities, such as adding USB cameras and USB input devices.
 
-This used to require a kernel patch provided [http://bugzilla.openmoko.org/cgi-bin/bugzilla/show_bug.cgi?id=876 as an attachment in Bugzilla], but that same page now details how to do this <i>without</i> any kernel hacking:
-
-
-Tell the device that it is logically a host:
+By default, the mini-USB port is in device mode. To tell the device that it is logically a host:
 
  echo "host" > /sys/devices/platform/s3c2410-ohci/usb_mode
 
-Instruct the device to provide 5 volts:
+Instruct the device to provide 5 volts (not available on Neo 1973):
 
  echo "1" > /sys/devices/platform/neo1973-pm-host.0/hostmode
 
+Note: You may want to run <code>ifconfig usb0 down</code> prior to switching to USB host mode, as the Neo's USB networking may not like having its USB port disappear. You'll probably want to ssh into your Neo over WiFi or Bluetooth before starting all of this, alternatively use an on screen keyboard.
 
-Note: You may want to run <code>ifconfig usb0 down</code> prior to switching to usb host mode, as the Neo's usb networking may not like having its USB port disappear. You'll probably want to ssh into your Neo over WiFi or Bluetooth before starting all of this, alternatively use an on screen keyboard.
+=== Providing power to connected USB devices while in host mode ===
 
-=== Three-Headed Cable ===
+Normally, USB host ports provide power to any connected USB device. In the case of portable handheld devices, this power may be limited. (Usually the battery is sized to power the handheld device alone, and to maximize standby time.) 
+
+Available power in host mode is limited to 100mA on the Neo FreeRunner, and no power is available in host mode on the Neo 1973. If your USB devices consumes less than 100mA, you may connect it directly to your Neo FreeRunner.
+
+If your USB device consumes more than 100mA, or if your Neo is a Neo 1973, you can provide power  by using a powered USB hub (see below), or by manually injecting power into the attached USB device via a modified USB cable (described further below).
+
+=== Powered USB hubs known to work with the Neo ===
+
+(please add any known to work)
+
+=== Providing power to run and charge the Neo while in host mode ===
+
+A slightly separate issue is power to run and charge the Neo itself. When the USB port is in device mode, the Neo can be powered and recharged via the USB port, but when in standard host mode, the Neo FreeRunner is set to provide power and does not charge. Fortunately, control of the direction of power (in or out) is independent of the personality of the USB port (host or device):
+
+To recap, the direction of power can be controlled:
+
+Set to 0 (default), no power is provided at the USB port, charging is enabled, and host 15K pulldowns are removed from D+ and D-:
+
+ echo "0" > /sys/devices/platform/neo1973-pm-host.0/hostmode
+
+Set to 1, provides up to 100mA USB power at the USB port (FreeRunner only), disables charging from USB, and applies 15K pulldowns to USB D+ and D-:
+
+ echo "1" > /sys/devices/platform/neo1973-pm-host.0/hostmode
+
+Next, power must somehow be injected. A powered USB hub only provides power to the connected devices, but not to the connected host, so the only solution here is to create a custom cable which will inject power into the host.
+
+=== Modified USB cable to inject power while in host mode ===
+
 Three-headed cables are required if you want to power the FreeRunner / USB device whilst in host mode.  For many uses the FreeRunner provides sufficient power to make such a cable unnecessary. At the moment, you'll have to manufacture this one yourself. You need to make a cable with three ends:
 
-* A mini-usb type B cable for the Neo itself
+* A mini-USB type B cable for the Neo itself
 * A cable of whatever type to go to your USB device.
 * A cable going to a +5V voltage source with enough power for your device and to charge the Neo. This could be a wall charger or even another USB plug.
 
@@ -67,7 +92,7 @@ when freerunner acts as a device and
  white 0V
  red +5V
 when it acts as a host.
-:#At your own risk, switch freerunner to USB host mode and connect an usb device to a receptable. Here's how the setup should look like:
+:#At your own risk, switch freerunner to USB host mode and connect an USB device to a receptable. Here's how the setup should look like:
 
 [[Image:Usb-gender-changer1.jpg]]
 [[Image:Usb-gender-changer2.jpg]]
