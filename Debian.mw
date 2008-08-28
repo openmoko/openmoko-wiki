@@ -25,6 +25,17 @@ Issues:
 
 * [[User:Phyce|Phyce]] 21:33, 20 August 2008 (UTC)  installed apm without problems; apm -s shutdowns the freerunner but I couldn't wake it up with power button... I had to remove the battery to boot again. suspend/resume was working quite reliably with latest kernels on ASU.
 
+* [[User:Morlac|Morlac]] 00:48, 29 August 2008 (CEST)  here a way for working suspend/resume: 
+first: disable service apmd 
+ mv /usr/bin/apm /usr/bin/apm.o
+creating /usr/bin/apm with following content:
+ ---- snip ----
+ #!/bin/sh
+ echo 1 > /sys/module/glamo_mci/parameters/sd_idleclk
+ apm.o ${*}
+ echo 0 > /sys/module/glamo_mci/parameters/sd_idleclk
+ ---- snap ---
+
 == Time ==
 
 The default time zone is UTC.  Reconfigure it by running
