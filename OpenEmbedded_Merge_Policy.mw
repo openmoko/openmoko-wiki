@@ -1,0 +1,23 @@
+= OpenEmbedded Merge Policy =
+What to check when merging upstream [http://www.openembedded.org OpenEmbedded] into the [http://git.openmoko.org/?p=openmoko.git;a=shortlog;h=org.openmoko.dev org.openmoko.dev] branch.
+
+== Compile check ==
+Make sure that a build from scratch is still working. This is specially interesting when a toolchain upgrade has happened or other major components were changed.
+
+=== Do not remove packages from task-openmoko-feed ===
+If packages from the task-openmoko-feed are not buildable anymore do not remove them but make them build. If it was removed from [http://www.openembedded.org OpenEmbedded] look at the reason and make a decision.
+
+== Check version numbers ==
+The upgrade path is important to us. Make sure that version numbers do not jump backwards but increase. This is one of the reasons we add .XY to the PR instead of increasing it by one.
+
+== Version policy ==
+[http://www.openembedded.org OpenEmbedded] has a versioning policy but is not following it. We have to fix that for them, sometimes we need to bump the PE to make the upgrade working.
+* Make sure that PR is not inside the PV (a hack for git base files)
+* Make everything but cvs SRCREV based (instead of SRCDATE)
+* Make sure that there are sane-srcrev's for the packages or add them
+* Move the SRCREVs from the bb file into sane-srcrev's
+* Use SRCPV for the Openmoko tree instead of SRCREV in the PV variable
+* make sure +gitr${SRCPV}, +svnr${SRCPV} (note the 'r') is present.
+
+== Merge early and often ==
+With merging early and often (regularly like every week) the adjustments we have to make and test should be managable.
