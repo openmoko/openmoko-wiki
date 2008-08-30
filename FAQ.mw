@@ -1,5 +1,7 @@
 {{Languages|FAQ}}
-Frequently Asked Questions... with answers included!
+
+{{NOTE:Substantial work in progress!!!!}}
+
 
 ==Introduction== 
 
@@ -112,6 +114,72 @@ For FreeRunner
 A: In a conventional closed phone, the handset maker and the mobile network operator work together to provide a service to you that best suits their business model.    The capabilities of a modern smartphone equipped with GPS, Wifi and bluetooth are amazing and the result is that many features are "locked down" because they do not suit the network operator.    Up until now it has been difficult to buy a phone on which you have freedom to install sofware which is not controlled by the network operators - Openmoko changes that!
 
 A: A list of examples of "closed" behaviour has been started here - [[Problems of typical "closed" phones]]
+
+== Getting Started with your Neo FreeRunner ==
+
+=== 2007.2 factory default software image ===
+
+==== Where can I download and reinstall the factory default image? ====
+
+:Have a look here: http://wiki.openmoko.org/wiki/Flashing_the_Neo_FreeRunner
+
+
+==== How do I save file in 'vi' or escape the edit mode? ====
+
+:Type <tt>:q</tt> or <tt>:q!</tt> to quit, or <tt>ZZ</tt> to save.
+
+:With default image you can't escape edit mode, due to the missing Esc key. You need to [[Switching_Keyboards|install a new on-screen keyboard]], and in order to do this you'll need to [[Getting_Started_with_your_Neo_FreeRunner#Set_up_USB-based_networking_and_update|set up USB networking]] first. You can then SSH into the Freerunner from your computer and use the keyboard on that computer to edit files in vi. Alternative on-screen keyboards feature an escape key.
+
+
+==== How do I enter the /, | or > characters? ====
+
+:With default image these keystrokes are missing from the 0 button, due to a bug.
+:This can be fixed by editing <tt>/etc/multitap-pad/im-multipress.conf</tt>, see [[Switching_Keyboards#Fix_Default| this page]], but unfortunately you need vi, or some other editor to do so.
+:Therefore you need to SSH in and [[Getting_Started_with_your_Neo_FreeRunner#Set_up_USB-based_networking_and_update|set up USB networking]] first.
+:Alternative on-screen keyboards should have these characters.
+
+
+==== When running `opkg update` I get "Signature Check Failed" errors. ====
+
+:This is normal - the signatures are missing from the repository.
+:As long as the Packages.gz files are downloading ok then don't worry about it for the moment.
+:Just try running <tt>opkg upgrade</tt> - if this is  the first time you've tried updating your phone then you should see quite a number of packages upgrading.
+
+
+==== The SSH / Dropbear connections over the USB link frequently freezes. ====
+
+:This happens when the phone goes to sleep after a few minutes. To unfreeze, unplug and replug the USB cable. To stop this from happening, hold on the Power button to get the Power menu, then choose Power Management: Disabled.
+
+
+==== My device is unresponsive, how should I hard reboot? ====
+
+:You may need to reboot your openmoko from time to time if it freezes. For different boot methods, see [[Booting the Neo FreeRunner]].
+
+
+
+=== ASU software image ===
+
+==== Why are the buttons in TangoGPS too large? The zoom out is missing!
+TangoGPS was fine in 2007.2! ====
+
+:There is no GTK engine or theme installed with the ASU build.  Fortunately, this is easy to fix!
+
+:At a terminal:
+:<tt># opkg install moko-gtk-theme moko-gtk-engine</tt>
+:<tt># ln -s /usr/share/themes/Moko/gtk-2.0/gtkrc /home/root/.gtkrc-2.0</tt>
+
+:Now you have pretty colors and widgets, but the font is too big.  Edit <tt>/usr/share/themes/Moko/gtk-2.0/gtkrc</tt> in your favorite text editor and add the following line:
+:<tt>gtk-font-name = "Sans 4"</tt>
+
+:To use the openmoko icon theme, install it with:
+:<tt># opkg install openmoko-icon-theme-standard2</tt>
+
+:and enable it editing the <tt>/usr/share/themes/Moko/gtk-2.0/gtkrc</tt> adding the line:
+:<tt>gtk-icon-theme-name="openmoko-standard"</tt>
+
+:You shouldn't even need to restart the device, although you will need to restart any GTK-based programs.
+
+
 
 ==Software==
 
