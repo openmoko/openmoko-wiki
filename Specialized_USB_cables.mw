@@ -17,36 +17,9 @@ Alternately, an adapter capable of connecting two type A plugs will allow attach
 (digikey part number for cable)
 (construction instructions)
 
-==USB cable for inject power while in host mode ==
+=== How to make a type B jack to a type A jack adapter (gender changer) ===
 
-Attached USB devices may require more current than the 500mA that the FreeRunner can deliver.
-
-A specialized cable is required when attaching the Neo to a USB device.
-
-
-
-=== Modified USB cable to 
-
-Three-headed cables are required if you want to power the FreeRunner / USB device whilst in host mode.  For many uses the FreeRunner provides sufficient power to make such a cable unnecessary. At the moment, you'll have to manufacture this one yourself. You need to make a cable with three ends:
-
-* A mini-USB type B cable for the Neo itself
-* A cable of whatever type to go to your USB device.
-* A cable going to a +5V +/-10%(max!) power supply with enough power for your device and to charge the Neo. This could be a wall charger or even another USB plug.
-
-You connect the Data+ and Data- wires of the Neo and the device, and connect all of the ground wires together and all of the +5V wires together. This powers the Neo and the device, while letting the neo talk to the device.
-You have to connect 2pcs  15kOhm resistors, one from D+ to ground, and one from D- to ground, to comply with USB-spec for hostmode, as Neo is switching off the internal resistors when you enable charging/powering over USB by asserting EN_USBHOST.
-See schematics, LOCATION:49XX
-
-Just for reference, the USB wires from left to right are:
-*Black: Power -
-*Green: Data -
-*White: Data +
-*Red: Power +
-
-The Mini_USB-B connector has a fifth pin, the ID-pin.
-This pin is supposed to be short to ground to signal Freerunner to enter hostmode. For the Y-cable and enabling external power while in hostmode, you may connect a 47kOhm resistor from ID-pin to ground. This is the same trick the OM-wallcharger uses to signal to Freerunner it can charge with 1A. Future kernels should switch to hostmode + external power when seeing this 47k resistor.
-
-== DIY USB host adapter ==
+This community provided instruction shows how to build an adapter from a USB socket salvaged from a computer motherboard.
 
 Note that these instructions are provided in the hope that they are useful but without any warranty!
 
@@ -78,7 +51,7 @@ when it acts as a host.
 [[Image:Usb-gender-changer1.jpg]]
 [[Image:Usb-gender-changer2.jpg]]
 
-=== Compatibility ===
+==== Compatibility ====
 
 The adapter works with kingston data traveller 4G memory stick and aiptec pencam webcam. However, for some reason (probably the missing 15k resistors at D+ and D-) it did not work with any of the tested USB keyboards or mice:
  usb 1-2: new full speed USB device using s3c2410-ohci and address 24
@@ -107,9 +80,38 @@ and connect the keyboard to the hub then it is correctly recognized:
 
 With the hub I can also use both keyboard and usb memory stick at the same time.
 
-=== Power consumption ===
+==== Power consumption ====
 
 When I unplug the USB hub (with only keyboard connected to it) the power consumption estimate at /sys/devices/platform/bq2700-battery.0/power_supply/bat/current_now decreases from 175000 to 145000 (are these microamperes?).
+
+== How to make a USB cable for powering attached USB devices and charging the Neo while in host mode ==
+
+This cable might be necessary for a number of reasons, e.g. 
+
+* The application requires that the Neo not become suspended
+* The application requires long run time
+* The attached USB device consumes a lot of power
+
+These instructions will show you how to make a cable with 3 ends:
+
+* A mini-USB type B cable for the Neo itself
+* A cable of whatever type to go to your USB device.
+* A cable going to a +5V +/-10%(max!) power supply with enough power for your device and to charge the Neo. This could be a wall charger or even another USB plug.
+
+You connect the Data+ and Data- wires of the Neo and the device, and connect all of the ground wires together and all of the +5V wires together. This powers the Neo and the device, while letting the neo talk to the device.
+You have to connect 2pcs  15kOhm resistors, one from D+ to ground, and one from D- to ground, to comply with USB-spec for hostmode, as Neo is switching off the internal resistors when you enable charging/powering over USB by asserting EN_USBHOST.
+See schematics, LOCATION:49XX
+
+Just for reference, the USB wires from left to right are:
+*Black: Power -
+*Green: Data -
+*White: Data +
+*Red: Power +
+
+The Mini_USB-B connector has a fifth pin, the ID-pin.
+This pin is supposed to be short to ground to signal Freerunner to enter hostmode. For the Y-cable and enabling external power while in hostmode, you may connect a 47kOhm resistor from ID-pin to ground. This is the same trick the OM-wallcharger uses to signal to Freerunner it can charge with 1A. Future kernels should switch to hostmode + external power when seeing this 47k resistor.
+
+
 
 
 [[Category:Neo1973 Hardware]]
