@@ -37,43 +37,22 @@ Now you must power up the GPS-chip by opening the "Settings" application and set
 
 Tangogps is a very nice GPS mapping application.  The latest version is available in [[Debian]].
 
-Unfortunately it depends on gpsd which conflicts with frameworkd in fso-frameworkd.
+It depends on gpsd which conflicts with frameworkd in fso-frameworkd, but there is a package available that provides
+the gpsd interface to clients while using the services of the FSO frameworkd daemon, fso-gpsd. To install tangogps run
 
- # apt-get install gpsd tangogps
+ # apt-get install fso-gpsd tangogps
 
-Edit <code>/etc/frameworkd.conf</code>.  In the section <code>[ogpsd]</code>, edit to read:
-<pre>
-# path = /dev/ttySAC1
-path = /dev/null
-</pre>
-
- /etc/init.d/fso-frameworkd restart
- /etc/init.d/zhone-session stop && sleep 2 && /etc/init.d/zhone-session start 
-
- # dpkg-reconfigure gpsd
-
-* Start gpsd automatically on boot? Yes.
-* Device the GPS receiver is attached to: /dev/ttySAC1
-* Should gpsd handle attached USB GPS receivers automatically? Yes
-** not certain what this answer should be
-* Options to gpsd: none
-
-
-Start tangogps like this:
-
- # echo 1 >/sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/neo1973-pm-gps.0/pwron
-Turns the GPS on.
-
- # DISPLAY=:0 tangogps
-
+To turn the gps on, you have two options.
+You can start the gps application in [[Zhone]], this will turn on the gps device for you or you can manually turn
+on the gps device using
+  # echo 1 >/sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/neo1973-pm-gps.0/pwron
 
 '''Issues:'''
-* The different daemons for reading GPS data mean that both tangogps and the framework demo GPS application can't be configured to work at the same time.  Reboots are probably necessary when switching between them.
-** Both gpsd and the framework publish GPS data through dbus, though with different interfaces.  This suggests a number of possible solutions.
-*** gpsd or the framework could implement the other's interface (along with their own).
-*** a translator could read one interface and emulate the other
-*** the framework could have an option to read data from gpsd.
-*** opgsd/gypsy could be extended to be backwards compatible with the majority of gps applications.
+* Both gpsd and the framework publish GPS data through dbus, though with different interfaces.  This suggests a number of possible solutions.
+** gpsd or the framework could implement the other's interface (along with their own).
+** a translator could read one interface and emulate the other. This is what fso-gpsd does.
+** the framework could have an option to read data from gpsd.
+** opgsd/gypsy could be extended to be backwards compatible with the majority of gps applications.
 
 == Downloading Maps for offline use ==
 tangoGPS can bunch-download the map images so you don't need an internet connection while walking around. By default tangoGPS stores downloaded maps to /tmp/. This folder is lost every time you reboo the device. But you can use the "Config" tab within tangoGPS to change the "Cache Dir" location to , for example, /osm/ . So downloaded maps will be kept in the Neos flash, also after reboot. This works fine on OM2007.2 and Debian. If this config gets lost during reboot file a bug against your distro.
