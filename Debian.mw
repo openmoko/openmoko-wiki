@@ -25,16 +25,14 @@ Issues:
 
 * [[User:Phyce|Phyce]] 21:33, 20 August 2008 (UTC)  installed apm without problems; apm -s shutdowns the freerunner but I couldn't wake it up with power button... I had to remove the battery to boot again. suspend/resume was working quite reliably with latest kernels on ASU.
 
-* [[User:Morlac|Morlac]] 00:48, 29 August 2008 (CEST)  here a way for working suspend/resume: 
-first: disable service apmd 
- mv /usr/bin/apm /usr/bin/apm.o
-creating /usr/bin/apm with following content:
- ---- snip ----
+To wake up successfully, the idle-clock of the SD card needs to be enabled right before suspend. It can be disabled again right after resume (this reduces GPS interference). Write into /etc/apm/suspend.d/00sd_idleclk 
+ #!/bin/sh 
+ echo 1 > /sys/module/glamo_mci/parameters/sd_idleclk 
+ touch /home/root/.profile
+and into /etc/apm/resume.d/00sd_idleclk 
  #!/bin/sh
- echo 1 > /sys/module/glamo_mci/parameters/sd_idleclk
- apm.o ${*}
- echo 0 > /sys/module/glamo_mci/parameters/sd_idleclk
- ---- snap ---
+ echo 0 > /sys/module/glamo_mci/parameters/sd_idleclk 
+These are from -stacy on the community list.
 
 == Time ==
 
