@@ -105,6 +105,36 @@ The only atypical part of using bluetooth on the FreeRunner is turning it on, wh
 Then the device should be visible using
  # hcitool dev
 
+== Running X as normal user ==
+
+First you need to create a user
+<pre>
+# useradd -m -G audio,dialout,floppy,video username
+# passwd username
+</pre>
+Then you need to stop zhone-session and disable it on boot
+<pre>
+# /etc/init.d/zhone-session
+# update-rc.d -f zhone-session remove
+</pre>
+
+Now you need to setup autologin and startup of X for the user you created. There are several ways of doing this, one
+method is using <code>rungetty</code>
+<pre>
+# apt-get install rungetty
+# cp /usr/bin/zhone-session ~username/.xinitrc
+# chown username.username ~username/.xinitrc
+</pre>
+Then edit <code>/etc/inittab</code> and change
+ 1:2345:respawn:/sbin/getty 38400 tty1
+to
+ 1:2345:respawn:/sbin/rungetty -u username -g username tty1 /usr/bin/xinit /etc/X11/Xsession /home/username/.xinitrc
+To activate the change and start up X
+<pre>
+# init q
+# pkill getty
+</pre>
+
 = Software =
 == TangoGPS ==
 {{main|TangoGPS}}
