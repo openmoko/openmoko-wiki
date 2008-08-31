@@ -6,7 +6,7 @@ First, you must specify the characteristics of the USB connection as a network d
 
  YaST -> Network Devices -> Network Card
 
-The network configuration utility will ask you to choose between a setup based on the Network Manager app, or by using ifup. These instructions were written with the latter chosen, though it may very well work using the Network Manager. In the next menu, you will see a list of network devices. If YaST recognizes the connected Freerunner, there will be one device with a name like "RNDIS ethernet gadget". You may select "Edit" to configure this device, or, if it is not present, "Add" it and continue.
+The network configuration utility will ask you to choose between a setup based on the Network Manager app, or by using ifup. These instructions were written with the latter chosen, though it may very well work using the Network Manager. In the next menu, you will see a list of network devices. If YaST recognizes the connected FreeRunner, there will be one device with a name like "RNDIS ethernet gadget". You may select "Edit" to configure this device, or, if it is not present, "Add" it and continue.
 
 In the "Edit" dialog, under the <i>Address</i> tab, choose "Static Address Setup" and set:
 
@@ -24,7 +24,7 @@ This will allow for the configuration of the firewall, which comes later. Click 
 
 == Enable IP Forwarding ==
 
-To use your host PC as a router for the Freerunner, you must implement IP forwarding. This is also done in YaST:
+To use your host PC as a router for the FreeRunner, you must implement IP forwarding. This is also done in YaST:
 
  YaST -> Network Services -> Routing
 
@@ -32,7 +32,7 @@ At the bottom of the dialog, enable "IP Forwarding"; no default gateway is neces
 
 == Configure Firewall ==
 
-The firewall must be configured to allow traffic to and from the Freerunner. Start by:
+The firewall must be configured to allow traffic to and from the FreeRunner. Start by:
 
  YaST -> Security and Users -> Firewall
 
@@ -40,14 +40,14 @@ The firewall must be configured to allow traffic to and from the Freerunner. Sta
 
 == Configure NAT ==
 
-After configuring and starting the USB interface, engaging the host PC as a router, and opening the firewall. You may add a route to  the Freerunner and start network address translation (NAT). It may be best to write short scripts to perform these actions, so they may be invoked without remembering or typing them. In one script, <b>neoFRup.sh</b>, place the commands:
+After configuring and starting the USB interface, engaging the host PC as a router, and opening the firewall. You may add a route to  the FreeRunner and start network address translation (NAT). It may be best to write short scripts to perform these actions, so they may be invoked without remembering or typing them. In one script, <b>neoFRup.sh</b>, place the commands:
 
  #! /bin/sh
  /sbin/route add -host 192.168.0.202/32 dev usb0
  iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
  iptables -P FORWARD ACCEPT
 
-This script will add the Freerunner to the route tables and enable NAT, so you should now be able to connect to your phone with:
+This script will add the FreeRunner to the route tables and enable NAT, so you should now be able to connect to your phone with:
 
  # ssh root@192.168.0.202
 
