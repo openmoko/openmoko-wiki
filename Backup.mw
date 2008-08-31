@@ -92,6 +92,26 @@ A failed run of dfu-util looks like this:
 And shows errors demsg like this:
  usb 5-2: usbfs: USBDEVFS_CONTROL failed cmd dfu-util rqt 161 rq 2 len 4096 ret -110
 
+=== Backing-up flash images (alternative) ===
+
+On the device:
+ mkdir /var/tmp/root
+ mount /dev/root /var/tmp/root
+
+On your workstation:
+ ssh root@192.168.0.202 "mkfs.jffs2 -d /var/tmp/root -e 128 --pad --no-cleanmarkers" | pv -W > rootfs.jffs2
+(The "| pv -W" is optional, it just gives you something to watch as the bytes fly by.)
+
+On the device:
+ umount /var/tmp/root
+
+=== Backing-up in a tar archive ===
+
+ ssh root@192.168.0.202 "tar c /bin /etc /home /lib /opt /sbin /tmp /usr /var" | pv -W > rootfs.tar
+(The "| pv -W" is optional, it just gives you something to watch as the bytes fly by.)
+
+Extract it and use <code>mkfs.jffs2</code> if you want convert it to a jffs2 image.
+
 ==Backup Scripts==
 
 If you plan on backing up frequently, using a script will simplify the process:
