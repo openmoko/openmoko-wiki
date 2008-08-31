@@ -5,19 +5,26 @@
 There is a collection of known FreeRunner hardware issues at the wiki page [[Freerunner_Hardware_Issues]]; reading that page could help you quickly solve those issues.
 
 ==Booting==
-'''Q: I can't boot Neo with charger?'''  
+'''Q: Why won't the FreeRunner boot even with the charger connected?'''  
 
 '''A:'''
-1. You can't boot GTA02 without a spare battery. You should boot Neo with spare battery and attach your charger, then you can boot into neo.
+1. Early builds of the FreeRunner<sup>1</sup> have the issue that the phone needs to boot fully to enable charging of the battery. However, current supplied via the charger is not sufficient to boot the phone; some power is required from the battery as well (see http://n2.nabble.com/FreeRunner-is-completely-dead-tp683923p683928.html). If you've let your battery discharge totally, the only (recommended<sup>2</sup>) way to boot the FreeRunner is with a spare battery. If you don't have a spare battery specifically for the FreeRunner, you can also use a Nokia battery (see [[Neo FreeRunner Battery]] for a list of compatible batteries). Put in the spare battery and plug in your charger, and let the phone boot.
 
-2. Once your phone is booted, remove the spare battery. Freerunner will remain running, 
+*<sup>1</sup> http://n2.nabble.com/HW-problems-...-tp759770p759791.html and http://n2.nabble.com/HW-problems-...-tp759770p760234.html imply that FreeRunners built during and after July 2008 no longer have this problem, but this has not been officially confirmed.
 
-3. Insert dead battery and let it charge.
+*<sup>2</sup> Andy Green mentions possible alternate approaches at http://n2.nabble.com/Dead-battery-tp735397p735419.html and http://n2.nabble.com/FreeRunner-is-completely-dead-tp683923p684209.html - these are entirely at your risk and are NOT recommended!
+
+2. Once your phone has booted, remove the spare battery. The FreeRunner should continue running on power drawn from the charger.
+
+3. Insert the dead battery and let it charge.
 
 '''Q: Unable to flash FreeRunner after booting either into NAND or NOR.'''
-'''A:''' {{note|Please check [[Getting_Started_with_your_Neo_FreeRunner]] for more information about the flashing image.}}
+
+'''A:''' {{note|Please check [[Getting_Started_with_your_Neo_FreeRunner]] for more information about flashing new images to your phone.}}
  
 '''Q: I can ssh into the phone via USB per the wiki instructions, but dfu-util does not find the phone. '''  
+
+{{note|The information below does not seem to answer the question, which states a problem with '''dfu-util''' and not with SSH over USB Ethernet networking --[[User:Eddsouza|eddsouza]] 06:47, 31 August 2008 (UTC)}}
 
 '''A:'''
 This is what I need to run as root and the everything works fine:
@@ -43,15 +50,29 @@ This is what I need to run as root and the everything works fine:
  iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
  root(eno,freerunner)#
 
-'''Q: What image version is used?''' 
+'''Q: What image versions are in use on the phone?'''
 
-'''A:'''
-
-1. Kernel version using: uname -a
-
-2. Root filesystem using: cat /etc/version or cat /etc/om-version
-
-3. u-boot using: grep  Bootloader /dev/mtdblock0
+'''A:''' You can run the commands given below on the phone (in an SSH session from your host PC, or in the Terminal application on the phone itself)
+{| border="1" cellspacing="0" cellpadding="5" align="left"
+! To find out
+! Run
+|- 
+| Kernel version that is currently running (you could have more than one distribution on your phone)
+| 
+  uname -a
+|-
+| The version of the root filesystem that you are currently using
+| 
+  cat /etc/version 
+or 
+  cat /etc/om-version
+|-
+| The versions of u-boot on the phone (The FreeRunner has one u-boot image in NOR memory, and one in NAND - see [[Booting the Neo FreeRunner]] for more information)
+| 
+  grep  Bootloader /dev/mtdblock0  (yields the NOR u-boot version)
+or
+  grep  Bootloader /dev/mtdblock1  (yields the NAND u-boot version)
+|}
 
 == Battery ==
 === What is the expected battery life? ===
