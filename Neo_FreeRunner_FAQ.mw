@@ -8,24 +8,47 @@ There is a collection of known FreeRunner hardware issues at the wiki page [[Fre
 '''Q: Why won't the FreeRunner boot even with the charger connected?'''  
 
 '''A:'''
-1. Early builds of the FreeRunner<sup>1</sup> have the issue that the phone needs to boot fully to enable charging of the battery. However, current supplied via the charger is not sufficient to boot the phone; some power is required from the battery as well (see http://n2.nabble.com/FreeRunner-is-completely-dead-tp683923p683928.html). If you've let your battery discharge totally, the only (recommended<sup>2</sup>) way to boot the FreeRunner is with a spare battery. If you don't have a spare battery specifically for the FreeRunner, you can also use a Nokia battery (see [[Neo FreeRunner Battery]] for a list of compatible batteries). Put in the spare battery and plug in your charger, and let the phone boot.
+Early builds of the FreeRunner<sup>1</sup> have the issue that the phone needs to boot fully to enable charging of the battery. However, current supplied via the charger is not sufficient to boot the phone; some power is required from the battery as well<sup>2</sup>. If you've let your battery discharge totally, the only recommended<sup>3</sup> way to boot the FreeRunner is with a spare battery. If you don't have a spare battery specifically for the FreeRunner, you can also use a Nokia battery (see [[Neo FreeRunner Battery]] for a list of compatible batteries). 
 
-*<sup>1</sup> http://n2.nabble.com/HW-problems-...-tp759770p759791.html and http://n2.nabble.com/HW-problems-...-tp759770p760234.html imply that FreeRunners built during and after July 2008 no longer have this problem, but this has not been officially confirmed.
-
-*<sup>2</sup> Andy Green mentions possible alternate approaches at http://n2.nabble.com/Dead-battery-tp735397p735419.html and http://n2.nabble.com/FreeRunner-is-completely-dead-tp683923p684209.html - these are entirely at your risk and are NOT recommended!
+1. Put in the spare battery and plug in your charger, and let the phone boot.
 
 2. Once your phone has booted, remove the spare battery. The FreeRunner should continue running on power drawn from the charger.
 
 3. Insert the dead battery and let it charge.
 
+Notes:
+
+*<sup>1</sup> http://n2.nabble.com/HW-problems-...-tp759770p759791.html and http://n2.nabble.com/HW-problems-...-tp759770p760234.html imply that FreeRunners built during and after July 2008 no longer have this problem, but this has not been officially confirmed.
+
+*<sup>2</sup> see http://n2.nabble.com/FreeRunner-is-completely-dead-tp683923p683928.html
+
+*<sup>3</sup> Andy Green mentions possible alternate approaches at http://n2.nabble.com/Dead-battery-tp735397p735419.html and http://n2.nabble.com/FreeRunner-is-completely-dead-tp683923p684209.html - '''these are entirely at your risk and are NOT recommended!'''
+
+
 '''Q: Unable to flash FreeRunner after booting either into NAND or NOR.'''
 
 '''A:''' {{note|Please check [[Getting_Started_with_your_Neo_FreeRunner]] for more information about flashing new images to your phone.}}
  
-'''Q: I can ssh into the phone via USB per the wiki instructions, but dfu-util does not find the phone. '''  
+'''Q: I can ssh into the phone via USB per the wiki instructions, but dfu-util does not find the phone. '''
 
-{{note|The information below does not seem to answer the question, which states a problem with '''dfu-util''' and not with SSH over USB Ethernet networking --[[User:Eddsouza|eddsouza]] 06:47, 31 August 2008 (UTC)}}
+'''A:''' In brief, you need to restart (or power on) the phone to get to the NOR u-boot menu before dfu-util will be able to connect. dfu-util uses the USB DFU (Universal Serial Bus Device Firmware Upgrade) protocol, which is only available at the u-boot menu, and '''not''' Ethernet over USB, which is what is available when the phone has booted fully. 
 
+Tip: If you're just trying out different distributions, you don't need to flash them with dfu-util; you can try out new distributions by putting them on the microSD card and booting from the card instead. If you'd like to do this instead of flashing, see [[Booting from SD]].
+
+To get the u-boot menu:
+# Press and hold the AUX button 
+# Press the Power button until the phone powers on and displays the boot menu
+# Release both buttons 
+# Press and release AUX to move the lightbar, so that the menu will not time out and boot the phone). 
+
+Also see the wiki pages/sections:
+* [[Booting the Neo FreeRunner]]
+* [[Device Firmware Upgrade]]
+* [[Flashing the Neo Freerunner]]
+* [[Dfu-util]]
+
+<!-- The (commented) information below does not seem to answer the question, which states a problem with '''dfu-util''' and not with SSH over USB Ethernet networking. Editors, please consider deleting commented information below. --[[User:Eddsouza|eddsouza]] 06:47, 31 August 2008 (UTC) -->
+<!--
 '''A:'''
 This is what I need to run as root and the everything works fine:
  root(eno,freerunner)# cat upom
@@ -49,15 +72,16 @@ This is what I need to run as root and the everything works fine:
  iptables -A OUTPUT -d 192.168.0.202 -o usb0  -j ACCEPT
  iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
  root(eno,freerunner)#
+-->
 
-'''Q: What image versions are in use on the phone?'''
+'''Q: How do I find out what image versions are in use on the phone?'''
 
 '''A:''' You can run the commands given below on the phone (in an SSH session from your host PC, or in the Terminal application on the phone itself)
 {| border="1" cellspacing="0" cellpadding="5" align="left"
 ! To find out
 ! Run
 |- 
-| Kernel version that is currently running (you could have more than one distribution on your phone)
+| Kernel version that is currently running
 | 
   uname -a
 |-
