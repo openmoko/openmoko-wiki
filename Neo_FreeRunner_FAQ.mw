@@ -5,7 +5,7 @@
 There is a collection of known FreeRunner hardware issues at the wiki page [[Freerunner_Hardware_Issues]]; reading that page could help you quickly solve those issues.
 
 ==Booting==
-'''Q: Why won't the FreeRunner boot even with the charger connected?'''  
+=== Q: Why won't the FreeRunner boot even with the charger connected? ===
 
 '''A:'''
 Early builds of the FreeRunner<sup>1</sup> have the issue that the phone needs to boot fully to enable charging of the battery. However, current supplied via the charger is not sufficient to boot the phone; some power is required from the battery as well<sup>2</sup>. If you've let your battery discharge totally, the only recommended<sup>3</sup> way to boot the FreeRunner is with a spare battery. If you don't have a spare battery specifically for the FreeRunner, you can also use a Nokia battery (see [[Neo FreeRunner Battery]] for a list of compatible batteries). 
@@ -24,8 +24,32 @@ Notes:
 
 *<sup>3</sup> Andy Green mentions possible alternate approaches at http://n2.nabble.com/Dead-battery-tp735397p735419.html and http://n2.nabble.com/FreeRunner-is-completely-dead-tp683923p684209.html - '''these are entirely at your risk and are NOT recommended!'''
 
+=== Q: How do I find out what image versions are in use on the phone? ===
 
-'''Q: Unable to flash FreeRunner after booting either into NAND or NOR.'''
+'''A:''' You can run the commands given below on the phone (in an SSH session from your host PC, or in the Terminal application on the phone itself)
+{| border="1" cellspacing="0" cellpadding="5" align="left"
+! To find out
+! Run
+|- 
+| Kernel version that is currently running
+| 
+  uname -a
+|-
+| The version of the root filesystem that you are currently using
+| 
+  cat /etc/version 
+or 
+  cat /etc/om-version
+|-
+| The versions of u-boot on the phone (The FreeRunner has one u-boot image in NOR memory, and one in NAND - see [[Booting the Neo FreeRunner]] for more information)
+| 
+  grep  Bootloader /dev/mtdblock0  (yields the NOR u-boot version)
+or
+  grep  Bootloader /dev/mtdblock1  (yields the NAND u-boot version)
+|}
+
+
+=== Q: I'm unable to flash FreeRunner after booting either into NAND or NOR. ===
 
 '''A:''' {{note|Please check [[Getting_Started_with_your_Neo_FreeRunner]] for more information about flashing new images to your phone.}}
  
@@ -73,31 +97,6 @@ This is what I need to run as root and the everything works fine:
  iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
  root(eno,freerunner)#
 -->
-
-'''Q: How do I find out what image versions are in use on the phone?'''
-
-'''A:''' You can run the commands given below on the phone (in an SSH session from your host PC, or in the Terminal application on the phone itself)
-{| border="1" cellspacing="0" cellpadding="5" align="left"
-! To find out
-! Run
-|- 
-| Kernel version that is currently running
-| 
-  uname -a
-|-
-| The version of the root filesystem that you are currently using
-| 
-  cat /etc/version 
-or 
-  cat /etc/om-version
-|-
-| The versions of u-boot on the phone (The FreeRunner has one u-boot image in NOR memory, and one in NAND - see [[Booting the Neo FreeRunner]] for more information)
-| 
-  grep  Bootloader /dev/mtdblock0  (yields the NOR u-boot version)
-or
-  grep  Bootloader /dev/mtdblock1  (yields the NAND u-boot version)
-|}
-
 
 == Battery ==
 
