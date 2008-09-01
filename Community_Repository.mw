@@ -41,44 +41,9 @@ If you want your package to be shown on [[Om2008.8_Installer |Installer]], pleas
 For [http://code.google.com/p/comic-reader/source/browse/trunk/data/comic-reader_svn.bb example]:
  PKG_TAGS_${PN} = "group::games"
 
-= Add Repository on Neo = 
-== Add repositories by installing repository packages ==
-* The community-repository is installed by default in [[Om2008.8 | Om 2008.8]].
+== Adding the community repository to the package manager == 
 
-== Add repository manually ==
-* Create a file, here we call it community-repos.conf
- > echo "arch community-repos 50" > community-repos.conf
- > echo "src community-repos http://downloads.openmoko.org/repository/Multiverse/" >> community-repos.conf
-* Connect to your Neo with USB
- > sudo ifconfig usb0 192.168.0.200
- > scp community-repos.conf root@192.168.0.202:/etc/opkg/
-* Let your Neo connect to the Internet
-** For USB users:
- > ssh root@192.168.0.202
- > echo 1 | sudo tee  /proc/sys/net/ipv4/ip_forward
- > sudo iptables -t nat -A POSTROUTING -s 192.168.0.0/24 -j MASQUERADE
- > scp /etc/resolv.conf root@192.168.0.202:/etc/
-** For geek users:
- > ssh root@192.168.0.202
- > iwlist eth0 scan
- Find a usable AP lets say OpenMind (Support it's an open AP)
- > iwconfig eth0 essid OpenMind
- > udhcpc eth0
- Then pray, if successfull, remove default gw *twice*.
- > route -n  # to see your gateway of eth0 say 192.168.1.1
- > route del default
- > route del default
- > route add default gw 192.168.1.1 eth0
- Then you can ping wiki.openmoko.org for testing :)
-** For GUI WiFi user:
- Click Settings
- Click WiFi
- Select an AP
- Input password if needed
- 
-* Refresh the opkg metadata database
- after connecting to Neo
- > opkg update
+The community-repository is already installed by default in [[Om2008.8 | Om 2008.8]]. Otherwise, see instructions on the [http://wiki.openmoko.org/wiki/Om_2008.8_Installer installer page].
 
 = We need your help =
 We need reviewers who can review new packages. If you want to help, please send e-mail to the mailing list ''community-repository@lists.openmoko.org
