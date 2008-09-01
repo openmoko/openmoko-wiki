@@ -3,7 +3,7 @@
 
 There is a new (much simpler) way to build SHR that is under construction right now.
 
-=== First build ===
+=== Before beginning ===
 
 * Download the FSO/SHR ''Makefile'' and ''common'' directory from [http://shr.bearstech.com/ Bearstech] (see README for details). You can use this simple [http://hacks-galore.org/aleix/files/scripts/get-shr.sh script] (''wget'' needed, edit it to fulfill your needs), type:
 
@@ -17,7 +17,23 @@ for:
 
  export BBPATH="${TOPDIR}:${TOPDIR}/shr/openembedded:${TOPDIR}/openembedded:${TOPDIR}/bitbake"
 
-* Then run:
+=== Set up your local.conf ===
+
+Before building the image, you might want to update ''conf/local.conf'' (under ''shr-unstable'' in the top directory) to speed up the building process with:
+
+ PARALLEL_MAKE = "-j 4"
+ BB_NUMBER_THREADS = "4"
+
+To avoid multiple locales generation, add:
+
+ GLIBC_GENERATE_LOCALES = "en_US.UTF-8"
+
+this will also speed up the whole build.
+
+=== First build ===
+
+* You are now ready to build the SHR image:
+
  $ make setup
  $ cd shr-unstable
  $ make image
@@ -30,19 +46,6 @@ By default, this will build the image for OM-GTA02. If you want to build the ima
  $ make setup-machine-om-gta01
 
 you can change it back to OM-GTA02 with ''make setup-machine-om-gta02''.
-
-=== Set up your local.conf ===
-
-Before ''make image'', you might want to update ''conf/local.conf'' (under ''shr-unstable'' in the top directory) to speed up the building process with:
-
- PARALLEL_MAKE = "-j 4"
- BB_NUMBER_THREADS = "4"
-
-To avoid multiple locales generation, add:
-
- GLIBC_GENERATE_LOCALES = "en_US.UTF-8"
-
-this will also speed up the whole build.
 
 === Making changes ===
 
