@@ -50,8 +50,25 @@ In the UI, we have widgets like dialogs, menus, different objects like tags, map
  
 In control part, we have a nav object for controlling the navigation, showing the tileset.
 
-== Create Offline Maps ==
-'''Locations''' comes with a tool called '''om-locations-map-pack'''. It can be used to pack tile images downloaded from OSM server into a map package:
+== Maps ==
+
+=== Installation ===
+Maps can be installed from [http://wiki.openmoko.org/wiki/Om2008.8_Installer Installer].
+
+{| class="wikitable" cellspacing="0" cellpadding="0" style="padding: 0%; margin:0em 0em 1em 0em; border:1px solid #c0c0c0; background:#eeeeee; floating="center";width:100%; "
+! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:25% " |  
+[[Image:Install.png|200px|thumb|catogory]]
+! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:25% " |
+[[Image:Install_maps2.png|200px|thumb|choose map]]
+! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:25% " |
+[[Image:Install_maps3.png|200px|thumb|install map]]
+|}
+
+=== Create Your Own Maps ===
+
+{{Note | Map packing eats lots of memory and fails easily on NEO.}} 
+
+'''Locations''' comes with a tool called '''om-locations-map-pack'''. It can be used to pack tile images downloaded from the OSM server into a map package:
 
 <pre>
 om-locations-map-pack /tmp/diversity-maps my_map.eet
@@ -66,10 +83,31 @@ Place '''my_map.eet''' in either of the directories
 
 and '''Locations''' will find it automatically.
 
-Note that map packing eats lots of memory and fails easily on NEO.
-
 === Share Maps ===
 To share maps for other Neo users to install, see directions on how to * [[CommunityRepository#How_to_release_packages | Add a package to Openmoko Repository]]
+
+=== Use SD Card for Tile Storage (git only) ===
+By default, tiles downloaded from the OSM server are stored in '''/tmp/diversity-maps'''.  They disappear after rebooting.  This default path can be changed to, for example, use SD card by adding/editing one line
+<pre>
+tile_path = /media/card
+</pre>
+
+to '''~/.om-locations/config/om-locations.cfg'''.
+
+=== Download Tiles of a Region (git only) ===
+You can download tiles of a region by specifying '''-d''' option in '''om-locations-map-pack'''.  The usage is
+
+<pre>
+om-locations-map-pack -d version,source,min_level,max_level,lon,lat,width,height <tile-path>
+</pre>
+
+For example, to download tiles of Taipei and store them on the SD card, one can
+
+<pre>
+om-locations-map-pack -d 0,osm,5,16,121.5,25.0,0.1,0.1 /media/card
+</pre>
+
+Those important are the last four parameter, which gives the region to download.
 
 == Turn on logging ==
 For now, nmea logging is off by default. To get nmea log for being used, we can send dbus message after om-locations launched as below:
@@ -81,18 +119,6 @@ Then the log will be saved to /home/root/nmealog in this example.
 After om-locations terminated, logging will stop.
 
 The size of log file will increase soon. For now be warned, if the dbus message was sent again, then the log will be overrridden. So backup or do some hacking first before doing that.
-
-== Install Maps ==
-To install maps from [http://wiki.openmoko.org/wiki/Om2008.8_Installer Installer].
-
-{| class="wikitable" cellspacing="0" cellpadding="0" style="padding: 0%; margin:0em 0em 1em 0em; border:1px solid #c0c0c0; background:#eeeeee; floating="center";width:100%; "
-! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:25% " |  
-[[Image:Install.png|200px|thumb|catogory]]
-! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:25% " |
-[[Image:Install_maps2.png|200px|thumb|choose map]]
-! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:25% " |
-[[Image:Install_maps3.png|200px|thumb|install map]]
-|}
 
 == Reference ==
 [1] git repository of Locations - http://git.openmoko.org/?p=om-locations.git;a=summary
