@@ -27,6 +27,30 @@ Should the battery become  completely discharged, your options are:
 
 The first option is probably the easiest and most sensible.
 
+=== More tricks ===
+
+''Q: Does anyone know WHY it don't charge when it is off? My logic says that it is very important to have the option charge the battery when it is flat.''
+
+A: I can't give you a simple answer. Charging is controlled by the PCF50633 
+chip, based on configuration values that are written to it by u-boot, 
+Linux, and userspace programs. Some of these settings are preserved 
+across a power-cycle (the PCF50633 has a small backup battery that's 
+also used to keep the RTC running) so the behavior at startup depends on 
+the software that you used during your last session.
+
+Another complication is that some Freerunners are capable of starting up 
+without a battery while others are not (possibly due to different 
+capacitor values on the internal power rails).
+
+I can give a few hints:
+* The current (Sep. 2nd, 2008) u-boot has a bug that means it will not properly charge from the wall charger. Try a USB cable into a PC instead.
+* Try to boot into the NAND u-boot menu (hold power and then aux) and then select "power off". This may leave the device in a state were it will charge. Wait 15 minutes and then try to boot Linux.
+* Try booting through NOR u-boot instead (hold aux and then power) with either the wall charger or a 500mA USB connection, then try booting Linux.
+* If the device shuts off during one of the above attempts, let it sit for a few minutes and then try that same item once again
+
+Kudos to Mike Montour on the
+[http://lists.openmoko.org/pipermail/community/2008-September/029243.html| Community mailing list].
+
 == Compatible Replacement Batteries ==
 
 Other known FreeRunner-compatible batteries include the BL-series (BL-4X, BL-5X) from Nokia, and their third-party equivalents.
