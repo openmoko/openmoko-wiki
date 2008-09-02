@@ -1,5 +1,9 @@
 {{Application|Orrery}}
 
+----
+Please note: Some websites have links directly to the .ipk files for this program.   While it is very flattering that other people like the program enough to include a link to the .ipk file, those links will not automatically update when a newer .ipk file is uploaded.   So using one of those links might cause you to install an obsolete version of the program.   If your version of the code doesn't match the description below, please download the most recent version from here: [http://projects.openmoko.org/projects/orrery/]
+----
+
 == Overview ==
 The orrery is a simple open-source application for the Openmoko platform
 which displays the night (and day!) sky. It is nowhere near as elaborate as, for
@@ -51,10 +55,18 @@ symbolic representations of the solar system objects.
 
 [[Image:OrreryFullScreenConstellations.png|Orrery Full Screen Constellation]]
 
+The constellations are plotted in three colors.  The twelve zodiac
+colors are plotted in hot pink.  The constellations plotted in
+yellow are the classical Greek constellations, as listed in Ptolomy's
+Almagest.  The only constellation from the Almagest which is not
+plotted is Argo Navis, which is not one of the official modern
+constellations.   The remaining constellations, plotter in blue, where
+added during the last few hundred years.
+
 In addition to constellation names and figures, the Celestial Equator 
 (light yellow), Ecliptic (red) and Galactic Plane (blue-green) are shown.  
-Solar system objects are shown symbolically (see Mars, the Moon and the Sun
-in the above image).
+Solar system objects are shown symbolically (see Mercury, Venus,
+the Moon and the Sun in the above image).
 
 == Control Modes ==
 The orrery has two control modes, "finger mode" and "stylus mode".
@@ -76,24 +88,51 @@ In stylus mode, to exit from fullscreen you must tap in the area
 above the upper blue line, in the region where the time and location
 are displayed.   Tapping anywhere else toggles between the two screens.
 
-There is a check box in the display menu which allows you to turn finger mode on and off.
+There is a check box in the opts menu which allows you to turn finger mode on and off.
 
-One may enter fullscreen mode by tapping the fullscreen button at the
+One may enter fullscreen mode by tapping the FS button at the
 bottom left of the display.
 
 == Menus ==
-When not in fullscreen mode, three menus are displayed at the bottom of
-the screen.
+When not in fullscreen mode, one button and four menus are displayed at the bottom of the screen.
 
-===Time===
+===FS===
+Pushing the "FS" button pops you into fullscreen mode.   To exit,
+tap the top 1/5th of the display (if you are in finger mode) or
+the region where the location and time is displayed (in stylus mode).
+
+=== opts ===
+The opts menu allows you to toggle between finger and stylus mode.
+It also has a checkbox labeled "Save All Changes". If that box is
+checked, all changes you make within the menus are saved to flash
+memory when you click the "OK" button.   If "Save All Changed" is not
+selected, you must click the "Save to Configuration File" to save
+changed configurations to flash - clicking "OK" makes the changes
+active for the current session, but does not save to flash.
+
+The "White Flashlight" button paints the entire screen white, and the
+"Red Flashlight" button paints the entire screen red.   Both may
+be used as a flashlight, but the red one is best if you are trying
+to preserve your night vision.
+
+=== time ===
 The time menu allows you to specify an
 explicit time between 3000 BC and 3000 AD, or the current
-time.   If current time is selected, the display updates
+time.   If "Now" is selected, the current time is used and the display updates
 automatically once per minute.   If a specific time is selected,
 it is shown in red, to remind you that the display is not
-going to update automatically as time passes.
+going to update automatically as time passes.   The time may be
+specified as a calendar date, or as a Julian Date. 
 
-=== Place ===
+The Julian Date is a less ambiguous way of entering times
+in the distant past than using a calendar date, because of the
+differing calendar systems in use worldwide before the late 16th 
+century.  For example, the date October 10, 1582 never occurred in
+some European co untries.  Many countries have gaps in their calendars
+with missing dates when they adopted the Gregorian Calendar.
+
+
+=== place ===
 The place menu allows you to select the GPS-derived location,
 a user specified latitude and longitude, or a city or
 astronomical observatory selected from a menu.   The lists of
@@ -107,7 +146,12 @@ edit one of the menu files, and add the name, latitude and longitude
 of the location.   You will need to restart the orrery program for
 your new locations to become available.
 
-=== Display ===
+If you select a "Custom" or "Menu" location, a button labeled
+"Save in Private Menu" will appear.   After you select your new position,
+you may push that button to save it in the menu labeled "Private".
+That menu is initially empty.
+
+=== items ===
 The display menu allows you to configure the display, selecting
 such things as the faintest magnitude object displayed, whether constellation
 lines are plotted, whether or not star names are displayed, etc.
@@ -159,24 +203,10 @@ file resides in /usr/share/applications .
 == Installing this Program ==
 .ipk files for this program are now available for both the 2007.2
 and 2008.8 stacks, at the gForge site.   It is much easier to install
-than it used to be. The program has been added to the community
-repository, so if you are running the 2008.8 stack, you need only
-type:
-
-'''opkg install orrery'''
-
-If you are running the 2007.2 stack, it is better (you get
-a better launch icon) if you download and install via
-opkg the latest .ipk file with 2007.2 in its name from here:
+than it used to be.  The latest .ipk files can be found here:
 [http://projects.openmoko.org/projects/orrery/].
 
 == Known Bugs ==
-=== Slow Display of Constellations ===
-The first time you tap the display
-to go into constellation mode, it takes several
-seconds to show the constellations.   This only
-happens the first time - subsequent switches
-are pretty fast (< 1 second).
 
 === Blurry Orion Label ===
 Ooops - I didn't remove some emacs backup files from
@@ -196,31 +226,67 @@ orrery will crash if it is configured to use the GPS position.
 '''Send more bug reports!'''
 
 == Revision(ist) History ==
-Version 1.1 Changes:
+ Version 1.2:
     New user features:
-        1) Added "finger mode", which allows
-           orrery to be used without a stylus.
-           This is now the default mode.
-        2) Users can now specify which
-           directory is the top of the data file 
-           tree for orrery.   By default, this is 
-           /media/card/orrery, but the -d switch
-           overrides this, so
-           "orrery -d /usr/share/orrery"
-           will tell orrery to
-           look in /usr/share/orrery for the
-           data files.
-        3) The orrery will now display the names
-           of some of the most prominent
-           stars.   This is not enabled by
-           default, however - you must select
-           this feature using the "display" menu.
+        Constellation stick figures are now shown
+        in three colors:
+            Pink constellations are zodiac
+                 constellations
+            Gold constellations are the non-zodiac
+                 constellations from Greek antiquity,
+                 as listed in Ptolomy's Almagest.
+            Blue constellations are modern additions
+ 
+        On screen 1, if "Display Names" is selected,
+        planet names are now displayed in addition
+        to star names.
+ 
+    	Transition to and from fullscreen mode has
+        been sped up.
+ 
+        The time can now be entered as a Julian Date.
+        This is a less ambiguous way of entering times
+        in the distant past than using a calendar date,
+        because of the differing calendar systems in use
+        worldwide before the late 16th century.
+ 
+        The label of the "fullscreen" button was changed
+        to "FS" and the label of the "display" button
+        was changed to "items".   Those changes were made
+        to make room for another pulldown menu, labelled
+        "opts", which allows one to modify parameters
+        which effect all displays.   The first of these
+        options is the finger mode options, and the
+        second is a new option called "Save All Changes".
+        If "Save All Changes" is selected, then the
+        "Save to Configuration File" option will be
+        removed from the menus, and clicking the "OK"
+        button will have the "Save to Configuration File"
+        effect.   A lot of people believe this is how
+        programs on handheld devices should work - the
+        user should never have to explicitly save changes.
+ 
+        Red and white flashlight buttons under the opts
+        menu have been added.   These buttons set all
+        pixels red or white.   Red flashlight mode is
+        better for preserving night vision.   To exit
+        flashlight mode tap the display anywhere.
+ 
+        Added the ability to save locations to the Private
+        location menu.   This option appears in the "place"
+        If the Custom or Menu checkbox is clicked.   The
+        Private menu is now empty by default (it used to
+        contain "Cambridge MA").
+ 
     Bug Fixes:
-        1) Fixed bug which caused cardinal point 
-           label ("North" etc) to be
-           displayed at the top of the window 
-           rather than at the bottom, where
-           it belongs.
+    	Spelling error fixed in writing of config file
+        parameter DEBUG_MESSAGES_ON.
+ 
+        Initial display of constellations has been sped
+        up considerably.
+ 
+        Fixed a bug which occasionally caused the routine
+        which creates location menus to seg fault.
 
 == Contact Information ==
 Please send comments, suggestions, questions and/or
