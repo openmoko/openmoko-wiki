@@ -1,34 +1,10 @@
-==Make the Neo FreeRunner act as a mass storage device==
+The following script can be used to make the Neo FreeRunner act as a mass storage device (memory stick, USB key, portable drive...)
 
-To access the microSD card in the Freerunner from the host computer as if it were a USB key or memory stick, the following script can be used:
-
- #!/bin/sh
- ifdown usb0
- umount /media/card
+ #!/bin/sh                                                                                                                                                                   
+ /etc/init.d/networking stop
  rmmod g_ether
- modprobe g_file_storage file=/dev/mmcblk0 stall=0
-Reference: [http://lists.openmoko.org/pipermail/community/2008-September/029261.html Petr Vanek's "usb mass media storage" message on the community mailing list], updated by [[User:Mmontour|Mmontour]] 16:25, 21 March 2009 (UTC). The "stall=0" parameter is required on at least some systems to prevent timeouts and errors.
+ modprobe g_file_storage file=/dev/mmcblk0p1
 
-The card is not accessible from the Freerunner in this mode. Sometimes, however, the message displayed may be "interface usb0 already configured" and no device would be detected by the OS FreeRunner is connected to. This issue needs to be addressed properly.
-
-==Make the Neo FreeRunner revert to USB networking==
-
-Be sure to properly unmount on the host computer first, just as you would with any other USB storage.
-
-The following script can be used:
-
- #!/bin/sh
- rmmod g_file_storage
- mount /dev/mmcblk0p1 /media/card
- modprobe g_ether
- ifup usb0
-
-==Is it possible to pretend to be a USB hub, providing both g_ether and g_file_storage?==
-
-Not yet. At the moment it's one gadget driver at a time, but there is a project under way to allow use of multiple gadget drivers together. See [http://blog.felipebalbi.com/?p=44 this blog posting called 'USB Composite Gadget Framework'] or [http://www.linux-usb.org/gadget/ Linux-USB Gadget API Framework]
-
-==See also==
-* [http://www.linux-usb.org/gadget/file_storage.html Backing Storage for the File-backed Storage Gadget]
+Reference: Petr Vanek "usb mass media storage" on the community mailing list, 2/9/08
 
 [[Category:USB]]
-[[Category:USB software]]
