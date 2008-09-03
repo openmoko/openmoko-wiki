@@ -31,6 +31,27 @@ to
 
 filesrc.set_property( "location", "/usr/share/sounds/ringtone" )
 
+If you would like to play most formats of audio file (including ogg), change the play() function
+to this
+
+    def _play( self ):
+        self.player = pipeline = gst.Pipeline( "oeventd-pipeline" )
+        sink = gst.element_factory_make( "alsasink", "sink" )
+        playbin = gst.element_factory_make( "playbin", "playbin" )
+        playbin.set_property( "uri", "file:///usr/share/sounds/ringtone" )
+        playbin.set_property("audio-sink", sink)
+        pipeline.add(playbin)
+        
+        bus = self.player.get_bus()
+        bus.add_signal_watch()
+        bus.connect( "message", self._onMessage )
+        pipeline.set_state(gst.STATE_PLAYING)
+        logger.info( 'playing ringtone' )
+        self.ringing = True
+
+There does seem to be a lag of a few vibrations before the sound starts but that might desirable. (I didn't compare against the original code).  The code to specifically handle formats, (oggs for example) can be a little complicated and makes things messy.
+Since, it seems like this code is changing in FSO, I'm leaving it for the moment.
+
 Then
 
  mv receiver.pyo /home/root 
@@ -51,6 +72,6 @@ Then
 zhone for FSO seems to be launched by Xsession.d so maybe try:
  /etc/init.d/xserver-nodm restart
 
-Now you can link /usr/share/sounds/ringtone to any mp3 and that will be your ringtone
+Now you can link /usr/share/sounds/ringtone to any mp3 (or other sound file if you took the second option) and that will be your ringtone
 
 [[Category:Add-on data]]
