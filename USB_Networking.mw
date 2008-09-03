@@ -47,7 +47,41 @@ or
 
 For more info see the [http://www.linux-usb.org/usbnet/ usbnet driver homepage].
 
-It can be complex to set all the correct options for masquerading in the kernel if they are not turned on.  This could be detailed further.
+Masquerading options (tested on Linux 2.6.26.3) are found in:
+
+ ''Networking --->
+      Networking options --->''
+
+To see the other options, enable
+
+* CONFIG_NETFILTER (''Network packet filtering framework (Netfilter)'')
+
+Then, from
+
+ ''Networking --->
+      Networking options --->
+         [*] Network packet filtering framework (Netfilter) --->
+                Core Netfilter Configuration --->''
+
+You need at least following options enabled as modules:
+
+* CONFIG_NF_CONNTRACK (''Netfilter connection tracking support'')
+* CONFIG_NF_CONNTRACK_FTP (''FTP protocol support'')
+* CONFIG_NETFILTER_XTABLES (''Netfilter Xtables support'')
+
+Rest of the needed options are found from
+
+ ''Networking --->
+      Networking options --->
+         [*] Network packet filtering framework (Netfilter) --->
+                IP: Netfilter Configuration --->''
+
+You need to enable (again, as modules is fine):
+
+* CONFIG_NF_CONNTRACK_IPV4 (''IPv4 connection tracking support (required for NAT)'')
+* CONFIG_IP_NF_IPTABLES (''IP tables support (required for filtering/masq/NAT)'')
+* CONFIG_NF_NAT (''Full NAT'')
+* CONFIG_IP_NF_TARGET_MASQUERADE (''MASQUERADE target support'')
 
 = Firewall Issues =
 
