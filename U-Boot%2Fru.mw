@@ -42,23 +42,23 @@ u-boot, однако, не поддерживает множество веще�
 == Разработка загрузчика ==
 
 === QT2410 ===
-If you want to do bootloader development on the QT2410, it's easier to work with a bootloader image that can be downloaded via USB into RAM instead of flashing.
+Если вы хотите заняться разработкой загрузчика на QT2410, легче будет не прошивать его во флеш-память, а работать с его образом, закаченным через USB в оперативную память.
 
-To do so, you need to edit the u-boot/include/configs/qt2410.h file, and change the "if 0" in Line 32 into a "if 1", then recompile with "make".
+Для этого надо отредактировать файл u-boot/include/configs/qt2410.h: изменить 32-ю строку с "if 0" на "if 1", и пересобрать образ: "make".
 
-The resulting "u-boot.bin" is _NOT SUITABLE_ for NAND flash, but only for direct execution from within ram, e.g. by using the [[s3c2410_boot_usb]] program.
+Получившийся образ "u-boot.bin" _НЕ ПРЕДНАЗНАЧЕН_ для записи в NAND-флеш и может быть исполнен только в памяти, например с помощью [[s3c2410_boot_usb]].
 
 === GTA01 ===
 
-Doing bootloader development on the GTA01 is a bit more tricky.  first, we don't have any NOR flash.  Second, there is no other way to boot _but_ from NAND.  Therefore, we also don't have a USB downloader like the QT2410.
+Ситуация с работой с загрузчиком на самом устройстве GTA01 немного сложнее: во-первых у нас нет здесь NOR-флеши, во-вторых не существует возможности загрузиться ни с чего, кроме NAND. Следовательно, нет у нас в распоряжении и USB-загрузчика, как на QT2410.
 
-The main problem is:  The [[S3C2410 Steppingstone]] unconditionally copies the first 4k of flash into its internal SRAM.   That SRAM segment stays unconditionally mapped at physical address zero. How do we get around this
+Проблема заключается в том, что [[S3C2410 Steppingstone]] безусловно копирует первые 4 Кб с флеши в свою внутреннюю память, SRAM. Этот сегмент SRAM-памяти так же безусловно связывается с физическим адресом 0. Как это обойти?
 
 ==== Использование JTAG для загрузки из оперативной памяти ====
 
-So how can we boot from RAM? We use JTAG / OpenOCD to
+Так как же загрузиться из памяти? Используем JTAG / [[OpenOCD]] для:
 
-* reset and halt the cpu at PC=0
+* сброса и останова CPU на PC=0
 <pre>
 > reset halt
 target halted in ARM state due to debug request, current mode: Supervisor
@@ -66,19 +66,19 @@ cpsr: 0x400000d3 pc: 0x00000000
 MMU: disabled, D-Cache: disabled, I-Cache: disabled
 </pre>
 
-* download a small piece of code for low-level SDRAM timing initialization (overwrite 4k SRAM of steppingstone)
+* загрузки небольшого кода для низкоуровневой инициализации тайминга SDRAM (переписывание первых 4 Кб SRAM у [[S3C2410 Steppingstone|Steppingstone]])
 <pre>
 > load_binary /space/misc/gta01/u-boot.git/foo.bin 0            
 downloaded 332 byte in 0s 21899us
 </pre>
 
-* assert a break point at address 0x33f80000 (which indicates that the low-level code has finished)
+* установки точки останова по адресу 0x33f80000 (это означает, что код из предыдущего пункта завершил исполнение)
 <pre>
 > bp 0x33f80000 4 hw
 breakpoint added at address 0x33f80000
 </pre>
 
-* run the code up to the break point
+* запуска кода до этой точки
 <pre>
 > resume
 Target 0 resumed
@@ -88,19 +88,19 @@ cpsr: 0x600000d3 pc: 0x33f80000
 MMU: disabled, D-Cache: disabled, I-Cache: enabled
 </pre>
 
-* download the u-boot RAM image to 0x33f80000
+* загрузки образа u-boot в память по адресу 0x33f80000
 <pre>
 > load_binary /space/misc/gta01/u-boot.git/u-boot.bin 0x33f80000
 downloaded 135692 byte in 6s 567264us
 </pre>
 
-* resume processing
+* продолжения исполнения кода
 <pre>
 > resume
 Target 0 resumed
 </pre>
 
-At this point, the display backlight gets bright and we see the following familiar prompt on the serial console:
+В этот момент подсветка экрана зажигается и мы видим примерно такое сообщение на серийной консоли:
 <pre>
 U-Boot 1.1.6 (Jan 13 2007 - 23:44:23)
 
