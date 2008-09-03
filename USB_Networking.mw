@@ -470,17 +470,17 @@ You might want to use keys to bypass the login prompt too.
 
 To generate ssh keys for use as a login mechanism type:
 
- ssh-keygen -t rsa
+ user@host$ ssh-keygen -t rsa
 
 When prompted for a password either hit enter for no password (''not really a good idea'') or enter a password for this key. ssh into the phone and create ~/.ssh:
 
- # mkdir ~/.ssh
+ root@phone# mkdir ~/.ssh
 
 Then from your desktop copy the '''.pub''' file to the phone.
 
- # scp ~/.ssh/id_rsa.pub phone:.ssh/authorized_keys
+ user@host$ scp ~/.ssh/id_rsa.pub root@phone:~/.ssh/authorized_keys
 
-You should now be able to ssh directly into the phone without a password prompt.
+You should now be able to ssh directly into the phone without a password prompt using a command like 'ssh root@phone' from the account user@host because the public key in the file user@host:~/.ssh/id_rsa.pub is contained in the list of keys which have access in the file root@phone:~/.ssh/authorized_keys (since scp is used, only one key exists, but you can grant access to the phone from more than one account, for example user@host, user@laptop).
 
 To disable password logins ('''after setting up key access''') edit /etc/init.d/dropbear and change the following line:
 
