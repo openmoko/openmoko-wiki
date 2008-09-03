@@ -16,7 +16,7 @@ uses [http://www.openstreetmap.org OpenStreetMap] as its map source and allows u
 |}
 
 == Usage ==
-In addition to downloading map images from the OSM server, '''Locations''' also supports local maps, which can be downloaded through the [[Installer]].  You can also create your own maps if your city is not available.  For more information, refer to the [http://wiki.openmoko.org/wiki/Om2008.8_Locations#Create_Offline_Maps Create Offline Maps] section below. 
+In addition to downloading map images from the OSM server, '''Locations''' also supports local maps, which can be downloaded through the [[Installer]].  You can also create your own maps if your city is not available.  For more information, refer to the [[#Create Your Own Maps]] section below. 
 
 === Map === 
 Use the '''MAP''' view to manage ''Tags'' with options to ''save'', ''edit'' or ''send''.  '''MAP''' view also allows users to browse maps with zoom in and zoom out for accurate locating.  If you get lost while browsing, simply tap the '''REFRESH''' button to return to your current position.  It's that easy.
@@ -38,17 +38,6 @@ Once you are connected to GPS, saving and sending tags to friends is fun and sim
 # In the '''MAP''' view, tap on the text of your ''Tag'', launching the '''edit * send''' bubble.
 # Pressing on ''send'' will launch the ''Send a Tag'' message box
 # Tap directly within the text boxes to edit your ''Tag'' before sending, or press ''Send'' and your ''Tag'' will be on its way.
-
-== Architecture ==
-'''Locations''' is a UI application, communicating with the diversity-daemon dbus interface to get all the data it needs.
-What '''Locations''' does and shows is based on and through diversity-daemon, like tag management, sharing, map downloading and GPS status.
-
-=== Design ===
-'''Locations''' uses the [http://enlightenment.org/p.php?p=about&l=en EFL library] to implement UI.
-Synced with diversity-daemon, '''Locations''' has objects, world and viewport concepts. There is a dbus wrapper layer for the diversity-daemon. 
-In the UI, we have widgets like dialogs, menus, different objects like tags, map tilesets, etc.
- 
-In control part, we have a nav object for controlling the navigation, showing the tileset.
 
 == Maps ==
 
@@ -123,6 +112,36 @@ Then the log will be saved to /home/root/nmealog in this example.
 After om-locations terminated, logging will stop.
 
 The size of log file will increase soon. For now be warned, if the dbus message was sent again, then the log will be overrridden. So backup or do some hacking first before doing that.
+
+== Development ==
+'''Locations''' is written in C and [http://enlightenment.org/p.php?p=about/efl EFL].  It talks to '''diversity-daemon''' through [http://www.freedesktop.org/wiki/Software/dbus D-Bus] to, for example, send tags and download tiles.
+
+To compile diversity-daemon,
+
+<pre>
+$ svn checkout svn://svn.projects.openmoko.org/svnroot/diversity/trunk/diversity-daemon
+$ cd diversity-daemon
+$ ./configure --enable-session-bus
+$ make
+$ sudo make install
+</pre>
+
+Please ensure that at least Control and OpenStreetMap backends are enabled.  If not, check that you have libdbus-glib-1-dev and libcurl4-gnutls-dev (on debian) or similar packages installed.
+
+To compile Locations,
+
+<pre>
+$ git clone git://git.openmoko.org/git/om-locations.git
+$ cd om-locations
+$ ./configure
+$ make
+$ sudo make install
+</pre>
+
+Locations depends directly on recent versions of eet, evas, ecore, edje, and etk from EFL.  Please consult its website for instructions to build them.
+
+== Feedbacks ==
+'''Locations''' uses [https://docs.openmoko.org/trac/ Trac] for bug tracking.  When report bugs, please choose category Locations so that they go to the developers directly.  There is no mailing list specific for '''Locations'''.  Please use http://lists.openmoko.org/mailman/listinfo/ for discussion.
 
 == Reference ==
 [1] git repository of Locations - http://git.openmoko.org/?p=om-locations.git;a=summary
