@@ -1,0 +1,90 @@
+== Read first ==
+[[Gentoo]], http://www.gentoo.org/doc/en/handbook/handbook-arm.xml
+
+
+== Needed things ==
+
+*unpatched QEMU from any normal distro
+*Gentoo stage: http://torindel.sezamkowa.net/openmoko/armv4tl-softfloat-linux-gnueabi/~arm/
+*Portage snapshot: look for mirror on: http://www.gentoo.org/main/en/mirrors2.xml and get snapshots/portage-DATE.tar.bz2
+*Kernel and modules for generic qemu arm target e.g. http://pokylinux.org/releases/pinky-3.1/zImage-2.6.23-pinky-3.1-qemuarm.bin
+*Tun/Tap module for localhost
+*Iptables and modules for internet connection sharing on localhost
+
+
+== Seting up with local hdd image ==
+
+<pre>
+dd if=/dev/zero of=qemuarm-0.rootfs.ext2 count=16777216
+dd if=/dev/zero of=qemuarm-0.swapfs count=524288
+losetup -f qemuarm-0.rootfs.ext2
+mkfs.ext2 /dev/loop0
+mount /dev/loop0 /mnt
+tar -xjpf /media/card/stage3-armv4tl-*.tar.bz2 -C /media/card
+tar -xjpf /media/card/portage-*.tar.bz2 -C /media/card/usr
+umount /mnt
+mkswap qemuarm-0.swapfs
+</pre>
+
+
+== QEMU run scripts for local hdd image ==
+
+run-qemu-1:
+<pre>
+#!/bin/bash
+
+CURDIR="/somedirwithqemuscriptsandrootfsimage"
+NUMBER=1
+
+KERNEL="$CURDIR/zImage-2.6.23-pinky-3.1-qemuarm.bin"
+ROOTFS="$CURDIR/qemuarm-$NUMBER.gentoo.ext2"
+SWAPFS="$CURDIR/qemuarm-$NUMBER.swapfs"
+
+qemu-system-arm -kernel $KERNEL -net nic,vlan=0 -net tap,vlan=0,ifname=tap$NUMBER,script=$CURDIR/qemu-ifup-$NUMBER,downscript=$CURDIR/qemu-ifdown-$NUMBER \
+    -M versatilepb -hda $ROOTFS -hdb $SWAPFS -hdd $PORTAGEFS -no-reboot -m 256 -show-cursor -serial stdio -parallel none \
+    -monitor unix:"$QEMU_MONITOR",server,nowait -nographic \
+    --append root=/dev/sda\ console=ttyAMA0\ ip=192.168.$NUMBER.10::192.168.$NUMBER.1:255.255.255.0\ mem=256M\ quiet
+</pre>
+
+qemu-ifup-1:
+<pre>
+#!/bin/sh
+
+/sbin/ifconfig tap1 192.168.1.1
+echo 1 > /proc/sys/net/ipv4/ip_forward
+/sbin/iptables -I INPUT 1 -s 192.168.1.10 -j ACCEPT
+/sbin/iptables -I OUTPUT 1 -s 192.168.1.1 -j ACCEPT
+/sbin/iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.1.0/24
+</pre>
+
+qemu-ifdown-1:
+<pre>
+#!/bin/sh
+
+/sbin/ifconfig tap1 down
+echo 0 > /proc/sys/net/ipv4/ip_forward
+/sbin/iptables -D INPUT -s 192.168.1.10 -j ACCEPT
+/sbin/iptables -D OUTPUT -s 192.168.1.1 -j ACCEPT
+/sbin/iptables -D POSTROUTING -t nat -j MASQUERADE -s 192.168.1.0/24
+</pre>
+
+
+== First boot ==
+
+*Add "\ init=/bin/bash" to the end of run-qemu-1 just after quiet to get bash to do initial setup and run it
+*<pre>mount -n -o remount,rw /</pre>
+*do setup things described in [[Gentoo]]
+*<pre>mknod /dev/ttyAMA0 c 204 64</pre>
+*edit /etc/inittab unhashing s0 and changeing it to ttyAMA0
+*add ttyAMA0 to /etc/securetty
+*emerge ntp (use binaries)
+*setup /etc/resolv.conf and /etc/conf.d/net corectly (useing 192.168.1.10 as local ip and 192.168.1.1 as default route)
+*add ntpdate ntp.task.gda.pl at the begining of start() in /etc/init,d/fsck
+*<pre>mkdir -p /lib/modules/2.6.23</pre>
+*<pre>touch /lib/modules/2.6.23/modules.dep</pre>
+*<pre>sync</pre>
+*<pre>mount -n -o remount,ro /</pre>
+*<pre>init 0</pre>
+*Use ctrl+a ctrl+x to turn off qemu
+*Remove "\ init=/bin/bash" from run-qemu-1
+*Run run-qemu-1 / fix things if needed
