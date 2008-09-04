@@ -20,8 +20,8 @@ dd if=/dev/zero of=qemuarm-0.swapfs count=524288
 losetup -f qemuarm-0.rootfs.ext2
 mkfs.ext2 /dev/loop0
 mount /dev/loop0 /mnt
-tar -xjpf stage3-armv4tl-*.tar.bz2 -C /mnt
-tar -xjpf portage-*.tar.bz2 -C /mnt/usr
+tar -xjpf /media/card/stage3-armv4tl-*.tar.bz2 -C /media/card
+tar -xjpf /media/card/portage-*.tar.bz2 -C /media/card/usr
 umount /mnt
 mkswap qemuarm-0.swapfs
 </pre>
@@ -41,7 +41,7 @@ ROOTFS="$CURDIR/qemuarm-$NUMBER.gentoo.ext2"
 SWAPFS="$CURDIR/qemuarm-$NUMBER.swapfs"
 
 qemu-system-arm -kernel $KERNEL -net nic,vlan=0 -net tap,vlan=0,ifname=tap$NUMBER,script=$CURDIR/qemu-ifup-$NUMBER,downscript=$CURDIR/qemu-ifdown-$NUMBER \
-    -M versatilepb -hda $ROOTFS -hdb $SWAPFS -no-reboot -m 256 -show-cursor -serial stdio -parallel none \
+    -M versatilepb -hda $ROOTFS -hdb $SWAPFS -hdd $PORTAGEFS -no-reboot -m 256 -show-cursor -serial stdio -parallel none \
     -monitor unix:"$QEMU_MONITOR",server,nowait -nographic \
     --append root=/dev/sda\ console=ttyAMA0\ ip=192.168.$NUMBER.10::192.168.$NUMBER.1:255.255.255.0\ mem=256M\ quiet
 </pre>
@@ -69,30 +69,17 @@ echo 0 > /proc/sys/net/ipv4/ip_forward
 </pre>
 
 
-== Alternative nfs rootfs ==
-
-*Setup nfs server on localhost
-*Unpack stage/portage
-<pre>
-tar -xjpf stage3-armv4tl-*.tar.bz2 -C NFSPATH
-tar -xjpf portage-*.tar.bz2 -C NFSPATH/usr
-</pre>
-*Make swap patition
-*Replace "root=/dev/sda" with "root=/dev/nfs nfsroot=192.168.1.1:NFSPATH rw" and remove "-hda $ROOTFS" in run-qemu-1
-
-
 == First boot ==
 
 *Add "\ init=/bin/bash" to the end of run-qemu-1 just after quiet to get bash to do initial setup and run it
 *<pre>mount -n -o remount,rw /</pre>
-*<pre>source /etc/profiles; env-update</pre>
 *do setup things described in [[Gentoo]]
 *<pre>mknod /dev/ttyAMA0 c 204 64</pre>
 *edit /etc/inittab unhashing s0 and changeing it to ttyAMA0
 *add ttyAMA0 to /etc/securetty
 *emerge ntp (use binaries)
 *setup /etc/resolv.conf and /etc/conf.d/net corectly (useing 192.168.1.10 as local ip and 192.168.1.1 as default route)
-*add ntpdate ntp.task.gda.pl at the begining of start() in /etc/init,d/fsck to ensure correct date at boot (no rtc clock support in that kernel image)
+*add ntpdate ntp.task.gda.pl at the begining of start() in /etc/init,d/fsck
 *<pre>mkdir -p /lib/modules/2.6.23</pre>
 *<pre>touch /lib/modules/2.6.23/modules.dep</pre>
 *<pre>sync</pre>
@@ -101,15 +88,3 @@ tar -xjpf portage-*.tar.bz2 -C NFSPATH/usr
 *Use ctrl+a ctrl+x to turn off qemu
 *Remove "\ init=/bin/bash" from run-qemu-1
 *Run run-qemu-1 / fix things if needed
-
-
-== Advanced setup ==
-
-* emerge distcc on qemu and localhost
-* install cross armv4tl-softfloat-linux-gnueabi toolchain on localhost (same versions as on gentoo image)
-* setup distcc specifying only localhost on emulated system
-* modify PATH in profile specifying /usr/lib/distcc/bin as first element so only preprocessing is done in qemu and all compilation on localhost
-
-(instead of modifying the profile, just add a .sh file in /etc/profile.d that re-exports path. This will get sourced at the end of /etc/profile) --[[User:Trickie|Trickie]] 09:34, 23 October 2008 (UTC)
-
-[[Category:Emulation]]
