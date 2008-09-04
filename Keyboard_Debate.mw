@@ -87,16 +87,26 @@ for illume.
 
 === How to change the dictionary used by the predictive keyboards ? ===
 
-The dictionary for the "standard" (qtopia) predictive keyboard is stored in ''/opt/Qtopia/etc/dict/<LANG>/words.dawg''. To change it, compile with ''dawgen'' an ispell dictionary (list of words) and replace the en-US words file. You can find an x86 binary ''dawgen'' executable  [http://www.3v1n0.net/openmoko/qtopia-italian-keyboard.tar.bz2 here].
+General instructions:
+On your Linux-Box 
+ wget http://www.3v1n0.net/openmoko/qtopia-italian-keyboard.tar.bz2
+ tar xvf qtopia-italian-keyboard.tar.bz2
+ wget ftp://ftp.mathematik.uni-marburg.de/pub/mirror/openwall/wordlists/languages/***YourLanguageHere***/lower.gz
+ gunzip lower.gz
+ ./qdawggen -d lang_LANG lower
+ mv lang_LANG/lower.dawg words.dawg
+On your NEO
+ cd /opt/Qtopia/etc/dict/
+ cp en_EN _en_EN
+ mv en_EN lang_LANG
+ ln lang_LANG en_EN
+ rm lang_LANG/words.dawg
+Back on your Linux Box
+ scp words.dawg root@192.168.0.202:/ opt/Qtopia/etc/dict/en_EN/words.dawg
 
-Another user suggested:
-
- cp the en_EN directory to _en_EN
- mv en_EN to de_DE
- ln de_De to en_EN
- replace de_DE/words.dwag with the German list of words [http://www.file-upload.net/download-1088244/words.dwag.html here].
- restart X
-
+Restart X or reboot your Neo.
+A precompiled german words.dawg can be found [http://www.file-upload.net/download-1088244/words.dwag.html here]
+ 
 For illume: TBD. The Terminal layout has an empty dictionary. The words you type are entered automatically in the dictionary.
 
 Matchbox has no predictive mode (to be confirmed ?).
