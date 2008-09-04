@@ -17,43 +17,60 @@ Gentoo armv4tl-softfloat-linux-gnueabi optimalized for Openmoko (-Os -march=armv
 
 == Installation ==
 *Partition your sd card if needed (don`t make swap partitions, ensure card isn't mounted)
-:<tt>e.g.</tt> fdisk /dev/mmcblk0
+:<tt>e.g.</tt> 
+ fdisk /dev/mmcblk0
 *Make ext2 or ext3 filesystem
-:<tt>e.g.</tt> mkfs.ext2 /dev/mmcblk0p1
+:<tt>e.g.</tt>
+ mkfs.ext2 /dev/mmcblk0p1
 *Mount partition
-:<tt>e.g.</tt> mount /dev/mmcblk0p1 /media/card
+:<tt>e.g.</tt>
+ mount /dev/mmcblk0p1 /media/card
 *Copy stage and portage from host to moko
-:<tt>e.g.</tt> ''[localhost]'' scp stage3-armv4tl-*.tar.bz2 portage-*.tar.bz2 root@openmoko:/media/card
+:<tt>e.g.</tt> ''[localhost]''
+ scp stage3-armv4tl-*.tar.bz2 portage-*.tar.bz2 root@openmoko:/media/card
 *Unpack stage and portage
-:<tt>e.g.</tt> tar -xjpf /media/card/stage3-armv4tl-*.tar.bz2 -C /media/card
-::<tt>    </tt> tar -xjpf /media/card/portage-*.tar.bz2 -C /media/card/usr
+:<tt>e.g.</tt>
+ tar -xjpf /media/card/stage3-armv4tl-*.tar.bz2 -C /media/card
+ tar -xjpf /media/card/portage-*.tar.bz2 -C /media/card/usr
 *Cleanup removing tar.bz2
-:<tt>e.g.</tt> rm /media/card/stage3-armv4tl-*.tar.bz2 /media/card/portage-*.tar.bz2
+:<tt>e.g.</tt>
+ rm /media/card/stage3-armv4tl-*.tar.bz2 /media/card/portage-*.tar.bz2
 *Chroot
-:<tt>e.g.</tt> chroot /media/card /bin/bash
+:<tt>e.g.</tt> 
+chroot /media/card /bin/bash
 *Update chroot environment
-:<tt>e.g.</tt> source /etc/profiles; env-update
+:<tt>e.g.</tt> 
+ source /etc/profiles; env-update
 *Set timezone
-:<tt>e.g.</tt> cp /usr/zoneinfo/YOURZONE /etc/localtime
+:<tt>e.g.</tt>
+ cp /usr/zoneinfo/YOURZONE /etc/localtime
 *Set hostname
-:<tt>e.g.</tt> nano /etc/conf.d/hostname
+:<tt>e.g.</tt>
+ nano /etc/conf.d/hostname
 *Remove console font changing (small is beautiful ;])
-:<tt>e.g.</tt> nano /etc/conf.d/consolefont (hash consolefont= line)
+:<tt>e.g.</tt>
+ nano /etc/conf.d/consolefont (hash consolefont= line)
 *Setup fstab
-:<tt>e.g.</tt> nano /etc/fstab
+:<tt>e.g.</tt>
+ nano /etc/fstab
 *Edit inittab (hash out c3, c4, c5, c6, s0, s1 lines)
-:<tt>e.g.</tt> nano /etc/inittab
+:<tt>e.g.</tt>
+ nano /etc/inittab
 *Setup usb networking
-:<tt>e.g.</tt> ln -s /etc/init.d/net.lo /etc/init.d/net.usb0
-::echo "config_usb0=( \"192.168.0.202 netmask 255.255.255.0\" )" > /etc/conf,d/net
-::echo "routes_usb0=\"default via 192.168.0.200\"" >> /etc/conf.d/net
-::echo "nameserver 192.168.0.200" > /etc/resolv.conf
+:<tt>e.g.</tt>
+ ln -s /etc/init.d/net.lo /etc/init.d/net.usb0
+echo "config_usb0=( \"192.168.0.202 netmask 255.255.255.0\" )" > /etc/conf,d/net
+echo "routes_usb0=\"default via 192.168.0.200\"" >> /etc/conf.d/net
+echo "nameserver 192.168.0.200" > /etc/resolv.conf
 *Enable sshd
-:<tt>e.g.</tt> rc-update add sshd default
+:<tt>e.g.</tt>
+ rc-update add sshd default
 *Change root password
-:<tt>e.g.</tt> passwd
+:<tt>e.g.</tt>
+ passwd
 *Leave chroot
-:<tt>e.g.</tt> exit
+:<tt>e.g.</tt>
+ exit
 *Copy kernel
 *Copy modules
 *Setup uboot for booting from sd card
@@ -63,13 +80,17 @@ Gentoo armv4tl-softfloat-linux-gnueabi optimalized for Openmoko (-Os -march=armv
 
 == Emerging binary packages ==
 *Add PORTAGE_BINHOST to make.conf
-:<tt>e.g.</tt> echo "PORTAGE_BINHOST=http://torindel.sezamkowa.net/openmoko/armv4tl-softfloat-linux-gnueabi/~arm/packages/All" >> /etc/make.conf
+:<tt>e.g.</tt>
+ echo "PORTAGE_BINHOST=http://torindel.sezamkowa.net/openmoko/armv4tl-softfloat-linux-gnueabi/~arm/packages/All" >> /etc/make.conf
 *Update environment
-:<tt>e.g.</tt> source /etc/profiles; env-update
+:<tt>e.g.</tt>
+ source /etc/profiles; env-update
 *Setup install mask if you don't want compiler headers/docs etc (mask headers only if you'll be always using binary packages)
-:<tt>e.g.</tt> INSTALL_MASK="*.h"
+:<tt>e.g.</tt>
+ INSTALL_MASK="*.h"
 *Emerge packages with -kG
-:<tt>e.g.</tt> emerge -kG syslog-ng
+:<tt>e.g.</tt>
+ emerge -kG syslog-ng
 
 
 == Binary package wishlist ==
