@@ -1,38 +1,77 @@
-{{Languages|Gentoo}}
+== Overview ==
+Gentoo armv4tl-softfloat-linux-gnueabi optimalized for Openmoko (-Os -march=armv4t -mtune=arm920t) on 2008.0/arm profile (glibc based, sane bootstrapable toolchain)<br>
+(embedded uclibc/arm profile armv4tl-softfloat-linux-uclibcgnueabi in plans)
 
-= Gentoo on Openmoko phones =
 
-Gentoo project on Openmoko phones has its own homepage: [http://gentoo.mindzoo.de/ http://gentoo.mindzoo.de/]
+== Read first ==
+'''http://www.gentoo.org/doc/en/handbook/handbook-arm.xml''' (Skip points 2 and 3)
 
-We have a portage overlay and some Openmoko packages like Xglamo, Illume or Zhone already have their ebuilds and many more will follow !
 
-== Ways to work with Gentoo ==
-Currently, there are 3 ways to install Gentoo, each having their own advantages and disadvantages:
+== Needed things ==
 
-* [http://gentoo.mindzoo.de/index.cgi/wiki/cross-compiling Cross compile approach], where you use another machine to compile your whole phone system. (Requires a Gentoo machine)
+*Gentoo stage: http://torindel.sezamkowa.net/openmoko/armv4tl-softfloat-linux-gnueabi/~arm/
+*Portage snapshot: look for mirror on: http://www.gentoo.org/main/en/mirrors2.xml and get snapshots/portage-DATE.tar.bz2
+*Kernel and modules
+*Any working Openmoko distro
 
-* [http://gentoo.mindzoo.de/index.cgi/wiki/native-compiling Native compilation approach], where you work with Gentoo on phone as with a normal system fully capable of installing its own packages.
 
-* [http://gentoo.mindzoo.de/index.cgi/wiki/qemu-user qemu-user emulated native compilation], where you use another machine 'chroot' into a gentoo filesystem (created by either of the methods above) and execute ARM binaries as if they were native executables.
+== Installation ==
+*Partition your sd card if needed (don`t make swap partitions, ensure card isn't mounted)
+:<tt>e.g.</tt> fdisk /dev/mmcblk0
+*Make ext2 or ext3 filesystem
+:<tt>e.g.</tt> mkfs.ext2 /dev/mmcblk0p1
+*Mount partition
+:<tt>e.g.</tt> mount /dev/mmcblk0p1 /media/card
+*Copy stage and portage from host to moko
+:<tt>e.g.</tt> ''[localhost]'' scp stage3-armv4tl-*.tar.bz2 portage-*.tar.bz2 root@openmoko:/media/card
+*Unpack stage and portage
+:<tt>e.g.</tt> tar -xjpf /media/card/stage3-armv4tl-*.tar.bz2 -C /media/card
+::<tt>    </tt> tar -xjpf /media/card/portage-*.tar.bz2 -C /media/card/usr
+*Cleanup removing tar.bz2
+:<tt>e.g.</tt> rm /media/card/stage3-armv4tl-*.tar.bz2 /media/card/portage-*.tar.bz2
+*Chroot
+:<tt>e.g.</tt> chroot /media/card /bin/bash
+*Update chroot environment
+:<tt>e.g.</tt> source /etc/profiles; env-update
+*Set timezone
+:<tt>e.g.</tt> cp /usr/zoneinfo/YOURZONE /etc/localtime
+*Set hostname
+:<tt>e.g.</tt> nano /etc/conf.d/hostname
+*Remove console font changing (small is beautiful ;])
+:<tt>e.g.</tt> nano /etc/conf.d/consolefont (hash consolefont= line)
+*Setup fstab
+:<tt>e.g.</tt> nano /etc/fstab
+*Edit inittab (hash out c3, c4, c5, c6, s0, s1 lines)
+:<tt>e.g.</tt> nano /etc/inittab
+*Setup usb networking
+:<tt>e.g.</tt> ln -s /etc/init.d/net.lo /etc/init.d/net.usb0
+::echo "config_usb0=( \"192.168.0.202 netmask 255.255.255.0\" )" > /etc/conf,d/net
+::echo "routes_usb0=\"default via 192.168.0.200\"" >> /etc/conf.d/net
+::echo "nameserver 192.168.0.200" > /etc/resolv.conf
+*Enable sshd
+:<tt>e.g.</tt> rc-update add sshd default
+*Change root password
+:<tt>e.g.</tt> passwd
+*Leave chroot
+:<tt>e.g.</tt> exit
+*Copy kernel
+*Copy modules
+*Setup uboot for booting from sd card
+*Reboot
+*Setup/emerge rest of the system
 
-{{Note|
-Many thanks go to 'torindel' who apparently started the effort and made a stage tarball we are using even today for the native approach and to Tuxxx who contributed strongly to the cross compilation efforts on gentoo for openmoko phones.
-}}
 
-== Getting Started ==
-* Read instructions on the project [http://gentoo.mindzoo.de/ homepage]
-* Visit the project overlay page [http://overlays.gentoo.org/proj/embedded overlay page]
+== Emerging binary packages ==
+*Add PORTAGE_BINHOST to make.conf
+:<tt>e.g.</tt> echo "PORTAGE_BINHOST=http://torindel.sezamkowa.net/openmoko/armv4tl-softfloat-linux-gnueabi/~arm/packages/All" >> /etc/make.conf
+*Update environment
+:<tt>e.g.</tt> source /etc/profiles; env-update
+*Setup install mask if you don't want compiler headers/docs etc (mask headers only if you'll be always using binary packages)
+:<tt>e.g.</tt> INSTALL_MASK="*.h"
+*Emerge packages with -kG
+:<tt>e.g.</tt> emerge -kG syslog-ng
 
-== Community Support ==
-If you wish to get (or provide) volunteer support for Gentoo on openmoko phones, please try one of the following.
 
-=== IRC ===
-<nowiki>#</nowiki>gentoo-openmoko on [http://freenode.net/ Freenode]
-
-=== Mailing List ===
-Send an e-mail with the subject 'Subscribe' to [mailto:gentoo-embedded-request@lists.gentoo.org gentoo-embedded-request@lists.gentoo.org]
-
-=== Bug Reports ===
-You can submit bug reports on the project [http://gentoo.mindzoo.de/index.cgi/newticket Trac] page.
-
-[[Category:Gentoo| ]]
+== Binary package wishlist ==
+As i'll be adding some packages to ftp above you might want to ask for some package here: [[GentooPackageWishList]]<br>
+Overlay with moko things and more packages coming soon.
