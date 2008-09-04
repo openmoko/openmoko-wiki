@@ -142,6 +142,186 @@ Some additional signals that did not fit on the JTAG connector are brought out t
 
 Yes
 
+=== Why won't the FreeRunner boot even with the charger connected? ===
+
+'''A:'''
+Early builds of the FreeRunner<sup>1</sup> have the issue that the phone needs to boot fully to enable charging of the battery. However, current supplied via the charger is not sufficient to boot the phone; some power is required from the battery as well<sup>2</sup>. If you've let your battery discharge totally, the only recommended<sup>3</sup> way to boot the FreeRunner is with a spare battery. If you don't have a spare battery specifically for the FreeRunner, you can also use a Nokia battery (see [[Neo FreeRunner Battery]] for a list of compatible batteries). 
+
+1. Put in the spare battery and plug in your charger, and let the phone boot.
+
+2. Once your phone has booted, remove the spare battery. The FreeRunner should continue running on power drawn from the charger.
+
+3. Insert the dead battery and let it charge.
+
+Notes:
+
+=== How do I find out what image versions are in use on the phone? ===
+
+'''A:''' You can run the commands given below on the phone (in an SSH session from your host PC, or in the Terminal application on the phone itself)
+{| border="1" cellspacing="0" cellpadding="5" align="left"
+! To find out
+! Run
+|- 
+| Kernel version that is currently running
+| 
+  uname -a
+|-
+| The version of the root filesystem that you are currently using
+| 
+  cat /etc/version 
+or 
+  cat /etc/om-version
+|-
+| The versions of u-boot on the phone (The FreeRunner has one u-boot image in NOR memory, and one in NAND - see [[Booting the Neo FreeRunner]] for more information)
+| 
+  grep  Bootloader /dev/mtdblock0  (yields the NOR u-boot version)
+or
+  grep  Bootloader /dev/mtdblock1  (yields the NAND u-boot version)
+|}
+
+&nbsp;
+
+ 
+=== I can SSH into the phone via USB as per the wiki instructions, but dfu-util does not find the phone. ===
+
+'''A:''' In brief, you need to restart (or power on) the phone to get to the NOR u-boot menu before dfu-util will be able to connect. dfu-util uses the USB DFU (Universal Serial Bus Device Firmware Upgrade) protocol, which is only available at the u-boot menu, and '''not''' Ethernet over USB, which is what is available when the phone has booted fully. 
+
+Tip: If you're just trying out different distributions, you don't need to flash them with dfu-util; you can try out new distributions by putting them on the microSD card and booting from the card instead. If you'd like to do this instead of flashing, see [[Booting from SD]].
+
+To get the u-boot menu:
+# Press and hold the AUX button 
+# Press the Power button until the phone powers on and displays the boot menu
+# Release both buttons 
+# Press and release AUX to move the lightbar, so that the menu will not time out and boot the phone). 
+
+Also see the wiki pages/sections:
+* [[Booting the Neo FreeRunner]]
+* [[Bootloader#Device Firmware Upgrade]]
+* [[Flashing the Neo FreeRunner]]
+* [[Dfu-util]]
+
+=== Battery ===
+
+==== What is the expected battery life? ====
+See [[Neo FreeRunner (GTA02) Battery#Notes_about_expected_battery_life]] and more battery information in [[Neo_FreeRunner_(GTA02)_Battery]]
+
+==== How do I enable fast charge mode for anything but the official mains charger? ====
+See [[Forcing fast charge mode]].
+
+=== USB ===
+==== How do I connect a USB memory-stick etc? ====
+
+'''A:''' This requires an adapter Mini-B 5-pole => Type A jack or an adapter jack => jack. See [[Host Mode]] for more information.
+
+Q:''' Once I have such an adapter, can I use it to connect 2 Neos to each other?
+
+'''A:''' This question is equivalent to '''How to connect two [Unix/Linux] computers via USB cable and what sort of special cable is needed?''' -> http://www.linuxquestions.org/questions/linux-general-1/connecting-two-computers-with-a-usb-cable-data-cable-411073
+<br >
+It should work if one Neo is set to Host mode and the other one set to Device mode. One Neo could give power to the USB-port it the other Neo's battery is low. ''(I have to verify this)''
+
+====How do I use an external USB or Bluetooth keyboard with the FreeRunner ? ====
+
+{{Note| These commands appear to be for USB only? Could someone please supply the commands for using a Bluetooth keyboard? --[[User:Eddsouza|eddsouza]] 08:21, 31 August 2008 (UTC)}}
+
+Run:
+ echo "host" > /sys/devices/platform/s3c2410-ohci/usb_mode
+ echo "1" > /sys/devices/platform/neo1973-pm-host.0/hostmode
+
+These commands will put the FreeRunner into powered USB host mode. After this, just plug in the keyboard and it'll work. Personally, I've made a .desktop file to switch into and out of host mode. 
+
+To switch back to unpowered device mode just run:
+
+ echo "device" > /sys/devices/platform/s3c2410-ohci/usb_mode
+ echo "0" > /sys/devices/platform/neo1973-pm-host.0/hostmode
+
+[[Category:Neo FreeRunner Hardware]]
+
+=== GSM ===
+
+==== SIM compatibility: It looks like my SIM card is not working; how do I run diagnostics? ====
+
+'''A:'''
+Here is how to check: follow [[Manually_using_GSM]] until you get an OK prompt. 
+
+For more detailed documentation, please refer to [[FreeRunner_unable_to_work_with_3G_SIM_cards]] and [[Carriers]].
+
+==== GSM/GPRS information ====
+
+The following pages contain very useful information:
+
+* [http://wiki.openmoko.org/wiki/Gsmd GSM Daemon]
+
+* [http://wiki.openmoko.org/wiki/Gsm General GSM page]
+
+* [http://wiki.openmoko.org/wiki/Hardware:AT_Commands AT commands]
+
+* [http://freeyourphone.de/portal_v1/viewtopic.php?f=21&t=295#p2956 Useful script for GPRS]
+
+=== GPS ===
+
+==== How do I get the GPS working? ====
+
+'''A: '''See [[GTA02 GPS]]
+
+==== It takes a long time (10min+) before the FreeRunner gets the first GPS data/readings ====
+
+'''A: '''See [[GPS Problems]].
+
+=== Wi-Fi ===
+
+=== How do I get the WLAN working? ===
+
+'''A: ''' See [[GTA02 WLAN]]
+
+=== Bluetooth ===
+
+==== How do I get Bluetooth working manually? ====
+
+'''A: ''' See [[Manually_using_Bluetooth]]
+
+=== Sysfs functions/functionality===
+
+==== How do I get low level hardware related function, like power up device, dump register? ====
+
+'''A: ''' See [[GTA02_sysfs]]
+
+=== Display ===
+
+==== Can it play VGA video? ====
+
+No, it can do about 20 fps QVGA with software, and something beetween QVGA and VGA playing MPEG-4 using hardware (at resonable fps). Scaling is also done with GPU hardware.
+
+==== How to change the background picture of the root window? ====
+
+Look [http://wiki.openmoko.org/wiki/Today/2007.2#Adjust_UI_components_at_runtime here].
+
+=== Software ===
+
+==== Does it support Java? ====
+There is a [https://wiki.evolvis.org/jalimo/index.php/Openmoko port of Jalimo] for Openmoko.
+
+==== Does it support Flash so can I watch YouTube? ====
+You don't really need Flash to watch YouTube videos, for example, if you want to watch www.youtube.com/watch?v=k9QLdK6pFCI just install mplayer and use this command: 
+ mplayer http://ytpocket.com/getflv.php?id=k9QLdK6pFCI
+or use this small script with the video URL as the first parametre:
+ #!/bin/sh
+ vid=`echo "$1" | sed 's/.*\?.*=\(.*\)/\1/'`
+ mplayer http://ytpocket.com/getflv.php?id=$vid
+
+==== Does it support Ruby? ====
+
+For Ruby 1.9, please refer to http://blog.sparkymat.net/2008/08/10/ruby-19-on-openmoko/
+
+For Ruby 1.8.6, please refer to http://blog.wolfman.com/articles/2008/08/10/ruby-1-8-6-on-openmoko-freerunner
+
+==== How can I type a '/' in the software keyboard? ====
+
+See [[Switching Keyboards]]
+
+==== How do I get a QWERTY layout software keyboard?====
+
+See [[Switching Keyboards]]
+
 ==Software==
 
 ===What image comes on the Neo FreeRunner?===
