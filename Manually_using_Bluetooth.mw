@@ -423,6 +423,41 @@ You may also be able to listen to system audio given the right state file:
  alsactl -f /etc/systembluetooth.state restore
  madplay song.mp3
 
+==Bluetooth on Debian==
+
+{{note|work in progress}}
+
+[http://lists.openmoko.org/pipermail/support/2008-September/thread.html#2627 This thread] suggests the following:
+
+:Pair your headset according to [http://wiki.bluez.org/ these] instructions.
+
+:Make a ./home/root/asoundrc to set the headset up as the default alsa device. This step may not be required. Contents of file should be:
+
+ pcm.!default {
+         type bluetooth
+         device <device mac address from above pairing>
+         profile "auto"
+ }
+
+:Create the following python script to set up the audio service and set the headset as the default device:
+
+:http://handheldshell.com/BtHeadset.py
+
+:Compile the binary from the wiki page http://wiki.openmoko.org/wiki/Neo1973_audio_subsystem
+
+:http://handheldshell.com/bluetooth_pcm
+
+:Get the [[http://wiki.openmoko.org/images/6/64/Gsmbluetooth_gta02.state.txt|alsa state file]]
+
+:Now start the call and then run
+
+ alsactl restore 0 Gsmbluetooth_gta02.state.txt
+ BtHeadset.py <headset mac addres> & bluetooth_pcm
+
+You should now hear the call in your headset. I have not tried to see if the mic is working yet. This was all done with the 2008-updates image from sept 4.
+
+
+
 == Further reading ==
 
 http://www.holtmann.org/papers/bluetooth/ols2006_slides.pdf
