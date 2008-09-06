@@ -2,7 +2,7 @@
 {{FSO}}
 {{Distributions|FSO}}
 
-FSO is an abbreviation for FreeSmartphone.Org. With FSO, Openmoko is trying to make some stable back-end software. This distribution will be merged with the 2008.8 distribution (or its successor) when the system is stable enough. For more information see http://www.freesmartphone.org and http://trac.freesmartphone.org .
+FSO is an abbreviation for FreeSmartphone.Org. With FSO, Openmoko is working on a stable system services software back-end. The framework will be used in forthcoming Openmoko distributions -- a demonstration one is available as FSO-image. For more information see http://www.freesmartphone.org and http://trac.freesmartphone.org .
 
 =Q/A=
 * ''Question'': Is this an Openmoko-only thing?
@@ -10,7 +10,7 @@ FSO is an abbreviation for FreeSmartphone.Org. With FSO, Openmoko is trying to m
 * ''Question'': Is this a part of the current images yet? Is it perhaps the mystic ASU?
 * ''Answer'': No.
 * ''Question'': When can I see this as part of an image?
-* ''Answer'': Not before winter 2008.
+* ''Answer'': Not before spring 2009.
 * ''Question'': What's the current status?
 * ''Answer'': See right below or hop over to http://trac.freesmartphone.org .
 ** [[OpenmokoFramework/Status Update 1|Status Update 1]]
@@ -81,31 +81,27 @@ We implement the following software for that:
 * [http://www.freesmartphone.org/index.php/Implementations/OpenDeviceDaemon odeviced]
 
 ====Audio====
-The low level audio service relies on a working ALSA device driver. On top of that, there are two components:
-# [http://gstreamer.freedesktop.org/ gstreamer]
-# [http://pulseaudio.org pulseaudio]
+The low level audio service relies on a working ALSA device driver with the dmix software mixing plugin (*). On top of that, there is the GStreamer streaming media framework:
+* [http://gstreamer.freedesktop.org/ gstreamer]
 
 '''Gstreamer''' is to be used for all kinds of event sounds where a) multiple audio formats need to be supported and b) a latency of about one second is acceptable. This goes for e.g. ring tones, welcome tones, plug indication.
 
-'''Pulseaudio''' is to be used for event sounds, where low-latency is necessary, e.g. touch click sounds and UI event acknowledge sounds. Pulseaudio is our general all-purpose mixer. Gstreamer will use the pulseaudio sink to feed audio through.
-
-On further reflection, it seems Pulseaudio will not be used as it currently doesn't provide good performance on this hardware.  Alsa/dmix will be used instead. [http://lists.openmoko.org/pipermail/devel/2008-July/000253.html]
+*) Initially, we wanted to use PulseAudio on top of ALSA, howver currently it has serious performance problems on this hardware. [http://lists.openmoko.org/pipermail/devel/2008-July/000253.html]
 ====GSM====
-The low level GSM services expect a modem complying to GSM 07.07, GSM 07.05, and assorted GSM specifications, talking an AT-protocol over a serial line. If GSM 07.10 is supported, we use the multiplexing daemon...
+The low level GSM services expect a modem complying to GSM 07.07, GSM 07.05, and assorted GSM specifications, talking an AT-protocol over a serial line. If GSM 07.10 is supported, we use the multiplexing daemon to export virtual serial lines over which -- again -- AT-protocol can be spoken:
 * [http://www.freesmartphone.org/index.php/Implementations/gsm0710muxd gsm0710muxd]
-...to export virtual serial lines over -- again -- AT-protocol can be spoken.
 
 ====Bluetooth====
 The low level Bluetooth services rely on the official Linux Bluetooth subsystem:
 * [http://www.bluez.org BlueZ].
 
 ====GPS====
-The low level GPS services assume a GPS device that talks NMEA over a device node. We rely on the following software:
+The low level GPS services assume a GPS device that talks NMEA over a device node. We implemented an ogpsd daemon speaking an extended Gypsy API:
 * [http://gypsy.freedesktop.org Gypsy]
 
 ====Network====
 The low level networking service assumes network interfaces, such as USB, Ethernet, Wifi, etc. We rely on the following software here:
-* Network Manager or Intel Connection Manager (undecided yet)
+* Intel Connection Manager
 * PPP
 
 ===High Level===
@@ -126,8 +122,7 @@ An intelligent storage database server. This is being carried out as a Google Su
 
 ====Context====
 * Intelligent context API, integrating location as one -- among other -- sources
-TBD
-Reference Geoclue
+* Geoclue?
 
 ====[http://www.freesmartphone.org/index.php/Standards/PhoneAPI Phone]====
 The phone subsystem can be used to create and manage voices communications. It makes abstraction of the protocol used.
@@ -143,20 +138,20 @@ The phone subsystem can be used to create and manage voices communications. It m
 ===Completion Status===
 
 ====Low-Level====
-* Device control: 50%
-* Audio: 80%
-* GSM: 90%
-* GPRS: 90%
+* Device control: 75%
+* Audio: 90%
+* GSM: 95%
+* GPRS: 95%
 * Bluetooth: 80%
-* GPS: 80%
+* GPS: 95%
 * Network: 50%
 
 ====High Level====
-* Usage: 30%
-* Event: 30%
+* Usage: 50%
+* Event: 70%
 * [http://www.freesmartphone.org/index.php/Implementations/OpenPreferencesDaemon Preferences]: 50%
 * Context: 0%
-* [[Roadmap/Telephony|Telephony]]: 80%
+* 95%
 * Networking: 0%
 * PIM: 0%
 
@@ -179,25 +174,7 @@ Once the APIs have been used by application programmers, we can start profiling 
 * [[User:Charlie| Guillaume 'Charlie' Chereau]] -- Openmoko employee, working fulltime in the Openmoko office, Taipei, Taiwan.
 * [[User:Shoragan|Jan 'Shoragan' Luebbe]] -- Openmoko student, working part-time in Brunswick, Germany.
 * [[User:DanielWillmann|Daniel 'Alphaone' Willmann]] -- Openmoko student, working part-time in Brunswick, Germany.
-* (Holger 'Zecke' Freyther -- hopefully joining the team after releasing ASU, working in Berlin, Germany.)
-
-'''Subsystem Ownership'''
-
-''Phase 1 subsystems''
-
-* odeviced (mickey)
-* ogsmd (mickey)
-* ousaged (jan)
-* oeventd (jan)
-* ophoned (guillaume)
-* opreferencesd (guillaume)
-* ocontextd (guillaume)
-* ogpsd (daniel)
-
-''Phase 2 subsystems''
-
-* network (to be defined)
-* pim (to be defined)
+* [[User:StefanSchmidt|Stefan Schmidt]] -- Openmoko student, working part-time in Brunswick, Germany.
 
 ==Roadmap==
 
