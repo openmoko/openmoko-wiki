@@ -338,38 +338,9 @@ See [[Switching Keyboards]]
 
 ==Software==
 
-===What image comes on the Neo FreeRunner?===
+===General Questions===
 
-See [[Distributions#2007.2|factory default software image]]
-
-===What alternate distributions are available for the Neo FreeRunner?===
-
-See [[Distributions|Distributions]]
-
-=== Where can I download and reinstall the factory default image? ===
-
-See [[Flashing_the_Neo_FreeRunner|Flashing the Neo FreeRunner]]
-
-===Can the Neo FreeRunner dual boot? Multiple boot?===
-
-Since the Neo FreeRunner can boot from the micro SD card, you can install and boot from as many distributions as will fit on your card. See [[Boot_from_sd_card|Booting from SD]].
-
-===Can the software do/connect to/... ===
-
-Reviews of the latest "bleeding edge" daily builds of the Openmoko software stack can be seen [[Snapshot_review|here]]
-
-At the moment, the answer to many other questions is "no". The phone is at the moment a small Linux box with a touchscreen, a working dialer and some prototype apps.  Most do not function in any way that would be suitable for end-users.  If you want to add a feature or application request, then look over the existing [[Applications]] and either add one, or add a feature request to the applications page.
-
-===Q: What software is on the phone?===
-
-At the moment, almost no 'end-user' applications are present and working in a usable state.
-It is possible to make and receive calls in some software revisions, this frequently breaks though.
-
-===Q: What software can be installed on the phone?===
-
-Pretty much any that can be cross-compiled for Arm
-
-===Is it completely free software/open source? ===
+====Is it completely free software/open source? ====
 
 Yes. All software that runs on the main CPU and can be updated by the user is available in source.
 
@@ -377,19 +348,96 @@ Firmware in "black box" hardware modules that can not be modified by users is no
 
 This allows, for example, that the driver for the GSM module be completely open sourced without violating any FCC rules.
 
-===How do I install and manage software on Openmoko? ===
+====Can the software do/connect to/... ====
+
+Reviews of the latest "bleeding edge" daily builds of the Openmoko software stack can be seen [[Snapshot_review|here]]
+
+At the moment, the answer to many other questions is "no". The phone is at the moment a small Linux box with a touchscreen, a working dialer and some prototype apps.  Most do not function in any way that would be suitable for end-users.  If you want to add a feature or application request, then look over the existing [[Applications]] and either add one, or add a feature request to the applications page.
+
+====Does Openmoko run on any other hardware? ====
+
+You can run it on your [[How_to_run_Openmoko_Apps_on_PC|PC]].  You may be able to run it on other [[Openmoko-supported_hardware | mobile platforms]]
+
+
+===Distributions===
+
+====What is the stock distribution image that comes on the Neo FreeRunner?====
+
+See [[Distributions#2007.2|factory default software image]]
+
+====What alternate distributions are available for the Neo FreeRunner?====
+
+See [[Distributions|Distributions]]
+
+==== Where can I download and reinstall the factory default image? ====
+
+See [[Flashing_the_Neo_FreeRunner|Flashing the Neo FreeRunner]]
+
+==== How do I find out what image versions are in use on the phone? ====
+
+You can run the commands given below on the phone (in an SSH session from your host PC, or in the Terminal application on the phone itself)
+{| border="1" cellspacing="0" cellpadding="5" align="left"
+! To find out
+! Run
+|- 
+| Kernel version that is currently running
+| 
+  uname -a
+|-
+| The version of the root filesystem that you are currently using
+| 
+  cat /etc/version 
+or 
+  cat /etc/om-version
+|-
+| The versions of u-boot on the phone (The FreeRunner has one u-boot image in NOR memory, and one in NAND - see [[Booting the Neo FreeRunner]] for more information)
+| 
+  grep  Bootloader /dev/mtdblock0  (yields the NOR u-boot version)
+or
+  grep  Bootloader /dev/mtdblock1  (yields the NAND u-boot version)
+|}
+
+====Can the Neo FreeRunner dual boot? Multiple boot?====
+
+Since the Neo FreeRunner can boot from the micro SD card, you can install and boot from as many distributions as will fit on your card. See [[Boot_from_sd_card|Booting from SD]].
+
+
+===Applications and Package Management===
+
+====What software is on the phone?====
+
+At the moment, almost no 'end-user' applications are present and working in a usable state.
+It is possible to make and receive calls in some software revisions, this frequently breaks though.
+
+====What software can be installed on the phone?====
+
+Pretty much any that can be cross-compiled for the ARM architecture.
+
+====How do I install and manage software on Openmoko? ====
 
 ipkg: http://handhelds.org/moin/moin.cgi/Ipkg
 
-===How can I compile programs for the Neo FreeRunner? ===
+====Will it be possible to use popular VoIP applications such as Skype on the Openmoko platform? ====
+
+Since it has WiFi the FreeRunner should be a good platform for VOIP use.    
+
+In either case please check for softphone apps ported to the Openmoko distribution at the [http://projects.openmoko.org/  projects] page. We need to focus efforts on free software. Not convincing non-free software companies to release binaries for our Neos.
+
+====Will it be possible to use popular Instant Messaging applications such as MSN Messenger? ====
+
+Very probably. MSN is closed source and will only run where Microsoft wants you to run it. But there are many Open Source IM clients, many of which have a plugin architecture and so support the use of more than one IM protocol, even simultaneously. One example is [http://www.pidgin.im  Pidgin, formerly called GAIM]. GPRS does induce a certain amount of latency but that should not be a problem for simple, text-oriented chat between parties. And the GTA02's WiFi  will make it even better.
+
+===Development===
+
+====How can I compile programs for the Neo FreeRunner? ====
 
 See [[Toolchain]].
 
-===Is there an emulator available for Openmoko? ===
+====Is there an emulator available for Openmoko? ====
 
 For a lot of testing and development work you can simply run Openmoko directly on your PC.
 
-====QEMU====
+=====QEMU=====
 
 QEMU can emulate the Neo 1973 and the Neo FreeRunner. The [[MokoMakefile]] has support for automatically building, flashing, and running [[Openmoko under QEMU|the Neo emulator]].
 
@@ -400,7 +448,7 @@ QEMU can emulate the Neo 1973 and the Neo FreeRunner. The [[MokoMakefile]] has s
 
 See [[Qemu]] for more advanced information on running Openmoko in Qemu.
 
-====Xoo====
+=====Xoo=====
 
 [http://projects.o-hand.com/xoo Xoo]. Koen says: "Xoo should be enough for most applications people will develop, since most don't need access to the GSM uart directly. If you're hardcore you could use qemu + xoo, but that still doesn't emulate all the hardware quirks (e.g. unaligned access)".
 
@@ -414,7 +462,7 @@ Start with 'xoo --device /path/to/neo1973.xml'
 
 Some more details [[Getting_Openmoko_working_on_host_with_Xoo|here]].
 
-====Xephyr====
+=====Xephyr=====
 
 Or use Xephyr directly with locally compiled programs (e.g. matchbox svn + openmoko):
  Xephyr -screen 480x640 -nolisten tcp -ac :1 &
@@ -427,13 +475,13 @@ Or use Xephyr directly with locally compiled programs (e.g. matchbox svn + openm
  openmoko-footer &
  openmoko-taskmanager &
 
-===Where can I find some type of tutorial for a 'Hello, world' on Openmoko? ===
+====Where can I find some type of tutorial for a 'Hello, world' on Openmoko? ====
 
 This should get you started:
 * [[Building_a_hello_world_application]]
 * http://www.gtk.org/documentation.html#Tutorials
 
-===Can PalmOS apps applications be ported to run on Openmoko? ===
+====Can PalmOS apps applications be ported to run on Openmoko? ====
 
 Making legacy apps written for the "Garnet" OS (née "Palm OS") run on Linux
 is decidedly non-trivial.
@@ -446,29 +494,26 @@ It is possible that POSE, an emulator that simulates a Palm device on a Linux ho
 
 Hopefully emulation will be necessary only for M68000 code (pre-PalmOS 5) while native ARM programs can run natively under Linux, provided a proper set of PalmOS libraries and a .prc executable loader.
 
-===Does it have Java? ===
+==== Does it support Java? ====
 It will have eventually, if you help us to get it working. Some good places to keep track of would be [http://projects.openmoko.org/projects/java-pkg/ projects.openmoko.org] and [https://phoneme.dev.java.net/ PhoneME].
 
-Project [[https://wiki.evolvis.org/jalimo/index.php/Jalimo Jalimo]] is a project aiming to provide a Java stack on mobile devices. This project supports Openmoko.
+Project [[https://wiki.evolvis.org/jalimo/index.php/Jalimo Jalimo]] is a project aiming to provide a Java stack on mobile devices. There is a [https://wiki.evolvis.org/jalimo/index.php/Openmoko port of Jalimo] for Openmoko.
+The [[Debian]] distribution supports CacaoVM and JamVM through apt-get. See [[Java]] for more infos.
 
-===What are the relevant X11 details? ===
+==== Does it support Ruby? ====
+
+For Ruby 1.9, please refer to http://blog.sparkymat.net/2008/08/10/ruby-19-on-openmoko/
+
+For Ruby 1.8.6, please refer to http://blog.wolfman.com/articles/2008/08/10/ruby-1-8-6-on-openmoko-freerunner
+
+==== Does it support Python? ====
+
+Yes, with some caveats. See [[Python]] for more information.
+
+
+====What are the relevant X11 details? ====
 
 See [http://lists.openmoko.org/pipermail/community/2007-January/001353.html xdpyinfo output].
-
-===Does Openmoko run on any other hardware? ===
-
-You can run it on your [[How_to_run_Openmoko_Apps_on_PC|PC]].  You may be able to run it on other [[Openmoko-supported_hardware | mobile platforms]]
-
-
-===Will it be possible to use popular VoIP applications such as Skype on the Openmoko platform? ===
-
-Since it has WiFi the FreeRunner should be a good platform for VOIP use.    
-
-In either case please check for softphone apps ported to the Openmoko distribution at the [http://projects.openmoko.org/  projects] page. We need to focus efforts on free software. Not convincing non-free software companies to release binaries for our Neos.
-
-===Will it be possible to use popular Instant Messaging applications such as MSN Messenger? ===
-
-Very probably. MSN is closed source and will only run where Microsoft wants you to run it. But there are many Open Source IM clients, many of which have a plugin architecture and so support the use of more than one IM protocol, even simultaneously. One example is [http://www.pidgin.im  Pidgin, formerly called GAIM]. GPRS does induce a certain amount of latency but that should not be a problem for simple, text-oriented chat between parties. And the GTA02's WiFi  will make it even better.
 
 == 2007.2 factory default software image ==
 
