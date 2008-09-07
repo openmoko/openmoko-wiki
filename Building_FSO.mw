@@ -1,5 +1,53 @@
 {{FSO}}
 
+{{Note|This page is a mess.  It's in the process of being rewritten.}}
+
+= Building FSO = 
+
+The freesmartphone.org (FSO) image is based on the OpenEmbedded distribution.  OpenEmbedded is not part of Openmoko, and targets many different devices.  
+
+FSO's source tree, documentation and bug tracker are not hosted at openmoko.org.  This wiki page simply points to the relevant portions of OpenEmbedded's documentation.  Openembedded.org and freesmartphone.org contain more complete documentation.
+
+== FsoMakefile ==
+
+There are two ways to build an FSO image.
+
+The first approach uses FsoMakefile to automatically download and configure the a build environment, and is the easiest way to build an image:
+
+ wget http://shr.bearstech.com/Makefile
+ make fso-testing-image
+
+This is the process used by the build servers to create new images.  
+
+See http://shr.bearstech.com/README for more information.  Note that FsoMakefile and [[MokoMakefile]] are separate entities, and target different images.
+
+You can use the development copy of FsoMakefile (not recommended) with this command:
+
+ git clone git://git.freesmartphone.org/fso-makefile common
+ ln -s common/Makefile Makefile
+ make fso-testing-image
+
+== Building manually ==
+
+While convenient, building with FsoMakefile does not tell you much about what is going on under the hood.  FsoMakefile automatically downloads an OpenEmbedded build tree, configures it to build FSO and then builds the image.  
+
+OpenEmbedded's manual build directions at http://wiki.openembedded.net/index.php/Getting_Started describe the process in more detail.  They also explain how to build individual packages, and describe bitbake, which manages OpenEmbedded builds.
+
+OpenEmbedded targets a number of devices, and their package database can produce a number of different images.  Therefore, as you follow their directions, you will need to modify them to build FSO for your device.
+
+First, when you edit the targets in local.conf, you should set
+
+ DISTRO = "openmoko"
+ MACHINE = "om-gta02"
+
+(or "om-gta01" if you are building an image for a Neo1973 instead of a FreeRunner).
+
+Once you've finished setting up the build environment, you can build the FSO image with the command:
+
+ bitbake fso-image
+
+{{Note|Old stuff below here}}
+
 {{Note|The easiest way to build FSO is:
 
 wget http://shr.bearstech.com/Makefile
