@@ -1,0 +1,156 @@
+Este es un pequeño manual para poder utilizar internet en el neo, con
+conexión gprs. Mientras no se crea algún apartado en el settings para la
+configuración del gprs. Sí, es lentísimo. El neo pide a gritos un chip
+hspa, para subida y bajada de alta velocidad, que hoy por hoy existe en
+todo el mundo y suelen ser chips con compatibilidad gsm por si en algún
+lado o alguna operadora no ofreciese UMTS. Pero puede ser muy útil.
+Bueno, a lo que vamos que me lío.
+
+Esta es una pequeña traducción y "ensamblaje" de cosillas que se
+comentan por aquí:
+http://freeyourphone.de/portal_v1/viewtopic.php?f=21&t=295
+y por aquí: http://wiki.openmoko.org/wiki/GPRS y cosillas de cosecha
+propia.
+
+Como vereis en la primera página también se hace una explicación de como
+usar a-gps. Para este pequeño tutorial prescindí de la parte del a-gps.
+Más adelante escribiré algo sobre él, pero de momento el tiempo no da
+para más. Si alguien se me quiere adelantar todo suyo :) Y aviso que
+este tutorial es para 2008.8 podría servir para 2007.2 pero yo
+personalmente no lo testee y no sé qué tal irá con 2007.2, no leí nada
+al respecto.
+
+Empecemos pues.
+
+- Añadimos el repositorio Angstrom:
+ echo "arch base 50" > /etc/opkg/angstrom-feed.conf
+ echo "src/gz base http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base" >> /etc/opkg/angstrom-feed.conf
+
+- Actualizamos:
+ opkg update
+ opkg upgrade
+
+- Nos bajamos unos scripts:
+ http://www.karasuma.net/mokoservicescripts.tar.gz
+podemos bajarlos directamente a nuestro home en el neo, o al pc y luego pasarlo a nuestro home en el neo. Eso a
+a gusto del consumidor.
+
+- Instalamos unos paquetes necesarios:
+ opkg install gsm0710muxd moko-gtk-theme moko-gtk-engine python-pygtk python-pygobject python-subprocess
+posiblemente alguno ya lo tengamos instalado y opkg nos adevertirá de ello. Es importante que hayamos añadido el repositorio
+Angstrom y hayamos actualizado. Porque necesitamos la última versión de gsm0710muxd que se encuentra en ese repositorio.
+Este paquete es muy importante pues es el que se encarga de hacer la multiplexación. De manera que podamos estar conectados a
+internet y podamos recibir y hacer llamadas a la vez.
+
+- Descomprimimos e instalamos los scripts:
+ tar -xvzf mokoservicescripts.tar.gz
+ cd mokoscripts
+ cp gprs-* /etc/ppp/ (make sure these are executable)
+ cp gprs /etc/ppp/peers/
+ cp gprs* wifistatus nowifi mokoservices.py /usr/bin (antes de
+ copiarlos nos aseguramos de que tienen permisos de ejecución)
+ cp gtkrc /usr/share/themes/Moko/gtk-2.0/ (Sólo es necesario en 2008.8,
+ no en 2007.2)
+ ln -s /usr/share/themes/Moko/gtk-2.0/gtkrc /home/root/.gtkrc-2.0 (Esto
+ sólo es necesario en 2008.8 no en 2007.2)
+ cp mokoservices.png /usr/share/pixmaps/
+ cp mokoservices.desktop /usr/share/applications
+
+Estos pasos nos proporcionarán una nueva aplicación "Services" en la
+pantalla principal. Es una pequeña interfaz en python que nos permite
+encender y apagar el gsm (algo que echaba en falta en 2008.8), el gprs
+(aquí además indica los Kbit subidos y bajados) la wifi, el bluetooth
+y el gps. De momento vamos a dejar esta interfaz tranquilita.
+
+- Echamos a andar el multiplexor, añadiéndolo a los servicios de arranque:
+ update-rc.d gsm0710muxd defaults 22
+
+- Le mandamos a nuestra 2008.8 usar el multiplexor gsm en vez de acceder directamente al modem gsm:
+ cp 89qtopia /etc/X11/Xsession.d/
+Es importante que guardemos una copia del fichero 89qtopia, para
+tenerla siempre a mano, pues una actualización de qtopia podría
+sobreescribir la copia que dejamos en /etc/X11/Xsession.d/ así que
+deberíamos volver a realizar este paso si esto pasa.
+
+- Modificamos syslog.conf:
+ Editamos /etc/syslog.conf y cambiamos DESTINATION="remote" por
+ DESTINATION="file"
+ En mi caso tuve que cambiar DESTINATION="buffer" por
+ DESTINATION="file" esto es necesario para "Services"
+
+- Reiniciamos
+
+- Ahora viene lo duro, configuramos los parámetros gprs con los datos de
+ nuestra operadora:
+ * Editamos /etc/ppp/pap-secrets:
+   Nos encontraremos algo tal que así:
+   # Secrets for authentication using PAP
+   # client        server  secret                  IP addresses
+       *             *       *                        *
+El primer * (debajo de client) se refiere al usuario que nos
+proporciona la operadora. Para algunas operadoras españolas el
+usuario va en blanco. Lo lógico sería poner "". Meeec error. Si
+ponemos "" no nos va a funcionar!!!! Así que en caso de que el
+usuario vaya en blanco ponemos un * (que significa cualquiera)
+debajo de secret en vez del * debe ir la contraseña que nos indica
+el operador en este caso si va en blanco sí que se pone "". El resto
+lo dejamos tal cual
+
+El fichero quedaría algo tal que así:
+   # Secrets for authentication using CHAP
+   # client        server  secret                  IP addresses
+   "user"         *       "password"                  *
+Con el user y el password de nuestra operadora. O * si el en user si el user
+es en blanco y "" si la password va en blanco, como es el caso de simyo
+
+ * Editamos /etc/ppp/chap-secrets poniendo lo mismo que en el fichero anterior
+
+ * Editamos /etc/ppp/peers/gprs cambiando PUT_USERNAME_IN_HERE por el usuario que pusimos en
+   en los ficheros CHAP y PAP. En este caso si el usuario es en blanco dejamos "". Y añadimos
+   un par de lineas más si queremos que la conexión sea persistente. Por diversos motivos puede
+   ser que perdamos la conexión de datos aunque sigamos asociados correctamente a un bts. Estas dos
+   lineas facilitarán que volvamos a recuperar la conexión automáticamente:
+   persist
+   holdoff 15
+
+ * Editamos /etc/ppp/gprs-connect-chat. Aquí hay que cambiar hspa por el apn que proporciona la operadora
+   ejemplos típico son hspa, internet, Internet. También cambiaremos si es necesario el número a marcar
+   donde pone *99# OJO sólo se cambiaría el 99 por el número correspondiente a la operadora. Valores típicos
+   suelen ser 99 99***1 y 99***2
+
+- Activamos la conexión gprs:
+ Para esto tenemos dos maneras, nos vamos al terminal y ejecutamos gprson y para desactivarla gprsoff o vamos a
+ la aplicación que instalamos antes "Services" y pulsamos donde pone gprs is off para activarlo. El botón cambiará
+ a gprs is on cuando se establezca la conexión. Y podremos pulsar ahí de nuevo para desactivarla.
+
+Comentarios:
+Cuando pppd está funcionando Services nos pondrá gprs is on. Si activamos la conexión desde Services y pone fail es que el
+que pppd no está funcionando, no arranco bien, podemos volver a pulsar y debería funcionar. Al menos esa es mi experiencia
+Con los ajustes tal y como están en este mail el pppd debería funcionar bien.
+Otra cosa son los parámetros de la operadora que estén mal y no tengamos conexión gprs. Ver más abajo
+
+Después de unos segundos si pppd funciona debería ponernos 0 k / 0 K si no hubo ninguna transmisión de datos.
+Y el número se iría incrementando según bajamos o subimos datos (el primer número es la descarga en Kb y el segundo la subida
+en Kb, OJO Kb no KB!!)
+Si nos encontramos con que pasado ese tiempo sólo pone K / K es que pppd se está ejecutando correctamente pero no tenemos
+conexión gprs, es decir los datos de la operadora están mal. User incorrecto, password incorrecto, apn incorrecta o número
+de marcación incorrecto.
+
+Otro posible problema es que tengáis el pppd funcionando y la conexión correctamente establecida (ifconfig nos muestra ppp0 con
+su ip y todo eso) pero que al abrir el navegador no tengamos internet. Si ejecutamos route veremos que la interfaz ppp0 tiene la
+ruta por defecto y está todo en orden. Sugerencia ifdown usb0. Esto es algo que no entiendo. Siendo la de ppp0 la ruta por
+defecto y estando desenchufado el usb debería de tomar la salida a internet por ppp0 pero no lo hace.
+
+Y eso es todo, las pruebas las hice  con minimo y openmoko-webbrowser2. Y simyo como operadora, por sus
+precios de conexión diaria más que nada. Y todo fue a la perfección. Las páginas algo lentas cargando pero eso es cosa del gprs
+que no se le puede pedir más. Para eso nada mejor que las páginas optimizadas para móviles.
+
+Sobre parámetros de operadora ahí os puede ayudar más google que yo. Puedo pasaros los de simyo o los ficheros de configuración
+para simyo, que a la noche procuraré publicar en el wiki   http://wiki.openmoko.org/wiki/GPRS#Some_APN_names_for_reference
+donde de momento no hay datos de ninguna española. Y los de simyo Alemania no valen para España. También podría igual poner los
+de Vodafone. Y de yoigo pero cuando probé la tarjeta de yoigo en el neo no funcionó ni a la de tres. Y en cuanto se les acabe
+la cobertura paraguas de vodafone y movistar ya sólo tendrán UMTS así que será imposible usarla en el neo.
+
+Espero que os haya sido de utilidad.
+
+Un saludo
