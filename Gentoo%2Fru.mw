@@ -15,7 +15,7 @@ Gentoo armv4tl-softfloat-linux-gnueabi optimalized for Openmoko (-Os -march=armv
 *Любой рабочий дистрибутив Openmoko
 
 == Установка ==
-*Partition your sd card if needed (don`t make swap partitions, ensure card isn't mounted)
+*Разделы вашей micro sd card если надо(не делайте раздел swap, иначе карта не сможет смонтироваться)
 :<tt>e.g.</tt> <pre>fdisk /dev/mmcblk0</pre>
 *Создание ext2 или ext3 файловой системы
 :<tt>e.g.</tt> <pre>mkfs.ext2 /dev/mmcblk0p1</pre>
@@ -23,29 +23,29 @@ Gentoo armv4tl-softfloat-linux-gnueabi optimalized for Openmoko (-Os -march=armv
 :<tt>e.g.</tt> <pre>mount /dev/mmcblk0p1 /media/card</pre>
 *Copy stage and portage from host to moko
 :<tt>e.g. (on localhost)</tt> <pre>scp stage3-armv4tl-*.tar.bz2 portage-*.tar.bz2 root@openmoko:/media/card</pre>
-*Распаковка stage and portage
+*Распаковка stage и portage
 :<tt>e.g.</tt> 
 <pre>
 tar -xjpf /media/card/stage3-armv4tl-*.tar.bz2 -C /media/card
 tar -xjpf /media/card/portage-*.tar.bz2 -C /media/card/usr
 </pre>
-*Cleanup removing tar.bz2
+*Почистим удаленные tar.bz2
 :<tt>e.g.</tt> <pre>rm /media/card/stage3-armv4tl-*.tar.bz2 /media/card/portage-*.tar.bz2</pre>
-*Chroot
+*сменим режим
 :<tt>e.g.</tt> <pre>chroot /media/card /bin/bash</pre>
-*Update chroot environment
+*Обновим окружение chroot
 :<tt>e.g.</tt> <pre>source /etc/profiles; env-update</pre>
-*Set timezone
+*Настройка timezone
 :<tt>e.g.</tt> <pre>cp /usr/zoneinfo/YOURZONE /etc/localtime</pre>
-*Set hostname
+*Настройки hostname
 :<tt>e.g.</tt> <pre>nano /etc/conf.d/hostname</pre>
-*Remove console font changing (small is beautiful ;])
+*Удаляем консольные шрифты (Маленькие превосходны ;])
 :<tt>e.g.</tt> <pre>nano /etc/conf.d/consolefont</pre> (hash consolefont= line)
-*Setup fstab
+*Настройка fstab
 :<tt>e.g.</tt> <pre>nano /etc/fstab</pre>
-*Edit inittab (hash out c3, c4, c5, c6, s0, s1 lines)
+*Редактирование inittab (Меняем строки c3, c4, c5, c6, s0, s1 )
 :<tt>e.g.</tt> <pre>nano /etc/inittab</pre>
-*Setup usb networking
+*Настройка сети через usb
 :<tt>e.g.</tt> 
 <pre>
 ln -s /etc/init.d/net.lo /etc/init.d/net.usb0
@@ -53,17 +53,17 @@ echo "config_usb0=( \"192.168.0.202 netmask 255.255.255.0\" )" > /etc/conf.d/net
 echo "routes_usb0=\"default via 192.168.0.200\"" >> /etc/conf.d/net
 echo "nameserver 192.168.0.200" > /etc/resolv.conf
 </pre>
-*Enable sshd
+*Разрешаем sshd
 :<tt>e.g.</tt> <pre>rc-update add sshd default</pre>
-*Change root password
+*Изменим пароль root
 :<tt>e.g.</tt> <pre>passwd</pre>
-*Leave chroot
+*Выйдем из chroot
 :<tt>e.g.</tt> <pre>exit</pre>
-*Copy kernel
-*Copy modules
-*Setup uboot for booting from sd card
-*Reboot
-*Setup/emerge rest of the system
+*Копируем kernel
+*Копируем modules
+*Настраиваем uboot для загрузки с карты
+*Перегружаем
+*Устанавливаем/востанавливаем систему
 
 == Аварийные готовые пакеты ==
 *Add PORTAGE_BINHOST to make.conf
