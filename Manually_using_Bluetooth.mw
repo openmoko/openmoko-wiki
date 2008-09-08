@@ -433,31 +433,39 @@ You may also be able to listen to system audio given the right state file:
 
 :Turn on bluetooth
 
-:Pair your headset according to [http://wiki.bluez.org/ these] instructions.
+:Pair your headset according to [http://wiki.bluez.org/ these] instructions or use the script below. The script will change your .asoundrc so make a backup before you run it.
 
-:Create the following python script to set up the audio service and set the headset as the default device:
+:http://handheldshell.com/BtConfigure.py
+:Put the headset in pairing mode and run
+ BtConfigure.py 
+
+:Download the the following python scripts to set up the audio service and set the headset as the default device:
 
 :http://handheldshell.com/BtHeadset.py
 :http://handheldshell.com/BtHeadsetDisconnect.py
+:http://handheldshell.com/python-pyalsaaudio_0.3-ml0_armv4t.ipk  - can someone add python-pyalsa to the feeds ?
 
-:This is the compiled the binary from the wiki page http://wiki.openmoko.org/wiki/Neo1973_audio_subsystem
+:Get the [[http://handheldshell.com/gsm_headset.txt alsa state file]] - this state file currently only works for hearing the call. Still working on the mic routing.
 
-:http://handheldshell.com/bluetooth_pcm
-
-:Get the [[http://handheldshell.com/gsm_headset.txt alsa state file]]
-
- BtHeadset.py <headset mac address> & 
+ BtHeadset.py 
 
 :Now start the call and then run
 
  alsactl restore 0 -f gsm_headset.txt
- bluetooth_pcm
 
 :End the call
 
-  BtHeadsetDisconnect.py <headset mac address> & 
+ BtHeadsetDisconnect.py 
 
-You should now hear the call in your headset. I have not tried to see if the mic is working yet. This was all done with the 2008-updates image from sept 4.
+You should now hear the call in your headset. I have not tried to see if the mic is working yet. This was all done with the 2008-updates image from sept 4. 
+
+The new scripts rely on a specific format for the .asoundrc . A stanza like this is required :
+
+ pcm.headset {
+     type bluetooth
+     device <headset mac>
+     profile "voice"
+ }
 
 == Further reading ==
 
