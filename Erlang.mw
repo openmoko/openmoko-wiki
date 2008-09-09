@@ -1,149 +1,39 @@
-== Introduction ==
-[http://www.erlang.org Erlang] is a programming language which has many features more commonly associated with an operating system than with a programming language: concurrent processes, scheduling, memory management, distribution, networking, etc.
+Erlang is a programming language which has many features more commonly associated with an operating system than with a programming language: concurrent processes, scheduling, memory management, distribution, networking, etc.
 
-=== Concurrency ===
-- Erlang has extremely lightweight processes whose memory requirements can vary dynamically. Processes have no shared memory and communicate by asynchronous message passing. Erlang supports applications with very large numbers of concurrent processes. No requirements for concurrency are placed on the host operating system.
+Concurrency - Erlang has extremely lightweight processes whose memory requirements can vary dynamically. Processes have no shared memory and communicate by asynchronous message passing. Erlang supports applications with very large numbers of concurrent processes. No requirements for concurrency are placed on the host operating system.
 
-=== Distribution ===
-- Erlang is designed to be run in a distributed environment. An Erlang virtual machine is called an Erlang node. A distributed Erlang system is a network of Erlang nodes (typically one per processor). An Erlang node can create parallel processes running on other nodes, which perhaps use other operating systems. Processes residing on different nodes communicate in exactly the same was as processes residing on the same node.
+Distribution - Erlang is designed to be run in a distributed environment. An Erlang virtual machine is called an Erlang node. A distributed Erlang system is a network of Erlang nodes (typically one per processor). An Erlang node can create parallel processes running on other nodes, which perhaps use other operating systems. Processes residing on different nodes communicate in exactly the same was as processes residing on the same node.
 
-=== Robustness ===
-- Erlang has various error detection primitives which can be used to structure fault-tolerant systems. For example, processes can monitor the status and activities of other processes, even if these processes are executing on other nodes. Processes in a distributed system can be configured to fail-over to other nodes in case of failures and automatically migrate back to recovered nodes.
+Robustness - Erlang has various error detection primitives which can be used to structure fault-tolerant systems. For example, processes can monitor the status and activities of other processes, even if these processes are executing on other nodes. Processes in a distributed system can be configured to fail-over to other nodes in case of failures and automatically migrate back to recovered nodes.
 
-=== Soft real-time ===
-- Erlang supports programming "soft" real-time systems, which require response times in the order of milliseconds. Long garbage collection delays in such systems are unacceptable, so Erlang uses incremental garbage collection techniques.
+Soft real-time - Erlang supports programming "soft" real-time systems, which require response times in the order of milliseconds. Long garbage collection delays in such systems are unacceptable, so Erlang uses incremental garbage collection techniques.
+Hot code upgrade - Many systems cannot be stopped for software maintenance. Erlang allows program code to be changed in a running system. Old code can be phased out and replaced by new code. During the transition, both old code and new code can coexist. It is thus possible to install bug fixes and upgrades in a running system without disturbing its operation.
 
-=== [[Hot code loading]] ===
-- Many systems cannot be stopped for software maintenance. Erlang allows program code to be changed in a running system. Old code can be phased out and replaced by new code. During the transition, both old code and new code can coexist. It is thus possible to install bug fixes and upgrades in a running system without disturbing its operation.
+Incremental code loading - Users can control in detail how code is loaded. In embedded systems, all code is usually loaded at boot time. In development systems, code is loaded when it is needed, even when the system is running. If testing uncovers bugs, only the buggy code need be replaced.
 
-=== Incremental code loading ===
-- Users can control in detail how code is loaded. In embedded systems, all code is usually loaded at boot time. In development systems, code is loaded when it is needed, even when the system is running. If testing uncovers bugs, only the buggy code need be replaced.
+External interfaces - Erlang processes communicate with the outside world using the same message passing mechanism as used between Erlang processes. This mechanism is used for communication with the host operating system and for interaction with programs written in other languages. If required for reasons of efficiency, a special version of this concept allows e.g. C programs to be directly linked into the Erlang runtime system.
 
-=== External interfaces ===
-- Erlang processes communicate with the outside world using the same message passing mechanism as used between Erlang processes. This mechanism is used for communication with the host operating system and for interaction with programs written in other languages. If required for reasons of efficiency, a special version of this concept allows e.g. C programs to be directly linked into the Erlang runtime system.
+Installation
 
-=== Fast and Lean ===
-- Erlang is fast and lean. A general erlang application has lots of processes. If you are used to OOP you can compare a process with an object. One process per object instance. To make sure the neo could cope with this I watched top while I was busy dialing a phone number on the [[Aphasia]] dialer. Each of the twelve buttons are a separate process. Each has its own little animation, and if you look carefully you can see they run in parallell and are acting independent of each other. The top statistics show a really low CPU utilization, I have to dial quite fast to exceed 5% CPU. Next test I made was to measure the time it takes to start these 12 processes and have them display themselves on the screen (aka start the dialer app). It takes approximately 0.5 sec!<br>
+Make sure you have an uboot that is compatible, I used use Uboot u-boot-gta01bv4-1.2.0+svnnow-r13_0_2632_0.bin
 
-[[Image:Dialer.gif]]
-
-== Installation on OpenWrt ==
-
-Follow the guidelines in the [[OpenWrt]] wiki page. Go to "Build Custom Image" and follow the instructions. In "Configure target and packages" scroll down to Languages and select Erlang.
-
-== Installation on FSO distribution ==
-
-The minimal erlang system is only 4 MB. It fits nicely into whats left in the Freerunner and neo1973 after openmoko-fso-image is installed. 
-
-Download cean_installer.bin from CEAN http://cean.process-one.net/downloads/ At the CEAN Downloads page, select "Installer" and "Production" and "Linux ARMEL" and Download.  Copy the file cean_installer.bin to your neo. To save keystrokes I have added "192.168.0.202 phone" to my /etc/hosts file.
-
-<pre>
-scp cean_installer.bin  root@phone:/home/root
-</pre>
-
-Open a terminal window to the phone. Password is blank. Unless you changed it to something you just have to press enter at the prompt.
-
-<pre>
-ssh root@phone
-</pre>
-
-Before you can install erlang you have to get a copy of the file libsctp.so.1. I grabbed one from my Debian installation on the cf card at /media/mmcblk0p2/usr/lib/
-
-<font color="green">
-<pre>
-cp /media/mmcblk0p2/usr/lib/libsctp.so.1 /usr/lib
-</pre>
-</font>
-
-Or if you get it from your host:
-<pre>
-scp ./somedir/libsctp.so.1.0.9 root@phone:/usr/lib/libsctp.so.1
-</pre>
-
-Make sure you have "tar" installed on the phone:
-<font color="green">
-<pre>
-opkg update
-opkg install tar
-</pre>
-</font>
-
-Now you are ready to install erlang. On the phone, type
-<font color="green">
-<pre>
-chmod 777 cean_installer.bin
-./cean_installer.bin
-</pre>
-</font>
-
-If all goes well you will see the erlang console prompt
-
-<pre>
-Erlang (BEAM) emulator version 5.6.3 [source] [async-threads:0] [kernel-poll:false]
-
-Eshell V5.6.3  (abort with ^G)
-1>
-</pre>
-
-I use  ^G and then "q" to exit the shell.
-
-== Installation on SHR-testing distribution ==
-
-Get a version from CEAN, as described above, but get the "Archive", and not the "Installer".  You will need the "libsctp" lib, too, but it's not in SHR anywhere.  You can get a compatible .so out of the .deb package from this link [http://packages.debian.org/lenny/armel/libsctp1/download].  Find the file libsctp.so.1.0.9, and save it to /usr/lib/ on your SHR freerunner.  You should now be able to start the erlang shell.
-
-== Installation on Debian distribution ==
-
-Make sure you have an uboot that is [http://wiki.openmoko.org/wiki/Flashing_the_Neo_FreeRunner#Flashing_the_boot_loader_to_the_NAND compatible], I used Uboot u-boot-gta01bv4-1.2.0+svnnow-r13_0_2632_0.bin
+Install Debian, install script is here http://wiki.openmoko.org/wiki/Debian
 
 Follow the instructions. I had to type in the setenv string and then saveenv.
 Reboot to get the new menu_4 title to show up.
 
-Install Debian, install script is here: [[Debian]]
+In home directory .profile
+export DISPLAY=:0
 
-<font color="green">
-<pre>
+remove "-nolisten tcp" from /etc/X11/xinit/xservrrc or compile erlang ex11 unixports
+
+Install xauth package and create .Xauthenticate file
+debian-gta01:~# xauth
+xauth:  creating new authority file /root/.Xauthority
+Using authority file /root/.Xauthority
+xauth> q
+
+
+Install erlang
+
 apt-get install erlang-base
-</pre>
-</font>
-
-== Erlang development environment ==
-You can in fact choose any text editor, and use a terminal window to compile and copy compiled erlang beam-files to the phone. However, I have found SciTE to be a nice choice. It has erlang colour coding, bracket matching, code completion and lots of more stuff you are accustomed to find in a programmers editor. And it's easily configurable to handle compilation and error tracking, click on an error message to go to the line where the error is located.
-
-In addition to all this you can set it up to let you run your erlang app on the host, and to copy the compiled app to the phone and run it there. All from within SciTE. This gives a very fast turnaround time, I can compile my app - run on host - copy to neo - run on neo in less than a minute. Part of this fast development cycle is of course due to the fact that erlang is platform agnostic - the same compiled code runs on Arm and Intel Linux and Windows.
-
-Mac users have TextMate. Check out the bundle and install.
-<pre>
-$ svn co http://svn.textmate.org/trunk/Bundles/Erlang.tmbundle
-</pre>
-
-{{note |Other options for erlang developers are Eclipse and NetBeans. Add [http://erlide.sourceforge.net/ erlIDE] to Eclipse or use [http://sourceforge.net/projects/erlybird ErlyBird] }}
-
-
-=== You don't need an emulator ===
-All you need to run a phone application on your host is erlang and an X-server. Are you running linux it's just to install erlang and you are done. On a Mac you also have to install the Apple X-server app. It works right out of the box, and is a free download from www.apple.com. Textmate is the recommended erlang ide for mac-users. Windows users have to take another path. You develop and compile erlang source on your windows box, and use erlang's built in [[hot code loading]] to run your code right on the phone without any restart or reboot.
-
-== Example Code ==
-=== Use [[D-Bus]] in erlang ===
-<pre>
-Dbus = open_port({spawn,"mdbus -s"}, [stream, use_stdio, binary]),
-loop(Dbus).
-</pre>
-And get the response
-<pre>
-loop(Dbus) ->
-receive
-{Dbus,Msg} -> io:format("Dbus msg:~p~n",[Msg]),loop(Dbus)
-end.
-</pre>
-
-There also is a Native DBus Implementation available for Erlang: 
-
-http://sourceforge.net/projects/dbus-erlang/
-
-===Use GTK in Erlang===
-
-You can design GUIs with glade using erlang-gtknode. 
-
-
-
-[[Category:Application Developer]]
