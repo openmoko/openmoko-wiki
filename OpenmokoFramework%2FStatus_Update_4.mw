@@ -10,6 +10,10 @@ For the general motivation, the goals, and the way we are doing our work, please
 
 * Stefan Schmidt <stefan@openmoko.org> was reactivated and joined the framework team part-time -- welcome back, Stefan!
 
+=== Patches ===
+
+* We've been getting a nice bunch of patches from the community now that the project is more visibly. Thanks a lot, folks -- especially to the pkg-fso people from the Debian project.
+
 === DBus APIs ===
 
 * org.freesmartphone.GSM.Network: Added calls for USSD (requesting your pre-paid balance etc.)
@@ -24,7 +28,7 @@ For the general motivation, the goals, and the way we are doing our work, please
 
 === Implementations ===
 
-'''Openmoko Framework Image -- 'On the Road' (Milestone III)'''
+'''Openmoko Framework Image -- 'On the Road Again' (Milestone III)'''
 
 This is the third milestone release of the framework and the framework testing application 'Zhone'.
 
@@ -37,19 +41,20 @@ A lightweight image that turns an Openmoko phone into a featurephone and that ca
 '''Note: These are only the highlights. See the [http://git.freesmartphone.org gitweb] commit logs for the gory details...'''
 
 * General
-** Add dbus interface to configure debug logging level and destination at runtime
+** Added dbus interface to configure debug logging level and destination at runtime
+** Refactored lots of code to improve clarity and maintainability
 
 * odevice
 ** Implements org.freesmartphone.Device.PowerSupply (almost polling free [only for CC battries though])
 ** Implements org.freesmartphone.Device.PowerControl for Freerunner USB Host
 
 * ogsmd (''renamed from ophoned'')
-** Lots of bug and stability fixes
-** Switched SMS handling to PDU mode -- the foundation for language support
+** Lots of bug and stability fixes based on feedback (and debug logs) from people
+** Switched SMS handling to PDU mode -- the foundation for great language support
 
 * oeventsd (''revamped oeventd'')
-** we now have a full-fledged user-tweakable rules engine using yaml-syntax to configure system-wide behaviour.
-** Example:
+** We now have a full-fledged user-tweakable rules engine using yaml-syntax to configure system-wide behaviour.
+** See the rules file that we ship with milestone3 as an example:
 
 <pre>
 -
@@ -63,9 +68,6 @@ A lightweight image that turns an Openmoko phone into a featurephone and that ca
     trigger: CallStatus()
     filters: Not(HasAttr(status, "incoming"))
     actions: RingTone(stop)
--
-    trigger: Time(12,29)
-    actions: Debug("A Test")
 -
     trigger: CallStatus()
     filters: HasAttr(status, "active")
@@ -112,15 +114,21 @@ A lightweight image that turns an Openmoko phone into a featurephone and that ca
     actions: Command('amixer -d sset "Amp Spk" unmute')
 </pre>
 
+** Regarding granularity and verbosity we're not 100% sure yet what we want to provide as rules -- feedback appreciated.
+
 * opreferencesd
 ** Delivers configuration depending on the current profile
 
-* opgsd (''new subsystem'')
+* opgsd
 ** Stability fixes all over the place
+** Improve warmstart by making ephemeris and almanac persistent
 
 * zhone
-** Improved illume integration
+** Move some functionality into illume and improve integration
+** Move some functionality into oeventsd rules
 ** Add profile switcher
+** Add aux menu
+** Add DTMF tab
 
 ====Download / Installation====
 
