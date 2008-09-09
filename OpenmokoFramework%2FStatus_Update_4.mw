@@ -1,0 +1,169 @@
+=Openmoko Framework Team Status Report 2008.9.1=
+
+Hi guys! This is the fourth Openmoko Framework Team Status update, featuring our third milestone release and more.
+
+For the general motivation, the goals, and the way we are doing our work, please see http://wiki.openmoko.org/wiki/OpenmokoFramework.
+
+== What happened since the last report ==
+
+=== People ===
+
+* Stefan Schmidt <stefan@openmoko.org> was reactivated and joined the framework team part-time -- welcome back, Stefan!
+
+=== DBus APIs ===
+
+* org.freesmartphone.GSM.Network: Added calls for USSD (requesting your pre-paid balance etc.)
+* org.freesmartphone.Objects.ListObjectsByInterface: implemented what dbus is missing.
+* org.freesmartphone.Device.PowerSupply: added support for status signals -- clients should no longer poll now.
+* org.freesmartphone.Device.Audio: added scenario support.
+* org.freesmartphone.Preferences: added.
+* org.freedesktop.Time: added (experimental).
+
+* Completely revamped documentation generation
+* Set up a new site for API docs: [[http://docs.freesmartphone.org docs.freesmartphone.org]]
+
+=== Implementations ===
+
+'''Openmoko Framework Image -- 'On the Road' (Milestone III)'''
+
+This is the third milestone release of the framework and the framework testing application 'Zhone'.
+
+====Purpose====
+
+A lightweight image that turns an Openmoko phone into a featurephone and that can serve as the basis for further application development using the freesmartphone.org dbus APIs.
+
+==== What's new since Milestone II ====
+
+'''Note: These are only the highlights. See the [http://git.freesmartphone.org gitweb] commit logs for the gory details...'''
+
+* General
+** Add dbus interface to configure debug logging level and destination at runtime
+
+* odevice
+** Implements org.freesmartphone.Device.PowerSupply (almost polling free [only for CC battries though])
+** Implements org.freesmartphone.Device.PowerControl for Freerunner USB Host
+
+* ogsmd (''renamed from ophoned'')
+** Lots of bug and stability fixes
+** Switched SMS handling to PDU mode -- the foundation for language support
+
+* oeventsd (''revamped oeventd'')
+** we now have a full-fledged user-tweakable rules engine using yaml-syntax to configure system-wide behaviour.
+** Example:
+
+<pre>
+-
+    trigger: IncomingMessage()
+    actions: MessageTone(play)
+-
+    trigger: CallStatus()
+    filters: HasAttr(status, "incoming")
+    actions: RingTone(play)
+-
+    trigger: CallStatus()
+    filters: Not(HasAttr(status, "incoming"))
+    actions: RingTone(stop)
+-
+    trigger: Time(12,29)
+    actions: Debug("A Test")
+-
+    trigger: CallStatus()
+    filters: HasAttr(status, "active")
+    actions: SetScenario(gsmhandset)
+-
+    trigger: CallStatus()
+    filters: HasAttr(status, "release")
+    actions: SetScenario(stereoout)
+-
+    trigger: PowerStatus()
+    filters: HasAttr(status, "Charging")
+    actions:
+            - SetLed("gta02_power_blue", "dark")
+            - SetLed("gta02_power_orange", "light")
+-
+    trigger: PowerStatus()
+    filters: HasAttr(status, "Discharging")
+    actions:
+            - SetLed("gta02_power_blue", "dark")
+            - SetLed("gta02_power_orange", "dark")
+-
+    trigger: PowerStatus()
+    filters: HasAttr(status, "Full")
+    actions:
+             - SetLed("gta02_power_blue", "light")
+             - SetLed("gta02_power_orange", "dark")
+-
+    trigger: PowerStatus()
+    filters: HasAttr(status, "Critical")
+    actions:
+             - SetLed("gta02_power_blue","dark")
+             - SetLed("gta02_power_orange","blink")
+-
+    trigger: InputEvent()
+    filters:
+             - HasAttr(switch, "HEADSET")
+             - HasAttr(event, "pressed")
+    actions: Command('amixer -d sset "Amp Spk" mute')
+-
+    trigger: InputEvent()
+    filters:
+             - HasAttr(switch, "HEADSET")
+             - HasAttr(event, "released")
+    actions: Command('amixer -d sset "Amp Spk" unmute')
+</pre>
+
+* opreferencesd
+** Delivers configuration depending on the current profile
+
+* opgsd (''new subsystem'')
+** Stability fixes all over the place
+
+* zhone
+** Improved illume integration
+** Add profile switcher
+
+====Download / Installation====
+
+# Grab a uImage and a .jffs2 for your device from http://downloads.openmoko.org/framework/milestone3/.
+# Flash it to your Neo1973 (om-gta01) or NeoFreeRunner (om-gta02) with dfu-util.
+# Boot and wait until the Zhone main window appears.
+# Have fun.
+
+====What you can expect from this release====
+
+* Telephony
+* Phonebook
+* Messagebook (SMS)
+* GPS
+* frameworkd implementing the following dbus APIs:
+** org.freesmartphone.Device.{Audio|Input|IdleNotifier|PowerSupply|Display|LED|PowerControl}
+** org.freesmartphone.Usage
+** org.freesmartphone.GSM.{Device|SIM|Network|PDP|CB|HZ}
+** org.freedesktop.Gypsy
+
+====What we expect from you====
+
+* Feedback and comments for the dbus APIs. This is your chance to take an active role into shaping the application programming interface for all your cool applications.
+
+* Focus on using the services. Zhone is just our testing-UI and bears little functionality. It's the services that matter.
+
+* The best way to interact with the framework is by exploring the dbus APIs. For that you can use the two tools, which are already installed:
+** [[OpenmokoFramework/mdbus|mdbus]] -- a dbus introspection and interaction utility,
+** [[OpenmokoFramework/cli|cli-framework]] -- a python dbus command line interface.
+
+* If you want to interact with the GSM modem, while the frameworkd is running, you can use [[OpenmokoFramework/mickeyterm|mickeyterm]] -- a MUXer-aware minimal terminal emulator.
+
+===What's next===
+
+* Google Summer of Code project integration
+** Accellerometer Gestures
+** Bluetooth Remote
+** PIM
+* Alarm support
+
+==The Team==
+
+Mickey, Jan, Daniel, Guillaume, John, Stefan. 
+
+[[Category:Framework]]
+[[Category:Community Update]]
