@@ -1,0 +1,160 @@
+{{Languages|Om 2008.8}}
+{{Om 2008.8}}
+
+{{Distributions|Om 2008.8}}
+
+== Общее ==
+
+'''Om 2008.8''' is the successor to [[Om 2007.2]] and had '''ASU''' as a codename. It was [http://lists.openmoko.org/pipermail/community/2008-August/025619.html released] on '''August 08, 2008''' (+ update "stable" releases starting from '''August 26, 2008'''). Om 2008.8 uses EFL for the launcher, custom UI applications and [[QtopiaOnX11|Qtopia on X11]] for telephony. The distribution  is the first step from GTK+ on x11 to using multiple toolkits in combination.
+
+== What's New ? ==
+
+Compared to 2007.2 that has a longer development history, Om 2008.8 is definitely a .0 major release. So think KDE 4.0 vs. 3.5, not Linux 2.6.23 vs. 2.6.22. There are daily updates, some good some bad. If you want the stability level required to use the FreeRunner as your main phone, it is suggested for now to keep 2007.2 in the phone's flash memory and test 2008.8 on a removable SD card.
+
+The main user-visible changes:
+
+* The user interface has been fully revised with a new window manager [[illume]]. It is visually much richer, and can be customized further by using your own [[Edje]] files.
+* '''[[Om2008.8_Installer|A graphical installer]]''' allows to add easily new applications, themes and functionality.
+* A new [[Om2008.8_Locations|Locations]] application is provided, to save your favorite spots and share them with friends via sms.
+* Power management has been improved: The Aux button now locks the screen, the Power button suspends and the red LED behind the Aux button lights up when charging.
+* The [[Om2008.8_Keyboard| keyboard]] is now the Qtopia one (whether this is an improvement has been [[Keyboard_Debate|hotly debated]]).
+
+For developers, the main changes are:
+* Multiple toolkits: '''Om 2008.8''' supports [http://www.enlightenment.org/ EFL], [http://trolltech.com/products/qtopia Qtopia] and [http://www.gtk.org GTK+] applications.
+* A [[CommunityRepository| Community Repository]] has been set up, it is integrated in the ([[Om2008.8_Installer|Installer]]).
+* '''Source Codes''' are publicly available, allowing for customization all the way down to low level systems.
+
+For more details, see the [[Om 2008.8 Guide]] and the [[Om2008.8 Feature Plan|Om 2008.8 Feature Plan]].
+
+
+{| class="wikitable" cellspacing="2" cellpadding="2" style="padding: 0%; margin:0em 0em 1em 0em; border:1px solid #c0c0c0; background:#eeeeee; width:100%;floating="center"; "
+! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:1px solid #222222; width:33% " |
+[[Image:Om2008 home.png|200px|center]]
+! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:1px solid #222222; width:33% " |
+[[Image:Installer4.png|200px|center]]
+! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:1px solid #222222; width:33% " |
+[[Image:Om2008 installer1.png|200px|center]]
+|-
+
+! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:1px solid #222222; width:33% " |  
+[[Image:Main.png|200px|center]]
+! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:1px solid #222222; width:33% " |
+[[Image:Edit1.png|200px|center]]
+! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:1px solid #222222; width:33% " |
+[[Image:Om locations4.png|200px|center]]
+|}
+
+
+<!---the following anchor is here to ensure that the "Download" link at http://openmoko.com/download.html links to the correct section. please don't delete the anchor unless that link is changed or removed--->
+<span id="Flash_Om_2008.8_images"></span>
+
+== Installation ==
+
+To install the Om2008.8 stable distribution on the Neo FreeRunner, download the Root Filesystem and the Kernel image files from [[Download]] page and install according to [[Flashing the Neo FreeRunner]]. Note that flashing the smartphone will overwrite all your existing data and software.
+
+== Known Issues ==
+
+This is only a subset, and some of the bits reported below may have been fixed by stable updates (see [http://onlinedev.blogspot.com/search/label/om2008.8%20review Alasal's test reports] as well as the "Updates" section below). See [http://docs.openmoko.org/trac/search?q=2008.8 all tickets with 2008.8] in the bug tracker.
+
+'''Suspend'''
+
+Builds from the last days of August tend to suspend after 30s no matter what you set in settings. Switching the screensaver off with `xset s off' disables suspend completely.  Note that this command must be typed into the terminal application on the phone itself; if you try to run it from an ssh session it fails with the error `xset:  unable to open display ""'.  This is because ssh sessions change the display settings expecting you might want X11 forwarding.  In fact if you are using X11 forwarding with ssh -Y, the command won't fail over ssh, but it still won't do what you expect, as xset will assume you're talking about the forwarded X11 session, and thus doesn't affect the X11 session on the phone. Therefore if you use a ssh session you need to enter `xset -display :0 s off'.
+
+Alex reportedly solved the problem going into Illume Settings, then Power, and setting to OFF the 2 parameters. He still gets the screensaver, but can reactivate easily just by touching.
+
+'''GSM'''
+
+* [http://docs.openmoko.org/trac/ticket/1766 Cannot make calls or receive SMS messages]
+* [http://docs.openmoko.org/trac/ticket/1662 GSM not working properly after x hours]
+
+'''WiFi'''
+ 
+* [http://docs.openmoko.org/trac/ticket/1625 WiFi can only connect once]
+* [http://docs.openmoko.org/trac/ticket/1734 WiFi shows up unknown] is caused by hald not running, which can be fixed by removing <tt>/etc/volatile.cache</tt> and rebooting
+
+'''Audio quality'''
+
+* [http://docs.openmoko.org/trac/ticket/1640 Improve overall audio]
+
+'''System Software''' 
+
+* [http://docs.openmoko.org/trac/ticket/1736 Boot screen goes into sleep and never wake up if not touch during booting]
+* [http://docs.openmoko.org/trac/ticket/1597 After long suspend, kernel thread events]
+* [http://docs.openmoko.org/trac/ticket/1315 xglamo: performance decreases after a while]
+* [http://docs.openmoko.org/trac/ticket/1682 Neo turns off before reaching x]
+
+'''Networking'''
+* No Updates/Installation are possible or pings to domains because DNS is not working. This problem occurs because the /etc/resolv.conf is empty by default.
+Add these lines in /etc/network/interfaces:
+
+ up echo nameserver 208.67.222.222 > /etc/resolv.conf
+ up echo nameserver 208.67.220.220 >> /etc/resolv.conf
+This is to be inserted below gateway address and above the bluetooth networking. After this it will be set on every reboot.
+
+For resolving DNS without restarting, run the following commands:
+
+ echo nameserver 208.67.222.222 > /etc/resolv.conf
+ echo nameserver 208.67.220.220 >> /etc/resolv.conf
+This should solve most of your moko side networking issues. If you need any other help please refer to [[USB Networking]]
+
+{{note| [http://en.wikipedia.org/wiki/Resolvconf resolvconf] is installed so should probably be used 
+
+'''Problem''': parts of resolvconf are missing:  without the scripts under /etc/network/if-{up,down}.d, and /etc/resolvconf/run/enable-updates and /lib/resolvconf/list-records it does nothing, and even then, /etc/resolvconf/run should probably be a symlink to /var/run, or /etc/resolv.conf needs to be pointed at /etc/resolvconf/run/resolv.conf -- once all that's done, it seems to work as long as you add something like this to /etc/network/interfaces at the end of the usb0 stanza:
+
+    dns-nameservers 192.168.0.200
+    dns-search example.com
+
+and add <tt>usb*</tt> above <tt>eth*</tt> in <tt>/etc/resolvconf/interface-order</tt>
+
+}}
+
+{{Note| '''Solution:''' Steps to add missing resolvconf script: <br>
+<code>touch /etc/resolvconf/run/enable-updates</code><br>
+<code>cd /etc ; rm resolv.conf ; ln -s /etc/resolvconf/run/resolv.conf .</code><br>
+<code>mkdir /lib/resolvconf/ ; cd /lib/resolvconf/</code><br>
+<code><nowiki>wget http://87.227.108.179/list-records</nowiki></code><br>
+<code>chmod +x list-records</code><br>
+Edit <code>/etc/network/interfaces</code> and remove the lines:<br>
+<code>       network 192.168.0.0</code><br>
+<code>       gateway 192.168.0.200</code><br>
+If we need to use the usb network more then just locally from the computer in the other end of the USB-cable, login with ssh and add a default route like this:<br>
+<code>route add default gateway 192.168.0.200</code>
+}}
+
+* Usb-networking will not work until rebooted after initial boot.
+
+'''Usability''' 
+
+* The Pin-Dialog by default just shows letters. You have to slide your finger up/down over the keyboard to make the numbers/uppercase/special characters appear.
+* The installer app doesn't release administrative rights which results in not being able to use opkg. Solution: run "killall packagekitd" (on the freerunner or when ssh'ed in).
+* The installer app doesn't release administrative rights which results in not being able to use opkg. Alternate Solution: On the FreeRunner, use the drop-down menu to close all open applications.
+* The keyboard may not be adapted for all uses. See [[Keyboard Debate]] for a full discussion and options.
+
+== Updates for Om 2008.8 ==
+
+Posterior to the Om2008.8 release made on 2008/08/08, development has been [http://lists.openmoko.org/pipermail/community/2008-August/026491.html split in two branches] aiming respectively at the next minor and major releases.
+
+Support for 2008.8 occurs on the ''org.openmoko.asu.stable'' branch, with the short term goal to improve stability and useability, keeping the same features set. Changes to that branch are described in [http://git.openmoko.org/?p=openmoko.git;a=log;h=org.openmoko.asu.stable the Om 2008.8 stable changelog], and official updates  are available (as of 2008/08/26) in two forms (see [http://lists.openmoko.org/pipermail/community/2008-August/027997.html see this message] for the announcement) :
+* in the http://downloads.openmoko.org/repository/Om2008.8/ opkg feeds. Since these are already configured  in 2008.8, using 'opkg update; opkg upgrade' is sufficient to get these.
+* as flash-able images in http://downloads.openmoko.org/releases/Om2008.8-update/
+As always, update often only if you like to be on the leading edge with the associated risks. Otherwise ask around on IRC before you jump or simply wait for an official announce that the branch is in a good state. Rumours are that this branch should flower every few weeks. There has even been signs that the next [http://en.wikipedia.org/wiki/Point_release point release] could be named 2008.9.
+
+The long-term development branch is named ''org.openmoko.dev''. This branch has refocused on the base system functionalities (applications will not be installed by default), and started by catching up with upstream. Critical bugfixes from that branch should percolate to the ''.asu.stable'' branch after an unspecified delay. Using binaries updates from that branch (or any other non-2008.8 repository) on a 2008.8 stable base is likely to send you in [http://en.wikipedia.org/wiki/Dependency_hell Dependency Hell], you have been warned.
+
+== Dedication ==
+
+<pre>
+From: Openmoko
+To: openmoko-community mailing list
+
+Om 2008.8 was designed to be empty, for the very purpose of showcasing your ideas.
+
+Think of our products as galleries. We're building the environment.
+Each one different from the next. You'll get all the free art supplies
+you could imagine because we want you to add your own meaning.
+You choose: consume, create, or both.
+
+Either way you create your own meaning. It's about you.
+</pre>
+
+[[Category:Om 2008.8| ]]
