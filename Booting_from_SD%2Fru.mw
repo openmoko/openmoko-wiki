@@ -7,7 +7,7 @@
 
 First, a warning. There is a longstanding bug, probably somewhere in the Linux kernel, that tends to eat the partition table of high-capacity SD cards when the system suspends. This is ticket [https://docs.openmoko.org/trac/ticket/1802 #1802]. See [http://thread.gmane.org/gmane.comp.handhelds.openmoko.community/19154/focus=19281| this thread] for explanation of the partition table removal on suspend and maybe other problems related to using high capacity SD cards. A safety net is to keep a written copy of the partition table on paper, just in case one needs to recreate it.
 
-== How it Works ==
+== Как это работает ==
 
 On the Neo, [[u-boot]] performs a similar role to the 'grub' bootloader on a PC. U-boot loads a kernel image into memory and then passes a list of parameters to the kernel. These parameters specify, among other things, the device on which the root filesystem is located.
 
@@ -17,11 +17,11 @@ This sequence is the same whether the device is booting from built-in Flash or f
 
 The following sections provide additional details.
 
-=== Menu Entries ===
+=== Вход в меню ===
 
 U-boot menu entries are defined by environment variables named "menu_X" (where X is a number). The value of the environment variable is a string "<label>:<commands>", where <label> is the text shown on the screen, and <commands> is a sequence of u-boot commands (delimited by ';' characters) to be executed when the menu item is selected. When entering a string of commands, the ';' and '$' characters must be backslash-escaped ("\;" and "\$"). 
 
-=== Loading the Kernel ===
+=== Загрузка ядра ===
 
 A pair of u-boot commands must be used to load the kernel from SD. First is "mmcinit", which will cause u-boot to detect the card. Next is a command to load a file into memory - either "fatload" or "ext2load" depending on whether the kernel is on a FAT filesytem or an ext2/ext3 filesystem.
 
@@ -38,7 +38,7 @@ where &lt;p&gt; is the partition number, and &lt;filepath&gt; is the path to the
 
 {{Note| U-Boot supports SDHC protocol on the FreeRunner only: on the Neo1973, u-boot is unable to access SDHC cards (4G or larger). The kernel does have SDHC support on Neo1973, so it is possible to have the root filesystem on SDHC and the kernel on NAND flash to work around it. }}
 
-=== Root Filesystem Parameters ===
+=== Параметры корневой файловой системы ===
 
 The contents of the "bootargs" environment variable are passed to the kernel. Bootargs is a space-delimited list of "name=value" definitions. The items relevant to SD-booting are "root", "rootfstype", and "rootdelay". 
 
@@ -54,10 +54,9 @@ Note that the kernel must have built-in support (i.e. not a module) for the file
 
 It is not possible to use VFAT for the root filesystem.
 
-==== ext2 vs. ext3 ====
+==== ext2 в сравнении ext3 ====
 
 Opinion is divided on whether it is better to use ext2 or ext3 for the root filesystem. Ext3 in general is a superior choice, because it is a journalled filesystem and so does not require a long 'fsck' (file system check) after an unclean shutdown. However, if used on a flash device that does not support wear-leveling then ext3 may cause premature wear on the blocks of the card where the journal is stored. SD cards are supposed to support wear leveling, but this can not be guaranteed for all vendors.
-
 
 == Acquiring a tarfile rootfs ==
 
