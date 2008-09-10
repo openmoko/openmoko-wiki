@@ -1,6 +1,23 @@
 NOTE! The string found in /proc/cpuinfo IS NOT A RELIABLE INDICATOR OF WHICH HARDWARE YOU HAVE! [citation needed -- for shipping A5 and A6 PCBs it should be perfectly reliable]
 
-You will need to login via [[USB Networking]] or otherwise SSH into your FreeRunner, and find the hardware revision as follows:
+For all methods, you will need to login via [[USB Networking]] or otherwise SSH into your FreeRunner, and find the hardware revision using one of the following methods:
+
+= /proc/cpuinfo =
+
+<pre>
+root@om-gta02:~# cat /proc/cpuinfo
+.
+.
+.
+Hardware	: GTA02
+Revision	: 0350
+</pre>
+
+The line that says "Revision" is the one you want. The "03" means it's a FreeRunner, and the "05" indicates the hardware revision, in this case revision 05.
+
+'''Caution: may be wrong for hardware versions earlier than 05, or for u-boot earlier than about June, 2008.'''
+
+= Using libgsmd-tool =
 
 <pre>
 root@om-gta02:~# libgsmd-tool -m shell
@@ -12,6 +29,8 @@ rv
 revision: "HW: GTA02BV5, GSM:
 gsm_ac_gp_fd_pu_em_cph_ds_vc_cal35_ri_36_amd8_ts0-Moko8"
 </pre>
+
+= FSO =
 
 If your are running [[OpenmokoFramework|fso]], you can use [[OpenmokoFramework/mickeyterm|mickeyterm]] and the '''at+cgmr''' command. Or you can use [[OpenmokoFramework/mdbus|mdbus]], like this:
 <pre>
