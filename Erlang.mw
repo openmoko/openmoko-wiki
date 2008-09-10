@@ -50,13 +50,10 @@ xauth> q
 
 When everything is installed you can try this "hello World" code to verify the platform.
 
-
- -module(x11).
- -vsn("$Id: dialer.erl 36 2008-04-18 15:41:59Z skvamme $").
+ -module(test).
  -export([start/0]).
  -import(sw, [xStart/1]).
- -import(ex11_lib,[xFlush/1, xDo/2, xCreateGC/2, xColor/2,ePolyLine/4, mkPoint/2]).
- -import(swCanvas, [newPen/4, draw/3, delete/2]).
+ -import(ex11_lib,[xFlush/1]).
  -include("../../lib/ex11_lib.hrl").
    
  start() -> spawn(fun win/0).
@@ -65,19 +62,24 @@ When everything is installed you can try this "hello World" code to verify the p
    Pid = self(),
    Display = xStart("3.1"),
    Win = swTopLevel:make(Display,480, 640, ?grey),
-   Xtest = xtest:make(Pid,Win),
    xFlush(Display),
-   loop(Xtest,Display,Pid,Win).
+   loop().
    
- loop(Xtest,Display,Pid,Win) ->
+ loop() ->
    receive
-     {event,_,expose, _} ->
-     io:format("Event expose~n",[]),
-     loop(Xtest,Display,Pid,Win);
-   Any -> 
-     io:format("Unknown Event~p~n",[Any]),
-     loop(Xtest,Display,Pid,Win)
+     Any -> 
+       io:format("Unknown Event~p~n",[Any]),
+       loop()
  end.
+
+Put this code in a file named test.erl Compile the file with
+
+ erlc test.erl
+
+Run from erlang console.
+
+  erl
+  test:start().
 
 == Install the dbus package ==
 
