@@ -60,22 +60,21 @@ When everything is installed you can try this "hello World" code to verify a fun
  -include("../../lib/ex11_lib.hrl").
  start() -> spawn(fun win/0).
  win() ->
-	Pid = self(),
-	Display = xStart("3.1"),
-	Win  = swTopLevel:make(Display,480, 640, ?grey),
-	Xtest = xtest:make(Pid,Win),
-	xFlush(Display),
-	loop(Xtest,Display,Pid,Win).
+ Pid = self(),
+ Display = xStart("3.1"),
+ Win  = swTopLevel:make(Display,480, 640, ?grey),
+ Xtest = xtest:make(Pid,Win),
+ xFlush(Display),
+ loop(Xtest,Display,Pid,Win).
  loop(Xtest,Display,Pid,Win) ->
-	receive
-	{event,_,expose, _} ->
-		io:format("Event expose~n",[]),
-		loop(Xtest,Display,Pid,Win);
-	Any -> 
-		io:format("Unknown Event~p~n",[Any]),
-		loop(Xtest,Display,Pid,Win)
-	
-	end.
+ receive
+ {event,_,expose, _} ->
+ io:format("Event expose~n",[]),
+ loop(Xtest,Display,Pid,Win);
+ Any -> 
+ io:format("Unknown Event~p~n",[Any]),
+ loop(Xtest,Display,Pid,Win)
+ end.
 
 == Install the dbus package ==
 
