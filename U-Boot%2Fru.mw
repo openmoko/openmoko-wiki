@@ -611,14 +611,13 @@ QT2410# bootm 0x32000000
 
 == Обноврение программного обеспечения устройства ==
 
-Our version of u-boot also implements [[USB DFU]]. This can be useful to
-load files and kernel for quick testing.
+Наша версия u-boot имеет также реализацию [[USB DFU]]. Это, в частности, может быть полезно для загрузки файлов и образов ядер для проведения быстрого тестирования.
 
-To find out whether your version of u-boot supports this, use the output of
+Чтобы понять, поддерживает ли ваш u-boot эту функцию, посмотрите на вывод
  $ lsusb -v -d 1457:5119
-while the phone is in u-boot mode.
+в то время как телефон находится в режиме u-boot.
 
-If it supports DFU, you should see the following snippet towards the end of the output:
+Если DFU поддерживается, вы увидите следующий блок текста ближе к концу вывода команды:
 <pre>
     Interface Descriptor:
       bLength                 9
@@ -632,19 +631,18 @@ If it supports DFU, you should see the following snippet towards the end of the 
       iInterface              0 
 </pre>
 
-For information on how to do firmware upgrades, please see [[dfu-util]].
+Далее читайте страницу [[dfu-util]], где описан процесс обновления версий ПО телефона.
 
 === Загрузка через DFU ===
 
-To load a file at memory address 0x32000000:
+Для загрузки файла в память по адресу 0x32000000:
 <pre>
 dfu-util -a 0 -D fileToLoad -R
 </pre>
 
-After that, send 'bootm 0x32000000' to u-boot or 'bootelf 0x32000000' if
-its an elf file.
+После этого отправьте u-boot команду 'bootm 0x32000000', или 'bootelf 0x32000000', если это файл формата [http://ru.wikipedia.org/wiki/Executable_and_Linkable_Format ELF].
 
-Simple python script that can boot an ELF image - avoiding a ACM bug that breaks on large packets.
+Вот простой скрипт на Python, который загружает образ ELF, избегая при этом ошибки в [[The USB Control Device Class Abstract Control Model - CDC ACM|ACM]], приводящей к сбою при передаче больших пакетов.
 
 <pre>
 #!/usr/bin/python
