@@ -151,31 +151,32 @@ saveenv
 == Информация загрузчика ==
 
 === Получение загрузочной информации ===
-The bootloader prompt is available either on the serial console (via [[Debug Board]]), or as virtual USB Serial device (USB CDC_ACM).
-Whether the serial port or usb is used depends on the u-boot environment variables '''stdin''', '''stdout''' and '''stderr'''.
+Строка приглашения загрузчика доступна либо через серийную консоль (см. [[Debug Board]]), либо как виртуальное серийное устройство USB (USB CDC_ACM); способ соединения зависит от значений переменных окружения '''stdin''', '''stdout''' и '''stderr'''.
 
-Whether or not you use usbtty, the first couple of messages will always be displayed on the serial console.
+Независимо от того, используете ли вы usbtty или нет, первые несколько сообщений будут выведены в поток серийной консоли.
 
-The bootloader is currently configured to wait for three seconds.  If a key press on the '''stdin''' is received within those three seconds, auto-boot is aborted.
+Загрузчик по умолчанию настроен на 3-секундное ожидание. Если в течение этого времени на '''stdin''' будет получено нажатие какой-либо клавиши, загрузка прерывается.
 
 ==== Использование usbtty ====
 
-Just by connecting the phone in u-boot mode to your Linux pc should make it detect a [[CDC ACM]] device, and you should get a new tty device called /dev/ttyACM0. If not, enable the CONFIG_USB_ACM (Device Drivers -> USB support -> USB Modem (CDC ACM) support). (Instructions for MacOS users are [[MacOS_X#USB_Serial|here]])
+Простое подключение телефона в режиме u-boot к компьютеру с Linux должно привести к обнаружению устройства [[CDC ACM]] и появлению нового tty-устройства /dev/ttyACM0. Если этого не случилось, включите опцию ядра CONFIG_USB_ACM (Device Drivers -> USB support -> USB Modem (CDC ACM) support). (Инструкции для пользователей MacOS [[MacOS_X#USB_Serial|тут]].)
 
-Use your favourite terminal emulator (minicom, cu, zc, screen ...) to access it like any other serial port. If you don't have a favorite, try just: (cu is in the taylor-uucp package, use "apt-get install cu" if it is not yet installed)
+Затем просто воспользуйтесь любым эмулятором терминала на выбор (minicom, cu, zc, screen ...), подключившись к вышеупомянутому /dev/ttyACM0. Для примера рассмотрим вариант с cu. Если у вас он не установлен (а в Debian он находится в пакете taylor-uucp), выполните обычную команду "apt-get install cu".
+
  cu -l /dev/ttyACM0
 
-You might need to 
+Вам возможно понадобится
+
  chown uucp.uucp /dev/ttyACM0
 
-to get the necessary right (even as root).
+для установки соответствующих прав, даже если вы root.
 
-First, you should try to check whether the USB device shows up in 'lsusb' while you're running in u-boot mode:
+Для начала проверьте, есть ли в списке USB-устройств ваш телефон (команда "lsusb"). Напоминаем, что устройство должно находиться в режиме u-boot.
 
  # lsusb -d 1457:5119
  Bus 005 Device 079: ID 1457:5119  
 
-Second, lets see some more details about the available endpoints and configurations:
+Затем посмотрите набор возможных конфигурационных опций устройства:
 
 <pre>
 # lsusb -v -d 1457:5119
@@ -279,9 +280,9 @@ Device Status:     0x0001
   Self Powered
 </pre>
 
-Next, you can access it using your favourite terminal program.
+После этого вы можете запускать свою терминальную программу.
 
-Then, if the environment is not set correctly, you will need to use the current console (e.g. serial console) to set
+Наконец, если переменные среды установлены неверно, используйте соединённую с телефоном консоль (серийную или USB) для выполнения следующих команд:
 <pre>
 GTA01Bv2 # setenv stderr usbtty
 GTA01Bv2 # setenv stdout usbtty
@@ -309,17 +310,17 @@ GTA01Bv3 #
 
 ==== Автозагрузка ====
 
-Auto-boot executes the command[s] specified in the ''bootcmd'' environment variable. The default configuration is:
+Автозагрузка по ходу своей работы исполняет команды, указанные в переменной окружения ''bootcmd''. Вот конфигурация по умолчанию:
 <pre>
 GTA01Bv3 # printenv
 bootcmd=setenv bootargs ${bootargs_base} ${mtdparts}; nand read.e 0x32000000 kernel; bootm 0x32000000
 </pre>
 
-This basically tells us that it will load the content of the NAND partition '''kernel''' to memory address 0x32000000 and then try to boot it.  
+Коротко говоря, тут сказано, что будет производиться загрузка содержимого с раздела NAND '''kernel''' в память по адресу 0x32000000, а затем этому коду будет передано исполнение.
 
 ==== Среда окружения ====
 
-u-boot is configured to manage a non-volatile environment that is stored in NAND flash.  You can use the commands to read/alter/store the environment in the following example:
+Работа u-boot ориентирована на конфигурацию, постоянно хранимую в NAND-флеши. Для чтения, изменения и сохранения этих параметров используйте следующие команды:
 <pre>
 GTA01Bv2 # printenv
 baudrate=115200
@@ -349,7 +350,7 @@ Erasing Nand...Writing to Nand... done
 GTA01Bv3 # 
 </pre>
 
-Note: When setting multiple commands, e.g. for bootcmd, you need to escape the ';', for instance
+Обратите внимание: при установке нескольких команд в одну переменную, например bootcmd (см. подраздел "Автозагрузка" выше), символы ";" должны быть экранированы обратной косой чертой:
 
 <pre>
 GTA01Bv3 # setenv bootcmd mmcinit\; ext2load mmc 0 0x32000000 uImage\; bootm 0x32000000
@@ -357,7 +358,7 @@ GTA01Bv3 # setenv bootcmd mmcinit\; ext2load mmc 0 0x32000000 uImage\; bootm 0x3
 
 ==== MMC/SD ====
 
-in order to initialize a MMC/SD card, you have to use the ``mmcinit'' command.
+Для инициализации (форматирования) карт MMC/SD используйте команду ``mmcinit''.
 <pre>
 GTA01Bv3 # mmcinit
 trying to detect SD Card...
@@ -373,7 +374,7 @@ size = 4208984064
 GTA01Bv3 #
 </pre>
 
-afterwards, you can read ext2 filesystems like:
+После этого на карте можно прочитать файловую систему ext2:
 <pre>
 GTA01Bv3 # ext2ls mmc 0
 <DIR>       1024 .
@@ -421,8 +422,7 @@ Starting kernel ...
 
 ===== Запись нового загрузчика в NAND =====
 
-The following set of commands loads the file u-boot.bin from ext2/mmc and flashes it into the
-bootloader flash partition:
+Следующие команды загружают файл u-boot.bin с карты MMC и записывают его во флеш-раздел загрузчика:
 
 <pre>
 GTA01Bv3 # ext2load mmc 0 0x32000000 u-boot.bin
