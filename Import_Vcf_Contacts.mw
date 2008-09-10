@@ -130,19 +130,27 @@ The script does a listdir and imports ALL files it found in that dir. (i'm a bad
 Thanks to [[Import_Sim_Contacts]] for the original Python Script.
 
 == Import for ASU/Qtopia ==
-The Qtopia addressbook application supports import of VCF files out of the box:
+The Qtopia addressbook application supports import of VCF files out of the box. However, since there is a bug, if there are non-ASCII characters in your contacts you cannot use the version 3 format, otherwise you get multibyte UTF-8 characters mangled. Use the version 2.1 to get the encoding stated explicitly and thus characters imported correctly. But because there is another bug, when using version 2.1 vCards, the addressbook eats up all memory (and potentionally crashes the system) on ''some'' vCards with multiline entries.
 
 If you're connected via SSH, run the following command first:
   export DISPLAY=:0
+
+Then you can simply run:
+  addressbook path_to_vCards_file_to_import.vcf
+
+You will be asked if you want to import the contacts form addressbook.vcf (the contact name will be taken from the "N:" vCard field).
+
+To import a huge number of contacts, single .vcf files can be merged together using cat *.vcf > all.vcf, than import all.vcf
+
+''Tip: If you want to prevent crashing your system if the memory leak occurs, set some limit on memory available to use, so that only the addressbook application dies after reaching the limit. I.e. prior to running the import, do something like:''
+  ulimit -v 50000
+
+If the above does not work, here are the original import guidelines:
 
 To import your address book from VCard format (ASU/<=Qtopia 4.3.2-080808 snapshot):
   LD_LIBRARY_PATH=/opt/Qtopia/lib /opt/Qtopia/bin/addressbook /home/root/addressbook.vcf
 
 To import your address book from VCard format (>=Qtopia 4.3.2 stable):
   LD_LIBRARY_PATH=/opt/Nokia/Qtopia/lib /opt/Nokia/Qtopia/bin/addressbook /home/root/addressbook.vcf
-
-You will be asked if you want to import the contacts form addressbook.vcf (the contact name will be taken from the "N:" vCard field).
-
-To import a huge number of contacts, single .vcf files can be merged together using cat *.vcf > all.vcf, than import all.vcf
 
 [[Category:Advanced End User]]
