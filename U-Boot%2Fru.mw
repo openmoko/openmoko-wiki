@@ -432,8 +432,7 @@ GTA01Bv3 # nand write.e 0x32000000 u-boot ${filesize}
 
 ===== Запись ядра в NAND =====
 
-The following set of commands loads the file uImage from ext2/mmc and flashes it into the
-kernel flash partition:
+Следующие команды загружают файл uImage с карты MMC и записывают его во флеш-раздел загрузчика:
 
 <pre>
 GTA01Bv3 # ext2load mmc 0 0x32000000 uImage
@@ -443,8 +442,7 @@ GTA01Bv3 # nand write.e 0x32000000 kernel ${filesize}
 
 ===== Запись системного образа в NAND =====
 
-The following set of commands loads the file rootfs.jffs2 from ext2/mmc and flashes it into the
-rootfs flash partition:
+Следующие команды загружают файл rootfs.jffs2 с карты MMC и записывают его в корневой (rootfs) флеш-раздел загрузчика:
 
 <pre>
 GTA01Bv3 # ext2load mmc 0 0x32000000 rootfs.jffs2
@@ -452,11 +450,11 @@ GTA01Bv3 # nand erase rootfs
 GTA01Bv3 # nand write.e 0x32000000 rootfs ${filesize}
 </pre>
 
-Please note that this will only work with root file system sizes that are smaller than the amount of memory above 0x32000000, which in the case of 64MB SDRAM is something like 32MB.
+Заметьте, что это работает только для файловых систем размером меньше, чем свободная память выше адреса 0x32000000, что в случае общей памяти в 64Мб равняется 32Мб.
 
 ==== Специфичные команды Neo1973 ====
 
-Our version of u-boot supports a couple of Neo1973 specific commands:
+Наша версия u-boot поддерживает несколько специфичных для Neo1973 команд:
 <pre>
 GTA01Bv2 # help neo1973
 neo1973 neo1973 info - display phone informantion
@@ -471,82 +469,79 @@ neo1973 vibrator (on|off) - switch vibrator on or off
 neo1973 udc pullup (on|off) - switch pull-up on or off
 </pre>
 
-What's the udc?
-
+А что такое udc?
 
 ===== Задержки =====
 
-The boot menu timeout can be changed using
+Время задержки загрузочного меню может быть изменено так:
 <pre>
 setenv boot_menu_timeout=[seconds?]
 </pre>
 
-Also, by changing bootdelay you can have more time to take control of u-boot:
+Также, изменив задержку самой загрузки, можно получить больше времени для манипуляций с u-boot:
 <pre>
 setenv bootdelay=[seconds]
 </pre>
 
 ===== Выключение питания =====
 
-Using
+Исполнив
  neo1973 power-off
 
-you can switch the device off from the bootloader prompt.
+вы сможете выключить устройство прямо из строки приглашения загрузчика.
 
 ===== Заряд батареи =====
 
-For a detailed description of the charger basics, see [[Neo1973 Battery Charger]].
+За детальной информацией об основах зарядки телефона обратитесь к [[Neo1973 Battery Charger|соответствующей странице]].
 
 ====== Получение состояния батареи ======
 
-You can get the current charger status by issuing
+Следующая команда покажет сам состояние зарядки устройства:
  neo1973 charger status
 
-The following modes are possible:
+Возможны следующие состояния:
 
-* idle - no charging
+* idle - в данный момент не заряжается
 * trickle - FIXME
-* pre - Slow (100mA) charging, works in hardware.
-* fast_cccv - Fast (500mA) charging, using Constant-Current followed by Constant Voltage (Li-Ion)
+* pre - Медленная зарядка на скорости 100мА/ч., штатный режим.
+* fast_cccv - Быстрая зарядка, 500мА/ч., используя Constant-Current и Constant Voltage (Li-Ion), также известный как режим ''fast_cccv''.
 
 ====== Запрещение загрузки батареи ======
 
-You can disable battery charging (until the next reboot) by issuing
+Можно запретить зарядку батареи до следующей перезагрузки:
  neo1973 charger off
 
 ====== Быстрая зарядка ======
 
-Using
+Исполнив
  neo1973 charger fast
-you can force the PMU to try to do a fast (500mA) charge of the battery. It will abort if the battery is in over temperature or some other error condition occurs.
+вы заставите устройство управления питанием (Power management unit, PMU) осуществить зарядку на повышенной скорости в 500мА/ч. Операция автоматически прекратится в случае перегрева аккумулятора или по возникновении другой нештатной ситуации.
 
 ====== Разрешение / Запрещение автоматической быстрой зарядки ======
 
-Autofast is a feature of the PCF50606 PMU.  It means that the fast_cccv mode will be automatically selected if a charger with suitable voltage is plugged in, and the battery not in over temperature condition.
+Функция быстрой зарядки "Autofast" -- штатное свойство блока [[PCF50606|PCF50606 PMU]]. Это значит, что режим ''fast_cccv'' будет активизирован автоматически, если к телефону будет подсоединено зарядное устройство с соответствующими выходными характеристиками по вольтажу и аккумулятор в данный момент не перегрет.
 
-{{warning|This is potentially dangerous.  Only enable autofast if you ARE SURE that you can draw 500mA from the USB connector.  This is the case with a wall outlet charger, or if you are attached to a self-powered hub or a desktop PC root hub.  Bus powered hubs and some laptops only provide 100mA on their USB ports and can thus not support fast charging}}
+{{warning|Такая зарядка потенциально опасна! Включайте её принудительно только в том случае, когда '''вы уверены''', что от подключённого USB-шнура действительно можно получить не менее 500мА, например, когда зарядник подключён к мощному домашнему питанию, или к имеющему самостоятельное питание USB-хабу, или к компьютеру. Некоторые хабы и ноутбуки, однако, дают на выходе USB только 100мА и поэтому быструю зарядку не поддерживают.}}
 
-You can enable or disable autofast by 
+Включать/выключать autofast можно командами
  neo1973 charger autofast
-and
+и
  neo1973 charger !autofast
-respectively.
+соответственно.
 
 ===== Подсветка =====
 
-You can switch the backlight on and off by using
+Подсветка экрана включается и выключается:
  neo1973 backlight on
-and
+и
  neo1973 backlight off
-respectively.
 
 ===== Вибро =====
 
-You can switch the vibrator on and off by using
+Встроенный в корпус вибратор включается и выключается:
  neo1973 vibrator on
-and 
+и
  neo1973 vibrator off
-respectively.
 
 ==== Специфичные команды S3C2410 ====
 
@@ -569,19 +564,19 @@ FCLK = 101 MHz, HCLK = 50 MHz, PCLK = 50 MHz
 
 ===== Установка системного таймера на 266 МГц  =====
 
-You can re-configure the [[S3C2410]] PLL to generate a 266 MHz core cpu clock (rather than the 200MHz default) by using
+Вы можете перенастроить блок PLL у [[S3C2410]] на генерацию частоты процессора в 266МГц (вместо 200МГц) с помощью команд
  GTA01Bv2 # s3c2410 speed set 266 
-and
+и
  GTA01Bv2 # s3c2410 speed set 202
-respectively.
+соответственно.
 
-{{warning|The old hardware (Phase 0 - GTA01Bv3) only runs stable at 266MHz if you do not attach anything (esp. the FPC / [[Debug Board]] to the Debug Port}}
+{{warning|Старое оборудование ([[GTA01 revisions|Phase 0 - GTA01Bv3]]) стабильно работает на частоте 266МГц только если к аппарату не подключены никакие внешние устройства, особенно [[Debug Board|отладочная панель]] через коннектор FPC}}
 
 ==== TFTP на QT2410 ====
 
-The QT2410 cs8900a Ethernet can be used to download images via network.
+Сетевой интерфейс cs8900a устройства [[QT2410]] может быть использован для получения загрузочных образов по сети.
 
-First, you have to make sure that ''ipaddr'', ''serverip'', ''ethaddr' and ''netmaskk'' are set correctly in the environment:
+Для начала установите правильные значения переменных окружения ''ipaddr'', ''serverip'', ''ethaddr'' и ''netmaskk'':
 
 <pre>
 QT2410 # printenv
@@ -609,7 +604,7 @@ done
 Bytes transferred = 1544788 (179254 hex)
 </pre>
 
-you can then commence booting via
+Далее вы можете осуществить загрузку полученного образа:
 <pre>
 QT2410# bootm 0x32000000
 </pre>
