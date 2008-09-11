@@ -80,29 +80,50 @@ Dalla tua Linux box rinomina il file <tt>uImage-2.6.24+git18+9c058ff0d2641df3c36
   scp uImage.bin root@192.168.0.202:/media/card/boot/
   scp uImage.bin root@192.168.0.202:/media/card/
 
-== Option 3: updating from source ==
+== Opzione 3: aggiornamento dai sorgenti ==
 
-{{note|This will upgrade only opt/Qtopia directory, you should use opkg update/upgrade for the rest}}
-Original Qtopia images (the distribution released by Trolltech, not ASU) are rarely released as a rootfs image, but the source code is often updated. If you want to reflash your OM with the latest version of Qtopia you might build it from sources. This has been explained in [http://lists.openmoko.org/pipermail/community/2008-August/024785.html this thread] of the community mailing list. Summing up:
+{{note|Questa procedura aggiornerà solo la cartella opt/Nokia/Qtopia, bisognerà usare opkg update/upgrade per il resto}}
+Le immagini originali di Qtopia (la distribuzione rilasciata da Trolltech, non 2008.8) sono rilasciate raramente come immagini rootfs, ma il codice sorgente è spesso aggiornato. Se vuoi fare il reflash con l'ultima versione di Qtopia dovrai compilarla dai sorgenti. Ciò è spiegato in [http://lists.openmoko.org/pipermail/community/2008-August/024785.html questo thread] della mailing list della community. Riassumendo:
 
-* get the latest toolchain released by trolltech: http://www.qtopia.net/modules/mydownloads/singlefile.php?lid=38 and unzip it on your PC (as root)
+* procurati l'ultima toolchain rilasciata da trolltech [http://www.qtopia.net/modules/mydownloads/singlefile.php?lid=38 qui] ed estraila sul tuo pc (come root)
   cd /
   wget http://qtopia.net/downloads/neo/arm920t-eabi-ficgta01-toolchain.tgz
   tar xvzf arm920t-eabi-ficgta01-toolchain.tgz
-* get the latest snapshot from trolltech: ftp://ftp.trolltech.com/qtopia/snapshots/
-*  once dowloaded untar it
-   tar xvzf qtopia-opensource-src-4.3.2-snapshot-20080806.tar.gz
-* make a "build" dir 
+* procurati l'ultimo snapshot da trolltech: [ftp://ftp.trolltech.com/qtopia/snapshots/ qui]
+* una volta scaricato estrai il contenuto
+   tar xvzf qtopia-opensource-src-4.3.2-snapshot-20080911.tar.gz
+* imposta la variabile QTOPIA_DEPOT_PATH alla cartella in cui si trovano i sorgenti
+   export QTOPIA_DEPOT_PATH=PERCORSODELLACARTELLA/qtopia-opensource-src-4.3.2-snapshot-20080911
+* crea una cartella di build
    mkdir build
-   cd build
-* configure and make:
-   ../qtopia-opensource-src-4.3.2-snapshot-20080806/configure -device ficgta01
+* imposta la variabile QPEDIR al percorso della cartella build
+   export QPEDIR=PERCORSODELLACARTELLA/build
+* configure e make:
+   cd $QPEDIR
+   $QTOPIA_DEPOT_PATH/configure -device ficgta01
    make 
-This will take some time (couple hours). Note that the option "-device ficgta01" should work for both neo and freerunner. Then:
+
+Questi passaggi richiederanno parecchio tempo (un paio d'ore). 
+
+{{note|Nota che l'opzione "-device ficgta01" dovrebbe funzionare sia per il Neo1973 che per il NeoFreerunner.}} 
+
+Quindi:
 
   make install
 
-will make a root directory into build directory. That directory should be copied to /opt/Qtopia of your phone with scp. once done restart qpe or whole phone.
+Questo creerà una cartella root dentro $QPEDIR.
+
+Lo script seguente trovato [http://blog.wolfman.com/articles/2008/08/27/porting-xgps-to-qtopia-for-the-freerunner qui] dovrebbe copiare l'immagine così creata nella cartella corretta e automaticamente riavviare Qtopia.
+{{note|Questa procedura modificherà solo la cartella opt/Nokia/Qtopia, le impostazioni personali non dovrebbero essere modificate, né perse}}
+
+ #!/bin/sh
+ QTOPIA_DIR=$QPEDIR/image
+ QTOPIA_IMAGE=qtopia.tar.gz
+ PHONEIP=192.168.0.200
+ # sudo ifconfig usb0 192.168.0.200 up
+ 
+ tar -C $QTOPIA_DIR czvf $QTOPIA_IMAGE
+ cat $QTOPIA_IMAGE | ssh "root@$PHONEIP" '(set -x;rm -f /tmp/restart-qtopia;killall qpe; mkdir -p /opt/Nokia/Qtopia;rm -rf /opt/Nokia/Qtopia/*; cd /opt/Nokia/Qtopia;gunzip |tar xvf -;/etc/init.d/qpe start &)'
 
 == Lanciare Qtopia ==
 Ora spegni il FreeRunner
