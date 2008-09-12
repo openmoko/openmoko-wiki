@@ -1,171 +1,170 @@
 {{Languages|Flashing_the_Neo_FreeRunner}}
-Openmoko регулярно выпускает обновлённые версии Openmoko корневой файловой системы, [[kernel]], и [[Bootloader/ru| U-Boot]] в двоичных образах. Всё это может быть записано во Flash память(NAND) Neo FreeRunner. Для этого, вы можете использовать USB кабель и другой компьютер чтобы прошить Neo FreeRunner "через" USB.
+Openmoko regularly releases updated versions of the Openmoko root filesystem, the [[kernel]], and the [[Bootloader| U-Boot]] as binary images. These may be programmed into the Flash memory (NAND) of Neo FreeRunner. For that, you can use the USB cable and another computer which will run an Openmoko provided tool to flash the Neo FreeRunner "through" USB.
 
 == Обзор ==
-Все компоненты программного обеспечения FreeRunner объединяются в месте в двоичные образы.
+All the components of the software in the FreeRunner are bundled together into binary images.
 
-В настольном компьютере когда Вы хотите заменить операционную систему (OS), вы должны загрузиться с привода CD-ROM, затем скопировать файлы OS с CD на жесткий диск. FreeRunner не имеет привода CD-ROM и файлы должны быть перезаписаны/прошиты непосредственно на внутренний накопитель (NAND flash). Так же возможно записать все файлы OS на внешнюю карту памяти microSD и загружаться с неё.
+On a desktop computer when you want to replace the operating system (OS), you would boot it from a CD-ROM drive, then copy OS files from the CD to the internal hard drive. The FreeRunner does not have a CD-ROM drive and files must typically be re-written/flashed directly into internal storage (NAND flash).  It is also possible to load all the OS files to and boot from a microSD.
 
+The FreeRunner has two kinds of internal program storage: NOR flash and NAND flash. The NOR flash is small and stores only a special boot program used when you need to re-write the contents of the NAND flash. NAND flash acts more like a hard drive.
 
-FreeRunner имеет два внутренних накопителя: NOR flash и NAND flash. NOR flash небольшая и хранит только специальную загрузочную программу, используемую когда вам нужно перезаписать или прочитать содержимое на NAND flash. NAND flash работает как накопитель, типа жесткого диска.
+The NAND Flash is divided into 3 partitions for the bootloader, kernel, and root filesystem - so each of these components can be flashed separately. For example if you are trying to install a modified kernel, you only have to follow the steps to flash the kernel image.
 
-The NAND Flash разбит на три раздела, для загрузчика (bootloader), ядра (kernel) и корневой файловой системы (root filesystem) - все эти компоненты могут быть перезаписаны по отдельности. Например если вы хотите установить модифицированное ядро, вам нужно сделать только один шаг, прошить образ ядра.
-* '''загрузчик (bootloader)''': это небольшая программа которая загружается первой и запускается при включении или reset FreeRunner(в зависимости [[Booting the Neo FreeRunner/ru|какую загрузку выбрали]], версию для NOR или NAND загрузчика).
-* '''ядро (kernel)''': Основной компонент операционной системы Linux.
-* '''корневая ФС (root filesystem)''': содержит все файлы, образующие команды и приложения, которые вы можете запустить.
-
-'''Прежде чем начинать: Очистка root filesystem или прошивка uboot это радикальные меры. Подумайте о необходимости таких действий. Иногда проблемы могут быть устранены обновлением только ядра.'''
+* '''bootloader''': a small program that runs first and starts everything else when the FreeRunner is powered on or reset (depending on [[Booting the Neo FreeRunner|how you reset it]], the version from NOR or NAND is booted).
+* '''kernel''': the central component in the Linux operating system.
+* '''root filesystem''': contains all the files that make up the commands and applications that you can run.
+ 
+'''Before you start: Erasing the root filesystem or flashing the uboot are radical measures. Take the time to ponder the necessity. Sometimes problems can be fixed by updating only the kernel.'''
 
 == Альтернатива : запуск с карточки microSD ==
 
-Вы можете установить дистрибутив на карте microSD, для того, чтобы  [[Booting from SD/ru | загружаться с microSD карты]]. Это позволит вам, сохранить другой дистрибутив установленный в NAND (например, чтобы тестировать 2008.08 и иметь 2007.2 для загрузки по умолчанию).
+You may install this distribution on the microSD card, in order to [[Booting from SD | boot from microSD card]]. That allows you to keep another distribution installed in NAND (for instance to test 2008.08 while still having 2007.2 for default boot).
 
-== Соберите то что вам нужно ==
+== Collect the things you need ==
 
 === Скачивание программы DFU-util ===
 
-Установите эту программу на ваш компьютер. Это позволит вам подключать FreeRunner по кабелю USB и управлять загрузчиком. Это соединение использует специальный протокол который обращается к интерфейсу загрузчика и отличается от связи(организации сети) по USB. Есть отдельная страница с более подробным описанием: [[dfu-util]].
+You will download that program on your desktop computer. It will allow you to connect to the FreeRunner through the USB cable and control its bootloader. That connection uses a special protocol which addresses the bootloader's interface, and differs from USB networking. There is a separate page to describe it in more detail: [[dfu-util]].
 
 
 '''MacOS X:''' [[MacOS_X#Graphical_Flashing_with_Openmoko_Flasher]]
 
 '''Linux:''' http://downloads.openmoko.org/releases/Om2008.8-update/dfu-util
 
-Убедитесь, что dfu-util имеет права на выполнение, установите их командой: chmod a+x dfu-util
+Make sure it is executable by setting the permissions with this command: chmod a+x dfu-util
 
-'''Важно:''' Кажется, на 64-bit версии Linux утилита dfu-util падает с ошибкой "-62". Если у вас в распоряжении есть 32-bit машина, лучше используйте ее!
-Есть некоторые пакеты в ubuntu64 interpid, которые работают хорошо также и в hardy. Поэтому можете попробовать на свой собственный риск: [http://packages.ubuntu.com/de/intrepid/dfu-util].
+'''Note:''' dfu-util seems to consistently fail with a "-62" error on 64-bit Linux. If you have access to a 32-bit machine, use it instead!
+There are some ubuntu64 interpid packages which work just fine for me in hardy too. So you might try at your own risk: [http://packages.ubuntu.com/de/intrepid/dfu-util].
 
-Использование 32-bit chroot (на amd64 debian) у меня работало --[[User:Bubak|Bubak]] 16:54, 4 September 2008 (UTC).
+Using 32-bit chroot (on amd64 debian) worked for me --[[User:Bubak|Bubak]] 16:54, 4 September 2008 (UTC).
 
-'''Windows:''' http://projects.openmoko.org/frs/?group_id=166&release_id=162
+'''Windows:''' http://projects.openmoko.org/frs/?group_id=166&release_id=162 
 
-Смотрите дополнительные инструкции по установке драйверов для Windows в [[Dfu-util-windows]]
+See additional driver installation instructions for Windows at [[Dfu-util-windows]]
 
 === Скачивание образа который вам нужен ===
 
-То, какие точно файлы вам нужны, зависит от того, что вы пытаетесь установить. В большинстве случаев вам потребуется установить ядро (uImage) и корневую файловую систему (rootfs). В редких случаях, когда вы хотите исправить некоторые ошибки, вам потребуется также установить новый загрузчик.
+Exactly what files you need depends on what you are trying to install. In most cases you will need to install a Kernel (uImage) and a Root Filesystem (rootfs). In rare cases, when there is a bug you need fixed, you will also install a new bootloader.
 
-Пожалуйста, прочтите страницу [[Distributions | Дистрибутивы]] для выбора дистрибутива, который соответствует вашим потребностям, затем обратитесь к странице [[Download | Загрузка]] для загрузки.
+Please read [[Distributions]] for choosing the distribution which fits your needs, and then see [[Download]] for downloading.
 
 == Загрузка FreeRunner с NOR Flash (внутренней памяти) ==
 
 [[Image:menu15.jpg|thumb|Booting from NOR Flash]]
 
-# Для начала прочтите другие секции этой страницы, поскольку у вас будет 30 секунд на то, чтобы ввести команды прошивки, вернитесь сюда, когда будете готовы.
-# Не подсоединяйте USB кабель от PC к вашему Neo FreeRunner (отсоедините его).
-# Загрузите ваш Neo FreeRunner в NOR uBoot для прошивки.
-## Зажмите и удерживайте кнопку AUX
-## Нажмите кнопку Power пока не появится меню загрузки
-## Это меню помечено '''*** BOOT MENU (NOR) ***'''
-## См. также [[Booting the Neo FreeRunner | Загрузка Neo FreeRunner]]
-# Оставайтесь в NOR uBoot меню, не выбирайте и не входите ни в какой другой пункт меню. Теперь вы имеете возможность прошивки, резервного копирования вашего FreeRunner или обращения к устройству посредством dfu-util.
-# FreeRunner остается в NOR boot около 30 секунд и выключается, если вы ничего не предпримите.
-# Подсоедините ваш Neo к GNU/Linux или Windows хосту через USB кабель.
-# Теперь вы можете водить команды dfu-util с PC как описано ниже.
-# Если Neo FreeRunner выключится перед тем, как вы нажмете начать прошивку ('''экран станет черным'''), вернитесь назад к пункту 2. Если вы начали прошивку вовремя, телефон не отключится сразу.
+# Read the other sections of this page first, because you will have 30 seconds to enter the flashing commands, come back here when ready.
+# Do not connect the USB cable from the PC to your Neo FreeRunner yet (disconnect it).
+# Boot your Neo FreeRunner into the NOR uBoot menu for flashing.
+## Press and hold AUX button
+## Press the Power button until the boot menu comes up
+## This menu is labelled '''*** BOOT MENU (NOR) ***'''
+## See also [[Booting the Neo FreeRunner]]
+# Stay in NOR uBoot menu, do not select or enter any item in menu. Now you will be able to flash, make backups of your FreeRunner or query the FreeRunner with dfu-util.
+# The FreeRunner only stays at the NOR boot prompt for about 30 seconds and then shuts off unless you do something.
+# Connect your Neo to the GNU/Linux or Windows host via a USB cable. 
+# Now you can enter the dfu-util commands on your PC as described below.
+# If the Neo FreeRunner turns off before you press start flashing ('''screen goes black'''), go back to step 2. If you start flashing in time, the phone will not turn off meanwhile.
 
 <!-- The following, upto dfu-util -l is taken from the thread "Re: FreeRunner (GTK2007.2) has suddenly become unbootable" on the Support list. -->
 
-Имейте ввиду, что соединение dfu-util '''не''' использует Ethernet через USB - это значит, что вы не должны настраивать сетевой интерфейс usb0 на вашем GNU/Linux хосте (в Windows вам потребуется DFU class драйвер, или LibUSB-Win32 драйвер, описанный на странице [[Dfu-util-windows]]). dfu-util устанавливает свои собственные соединения с FreeRunner. Фактически, вы не можете установить соединение Ethernet-через-USB с FreeRunner, когда он будет в uBoot меню; этот тип соединения доступен только когда FreeRunner загружен полностью.
+Note that the dfu-util connection does '''not''' use Ethernet over USB - that is, you should not attempt to set up a usb0 network interface on your GNU/Linux host desktop (on Windows, you need a DFU class driver, or you can use the LibUSB-Win32 driver described on the [[Dfu-util-windows]] page). The dfu-util utility sets up its own connection to the FreeRunner. In fact, you will not be able to make an Ethernet-over-USB connection to the FreeRunner when it is at the uBoot menu; this type of connection is only available when the FreeRunner has booted fully.
 
-После соединения FreeRunner к вашему хосту через USB кабель, вы можете проверить, "видит" ли dfu-util ваш FreeRunner, выполнив:
+After connecting the FreeRunner to your host via USB cable, you can test whether dfu-util "sees" the FreeRunner by executing:
 
-dfu-util -l
+   dfu-util -l
 
-Если вы получите сообщения об ошибках от команды dfu-util тогда попробуйте снова. Часто это работает со второй попытки.
+If you get error messages from the dfu-util command then try again. Often it works on the second try.
 
-Также, пожалуйста не забудьте выполнять команду dfu-util с достаточными привилегиями (те. root) -- вам потребуется полный контроль над шиной usb.
+Also, please remember to execute the dfu-util command with sufficient privileges (ie. root) -- you will need complete control over the usb bus.
 
-== Резервное копирование ==
+== Ререзвное копирование ==
 
-Если у вас есть рабочий образ, который вам нравится, вероятно, вы должны сделать [[Pre-Flash Backup]].
+If you have a working image that you're happy with but want to try something different, you should probably do a [[Pre-Flash Backup]].
 
 == Использование dfu-util ==
 
-dfu-util может использоваться для чтения флеш памяти, записи памяти, и получения информации от устройства.
+dfu-util can be used to read flash memory, write memory, and get information from the device.
 
-Это - основной формат команды для записи файла образа на (предопределенный) "раздел"
-(называемый 'altsetting' в руководстве по dfu-util) :
+This is the general command format to write an image file to a (predefined) "partition name" (referred to as ''altsetting'' in dfu-util help/manual) :
 
-dfu-util -a ''altsetting'' -R -D ''file_name''
+ dfu-util -a ''altsetting'' -R -D ''file_name''
 
-где:<br>
--a ''altsetting'' : Указывает altsetting интерфейса DFU по имени или номеру<br>
+where:<br>
+-a ''altsetting'' : Specify the altsetting of the DFU interface by name or by number<br>
 -R  : Issue USB Reset signalling once we're finished<br>
--D  ''file_name'' : Запись прошивки из ''file_name'' на устройство
+-D  ''file_name'' : Write firmware from ''file_name'' into device
 
-В Linux, вы запускаете dfu-util из приглашения командной оболочки. Если dfu-util не является стандартной командой, возможно вам потребуется добавить к ней префикс "./", например так: '''./dfu-util'''.
-На некоторых системах вам потребуется стать пользователем root, перед тем, как это будет работать, а на Ubuntu вы должны предварить вызов командой "sudo" иначе вы получите следующую ошибку: "Cannot claim interface: could not claim interface 2: Operation not permitted"
+On Linux, you run dfu-util from a command shell prompt. If you have not put it somewhere on your command path you probably need to prefix it with a "./" like this '''./dfu-util'''.
+On some systems you need to be root before this will work and on Ubuntu you must preface the command with "sudo" or you will get the following error: "Cannot claim interface: could not claim interface 2: Operation not permitted"
 
-На Windows, вам придется открыть окно ввода команд, чтобы вводить соответствующие команды. Используйте Пуск-Выполнение команды и напечатайте "cmd" для открытия окна.
+On Windows, you need to open a command window and run from a command line. Use Start-Run Program and type "cmd" to open a Window.
 
-Более детальное руководство по dfu-util доступно здесь : [[Dfu-util]]
+More detailed manual for gfu-util is available here : [[Dfu-util]]
 
 == Прошивка ядра ==
 
-Важно: Телефон должен быть в меню U-boot для того, чтобы работать.
-Доберитесь до него, зажав и удерживая кнопку AUX, приводя устройство в действие.
+ Note: The phone needs to be in the U-boot bootup menu for this to work.
+       Get there by holding down the aux button while powering up the device.
 
-Формат команды следующий:
+The command format is 
 
-dfu-util -a kernel -R -D ''/path/to/uImage''
+ dfu-util -a kernel -R -D ''/path/to/uImage''
 
-Когда прошивка завершена, будет показано следующее:
+When flashing succeeds the following will be shown:
 
-status(0) = No error condition is present
-Done!
+ status(0) = No error condition is present
+ Done!
 
-Прошивка может закончится неудачей с ошибкой -110. Это означает, что ядро слишком большое для раздела ядра по умолчанию. uboot может быть применен для изменения размера раздела по умолчанию на устройстве. Это может также означать, что вы пытаетесь разместить что-то неподходящее в области ядра.
+Flashing may fail with an error -110. This indicates that the kernel is too big for the default kernel partition. uboot can be used to change the size of the default partitions on the device. It may also mean that you are trying to put the wrong thing in the kernel space.
 
 == Прошивка основной файловой системы ==
 
-Корневая файловая система должна быть образом в формате jffs2. Если загруженный вами файл упакован или сжат (имеет .gz, bz2, .zip, tar, tar.gz или .tgz расширение) сперва вам следует его распаковать.
+The root filesystem has to be an image in jffs2 format. If the file you downloaded is zipped or compressed (has a .gz, bz2, .zip, tar, tar.gz or .tgz extension) you have to uncompress it first.
 
-Формат команды здесь такой:
+The command format is
 
-dfu-util -a rootfs -R -D ''rootfs_filename.jffs2''
+ dfu-util -a rootfs -R -D ''rootfs_filename.jffs2''
 
-где ''rootfs_filename.jffs2'' это имя файла, содержащего корневую файловую систему.
+where ''rootfs_filename.jffs2'' is the name of the file containing the root filesystem.
 
-Когда прошивка завершена, будет показано следующее сообщение:
+When flashing succeeds the following will be shown:
 
-status(0) = No error condition is present
-Done!
+ status(0) = No error condition is present
+ Done!
 
 == Прошивка загрузчика в NAND==
 
-Файл загрузчика (U-boot) имеет расширение .bin. Как в случае с корневой файлоой системой, если загруженный файл упакован или сжат (имеет расширение .gz или .zip), вам следует сперва его распаковать.
+The boot loader (U-boot) file should have a .bin extension. As with the root filesystem, if the file you downloaded is zipped or compressed (has a .gz or .zip extension) you have to uncompress it first.
 
-формат команды:
+The command format is 
 
-dfu-util -a u-boot -R -D ''uboot.bin''
+ dfu-util -a u-boot -R -D ''uboot.bin''
 
-где ''uboot.bin'' имя двоичного файла загрузчика.
+where ''uboot.bin'' is the name of the boot loader binary image file.
 
-''Напоминание'': Вы должны [[Flashing_the_Neo_FreeRunner#Boot_the_FreeRunner_from_NOR_Flash|сначала загрузить NOR]], чтобы прошить загрузчик в NAND. После завершения прошивки, убедитесь, что загрузка происходит с новым прошитым NAND загрузчиком, чтобы извлечь выгоду из обновлений.
+''Reminder'': You should have [[Flashing_the_Neo_FreeRunner#Boot_the_FreeRunner_from_NOR_Flash|boot from NOR first]], in order to flash the boot-loader in NAND. After flashing succesfully, make sure you reboot from NAND's newly flashed boot loader, to benefit from the updates.
 
 <!-- Taken from posts by Mikael Berthe <mikael.berthe@lilotux.net> and Torfinn Ingolfsen <tingox@gmail.com> to Support list, subject: Re: Upgrading u-boot needed ? -->
-(Дополнительно) После обновления вы можете пожелать проверить, что версия u-boot соответствует той, которую вы только что прошили. Вы можете использовать 'grep  Bootloader /dev/mtdblock1' из оболочки FreeRunner (или, возможно, 1973) для получения версии '''NAND''' u-boot, подобно следующему:
-root@om-gta02:~# grep Bootloader /dev/mtdblock1
-Neo1973 Bootloader U-Boot 1.3.2+gitr18+64eb10cab8055084ae25ea4e73b66dd03cc1a0cb
+(Optional) After an upgrade, you may wish to check that the u-boot version matches the one you have just flashed. You can use 'grep  Bootloader /dev/mtdblock1' from a shell on the FreeRunner (and possibly the 1973 as well) to get the '''NAND''' u-boot version, like this:
+   root@om-gta02:~# grep Bootloader /dev/mtdblock1
+   Neo1973 Bootloader U-Boot 1.3.2+gitr18+64eb10cab8055084ae25ea4e73b66dd03cc1a0cb
 
-Вы можете выполнить тоже самое для /dev/mtdblock0, чтобы получить версию '''NOR''' u-boot:
-root@om-gta02:~# grep  Bootloader /dev/mtdblock0
-Neo1973 Bootloader U-Boot 1.3.2-moko12
+You can grep for the same string in /dev/mtdblock0 to retrieve the '''NOR''' u-boot version:
+   root@om-gta02:~# grep  Bootloader /dev/mtdblock0
+   Neo1973 Bootloader U-Boot 1.3.2-moko12
 
 <!-- ENDS ... subject: Re: Upgrading u-boot needed ? -->
 
 == Перезагрузка FreeRunner с NAND ==
 
-Теперь вы можете загрузить новые образы.
+You should now be able to boot into the new images.
 
-Обратите внимание '''теперь загружайтесь с NAND флеш''', особенно если вы модифицировали загрузчик (кратно: 1. нажмите и удерживайте ''кнопку питания'', и тогда 2. нажмите ''дополнительную кнопку'')
+Pay attention '''to booting from the NAND flash this time''', in particular if you upgraded the boot-loader (in short: 1. press and hold ''power button'' down, and then 2. press ''aux button'')
 
-Загрузочное меню на этот раз должно быть помечено '''*** BOOT MENU (NAND) ***''' (см. [[Booting#Log_into_U-Boot_in_the_NAND_Flash|загрузка с NAND]] для более детальных инструкций).
+The boot menu should be labelled '''*** BOOT MENU (NAND) ***''' this time (see [[Booting#Log_into_U-Boot_in_the_NAND_Flash|booting from NAND]] for more detailed instructions).
 
 == Скрипт который все это делает GUI... ==
 
-... в разработке, смотри [http://lists.openmoko.org/pipermail/community/2008-September/029731.html this thread] и [http://lists.openmoko.org/pipermail/community/2008-September/030257.html that update]. Скачать http://users.on.net/~antisol/frutil
+... is under development, see [http://lists.openmoko.org/pipermail/community/2008-September/029731.html this thread] and [http://lists.openmoko.org/pipermail/community/2008-September/030257.html that update]. Download from http://users.on.net/~antisol/frutil
 
-[[Category:Flashing Openmoko|Flashing Openmoko]]
+[[Category:Flashing Openmoko| ]]
