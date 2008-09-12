@@ -1,0 +1,283 @@
+{{Languages|Neo FreeRunner Menu}}
+
+Эта страница документации о [http://en.wikipedia.org/wiki/Wireless_networking wireless networking] руководство о [http://en.wikipedia.org/wiki/Wireless_LAN WLAN] или WiFi. 
+
+There are other ways to enable wireless communications on the Neo, including [[Bluetooth]]. For Bluetooth solutions, see [[How to use bluetooth to transfer data between Neo and Desk-top]] and [[Manually using Bluetooth]].
+
+== Использование GUI в 2008.8 ==
+
+In the Settings application on Om 2008.8, there's a "WiFi" item. It should work fairly well in stable-updated 2008.8 (even with WPA2).
+
+If it says "WiFi unknown", you can delete the /etc/volatives.cache file and reboot.  It should work after that.[http://docs.openmoko.org/trac/ticket/1734]  After connecting using the GUI, you may also need to run "udhcpc eth0" manually in the terminal to get DNS entries added to your resolv.conf.  You may also need to run "ifdown usb0" to remove the routing issue caused by having both interfaces up at the same time.  Some users have reported that 802.11g modulation needs to be enabled on APs to allow the FreeRunner to connect (The hardware is suppose to support 802.11b/g).
+
+Otherwise there's also [[lint-wifi]].  Refer to the section below, [[#Available Software|"Available Software"]] to find out what else might be available.
+
+== Как я могу сказать точке доступа (Access Points (APs)) чтобы увидеть ее? ==
+
+You can connect to wireless networks through wireless [http://en.wikipedia.org/wiki/Access_point| access points]. If you want to know the names of all the access points that are currently visible to you, you can perform a scan with this command:
+
+ root@om-gta02:~# '''iwlist eth0 scan'''
+
+If anything is visible you will get a list that looks something like this:
+
+ eth0      Scan completed :
+           Cell 01 - Address: 00:16:B6:DE:77:58
+                     ESSID:"StarvinMarvin"
+                     Mode:Master
+                     Frequency:2.437 GHz (Channel 6)
+                     Quality=9/94  Signal level=-86 dBm  Noise level=-95 dBm
+                     Encryption key:on
+                     Extra:bcn_int=100
+                     Extra:wpa_ie=dd180050f20101000050f20201000050f20201000050f2020000
+           Cell 02 - Address: 00:21:29:AA:10:97
+                     ESSID:"CandT Network"
+                     Mode:Master
+                     Frequency:2.437 GHz (Channel 6)
+                     Quality=39/94  Signal level=-56 dBm  Noise level=-95 dBm
+                     Encryption key:on
+                     Extra:bcn_int=100
+                     Extra:wpa_ie=dd1c0050f20101000050f20202000050f2040050f20201000050f2020000
+                     Extra:rsn_ie=30180100000fac020200000fac04000fac020100000fac020000
+           Cell 03 - Address: 00:14:95:1B:8E:B9
+                     ESSID:"2WIRE852"
+                     Mode:Master
+                     Frequency:2.437 GHz (Channel 6)
+                     Quality=5/94  Signal level=-90 dBm  Noise level=-95 dBm
+                     Encryption key:on
+                     Extra:bcn_int=100
+           Cell 04 - Address: 00:E0:98:52:3D:78
+                     ESSID:"smith"
+                     Mode:Master
+                     Frequency:2.437 GHz (Channel 6)
+                     Quality=36/94  Signal level=-59 dBm  Noise level=-95 dBm
+                     Encryption key:on
+                     Extra:bcn_int=100
+
+If you want to connect to an unsecured network run:
+  
+  udhcpc  
+
+
+== Использование WPA и /etc/network/interfaces==
+
+[http://en.wikipedia.org/wiki/Wi-Fi_Protected_Access  WPA] is a encryption method for securing your wireless network.
+Once you have a [[GTA02_WLAN#Sample_wpa_supplicant.conf|/etc/wpa_supplicant/wpa_supplicant.conf]] file, add a line under the eth0 entry in /etc/network/interfaces:
+ iface eth0 inet dhcp
+    wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+
+Save your changes and run:
+  # ifdown eth0 && ifup eth0
+
+You'll get a lot of messages, like <tt>ioctl[SIOCSIWENCODEEXT]: Operation not supported</tt> and <tt>sed: unrecognized option `--quiet'</tt>, they appear to be harmless. The "--quiet" error message can be avoided by replacing "sed --quiet" with "sed -n" in /etc/wpa_supplicant/*.sh
+
+== Использование WEP и /etc/network/interfaces==
+[http://en.wikipedia.org/wiki/Wired_Equivalent_Privacy WEP] is an encryption method for securing your wireless network. WEP is generally considered to be weak, you should use WPA instead if possible.
+  iface eth0 inet dhcp
+    wireless-key my_wep_key
+    wireless-essid my_essid
+
+ iface eth0 inet dhcp
+    wpa-wep-key0 my_wep_key
+    wpa-key-mgmt NONE
+    wpa-ssid my_essid
+
+Save your changes and run:
+  # ifdown eth0 && ifup eth0
+
+== Ручное подключение ==
+
+Create and edit a suitable [[GTA02_WLAN#Sample_wpa_supplicant.conf|/etc/wpa_supplicant/wpa_supplicant.conf]]   
+
+ root@om-gta02:~# ifup eth0
+ root@om-gta02:~# wpa_supplicant -ieth0 -c/etc/wpa_supplicant/wpa_supplicant.conf -B
+ root@om-gta02:~# udhcpc eth0
+
+== Wake up from wireless (wow)==
+
+Wi-Fi module constantly drain currents after module power up, for wi-fi SIP phone or some application need long standby time, will need wake up from wireless function for power saving. There is a sleep mode that Ar6k supported for wake up from wireless.
+
+ http://svn.openmoko.org/trunk/src/target/AR6kSDK.build_sw.18/host/tools/wmiconfig
+
+ export ATH_CROSS_COMPILE_TYPE=arm-angstrom-linux-gnueabi-
+ make
+
+Basically, it's achieved via wmiconfig tool to issue IOCTL if we want
+ar6k wifi module to generate interrupt to host controller. The procedure
+to enable wakeup-on-wireless(wow) is listed here:
+
+ 1. wmiconfig --sethostmode asleep /* to tell ar6k what host's current is */
+ 2. wmiconfig --setwowmode enable /* enable wow function */
+ 3. wmiconfig --addpattern 0 1 33 01 ff /* add packet filter pattern, this is the ICMP filter pattern */
+ 4. apm -s
+ 5. ping IP_of_Neo
+ 6. The GPIO1 pin would be pulled up. The system would resume then.
+ 7. wmiconfig --sethostmode awake /* The firmware of ar6k will pull low the GPIO1 pin */
+
+--addwowpattern <list-id> <pattern-size> <pattern-offset> <pattern> <pattern-mask>
+
+Here are some addwowpattern commands:
+
+Protocol type=IP=0800
+Protocol type in IP header=ICMP=01
+
+ - To filter for IP packets(offset 22)
+ wmiconfig --addwowpattern 0 2 22 0800 ffff
+ - To filter for ICMP packets (offset 33)
+ wmiconfig --addwowpattern 0 1 33 01 ff
+
+== пример wpa_supplicant.conf ==
+
+ ctrl_interface=/var/run/wpa_supplicant
+ ctrl_interface_group=0
+ eapol_version=1
+ ap_scan=1
+ fast_reauth=1 
+ # WPA2:
+ network={
+        ssid="your ssid"
+        scan_ssid=1
+        proto=RSN
+        key_mgmt=WPA-PSK
+        pairwise=CCMP TKIP
+        group=TKIP CCMP
+        psk="secret key"
+        priority=50
+ }
+ 
+ # WPA:
+ network={
+       ssid="your_ssid"
+       proto=WPA
+       key_mgmt=WPA-PSK
+       pairwise=TKIP
+       group=TKIP
+       scan_ssid=1
+       psk="secret key"
+       priority=10
+ }
+ 
+ # WEP:
+ network={
+      ssid="your_ssid"
+      scan_ssid=1
+      key_mgmt=NONE
+      wep_tx_keyidx=0
+      wep_key0=your_hex_key
+      priority=8
+ }
+ 
+ # Open:
+ network={
+      ssid="your ssid"
+      key_mgmt=NONE
+      priority=5
+ }
+
+======wpa_supplicant.conf explained======
+The highest priority is tried first then falls back to the next highest number.
+
+priority=100  1st  <br>
+then<br>
+priority=99  <br> 
+<pre> 
+
+# Simple case: WPA-PSK, PSK as an ASCII passphrase, allow all valid ciphers
+network={
+	ssid="AP_ESSID"
+	psk="presharedkey"
+	priority=5
+}
+
+
+#try open AP regardless of its SSID.
+# change root password before you go roaming around it could prove dangerous
+network={
+	key_mgmt=NONE
+priority=1  #try any open AP last
+}
+</pre>
+
+A more in depth explanation can be found here:<br> 
+http://hostap.epitest.fi/gitweb/gitweb.cgi?p=hostap.git;a=blob_plain;f=wpa_supplicant/wpa_supplicant.conf
+
+== A very ugly /etc/init.d/wlan startscript ==
+ #!/bin/sh
+ #
+ # wlan	This shell script starts and stops wlan.
+ #
+ # processname: wlan
+ 
+ # Source function library.
+ #. /etc/rc.d/init.d/functions
+ # "written" by HdR
+ 
+ RETVAL=0
+ prog="wlan"
+ 
+ # test -f /etc/default/$prog && . /etc/default/$prog
+ 
+ start() {
+ 	echo -n "Starting $prog: "
+ 	ifconfig eth0 up
+ 	wpa_supplicant -ieth0 -c/etc/wpa_supplicant/wpa_supplicant.conf -B
+ 	sleep 10
+ 	udhcpc eth0
+ 	RETVAL=$?
+ 	return $RETVAL
+ }
+ 
+ stop() {
+ 	# Stop daemons.
+ 	echo -n "Shutting down $prog: "
+         killall wpa_supplicant
+ 	ifconfig eth0 down
+ #        killproc gpsd
+ 	RETVAL=$?
+ 	return $RETVAL
+ }
+ 
+ # See how we were called.
+ case "$1" in
+   start)
+ 	start
+ 	;;
+   stop)
+ 	stop
+ 	;;
+   restart|reload)
+ 	stop
+ 	start
+ 	RETVAL=$?
+ 	;;
+   *)
+ 	echo "Usage: $0 {start|stop|restart}"
+ 	exit 1
+ esac
+ 
+ exit $RETVAL
+
+Note: Don't forget to make this script executable with "chmod +x <filename>"
+
+== Route internet connection through Wifi rather than USB ==
+
+Wifi is faster than USB, so it is a good idea to tell the FreeRunner to connect through it. Put the following in /etc/network/interfaces under eth0:
+
+up route del default gw 192.168.0.200
+
+This will remove your computer as the default gateway and use the  wireless one when the interface is brought up. User nickd reports that sometimes it fails so he has had to put it in twice.
+
+
+== Доступные программы ==
+
+Programs in development providing GUI interfaces to administer WiFi connections:
+
+* [[Lint-wifi]]
+* [[Mofi]]
+* [[Camp-Wifi]]
+
+== Внешние ссылки ==
+
+* [http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/ WiFi on Linux]
+
+[[Category:Neo FreeRunner Hardware]]
+[[Category:Networking]]
