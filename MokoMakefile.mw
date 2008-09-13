@@ -9,7 +9,7 @@ MokoMakefile does not install anything into your system (it can and should be st
 
 MokoMakefile is developed by [[User:RodWhitby|Rod Whitby]] - it is not an official product of Openmoko (although I would be happy for them to pick it up and use it internally).  If there is any discrepancy between the [[Openmoko2007.2#How_to_build|official Openmoko build instructions]], and the operation of the MokoMakefile, then you should consider the official instructions to be correct.
 
-The MokoMakefile is able to build both OM-2007.2 and QTopia-X11 images.
+The MokoMakefile is able to build both Om2008.8 (org.openmoko.asu.stable, openmoko-asu-image) and "Bleeding Edge" (org.openmoko.dev, openmoko-base-image) images.
 
 MokoMakefile also builds the QEMU-based Neo1973 emulator as part of the build process and has make targets to install the Openmoko images into it and run it. These commands can also be used without downloading and building the whole Openmoko OpenEmbedded distribution. This part is described in [[Using QEMU with MokoMakefile]].
 
@@ -102,29 +102,25 @@ If that doesn't work, try
 {{note|MokoMakefile uses BitBake 1.8.8 which requires python-sqlite2 and sqlite-3.3 or later. Users of SUSE Linux 10.1 can update to [http://download.opensuse.org/pub/opensuse/distribution/10.2/repo/oss/suse/i586/sqlite-3.3.8-14.i586.rpm the version of openSUSE 10.2]}}
 
 === Environment ===
-If you want to make the ASU or FSO instead of the OM2007.2, see [[Distributions]], you need to edit your Makefile.  Change OM_GIT_BRANCH to one of the following:
-  OM_GIT_BRANCH := org.openmoko.dev         # OM2007.2 (enabled by default)
-  OM_GIT_BRANCH := org.openmoko.asu.stable  # ASU stable
-  OM_GIT_BRANCH := org.openembedded.dev     # FSO
+If you want to make the "Bleeding Edge" (org.openmoko.dev, openmoko-base-image) image instead of the Om2008.8 image, see [[Distributions]], you need to edit your Makefile.  Read the top of the Makefile for details.
 
-Note that if you want to build FSO, you should change OM_GIT_SITE to git.openembedded.net as well, since FSO is developed in the OpenEmbedded repository, not the Openmoko repository.
+Note that if you want to build FSO, you should use the FSO Makefile at http://shr.bearstech.com rather than the MokoMakefile.
 
 Set up the environment with:
 
    make setup
 
 If you are building for the Neo1973 GTA01, then also do this
-  make setup-machine-neo
+  make setup-machine-om-gta01
 If you are building for the FreeRunner GTA02, then also do this
-  make setup-machine-freerunner
+  make setup-machine-om-gta02
 
 === Building ===
-Before starting a lengthy make process, check the [[#Tips|Tips]] section below for how to make Make multicore aware. You may want to modify the build/conf/local.conf file for your target (emulation/chroot) environment:
-   make openmoko-devel-image
-   (or use "make openmoko-qtopia-x11-image" if you're building the ASU)
-   (or use "make fso-image" if you're building the FSO)
+Before starting a lengthy make process, check the [[#Tips|Tips]] section below for how to make Make multicore aware. You may want to modify the build/conf/local.conf file for your target (emulation/chroot) environment.
 
-''Hint:'' The images build with this command can be found under {$OMDIR}/build/tmp/deploy/images/neo1973
+   make image
+
+''Hint:'' The images build with this command can be found under {$OMDIR}/build/tmp/deploy/glibc/images/neo1973
 
 This will set up the recommended directory structure as described in [[Building Openmoko from scratch]], will download all the required software (from the right places with the right versions), and will immediately start building an image.
 
@@ -145,7 +141,7 @@ Be aware that any changes you previously made to the Makefile (like the git bran
    make update
 
 A quick way to rebuild a new image with the latest updates:
-   make update-makefile && make setup update openmoko-devel-image
+   make update-makefile && make setup update image
 
 ==Build issues==
 First, make sure that the problem is reproducible after running
@@ -160,7 +156,7 @@ then run
 
 and finally
 
- make openmoko-devel-image
+ make image
 
 With luck - you should now have images in your $omdir/build/tmp/deploy/glibc/images/neo1973/ directory.
 You can then [[Flashing openmoko|flash these]].
@@ -225,10 +221,6 @@ Work-arounds for temporary or isolated problems can be found and should be added
 ==Tips==
 *Make sure umask is set to 0022 before you run "make setup"
 
-*You can reduce the amount of consumed disk space significantly by adding
-   INHERIT += "rm_work"
-in your local.conf (e.g. ~/moko/build/conf/local.conf). This will remove the contents of each build/tmp/work/*/<package> directory after the corresponding package builds correctly. As of 10/16/07, this appears to be present in local.conf by default.
-
 *If a certain package does not build due to corrupted download or some such try to remove the sources and rebuild it.
  rm sources/<package>*
  cd build
@@ -253,7 +245,7 @@ Change the PARALLEL_MAKE and BB_NUMBER_THREADS values to something that suits be
 * To not build any binary locales at all, add this to local.conf:
  ENABLE_BINARY_LOCALE_GENERATION = "0"
 
-* If you want to rebuild the package indexes (for instance, after compiling a new version of a package) without building <code>openmoko-devel-image</code>, run <code>make build-package-package-index</code>.
+* If you want to rebuild the package indexes (for instance, after compiling a new version of a package) without building the whole <code>image</code>, run <code>make build-package-package-index</code>.
 
 [[User:Wurp]] will update this to be a little more comprehensible, but maybe it can help someone as-is in the meantime:
 * If MokoMakefile always fails on some fetch in zlib, just find the binary somewhere, add it to the downloads or sources directory manually (create the .md5 matching file if necessary), and retry.
@@ -263,11 +255,11 @@ Change the PARALLEL_MAKE and BB_NUMBER_THREADS values to something that suits be
 === Useful commands ===
 Here is the list (not complete) of useful MokoMakefile commands (actually make targets) and a short description of each one. These should be run inside $OMDIR directory.
 
-; make openmoko-devel-image : build the full development image
+; make image : build the full development image
 
-; make openmoko-devel-tools : build statically-linked [[dfu-util]] and [[openocd]] binaries
+; make tools : build statically-linked [[dfu-util]] and [[openocd]] binaries
 
-; make openmoko-toolchain : builds [[toolchain]]
+; make toolchain : builds [[toolchain]]
 
 ; make qemu : builds qemu, downloads flash images from official repository, flashes qemu emulated Neo1973 and runs emulator (see also [[Openmoko under QEMU]]). 
 
@@ -285,15 +277,13 @@ Here is the list (not complete) of useful MokoMakefile commands (actually make t
    
 ; make update : to update the Openmoko repository checkout and the MokoMakefile patches to the latest version
 
-; make setup-machine-neo : setup for GTA01 version of Neo1973
+; make setup-machine-om-gta01 : setup for GTA01 version of Neo1973
 
-; make setup-machine-freerunner : setup for GTA02 version of FreeRunner
+; make setup-machine-om-gta02 : setup for GTA02 version of FreeRunner
 
 ; make build-package-package-index : Rebuild the package index
 
 ==Developing with MokoMakefile==
-
-{{note|If using MokoMakefile with OM2007.2 then references to $OMDIR/openmoko should be replaced with $OMDIR/openembedded.  Also references to tmp/work/armv4t-linux should be replaced with tmp/work/fic-gta01-angstrom-linux-gnueabi}}
 
 For the following explanations $OMDIR is the directory where there Makefile puts all the stuff.
 
@@ -364,7 +354,7 @@ Here, increase the value '''PR''' by one and add '''mycoolpackage \''' (with the
 Now run
   quilt refresh
   cd ..
-  make update openmoko-devel-image
+  make update image
 
 And if everything's alright you should now have an Openmoko image to flash to your phone or run in qemu as described above.
 
