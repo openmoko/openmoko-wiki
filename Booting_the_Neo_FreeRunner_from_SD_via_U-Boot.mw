@@ -172,7 +172,14 @@ The next step is to mount the first partition of the sd card and install the ker
  mount /dev/mmcblk0p1 /mnt/mokokernel
  cp uImage-fic-gta01-latest.bin /mnt/mokokernel/uImage.bin
 
-Make sure your kernel is called ''uImage.bin''. If the u-boot doesn't find the kernel image during boot, [[Bootloader#Using usbtty from Linux|log into the bootloader]] with ''[http://www.airs.com/ian/uucp.html cu]'', mount the partition with mmcinit and check the presence and the name of the kernel image with ''fatls mmc 1:1'' for FAT filesystem or ''ext2ls mmc 1:1'' for ext2 filesystem.
+Or, for some versions of NOR u-boot:
+
+ mount /dev/mmcblk0p1 /mnt/mokokernel
+ cp uImage-fic-gta01-latest.bin /mnt/mokokernel/uimage
+
+(Yes, lower case i and no extension.)
+
+Make sure your kernel is called ''uImage.bin'' (or ''uimage'' for some versions of NOR u-boot). If the u-boot doesn't find the kernel image during boot, [[Bootloader#Using usbtty from Linux|log into the bootloader]] with ''[http://www.airs.com/ian/uucp.html cu]'', mount the partition with mmcinit and check the presence and the name of the kernel image with ''fatls mmc 1:1'' for FAT filesystem or ''ext2ls mmc 1:1'' for ext2 filesystem. Compare this carefully with the result of ''printenv sd_image_name''. Remember that you can modify the environment in NAND FLASH, but not in NOR FLASH, so if you plan to boot from NOR FLASH you have to modify the file name to match the environment variable.
 
 Unmount both the rootfs partition and the kernel partition and make sure all remaining buffers are written to it:
 
