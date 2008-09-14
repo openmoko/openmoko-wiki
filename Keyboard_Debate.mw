@@ -93,27 +93,31 @@ for illume.
 === How to change the dictionary used by the predictive keyboards ? ===
 
 ==== Qtopia keyboard ====
+You can compile your own wordlist or use precompiled wordlists.
+===== From the Openwall project =====
+This method retrieves wordlists with lower case words only, not including proper names. This is not sufficient for languages with capitalized nouns, such as german.
+Precompiled openwall words.dawg: http://alasal.be/openmoko/keyboard
+To compile the openwall wordlist on your Linux box:
+  wget http://www.3v1n0.net/openmoko/qtopia-italian-keyboard.tar.bz2
+  tar xvf qtopia-italian-keyboard.tar.bz2
+  wget ftp://ftp.mathematik.uni-marburg.de/pub/mirror/openwall/wordlists/languages/***YourLanguageHere***/lower.gz
+  gunzip lower.gz
+  ./qdawggen -d lang_LANG lower
+  mv lang_LANG/lower.dawg words.dawg
+===== Other sources =====
+A better german wordlist, including proper names and nouns, can be downloaded from http://www.fragcom.de/server/fragcom_words .
 
-First, compile the wordlist on your Linux box:
- wget http://www.3v1n0.net/openmoko/qtopia-italian-keyboard.tar.bz2
- tar xvf qtopia-italian-keyboard.tar.bz2
- wget ftp://ftp.mathematik.uni-marburg.de/pub/mirror/openwall/wordlists/languages/***YourLanguageHere***/lower.gz
- gunzip lower.gz
- ./qdawggen -d lang_LANG lower
- mv lang_LANG/lower.dawg words.dawg
-Second, move the English dictionary out of the way, on your Neo:
+===== Installing the words.dawg file =====
+First, move the English dictionary out of the way, on your Neo:
  cd /opt/Qtopia/etc/dict/
  cp -r en_EN lang_LANG
- rm lang_LANG/words.dawg
-Third, back on your Linux box, send the dictionary:
+Second, back on your Linux box, send the dictionary (overwriting the existing words.dawg in the new directory):
  scp words.dawg root@192.168.0.202:/opt/Qtopia/etc/dict/lang_LANG/words.dawg
-Fourth, edit /opt/Qtopia/etc/default/Trolltech/locale.conf to change the language
+Third, edit /opt/Qtopia/etc/default/Trolltech/locale.conf to change the language
  [Language]
  InputLanguages = lang_LANG
  Language = lang_LANG
 Fifth, restart X or reboot your Neo.
-
-Precompiled words.dawg: http://alasal.be/openmoko/keyboard
 
 ==== Illume keyboard ====
 
