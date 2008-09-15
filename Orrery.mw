@@ -131,7 +131,6 @@ century.  For example, the date October 10, 1582 never occurred in
 some European countries.  Many countries have gaps in their calendars
 with missing dates when they adopted the Gregorian Calendar.
 
-
 === place ===
 The place menu allows you to select the GPS-derived location,
 a user specified latitude and longitude, or a city or
@@ -156,6 +155,104 @@ The display menu allows you to configure the display, selecting
 such things as the faintest magnitude object displayed, whether constellation
 lines are plotted, whether or not star names are displayed, etc.
 
+==== Deep Sky Objects ====
+If you select "Deep Sky Obs" from the items menu, you will
+be shown some of the brightest Deep Sky Objects.   Deep Sky
+Objects are objects such as galaxies, expelled envelopes of
+dying stars, clusters of young stars and lumious gas.   A few,
+such as the Antromeda Galaxy, are visible to the unaided eye.
+Many more are visible with binoculars or a small telescope.
+At the moment, the orrery's only catalog of Deep Sky Objects
+is the Messier Catalog.    The image bellow shows the deep sky
+objects in Sagittarius.
+[[Image:OrrerySagitarriusClusters.png|Star clusters in Sagittarius]]
+
+==== Changing the Magnitude Limit ====
+By default, the orrery displays every star a person with excellent
+eyesight located in a very dark area on a moonless night can see.
+If your observing conditions are less ideal than that, it can be
+helpful to use the "Mag. Limit" filed in the item menu to lower
+the limit of the faintest object plotted.   The plot below shows
+the "Summer Triangle" region plotted with the default 6.6 limiting
+magnitude on the left, and a 5.0 limiting magnitude on the right.
+
+[[Image:OrreryMagComparison.png|Changing the limiting magnitude]]
+
+If you tap "Save to Configuration FIle" your new magnitude limit
+will be the default the next time orrery is run.
+
+== Touchscreen Gestures ==
+There are four types of touchscreen gestures which you can make
+in the plotting area which are recognized by the orrery: Taps,
+Zooms, Pans and Presses.
+
+=== Taps ===
+If you press the display area, and withdraw your finger or stylus
+within 0.25 seconds, that gesture is considered a tap.
+
+Tapping in the lower 1/5 of the display area will pan the display in
+azimuth.   If you are in fullscreen mode, then tapping in the upper 1/5
+of the display will take you out of fullscreen mode.   Tapping anywhere
+else toggles between the default screen and the constellation screen.
+
+=== Zooms ===
+If you press the screen and trace out a roundish figure, and remain
+in contact with the screen for more than 0.25 seconds, and if
+the figure encloses a nontrivial (> 300 pixels) area, the gesture
+is considered to be a zoom.   After you release your finger, orrery
+will show the region you traced out in green, and it will show a
+red box.   The red box is a rectangle with the aspect ratio of the
+display area, and the same area and centroid as the region you
+traced out with your finger.   The display will then be zoomed so
+that the region in the red box fills the display area:
+
+[[Image:orreryZoomDemo.png|Orrery Zoom Demo]]
+
+The image above shows the display immediately after the zoom gesture
+has been made (left) and after the zoom has become active (right).
+One may zoom an image which has already been zoomed.
+
+Zooming can do some non-intuitive things, especially if you zoom near
+the upper left or upper right of the display.   This is because
+the orrery's transverse mercator projection always has a line of
+constant azimuth in the center.   This means that something zoomed
+at the edge of the display area will be rotated as it is zoomed, and
+some of the stars you wish to display may be rotated out of the
+display area.   It is best, especially if you are zooming in on
+an area near the zenith, to first pan the display so that the region
+is near the center of the display, before zooming.
+
+If your zoom area includes the zenith, the display any do weird
+things.   This is a bug.
+
+=== Pans ===
+A pan is like a zoom, but with a more linear, rather than roundish
+gesture.   A pan can be used to move the center of a zoomed region.
+It has no effect if the display area is not zoomed.   After you
+release your finger or stylus following a zoom gesture, orrery
+will show the region you traced out in green, and will draw a red
+arrow showing the direction and size of the pan.   After that,
+the display is re-drawn with the new center position. 
+
+[[Image:orreryPanDemo.png|Orrery Pan Demo]]
+
+The image above shows the display immediately after a pan gesture
+has been made (left) and following the re-drawing of the display
+area (right).
+
+=== Presses ===
+If you push down on the touchscreen for more than 0.25 seconds, and
+do not move your finger or stylus significantly while making contact,
+you will have made a press gesture.   Since one almost always moves
+one's finger a little by while pressing the screen, some small motion
+is allowed during a press gesture.   This means that a zoom or pan
+gesture cannot be arbitrarily small, because it will be interpreted
+as a press.
+
+If the screen is zoomed, then the press gesture unzooms it.   If the
+screen is already unzoomed, then the press gesture has the same
+effect as a tap gesture.
+
 == Symbols ==
 === Planet Symbols ===
 The solar system symbols, used by default on the constellation
@@ -176,6 +273,25 @@ are always near, but usually not exactly on, the Ecliptic.
 The blue-green dotted line is
 the Galactic Plane, the intersection of the plane of the Milky Way's
 disk and the celestial sphere.
+
+== Displaying Stars Too Faint for the Unaided Eye to See ==
+The default sky catalog used by the orrery contains every star
+you can see with your unaided eye.   If you wish to display stars
+which require binoculars or a small telescope to be seen, you can
+download the file hipparcos_9.0.dat from the orrery area of the
+gForge site.   You must then load that program to your phone
+with the name /usr/share/orrery/hipparcos.dat (you will be overwriting
+the smaller catalog which comes with the package).   If you
+prefer to put the file elsewhere (on your microSD, for example), you
+may make /usr/share/orrery/hipparcos.dat a soft link.
+
+The default orrery star catalog contains 9931 stars.   hipparcos_9.0.dat
+contains 83392 stars, and is complete to 9th magnitude.  Note
+that the orrery will be more sluggish if you use this larger catalog.
+Most people definately won't want to use it.   The plot below shows
+Lyra with limiting magnitudes of 6.6 (left) and 9.0 (right).
+
+[[Image:orreryLyraComparison.png|Orrery Catalogs]]
 
 == System Requirements ==
 === Supported Phones ===
@@ -208,16 +324,10 @@ than it used to be.  The latest .ipk files can be found here:
 
 == Known Bugs ==
 
-=== Blurry Orion Label ===
-Ooops - I didn't remove some emacs backup files from
-my first .ipk files.   The only visible
-effect of this that the name of the constellation
-Orion will be typed twice, slightly displaced from each
-other, one with a tilda (~) following it.   You can fix
-that by removing the file
-/usr/share/orrery/constellations/Orion~ . This problem
-was fixed on the 1.1.1 .ipk file for 2007.2, and the
-1.1.2 .ipk file for 2008.8 .
+=== Zooming the zenith area doesn't work ===
+If you make a zoom gesture that includes the zenith, or if
+you pan a zoomed region so that the zenith falls within it,
+the orrery goes nuts.
 
 === Restarting gpsd crashes orrery ===
 If you restart gpsd while the orrery is running, the
@@ -226,68 +336,32 @@ orrery will crash if it is configured to use the GPS position.
 '''Send more bug reports!'''
 
 == Revision(ist) History ==
- Version 1.2:
+
+ Version 2.0:
     New user features:
-        Constellation stick figures are now shown
-        in three colors:
-            Pink constellations are zodiac
-                 constellations
-            Gold constellations are the non-zodiac
-                 constellations from Greek antiquity,
-                 as listed in Ptolomy's Almagest.
-            Blue constellations are modern additions
+        The display can now be zoomed and panned.
  
-        On screen 1, if "Display Names" is selected,
-        planet names are now displayed in addition
-        to star names.
+        Deep sky objects may be displayed.
  
-        Transition to and from fullscreen mode has
-        been sped up.
+        A deeper star catalog is available as
+        an option.
  
-        The time can now be entered as a Julian Date.
-        This is a less ambiguous way of entering times
-        in the distant past than using a calendar date,
-        because of the differing calendar systems in use
-        worldwide before the late 16th century.
- 
-        The label of the "fullscreen" button was changed
-        to "FS" and the label of the "display" button
-        was changed to "items".   Those changes were made
-        to make room for another pulldown menu, labelled
-        "opts", which allows one to modify parameters
-        which effect all displays.   The first of these
-        options is the finger mode options, and the
-        second is a new option called "Save All Changes".
-        If "Save All Changes" is selected, then the
-        "Save to Configuration File" option will be
-        removed from the menus, and clicking the "OK"
-        button will have the "Save to Configuration File"
-        effect.   A lot of people believe this is how
-        programs on handheld devices should work - the
-        user should never have to explicitly save changes.
- 
-        Red and white flashlight buttons under the opts
-        menu have been added.   These buttons set all
-        pixels red or white.   Red flashlight mode is
-        better for preserving night vision.   To exit
-        flashlight mode tap the display anywhere.
- 
-        Added the ability to save locations to the Private
-        location menu.   This option appears in the "place"
-        If the Custom or Menu checkbox is clicked.   The
-        Private menu is now empty by default (it used to
-        contain "Cambridge MA").
+        The separate toggle buttond for the
+        Celestial Equator, the Ecliptic and
+        the Galactic Plane have been rolled into
+        one toggle called "Great Circles", to
+        save menu space.
  
     Bug Fixes:
-    	Spelling error fixed in writing of config file
-        parameter DEBUG_MESSAGES_ON.
+        An error that prevented some 4th magnitude
+        stars from being plotted (they were plotted
+        in black!) has been fixed.
  
-        Initial display of constellations has been sped
-        up considerably.
+        A bug which caused some stars near the
+        celestial equator to be plotted at the
+        wrong position (by ~1 degree) has been
+        fixed.
  
-        Fixed a bug which occasionally caused the routine
-        which creates location menus to seg fault.
-
 == Contact Information ==
 Please send comments, suggestions, questions and/or
 abuse to orrery.moko@gmail.com
