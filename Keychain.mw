@@ -1,0 +1,28 @@
+==Presentation==
+ssh-agent permit SSH passwordless login, and works by caching the key(that is encrypted on the filesystem)...so it's more secure than passwordless ssh key files.
+Keychain permit us to use ssh-agent easily...and permit us to access the ssh-agent deamon from any terminal...
+
+you can find documetation on the usage of keychain [http://www.gentoo.org/doc/en/articles/openssh-key-management-p2.xml here]
+
+==Installation==
+All the commands has to be typed on the openmoko(you can also use ssh)
+we will download keychain:
+ wget http://agriffis.n01se.net/keychain/keychain-2.6.8.tar.bz2
+ cd keychain-2.6.8
+as install -m0755 keychain /usr/bin/keychain doesn't work because we don't have the install command we will type:
+ cp keychain /usr/bin/
+ chmod 0775 /usr/bin/keychain
+Then we will need to activate it:
+ cd /etc/skel
+ cp * /home/root/
+edit the /home/root/.bashrc file:
+ opkg update
+ opkg install nano
+ nano /home/root/.bashrc
+navigate inside the file with the arrows and add this to the end:
+ eval `/usr/bin/keychain --ignore-missing --eval  ~/.ssh/id_rsa ~/.ssh/id_dsa`
+then quit with ctrl+x,press y to save change,and press enter
+Then we will need vte:
+ opkg update
+ opkg install vte
+if keychain doesn't work edit /etc/passwd and change the terminal of the root entry to /bin/bash
