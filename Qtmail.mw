@@ -1,0 +1,20 @@
+==Presentation==
+Qtmail is the mail application on om2008.8
+==configuration for encrypted mail==
+qtmail is already installed by default so we don't need to install it
+but it doesn't support ssl/tls by default...so we will make it use ssl/tls
+ cd /usr/lib
+ ln -s libssl.so.0.9.7 libssl.so
+ ln -s libcrypto.so.0.9.7 libcrypto.so
+then we need to import our certificate...
+I use no-log.org so the settings will be for it:
+on your desktop computer do:
+ openssl s_client -connect :143 -showcerts
+copy the part between(and including ):
+ -----BEGIN CERTIFICATE-----
+ -----END CERTIFICATE-----
+put it in a file,that you will put on a folder,then do
+ c_rehash /path/to/the/folder
+then copy the content of the folder to /opt/Qtopia/etc/ssl/certs/
+
+then it should work...you only need to configure it according to your mail provider settings
