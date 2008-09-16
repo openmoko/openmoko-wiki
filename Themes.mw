@@ -8,3 +8,28 @@ A Tango variant is at http://52grad.de/.stuff/freerunner/ .
 The [http://exchange.enlightenment.org/ Enlightenment exchange] repository has themes, modules and applications.
 
 There are a few background images for the [[Display Locker]] screen in Om 2007.2.
+
+== How to customize the boot screens ==
+
+There are three steps: u-boot, kernel and X.
+
+=== Changing the u-boot splash image ===
+
+The u-boot splash image is on its own partition. According to ticket <strike>[http://docs.openmoko.org/trac/ticket/1735 1735]</strike>:
+ To replace the splash screen image on the device you need to convert the PNG file to a compressed raw frame buffer content and then flash this into the splash screen partition.
+ For the conversion, go to svn.openmoko.org/trunk/src/host/splash/ and run
+   ./splashimg.pl boot_image.png | gzip -9 >new_splash.gz
+ If your update process runs under Linux (OE package ?) you'd then execute the following commands:
+   flash_eraseall /dev/mtd4
+   nandwrite -p /dev/mtd4 new_splash.gz
+ If you update through DFU, you would:
+   dfu-util -a splash -R -D new_splash.gz
+ Note the NOR also contains a copy of the splash screen. If you generate a new NOR image with "mknor", just specify the new image with -s boot_image.png, and it will put the "openmoko" text near the bottom of the screen. 
+
+=== Changing the Kernel's boot splash image ===
+
+TBD
+
+=== Changing X's startup ===
+
+TBD
