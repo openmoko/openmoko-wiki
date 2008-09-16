@@ -18,55 +18,67 @@ Gentoo armv4tl-softfloat-linux-gnueabi optimalized for Openmoko (-Os -march=armv
 
 
 == Installation ==
-*Partition your sd card if needed (don`t make swap partitions, ensure card isn't mounted)
-:<tt>e.g.</tt> <pre>fdisk /dev/mmcblk0</pre>
-*Make ext2 or ext3 filesystem
-:<tt>e.g.</tt> <pre>mkfs.ext2 /dev/mmcblk0p1</pre>
-*Mount partition
-:<tt>e.g.</tt> <pre>mount /dev/mmcblk0p1 /media/card</pre>
-*Copy stage and portage from host to moko
-:<tt>e.g. (on localhost)</tt> <pre>scp stage3-armv4tl-*.tar.bz2 portage-*.tar.bz2 root@openmoko:/media/card</pre>
-*Unpack stage and portage
-:<tt>e.g.</tt> 
-<pre>
-tar -xjpf /media/card/stage3-armv4tl-*.tar.bz2 -C /media/card
-tar -xjpf /media/card/portage-*.tar.bz2 -C /media/card/usr
-</pre>
-*Cleanup removing tar.bz2
-:<tt>e.g.</tt> <pre>rm /media/card/stage3-armv4tl-*.tar.bz2 /media/card/portage-*.tar.bz2</pre>
-*Chroot
-:<tt>e.g.</tt> <pre>chroot /media/card /bin/bash</pre>
-*Update chroot environment
-:<tt>e.g.</tt> <pre>source /etc/profile; env-update</pre>
-*Set timezone
-:<tt>e.g.</tt> <pre>cp /usr/share/zoneinfo/YOURZONE /etc/localtime</pre>
-*Set hostname
-:<tt>e.g.</tt> <pre>nano /etc/conf.d/hostname</pre>
-*Remove console font changing (small is beautiful ;])
-:<tt>e.g.</tt> <pre>nano /etc/conf.d/consolefont</pre> (hash consolefont= line)
-*Setup fstab
-:<tt>e.g.</tt> <pre>nano /etc/fstab</pre>
-*Edit inittab (hash out c3, c4, c5, c6, s0, s1 lines)
-:<tt>e.g.</tt> <pre>nano /etc/inittab</pre>
-*Setup usb networking
-:<tt>e.g.</tt> 
-<pre>
-ln -s /etc/init.d/net.lo /etc/init.d/net.usb0
-echo "config_usb0=( \"192.168.0.202 netmask 255.255.255.0\" )" > /etc/conf.d/net
-echo "routes_usb0=\"default via 192.168.0.200\"" >> /etc/conf.d/net
-echo "nameserver 192.168.0.200" > /etc/resolv.conf
-</pre>
-*Enable sshd
-:<tt>e.g.</tt> <pre>rc-update add sshd default</pre>
-*Change root password
-:<tt>e.g.</tt> <pre>passwd</pre>
-*Leave chroot
-:<tt>e.g.</tt> <pre>exit</pre>
-*Copy kernel
-*Copy modules
-*Setup uboot for booting from sd card
-*Reboot
-*Setup/emerge rest of the system
+<ol>
+<li>Partition your sd card if needed (don`t make swap partitions, ensure card isn't mounted): </li> 
+  fdisk /dev/mmcblk0
+
+<li>Make ext2 or ext3 filesystem: </li> 
+  mkfs.ext2 /dev/mmcblk0p1
+
+<li>Mount partition: </li> 
+  mount /dev/mmcblk0p1 /media/card
+
+<li>Copy stage and portage from host to moko (e.g. on localhost): </li>
+  scp stage3-armv4tl-*.tar.bz2 portage-*.tar.bz2 root@openmoko:/media/card
+
+<li>Unpack stage and portage: </li> 
+  tar -xjpf /media/card/stage3-armv4tl-*.tar.bz2 -C /media/card
+  tar -xjpf /media/card/portage-*.tar.bz2 -C /media/card/usr
+
+<li>Cleanup removing tar.bz2: </li> 
+  rm /media/card/stage3-armv4tl-*.tar.bz2 /media/card/portage-*.tar.bz2
+
+<li>Chroot: </li> 
+  chroot /media/card /bin/bash
+
+<li>Update chroot environment: </li> 
+  source /etc/profile; env-update
+
+<li>Set timezone: </li> 
+  cp /usr/share/zoneinfo/YOURZONE /etc/localtime
+
+<li>Set hostname: </li> 
+  nano /etc/conf.d/hostname
+
+<li>Remove console font changing (small is beautiful ;]): </li> 
+  nano /etc/conf.d/consolefont (hash consolefont= line)
+
+<li>Setup fstab: </li> 
+  nano /etc/fstab
+
+<li>Edit inittab (hash out c3, c4, c5, c6, s0, s1 lines): </li> 
+  nano /etc/inittab
+
+<li>Setup usb networking: </li> 
+  ln -s /etc/init.d/net.lo /etc/init.d/net.usb0
+  echo "config_usb0=( \"192.168.0.202 netmask 255.255.255.0\" )" > /etc/conf.d/net
+  echo "routes_usb0=\"default via 192.168.0.200\"" >> /etc/conf.d/net
+  echo "nameserver 192.168.0.200" > /etc/resolv.conf
+
+<li>Enable sshd: </li> 
+  rc-update add sshd default
+
+<li>Change root password: </li> 
+  passwd
+
+<li>Leave chroot: </li> 
+  exit
+
+<li>Copy kernel. </li>
+<li>Copy modules. </li>
+<li>Setup uboot for booting from sd card. </li>
+<li>Reboot. </li>
+<li>Setup/emerge rest of the system. </li>
 
 == Emerging binary packages ==
 *Binary package sites
