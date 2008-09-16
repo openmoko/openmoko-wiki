@@ -1,64 +1,20 @@
-[[Image:Qtmail-account.png|180px|right|thumb|Qtmail on Om 2008.8]]
-[[Image:Contacts-email.png|180px|right|thumb|E-mail button is available after configuring outgoing account.]]
-{{Application|Qtmail}}
-
-Qtmail is the default mail application on Om 2008.8. It is called ''Messages'' on the main screen. Qtmail supports POP3, IMAP, SMTP, SMS, MMS, EMS. 
-
-== Basic setup ==
-
-To send e-mail you need to set up at least one outgoing e-mail account. After this setup you can start sending e-mails from your Contacts list too.
-
-* Start Messages
-* Click Options and choose Account settings...
-* Click Options and choose Add account...
-* Configure your e-mail account and outgoing server settings
-
-==Configuration for encrypted mail==
-
-1. qtmail is already installed by default, but it doesn't support ssl/tls, So we will make it use ssl/tls
+==Presentation==
+Qtmail is the mail application on om2008.8
+==configuration for encrypted mail==
+qtmail is already installed by default so we don't need to install it
+but it doesn't support ssl/tls by default...so we will make it use ssl/tls
  cd /usr/lib
- ln -s libssl.so.0.9.8 libssl.so
- ln -s libcrypto.so.0.9.8 libcrypto.so
-
-2. You will need the c_rehash script, which is not in the OM repositories. As it is a perl script, it will run on any machine with perl, and can be copied direct from your desktop/laptop. It will be in /usr/bin. Copy it to the same location on your neo. Ensure it is permitted to execute.
-
-3. Get openssl.
- apt-get install openssl
-
-4. Then we need to import our certificate. Change 'myprovider' and 'port' according to your settings.  On the freerunner (possibly via ssh), do:
- openssl s_client -connect 'myprovider':'port' -showcerts
-
-Examples:
-*gmail:
-**myprovider: imap.googlemail.com
-**port: 993
-
-*yahoo
-**myprovider:?
-**port:?
-
-5. Copy the part between (and including):
+ ln -s libssl.so.0.9.7 libssl.so
+ ln -s libcrypto.so.0.9.7 libcrypto.so
+then we need to import our certificate...
+I use no-log.org so the settings will be for it:
+on your desktop computer do:
+ openssl s_client -connect :143 -showcerts
+copy the part between(and including ):
  -----BEGIN CERTIFICATE-----
- ...
  -----END CERTIFICATE-----
+put it in a file,that you will put on a folder,then do
+ c_rehash /path/to/the/folder
+then copy the content of the folder to /opt/Qtopia/etc/ssl/certs/
 
-6. Create a directory to contain the file, e.g. /path/to/the/directory.  Then write the certificate to a file in that directory, where the filename ends in .crt, e.g. /path/to/the/directory/yourisp.crt.  Then do
- c_rehash /path/to/the/directory
-Now create the qtmoko certs directory and copy the c_rehash output to that new directory:
- mkdir -p /opt/qtmoko/etc/ssl/certs
- cp /path/to/the/directory/* /opt/qtmoko/etc/ssl/certs
-
-7. Configure qtmail according to your mail provider settings, and it should work.  Note that qtmail always defaults the port for the outgoing server to 143 but this might be wrong, e.g, IMAP4 over SSL (IMAPS) uses port 993.  Your mailserver might be configured to use nonstandard ports.
-
-<onlyinclude>
-{{ApplicationBox|
-  Name=[[Qtmail]]|
-  Description=The Qtopia mail and SMS application, default ''Messages'' application on Om 2008.8|
-  Screenshot=Qtmail-account.png|
-  Homepage=http://qtopia.net|
-  TestedOn=Om 2008.12|
-  PackageName=qtopia-phone-x11-qtmail
-}}
-</onlyinclude>
-
-[[category:Internet Applications]]
+then it should work...you only need to configure it according to your mail provider settings
