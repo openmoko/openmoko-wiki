@@ -1,0 +1,144 @@
+=NeoTool=
+
+NeoTool is a bash script which makes use of zenity to provide a friendly GUI frontend to some common management tasks. It is aimed at being very intuitive and easy to use, and flexible enough to make it usefull in a wide variety of circumstances.
+
+== Features ==
+
+The main features of NeoTool are:
+* Ability to flash your Neo via a GUI
+* Ability to flash multiple images at once (for example, flash rootfs and the kernel at the same time)
+* Ability to backup your Neo via a GUI
+* Ability to backup Multiple images at once
+* rootfs can be backed up to either a flashable image or a tar archive
+* most / all configuration can be done via the GUI
+
+== Download / Releases ==
+
+The most recent version of NeoTool is available for download at http://users.on.net/~antisol/neotool
+
+When a new version is released it will be announced on the community mailing list, and on this page.
+
+== Requirements ==
+
+The software prerequisites for NeoTool should be installed on most modern linux systems by default:
+* bash
+* zenity
+* which
+* awk
+
+* dfu-util is required to be able to flash your Neo, but NeoTool is able to download this automatically.
+
+=== Optional ===
+
+* pipe viewer (pv), shows display while backing up rootfs
+
+* to backup rootfs, you need to have a [[USB_Networking|USB networking]] configured and working
+
+* mkfs-jffs2 needs to be installed on your neo to backup rootfs to a flashable image (type 'opkg install mkfs-jffs2' in ssh)
+
+* While not a requirement, backing up rootfs is much less painful if you set up an authorized_keys entry for your host on your Neo. To do this, run 'ssh-keygen' (preferrably as root) on your host, and then copy the contents of ~/.ssh/id_rsa.pub on your host into /home/root/.ssh/authorized_keys on your freerunner
+
+<pre>
+user@host# su
+
+root@host# ssh-keygen
+
+root@host# scp ~/.ssh/id_rsa.pub root@<Neo IP Address>:/home/root
+
+root@host# ssh root#<Neo IP Address>
+root@om-gta02:~# cat id_rsa.pub >> /home/root/.ssh/authorized_keys
+
+</pre>
+
+This will prevent you from having to enter the password for your Neo when you use ssh and scp.
+
+If you don't do this, you will need to enter your password repeatedly in order to backup rootfs.
+
+== Usage ==
+
+NeoTool should usually be run as root, although this is not required if you only want to backup rootfs and/or the kernel via scp.
+
+<pre>sudo ./neotool</pre>
+
+You will initially be presented with the main menu. Most of the functions should be relatively self-explanatory
+
+(thorough documentation on usage goes here)
+
+== Revision History ==
+
+See [http://lists.openmoko.org/pipermail/community/2008-September/029731.html this thread] and [http://lists.openmoko.org/pipermail/community/2008-September/030257.html that update] for discussions on the community list. 
+
+=== 09-Sep-2008 ===
+
+- ability to flash more than one image at once - the 'what do you wanna 
+flash' now has checkboxes instead of radio buttons, and all your 
+selections are flashed one after the other. (which i find very handy, 
+stops the FR powering down while you're typing the next dfu-util 
+command, or locating the next image - works great for flashing a new 
+distro & kernel). if an error occurs, subsequent files will not be flashed.
+
+- more confirmation / idiot-proofing - it now tells you what you're 
+doing much more clearly (i.e: "about to flash Kernel with /foo/bar.bin, 
+rootfs with /foo/bar.jffs". allows you to confirm that you chose the 
+right images). also the 'choose file' dialogs tell you what you're 
+browsing for
+
+- ability for users to press 'cancel' at the various dialogs and exit 
+gracefully.
+
+- checks that dfu-util exists and is executable. I moved my dfu-util to 
+/usr/local/bin, so it looks there first, but it will also check the 
+current directory and prompt if it can't find it
+
+- I wasn't a fan of patching dfu-util, and the pulsating zenity progress 
+dialog drags my (prehistoric) PC to a crawl, so I disabled the progress 
+bar and use the text output of dfu-util instead.
+
+=== 12-Sep-2008 (v1.0) ===
+
+- Utility now has the ability to flash the splash image as per request
+
+- Utility can now also backup your device to flashable rootfs / kernel images (david might like this for building FDOM images)
+
+- Configurification is loaded on startup and saved in /etc/frutil (you can only modify settings if you run it as root)
+
+- more idiot proofing - uses 'which' to find dfu-util, checks to ensure it's being run as root, checks that zenity is installed on the host, checks that you have mkfs.jffs2 installed before backing up, checks that you have pv installed and acts accordingly (by either using it or not during the backup [this is not properly tested because I don't have pv, please report]), and possibly other stuff I've forgotten about.
+
+- new name (frutil) to reflect the new abilities
+
+=== 17-Sep-2008 (v1.1) ===
+
+- Added ChangeLog
+
+- Added ability to handle multiple DFU-capable devices
+
+- Changed references to 'freerunner' to 'neo' 
+
+- name changed to NeoTool (despite implied connection with Keanu Reeves' crotch)
+
+- Added 'Reset to defaults' option
+
+- Added warning that flashing uboot on neo1973 may result in a paperweight
+
+- several small bugfixes
+
+- made backup functionality much more versatile:
+
+	- made backup filenames configurable
+
+	- Added ability to choose what to backup
+
+	- Added rootfs backup type option (jffs2 or tar)
+
+	- Added kernel backup method option (scp or dfu)
+
+	- Added ability to backup uboot and splash
+
+== Support ==
+
+Suggestions? comments? feedback? problems? 
+* Are all welcome
+* Email the Community list, 
+* or, email antisol (at) internode (dot) on (dot) net
+
+<strike>NeoTool is perfect in every respect - if it breaks it's because you did something wrong.</strike>
