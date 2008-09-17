@@ -57,7 +57,7 @@ Maps can be installed from [[Installer]].
 
 === Create Your Own Maps ===
 
-{{Note | Map packing eats lots of memory and fails easily on NEO.}} 
+{{Note | Map packing eats lots of memory and fails easily on NEO.}}
 
 '''Locations''' comes with a tool called '''om-locations-map-pack'''. It can be used to pack tile images downloaded from the OSM server into a map package:
 
@@ -123,6 +123,7 @@ To compile diversity-daemon,
 <pre>
 $ svn checkout svn://svn.projects.openmoko.org/svnroot/diversity/trunk/diversity-daemon
 $ cd diversity-daemon
+$ ./autogen.sh
 $ ./configure --enable-session-bus
 $ make
 $ sudo make install
@@ -136,12 +137,56 @@ To compile Locations,
 $ git clone git://git.openmoko.org/git/om-locations.git
 $ cd om-locations
 $ ./autogen.sh
-$ ./configure
 $ make
 $ sudo make install
 </pre>
 
 Locations depends directly on recent versions of eet, evas, ecore, edje, and etk from EFL.  Please consult its website for instructions to build them.
+
+=== Using Toolchain ===
+
+{{Note | More tests needed on a clean machine.  At least, edje_cc is missing in this setup.}}
+
+After the recent release of the [[Toolchain]], it is possible to cross-compile '''Locations''' by following some simple steps.
+
+First, one need to get the [[Toolchain]],
+
+<pre>
+$ wget http://downloads.openmoko.org/toolchains/openmoko-i686-arm-linux-gnueabi-toolchain.tar.bz2
+$ tar -C /tmp -jxf openmoko-i686-arm-linux-gnueabi-toolchain.tar.bz2
+$ sudo mv /tmp/usr/local/openmoko /usr/local
+</pre>
+
+and install the dependencies,
+
+<pre>
+$ . /usr/local/openmoko/arm/environment-setup
+$ opkg-target install libdbus-glib-1-dev curl-dev            # requirements for diversity-daemon
+$ opkg-target install libetk-dev edbus-dev libts-dev         # requirements for om-locations
+</pre>
+
+You are ready to compile '''diversity-daemon''' and '''om-locations''' now.  To compile '''diversity-daemon''',
+
+<pre>
+$ . /usr/local/openmoko/arm/environment-setup
+$ svn checkout svn://svn.projects.openmoko.org/svnroot/diversity/trunk/diversity-daemon
+$ cd diversity-daemon
+$ ./autogen.sh
+$ ./configure --host=arm-angstrom-linux-gnueabi --enable-session-bus
+$ make
+</pre>
+
+The binary is available at src/diversity-daemon.  To compile '''om-locations''',
+
+<pre>
+$ . /usr/local/openmoko/arm/environment-setup
+$ git clone git://git.openmoko.org/git/om-locations.git
+$ cd om-locations
+$ ./autogen.sh --host=arm-angstrom-linux-gnueabi
+$ make
+</pre>
+
+The binary and theme could be found at src/om-locations and data/themes/default.edj.
 
 == Feedbacks ==
 '''Locations''' uses [https://docs.openmoko.org/trac/ Trac] for bug tracking.  When report bugs, please choose category Locations so that they go to the developers directly.  There is no mailing list specific for '''Locations'''.  Please use http://lists.openmoko.org/mailman/listinfo/ for discussion.
