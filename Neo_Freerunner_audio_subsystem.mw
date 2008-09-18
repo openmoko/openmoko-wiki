@@ -1,95 +1,19 @@
-The Neo Freerunner (GTA02) inherited the audio subsystem from its older brother the Neo 1973 (GTA01). However, there are a few small differences.
-This page tries to show and explain the differences and points you to the [[Neo_1973_audio_subsystem | Neo 1973]] page whenever it touches the common points (but there may be overlaps for the sake of usability). As wiki pages are, errors and omissions are likely, and your help is welcomed.
+The Neo Freerunner inherited the audio subsystem from its older brother the Neo 1973. However, there are a few small differences. 
+This page tries to show and explain the differences and points you to the [[Neo_1973_audio_subsystem | Neo 1973]] page whenever it touches the common points (but there may be overlaps for the sake of usability). It is maintained by the Community and therefore it may contain errors and omissions.
 
-==Differences from Neo 1973==
-* There is only 1 (mono) built-in loud speaker (connected to LOUT1) instead of 2 (stereo).
-* The Wolfson Codec driver presents 94 separate controls {switches, multiplexers, and volumes} to the alsa system (in both Neos). Unfortunately they are not mapped exactly the same for the GTA01 as for the GTA02.
+----
 
-==Possible sound connections through the Wolfson Codec==
-* "Yes" = Confirmed, alsa state file exists.
-* "No" = Not possible / not desirable.
-* "Should" = Should be possible, not confirmed yet.
-* "?" = Have no idea.
+'''Alsamixer channel controls'''
 
-{| cellspacing="0" cellpadding="5" border="1"
-
-|- align="center"
-! - !! CPU !! GSM !! Bluetooth
-
-|- align="center"
-! GSM
-| Yes
-
-|- align="center"
-! Bluetooth
-| via BT-USB || Yes
-
-|- align="center"
-! Wired Speaker
-| Yes || Yes || via CPU
-
-|- align="center"
-! Wired Mic
-| Yes || Yes || via CPU
-
-|- align="center"
-! Body Earpiece
-| Should || Yes || should (via CPU)
-
-|- align="center"
-! Body Speaker
-| Yes || Yes || should (via CPU)
-
-|- align="center"
-! Body Mic
-| Yes || Yes || should (via CPU)
-
-|}
-
-==Alsamixer channel controls==
-The ALSA state files are installed by default, and belong to package ''"openmoko-alsa-scenarios"''.
-To see where the files reside, do ''"opkg files openmoko-alsa-scenarios"''.
-Currently ([[SHR]]), they are in ''"/etc/freesmartphone/conf/openmoko_gta/alsa-default/gsmhandset"''; in other systems, they might be found in ''"/usr/share/openmoko/scenarios/"''.
-Recommended statefile for phone usage is http://docs.openmoko.org/trac/attachment/ticket/2121/gsmhandset.state.new
-
-# State: '''''GSM <-> Built-in Handset''''' (file gsmhandset.state)
+# State: ''GSM <-> Built-in Handset''
 ## Mic volume:
-##* Control 48: "Mic2 Capture Volume" (alsamixer name: "Mic2". Suggested value: max [3] - see below)
-##* Control 12: "Mono Sidetone Playback Volume" (alsamixer name: "Mono sidetone" Suggested value: 5 [=0dB])
-##* Control 5: "Mono Playback Volume" (alsamixer name: "Mono" Value: as needed [80..110]) This is the "user control" for mic
-##* Control 63: 'Mic Sidetone Mux' MANDATORY VALUE "Mic 2"!!!
-##* General rule is to keep control.12, and ajust control.48 so you have a resonable setting for user control.5 (i.e. NOT <70 or >110)
-##  Earpiece volume:
-##* Control 6: "Bypass Playback Volume"
-##* Control 4: "Speaker Playback Volume" This is the user control for earpiece volume
-
-According to the [http://www.mail-archive.com/community@lists.openmoko.org/msg56045.html conclusion] of a [http://www.mail-archive.com/community@lists.openmoko.org/msg56037.html thread] from Dec 09, you might want to set Control 12 to value 5 if people you call complain about background noise, static, etc with the above settings.
-
-For mic settings please refer also to http://wiki.openmoko.org/wiki/Neo_1973_and_Neo_FreeRunner_gsm_modem#AT.25Nxxxx
-
-user should set volume according to own preferences:
- for mic the (full, true) procedure is as follows:
- reduce #5 by some 15..30 steps
- do testcall:
- you get very low volume at far end. but tone should be clear, no clipping (sharp agressive noise)
- if there is clipping: reduce #48 by one step (i.e. to "2")
- then adjust #5 to your preferences and taste
- (do `alsactrl store -f gsmhandset.state` to save the changes if you used a mixer to adjust the levels)
-
-for earpiece(-speaker): 
- level up modem to full volume (AT+CLVL cmd used by framework), 
- level up #6 to full volume, 
- adjust by #4
- if you get clipping when #4 is at moderate level (same as above): reduce #6 (or even AT+CLVL) until clipping vanishes
- (very unlikely to occur for earpiece playback)
-
-
-# State: '''''GSM <-> Built-in Handsfree''''' (file gsmspeakerout.state)
-## Mic volume:
-##* Control ?:
+##* Control 48: "Mic2 Capture Volume"
+##* Control 12: "Mono Sidetone Playback Volume"
+##* Control 5: "Mono Playback Volume"
 ## Speaker volume:
-##* Control ?:
-# State: '''''GSM <-> Wired Headset''''' (file gsmheadset.state)
+##* Control 6: "Bypass Playback Volume"
+##* Control 4: "Speaker Playback Volume"
+# State: ''GSM <-> Wired Headset''
 ## Mic volume:
 ##* Control 49: "Mic1 Capture Volume"
 ##* Control 12: "Mono Sidetone Playback Volume"
@@ -97,81 +21,13 @@ for earpiece(-speaker):
 ## Speaker volume:
 ##* Control 6: "Bypass Playback Volume"
 ##* Control 3: "Headphone Playback Volume"
-# State: '''''GSM <-> Bluetooth Headset''''' (file ???)
-## Alternative working state files: [http://handheldshell.com/gsm_headset.txt]
+# State: ''GSM <-> Bluetooth Headset''
 ## Mic volume:
 ##* Control 13: "Mono Voice Playback Volume"
 ##* Control 5: "Mono Playback Volume"
-# State: '''''CPU <-> Built-in Handset''''' (file voip-handset.state)
-## Mic volume:
-##* Control ?:
-## Speaker volume:
-##* Control ?:
-# State: '''''CPU <-> Wired Headset''''' (file headset.state)
-## Stereo sound:
-##* Control ?:
-## Headset output:
-##* Control 94: "Amp Spk Switch" <- false
-# State: '''''CPU <-> Buildin Speaker''''' (file stereoout.state)
-## Mono sound:
-##* Control ?:
-## Headset output:
-##* Control 94: "Amp Spk Switch" <- true
-# State: '''''CPU -> GSM''''' (file gsmhandset.state)
-## Mono sound:
-##* Control 74: Mono Mixer Left Playback Switch to true
-##* Control 75: Mono Mixer Right Playback Switch to true
-##* Control 1: PCM Volume suggested value 135
 
+----
 
---[[User:Femto|Femto]] 12:39, 24 September 2008 (UTC) I've updated above values. Must be checked.
+'''Additional Software'''
 
--- I created another state file (voip-handsfree.state) for CPU Handsfree, mixed and matched voip-handset and stereoout. You can find it [http://wiki.openmoko.org/wiki/User:Savimonty here]. Feel free to make a change to it if there are errors. I don't see any, though.
-
-=== Volume Control ===
-
-Angus Ainslie has written a simple [http://n2.nabble.com/Sound-quality-in-calls.-tp1087522p1096155.html python volume control] (which is getting more and more sophisticated) using some of these settings.
-
-Installing the GUI mixer
-
-<pre>
-wget http://handheldshell.com/pymixer.py
-wget http://handheldshell.com/volume.desktop
-cp pymixer.py /usr/bin
-chmod u+x /usr/bin/pymixer.py
-cp volume.desktop /usr/share/applications
-opkg install python-pygtk
-opkg install http://handheldshell.com/python-pyalsaaudio_0.3-ml0_armv4t.ipk
-</pre>
-
-If the python script aborts unexpectedly then look [http://lists.openmoko.org/nabble.html#nabble-td1128064 here] for a fix
-
-You could also try [http://www.mazikeen.demon.co.uk/openmoko/fso-simplemixer.py fso-simplemixer.py], a simplified mixer based on the one above.
-
-== Empirical Data for Mic Settings ==
-
-'''"Experiment 1"''' in the table means:
-# Set your controls as follows:<br>   control.12 (Mono Sidetone Playback Volume): 5<br>   control.48 (Mic2 Capture): 3<br>   control.63 (Mic Sidetone Mux): Mic 2<br>
-# Call another phone from your Neo FreeRunner, mute it's microphone and listen to your voice coming from Neo FreeRunner's microphone. Connect to FreeRunner, run alsamixer and experiment then with control.5 (Mono Playback Volume) by lowering it so that buzzing noise is gone or at an acceptable level. After the noise is reduced, observe the actual volume/clarity of your voice when you speak.
-# Write result in the table:<br>   "''Positive''" if you don't normally use such settings, but you achieved at least similar level of quality while using these settings, quality meaning lack of noise and clarity/volume of voice.<br>   "''Already in use''", if you already normally use settings that have control.12/48/63 like above. Write in notes if you experimented with other settings but found out these were superior, or similar.<br>   "''Negative''" if you don't normally use such settings, you experimented, but you failed to achieve similar level of quality with the settings above and experimenting with control.5. Please write in the notes how it failed - most typically did you not hear anymore your voice as well after reducing control.5 enough to get rid of the noise, or how did the experiment turn out negative?<br>   "''Not done''", if you didn't complete this experiment.
-
-{| cellspacing="0" cellpadding="5" border="1"
-| User || FR Revision + buzzfix? || Microphone Settings in Use (before) || Result of Experiment 1 || Notes
-|- align="center"
-| [[User:TimoJyrinki]] || A7 || control.5: 97<br>control.12: 5<br>control.48: 3<br>control.63: Mic 2 || Already in use || Able to reach acceptable level of quality with other settings as well, but somewhat less volume can be had with control.63 set to Right PGA before noise starts to be heard (when increasing control.5 and/or control.12 to compensate).
-|- align="center"
-| [[User:TimoJyrinki]] || A5 + buzzfix || control.5: 105<br>control.12: 7<br>control.48: 3<br>control.63: Mic 2 || Not done || Only checked from a backup, not sure anymore how the audio quality was like. Buzzfix now failing on the device so cannot test. I have used these kind of settings and also earlier control.63 set to Right PGA while increasing control.5.
-|- align="center"
-| [[User:Pini]] || A5 + buzzfix || control.5: 121<br>control.12:: 3<br>control.48: 0<br>control.63: Mic 2 || Not done || Setting successfully tested in a rather noisy environment (train platform)
-|- align="center"
-| [[User:Neiljerram]] || A6 + buzzfix || control.5: 110<br>control.12: 7<br>control.48: 3<br>control.63: Right PGA || Not done || I've had no complaints at all about audio quality since accidentally discovering the Right PGA setting.  It may be voodoo, but it works for me.
-Remark jOERG: Great! :-S So *what* exactly should we learn from that? (since I use that new teaspoon to dosage my spices, my meals really are better. Wasn't my explanation clear enough about PGA involving another roundabout 10 controls that have massive impact on your results? Without quoting those, this report is absolutely useless :-/ And it even fails to compare this deprecated PGA routing to the suggested correct one. Really not helpful)
-|- align="center"
-| [[User:YourName]] || A1 + buzzfix || control.5: NN<br>control.12:: N<br>control.48: N<br>control.63: NNNN || Not done || -
-|}
-
-
-Remark by jOERG: Please try to understand when you are using a different setting than control.63: Mic 2, you are using a whole bunch of function blocks from PGA and digital section and you are not considering how the settings of those function blocks impact on your results. The whole test report is void / useless if using left/right_PGA. Also, as elaborated here and in Talk, there's no benefit from using PGA routing (beyond voodoo).
-
-[[Category:Neo FreeRunner Hardware]]
-[[Category:Audio]]
+Angus Ainslie has written a simple [http://n2.nabble.com/Sound-quality-in-calls.-tp1087522p1096155.html python volume control] using some of these settings.
