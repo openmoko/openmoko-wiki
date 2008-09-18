@@ -6,18 +6,18 @@ As long as requests for "power on" are active, the phone will not suspend. If no
 
 === Avoid suspension ===
 If an application wants to tell the phone that it should not suspend, it should send a dbus message. This message could be send by dbus API. In case of a shell script, sending dbus messages could be achieved by the command ''dbus-send'':
- dbus-send --system --dest=org.openmoko.Power / org.openmoko.Power.Core.RequestResourceState? \
+ dbus-send --system --dest=org.openmoko.Power / org.openmoko.Power.Core.RequestResourceState \
  string:cpu string:my-system-name string:on
 
 If the application then is in a state it could be suspendet, it should send:
- dbus-send --system --dest=org.openmoko.Power / org.openmoko.Power.Core.RemoveRequestedResourceState? \
+ dbus-send --system --dest=org.openmoko.Power / org.openmoko.Power.Core.RemoveRequestedResourceState \
  string:cpu string:my-system-name 
 
 "my-system-name" is an identifier telling dbus the requesting source. In case of tangogps, this could be "application-tangogps".
 
 === Requesting suspension ===
 The daemon is also able to request a suspend by explicitely requesting a "power off":
- dbus-send --system --dest=org.openmoko.Power / org.openmoko.Power.Core.RequestResourceState? \
+ dbus-send --system --dest=org.openmoko.Power / org.openmoko.Power.Core.RequestResourceState \
  string:cpu string:my-system-name string:off
 
 == Ticket ==
