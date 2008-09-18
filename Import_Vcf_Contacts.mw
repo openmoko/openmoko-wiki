@@ -1,4 +1,106 @@
+To copy your contacts from other devices or desktop systems, you can use the VCF VCard format. This page explains how to export your contacts from various systems and how to import the resulting file on on Openmoko smartphone.
+
+== Exporting old contacts to VCard format ==
+
+To use the import tools you need your Contacts in VCF format.
+
+# On nokia phones use the Nokia phone manager {{Citation needed}}
+# On windows mobile phones you could use active sync to sync with Outlook and then use a Outlook export plugin to export as vcf
+# On LG phones the backup function to memory card creates one file with multiple VCards
+
+=== Exporting from Outlook / ActiveSync to VCF ===
+
+Open Outlook, then open the VB editor by pressing ALT-F11, Insert a module, and paste in the following. Change "Z:\Openmoko\contacts" to wherever you want your vcf files saved (should be an existing, empty directory), and press F5 to run it.
+
+'''Code:'''
+
+<pre>
+
+Sub ExportContactsToVCF()
+
+
+    'Cheap and nasty way to export All Contacts to VCF files. 
+    'By Dale Maggee, antisol (at) earthling (dot) net
+
+    Dim CN As ContactItem
+    Dim NS As NameSpace
+    Dim Fld As MAPIFolder    
+
+    Set NS = Application.GetNamespace("MAPI")
+    Set Fld = NS.GetDefaultFolder(olFolderContacts)     
+
+    For Each CN In Fld.Items
+        Debug.Print CN.FullName
+        CN.SaveAs "z:\Openmoko\contacts\" & CN.FullName & ".vcf", olVCard
+    Next CN
+
+    MsgBox "Done!"
+
+End Sub
+</pre>
+
+voila! you now have multiple VCF files in whatever directory you chose, suitable to be imported by the Om 2007.2 python script below. (However not suitable for the addressbook tool of Om 2008.8.)
+
+=== Export vCards from Mac OS X Addressbook ===
+
+# Set the vCard Format to 2.1 in the config dialog
+# Select all contacts and say "export vcard"
+# Despite having selected the charset to be utf-8 you may need to do:
+
+<code>
+ iconv -f latin1 -t utf-8 vCards.vcf | sed 's/CHARSET=LATIN1://g' > all.vcf
+</code>
+
+== Import on Om 2008.8 and Qtopia ==
+
+The Qtopia addressbook application supports import of VCF files out of the box. However, since there is a bug, if there are non-ASCII characters in your contacts you cannot use the version 3 format, otherwise you get multibyte UTF-8 characters mangled. Use the version 2.1 to get the encoding stated explicitly and thus characters imported correctly. But because there is another bug, when using version 2.1 vCards, the addressbook eats up all memory (and potentionally crashes the system) on ''some'' vCards with multiline entries.
+
+If you're connected via SSH, run the following command first:
+  export DISPLAY=:0
+
+''(So that the addressbook will show on your phone. If you do not that and try to run addressbook locally on your computer display, you won't be able to use the application since the needed buttons will not show.)''
+
+Then you can simply run:
+  addressbook path_to_vCards_file_to_import.vcf
+
+You will be asked if you want to import the contacts form addressbook.vcf (the contact name will be taken from the "N:" vCard field).
+
+To import a huge number of contacts, single .vcf files can be merged together using cat *.vcf > all.vcf, than import all.vcf
+
+''Tip: If you want to prevent crashing your system if the memory leak occurs, set some limit on memory available to use, so that only the addressbook application dies after reaching the limit. I.e. prior to running the import, do something like:''
+  ulimit -v 50000
+
+If the above does not work, here are the original import guidelines:
+
+To import your address book from VCard format (ASU/<=Qtopia 4.3.2-080808 snapshot):
+  LD_LIBRARY_PATH=/opt/Qtopia/lib /opt/Qtopia/bin/addressbook /home/root/addressbook.vcf
+
+To import your address book from VCard format (>=Qtopia 4.3.2 stable):
+  LD_LIBRARY_PATH=/opt/Nokia/Qtopia/lib /opt/Nokia/Qtopia/bin/addressbook /home/root/addressbook.vcf
+
+===Mass Delete===
+
+The Qtopia addressbook doesn't seem to have a delete all function, which means that botching a vcf import is a painful process to undo through the phone gui.
+
+If you want to delete your entire addressbook or do other mass edits then you'll need access to a command line or GUI SQLite client (SQLite Database Browser seems to be a good, free one, though the SQLite command line client should be fine). Shutdown Qtopia and use the client you have chosen to open up /home/root/Applications/qtopia_sqlite.db
+
+Important tables - 
+{|cellspacing="0" border="1" cellpadding="5"
+| contacts
+| Contact names and other descriptive information, plus a unique id (recid)
+|-
+| contactphonenumbers
+| A list of contact phone numbers matched to recid
+|-
+| contactaddresses
+| Links address information to recid
+|}
+
+Restart Qtopia when you're done and you should have a reset addressbook.
+[[Category:Advanced End User]]
+
 == Import for 2007.2 ==
+
 === Basic Information ===
 
 Neo FreeRunner uses Evolution data server (eds) to save contacts. 
@@ -31,56 +133,6 @@ In the simple scripts you need to add the following lines
  m = r.search (l)
  a = m.expand ('\\1')
  os.environ ['DBUS_SESSION_BUS_ADDRESS'] = a
-
-=== Exporting old contacts to VCard format ===
-
-To use the manage Script you need your Contacts in VCF format.
-
-# on nokia phones i used the nokia phone manager (long time ago)
-# on windows mobile phones you could use active sync to sync with Outlook and then use a Outlook export plugin to export as vcf
-# on lg phones the backup function to memory card creates one file with multiple VCards.
-
-=== Exporting from Outlook / ActiveSync to VCF ===
-
-Doing a quick google I was unable to find a free export plugin for outlook (they all seem to want between $19.95 and $49), so I put together some quick-and-dirty VB code to do it. To use it, Open Outlook, then open the VB editor by pressing ALT-F11, Insert a module, and paste in the following. Change "Z:\Openmoko\contacts" to wherever you want your vcf files saved (should be an existing, empty directory), and press F5 to run it.
-
-'''Code:'''
-
-<pre>
-
-Sub ExportContactsToVCF()
-
-
-    'Cheap and nasty way to export All Contacts to VCF files. 
-    'By Dale Maggee, antisol (at) earthling (dot) net
-
-    Dim CN As ContactItem
-    Dim NS As NameSpace
-    Dim Fld As MAPIFolder    
-
-    Set NS = Application.GetNamespace("MAPI")
-    Set Fld = NS.GetDefaultFolder(olFolderContacts)     
-
-    For Each CN In Fld.Items
-        Debug.Print CN.FullName
-        CN.SaveAs "z:\Openmoko\contacts\" & CN.FullName & ".vcf", olVCard
-    Next CN
-
-    MsgBox "Done!"
-
-End Sub
-</pre>
-
-voila! you now have multiple VCF files in whatever directory you chose, suitable to be imported by the python script below.
-
-=== Export vCards from Mac OS X Addressbook ===
-
-# set the vCard Format to 2.1 in the config dialog
-# select all contacts and say "export vcard"
-# despite having selected the charset to be utf-8 you may need to do:
-<code>
- iconv -f latin1 -t utf-8 vCards.vcf | sed 's/CHARSET=LATIN1://g' > all.vcf
-</code>
 
 === Usage ===
 
@@ -132,55 +184,9 @@ The script does a listdir and imports ALL files it found in that dir. (i'm a bad
 
 
 === Authors ===
+
 * Simple script by smurfy - phil <openmoko at smurfy.de>
 * Manage Contacts script by Roland Mas <lolando at debian.org>
 * Remove all Contacts script / simple script for one big file by Andreas Dalsgaard <andreas.dalsgaard at gmail.com>
 
 Thanks to [[Import_Sim_Contacts]] for the original Python Script.
-
-== Import for ASU/Qtopia ==
-The Qtopia addressbook application supports import of VCF files out of the box. However, since there is a bug, if there are non-ASCII characters in your contacts you cannot use the version 3 format, otherwise you get multibyte UTF-8 characters mangled. Use the version 2.1 to get the encoding stated explicitly and thus characters imported correctly. But because there is another bug, when using version 2.1 vCards, the addressbook eats up all memory (and potentionally crashes the system) on ''some'' vCards with multiline entries.
-
-If you're connected via SSH, run the following command first:
-  export DISPLAY=:0
-
-''(So that the addressbook will show on your phone. If you do not that and try to run addressbook locally on your computer display, you won't be able to use the application since the needed buttons will not show.)''
-
-Then you can simply run:
-  addressbook path_to_vCards_file_to_import.vcf
-
-You will be asked if you want to import the contacts form addressbook.vcf (the contact name will be taken from the "N:" vCard field).
-
-To import a huge number of contacts, single .vcf files can be merged together using cat *.vcf > all.vcf, than import all.vcf
-
-''Tip: If you want to prevent crashing your system if the memory leak occurs, set some limit on memory available to use, so that only the addressbook application dies after reaching the limit. I.e. prior to running the import, do something like:''
-  ulimit -v 50000
-
-If the above does not work, here are the original import guidelines:
-
-To import your address book from VCard format (ASU/<=Qtopia 4.3.2-080808 snapshot):
-  LD_LIBRARY_PATH=/opt/Qtopia/lib /opt/Qtopia/bin/addressbook /home/root/addressbook.vcf
-
-To import your address book from VCard format (>=Qtopia 4.3.2 stable):
-  LD_LIBRARY_PATH=/opt/Nokia/Qtopia/lib /opt/Nokia/Qtopia/bin/addressbook /home/root/addressbook.vcf
-
-===Mass Delete===
-
-The Qtopia addressbook doesn't seem to have a delete all function, which means that botching a vcf import is a painful process to undo through the phone gui.
-
-If you want to delete your entire addressbook or do other mass edits then you'll need access to a command line or GUI SQLite client (SQLite Database Browser seems to be a good, free one, though the SQLite command line client should be fine). Shutdown Qtopia and use the client you have chosen to open up /home/root/Applications/qtopia_sqlite.db
-
-Important tables - 
-{|cellspacing="0" border="1" cellpadding="5"
-| contacts
-| Contact names and other descriptive information, plus a unique id (recid)
-|-
-| contactphonenumbers
-| A list of contact phone numbers matched to recid
-|-
-| contactaddresses
-| Links address information to recid
-|}
-
-Restart Qtopia when you're done and you should have a reset addressbook.
-[[Category:Advanced End User]]
