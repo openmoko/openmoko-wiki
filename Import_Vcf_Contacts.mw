@@ -80,11 +80,14 @@ To import your address book from VCard format (>=Qtopia 4.3.2 stable):
 
 ===Mass Delete===
 
-The Qtopia addressbook doesn't seem to have a delete all function, which means that botching a vcf import is a painful process to undo through the phone gui.
+The Qtopia addressbook doesn't seem to have a delete all function, which means that botching a vcf import is a painful process to undo through the phone GUI.
 
-If you want to delete your entire addressbook or do other mass edits then you'll need access to a command line or GUI SQLite client (SQLite Database Browser seems to be a good, free one, though the SQLite command line client should be fine). Shutdown Qtopia and use the client you have chosen to open up /home/root/Applications/qtopia_sqlite.db
+If you want to delete your entire addressbook or do other mass edits then you'll need access to a command line or GUI SQLite client (SQLite Database Browser seems to be a good, free one, though the SQLite command line client should be fine). 
 
-Important tables - 
+Shutdown Qtopia and use the client you have chosen to open up /home/root/Applications/qtopia_sqlite.db.
+
+Important tables:
+
 {|cellspacing="0" border="1" cellpadding="5"
 | contacts
 | Contact names and other descriptive information, plus a unique id (recid)
@@ -97,6 +100,23 @@ Important tables -
 |}
 
 Restart Qtopia when you're done and you should have a reset addressbook.
+
+====On Om 2008.8====
+
+* Install sqlite3
+* Open the database
+* Delete all data from the contacts tables '''This will erase all your contacts and contact categories.'''
+
+  root@om-gta02:~# opkg install sqlite3
+  root@om-gta02:~# sqlite3 /home/root/Applications/Qtopia/qtopia_sqlite.db 
+  sqlite> delete from contactcategories;
+  sqlite> delete from contactaddresses;
+  sqlite> delete from contactcustom;
+  sqlite> delete from contactphonenumbers;
+  sqlite> delete from contacts;
+
+(I am not sure about contactcustom.)
+
 [[Category:Advanced End User]]
 
 == Import for 2007.2 ==
