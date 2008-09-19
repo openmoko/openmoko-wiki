@@ -1,74 +1,6 @@
-[http://www.linphone.org Linphone] is a Voice over IP ( VoIP ) application. Its purpose is to make phone calls over the data network, instead of using the telephony network. Especially when you want to avoid international roaming costs for mobile telefony the VoIP communication via [[Wlan|WLAN]] or [[USB Networking]] could be a good option.
+Linphone is a Voice over IP ( VoIP ) application. It lets
 
-==Command Line Versions and XDialog==
-If the command line version of Linphone is working properly, you can use 
-* shell script and
-* [http://xdialog.free.fr xdialog] of you phone
-to perform linphone commands.
-# use an [http://xdialog.free.fr/inputbox.gif input box] entering the phone number for calling.
-# use a [http://xdialog.free.fr/rangebox.gif range box] for setting values (e.g. volume).
-# ...
-The return values of the dialogs will determine the shell script calls on the command line for [http://www.linphone.org Linphone].
-
-'''ToDo:''' Provide a shell script, that works on any linux box with available xdialog and [http://www.linphone.org/eng/documentation/guide/linphonecsh-control.html linphonecsh].
-
-{{Note|[http://www.linphone.org/eng/documentation/guide/linphonecsh-control.html Linphonecsh] is a console utility to send non-blocking commands to an instance of [http://www.linphone.org/eng/documentation/guide/linphonecsh-control.html linphonec] runnning in the background, so that after any command send to  linphonec you return back to the shell. With this feature a shell script can take over the management for all the main interaction as GUI with [http://xdialog.free.fr xdialog].}}
-
-==SHR-U==
-Linphone is still not in the SHR-unstable repository but can be built following [http://shr-project.org/trac/wiki/Building%20SHR Building SHR] with 
-  cd shr-unstable/openembedded/recipes/libosip2
-  cp libosip2_3.1.0.bb libosip2_3.3.0.bb
-  cd ../../..
-  bitbake linphone
-
-My linphone packages are here [http://87.227.108.179/neo/linphone-3.1.0/]
-Because of alsa audio errors printed when running which can be seen if you run LinPhone from the commandline, I had to move away 
-   mv /etc/asound.conf /etc/asound.conf.bak
-and then put it back when done. If this is not done it get overloaded by printing the error message. I also remember there was some problem with the mic audio setting. Maybe some could add this here or maybe the koolu setting below is working. I have not tried it yet.
-
-You may want to add gtk+ and libglade dependencies to bitbake recipe file (shr-unstable/openembedded/recipes/linphone/linphone_3.1.0.bb):
-  DEPENDS = "intltool libosip2 speex libogg alsa-lib readline libexosip2 gtk+ libglade"
-
-==Android==
-Linphone on Android is availble in the Android Market, but Android on Freerunner does not have access to Android Market. So you need to go to [http://www.linphone.org/ http://www.linphone.org/] and follow the release notes (first versions released in 05/2010). A free download of the apk-file directly from the http://www.linphone.org is not provided, that can be installed via [[Android debug bridge]]. 
-
-The [http://www.linphone.org/eng/download/packages/android.html link to the Market] provides an http-error 404. The [[Android usage]] of Linphone for the freerunner needs a workaround, for downloading the Linphone binary.
-
-The apk-file is directly available on [http://www.linphone.org/ http://www.linphone.org/] but on the current Android for Freerunner version linphone is not working. 
-
-{{Note|08/2010 currently no OpenSource VoIP-SIP-Client is working, neither Linphone and nor [[SipDroid]]. The problem seems to be related to an underlying audio problem. On other Android device, linphone seems to be the currently best VoIP solution.}}
-
-==QtMoko==
-[[QtMoko]] has an installed X-Server with [[QX]] and the distribution is Debian based. You can install [http://www.linphone.org Linphone] with apt-get:
-  apt-get install linphone
-The option using xdialog with a shell script as a GUI for linphone needs linphonecsh installed on QtMoko. The command line environment <tt>linphonec</tt> is installed with the apt-get command mentioned above. For the shellscript use <tt>linphonecsh</tt> and install xdialog with:   
-  apt-get install xdialog
-Use xdialog features to send command to the linphonec instance via a shell script.
-
-{{Note|Fonts in Xdialog are small and a little bit difficult to read.}}
-In xdialog the clicked buttons are return to the shell script and can be handled in the script.
-
-==Qtopia==
-Here is a way to get the command line linphone working on Qtopia. Ideally this could be interfaced with the dialer somehow.
-Download link broken.
-<pre>
-echo "src/gz celtune http://rabenfrost.net/celtune/ipk/armv4t" >/etc/opkg/general-feed.conf
-opkg update
-opkg install libmediastreamer0
-opkg -nodeps install linphone
-opkg -nodeps install liblinphone2 linphonec linphone-rings
-opkg install libexosip2
-
-cd /etc/
-wget http://www.koolu.org/asound.conf
-wget http://www.koolu.org/voip-handset.state
-
-alsactl -f voip-handset.state restore # This step required to set proper audio parameters
-
-linphonec
-soundcard use 0
-proxy add
-</pre>
+Here is a way to get the command line linphone working on OE based distros (tested on Qtopia, but should work on 200x.x and others). Ideally this could be interfaced with the dialer somehow.
 
 Initial testing of this had the audio routed properly through the earpiece and good audio from the microphone. There was some echo on the non-Freerunner side, and on initial connection, a bit of a beeping sound. Otherwise, it's a go. Linphone uses only about 10-12% CPU (was using a PCM codec). Sound was decent to a cell phone in Canada using a Wifi connected Freerunner based in Costa Rica.
 
@@ -78,45 +10,26 @@ Regards,
 Brian Code,
 Koolu
 
-==FDOM==
-If you want to avoid installing linphone you can use the [[FDOM]] image. This includes the linphone installation. You just have to enter your sip-account details.
+ echo "src/gz celtune http://rabenfrost.net/celtune/ipk/armv4t" >/etc/ 
+ opkg/general-feed.conf
+ opkg update
+ opkg install libmediastreamer0
+ opkg -nodeps install linphone
+ opkg -nodeps install liblinphone2 linphonec linphone-rings
+ opkg install libexosip2
 
-== Configuration of Linphone ==
-Before using Linphone you need a SIP-Account. If you do not have on you can create one ([http://snapvoip.blogspot.com/2009/01/free-sip-accounts-revisited.html list of providers of free SIP-Accounts]).
-Setting of your Idenitiy, SIP-address and SIP-Server 
-<pre>
-''Enter proxy sip address:'' sip:sip.provider.com
-''Your identity for this proxy:'' sip:xxxxxxxxxx@sip.provider.com
-''Do you want to register on this proxy (yes/no):'' yes
-''Specify register expiration time in seconds (default is 600):''
-''Expiration:'' 600 seconds or so
-</pre>
+ cd /etc/
+ wget http://www.koolu.org/asound.conf
+ wget http://www.koolu.org/voip-handset.state
 
-===SIP Server (optional)===
-If you want to install you own Open Source SIP Server e.g. in a LAN or on a public IP you can install e.g. [http://www.opensips.org OpenSIPS]. Setting up a SIP server is not necessary for using Linphone (just a SIP account) only if you want to have full control over the SIP environment for testing.
+ alsactl -f voip-handset.state restore # This step required to set proper audio parameters
 
-===Asterisk===
-If you want to an [http://www.asterisk.org/ Asterisk] open source PBXi, telephony engine, and telephony applications toolkit.
-In <code>sip.conf</code>
-<pre>
-[jthneo]
-type=friend
-username=jthneo
-callerid= jth <jth>
-secret=thesecret
-qualify=no ; linphone will become unreachable if qualify=yes
-host=dynamic
-nat=yes
-canreinvite=yes
-disallow=all ; allow the sensible codecs you want
-allow=ulaw
-allow=alaw
-;allow=gsm
-;allow=speex</pre>
+ linphonec
+ soundcard use 0
+ proxy add
 
-==Links==
-* [http://www.linphone.org http://www.linphone.org]
-* [http://www.linphone.org/eng/documentation/guide/linphonecsh-control.html Linphone Command Line Tutorial]
- 
-[[Category:Telephony]]
-[[Category:Internet Applications]]
+ ''Enter proxy sip address:'' sip:sip.provider.com
+ ''Your identity for this proxy:'' sip:xxxxxxxxxx@sip.provider.com
+ ''Do you want to register on this proxy (yes/no):'' yes
+ ''Specify register expiration time in seconds (default is 600):''
+ ''Expiration:'' 600 seconds or so
