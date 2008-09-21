@@ -292,16 +292,16 @@ This appears to be fixed in Ubuntu 8.04 [[User:Mattt|Mattt]] 11:38, 30 July 2008
 
 == Mandriva ==
 
-Tested with Mandriva 2008.1. The idea here is that we will carve out a small (8 hosts) subnet from the main subnet. So our netmask will be 255.255.255.252
-
 This first file configures the network system for the usb0 interface. Any time you plug in the FreeRunner the interface will be configured. 
 
-/etc/sysconfig/network-scripts/ifcfg-usb0:
+<tt>/etc/sysconfig/network-scripts/ifcfg-usb0</tt>:
 
  DEVICE=usb0
  BOOTPROTO=static
  IPADDR=192.168.0.200
- NETMASK=255.255.255.252
+ NETMASK=255.255.255.0
+ NETWORK=192.168.0.0
+ BROADCAST=192.168.0.255
  ONBOOT=yes
  METRIC=10
  MII_NOT_SUPPORTED=no
@@ -309,10 +309,10 @@ This first file configures the network system for the usb0 interface. Any time y
 
 This next file configures the static routes that we need to communicate to the subnet. Since it has "usb0" in the name, the system will automatically apply these static routes any time that the usb0 interface is configured. (i.e. when you connect the FreeRunner)
 
-/etc/sysconfig/network-scripts/usb0-routes:
+<tt>/etc/sysconfig/network-scripts/usb0-routes</tt>:
 
  ADDRESS0=192.168.0.200
- NETMASK0=255.255.255.252
+ NETMASK0=255.255.255.0
 
 Now we need to restart the network system to pick up the changes.
 
