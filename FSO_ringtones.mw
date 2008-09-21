@@ -1,5 +1,40 @@
 {{FSO}}
+==The milestone 3 way==
+FSO milestone 3 introduces some configuration files for Zhone. It is now possible to define as many ringtone profiles as we want. Each profile is a YAML configuration file located in :
+ /etc/freesmartphone/opreferences/conf/phone
 
+The default profile is defined in the default.yaml file :
+ ring-tone: "Arkanoid_PSID.sid"
+ ring-volume: 10
+
+To change this default ringtone :
+# copy the sound file into /usr/share/sounds/
+# edit the "ringtone" field to match your sound filename.
+
+====Note====
+Not sure I'm doing this the Right Way, but I had to patch '''/usr/share/python-support/fso-frameworkd/framework/subsystems/oeventsd/fso_actions.py''' this way :
+ --- fso_actions.py.orig	2008-09-21 14:38:03.000000000 +0200
+ +++ fso_actions.py	2008-09-13 00:49:37.000000000 +0200
+ @@ -143,7 +143,7 @@
+          phone_prefs = prefs.GetService( "phone" )
+          ring_tone = phone_prefs.GetValue( "ring-tone" )
+          ring_volume = phone_prefs.GetValue( "ring-volume" )
+ -        sound_path = os.path.join( installprefix, "share/sounds/", ring_tone )
+ +        sound_path = os.path.join( installprefix, "usr/share/sounds/", ring_tone )
+  
+          if self.cmd == "play":
+              logger.info( "Start ringing : tone=%s, volume=%s", ring_tone, ring_volume )
+ @@ -180,7 +180,7 @@
+          phone_prefs = prefs.GetService( "phone" )
+          tone = phone_prefs.GetValue( "message-tone" )
+          volume = phone_prefs.GetValue( "message-volume" )
+ -        sound_path = os.path.join( installprefix, "share/sounds/", tone )
+ +        sound_path = os.path.join( installprefix, "usr/share/sounds/", tone )
+  
+          if self.cmd == "play":
+              logger.info( "Start ringing : tone=%s, volume=%s", tone, volume )
+
+==The milestone 2 way==
 The ringtone in milestone 2 is stored here:
 
  /usr/share/sounds/Arkanoid_PSID.sid
