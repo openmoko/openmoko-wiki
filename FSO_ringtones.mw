@@ -4,50 +4,19 @@ The ringtone in milestone 2 is stored here:
 
  /usr/share/sounds/Arkanoid_PSID.sid
 
+Fun fact : according to the gstreamer documentation, .sid files are in fact small Commodore 64 programs that are executed on an emulated 6502 CPU and a MOS 6581 sound chip. 
+
 Now to change it is a little bit of fun.
 
 first change directory to
 
  /usr/lib/python2.5/site-packages/framework/subsystems/oeventd/
 
-and open the file receiver.py
+and open the file parser.py
 
-#this will be /var/lib/python-support/python2.5/framework/subsystems/oeventd/receiver.py if you are using FSO under Debian
+#this will be /var/lib/python-support/python2.5/framework/subsystems/oeventd/parser.py if you are using FSO under Debian
 
-Change the line that reads:
-
-decoder = gst.element_factory_make( "siddec", "decoder" )
-
-to
-
-decoder = gst.element_factory_make( "mad", "decoder" )
-
-
-and change the line that reads:
-
-filesrc.set_property( "location", "/usr/share/sounds/Arkanoid_PSID.sid" )
-
-to
-
-filesrc.set_property( "location", "/usr/share/sounds/ringtone" )
-
-If you would like to play most formats of audio file (including ogg), change the play() function
-to this
-
-    def _play( self ):
-        self.player = pipeline = gst.Pipeline( "oeventd-pipeline" )
-        sink = gst.element_factory_make( "alsasink", "sink" )
-        playbin = gst.element_factory_make( "playbin", "playbin" )
-        playbin.set_property( "uri", "file:///usr/share/sounds/ringtone" )
-        playbin.set_property("audio-sink", sink)
-        pipeline.add(playbin)
-        
-        bus = self.player.get_bus()
-        bus.add_signal_watch()
-        bus.connect( "message", self._onMessage )
-        pipeline.set_state(gst.STATE_PLAYING)
-        logger.info( 'playing ringtone' )
-        self.ringing = True
+Search for PlaySound. Edit the 2 lines to point to your wav or mp3 file.
 
 There does seem to be a lag of a few vibrations before the sound starts but that might desirable. (I didn't compare against the original code).  The code to specifically handle formats, (oggs for example) can be a little complicated and makes things messy.
 Since, it seems like this code is changing in FSO, I'm leaving it for the moment.
@@ -55,12 +24,12 @@ Since, it seems like this code is changing in FSO, I'm leaving it for the moment
 Then
 
  mv receiver.pyo /home/root 
-#receiver.pyo will be receiver.pyc in FSO under Debian
 
+#receiver.pyo will be receiver.pyc in FSO under Debian
 
  python
   >>> import py_compile
-  >>> py_compile.compile("receiver.py")
+  >>> py_compile.compile("parser.py")
   >>> quit()
 #You may not have the py_compile module. You can install them like this:
  opkg install python-compile
