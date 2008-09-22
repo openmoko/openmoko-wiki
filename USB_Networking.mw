@@ -180,12 +180,38 @@ See [[MacOS_X#USB_Networking|MacOS X USB Networking]].
 See [[Neo1973_and_Windows#USB_Ethernet_emulation|Windows USB Ethernet emulation for Neo1973]].
 
 == FreeBSD ==
-You need to load the cdce kernel module.
-As root do:
+You need to load the cdce kernel module (if it is not already linked into your kernel). As root do:
 
- kldload cdce
+ # kldload cdce
 
-The Neo should then show up as cdce0 and you can handle the cdce0 device just like the usb0 device under Linux. For more information see the cdce manpage.
+The Neo should then show up as cdce0 interface and you can handle the cdce0 interface just like the usb0 device under Linux. For more information see the cdce manpage. An easy way to assign the IP address to the cdce0 interface is using the devd(8) daemon. Create the following two files,
+
+/usr/local/etc/devd/cdce.conf as:
+
+ notify 1 {
+        match "system"          "IFNET";
+        match "subsystem"       "cdce0";
+        match "type"            "ATTACH";
+        action "/usr/local/etc/devd/cdce.sh $subsystem $type";
+ };
+
+and /usr/local/etc/devd/cdce.sh as:
+
+ #!/bin/sh
+ case $2 in
+    'ATTACH')
+        ifconfig cdce0 192.168.0.200 netmask 255.255.255.0
+        exit 0 ;
+        ;;
+ esac
+ exit 0
+
+Then restart the devd(8) daemon with:
+
+ # /etc/rc.d/devd restart
+
+If you now plugin the FreeRunner into the USB port the cdce0 interface gets created and the IP addr will be assigned.
+
 
 == Debian, Ubuntu and others ==
 
