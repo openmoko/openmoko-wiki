@@ -427,8 +427,6 @@ You may also be able to listen to system audio given the right state file:
 
 ==Bluetooth Headset on Freerunner ==
 
-{{note|work in progress}}
-
 [http://lists.openmoko.org/pipermail/support/2008-September/thread.html#2627 This thread] suggests the following:
 
 :Turn on bluetooth. If some of the scripts below fail you may need to reboot [https://docs.openmoko.org/trac/ticket/1744 Bluetooth after suspend]
@@ -442,24 +440,46 @@ You may also be able to listen to system audio given the right state file:
 :Download the the following python scripts to set up the audio service and set the headset as the default device:
 
 :http://handheldshell.com/BtHeadset.py
+:http://handheldshell.com/passkey.py
 :http://handheldshell.com/BtHeadsetDisconnect.py
 :http://handheldshell.com/python-pyalsaaudio_0.3-ml0_armv4t.ipk  - can someone add python-pyalsa to the feeds ?
 
-:Get the [[http://handheldshell.com/gsm_headset.txt alsa state file]] - this state file currently only works for hearing the call. Still working on the mic routing.
+:Download the the following python scripts if you prefer not to mess around with alsactl:
+
+:http://handheldshell.com/pymixer.py
+:http://handheldshell.com/volume.desktop
+
+:put pymixer in /usr/bin
+
+ chmod u+x /usr/bin/pymixer.py
+
+:put volume.desktop in /usr/share/applications
+
+:Get the [[http://handheldshell.com/gsm_headset.txt alsa state file]] - this state file _WORKS_, mic and earphones are properly routed
+
+ cp gsm_headset.txt /usr/share/openmoko/scenarios/btheadset.state
+
+:from the home screen run Volume
+
+:from the terminal run
 
  BtHeadset.py 
 
-:Now start the call and then run
+:Wait until it says waiting for call to end, you should hear static in the headset. If you don't something has gone wrong.
 
- alsactl restore 0 -f gsm_headset.txt
+:Now start the call
+
+:In the volume control switch to the btheadset tab. press restore
+
+:You should now hear the call in your headset. 
 
 :End the call
 
  BtHeadsetDisconnect.py 
 
-You should now hear the call in your headset. Mic is working with the newer gsm_headset.txt. This was all done with the 2008-updates image from sept 4. 
+:This was all done with the 2008-updates image from sept 4. 
 
-The new scripts rely on a specific format for the .asoundrc . A stanza like this is required :
+:The new scripts rely on a specific format for the .asoundrc . A stanza like this is required :
 
  pcm.headset {
      type bluetooth
