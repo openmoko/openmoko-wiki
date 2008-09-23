@@ -271,6 +271,22 @@ up route del default gw 192.168.0.200
 
 This will remove your computer as the default gateway and use the  wireless one when the interface is brought up. User nickd reports that sometimes it fails so he has had to put it in twice.
 
+== ssh into FR over WiFi ==
+dropbear, the ssh server, is configured to listen on the USB interface only. Wireless interfaces like wlan or bluetooth are disabled for security reasons (empty root password).
+
+If you want to enable ssh over WiFi, change the /etc/default/dropbear from:
+
+  DROPBEAR_PORT=`ip addr list usb0 | awk 'BEGIN { FS="[ /]+" } /inet / { print  $3 }'`:22
+
+(which actually only prepends the usb0 ip address before the :22)
+
+into:
+
+  DROPBEAR_PORT=22
+
+* Be careful with this config file since it can close the only door into your phone.
+
+* Set a root password!
 
 == Available Software ==
 
