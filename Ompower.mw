@@ -4,6 +4,18 @@
 ''ompower'' manages suspension, but does not enforce it. It does this by a request mechanism. Applications may request either suspension or power-on.
 As long as requests for "power on" are active, the phone will not suspend. If no such requests are active (all "power-on" requests are removed or no requests have been made so far) ''ompower'' will suspend the phone (via calling ''apm -s''), if "power-off" requests are active. The "power-off" requests are usually issued by some application such as [[Illume]]. If neither "power-on" and "power-off" requests are in ''ompower''s queue, nothing will happen.
 
+=== List available resources ===
+
+To get a list of the available resources (at the time of writing, there is only ''cpu'', nothing for backlight, yet...):
+ dbus-send --system --print-reply --dest=org.openmoko.Power / org.openmoko.Power.Core.ListResources
+
+=== List current state ===
+
+To get the current state:
+ dbus-send --system --print-reply --dest=org.openmoko.Power / org.openmoko.Power.Core.GetResourceState string:cpu
+
+There seems to be no way (yet) to get a list of the 'my-system-names' that have requested a resource state.
+
 === Avoid suspension ===
 If an application wants to tell the phone that it should not suspend, it should send a dbus message. This message could be send by dbus API. In case of a shell script, sending dbus messages could be achieved by the command ''dbus-send'':
  dbus-send --system --dest=org.openmoko.Power / org.openmoko.Power.Core.RequestResourceState \
@@ -23,11 +35,13 @@ The daemon is also able to request a suspend by explicitely requesting a "power 
 == Ticket ==
 For further reading see Ticket [https://docs.openmoko.org/trac/ticket/2008 #2008 (Do not suspend when certain apps are running)]. That ticket was the reason for writing this article.
 
-
-
 == Source ==
 You can fetch the source here:
 http://svn.openmoko.org/developers/raster/ompower/
+
+== Strategy ==
+
+What ompower does is actually what screensavers usually do. So it might be worth thinking about adding the extra features or options (e.g. dbus-control) to (an) existing screensaver project(s). In contrast, a decision in favour of a new screensaver project would mean extra work to get missing features (e.g. locking with password) that are already implemented in existing screensavers.
 
 
 [[Category:Om 2008.8]]
