@@ -148,6 +148,37 @@ La deuxième partition doit être formattée en ext3 (sauf si vous avez inclus l
 
 == Remplissage de la carte SD ==
 
+Votre carte SD est maintenant prête à être remplie avec le système de fichiers rootfs et le noyau nécessaires au démarrage du FR.
+
+Montez la seconde partition de votre carte SD et placez l'image rootfs dessus :
+
+ mount /dev/mmcblk0p2 /mnt/moko
+ tar -C /mnt/moko/ -xzvf openmoko-devel-image-fic-gta01-20070313022035.rootfs.tar.gz
+
+'''''Note:''''' Comme toujours dans ce guide, veuillez à ajuster le nom de périphérique et du fichier rootfs à vos besoins.
+
+'''''Note:''''' Il faut porter attention à un point particulier si vous utilisez le démon automount de votre système d'exploitation hôte. Certains systèmes montent ces périphériques amovibles avec l'option "nodev" par défaut pour des raisons de sécurité. Si l'image que vous décompressez dispose d'un répertoire /dev rempli, les fichiers spéciaux ne seront pas créés. Si vous montez automatiquement la carte SD sur votre PC, vérifiez qu'il n'y a pas d'options de montage inadaptées en utilisant la commande "mount" pour lister les points de montage.
+
+La prochaine étape est de monter la première partition de la carte SD et d'installer le noyau dessus.
+
+ mount /dev/mmcblk0p1 /mnt/mokokernel
+ cp uImage-fic-gta01-latest.bin /mnt/mokokernel/uImage.bin
+
+Ou pour certaines version de u-boot sur la mémoire flash NOR :
+
+ mount /dev/mmcblk0p1 /mnt/mokokernel
+ cp uImage-fic-gta01-latest.bin /mnt/mokokernel/uimage
+
+(oui, en minuscules et sans extension)
+
+Faites bien attention que votre noyau soit nommé ''uImage.bin'' (ou ''uImage'' pour certaines version de u-boot en mode NOR). Si le programme u-boot ne trouve pas le fichier noyau lors du démarrage, [[Bootloader#Using usbtty from Linux| connectez-vous au bootloader]] avec ''[http://www.airs.com/ian/uucp.html cu]'', montez la partition avec mccinit et vérifiez la présence et le nom de l'image du noyau avec ''fatls mmc 1:1'' pour un système de fichier FAT  ou ''ext2ls mmc 1:1'' pour un système de fichiers ext2. Comparez le résultat avec soin avec la sortie de la commande ''printenv sd_image_name''. N'oubliez pas que vous pouvez modifier l'environnement de la flash NAND mais pas de la flash NOR, donc si vous voulez démarrez à partir de la flash NOR vous devez faire correspondre le nom de fichier à la variable d'environnement et non l'inverse.
+
+Démontez la partition rootfs et la partition noyau et faites bien attention que les données en cache soient bien écrites sur le disque :
+
+ umount /mnt/moko
+ umount /mnt/mokokernel
+ sync
+
 == Rajout de l'entrée au menu de démarrage uboot ==
 
 == Annexes ==
