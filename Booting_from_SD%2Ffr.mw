@@ -1,0 +1,111 @@
+
+== Démarrage à partir d'une carte SDHC / problème de mise en veille ==
+
+Tout d'abord un avertissement : Un bogue très ancien ayant pour origine probable le noyau Linux détruit la table des partitions des cartes SD de capacité élevée. Voir le bogue [https://docs.openmoko.org/trac/ticket/1802 #1802] et le [http://thread.gmane.org/gmane.comp.handhelds.openmoko.community/19154/focus=19281|fil de discussion] pour une explication détaillée sur la gestion des cartes SD de haute capacité. Une bonne précaution est de conserver une version papier de la table des partitions au cas où elle devrait être recréée.
+
+== Comment ça marche ==
+
+Sur le FR, [[u-boot]] fournit un mécanisme équivalent à celui de 'grub' sur un PC. U-boot charge l'image du noyau en mémoire et le déclenche avec une liste de paramètres noyau. Ces paramètres indiquent entre autres choses le périphérique sur lequel le système de fichiers racine se trouve.
+
+Lorsque le noyau démarre, il prépare le matériel et met en place le système de fichiers racine. Le noyau déclenche alors "/sbin/init", qui s'occupe du reste de la séquence de démarrage (avec l'affichage de l'image de démarrage et la barre de progression).
+
+Ceci fonctionne de manière identique que l'on démarre à partir de la mémoire Flash interne ou de la carte SD. La différence réside dans la manière dont le noyau et chargé et quel périphérique est utilisé comme système racine.
+
+Les sections suivantes fournissent des détails complémentaires.
+
+=== Choix du menu ===
+
+=== Chargement du noyau ===
+
+=== Paramètres associés au système de fichier racine ===
+
+== Récupération d'un fichier racine (rootfs) compressé ==
+
+Deux possibilités existent pour récupérer un fichier image rootfs en archive tar. Vous pouvez en créer un en utilisant la distribution OpenEmbedded ou en télécharger un directement depuis le serveur de création d'images openmoko.
+
+=== Choix 1 : Télécharger les fichiers tar rootfs/kernel du serveur Openmoko ===
+Choissisez la combinaison rootfs/kernel que vous désirez installer sur la page des [[http://wiki.openmoko.org/wiki/Latest_Images Dernières Images Générées]].
+
+=== Choix 2 : Créer un fichier tar en utilisant OpenEmbedded ===
+
+=== Choix 3 : Convertissez une image jffs2 en fichier tar ===
+
+== Préparation de la carte CD ==
+
+=== Partitionnement de la carte SD ===
+
+u-boot pre-2008-07-23 peut uniquement démarrer de système de fichiers FAT; si vous mettez à jour u-boot, vous pourrez démarrer de systèmes FAT ou ext2.
+Cet exemple montre comment créer une partition type en utilisant l'outil système fdisk. N'importe quel gestionnaire de partitions fonctionnerait aussi.
+
+ fdisk /dev/mmcblk0
+
+'''''Note:''''' Le fichier spécial associé au périphérique peut être différent sur votre configuration. Si vous n'êtes pas sur, vous pouvez utiliser la commande ''dmesg'' pour répérer le bon nom dans les messages de démarrage du noyau.
+
+Nous allons maintenant créer une partition de 8Mbit pour notre noyau et une autre pour le système de fichiers racine (rootfs) avec la place restante sur la carte.
+
+   Command (m for help): d
+   Selected partition 1
+   Command (m for help): n
+   Command action
+      e   extended
+      p   primary partition (1-4)
+   p
+   Partition number (1-4): 1
+   First cylinder (1-983, default 1):
+   Using default value 1
+   Last cylinder or +size or +sizeM or +sizeK (1-983, default 983): +8M
+   Command (m for help): n
+   Command action
+      e   extended
+      p   primary partition (1-4)
+   p
+   Partition number (1-4): 2
+   First cylinder (18-983, default 18):
+   Using default value 18
+   Last cylinder or +size or +sizeM or +sizeK (18-983, default 983):
+   Using default value 983
+   Command (m for help): w
+   The partition table has been altered!
+   Calling ioctl() to re-read partition table.
+   Syncing disks.
+
+''Should probably need to change type of first partition to FAT 16 too ?''
+
+si le message suivant apparaît à la sortie du programme fdisk :
+
+   Calling ioctl() to re-read partition table
+   fdisk: WARNING: rereading partition table failed, kernel still uses old table:   Device or resource busy
+
+lancez la commande
+
+   umount /dev/mmcblk0p1
+
+à partir d'une autre console et essayez de nouveau.
+
+=== Formatage de la carte SD ===
+
+Lancez la commande suivante pour créer un système de fichier FAT :
+
+ mkfs.vfat /dev/mmcblk0p1
+{{Note|Si vous ne disposez pas de mkfs.vfat vous le trouverez dans le paquet "dosfstools". Ce paquet ne semble pas être disponible en ipk, mais une version non officielle peut être téléchargée à http://members.shaw.ca/mmontour/neo/dosfstools_2.11-r0_armv4t.ipk}}
+
+
+La deuxième partition doit être formattée en ext3 (sauf si vous avez inclus les modules ext2 dans votre noyau) :
+
+ mkfs.ext3 /dev/mmcblk0p2
+
+== Remplissage de la carte SD ==
+
+== Rajout de l'entrée au menu de démarrage uboot ==
+
+== Annexes ==
+
+=== Démarrage à partir de la SDHC ===
+
+=== Démarrage automatique à partir de la SDHC ===
+
+=== Désactivation du montage automatique de udev ===
+
+=== Remarques sur les paramètres noyau ===
+
+==== loglevel ====
