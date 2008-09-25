@@ -1,6 +1,7 @@
+
 == Démarrage à partir d'une carte SDHC / problème de mise en veille ==
 
-Tout d'abord un avertissement : Un bogue très ancien ayant pour origine probable le noyau Linux détruit la table des partitions des cartes SD de capacité élevée. Voir le bogue [https://docs.openmoko.org/trac/ticket/1802 #1802] et le [http://thread.gmane.org/gmane.comp.handhelds.openmoko.community/19154/focus=19281| fil de discussion] pour une explication détaillée sur la gestion des cartes SD de haute capacité. Une bonne précaution est de conserver une version papier de la table des partitions au cas où elle devrait être recréée.
+Tout d'abord un avertissement : Un bogue très ancien ayant pour origine probable le noyau Linux détruit la table des partitions des cartes SD de capacité élevée. Voir le bogue [https://docs.openmoko.org/trac/ticket/1802 #1802] et le [http://thread.gmane.org/gmane.comp.handhelds.openmoko.community/19154/focus=19281|fil de discussion] pour une explication détaillée sur la gestion des cartes SD de haute capacité. Une bonne précaution est de conserver une version papier de la table des partitions au cas où elle devrait être recréée.
 
 == Comment ça marche ==
 
@@ -8,129 +9,76 @@ Sur le FR, [[u-boot]] fournit un mécanisme équivalent à celui de 'grub' sur u
 
 Lorsque le noyau démarre, il prépare le matériel et met en place le système de fichiers racine. Le noyau déclenche alors "/sbin/init", qui s'occupe du reste de la séquence de démarrage (avec l'affichage de l'image de démarrage et la barre de progression).
 
-Ceci fonctionne de manière identique que l'on démarre à partir de la mémoire Flash interne ou de la carte SD. La différence réside dans la manière dont le noyau est chargé et quel périphérique est utilisé comme système racine.
+Ceci fonctionne de manière identique que l'on démarre à partir de la mémoire Flash interne ou de la carte SD. La différence réside dans la manière dont le noyau et chargé et quel périphérique est utilisé comme système racine.
 
 Les sections suivantes fournissent des détails complémentaires.
 
 === Choix du menu ===
 
-Les choix du menu U-boot sont définis par les variables d'environnment nommées "menu_X" (avec X un nombre). La valeur de la variable d'environnement est une chaîne "<nom>:<commande>", où <nom> est le texte montré sur l'écran et <commande> est une séquence de commandes u-boot (séparées par le caractère ';') exécutées lorsque le choix du menu est sélectionné. Lorsqu'on entre une chaîne de commandes, les caractères ';' et '$' doivent être protégés par un antislash : "\;" et "\$".
-
 === Chargement du noyau ===
 
-Deux commandes u-boot sont nécessaires pour le chargement du noyau à partir d'une carte SD. La première est "mmcinit" qui permettra à u-boot de détecter la carte. La seconde est la commande de chargement d'un fichier en mémoire, soit "fatload" soit "ext2load" en fonction du type de système de fichiers sur lequel se trouve le noyau.
-
-La syntaxe de la commande est la suivante :
-
- fatload mmc 1:&lt;p&gt; 0x32000000 &lt;filepath&gt;
- ext2load mmc 1:&lt;p&gt; 0x32000000 &lt;filepath&gt;
-
-où &lt;p&gt; est le numéro de partition, et &lt;filepath&gt; est le chemin vers le fichier qui doit être chargé.
-
-{{Note| La commande "ext2load" ne fonctionne pas avec les version de u-boot antérieures à la "20080723", y compris celle fournie avec les premiers lots de FreeRunners. Ces vieux u-boot sont touchés par le bug [http://docs.openmoko.org/trac/ticket/799 #799]. Si vous mettez à jour votre U-Boot et votre noyau vous pouvez utilisez directement ext2 / 3 boot avec une seule partition pour tout.}}
-
-{{Warning | Soyez prudent en mettant à jour u-boot sur un Neo1973 sachant qu'il existe un risque de plantage (sauf avec un debug board). Ce n'est pas un problème avec le FreeRunner puisqu'il dispose d'une copie protégée de u-boot dans sa mémoire flash NOR. }}
-
-{{Note| U-Boot gère le protocole SDHC uniquement sur le FreeRunner : sur le Neo1973, u-boot est incapable d'accéder aux cartes SDHC (4G ou plus). Le noyau dispose du support SDHC avec le Neo1973, il est possible de placer le système racine sur la SDHC et le noyau sur la mémoire flash NAND pour contourner ce défaut. }}
-
 === Paramètres associés au système de fichier racine ===
-
-Le contenu de la variable d'environnement "bootargs" est envoyé au noyau. Bootargs est constitué de définitions "nom=valeur" séparées par des espaces. Les définitions associées au processus de démarrage sur carte SD sont "root", "rootfstype" et "rootdelay".
-
-Par exemple, les paramètres suivants indiqueraient au noyau de monter la troisième partition de la carte SD en tant que système de fichiers ext3 :
-
- root=/dev/mmcblk0p3 rootfstype=ext3 rootdelay=5
-
-Le paramètre "rootdelay" génère un temps d'attente du noyau le temps que la carte SD soit prête.
-
-Le noyau doit intégrer en statique (pas en module donc) la gestion des systèmes de fichiers indiqués au paramètre "rootfstype". Les configuration du noyau Openmoko par défaut intègrent le support de ext2 et ext3. Vous pouvez vérifier les systèmes de fichiers disponibles avec la commande Linux :
-
- less /proc/filesystems
-
-Il n'est pas possible d'utiliser FAT comme système de fichiers racine.
-
-==== ext2 comparé à ext3 ====
-
-Les opinions varient sur le meilleur système de fichiers à utiliser pour le système de fichiers racine. Ext3 est généralement considéré comme étant meilleur parce que c'est un système de fichiers journalisé qui ne nécessite pas une longue commande 'fsck' après un arrêt non planifié. Ceci dit, utilisé sur une carte qui n'intègre pas de gestion d'usure des blocs ext3 peut provoquer une usure prématurée des blocs sur lesquels se trouve le fichier journal. Les cartes SD sont censées intégrer un système de gestion d'usure, mais ce n'est pas garanti pour toutes les marques.
 
 == Récupération d'un fichier racine (rootfs) compressé ==
 
 Deux possibilités existent pour récupérer un fichier image rootfs en archive tar. Vous pouvez en créer un en utilisant la distribution OpenEmbedded ou en télécharger un directement depuis le serveur de création d'images openmoko.
 
 === Choix 1 : Télécharger les fichiers tar rootfs/kernel du serveur Openmoko ===
-Choissisez la combinaison rootfs/kernel que vous désirez installer sur la page des [http://wiki.openmoko.org/wiki/Latest_Images Dernières Images Générées].
+Choissisez la combinaison rootfs/kernel que vous désirez installer sur la page des [[http://wiki.openmoko.org/wiki/Latest_Images Dernières Images Générées]].
 
 === Choix 2 : Créer un fichier tar en utilisant OpenEmbedded ===
 
-Une autre possibilité pour obtenir une archive tar de votre rootfs est de la construire vous-même avec l'environnement OpenEmbedded.
-
-Pour construire OM-2007.2 vous devez ajouter "tar" aux types d'images dans votre fichier ''local.conf'' :
-
-IMAGE_FSTYPES = "jffs2 tar"
-
-Après cela vous pouvez construire une nouvelle image avec la commande :
-
- bitbake openmoko-devel-image
-
-Ou si vous utilisez le MokoMakefile :
-
- make openmoko-devel-image
-
-Une fois que la commande aura été exécutée vous disposerez d'une fichier ''Openmoko-....tar'' dans le répertoire deploy qui correspondra à votre nouvelle archive rootfs.
-
 === Choix 3 : Convertissez une image jffs2 en fichier tar ===
 
-Consultez la page [[Userspace root image]] pour de plus amples informations sur la manière d'accéder au contenu d'une image jffs2.
-
-== Préparation de la carte SD ==
+== Préparation de la carte CD ==
 
 === Partitionnement de la carte SD ===
 
 u-boot pre-2008-07-23 peut uniquement démarrer de système de fichiers FAT; si vous mettez à jour u-boot, vous pourrez démarrer de systèmes FAT ou ext2.
-Cet exemple montre comment créer une partition type en utilisant l'outil système fdisk. N'importe quel autre gestionnaire de partitions fonctionnerait aussi.
+Cet exemple montre comment créer une partition type en utilisant l'outil système fdisk. N'importe quel gestionnaire de partitions fonctionnerait aussi.
 
  fdisk /dev/mmcblk0
 
-{{Note| Le fichier spécial associé au périphérique peut être différent sur votre configuration. Si vous n'êtes pas sûr, vous pouvez utiliser la commande ''dmesg'' pour répérer le bon nom dans les messages de démarrage du noyau.}}
+'''''Note:''''' Le fichier spécial associé au périphérique peut être différent sur votre configuration. Si vous n'êtes pas sur, vous pouvez utiliser la commande ''dmesg'' pour répérer le bon nom dans les messages de démarrage du noyau.
 
-Nous allons maintenant créer une partition de 8Mo pour notre noyau et une autre pour le système de fichiers racine (rootfs) avec la place restante sur la carte.
+Nous allons maintenant créer une partition de 8Mbit pour notre noyau et une autre pour le système de fichiers racine (rootfs) avec la place restante sur la carte.
 
-<pre>Command (m for help): d
-Selected partition 1
-Command (m for help): n
-Command action
-e   extended
-p   primary partition (1-4)
-p
-Partition number (1-4): 1
-First cylinder (1-983, default 1):
-Using default value 1
-Last cylinder or +size or +sizeM or +sizeK (1-983, default 983): +8M
-Command (m for help): n
-Command action
-e   extended
-p   primary partition (1-4)
-p
-Partition number (1-4): 2
-First cylinder (18-983, default 18):
-Using default value 18
-Last cylinder or +size or +sizeM or +sizeK (18-983, default 983):
-Using default value 983
-Command (m for help): w
-The partition table has been altered!
-Calling ioctl() to re-read partition table.
-Syncing disks.
-</pre>
-''On devrait probablement aussi changer le type de la première partition en FAT16 ?''
+   Command (m for help): d
+   Selected partition 1
+   Command (m for help): n
+   Command action
+      e   extended
+      p   primary partition (1-4)
+   p
+   Partition number (1-4): 1
+   First cylinder (1-983, default 1):
+   Using default value 1
+   Last cylinder or +size or +sizeM or +sizeK (1-983, default 983): +8M
+   Command (m for help): n
+   Command action
+      e   extended
+      p   primary partition (1-4)
+   p
+   Partition number (1-4): 2
+   First cylinder (18-983, default 18):
+   Using default value 18
+   Last cylinder or +size or +sizeM or +sizeK (18-983, default 983):
+   Using default value 983
+   Command (m for help): w
+   The partition table has been altered!
+   Calling ioctl() to re-read partition table.
+   Syncing disks.
+
+''Should probably need to change type of first partition to FAT 16 too ?''
 
 si le message suivant apparaît à la sortie du programme fdisk :
 
-Calling ioctl() to re-read partition table
-fdisk: WARNING: rereading partition table failed, kernel still uses old table:   Device or resource busy
+   Calling ioctl() to re-read partition table
+   fdisk: WARNING: rereading partition table failed, kernel still uses old table:   Device or resource busy
 
 lancez la commande
 
- umount /dev/mmcblk0p1
+   umount /dev/mmcblk0p1
 
 à partir d'une autre console et essayez de nouveau.
 
@@ -138,167 +86,26 @@ lancez la commande
 
 Lancez la commande suivante pour créer un système de fichier FAT :
 
-mkfs.vfat /dev/mmcblk0p1
+ mkfs.vfat /dev/mmcblk0p1
 {{Note|Si vous ne disposez pas de mkfs.vfat vous le trouverez dans le paquet "dosfstools". Ce paquet ne semble pas être disponible en ipk, mais une version non officielle peut être téléchargée à http://members.shaw.ca/mmontour/neo/dosfstools_2.11-r0_armv4t.ipk}}
 
 
 La deuxième partition doit être formattée en ext3 (sauf si vous avez inclus les modules ext2 dans votre noyau) :
 
-mkfs.ext3 /dev/mmcblk0p2
+ mkfs.ext3 /dev/mmcblk0p2
 
 == Remplissage de la carte SD ==
 
-Votre carte SD est maintenant prête à être remplie avec le système de fichiers rootfs et le noyau nécessaires au démarrage du FR.
-
-Montez la seconde partition de votre carte SD et placez l'image rootfs dessus :
-
- mount /dev/mmcblk0p2 /mnt/moko
- tar -C /mnt/moko/ -xzvf openmoko-devel-image-fic-gta01-20070313022035.rootfs.tar.gz
-
-{{Note| Comme toujours dans ce guide, veuillez à ajuster le nom de périphérique et du fichier rootfs à vos besoins.}}
-
-{{Note| Il faut porter attention à un point particulier si vous utilisez le démon automount de votre système d'exploitation hôte. Certains systèmes montent ces périphériques amovibles avec l'option "nodev" par défaut pour des raisons de sécurité. Si l'image que vous décompressez dispose d'un répertoire /dev rempli, les fichiers spéciaux ne seront pas créés. Si vous montez automatiquement la carte SD sur votre PC, vérifiez qu'il n'y a pas d'options de montage inadaptées en utilisant la commande "mount" pour lister les points de montage.}}
-
-La prochaine étape est de monter la première partition de la carte SD et d'installer le noyau dessus.
-
- mount /dev/mmcblk0p1 /mnt/mokokernel
- cp uImage-fic-gta01-latest.bin /mnt/mokokernel/uImage.bin
-
-Ou pour certaines version de u-boot sur la mémoire flash NOR :
-
- mount /dev/mmcblk0p1 /mnt/mokokernel
- cp uImage-fic-gta01-latest.bin /mnt/mokokernel/uimage
-
-(oui, en minuscules et sans extension)
-
-Faites bien attention que votre noyau soit nommé ''uImage.bin'' (ou ''uimage'' pour certaines version de u-boot en mode NOR). Si le programme u-boot ne trouve pas le fichier noyau lors du démarrage, [[Bootloader#Using usbtty from Linux| connectez-vous au bootloader]] avec ''[http://www.airs.com/ian/uucp.html cu]'', montez la partition avec mccinit et vérifiez la présence et le nom de l'image du noyau avec ''fatls mmc 1:1'' pour un système de fichier FAT  ou ''ext2ls mmc 1:1'' pour un système de fichiers ext2. Comparez le résultat avec soin avec la sortie de la commande ''printenv sd_image_name''. N'oubliez pas que vous pouvez modifier l'environnement de la flash NAND mais pas de la flash NOR, donc si vous voulez démarrez à partir de la flash NOR vous devez faire correspondre le nom de fichier à la variable d'environnement et non l'inverse.
-
-Démontez la partition rootfs et la partition noyau et faites bien attention que les données en cache soient bien écrites sur le disque :
-
- umount /mnt/moko
- umount /mnt/mokokernel
- sync
-
 == Rajout de l'entrée au menu de démarrage uboot ==
-
-En fonction du lot du téléphone et du type de partition que vous utilisez, il peut être nécessaire de rajouter une entrée dans le menu de démarrage pour pouvoir démarrer le système à partir de la carte mémoire. Si vous utilisez le FreeRunner et avez créé un noyau sur FAT avec une partition rootfs ext2 vous devriez pouvoir démarrer à partir de la carte immédiatement puisqu'une entrée  pour cela devrait déjà exister dans le menu de démarrage NOR/NAND. Pour les autres cas vous devriez au moins vérifier que les entrées nécessaires existent dans votre menu avant de poursuivre. Vous aurez besoin de vous connecter au shell uboot du menu NAND pour cela. Une description de la procédure est disponible dans l'article [[Uboot#Bootloader_prompt]]. Des détails sur la manière de vous connecter au menu NAND sont disponibles [[Booting#Log_into_U-Boot_in_the_NAND_Flash| ici]].
-
-Après avoir consulté ces deux articles, vous devriez être connecté avec le shell sur uboot en mode NAND. La première chose à faire est de régler le délai de déconnexion du menu de démarrage à une valeur très élevée. Si vous ne faites pas cela, le gestionnaire de démarrage continuera le chargement après le délai par défaut (60 secondes) même si vous êtes connecté au shell uboot. Entrez la commande suivante :
-
- setenv boot_menu_timeout 99999
-
-Cela règlera le délai à 99999 secondes ce qui devrait vous donner le temps de lancer toutes les commandes que vous voulez dans le shell de démarrage.
-
-Maintenant, nous allons vérifier qu'une option du menu pour démarrer sur la carte SD est bien disponible et la créer si ce n'est pas le cas. Vous pouvez afficher l'environnement de démarrage du gestionnaire de démarrage avec la commande :
-
- printenv
-
-Si le résultat est une ligne commençant par ''menu_'' suivi des commandes qui sont listées dans ce guide, vous n'avez pas besoin de créer de nouvelle entrée dans le menu. Dans tous les autres cas veuillez suivre les instructions suivantes :
-
-Vérifiez que vous utilisez la bonne configuration à partir des décisions que vous avez prises auparavant. Pour plus d'informations sur les commandes uboot, utilisez :
- help
- help <commande>
-et [[Bootloader]] ainsi que [[Bootloader commands]].
-
-{{Note| Les antislashes (\) sont très importants en mode uboot pour enregistrer la commande en tant que nouvelle variable d'environnement plutôt que de l'exécuter immédiatement après l'appui sur la touche entrée.}}
-
-{{Note| Les touches copier et coller peuvent être inopérantes en fonction de l'émulateur de terminal utilisé. Commi fonctionne ou vous pouvez utiliser l'émulateur de terminal [[NeoCon|neocon]] en rajoutant un délai d'attente entre les caractères. Autrement, vous devrez retapez les lignes de commande à la main.}}
-
-Il est important de tenir compte des type de partitions FAT ou ext du noyau ainsi que des types ext2 ou ext3 de la partition racine.
-
-Vérifiez les numéros de partition dans les commandes suivantes.  Il peut être nécessaire en particulier de changer root=/dev/mmcblk0p'''#''' et fatload mmc '''#''' ou ext2load mmc '''#''' en fonction des partitions dans lesquelles se trouvent respectivement le noyau et le rootfs.  Les numéros commencent à 1.
-
-'''Entrée du menu pour le noyau sur FAT et le rootfs sur ext3 :'''
-
- setenv menu_9 Boot from microSD (FAT+ext3): setenv bootargs \${bootargs_base} rootfstype=ext3 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
-
-'''Entrée du menu pour le noyau sur FAT et le rootfs sur ext2:'''
-
- setenv menu_9 Boot from microSD (FAT+ext2): setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
-
-ou : avec option noyau 'init=/sbin/init' (nécessaire pour certaines images) :
- setenv menu_9 Boot 200808 from microSD (FAT+ext2): setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} init=/sbin/init ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
-
-'''Entrée du menu pour noyau sur ext2 et rootfs sur ext2: (nécessite un u-boot récent)'''
-
- setenv menu_2 Boot from microSD part2 (ext2+ext2): setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; ext2load mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
-
-'''Entrée du menu pour noyau et rootfs sur la même partition ext2 (testé avec Qtopia/nécessite un u-boot récent)'''
- setenv menu_3 QTopia: setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p1 rootdelay=5 \${mtdparts} ro\; mmcinit\; ext2load mmc 1:1 0x32000000 \${sd_image_name}\; bootm 0x32000000
-Vous avez bientôt fini. Lancez une commande
-
- printenv
-
-et vérifiez que votre choix de menu récemment créé est affiché correctement (sans que les antislashes soient affichés cette fois).
-
-Si tout se passe bien, entrez :
-
- saveenv
-
-en ligne de commande et tapez entrée. La nouvelle configuration devrait alors être enregistrée dans la mémoire flash NAND.
-
-Eteignez votre Neo avec la commande suivante :
-
- neo1973 power-off
-
-Après avoir redémarré le Neo et vous être reconnecté en mode NAND vous devriez pouvoir sélectionner votre choix récemment créé et pouvoir démarrer avec le système de fichiers racine de votre carte SD.
-
-----
-
-Voyez aussi [[Moving current system from flash to SD]] qui indique comment copier le système en flash vers la carte SD pour garder une sauvegarde et pouvoir démarrer avec.
-
-----
 
 == Annexes ==
 
 === Démarrage à partir de la SDHC ===
 
-{{Note|le texte suivant a été écrit pour le Neo1973. Les cartes SDHC et SD devraient fonctionner avec un FreeRunner si votre version de u-boot est au moins 2008-07-23. Les versions officielles de u-boot pour le Neo1973 ne supportent pas les SDHC.}}
-
-Sachant que les SDHC ne fonctionnent pas avec des versions plus anciennes de u-boot, vous ne pouvez pas utiliser ce qui est indiqué dans le guide Booting from SD.
-Mais il existe une sorte de contournement qui permet d'avoir au moins votre rootfs sur la microSDHC :
-
-Tout d'abord vous pouvez suivre l'étape 1 pour obtenir une image de noyau intégrant les support mmc et ext2. Mais au lieu de copier l'image sur le rootfs vous allez la flasher sur la mémoire NAND interne (en utilisant [[Dfu-util]]).
-Vous pouvez maintenant continuer à l'étape 2 (comme indiqué auparavant vous n'avez pas à copier votre uImage dans le rootfs) puis suivre les instructions de l'étape 3.
-Au lieu de la commande setenv indiquée en étape 3, vous allez indiquer la commande suivante :
-
- GTA01Bv4 # setenv menu_5 Boot from SDHC: setenv  bootargs root=/dev/mmcblk0p1 console=tty0 rootdelay=5 neo1973-nand:0x00040000(u-boot),0x00004000(u-boot_env),0x00200000(kernel),0x000a0000(splash)\; nand read.e 0x32000000 kernel\; bootm 0x32000000
- GTA01Bv4 # saveenv
-
-Et c'est tout !
-
-Maintenant vous pouvez utiliser l'option "Boot from SDHC" que vous venez de rajouter pour démarrer le noyau en utilisant le système de fichiers racine présent sur la microSDHC.
-
 === Démarrage automatique à partir de la SDHC ===
 
-Si vous voulez démarrer automatiquement sur la carte SDHC :
-Ajoutez une entrée au menu pour démarrer de la mémoire NAND
-
- GTA01Bv4 # setenv menu_6 Boot from NAND: setenv bootargs \${bootargs_base} \${mtdparts}\; nand read.e 0x32000000 kernel\; bootm 0x32000000
- GTA01Bv4 # saveenv
-
-Puis éteignez le FR et testez la nouvelle entrée du menu. Si vous pouvez démarrer depuis la NAND, éteignez, entrez dans le menu de démarrage, connectez-vous au bootloader et définissez la commande (auto)bootcmd pour démarrer de la carte SDHC :
-
- GTA01Bv4 # setenv bootcmd setenv bootargs root=/dev/mmcblk0p1 rootdelay=10 console=tty0 neo1973-nand:0x00040000(u-boot),0x00004000(u-boot_env),0x00200000(kernel),0x000a0000(splash)\; nand read.e 0x32000000 kernel\; bootm 0x32000000
- GTA01Bv4 # saveenv
-
-Maintenant vous démarrerez de la SDHC à chaque fois que vous appuierez le bouton Marche-Arrêt ou que vous redémarrerez le FR. Si vous désirez de nouveau démarrer à partir de la NAND, utilisez l'option NAND du menu de démarrage.
-
 === Désactivation du montage automatique de udev ===
-
-udev monte automatiquement la carte SD au point de montage /media/mmcblk0p1. Vous pouvez désactiver cela avec la commande suivante :
-
- echo /dev/mmcblk >> /etc/udev/mount.blacklist
 
 === Remarques sur les paramètres noyau ===
 
 ==== loglevel ====
-
-Certaines personnes suggèrent de rajouter :
-
-loglevel=8
-
-au paramètres du noyau. SI vous avez aussi le paramètre "console=tty0" dans la ligne de commande du noyau cela rend le démarrage du FR extrèmement lent parce que le framebuffer (l'affichage du neo en mode texte) doit afficher des tas de lignes de message de deboguage du genre :
-
-s3c2410-sdi s3c2410-sdi: ......
-mmc0: ....
