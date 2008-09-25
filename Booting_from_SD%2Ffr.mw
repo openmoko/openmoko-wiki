@@ -181,6 +181,74 @@ Démontez la partition rootfs et la partition noyau et faites bien attention que
 
 == Rajout de l'entrée au menu de démarrage uboot ==
 
+En fonction du lot du téléphone et du type de partition que vous utilisez, il peut être nécessaire de rajouter une entrée dans le menu de démarrage pour pouvoir démarrer le système à partir de la carte mémoire. Si vous utilisez le FreeRunner et avez créé un noyau sur FAT avec une partition rootfs ext2 vous devriez pouvoir démarrer à partir de la carte immédiatement puisqu'une entrée  pour cela devrait déjà exister dans le menu de démarrage NOR/NAND. Pour les autres cas vous devriez au moins vérifier que les entrées nécessaires existent dans votre menu avant de poursuivre. Vous aurez besoin de vous connecter au shell uboot du menu NAND pour cela. Une description de la procédure est disponible dans l'article [[Uboot#Bootloader_prompt]]. Des détails sur la manière de vous connecter au menu NAND sont disponibles [[Booting#Log_into_U-Boot_in_the_NAND_Flash| ici]].
+
+Après avoir consulté ces deux articles, vous devriez être connecté avec le shell sur uboot en mode NAND. La première chose à faire est de régler le délai de déconnexion du menu de démarrage à une valeur très élevée. Si vous ne faites pas cela, le gestionnaire de démarrage continuera le chargement après le délai par défaut (60 secondes) même su vous petes connecté au shell uboot. Entrez la commande suivante :
+
+ setenv boot_menu_timeout 99999
+
+Cela règlera le délai à 99999 seconeds ce qui devrait vous donner le temps de lancer toutes les commandes que vous voulez dans le shell de démarrage.
+
+Maintenant, nous allons vérifier qu'une option du menu pour démarrer sur la carte SD est bien disponible et la créer si ce n'est pas le cas. Vous pouvez afficher l'environnement de démarrage du gestionnaire de démarrage avec la commande :
+
+ printenv
+
+Si le résultat est une ligne commençant par ''menu_'' suivi des commandes qui sont listées dans ce guide, vous n'avez pas besoin de créer de nouvelle entrée dans le menu. Dans tous les autres cas veuillez suivre les instructions suivantes :
+
+Vérifiez que vous utilisez la bonne configuration à partir des décisions que vous avez prises auparavant. Pour plus d'informations sur les commandes uboot, utilisez :
+ help
+ help <commande>
+et [[Bootloader]] ainsi que [[Bootloader commands]].
+
+{{Note| Les antislashes (\) sont très importants en mode uboot pour enregistrer la commande en tant que nouvelle variable d'environnement plutôt que de l'exécuter immédiatement après l'appui sur la touche entrée.}}
+
+{{Note| Les touches copier et coller peuvent être inopérantes en fonction de l'émulateur de terminal utilisé. Commi fonctionne ou vous pouvez utiliser l'émulateur de terminal [[NeoCon|neocon]] en rajoutant un délai d'attente entre les caractères. Autrement, vous devrez retapez les lignes de commande à la main.}}
+
+Il est important de tenir compte des type de partitions FAT ou ext du noyau ainsi que des types ext2 ou ext3 de la partition racine.
+
+Vérifiez les numéros de partition dans les commandes suivantes.  Il peut être nécessaire en particulier de changer root=/dev/mmcblk0p'''#''' et fatload mmc '''#''' ou ext2load mmc '''#''' en fonction des partitions dans lesquelles se trouvent respectivement le noyau et le rootfs.  Les numéros commencent à 1.
+
+'''Entrée du menu pour le noyau sur FAT et le rootfs sur ext3 :'''
+
+ setenv menu_9 Boot from microSD (FAT+ext3): setenv bootargs \${bootargs_base} rootfstype=ext3 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
+
+'''Entrée du menu pour le noyau sur FAT et le rootfs sur ext2:'''
+
+ setenv menu_9 Boot from microSD (FAT+ext2): setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
+
+ou : avec option noyau 'init=/sbin/init' (nécessaire pour certaines images) :
+ setenv menu_9 Boot 200808 from microSD (FAT+ext2): setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} init=/sbin/init ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
+
+'''Entrée du menu pour noyau sur ext2 et rootfs sur ext2: (nécessite un u-boot récent)'''
+
+ setenv menu_2 Boot from microSD part2 (ext2+ext2): setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; ext2load mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
+
+'''Entrée du menu pour noyau et rootfs sur la même partition ext2 (testé avec Qtopia/nécessite un u-boot récent)'''
+ setenv menu_3 QTopia: setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p1 rootdelay=5 \${mtdparts} ro\; mmcinit\; ext2load mmc 1:1 0x32000000 \${sd_image_name}\; bootm 0x32000000
+Vous avez bientôt fini. Lancez une commande
+
+ printenv
+
+et vérifiez que votre choix de menu récemment créé est affiché correctement (sans que les antislashes soient affichés cette fois).
+
+Si tout se passe bien, entrez :
+
+ saveenv
+
+en ligne de commande et tapez entrée. La nouvelle configuration devrait alors être enregistrée dans la mémoire flash NAND.
+
+Eteignez votre Neo avec la commande suivante :
+
+ neo1973 power-off
+
+Après avoir redémarré le Neo et vous être reconnecté en mode NAND vous devriez pouvoir sélectionner votre choix récemment créé et pouvoir démarrer avec le système de fichiers racine de votre carte SD.
+
+----
+
+Voyez aussi [[Moving current system from flash to SD]] qui indique comment copier le système en flash vers la carte SD pour garder une sauvegarde et pouvoir démarrer avec.
+
+----
+
 == Annexes ==
 
 === Démarrage à partir de la SDHC ===
