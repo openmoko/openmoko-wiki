@@ -35,6 +35,20 @@ où &lt;p&gt; est le numéro de partition, et &lt;filepath&gt; est le chemin ver
 
 === Paramètres associés au système de fichier racine ===
 
+Le contenu de la variable d'environnement "bootargs" est envoyé au noyau. Bootargs est constitué de définitions "nom=valeur" séparées par des espaces. Les définitions associées au processus de démarrage sur carte SD sont "root", "rootfstype" et "rootdelay".
+
+Par exemple, les paramètres suivants indiqueraient au noyau de monter la troisième partition de la carte SD en tant que système de fichiers ext3 :
+
+  root=/dev/mmcblk0p3 rootfstype=ext3 rootdelay=5
+
+Le paramètre "rootdelay" génère un temps d'attente du noyau le temps que la carte SD soit prête.
+
+Le noyau doit intégrer en statique (pas en module donc) la gestion des systèmes de fichiers indiqués au paramètre "rootfstype". Les configuration du noyau Openmoko par défaut intègrent le support de ext2 et ext3. Vous pouvez vérifier les systèmes de fichiers disponibles avec la commande Linux :
+
+  less /proc/filesystems
+
+Il n'est pas possible d'utiliser FAT comme système de fichiers racine.
+
 == Récupération d'un fichier racine (rootfs) compressé ==
 
 Deux possibilités existent pour récupérer un fichier image rootfs en archive tar. Vous pouvez en créer un en utilisant la distribution OpenEmbedded ou en télécharger un directement depuis le serveur de création d'images openmoko.
