@@ -53,7 +53,25 @@ on the gps device using
 ** the framework could have an option to read data from gpsd.
 ** opgsd/gypsy could be extended to be backwards compatible with the majority of gps applications.
 
+== Running TangoGPS on FSO Milestone 3 ([[OpenmokoFramework]]) ==
+
+There are two various GPS interfaces -- (1) one provided with default gpsd and (2) the other provided by ogpsd (part of the frameworkd).  TangoGPS requires the ad 1 and it obtains information from gps from the dbus interface provided by gpsd.
+
+On FSO milestone 3, there is tangoGPS pre-installed as well as both gpsd and ogpsd (see <code>/etc/frameworkd.conf</code>, section <code>ogpsd</code>).  As mentioned above, there also exists a fso-gpsd package, that converts from ad 2 to ad 1 (unfortunately fso-gpsd is not in default image and must be installed with <code>opkg install fso-gpsd</code>).
+
+You cannot have both "providers" (ad 1 & ad 2) running, but you can have ad 2 (recommended for FSO) and "convertor" (fso-gpsd) providing the ad 1.  To get usable tangoGPS on FreeRunner, one has to:
+
+# check that <code>/etc/frameworkd.conf</code>, section <code>ogpsd</code> reads GPS data from the right device (<code>/dev/ttySAC1</code>)
+# if changes were made to configuration, one should restart the frameworkd -- <code>/etc/init.d/frameworkd stop && /etc/init.d/frameworkd start</code>
+# check that gpsd is not running -- <code>/etc/init.d/gpsd stop</code>
+# check that fso-gpsd is installed and running -- <code>opkg install fso-gpsd; fso-gpsd</code>
+# check that gps chip is online (<code>echo 1 > /sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/neo1973-pm-gps.0/pwron</code>)
+# finally start up the tangoGPS and locate the gps signal; it should be up in a few minutes.
+
+Note: handy application for testing the gps (and gps signal strength) is <code>openmoko-agpsui</code>, see general gps info at [[Gps]]
+
 == Downloading Maps for offline use ==
+
 tangoGPS can bunch-download the map images so you don't need an internet connection while walking around. By default tangoGPS stores downloaded maps to /tmp/. This folder is lost every time you reboo the device. But you can use the "Config" tab within tangoGPS to change the "Cache Dir" location to , for example, /osm/ . So downloaded maps will be kept in the Neos flash, also after reboot. Note that the map files can take up large amounts of space, so you may want to store them on your sd card, in /media/card/osm.
 
 If you find that TangoGPS does not remember configuration changes that you make to it, be sure to run it from the touchscreen, and not an SSH session.  TangoGPS uses gconf to store its settings, and cannot access gconf when run via SSH.
