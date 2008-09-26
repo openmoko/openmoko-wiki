@@ -1,6 +1,6 @@
-Q: How to make the Neo FreeRunner act as a mass storage device (memory stick, USB key, portable drive...)
+==Make the Neo FreeRunner act as a mass storage device==
 
-A: The following script can be used
+To access the microSD card in the Freerunner from the host computer as if it were a USB key or memory stick, the following script can be used:
 
  #!/bin/sh
  ifdown usb0
@@ -9,19 +9,22 @@ A: The following script can be used
  modprobe g_file_storage file=/dev/mmcblk0p1
 Reference: [http://lists.openmoko.org/pipermail/community/2008-September/029261.html Petr Vanek's "usb mass media storage" message on the community mailing list]
 
-Q: How to make the Neo FreeRunner revert to USB networking?
+The card is not accessible from the Freerunner in this mode.
 
-A: The following script can be used (Keep in mind that you need to properly unmount on the host computer FIRST or risk corruption)
+==Make the Neo FreeRunner revert to USB networking==
+
+The following script can be used:
 
  #!/bin/sh
  rmmod g_file_storage
  mount /dev/mmcblk0p1 /media/card
  modprobe g_ether
  ifup usb0
+Be sure to properly unmount on the host computer first, just as you would with any other USB storage.
 
-Q: Is it possible to pretend to be a USB hub, providing both g_ether and g_file_storage ?
+==Is it possible to pretend to be a USB hub, providing both g_ether and g_file_storage?==
 
-A: Not yet. At the moment it's one gadget driver at a time, but there is a project under way to allow use of multiple gadget drivers together. See [http://blog.felipebalbi.com/?p=44 this blog posting called 'USB Composite Gadget Framework'] or [http://www.linux-usb.org/gadget/ Linux-USB Gadget API Framework]
+Not yet. At the moment it's one gadget driver at a time, but there is a project under way to allow use of multiple gadget drivers together. See [http://blog.felipebalbi.com/?p=44 this blog posting called 'USB Composite Gadget Framework'] or [http://www.linux-usb.org/gadget/ Linux-USB Gadget API Framework]
 
 
 [[Category:USB]]
