@@ -85,10 +85,6 @@ tile_path = /media/card
 
 to '''~/.om-locations/config/om-locations.cfg'''.
 
-<pre>
-config file may reside in ~/diversity-nav/config/diversity-nav.cfg
-</pre>
-
 === Download Tiles of a Region (Om2008.9) ===
 You can download tiles of a region by specifying '''-d''' option in '''om-locations-map-pack'''.  The usage is
 
@@ -106,16 +102,29 @@ om-locations-map-pack -d `date "+%Y%m%d"`,osm,5,16,121.5,25.0,0.1,0.1 /media/car
 
 In this example, a region of longitude between '''121.5''' to '''121.6''' and of latitude bwtween '''25.0''' to '''25.1''' is specified.  Tiles in this region and of levels from '''5''' to '''16''' are downloaded to '''/media/card'''.  By instructing '''Locations''' to use '''/media/card''' as its tile path, one could pre-download tiles of any region and have '''Locations''' use them.
 
-== Turn on GPS Logging ==
-For now, nmea logging is off by default. To get nmea log for being used, we can send dbus message after om-locations launched as below:
+== GPS ==
+
+'''Locations''' relies on '''diversity-daemon''' to communicate with the GPS device.  By default, the GPS device (/dev/ttySAC1) is opened directly.  However, it is possible to configure '''diversity-daemon''' to talk to gpsd.
+
+=== Using gpsd (git only) ===
+
+After gpsd is installed and started, it listens on port 2947 by default.  To make '''diversity-daemon''' talk to gpsd, one could add/change:
+
 <pre>
-dbus-send --session --dest=org.openmoko.Diversity --type=method_call --print-reply /org/openmoko/Diversity/objects/0/equipments/nmea org.openmoko.Diversity.Equipment.SetConfig string:log variant:string:/home/root/nmealog
+gps_device = 127.0.0.1:2947
 </pre>
-Then the log will be saved to /home/root/nmealog in this example. 
 
-After om-locations terminated, logging will stop.
+to ~/.om-locations/config/om-locations.cfg.
 
-The size of log file will increase soon. For now be warned, if the dbus message was sent again, then the log will be overrridden. So backup or do some hacking first before doing that.
+=== Logging (git only) ===
+
+It is possible to turn on GPS logging by adding
+
+<pre>
+gps_log = /home/root/GPSLogs
+</pre>
+
+in ~/.om-locations/config/om-locations.cfg.
 
 == Development ==
 '''Locations''' is written in C and [http://enlightenment.org/p.php?p=about/efl EFL].  It talks to '''diversity-daemon''' through [http://www.freedesktop.org/wiki/Software/dbus D-Bus] to, for example, send tags and download tiles.
