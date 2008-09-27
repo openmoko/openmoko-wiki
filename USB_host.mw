@@ -15,7 +15,16 @@ Note: You may want to run <code>ifconfig usb0 down</code> prior to switching to 
 
 ¹)Debian note: You'll need the ohci-hcd module:
  modprobe ohci-hcd
-==USBMode-Script==
+
+=== Returning to USB device mode ===
+After doing whatever is needed to safely remove your device and unplugging it you can remove the provision of 5 volt power and return to device mode.
+
+ echo "0" > /sys/devices/platform/neo1973-pm-host.0/hostmode
+ echo "device" > /sys/devices/platform/s3c2410-ohci/usb_mode
+
+You can now safely restart USB networking.
+
+====USB-Mode-Script====
 These simple script is useful to switch the USB-Modes:
  #!/bin/sh
  grep -q 'host' /sys/devices/platform/s3c2410-ohci/usb_mode
@@ -31,14 +40,6 @@ These simple script is useful to switch the USB-Modes:
   echo USB-Port is in host-mode now.
  fi
 Put it on screen for easy access.
-
-=== Returning to USB device mode ===
-After doing whatever is needed to safely remove your device and unplugging it you can remove the provision of 5 volt power and return to device mode.
-
- echo "0" > /sys/devices/platform/neo1973-pm-host.0/hostmode
- echo "device" > /sys/devices/platform/s3c2410-ohci/usb_mode
-
-You can now safely restart USB networking.
 
 === Providing power to connected USB devices while in host mode ===
 
