@@ -295,23 +295,22 @@ Make /etc/network/freerunner executable with
 
 Ubuntu Feisty, Gutsy and Hardy reportedly have a bug where ifdown is not run when the interface is unplugged, meaning this only works once after the system is booted.  This is mentioned at https://bugs.launchpad.net/ubuntu/+source/ifupdown/+bug/130437 
 
-One can patch /etc/udev/rules.d/85-ifupdown.rules, editing the two lines at the end of the file:
+One can patch /etc/udev/rules.d/85-ifupdown.rules. Moving the DRIVERS=="*?" out of the top GOTO, to ACTION=="add" line fixes the problem.
 
- SUBSYSTEM=="net", DRIVERS=="?*", GOTO="net_start"
+ SUBSYSTEM=="net", GOTO="net_start"
  GOTO="net_end"
  
  LABEL="net_start"
  
  # Bring devices up and down only if they're marked auto.
  # Use start-stop-daemon so we don't wait on dhcp
- ACTION=="add",          RUN+="/sbin/start-stop-daemon --start --background --pidfile /var/run/network/bogus --startas /sbin/ifup -- --allow auto $env{INTERFACE}"
- 
- LABEL="net_end"
+ ACTION=="add", DRIVERS=="?*",       RUN+="/sbin/start-stop-daemon --start --background --pidfile /var/run/network/bogus --startas /sbin/ifup -- --allow auto $env{INTERFACE}"
  
  ACTION=="remove",       RUN+="/sbin/start-stop-daemon --start --background --pidfile /var/run/network/bogus --startas /sbin/ifdown -- --allow auto $env{INTERFACE}"
 
-The bug is that the LABEL="net_end" is at the wrong position
+ LABEL="net_end"
 
+The bug is that the DRIVERS variable isn't set at all when the device is unplugged.
 
 This appears to be fixed in Ubuntu 8.04 [[User:Mattt|Mattt]] 11:38, 30 July 2008 (UTC)
 :Actually it appears that it's not fixed, but patching that file and disconnecting and reconnecting the phone works perfectly. --[[User:Johndoesacc|Johndoesacc]] 18:37, 20 August 2008 (UTC)
