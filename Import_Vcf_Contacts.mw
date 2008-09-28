@@ -8,6 +8,27 @@ To use the import tools you need your Contacts in VCF format.
 # On windows mobile phones you could use active sync to sync with Outlook and then use a Outlook VCF export plugin below
 # On LG phones the backup function to memory card creates one file with multiple VCards
 
+=== Evolution ===
+
+Evolution can export only to VCF version 3.0, so you need to post-process the exported file.
+
+* Select Contacts, then File > Save Address Book as VCard and save to your desired destination.
+* Use the following command to remove evolution's proprietary fields and convert the file to an encoding Om2008.8 will understand (replace old.vcf to the filename you chose for export of your addressbook in evolution):
+
+<pre>
+sed -r -e 's/"X-EVOLUTION-CALLBACK"/MSG/g' \
+       -e 's/;TYPE=([^,]+),[^;]+([;:])/;TYPE=\1\2/g' \
+       -e 's/;X-EVOLUTION-UI-SLOT=[0-9]//g' old.vcf \
+    | iconv -t ISO-8859-1 > new.vcf
+</pre>
+
+Note that if you run into errors like 
+
+<pre>found unknown attribute in vobject, TEL </pre>
+
+then there are probably still occurrences of X-EVOLUTION- fields that need to be removed.
+Also note that the above script converts your addressbook file to ISO-8859-1 (see last line), as its native UTF-8 apparently isn't recognized by Om2008.8. If necessary, eplace ISO-8859-1 by a encoding that better suits your needs.
+
 === Thunderbird ===
 
 To export VCF from Thunderbird:
