@@ -1,112 +1,29 @@
-{{note|This article is way to unify community experience, tips and tricks in order to develop C++ applications based on the QT framework. It's actually incomplete and may be wrong in several parts, please fix and improve!}}
+{{note|This article is way to unify community experience, trip and ticks in order to develop C++ application based on the QT framework. It's actually incomplete and may be wrong in several parts, please fix and improve!}}
 =Introduction=
 extracted from wikipedia:
 
-''Qt is a cross-platform application development framework, widely used for the development of GUI programs, and also used for developing non-GUI programs such as console tools and servers. Qt is most notably used in KDE, Opera, Google Earth, Skype, Qtopia, Photoshop Elements, VirtualBox and OPIE. It is produced by the Norwegian company Trolltech and developed at its Brisbane office in Australia. Nokia acquired Trolltech on January 28, 2008.''
+''Qt is a cross-platform application development framework, widely used for the development of GUI programs, and also used for developing non-GUI programs such as console tools and servers. Qt is most notably used in KDE, Opera, Google Earth, Skype, Qtopia, Photoshop Elements, VirtualBox and OPIE. It is produced by the Norwegian company Trolltech. Nokia acquired Trolltech on January 28, 2008.''
 
-Applications using Qt should run on 2008.x, FSO/SHR, and Qtopia from Trolltech (on this firmware alternative widget toolkits, as gtk+,  actually do not work, as they need an X server). This makes Qt a good choice to start developing new applications for the Openmoko world.
+Applications using Qt should run on 2008.x, FSO/SHR, and Qtopia from Trolltech (on this firmware alternative widget toolkits, as gtk+,  actually do not work, as they need an X server). This make Qt a good choice to start developing new applications for the Openmoko world.
 
-=Developing with Trolltech/Qt Extended=
+=Developing with Trolltech/Qtopia=
+Trolltech provides goods SDK and documentation. You can download the official SDK  [http://sourceforge.net/project/downloading.php?groupname=qpe&filename=qtopia-ficgta01-sdk-4.3.2.iso&use_mirror=osdn].
 
-''The SDK for the new version 4.4.1 of Ot Extended, formerly known as Qtopia is not ready yet, tarball is available but it lacks updated documentation.''
+It's a vmware based virtual machine you can run with the free vmplayer. This is a ready to go solution.
 
-==Use pre-built SDK==
+If you prefer to dirty your hands and to have a SDK on your host linux system, you may build your qtopia image, and SDK manually:
 
-Trolltech provides good SDK and documentation. You can download the official SDK  [http://sourceforge.net/project/downloading.php?groupname=qpe&filename=qtopia-ficgta01-sdk-4.3.2.iso&use_mirror=osdn here].
+TBD, actually refer to the excellent article at [http://sourceforge.net/project/downloading.php?groupname=qpe&filename=qtopia-ficgta01-sdk-4.3.2.iso&use_mirror=osdn]
 
-It's a VMware based virtual machine you can run with the free vmplayer. This is a ready to go solution. What you get is an .iso image. Mount the iso. There's a readme in there.
-You will need to execute a script <tt>install.sh</tt>, which will generate several <tt>.vmdk</tt> files. Afterwards you need to load these into your vmplayer.
-
-The VM is Ubuntu, and comes with a Qtopia SDK (surprise, surprise). Use <tt>krandrtray</tt> to switch to correct screen resolution. I had to install a new version of VMware to get this running, but unsure if this is really necessary. For the VMware stuff, you might need to have the kernel headers. Remember that Ubuntu calls them ''linux-headers''. Also remember this is Ubuntu, for root access just <tt>sudo command</tt>.
-
-Fonts were huge in my version. Use <tt>KMenu -> Settings -> Appearance and Themes -> Fonts</tt>. Click <tt>Adjust all fonts</tt>, check <tt>size</tt>, choose <tt>7</tt>. Same with <tt>Qt Assistant</tt>, choose for the menu <tt>Edit -> Font Settings</tt>.
-
-==Manually build SDK==
-
-If you prefer to dirty your hands and to have a SDK on your host linux system, you may build your Qtopia image, and SDK manually:
-
-TBD, actually refer to the excellent article at [http://blog.wolfman.com/articles/2008/08/27/porting-xgps-to-qtopia-for-the-freerunner]
-
-''n.b. this methods will build applications suitable only for the Qtopia firmware''
-
-=Development with QtCreator (C++ and Qt4)=
-Easy crosscompiling and packaging with [[QtCreator]] IDE
-
-=Development with Eclipse (C++ and Qt4)=
-
-If you like to develop tools with C++ and Qt4 only with the Toolchain, see [[Development with Eclipse]]
+''n.b. this methods will build applications suitable only for the qtopia firmware''
 
 =Developing with FSO based images=
-You have to prepare an oe build tree using the makefile at http://downloads.freesmartphone.org, read [[Mokomakefile]] article, install needed tools and type the following commands as a normal unprivileged user:
-
-<pre>
-mkdir fso
-cd fso
-wget http://downloads.freesmartphone.org/Makefile
-make setup
-cd fso-unstable
-make create-topdir
-</pre>
-
-You are now ready to build Qt by typing:
-<pre>
-. setup-env
-bitbake qt4-x11-free
-</pre>
-After that you'll have staging Qt arm libraries and x86 tools to build your application.
-==Quick instructions for SHR unstable==
- sudo mkdir -p /oe/shr
- cd /oe/srh
- wget http://shr.bearstech.com/Makefile
- make setup
- cd shr-unstable
+You have to prepare an oe build tree using the makefile at http://downloads.freesmartphones.org, read [[Mokomakefile]] article for instruction. To build qt4-x11-free you may
+ cd /path_where_is_makefile/fso-unstable
  . setup-env
  bitbake qt4-x11-free
-==Using a devshell==
-You may use a modified environment to build your application interactively. At first you have to bitbake the dev shell:
-<pre>bitbake devshell</pre>
-Now create a text file 'qt-arm.env' as this:
-<pre>
-OE_TREE=/oe/openmoko-fso/tmp
-. ${OE_TREE}/deploy/glibc/addons/arm-angstrom-linux-gnueabi-openmoko-om-gta02-devshell
-export QMAKESPEC="${OE_TREE}/cross/armv4t/share/qt4/mkspecs/linux-gnueabi-oe-g++"
-export OE_QMAKE_UIC="${OE_TREE}/staging/i686-linux/usr/bin/uic4"
-export OE_QMAKE_MOC="${OE_TREE}/staging/i686-linux/usr/bin/moc4"
-export OE_QMAKE_RCC="${OE_TREE}/staging/i686-linux/usr/bin/rcc4"
-export OE_QMAKE_CC=$CC
-export OE_QMAKE_CXX=$CXX
-export OE_QMAKE_INCDIR_QT="${OE_TREE}/staging/armv4t-angstrom-linux-gnueabi/usr/include/qt4/"
-export OE_QMAKE_LINK=$CXX
-export OE_QMAKE_LIBDIR_QT="${OE_TREE}/staging/armv4t-angstrom-linux-gnueabi/usr/lib"
-export PS1="\[\033[01;33m\]cross-compile-qt-shell\[\033[01;34m\] \w \$\[\033[00m\] "
 
-</pre>
-''Set OE_TREE to point to your OE tree path''
-
-Now change your current directory to your qt .pro file path and type:
-<pre>
-. /path/to/qt-arm.env
-qmake-qt4
-make
-</pre>
-
-That's all! :)))
-
-You may now create an alias or a simple batch like this to deploy and run your application:
-<pre>
-#!/bin/bash
-scp arm-executable root@neo-ip:/tmp/
-ssh -Y root@neo-ip "/tmp/executable
-</pre>
-
-to have X11 forwarding or
-<pre>ssh -Y root@neo-ip "DISPLAY=:0 /tmp/executable"</pre>
-to launch it on the device display with local stdout/stderr
-
-''consider to enable ssh public authentication''
-
-==Using an OE bitbake recipie==
-If you want to build your application in batch mode you have to create a bitbake .bb recipie file. This is not suitable to fast build/debug cycles but is a necessary step if you want to insert your project in official feed/distributions like angstrom, fso based images, 2008.x and so on. It is a quickway to create a .opkg file too!
+After that you'll have staging qt arm library and x86 tools to build your application, so you'll have to create a somename.bb file.
 
 A simple skeleton may be:
 
@@ -124,16 +41,16 @@ S = "${WORKDIR}/trunk"
 inherit qt4x11
 
 do_configure() {
-${OE_QMAKE_QMAKE}
+        ${OE_QMAKE_QMAKE}
 }
 
 do_compile() {
-oe_runmake
+        oe_runmake
 }
 
 do_install() {
-install -d ${D}${bindir}
-install -m 0755 your_application_executable ${D}${bindir}
+        install -d ${D}${bindir}
+        install -m 0755 your_application_executable ${D}${bindir}
 }
 
 ALLOW_EMPTY = ""
@@ -141,76 +58,18 @@ RDEPENDS_${PN} = "qt4-x11-free"
 FILES_${PN}  =  "${bindir}/your_application_executable"
 </pre>
 
-This assumes you have an svn server for your sources, if not, SRC_URI has to be modified. To point a directory local to the build host you may use
-
-SRC_URI=:///absolute_path_to/source_dir
-and
-S=${WORKDIR}/source_dir
-
-You have to make bitbake knows about your bb file, so edit the file fso/fso-unstable/conf/local.conf and add the following line:
-BBFILES += "/path/to/dir_containing_somename.bb/*.bb"
-
+This assumes you have an svn server for your sources, if not, SRC_URI has to be modified (TBD).
 You can now do:
-bitbake somename
+ bitbake path_to/myapplication.bb
 
 If it compiles fine, you'll find in the tmp/deploy/glibc/ipk/armv4t an ipk package of your application, you may copy it to the device and install usually with opkg.
 
 You may be able to use the FSO framework using the QT dbus module.
-
 =Developing for 2008.x=
 On 2008.x qt library is already shipped in /opt/Qtopia, but there is no staging files you may use to build application against it. This is in discussion, and actually you may use some workarounds.
 
-The first is bitbaking qt4-x11-free with the official [[Mokomakefile]], and proceed as on the FSO section, but you have to load the correct libraries with LD_LIBRARY_PATH before running your application.
+The first is bitbaking qt4-x11-free with the official [[Mokomakefile]], and proceed as on the FSO section, but you have to load the correct libraries with LD_LIBRARY_PATH befor running your application.
 
 The second is to use build tools in the work section of the oetree as they whould be in the staging area (TBD)
 
 To interact with the middleware you should use Qtopia library (note not qt library), but this is undocumented/untested/unconfirmed.
-=Native compilation=
-Native compilation is slow but possible.
-==Debian based==
-This is the fastest way to have a full development environment on the device
- apt-get install libqt4-dev build-essential
-
-==Gentoo==
- emerge qt
-but it's very slow, actually binary package cross compilation is not possible.
-==Openembedded based==
-The last time I tried that I was not able to found qmake/uic/moc for the target device, howewer it should be possible trying to unpack qt sources on the device and produce them manually.
-
-=Known issues=
-* on Angstrom/FSO there is no support for sqlite driver, this is discussed on openembedded-devel mailinglist.
-* on FSO aux/power button does not brings up keyPressed events, you have to use FSO dbus Event api
-* on illume if you open/close a dialog the parent window does not return in active state, this would be useful if you want to filter FSO dbus event api based on it (this has to be checked on other windows manager too)
-* with <=480 horizontal screen resolution QMessageBox::* has serious problems, stalling the calling application, reported to qt issue tracker
-* weird painting/font-rendering on ARM platform due to definition of qreal as float, this was signaled to trolltech, waiting for feedbacks
-=Tip and Tricks=
-==Window Managers==
-Here some tips for a good interaction with window managers.
-===Matchbox===
-With common matchbox configuration (e.g. Hackable:1) you'll have:
-* QMainWindow->show()/showMaximized will show them maximized with visible matchbox-panel
-* QMainWindow->showFullscreen() will show them fullscreen, with hided matchbox-panel
-* QDialog->show()/showFullScreen will be showed normally, centered and with a drag&close titlebar
-* QDialog->showMaximized() will be showed maximized and with titlebar, the last will cover matchbox-panel
-* QWidget's behaviour is the same of QMainWindow
-
-QDialog issues:
-* Creating an unparented QDialog will create an "always on top" window!, if you have a top level widget showed too and switch to another application, you cannot switch to it again until the QDialog is closed.
-
-''So, use always QMainWindow/QWidget for creating the main application form, use QDialog (always parented) for simple user interaction (yes/ok/no/close/messages etc.), and QWidget to show application subwindows and customized maximized dialogs.''
-
-''Use setWindowModality if you want to emulate a QDialog with a Top Level QWidget''
-===Illume===
-* QMainWindow/QDialog/QWidget->show()/showMaximized will show them maximized with visible illume top bar
-* QMainWindow/QDialog/QWidget->showFullscreen() will show them fullscreen, with hided illume top bar
-
-How to show not fullscreen QDialog (as on matchbox?)
-
-=News=
-
-* 16 October 2008, openembedded repository was updated, the preferred version of Qt in "openmoko" distro (used by fso) is 4.4.1
-* 16 October 2008, openembedded version bump from 4.4.1 to 4.4.3
-* 17 March 2009, qt 4.5.0 emerged fine on my gentooized freerunner :) this release is faster, let's wait for a bump version in [[openembedded]] too.
-
-[[Category:Application Developer]]
-[[Category:Qt based distributions]]
