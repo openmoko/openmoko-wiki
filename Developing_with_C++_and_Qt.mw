@@ -1,0 +1,75 @@
+{{note|This article is way to unify community experience, trip and ticks in order to develop C++ application based on the QT framework. It's actually incomplete and may be wrong in several parts, please fix and improve!}}
+=Introduction=
+extracted from wikipedia:
+
+''Qt is a cross-platform application development framework, widely used for the development of GUI programs, and also used for developing non-GUI programs such as console tools and servers. Qt is most notably used in KDE, Opera, Google Earth, Skype, Qtopia, Photoshop Elements, VirtualBox and OPIE. It is produced by the Norwegian company Trolltech. Nokia acquired Trolltech on January 28, 2008.''
+
+Applications using Qt should run on 2008.x, FSO/SHR, and Qtopia from Trolltech (on this firmware alternative widget toolkits, as gtk+,  actually do not work, as they need an X server). This make Qt a good choice to start developing new applications for the Openmoko world.
+
+=Developing with Trolltech/Qtopia=
+Trolltech provides goods SDK and documentation. You can download the official SDK  [http://sourceforge.net/project/downloading.php?groupname=qpe&filename=qtopia-ficgta01-sdk-4.3.2.iso&use_mirror=osdn].
+
+It's a vmware based virtual machine you can run with the free vmplayer. This is a ready to go solution.
+
+If you prefer to dirty your hands and to have a SDK on your host linux system, you may build your qtopia image, and SDK manually:
+
+TBD, actually refer to the excellent article at [http://sourceforge.net/project/downloading.php?groupname=qpe&filename=qtopia-ficgta01-sdk-4.3.2.iso&use_mirror=osdn]
+
+''n.b. this methods will build applications suitable only for the qtopia firmware''
+
+=Developing with FSO based images=
+You have to prepare an oe build tree using the makefile at http://downloads.freesmartphones.org, read [[Mokomakefile]] article for instruction. To build qt4-x11-free you may
+ cd /path_where_is_makefile/fso-unstable
+ . setup-env
+ bitbake qt4-x11-free
+
+After that you'll have staging qt arm library and x86 tools to build your application, so you'll have to create a somename.bb file.
+
+A simple skeleton may be:
+
+<pre>
+SECTION = "x11/libs"
+PRIORITY = "optional"
+HOMEPAGE = "http://yourproject.org"
+LICENSE = "GPL QPL"
+DEPENDS = "qt4x11"
+
+SRC_URI = "svn://your_svn_server/some_path;module=trunk;proto=https;rev=xxx"
+
+S = "${WORKDIR}/trunk"
+
+inherit qt4x11
+
+do_configure() {
+        ${OE_QMAKE_QMAKE}
+}
+
+do_compile() {
+        oe_runmake
+}
+
+do_install() {
+        install -d ${D}${bindir}
+        install -m 0755 your_application_executable ${D}${bindir}
+}
+
+ALLOW_EMPTY = ""
+RDEPENDS_${PN} = "qt4-x11-free"
+FILES_${PN}  =  "${bindir}/your_application_executable"
+</pre>
+
+This assumes you have an svn server for your sources, if not, SRC_URI has to be modified (TBD).
+You can now do:
+ bitbake path_to/myapplication.bb
+
+If it compiles fine, you'll find in the tmp/deploy/glibc/ipk/armv4t an ipk package of your application, you may copy it to the device and install usually with opkg.
+
+You may be able to use the FSO framework using the QT dbus module.
+=Developing for 2008.x=
+On 2008.x qt library is already shipped in /opt/Qtopia, but there is no staging files you may use to build application against it. This is in discussion, and actually you may use some workarounds.
+
+The first is bitbaking qt4-x11-free with the official [[Mokomakefile]], and proceed as on the FSO section, but you have to load the correct libraries with LD_LIBRARY_PATH befor running your application.
+
+The second is to use build tools in the work section of the oetree as they whould be in the staging area (TBD)
+
+To interact with the middleware you should use Qtopia library (note not qt library), but this is undocumented/untested/unconfirmed.
