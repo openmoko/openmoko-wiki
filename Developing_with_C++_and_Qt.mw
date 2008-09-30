@@ -18,12 +18,27 @@ TBD, actually refer to the excellent article at [http://sourceforge.net/project/
 ''n.b. this methods will build applications suitable only for the Qtopia firmware''
 
 =Developing with FSO based images=
-You have to prepare an oe build tree using the makefile at http://downloads.freesmartphone.org, read [[Mokomakefile]] article for instruction. To build qt4-x11-free you may
- cd /path_where_is_makefile/fso-unstable
+You have to prepare an oe build tree using the makefile at http://downloads.freesmartphone.org, read [[Mokomakefile]] article, install needed tools and type the following commands as a normal unprivileged user:
+
+ mkdir fso
+ cd fso
+ wget http://downloads.freesmartphone.org/Makefile
+ make setup
+ cd fso-unstable
+ make create-topdir
+
+now you have to comment the line:
+ PREFERRED_VERSION_qt4-x11-free ?= "4.3.3"
+in the file
+ openembedded/conf/distro/include/preferred-om-2008-versions.inc
+This is necessary to build qt 4.4.1 and to fix a problem in the oetree.
+ ''FIXME, is it possible to use a local .conf file to set a correct preferred version, but how unset it definitively?''
+
+You are now ready to build Qt by typing:
  . setup-env
  bitbake qt4-x11-free
 
-After that you'll have staging qt arm library and x86 tools to build your application, so you'll have to create a somename.bb file.
+After that you'll have staging Qt arm libraries and x86 tools to build your application, so you'll have to create a somename.bb file.
 
 A simple skeleton may be:
 
