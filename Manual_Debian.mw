@@ -312,28 +312,12 @@ We also need to change the symlink for the X server to either Xfbdev or Xglamo (
  cd /usr/bin && mv X X.orig && ln -s Xfbdev X
 (replace Xfbdev by Xglamo if you want to use that, Xglamo is faster, but rotation still does not work correctly as of 2008-08-12).
 
-=GPS=
-
-Install gpsd and an application like [[TangoGPS]] on Debian:
-
- (as root)
- apt-get install gpsd
- apt-get install tangogps
-
-Unlike on OM 2008.8 the serial port for gps is not /dev/ttySAC1 but /dev/s3c2410_serial1. 
-The best way to set up gpsd on Debian is to use dpkg-reconfigure:
- dpkg-reconfigure gpsd
-Now use the parameters:
- Start gpsd automatically on boot? Yes
- Device the GPS receiver is attached to: /dev/s3c2410_serial1
- Should gpsd handle attached USB GPS receivers automatically? No
- Options to gpsd: (leave empty, just hit return)
+= GPS =
+{{main|TangoGPS}}
 
 Test the serial connection to the GPS chip:
- echo 0 > /sys/class/i2c-adapter/i2c-0/0-0073/neo1973-pm-gps.0/pwron &&  sleep 1s && echo 1 > /sys/class/i2c-adapter/i2c-0/0-0073/neo1973-pm-gps.0/pwron && stty -F /dev/s3c2410_serial1 -echo && cat -u /dev/s3c2410_serial1 | grep -v ^$
+ echo 0 > /sys/class/i2c-adapter/i2c-0/0-0073/neo1973-pm-gps.0/pwron &&  sleep 1s && echo 1 > /sys/class/i2c-adapter/i2c-0/0-0073/neo1973-pm-gps.0/pwron && stty -F /dev/s3c2410_serial1 -echo && cat /dev/s3c2410_serial1 | grep -v ^$
  (Finish testing with ctrl-c)
-Now you should be able to start tangogps from the X-mouse start menu:
- Start > other > GPS & Map
 
 =Official Debian Port=
 
