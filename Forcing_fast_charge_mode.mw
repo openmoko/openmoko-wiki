@@ -56,4 +56,42 @@ To enable fast 1000 mA charge "touch /home/root/allow_force_1000" I don't recomm
 
 [[Special:Emailuser/Beni|Beni]] wrote a small shellscript providing status output and the ability to change charge settings. Just download the script and execute it. You can fetch it here: http://beni.skyforcesystems.de/openmoko/fast_charge_gta02.sh
 
+== The checkFastCharge.py daemon ==
+
+=== What it does ===
+Your neo will detect when it is charging slowly and pop up a gui to ask if you want to switch to fast charge mode.  It will take a few seconds to detect that you are charging slowly.
+
+'''This will not work for the FreeRunner.  Andy Green has a patch to give the FreeRunner the needed functionality, then I'll need to update my script after that becomes available.'''
+
+=== Details ===
+checkFastCharge will remember if you select slow charge and not ask you again.  If you accidentally selected slow charge, unplug the neo from the charger for several seconds, then plug it back in.  Next time the script checks, it will ask again if you want slow or fast charge.
+
+When you select fast charge, the script goes through a confirmation sequence, because fast charge can be dangerous for your hardware if the charger doesn't support 500 mA or more.  Just click 'Confirm' four times to confirm that you want to go into fast charge mode.
+
+=== Install as a daemon ===
+On your neo, with an internet connection available:
+
+# cd /
+# wget http://static.frimp.net/neo/checkFastCharge.tgz
+# tar xzf checkFastCharge.tgz
+# cfc-inst
+# /etc/init.d/checkFastCharge start
+
+(The above just creates /home/root/bin/checkFastCharge.py, /etc/init.d/checkFastCharge, and the links to make checkFastCharge start up automatically when the neo reboots.)
+
+=== Just install the script ===
+If you want to run checkFastCharge manually, without the /etc/init.d script...
+
+# [http://static.frimp.net/neo/checkFastCharge.tgz Download the tgz]
+# extract checkFastCharge.py from the tgz to somewhere on your path
+
+I'll package this up into an ipkg with an /etc/init.d and a startup script when I get the time...
+
+=== Options ===
+Options are only available if you run the script manually, rather than through /etc/init.d
+
+* -f means start up even if the script thinks another instance is running
+* -d means check every few seconds for slow charge (without this flag it just checks once immediately)
+* -q means don't print out messages on the terminal about what the script is doing
+
 [[Category:Battery]]
