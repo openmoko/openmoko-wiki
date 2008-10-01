@@ -20,7 +20,18 @@ http://www.angstrom-distribution.org/repo/?pkgname=gsm0710muxd
 
 Make sure that you install the armv4t versions of all packages.
 
-The [[#Some APN names for reference|APN Reference]] table may come in handy when you are looking for the required network specific information.
+The most important step after installing gsm0710muxd is to tell QPE to use the MUX instead of the device directly.  If you follow the instructions in the link above, there is a step that replaces the 89qtopia init script with one from their script package.  The key difference is the addition of the following lines that tells QPE to use the MUX:
+
+in /etc/X11/Xsession.d/89qtopia
+
+  identvar=$(date +%s)
+  ptsvar=$(dbus-send --system --print-reply --type=method_call --dest=org.pyneo.muxer /org/pyneo/Muxer 
+  org.freesmartphone.GSM.MUX.AllocChannel string:$identvar | grep 
+  string | awk -F '"' '{ print $2 }')
+  export QTOPIA_PHONE_DEVICE=$ptsvar
+
+
+The [[#Some APN names for reference|APN Reference]] table may come in handy when you are looking for the required network specific information for the other scripts.
 
 Once you follow through with all the instructions, you will notice that the "Services" GUI will crash.  This has to do with this bug: http://docs.openmoko.org/trac/ticket/1718
 
