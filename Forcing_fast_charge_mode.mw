@@ -1,6 +1,6 @@
 This page is intended to consolidate the information about forcing fast charge mode on the Neos.
 
-=== Why this may be necessary ===
+== Why this may be necessary ==
 
 By default, the Neos will only draw 100 mA of power from a USB connection.  
 
@@ -10,22 +10,10 @@ If the [[USB charger]] used is not properly signaling the phone its capacity to 
 
 This switch is important, since the Neo almost always draws more than 100 mA to operate (I believe even while it's turned off, since the GSM stays powered up by default), so the battery will actually go dead while the Neo is charging!
 
-=== Neo 1973 ===
+== Neo FreeRunner ==
 
-
-There are several ways of forcing fast charge mode:
-
-* From a terminal or ssh session, execute 'echo -n "fast_cccv" > /sys/devices/platform/s3c2410-i2c/i2c-adapter/i2c-0/0-0008/chgmode'
-* To add a uboot menu entry, see [[Bootloader_commands#Forcing_fast_charge|Bootloader commands]]
-
-User:Wurp has written a python script to monitor for slow charge and automatically pop up a gui asking if you want to switch to fast charge, see next CheckFastrCharge.py below.
-
-=== Neo FreeRunner ===
-
-The behaviour is pretty much the same as described above for the Noe 1973. There's also a 1000 mA mode for the Openmoko-provided wall charger. Please note, that the sys-fs path changed slightly. It is now /sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/
+The behaviour is pretty much the same as described below for the Neo 1973. There's also a 1000 mA mode for the Openmoko-provided wall charger. Please note, that the sys-fs path changed slightly. It is now /sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/
 .
-
-==== Using a script ====
 
 See 
 [[GTA02_sysfs#.2Fsys.2Fdevices.2Fplatform.2Fs3c2440-i2c.2Fi2c-adapter.2Fi2c-0.2F0-0073.2Fforce_usb_limit_dangerous| the GTA02 sysfs]] page for a description of how to set/get the bit controlling power charge from the FR. What you want to do is something like this:
@@ -33,11 +21,12 @@ See
  echo 500 > /sys/class/i2c-adapter/i2c-0/0-0073/force_usb_limit_dangerous
  cat /sys/class/i2c-adapter/i2c-0/0-0073/usb_curlim
 
+=== The battery package ===
 Here's a nicely packaged battery level and charge state script
 
 http://hdr.meetr.de/neo/openmoko/battery/battery_0.20080721_armv4t.ipk
 
-'''or''' 
+=== Nytowl's power center ===
 
 [[User:Nytowl]] wrote a python script to control the fast charge states : ''Power Center''.  
 
@@ -51,19 +40,28 @@ To enable fast 500 mA charge "touch /home/root/allow_force_500"
 
 To enable fast 1000 mA charge "touch /home/root/allow_force_1000" I don't recommend using this one 
 
-'''or (2nd)'''
+=== Beni's fast_charge_gta02.sh ===
 
 [[Special:Emailuser/Beni|Beni]] wrote a small shellscript providing status output and the ability to change charge settings. Just download the script and execute it. You can fetch it here: http://beni.skyforcesystems.de/openmoko/fast_charge_gta02.sh
 
-'''or (3rd)'''
+=== batmon.py ===
 
 This battery monitor [http://tehinterweb.com/freerunner/batmon/ batmon.py] can force fast-charge mode.
 
-'''or (4th)'''
+=== The Battery project ===
 
 See this other [http://projects.openmoko.org/projects/battery/ Battery] project on the forge.
 
-== The checkFastCharge.py daemon ==
+== Neo 1973 and the checkFastCharge.py daemon ==
+
+There are several ways of forcing fast charge mode:
+
+* From a terminal or ssh session, execute '
+ echo -n "fast_cccv" > /sys/devices/platform/s3c2410-i2c/i2c-adapter/i2c-0/0-0008/chgmode'
+
+* To add a uboot menu entry, see [[Bootloader_commands#Forcing_fast_charge|Bootloader commands]]
+
+* Use a script. User:Wurp has written a python script to monitor for slow charge and automatically pop up a gui asking if you want to switch to fast charge, see next CheckFastrCharge.py below.
 
 === What it does ===
 Your neo will detect when it is charging slowly and pop up a gui to ask if you want to switch to fast charge mode.  It will take a few seconds to detect that you are charging slowly.
