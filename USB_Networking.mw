@@ -441,6 +441,30 @@ Set /etc/sysconfig/network-scripts/ifdown-usb:
 If you are using NetworkManager, restart it and enable the usb device from its menu, otherwise it will disable your connection shortly after you enable it.
 
  /sbin/service NetworkManager restart
+=== Option C - tested on F9 ===
+Plug in the usb cable. NetworkManager should detect the phone automatically but you should ignore it.
+Open Network Configuration tool (System -> Administration -> Network) and perform following steps:
+# Click '''New''' button on top bar
+# Click '''Forward''' 
+# Select OpenMoko from device list
+# Click '''Forward'''
+# Select 'Statically set IP address:' and enter address: 192.168.0.200, netmask 255.255.255.0. Leave gateway empty.
+# Click '''Forward'''
+# Click '''Apply''' to close add dialog
+# Select newly added usb0 device from the device list.
+# Click '''Edit''' button on top bar
+# You might want to remove a tick from 'Activate device when computer starts' check box.
+# Select '''Route''' tab
+# Click '''Add...''' to open add / edit dialog
+# Enter address: 192.168.0.202, netmask: 255.255.255.255 and gateway: 192.168.0.200.
+# Click '''Ok''' to close add / edit dialog dialog.
+# Click '''Ok''' to close window  dialog.
+Save settings and close the window.
+
+To setup usb0 network settings type:
+ # ifdown usb0
+ # ifup usb0
+The first command will remove any existing settings given by the NetworkManager and second command brings the device up with appropriate settings.
 
 == Red Hat or Similar (tested with Workstation 5) ==
 
