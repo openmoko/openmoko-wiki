@@ -448,23 +448,26 @@ Open Network Configuration tool (System -> Administration -> Network) and perfor
 # Click '''Forward''' 
 # Select OpenMoko from device list
 # Click '''Forward'''
-# Select 'Statically set IP address:' and enter address: 192.168.0.200, netmask 255.255.255.0. Leave gateway empty.
+# Select 'Statically set IP address:' and enter address: 192.168.0.200, netmask 255.255.255.0 (or use 255.255.255.240 if you want only route ip range 192.168.0.192-192.168.0.207). Leave gateway empty.
 # Click '''Forward'''
 # Click '''Apply''' to close add dialog
 # Select newly added usb0 device from the device list.
 # Click '''Edit''' button on top bar
 # You might want to remove a tick from 'Activate device when computer starts' check box.
-# Select '''Route''' tab
-# Click '''Add...''' to open add / edit dialog
-# Enter address: 192.168.0.202, netmask: 255.255.255.255 and gateway: 192.168.0.200.
-# Click '''Ok''' to close add / edit dialog dialog.
 # Click '''Ok''' to close window  dialog.
 Save settings and close the window.
 
-To setup usb0 network settings type:
+Open Firewall Configuration (System -> Administration -> Firewall) and enable masquerading:
+# Select '''Masquerading''' from left panel
+# Check device(s) which you'd like to share internet connection. Typically eth0 or wlan0.
+# Click '''Apply''' and close application
+
+Open terminal and perform (as root user):
  # ifdown usb0
  # ifup usb0
 The first command will remove any existing settings given by the NetworkManager and second command brings the device up with appropriate settings.
+
+From OpenMoko you should be able to ping e.g. 74.125.39.99 [www.google.com]. Setup /etc/resolv.conf and you should have full internet access.
 
 == Red Hat or Similar (tested with Workstation 5) ==
 
