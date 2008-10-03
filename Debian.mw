@@ -252,11 +252,13 @@ The above hack works, but you lose the ability to put FR in suspend mode by pres
 
 2. Install sudo package, put username in sudo group with usermod -G sudo username. This allows pre-specified users to temporarily gain superuser (root) access to the system, to allow system settings to be changed/software to be installed by normal users
 
-3. Uncomment the line "%sudo ALL=NOPASSWD: ALL" in /etc/sudoers. What does this do, exactly? It looks like it's allowing critical changes without entering a password. is that a good idea?
+3. Uncomment the line "%sudo ALL=NOPASSWD: ALL" in /etc/sudoers. This allows anyone in the '''group''' sudo (which was just added to the user in step 2) the ability to use sudo to become root without a password.
 
-4. Finally change the line  os.system( "apm -s" ) in /usr/bin/zhone to  os.system( "sudo apm -s" ). What does this do, is it to allow a standard user to suspend the phone? Can it be done without giving all users root access to the phone? it's kind of hacky and insecure.
+4. Finally change the line  os.system( "apm -s" ) in /usr/bin/zhone to  os.system( "sudo apm -s" ). This allows the user running the X session on display the chance to suspend the phone. 
 
-this looks great, much better than the way described above. it would be a lot more useful though, if someone could explain what each step does. thanks
+ALTERNATIVE: You could skip steps 2 through 4, and just do the following commands:
+chown root.staff /usr/sbin/apm ; chmod u+s g+x /usr/bin/apm ; usermod -G staff username
+This would allow staff group members to suspend without giving them system wide root privs.  But honestly... It's a phone. Are you giving out user accounts to your phone?
 
 == Sound ==
 Make sure to put your user in the audio group ("adduser <username> audio").
