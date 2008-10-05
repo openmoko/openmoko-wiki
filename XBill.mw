@@ -1,0 +1,66 @@
+[[Image:Xbill.png|right|thumb|150px|XBill on Om 2008.8.]]
+{{Application|XBill}}
+
+The classical game: You're a sysadmin, and someone's trying to destroy your computers. The little people running around the screen are trying to infect your computers with Wingdows [TM], a virus cleverly designed to resemble a popular operating system.
+
+== Installing ==
+
+Using [[Toolchain]] you can compile XBill from the official source code. Make sure you do NOT have a "gtk-config" in your path on your host OS while compiling, otherwise that will add the GTK include paths of your PC and linking will fail.
+
+Get the source:
+
+ wget http://www.xbill.org/download/xbill-2.1.tar.gz
+ tar -xzvf xbill-2.1
+
+Compile with your Toolchain tools, this will install the required Athena library into your Toolchain setup.
+
+ mypc$ . setup-env
+ mypc$ opkg-target install libxaw
+ mypc$ om-conf --enable-athena
+ mypc$ cd xbill-2.1
+ mypc$ make
+
+On Openmoko you need Athena again and a directory for XBill pixmaps:
+
+ om-gta02$ opkg install libxaw
+ om-gta02$ mkdir /usr/share/xbill
+ 
+Copy to your Openmoko:
+
+ mypc$ scp xbill root@192.168.0.202:/usr/bin
+ mypc$ scp -r pixmaps root@192.168.0.202:/usr/share/xbill
+ mypc$ scp -r bitmaps root@192.168.0.202:/usr/share/xbill
+
+== Desktop icon ==
+
+Here is an example desktop entry. Create a file called "/usr/share/applications/xbill.desktop" with content:
+
+<pre>
+[Desktop Entry]
+Version=2.1
+Type=Application
+Encoding=UTF-8
+Name=XBill
+Comment=XBill
+Exec=/usr/bin/xbill
+Icon=drm/Drm.png
+Categories=Application;Games
+Terminal=false
+</pre>
+
+== Further improvements ==
+
+Building against GTK+ would be cool. You could try ''om-conf --enable-gtk'', but ./configure will either unable to find ''gtk-config'' or it will use the host OS ''gtk-config'', so it won't work. Please extend this documentation if you know how to build against GTK+.
+
+Please send comments or questions about this installation guide to [[:User:Kempelen]].
+
+<onlyinclude>
+{{ApplicationBox|
+  Name=[[XBill]]|
+  Description=Save your computers from Wingdows.|
+  Screenshot=Xbill.png|
+  Homepage=http://www.xbill.org|
+  TestedOn=Om 2008.8|
+  PackageName=-
+}}
+</onlyinclude>
