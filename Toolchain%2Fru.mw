@@ -1,37 +1,37 @@
 {{Languages|Toolchain}}
 
 
-= Введение =
+= Introduction =
 
-toolchain это набор инструментов необходимых для создания кода. Для Openmoko мы предлагаем различные варианты для следующих целей использования:
+A toolchain is a set of tools that allows you to compile code. For Openmoko, we have to differentiate between the following use-cases:
 
-;(a) Разработка одиночных приложений
-:Для этого, мы можете использовать подготовленный toolchain из Openmoko проекта. На этой странице вы можете найти рецепт как начать с этим toolchain и пошагам собрать ваш проект и запустить на нужном устройстве. (You might have heard about ''OpenEmbedded'', однако разработчик приложений , вы should '''не''' можете использовать OpenEmbedded.)
-;(b) Системный интегратор и настройщик дистрибутива
-:Для этой задачи, вы должны использовать [[OpenEmbedded]] с сборкой этого на вашем кросс-компиляторе during the bootstrapping/build процесс. Системный интегратор и настройщик дистрибутива не должен использовать эту страницу.
+;(a) Developing a single application
+:For this, you should use a prebuilt toolchain from the Openmoko project. On this page you can find a recipe to get started with this toolchain leading you through a series of steps to compile a project and run it on your target device. (You might have heard about ''OpenEmbedded'', however as an application programmer, you should '''not''' be using OpenEmbedded.)
+;(b) System Integration and customizing a distribution
+:For this task, you should use [[OpenEmbedded]] which builds its own cross compiler during the bootstrapping/build process. System Integration and customizing a distribution is out of scope of this page.
 
-=Основы использования toolchain=
+=Basic toolchain usage=
 
-==Что необходимо==
+==Prerequisites==
 
 You should be reasonably familiar with Linux and its command line tools, have an x86-compatible computer with at least 1G of free disk space. You should have experience with compiling programs from source using your local compiler. The remainder of this document will also assume you have write access in your home directory (~) and <tt>/usr/local/</tt> (becoming root if needed). If any of this is not the case, please call your local administrator for help.
 
 Last but not least you should have a working setup that allows you to compile native software packages using the autotools build system (the triade of '''./configure, make, make install''').
 
-Частичный список необходимых пакетов -- пожалуйста добавьте если нехватает:
+A (partial) list of required packages -- please append as necessary:
 
-* Для большинства версий Linux вам необходимо установить следующие пакеты
+* For most Linux version you might only need to install the packages
 ** autoconf, automake
 ** binutils, gcc, gcc-c++
 ** libtool
 ** ccache
 ** intltool
 
-* Для Ubuntu 8.04 ( Предыдущая версия не поддерживает libmokoui2 ) необходимы пакеты:
+* For Ubuntu 8.04 ( Previous versions don't support libmokoui2 ) the following is required:
  sudo apt-get install gcc g++ autoconf automake binutils libtool libglib2.0-dev \
  ccache libxrender-dev intltool libmokoui2-dev libgconf2-dev mtools fakeroot alien check
 
-* Для Ubuntu 8.10 так же будут нужны дополнительные пакеты:
+* For Ubuntu 8.10 the following is additionally required, install also those above:
  sudo apt-get install uboot-mkimage
 
 * For Fedora-Core the following is required, while logged in as <tt>root</tt>:
@@ -39,70 +39,46 @@ Last but not least you should have a working setup that allows you to compile na
  ccache libXrender-devel intltool GConf2-devel mtools gettext-devel
 Fedora-Core does not appear to have <tt>libmokoui2</tt> available.
 
-==Скачивание и установка==
+==Downloading and installing==
 
--= 2008.9=- черновик
-
- There is a fresh meta-toolchain.
-
-
-        # checkout the source code
-        $cd /tmp
-        $svn checkout http://om-assassin.googlecode.com/svn/trunk assassin
-        $cd assassin
-
-        # Build !
-        $./autogen.sh --host=arm-angstrom-linux-gnueabi
-        $ file src/assassin
-        src/assassin: ELF 32-bit LSB executable, ARM, version 1 (SYSV), for GNU/Linux 2.6.14, dynamically linked (uses shared libs), not stripped
-
-
-        if you got some message when do configure, like this
-
-        No package 'edje' found
-
-        you can try "opkg-target list |grep edje |grep dev" to find out
-        what package you should install.
-
-
-{{Note|If you wish to improve an existing Openmoko application and you are running Debian or Ubuntu i386 (тоесть можете установить с .deb), you may wish to skip the below and instead use:
+{{Note|If you wish to improve an existing Openmoko application and you are running Debian or Ubuntu i386 (i.e. you can install a .deb), you may wish to skip the below and instead use:
 [http://andreasdalsgaard.blogspot.com/2008/07/openmoko-development-in-5-minutes.html Openmoko application development in 5 minutes] by Andreas Dalsgaard. (based on the 2007.2 stack)}}
 
-Подготовленный toolchains можно скачать с  [http://downloads.openmoko.org/toolchains downloads.openmoko.org]:
+The prebuilt toolchain can be downloaded from [http://downloads.openmoko.org/toolchains downloads.openmoko.org]:
 
-* Создание папки где будут исходники:
+* Creating a destination directory can be anywhere, but for example:
 
   mkdir ~/sources
   cd ~/sources
 
-* В зависимости от вашего процессора(x86_64 или i686) скачиваем пакет с настройками:
+* Depending on your CPU type (x86_64 or i686) download the proper package:
 
-  wget http://downloads.openmoko.org/developer/toolchains/openmoko-x86_64-arm-linux-gnueabi-toolchain.tar.bz2
- или
-  wget http://downloads.openmoko.org/developer/toolchains/openmoko-i686-arm-linux-gnueabi-toolchain.tar.bz2
+  wget http://downloads.openmoko.org/toolchains/openmoko-x86_64-arm-linux-gnueabi-toolchain.tar.bz2
+ or
+  wget http://downloads.openmoko.org/toolchains/openmoko-i686-arm-linux-gnueabi-toolchain.tar.bz2
 
-{{Note|Часть людей имеют проблемы с toolchain сборка 20080521.  Если есть ошибки, то попробуйте другие версии,}}
+{{Note|Several people have had problems with the latest toolchain built 20080521.  If you experience errors, try an older version. (as of July 23, 2008)}}
 
-Далее, вы должны это распаковать это в вашу файловую систему. Этот toolchain ''не'' переносимый, и должен быть распакован строго в <tt>/usr/local/openmoko/</tt>.
-Теперь вы можете получить следующии опции:
+Next, you want to extract it on your filesystem. This toolchain is ''not'' relocatable, it needs to be installed into <tt>/usr/local/openmoko/</tt>.
+Now you have the following options:
 
-* Распаковать напрямую имея права рута, используйте команду "su" вначале(или префикс "sudo" перед командой tar для пользователей Debian/Ubuntu):
+* Extract it directly as root, so use command "su" first (or prefix the tar command with "sudo" when you are using Debian/Ubuntu):
 
    cd /
    tar -xjvf ~/sources/openmoko-XYZ-arm-linux-gnueabi-toolchain.tar.bz2
 
-* На системах основанных на Debian(например Ubuntu), вы может использовать alien(+fakeroot) для простого создания easy-to-uninstall пакета из текущего .tar.bz2:
+* On Debian-based systems (e.g. Ubuntu), you can use alien(+fakeroot) to create an easy-to-uninstall package from this .tar.bz2:
 
    bunzip2 openmoko-*-arm-linux-gnueabi-toolchain.tar.bz2
    gzip openmoko-*-arm-linux-gnueabi-toolchain.tar
    fakeroot alien -d openmoko-*-arm-linux-gnueabi-toolchain.tar.gz
    sudo dpkg -i openmoko_*-arm-linux-gnueabi-toolchain*.deb
-
-* Готовый toolchain это для x86_64 или i686. Если вы хотите, you could build it on your own with OE:
+http://wiki.openmoko.org/index.php?title=Toolchain&action=submit
+* The prebuilt toolchain is for x86_64 or i686. If you wanted, you could build it on your own with OE:
 
    bitbake meta-toolchain-openmoko
 
-В конце, каждый раз когда вы будете использовать этот toolchain, Вам енобходимо настроить переменные окружения, чтобы инструменты были найдены. The toolchain provides a script to do that, so the only thing you need to do is to [http://learnlinux.tsf.org.za/courses/build/shell-scripting/ch10s02.html source] it.
+Finally, everytime you want to use this toolchain, you need to alter some environment variables, so that your tools will be found. The toolchain provides a script to do that, so the only thing you need to do is to [http://learnlinux.tsf.org.za/courses/build/shell-scripting/ch10s02.html source] it.
 Note that if you are not using a "sh" or "bash" shell (check with "echo $SHELL") that you need
 to start "sh" or "bash" first.
 
@@ -112,102 +88,101 @@ to start "sh" or "bash" first.
  export PATH=$PATH:/usr/local/openmoko/arm/bin 
 Note: This is will only last for your current session. Add it to your shell startup scripts to make it permenant (~/.bashrc for instance).
 
-==Установка новых библиотек==
+==Installing New Libraries==
 
-В Openmoko toolchain по умолчанию отсутствуют многие библиотеки. Однако, с его помощью вы можете скачать и установить библиотеки, которые уже существуют в репозитарии Openmoko. (По умолчанию обращение происходит к [http://downloads.openmoko.org/repository/testing/ Тестовому Репозитарию].)
+Openmoko toolchain didn't include many libraries in default. However, it can download and install library what has already existed in Openmoko repository. (It refer to [http://downloads.openmoko.org/repository/testing/ Testing Repository] by default.)
 
-*Перед тем как скачивать библиотеки, необходимо изменить некоторые переменные окружения.
- . /usr/local/openmoko/arm/environment-setup
+*You need to alter some environment variables before you download libraries.
+  . /usr/local/openmoko/arm/environment-setup
 
-*Во-первых, обновите базу данных opkg (Обратите внимание на необходимость использования псевдонима '''opkg-target''' вместо '''opkg''')
+*First, update the opkg database (Notice, you should use alias '''opkg-target''' but not '''opkg''')
  opkg-target update
 
-*Во-вторых, выберите какой из пакетов вам необходим. Для примера возьмем edje. Если вы хотите разрабатывать проект, который использует edje из Enlightenment, то вы можете использовать '''opkg-target list''' для того чтобы вывести на экране список всех пакетов, которые можно установить. Конечно жн, команда '''grep''' сильно облегчит задачу. (Помните, вам нужно установить еще и -dev пакет а не только libedje.)
+*Second, select a package what you want. Let's use edje as an example. If you want develop an project which use edje of Enlightenment, you can use '''opkg-target list''' to print out how many packages you can have. Of course, command '''grep''' will help you a lot.(Remember, you should install -dev package but not only libedje.)
  opkg-target list |grep edje-dev
 
-*В третьих, проинсталлируйте все что нужно
+*Third, install it
  opkg-target install libedje-dev
+*Fourth, have a cup of coffee and wait.
 
-*В четвертых, приготовьте чашечку кофе и запаситесь терпением.
+==Building a sample project==
 
-==Создаем пробный проект==
+In a chosen destination directory (in this example ~/):
 
-В целевом каталоге (в этом примере ~/) необходимо проделать следующие действия:
-
-* Скопировать предварительно скачанные исходники пробного проекта:
+* copy the downloaded sample application source:
 
  cp -r /usr/local/openmoko/source/openmoko-sample2 ~/
 
-* Не забыть установить правильные переменные openmoko-окружения (опять же, в "sh" или "bash"):
+* Remember to set the proper environment variables (again with "sh" or "bash") for openmoko:
 
  . /usr/local/openmoko/arm/setup-env
 
-* Создать сборочную конфигурацию для нашего приложения. Это действие, одновременно, проверяет все ли необходимые библиотеки, утилиты и т.д. доступны в вашей системе. Если это не срабатывает, смотрите указания по поводу необходимых пакетов в разделе [[#Что необходимо|"#Что необходимо"]] выше.
+* You need to create a build configuration for this application. This also checks if all needed libraries, tools, etc.. is available on your system. If this fails see the notes about the needed packages in the section "Prerequisites" mentioned earlier.
 
  om-conf openmoko-sample2
 
-* По желанию, на данном этапе вы можете внести изменения в исходный код в openmoko-sample2/src.  Перед следующим шагом, перейдите в каталог с примером.
+* Optionally now you can modify the source code in openmoko-sample2/src.  Before the next step, go into the sample directory.
 
  cd openmoko-sample2
 
-* Если вы используете старую версию toolchain, вам может понадобиться создать makefile при помощи "./autogen.sh".  В противном случае, чтобы собрать приложение из исходного кода, просто наберите:
+* If you are using an older version of the toolchain, you may have to create the makefile by running "./autogen.sh".  Otherwise, to build the application from the source code just type:
 
  make
 
-* Если есть ошибки (например "You need to install gnome-common from the GNOME CVS") устраните их.  Смотрите также раздел [[#Troubleshooting|"Troubleshooting"]] в конце этой страницы для ознакомления с известными проблемами.
+* If there are errors (i.e. "You need to install gnome-common from the GNOME CVS") deal with them.  Also see "Troubleshooting" section at the end of this page for known issues.
 
 
-Если вы хотите оставить данный проект в системе для последующего использования в качестве, например, разделяемой библиотеки, вы можете выполнить следующие шаги, которые установят его по соответствующим путям с заданным конфигурационным префиксом.
+If you want to install this project on host for staging usage later, a shared library, for example, you can do the following to install it into a given configured prefix.
  om-conf --prefix=/usr/local/openmoko openmoko-sample2
  cd openmoko-sample2
  make install
 
-==Как из пробного проекта создать свой собственный==
+==How to create your own project from the sample project==
 
-Чтобы собрать собственный проект используя файлы из openmoko-sample2, в них нужно внести некоторые изменения:
+In order to build your own project by using openmoko-sample2 files, some changes are needed:
 
-* скопируйте исходный код пробного проекта, который вы скачали
+* copy the downloaded sample application source
 
  cp -r /usr/local/openmoko/source/openmoko-sample2 ~/
-
-* дайте каталогу имя вашего проекта (в этом примере: your-project-name) и удалите старые файлы с исходным текстом
+ 
+* rename the folder with the name of your project (in this example your-project-name) and delete old sample files 
 
  mv openmoko-sample2 your-project-name
  cd your-project-name
  cd src
  rm *.c
 
-* скопируйте ваши исходники (в этом примере: your-sources) в каталог src/
+* copy your sources (in this example your-sources) into src/
 
  cp your-sources .
  cd ..
 
-* теперь в основном каталоге отредактируйте autogen.sh, исправив в нем следующие строки
+* now in the main folder modify autogen.sh by updating the following lines
 
  PKG_NAME="your-project-name"
 
-* отредактируйте configure.ac, исправив в нем следующие строки ('main.c' должен быть главным файлом вашего проекта)
+* modify configure.ac by updating the following lines ('main.c' should be the main file in your project)
 
- AC_INIT(your-project-name, 0.0.1, http://www.openmoko.org/)
+ AC_INIT(your-project-name, 0.0.1, http://www.openmoko.org/)    
  AC_CONFIG_SRCDIR(src/main.c)
 
-* перейдите в каталог data/ и дайте этим файлам имя вашего проекта
+* go into data/ folder and rename these files with the name of your project
 
  cd data
  mv openmoko-sample.png your-project-name.png
  mv openmoko-sample.desktop your-project-name.desktop
 
-* отредактируйте Makefile.am в каталоге data/, исправив в нем следующие строки
+* modify Makefile.am inside data/ by updating the following lines
 
  dist_desktop_DATA = your-project-name.desktop
  dist_appicon_DATA = your-project-name.png
 
-* отредактируйте Makefile.in в каталоге data/, исправив в нем следующие строки
-
+* modify Makefile.in inside data/ by updating the following lines
+ 
  dist_desktop_DATA = your-project-name.desktop
  dist_appicon_DATA = your-project-name.png
 
-* отредактируйте your-project-name.desktop, исправив в нем следующие строки
+* modify your-project-name.desktop by updating the following lines
 
  Name=your-project-name
  Encoding=UTF-8
@@ -215,42 +190,43 @@ Note: This is will only last for your current session. Add it to your shell star
  Type=Application
  Exec=your-project-name
 
-* и добавьте в него такую строку
+* and by adding the following line
 
  Icon=your-project-name
 
-* перейдите в каталог src/
+* move into src/ folder
 
  cd ..
  cd src
 
-* отредактируйте Makefile.am,  исправив в нем следующие строки
+* modify Makefile.am by updating the following lines
 
- bin_PROGRAMS = your-project-name
- your_project_name_SOURCES = \
- main.c
+ bin_PROGRAMS = your-project-name	
+ your_project_name_SOURCES = \				
+  		main.c 
  your_project_name_LDADD  = @DEPENDENCIES_LIBS@
 
-* убедитесь в том, что вместо main.c подставлены все ваши .c и .h файлы, а все символы '-' в именах переменных заменены на '_'
+* be sure to put instead of main.c all your .c and .h files and modify all the '-' characters with '_' in the variable names
 
-==Создание пакета с вашим приложением==
+==Packaging your application==
 
-Скрипт для создания ipkg-пакета из вашего приложения включен в состав toolchain. Отметим, что его использование не обязательно для тестирования вашго приложения (для этого вы просто можете скопировать необходимые данные и бинарники на Neo при помощи scp), тем не менее, этот скрипт очень удобен, если вы собираетесь поделиться вашим приложением с другими пользователями.
+We have included a script to make an ipkg out of your application. Note that this is not needed to test your application on the Neo (for that you can just scp the resulting binary and data over), however it's very handy if you want to distribute your application to others.
 
  om-make-ipkg openmoko-sample2
 
-Теперь у вас есть пакет openmoko-sample2_0.1_armv4t.ipk , можно скопировать его на Neo при помощи `scp', а потом установить:
+Now you got openmoko-sample2_0.1_armv4t.ipk , you can `scp' it to your
+Neo and install it:
 
  scp openmoko-sample2_0.1_armv4t.ipk root@192.168.0.202:
  ssh root@192.168.0.202 opkg install openmoko-sample2_0.1_armv4t.ipk
 
-Обратите внимание, что хотя вы и можете распространять сгенерированный ipkg-пакет, он, в сущности, - всего-лишь голый костяк, не содержащий никакой дополнительной информации, такой как, например, библиотечные зависимости. Ниже описано как это исправить.
+Note that while you can redistribute the generated ipkg, be aware that this is a bare-bones ipk that contains no further information, i.e. you will lack library dependencies. See below how to fix this.
 
-Информацию о версии приложения, описание, имя автора и контактнуя информацию вы можете добавить в control-файл:
+You can also supply the version number, a description, and an author / contacts string in a control file:
 
  om-make-ipkg myapp myapp_control
 
-Шаблон для файла myapp_control:
+A template of myapp_control:
 
  Package: $appname
  Version: 0.1
@@ -260,19 +236,19 @@ Note: This is will only last for your current session. Add it to your shell star
  Maintainer: $USER
  Architecture: armv4t
  Homepage: http://www.openmoko.org/
- Depends:
+ Depends: 
  Source: ${SRC}
 
-==Что делать дальше==
+==Where to go from here==
 
-Использование внешнего toolchain - это простой способ сборки приложений для вашего Neo. Если вы уже ознакомились с этой процедурой, возможно вы захотите разобраться с
-* Использованием [[Qemu]] для тестирования приложений в режиме эмуляции
-** Пользователи Ubuntu возможно предпочтут обратиться к [[Automatic emulation in Ubuntu/ru]]
-* Использованием [[Host-based_development_with_Xoo_and_Xephyr|host-based development/ru]] для повышения вашей продуктивности
-* Использованием [[OpenEmbedded/ru]] для адаптации образа дистрибутива к вашим специфическим нуждам.
+Using the external toolchain is an easy way to build applications for your Neo. If you are familiar with this procedure, you might also want to look into
+* Using [[Qemu]] to test your applications in an emulated environment
+** Ubuntu users might prefer to look at [[Automatic_emulation_in_Ubuntu]]
+* Using [[Host-based_development_with_Xoo_and_Xephyr|host-based development]] to improve your efficiency
+* Using [[OpenEmbedded]] to customize your Openmoko distribution image
 
-=Расширенные возмжности=
-==Сборка ядра Openmoko из git репозитория при помощи Toolchain==
+=Advanced topics=
+==Building Openmoko Kernel from git repo using Toolchain==
 
  git clone git://git.openmoko.org/git/kernel.git linux-2.6
  cd linux-2.6
@@ -280,27 +256,27 @@ Note: This is will only last for your current session. Add it to your shell star
  cp defconfig-gta02 .config
  ./build
 
-Это не будет работать и выдаст ошибку "arm-angstrom-linux-gnueabi-ld: unrecognized option '-Wl,-rpath-link,/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/lib'" пока вы не исправите /usr/local/openmoko/arm/setup-env is modified. LDFLAGS нужно поменять с:
+Will fail with error message "arm-angstrom-linux-gnueabi-ld: unrecognized option '-Wl,-rpath-link,/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/lib'" until /usr/local/openmoko/arm/setup-env is modified. LDFLAGS should be changed from:
 
  export LDFLAGS="-L${OMTOOL_DIR}/arm/arm-angstrom-linux-gnueabi/lib -Wl,-rpath-link,${OMTOOL_DIR}/arm/arm-angstrom-linux-gnueabi/lib -Wl,-O1"
 
-на:
+to:
 
  export LDFLAGS="-L${OMTOOL_DIR}/arm/arm-angstrom-linux-gnueabi/lib -rpath-link ${OMTOOL_DIR}/arm/arm-angstrom-linux-gnueabi/lib -O1"
 
-Возможно, вам также прийдется изменить сборочный скрипт и прописать в нем путь к компилятору.
+I also had to change the 'build' script to hardcode the path to the compiler.
 
-==Использование библиотек из toolchain==
-Добавьте необходимые библиотеки к полю _LDADD в src/Makefile.am, например:
+==Using toolchain provided libraries==
+Add the necessary libraries to the _LDADD field in src/Makefile.am, for example:
  openmoko_sample2_LDADD  = @DEPENDENCIES_LIBS@ -lmokogsmd2
 
-Не забудьте выполнить om-conf еще раз после добавления.
+make sure to run om-conf again after this.
 
-==Установка дополнительных библиотек для использования с toolchain==
+==Installing additional libraries into the toolchain==
 
-Рано или поздно вам захочется откомпилировать приложение с зависящее от чего-то, чего нет в готовом toolchain, например от каких-то малоизвестных библиотек.
+Sooner or later you will want to compile an application that has dependencies which can't be fulfilled by the precompiled toolchain, e.g. some obscure libraries.
 
-В этом случае не стесняйтесь просить включения дополнительных библиотек в следующий релиз Openmoko toolchain. Ну а пока новый релиз не вышел, вы можете расширить уже инсталлированный toolchain следующим образом. Предположим, вам необходима библиотека liburiparse.
+In that case, feel free to request the inclusion of additional libraries into the next release of the Openmoko toolchain. Until then, here is how you enhance your already installed toolchain. Say, we want to add the library called liburiparse:
 
  cd ~/source
  wget http://downloads.sourceforge.net/uriparser/uriparser-0.6.0.tar.bz2
@@ -311,58 +287,58 @@ Note: This is will only last for your current session. Add it to your shell star
  make
  make install
 
-Вот и все.
+That's it.
 
-==Как сделать, чтобы ваше приложение попало в пакеты OE==
+==Getting your application packaged by OE==
 
-Если вы написали что-то неимоверно клёвое и хотите поделиться с остальными, то лучший способ сделать это
+If you have written a cool application which you want to share with others, the best way to do that is to
 
-# закачать исходные коды вашего приложения туда, где они будут общедоступны
-# отошлите рецепт [[BitBake]] в [[OpenEmbedded]], желательно через [http://bugzilla.openembedded.org OpenEmbedded bugtracker].
+# upload your application source code to a public location
+# submit a [[BitBake]] recipe to [[OpenEmbedded]], preferably via the [http://bugzilla.openembedded.org OpenEmbedded bugtracker].
 
-Смотрите также [[Customizing the Openmoko Distribution]].
+See also [[Customizing the Openmoko Distribution]].
 
-==Решение проблем==
+==Troubleshooting==
 
-* Некоторые версии toolchain содержат испорченные .la файлы. Если при компиляции вы получаетее сообщение об ошибке '/space/fic/openmoko-daily/neo1973/work/armv4t-angstrom-linux-gnueabi/pango-1.18.3-r0/pango-1.18.3/pango/libpangoft2-1.0.la', то это ваш случай. Чтобы исправить положение, перейдите в каталог "/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/lib" и отредактируйте соответствующие .la файлы, заменив "/space/fic..." на "/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/lib". Вам прийдется исправить несколько .la файлов. Для ошибки с pango, например, нужно поменять "libpangocairo-1.0.la", но кроме него там есть и другие .la файлы с ошибками.
+* Some Versions of the Toolchain have corrupt .la files. If you compile an application using the Toolchain and you receive a '/space/fic/openmoko-daily/neo1973/work/armv4t-angstrom-linux-gnueabi/pango-1.18.3-r0/pango-1.18.3/pango/libpangoft2-1.0.la' error, you are affected. To fix that you should go to your "/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/lib" directory and open the affected .la files and change "/space/fic..." to "/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/lib". You have to fix more than one .la file. For the pango error you have to change "libpangocairo-1.0.la", but there are more corrupt .la files.
 
-Ниже приведен beta fix для этой проблемы. Выполните приведенный ниже скрипт под пользователем root:
+Attached is a beta fix for the .la problem. Untar the .tar.bz2 as root, and execute the following bash script as root:
 
- #!/bin/sh
- DIR=/usr/local/openmoko/arm
- for la in `find $DIR -iname \*.la`; do
- dependency_libs=
- . $la
- for lib in $dependency_libs ; do
- delib=`echo $lib | grep -E .la$`
- if [ -z $delib ] ; then
- echo -n
- elif [ -f $delib ]; then
- echo -n
- else
- basedelib=`basename $delib`
- replacedelibs=`find $DIR -iname $basedelib`
- found=0
- for replacedelib in $replacedelibs ; do
- if [ $replacedelib == $delib ]; then
- found=1
- fi
- done
- if [ $found -gt 0 ] ; then
- echo -n
- else
- sed_delib=`echo $delib | sed 's/\//\\\\\//g'`
- sed_replacedelib=`echo $replacedelib | sed 's/\//\\\\\//g'`
- # A bit slow, we could chain expressions for speed. :)
- cp $la $la.old
- cat $la | sed "s/$sed_delib/$sed_replacedelib/g" > $la.new
- mv $la.new $la
- rm $la.old
- fi
- fi
- done
- done
+        #!/bin/sh
+        DIR=/usr/local/openmoko/arm
+        for la in `find $DIR -iname \*.la`; do
+         dependency_libs=
+         . $la
+         for lib in $dependency_libs ; do
+         delib=`echo $lib | grep -E .la$`
+         if [ -z $delib ] ; then
+          echo -n
+         elif [ -f $delib ]; then
+          echo -n
+         else
+          basedelib=`basename $delib`
+          replacedelibs=`find $DIR -iname $basedelib`
+          found=0
+          for replacedelib in $replacedelibs ; do
+          if [ $replacedelib == $delib ]; then
+           found=1
+          fi
+          done
+          if [ $found -gt 0 ] ; then
+           echo -n
+          else
+            sed_delib=`echo $delib | sed 's/\//\\\\\//g'`
+            sed_replacedelib=`echo $replacedelib | sed 's/\//\\\\\//g'`
+            # A bit slow, we could chain expressions for speed. :)
+            cp $la $la.old
+            cat $la | sed "s/$sed_delib/$sed_replacedelib/g" > $la.new
+            mv $la.new $la
+            rm $la.old
+          fi
+         fi
+         done
+        done
 
-* Пользуйтесь почтовым списком рассылки [http://lists.openmoko.org/mailman/listinfo/openmoko-devel Openmoko-Devel].
+* Please use the [http://lists.openmoko.org/mailman/listinfo/openmoko-devel Openmoko-Devel] mailing list.
 
 [[Category:Application Developer]]
