@@ -20,6 +20,40 @@ to recursively copy a directory to the phone, use -r:
 
  scp -r somedirectory root@192.168.0.202:
 
+== SSHFS ==
+
+You can use sshfs to mount directories on your Openmoko smartphone into directories on your desktop computer. You can mount sshfs as normal user if you add yourself to the "fuse" group.
+
+This <tt>Makefile</tt> makes it very easy to mount and umount sshfs.
+
+<pre>
+# Usage: set the three vars here and then type 
+# make moko
+# that will create "moko" in the current dir and mount the specified path
+# You need sshfs installed and your user added to "fuse" group on your PC.
+moko_u=root
+moko_h=192.168.0.202
+moko_p=/media/card
+#remote_h=example.org     # host or ip
+#remote_u=username        # remote username
+#remote_p=/path/to/mount  # uses home if left empty
+
+%:
+	mkdir -p $(PWD)/$*
+	sshfs -C -o reconnect -o idmap=user $($*_u)@$($*_h):$($*_p) $(PWD)/$* || rmdir $(PWD)/$*
+
+%_:
+	mkdir -p $(PWD)/$*
+	sshfs -C -o reconnect -o idmap=user -o follow_symlinks $($*_u)@$($*_h):$($*_p) $(PWD)/$* || rmdir $(PWD)/$*
+
+%-:
+	-fusermount -u $(PWD)/$*
+	rmdir $(PWD)/$*
+</pre>
+
+Type <tt>make moko</tt> to mount and <tt>make moko-</tt> to umount, once you have [[USB_Networking]] set up.
+
+
 == TFTP ==
 client ('tftp')
 
