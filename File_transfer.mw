@@ -22,7 +22,7 @@ to recursively copy a directory to the phone, use -r:
 
 == SSHFS ==
 
-You can use sshfs to mount directories on your Openmoko smartphone into directories on your desktop computer. You can mount sshfs as normal user if you add yourself to the "fuse" group.
+You can use sshfs to mount directories on your Openmoko smartphone into directories on your desktop computer. Sshfs uses fuse, so you need to have access to <tt>/dev/fuse</tt> by adding yourself to the <tt>fuse</tt> group.
 
 This <tt>Makefile</tt> makes it very easy to mount and umount sshfs.
 
@@ -31,28 +31,31 @@ This <tt>Makefile</tt> makes it very easy to mount and umount sshfs.
 # make moko
 # that will create "moko" in the current dir and mount the specified path
 # You need sshfs installed and your user added to "fuse" group on your PC.
-moko_u=root
-moko_h=192.168.0.202
-moko_p=/media/card
+moko_h=root@192.168.0.202
+moko_p=/
+mokocard_h=$(moko_h)
+mokocard_p=/media/card
 #remote_h=example.org     # host or ip
-#remote_u=username        # remote username
+# to specify a user, add $USER@ or add appropriate line in ~/.ssh/config
 #remote_p=/path/to/mount  # uses home if left empty
 
 %:
 	mkdir -p $(PWD)/$*
-	sshfs -C -o reconnect -o idmap=user $($*_u)@$($*_h):$($*_p) $(PWD)/$* || rmdir $(PWD)/$*
+	sshfs -C -o reconnect -o idmap=user $($*_h):$($*_p) $(PWD)/$* || rmdir $(PWD)/$*
 
+# makes symlinks appear as real files/dirs, can be useful sometimes
 %_:
 	mkdir -p $(PWD)/$*
-	sshfs -C -o reconnect -o idmap=user -o follow_symlinks $($*_u)@$($*_h):$($*_p) $(PWD)/$* || rmdir $(PWD)/$*
+	sshfs -C -o reconnect -o idmap=user -o follow_symlinks $($*_h):$($*_p) $(PWD)/$* || rmdir $(PWD)/$*
 
+# "make moko-" unmounts
 %-:
 	-fusermount -u $(PWD)/$*
 	rmdir $(PWD)/$*
 </pre>
+:Originally created by [[User:Zash|Zash]] for convenient web server access.
 
 Type <tt>make moko</tt> to mount and <tt>make moko-</tt> to umount, once you have [[USB_Networking]] set up.
-
 
 == TFTP ==
 client ('tftp')
