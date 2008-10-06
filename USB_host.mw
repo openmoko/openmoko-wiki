@@ -1,7 +1,7 @@
 {{Languages|USB host}}
 The mini-USB port on both the Neo 1973 and the Neo FreeRunner supports both USB host and USB device. This opens up a range of possibilities, such as adding USB cameras and USB input devices.
 
-=== Selecting USB host mode ===
+=== Selecting USB host modes ===
 
 By default, the mini-USB port is in device mode. To tell the Neo that it is logically a host¹):
 
@@ -12,6 +12,21 @@ Independent of the logical mode of the USB port, the Neo FreeRunner can provide 
  echo "1" > /sys/devices/platform/neo1973-pm-host.0/hostmode
 
 Note: You may want to run <code>ifconfig usb0 down</code> prior to switching to USB host mode, as the Neo's USB networking may not like having its USB port disappear. You'll probably want to ssh into your Neo over WiFi or Bluetooth before starting all of this, alternatively use an on screen keyboard.
+
+Consider an USB hub connected to
+* a external USB Disk
+* a keyboard
+* a mouse 
+* the USB charger that comes with the FR
+* the Neo FreeRunner.
+
+So you want the FR to charge so that the battery doesn't get drained at once by the external drive. It should work. You need to set logical host mode:
+
+~ - echo host > /sys/devices/platform/s3c2410-ohci/usb_mode
+
+but NOT electrical host mode
+
+~ - echo 0 > /sys/devices/platform/neo1973-pm-host.0/hostmode
 
 ¹)Debian note: You'll need the ohci-hcd module:
  modprobe ohci-hcd
