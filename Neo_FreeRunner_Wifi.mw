@@ -171,6 +171,22 @@ Tom Yates documents his success [http://www.teaparty.net/technotes/openmoko-2.ht
 
 [http://en.wikipedia.org/wiki/Wired_Equivalent_Privacy WEP] is an encryption method for securing your wireless network. WEP is generally considered to be weak, you should use WPA instead if possible.
 
+=== Using iwconfig manually ===
+
+Note that for WEP our iwconfig requires a more specific format than generic iwconfig.
+
+The canonical way of running iwconfig for WEP would be something like this:
+
+# iwconfig eth0 key A4BEB3B8EC essid xyz
+
+Two things are important here:
+
+* the key must be in HEX. iwconfig will not do anything useful if the key is given as a string.   [http://www.powerdog.com/wepkey.cgi Here] is a handy ASCII string to HEX converter.
+
+* the ESSID must follow the key.
+
+If an incorrect key was set, please stop all activity on the interface for at least two minutes (i.e., killall udhcpc and ifconfig eth0 down), then issue the correct iwconfig command and retry.
+
 === Using WEP and /etc/network/interfaces ===
   iface eth0 inet dhcp
     wireless-key my_wep_key
