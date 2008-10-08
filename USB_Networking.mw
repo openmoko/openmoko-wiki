@@ -133,7 +133,7 @@ The script is designed to use [http://dnrd.sourceforge.net/ dnrd] as the DNS pro
 
 Another easy setup is using a UDP forwarder like the one from http://www.tapor.com/udpf/ - use it with the command"
 
- udpf-elf -p=53-f=`cat /etc/resolv.conf|awk '$1 == "nameserver"{print $2; exit(0);}'`:53
+ udpf-elf -p=53-f=`awk '$1 == "nameserver"{print $2; exit(0);}' /etc/resolv.conf`:53
 
 === Proxying with iptables ===
 
@@ -266,7 +266,7 @@ create file /etc/network/freerunner
  NETMASK=255.255.255.0
 
  # get first ip for dns
- DNSIP=$(cat /etc/resolv.conf | grep nameserver | awk '{ print $2 }' | head -n 1 )
+ DNSIP=$(awk '$1 == "nameserver"{print $2; exit(0);}' /etc/resolv.conf)
 
  case "$1" in
   start)
@@ -687,7 +687,7 @@ If you get an error like this:
 you need to set the DBUS_SESSION_BUS_ADDRESS environment variable to the value on the FreeRunner before launching the process from your desktop.  You can find the value of this variable by using a command such as
  ps auxwwwwe | grep -m 1 DBUS_SESSION_BUS_ADDRESS
 Note that you must run that command on the FreeRunner.  Back on your desktop, run the process you want with the ''env'' command like this:
- env DBUS_SESSION_BUS_ADDRESS=''dbus_address'' ''process''
+ env DBUS_SESSION_BUS_ADDRESS=''dbus_address'' ''process'' #(isn't the "env" redundant here?)
 
 ==Display Remote Applications on FreeRunner==
 
