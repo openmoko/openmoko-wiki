@@ -49,32 +49,29 @@ Pour de plus amples informations, vous pouvez consulter le [[Om 2008.8 Guide|gui
 
 == Installation ==
 
-=== Images Flash Om 2008.8 ===
-
-'''Téléchargement d'images Om 2008.8'''
-
-Ces images doivent être flashées dans la mémoire NAND du FreeRunner.
-* [http://downloads.openmoko.org/releases/Om2008.8/Om2008.8.rootfs.jffs2 Om2008.8.rootfs.jffs2] (image du système de fichier racine)
-* [http://downloads.openmoko.org/releases/Om2008.8/Om2008.8.uImage.bin Om2008.8.uimage.bin] (noyau)
-
-'''Installation'''
-
-* Pour les instructions sur comment flasher l'appareil, rendez-vous à : [[Flashing the Neo FreeRunner|Flasher le Neo FreeRunner]].
-
-=== Alternative : exécution depuis une carte microSD ===
-
-Vous pouvez installer cette distribution sur une carte microSD afin de pouvoir [[Boot from sd card|booter depuis une carte microSD]]. Les fichiers .tar sont disponibles [http://downloads.openmoko.org/releases/Om2008.8/ ici]. Cela permet de garder une autre distribution installée sur la mémoire NAND (pour tester 2008.8 tout en gardant 2007.2).
-
+Pour installer la distribution stable Om2008.8 sur le Neo FreeRunner, téléchargez le système de fichiers racine et l'image du noyau à partir de la page [[Download|Téléchargement]] et mettez-la en place comme indiqué à [[Flashing the Neo FreeRunner]].
 
 == Problèmes connus ==
+
+Seuls les principaux problèmes sont listés ici et certains peuvent avoir été résolus par les mises à jour de la version stable (voir [http://onlinedev.blogspot.com/search/label/om2008.8%20review Alasal's test reports] ainsi que la section "Mises à jour" ci-dessous). Pour des informations plus précises, consulter le gestionnaire de bugs : [http://docs.openmoko.org/trac/search?q=2008.8 toutes les bogues de 2008.8].
+
+'''Mise en veille'''
+
+Les versions de fin août on tendance à se mettre en veille au bout de 30s quel que soit le réglage du paramètre. Désactiver l'économiseur d'écran avec `xset s off' désactive la mise en veille complètement. Cette commande doit être tapée dans une fenètre terminal du téléphone lui-même. Si vous voulez le déclencher d'une session ssh, il faut alors utiliser la commande `xset -display :0 s off'.
+
+Alex a résolu le problème en allant dans les paramètres Illume, puis Power et en mettant à OFF les deux paramètres. L'économiseur est alors toujours actif mais peut être désactivé facilement en touchant l'écran.
+
+Si au réveil du téléphone le son ne fonctionne plus (plus de sonnerie ou de son quand on appelle quelqu'un), la raison probable est que le serveur de son pulseaudio est installé. Ceci arrive quand openmoko-mediaplayer2 est installé. Le problème est déjà [http://lists.openmoko.org/pipermail/openmoko-kernel/2008-August/004877.html en cours de résolution].
+
 '''GSM'''
 
+* [http://docs.openmoko.org/trac/ticket/1766 Appels et réception de SMS bloqués]
 * [http://docs.openmoko.org/trac/ticket/1662 Après x heures, le GSM ne fonctionne plus correctement]
-* [https://docs.openmoko.org/trac/ticket/1765 Pas de dialogue Pin, donc GSM inutilisable]
+* [http://docs.openmoko.org/trac/ticket/1832 Impossible de composer les numéros commençant par * ou #]
 
 '''WiFi'''
 
-* [http://docs.openmoko.org/trac/ticket/1625 Le WiFi ne se connecte qu'une fois]
+* [http://docs.openmoko.org/trac/ticket/1929 Le WiFi ne se connecte qu'une fois]
 
 '''Qualité Audio'''
 
@@ -87,6 +84,9 @@ Vous pouvez installer cette distribution sur une carte microSD afin de pouvoir [
 * [http://docs.openmoko.org/trac/ticket/1597 Après une longue veille, évènements au niveau des threads kernel]
 * [http://docs.openmoko.org/trac/ticket/1315 xglamo : performance diminuée après un moment]
 * [http://docs.openmoko.org/trac/ticket/1682 Le Neo s'arrête avant d'avoir lancé X]
+
+'''Consommation de CPU élevée pour QPE'''
+* QPE parcourt tout le système de fichier (y compris la carte SD) pour trouver les documents, fichiers mp3, etc... Si vous ne voulez pas cela vous pouvez éditer <tt>/opt/Qtopia/etc/default/Trolltech/Storage.conf</tt> et désactiver le parcours de la carte SD (remplacer 1 par 0).
 
 '''Réseau'''
 * Pas d'installations/mises à jour possibles ou des pings vers des noms de domaines en raison d'une défaillance DNS. Ce problème survient parce que le fichier /etc/resolv.conf est vide par défaut. Ajoutez cette ligne dans /etc/network/interfaces:
@@ -120,7 +120,9 @@ Après la sortie de la version Om 2008.8 (le 08/08/2008), le développement de A
 les mises à jours officielles de la branche "stable" sont maintenant (26/08/2008) disponibles sous 2 formes (voir [http://lists.openmoko.org/pipermail/community/2008-August/027997.html ce message]) :
 * dans http://downloads.openmoko.org/repository/Om2008.8/ pour opkg (qui doit être déjà configuré dans 2008.8)
 * comme images de flash dans http://downloads.openmoko.org/releases/Om2008.8-update/
+Le 19 septembre, une mise à jour mineure appelée [[Om2008.9 Update]] a été publiée.
 
+La version de développement à long terme est appelée ''org.openmoko.dev''. Cette version est focalisée sur les fonctionnalités de base du système (pas d'applications installées par défaut) et commencera par se synchroniser avec les versions les plus récentes des composants. Les correctifs critiques de cette version devraient se propager à la version ''.asu.stable'' après un certain délai. Attention : l'utilisation des mises à jour binaires de cette version (ou de tout dépôt non-2008.8) provoquera probablement des problèmes de dépendance insolubles. 
 
 == Dédicace ==
 
