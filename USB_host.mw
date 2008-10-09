@@ -13,14 +13,7 @@ Independent of the logical mode of the USB port, the Neo FreeRunner can provide 
 
 Note: You may want to run <code>ifconfig usb0 down</code> prior to switching to USB host mode, as the Neo's USB networking may not like having its USB port disappear. You'll probably want to ssh into your Neo over WiFi or Bluetooth before starting all of this, alternatively use an on screen keyboard.
 
-Consider an USB hub connected to
-* a external USB Disk
-* a keyboard
-* a mouse 
-* the USB charger that comes with the FR
-* the Neo FreeRunner.
-
-So you want the FR to charge so that the battery doesn't get drained at once by the external drive. It should work. You need to set logical host mode:
+Note that in full USB host mode the FreeRunner will power the external device. To avoid draining the battery use a powered USB hub, then on the FreeRunner enable logical host mode:
 
 ~ - echo host > /sys/devices/platform/s3c2410-ohci/usb_mode
 
@@ -28,8 +21,15 @@ but NOT electrical host mode
 
 ~ - echo 0 > /sys/devices/platform/neo1973-pm-host.0/hostmode
 
+Note that powered USB hubs do not send power upstream, that is, into the host. If you wish to power or charge the FreeRunner, you will need a [[Specialized USB cables|special USB cable]].
+
 ¹)Debian note: You'll need the ohci-hcd module:
  modprobe ohci-hcd
+
+==== Returning from USB host mode to USB device mode ====
+
+ echo device > /sys/devices/platform/s3c2410-ohci/usb_mode
+ echo 0 > /sys/devices/platform/neo1973-pm-host.0/hostmode
 
 === Returning to USB device mode ===
 After doing whatever is needed to safely remove your device and unplugging it you can remove the provision of 5 volt power and return to device mode.
