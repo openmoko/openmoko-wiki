@@ -1,7 +1,5 @@
 {{SHR}}
-= New way (using FSO/SHR Makefile) =
-
-There is a new (much simpler) way to build SHR that is under construction right now.
+= Using FSO/SHR Makefile =
 
 === Before beginning ===
 
@@ -17,7 +15,7 @@ make setup will download FSO, bitbake and SHR in the shr directory (SHR root dir
 
 === Set up your local.conf ===
 
-Before building the image, you might want to update ''shr-unstable/conf/local.conf'' to tweak your build.
+Before building the image, you might want to update ''shr-unstable/conf/local.conf'' (buildhost uses shr-testing!) to tweak your build.
 
 ==== Speed up the building process ====
 
@@ -62,7 +60,7 @@ Make changes to an SHR project (e.g. openmoko-dialer3, under the SHR root direct
  $ bitbake -c clean openmoko-dialer3
  $ bitbake -c build openmoko-dialer3
 
-There is no need to check-in the changes to the repo as the system now looks for SHR packages in the local filesystem. The problem is that it is necessary to '''always''' clean the packages so bitbake gets the new changes next time you compile.
+There is no need to check-in the changes to the SHR repo, because the system now looks for SHR packages in the local filesystem. The problem is that it is necessary to '''always''' clean the packages so bitbake gets the new changes next time you compile.
 
 Also, note that we are using ''bitbake -c build'', this is because bitbake needs to do all the necessary steps before compiling (i.e. fetch, unpack, configure...).
 
@@ -84,72 +82,8 @@ If you want to update everything (FSO, bitbake and SHR), from the top directory:
 
   $ make update
 
-= Old way =
-== Building openmoko-dialer3 ==
-Currently this is the only package of any size being developed for SHR, and it's the only one with any instructions.  If you start another SHR project (please check with [[User:Wurp|Bobby]] before starting one), put instructions for working on the project here!
-
-=== Before beginning ===
-You must build openembedded before you can build SHR packages.  The easiest way is to go to http://wiki.openmoko.org/wiki/Mokomakefile and build using the instructions for FSO.
-
- * Note: if building FSO fails using MokoMakefile (zhone! or no dbus show up on the top of the newly booted image), try using this
-   method: http://wiki.openmoko.org/wiki/FSO
-
-The rest of these instructions are written assuming that you used Mokomakefile and that the directory you downloaded the base Makefile into (using wget) is $MOKO.
-
-You must also download the SHR code using subversion.  See http://projects.openmoko.org/projects/shr.  We will refer to the directory to which you downloaded the project as $SHRSVN.  (This directory should contain $SHRSVN/packages/openmoko-dialer3.bb)
-
-=== Set up your BBPATH ===
-
-  export BBPATH=.:$MOKO/openembedded/:$MOKO/bitbake/:$MOKO/:$SHRSVN/trunk/packages/
-
-=== Set up the CACHE ===
-
-  export CACHE=tmp/cache
-
-=== Set up your local.conf ===
-
-Edit $MOKO/build/conf/local.conf and append the following lines:
-  BBFILES += "$SHRSVN/trunk/packages/*.bb $MOKO/openembedded/packages/*/*.bb"
-  SELECTED_OPTIMIZATION = "-Os -g"
-
-''Note: Spaces are important in your bitbake conf files!  You must have spaces before & after the = or +=''
-
-(Environment variables, $SHRSVN and $MOKO, can not be used inside local.conf, so absolute paths must be used instead)
-
-=== Set up your openmoko.conf (if using 2007.2) ===
-
-Edit $MOKO/openembedded/conf/distro/openmoko.conf
-
-and make sure that these Gtk+ options are set:
-
- # Select package versions we want to use.
- PREFERRED_PROVIDER_gtk+ = "gtk+-fastscaling"
- PREFERRED_VERSION_gtk+-fastscaling = "2.10.14"
-
-
-=== Add your cross-compiler to your PATH ===
-
-  export PATH=$MOKO/build/tmp/cross/bin/:$MOKO/build/tmp/staging/x86_64-linux/usr/bin:$PATH
-
-=== Run bitbake ===
-
-(Don't forget to source the setup-env file in the shell before running bitbake)
-
-  bitbake openmoko-dialer3
-
-After the first time you build successfully, you can build with
-
-  bitbake -b openmoko-dialog3_svn
-
-which is much faster.
-
-=== To recompile, and only recompile ===
-
-   bitbake -c compile -b $SHRSVN/trunk/packages/openmoko-dialer3.bb
-
 === Troubleshooting ===
 
-==== General ====
 One thing to try is to unset all environment variables not listed in this page.  LIBPATH and INCLUDE can be particularly troublesome.
 
 [[Category:SHR]]
