@@ -3,27 +3,12 @@
 == Overview ==
 The [[Stable Hybrid Release]] (SHR) is intended to be a combination of the [[OpenmokoFramework|FSO]], some of the [[Openmoko2007.2]] GTK software, and the [[ASU_Feature_Plan|ASU]] that provides all of the functionality of the 2007.2 software, but with the stability of the FSO and the new GUI toolkits provided by the ASU.  It will probably be based on an ASU build, with the FSO software and GTK end-user apps added.
 
-(We're not married to the idea of using the GTK apps, but they already exist and are more-or-less debugged at least on the UI side.  If someone knows of a more stable and/or usable app that's appropriate for the OM, let us know by dropping a comment on the ''discussion'' tab of this page.)
-
 Follow the project here: [http://projects.openmoko.org/projects/shr SHR Project Homepage]
 
 == Why SHR exists ==
-This is long and rambling, and maybe more of a tirade than information, but it does give some background on why this project was started.  The overview gives, well, the overview, this is more of a deeper examination of the existing releases and why we felt we needed something new.
+At first, SHR was introduced in order to use the [[Openmoko2007.2]] GTK software with the new [[OpenmokoFramework|FSO]].
+Things have changed.
 
-Feel free to skip this whole section if you already think SHR is a good idea :-)
-
-=== Why not ASU? ===
-ASU is the distro that OM is putting their main effort into right now.  ASU looks very slick, but is very unstable right now, and is likely to be unstable and feature-poor for some time.
-
-=== Why not 2007.2? ===
-2007.2 is the "old" Openmoko distribution, now unsupported.  Unsupported == often broken.  Also, neither calls nor suspend/resume ever worked reliably.
-
-=== Why not Qtopia? ===
-You can also install Qtopia on the phone.
-
-Qtopia is stable but you can only build qt apps on Qtopia, which means lots of linux apps you might want to port suddenly got a lot harder to port.  And some people just don't like developing for qt.
-
-Also, as far as I know, there is no documented build procedure for Qtopia on Openmoko.
 
 === Why not FSO? ===
 FSO is the initiative by Mickey Lauer and crew to create a good [[D-Bus]] infrastructure which runs on the neos, among other devices.
@@ -35,22 +20,16 @@ FSO is never intended on its own to be a full image, it's just the infrastructur
 Other people are supposed to put a front end on FSO.  So that's what we're doing.
 
 === Why SHR? ===
-So SHR is FSO, with us doing the necessary work to port the old high-functionality 2007.2 stuff on a stable call platform.  We have an adapter from the 2007.2 call service to the FSO call service and we're installing the basic 2007.2 apps on the FSO baseline install.
+So SHR is FSO, with us doing the necessary work to get some basic applications runing on a stable platform.
 
-In theory, it should be very simple, and should give us dialer, contact management, SMS, terminal, media player, gps app, etc. since all those already work on 2007.2.  And the dialer should be stable, which it wasn't in 2007.2
-
-== First steps ==
-The first pass at making the GTK software use the FSO will involve just creating a gsmd workalike that sends commands to the ophoned dbus api from FSO.  mickeyterm is an example of another program that lets you send GSM commands through ophoned.
-
-We want to have a build that is stable, so we'll need some standard way of identifying the latest stable pieces of all the different software in the SHR, as well as a way to identify previous released versions of the SHR.
 
 == Interest ==
 See the Developer Info on the upper right side of the [http://projects.openmoko.org/projects/shr SHR project page].
 
 == How to join ==
+* Hang out in ''#openmoko-cdevel'' on ''irc.freenode.net'' between 5pm and 11pm GMT to chat with the people developing SHR.  (Primarily MarcOChapeau, Ainulindale and quickdev.)
 * Send a request to join on the [http://projects.openmoko.org/projects/shr SHR project] on the OM projects page.
 * Join [http://lists.projects.openmoko.org/mailman/listinfo/shr-devel shr-devel@lists.projects.openmoko.org] and send an introductory email. The introductory email can just be a couple of lines if you like.  It should include what part would you want to work on, and any special knowledge you have that would relate to the project, e.g. if you are an OE guru or linux kernel geek, matchbox-window manager guru, etc.
-* Hang out in ''#openmoko-cdevel'' on ''irc.freenode.net'' between 5pm and 11pm GMT to chat with the people developing SHR.  (Primarily MarcOChapeau and Ainulindale.)
 * See [[SHR Development]] to find out how to set up your development environment to work on existing SHR packages.
 
 == Tasks & status ==
@@ -67,7 +46,7 @@ The list of tasks is available at the [http://docs.openmoko.org/trac/milestone/S
 |Comment
 |-
 |Run the build host
-|Have server CPU time and disk space; just need to talk about git branches
+|Have server CPU time and disk space
 |[[User:Paulproteus|paulproteus]]
 |
 |2008-07-03
@@ -75,9 +54,9 @@ The list of tasks is available at the [http://docs.openmoko.org/trac/milestone/S
 |-
 |Test & label good SHR releases
 |Awaiting builds
-|[[User:Kevin_Dean|Kevin Dean]]
+|
 |Nobody
-|2008-07-05
+|
 |
 |}
 
@@ -115,21 +94,21 @@ Statuses:
 
 === Getting the source code ===
 
-We're currently hosted by [[User:Ainulindale|Ainulindale]] on svn://daria.forty-two.fr/shr as projects went down for a whole week-end.
+We're currently hosted by [[User:Ainulindale|Ainulindale]] on svn://daria.forty-two.fr/shr . In order to contribute, you have to ask Ainulindale to get your public key on the server.
 
 There is no need to download the code independently as it is automatically obtained when setting the development environment described in [[SHR Development]].
 
 === Build logic ===
 
 Current applications (openmoko-dialer3 and openmoko-panel-gsm) use frameworkd.
-So in order to be able to build and test these applications, you have to build frameworkd (MS2) and gsm0710muxd.
+So in order to be able to build and test these applications, you have to build frameworkd and gsm0710muxd.
 
 === [[libframeworkd-glib]] ===
 
 In order to be able to use in an easy way frameworkd, without bothering about dbus calls (which could be difficult for new developers), we built a library allowing everyone to use the functions of frameworkd as if it were simple C functions. We're using asynchronous callbacks for dbus.
 
 === Architecture ===
-SHR uses FSO to interface to the hardware, so see the FSO architecture documentation, too.  For how the openmoko*3 applications that SHR forked off 2007.2 access FSO, see http://www.calaquendi.org/om/lf.png.
+SHR uses FSO to interface to the hardware, so see the FSO architecture documentation, too. For how the openmoko*3 applications that SHR forked off 2007.2 access FSO, see http://www.calaquendi.org/om/lf.png.
 
 == List of packages included ==
 
@@ -140,13 +119,9 @@ From FSO:
 * odeviced
 * lots more...
 
-From 2007.2:
-* TODO
-* lots more...
+Additionally:
+* openmoko-dialer3
 
-From ASU:
-* TODO
-* lots more...
 
 == IRC conversation about how we're using revision control ==
 
