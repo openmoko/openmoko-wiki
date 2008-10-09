@@ -92,7 +92,9 @@ Si au réveil du téléphone le son ne fonctionne plus (plus de sonnerie ou de s
 * Pas d'installations/mises à jour possibles ou des pings vers des noms de domaines en raison d'une défaillance DNS. Ce problème survient parce que le fichier /etc/resolv.conf est vide par défaut. Ajoutez cette ligne dans /etc/network/interfaces:
 
 
- up echo nameserver 192.168.0.200 >/etc/resolv.conf
+ up echo nameserver 208.67.222.222 >/etc/resolv.conf
+ up echo nameserver 208.67.220.220 >> /etc/resolv.conf
+
 Cette ligne est à ajouter après la ligne 'gateway address' et avant 'bluetooth networking'. Après la modification, il convient de redémarrer l'appareil. Ensuite, allez compléter manuellement /etc/resolv.conf en utilisant les données de ce fichier sur votre machine locale ou l'adresse DNS.
 
 Pour résoudre les DNS sans redémarrer, entrer les commandes suivantes :
@@ -102,16 +104,37 @@ Pour résoudre les DNS sans redémarrer, entrer les commandes suivantes :
 
 Cela devrait résoudre la majeure partie de vos soucis de réseau. Si vous avez besoin d'autres aides, référez vous au [[USB Networking|réseau par USB]].
 
-{{note| [http://en.wikipedia.org/wiki/Resolvconf resolv.conf] est installé et devrait normalement être utilisé}}
+{{note| [http://en.wikipedia.org/wiki/Resolvconf resolv.conf] est installé et devrait normalement être utilisé
 
-* Le réseau par USB ne devrait pas fonctionner après le démarrage initial.
+'''Problème''' : Certaines parties de resolvconf sont manquantes : sans les scripts dans /etc/network/if-{up,down}.d, sans /etc/resolvconf/run/enable-updates et /lib/resolvconf/list-records cela ne fonctionne pas. Même si ces scripts sont rajoutés /etc/resolvconf/run devrait être un lien vers /var/run ou /etc/resolv.conf devrait pointer vers /etc/resolvconf/run/resolv.conf. Une fois que tout cela est corrigé, cela semble fonctionner à partir du moment où vous rajoutez ceci à la fin du fichier /etc/network/interfaces à la fin de la section usb0 :
+
+    dns-nameservers 192.168.0.200
+    dns-search example.com
+
+ainsi que <tt>usb*</tt> sous <tt>eth*</tt> dans <tt>/etc/resolvconf/interface-order</tt>
+
+}}
+
+{{Note| '''Solution:''' Etapes pour rajouter le script manquant resolvconf : <br>
+<code>touch /etc/resolvconf/run/enable-updates</code><br>
+<code>cd /etc ; rm resolv.conf ; ln -s /etc/resolvconf/run/resolv.conf .</code><br>
+<code>mkdir /lib/resolvconf/ ; cd /lib/resolvconf/</code><br>
+<code><nowiki>wget http://87.227.108.179/list-records</nowiki></code><br>
+<code>chmod +x list-records</code><br>
+Editez <code>/etc/network/interfaces</code> et supprimez les lignes:<br>
+<code>       network 192.168.0.0</code><br>
+<code>       gateway 192.168.0.200</code><br>
+Si vous avez besoin d'utiliser le réseau usb pour accéder à internet, il faut rajouter par ssh une route par défaut comme ceci :<br>
+<code>route add default gateway 192.168.0.200</code>
+}}
+
+* Le réseau par USB ne fonctionne qu'après un redémarrage suite au premier démarrage.
 
 '''Utilisabilité'''
 
 * Le dialogue PIN par défaut ne montre que les lettres. Vous devez glisser vos doigts de haut en bas sur le clavier pour changer les caractères en chiffres/lettres/spécial.
 
 * L'installeur n'a pas les droits administrateur, ce qui résulte en une impossibilité d'utiliser opkg. Solution : exécuter "killall packagekitd" (sur le FreeRunner ou lorsque vous y êtes connectés en ssh).
-
 
 == Mises à jour officielles pour Om 2008.8 "stable" ==
 
