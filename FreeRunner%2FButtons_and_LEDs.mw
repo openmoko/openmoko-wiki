@@ -174,4 +174,49 @@ The following is an example "fireworks"-file that can be used to test the led bl
  0 0 1 100
  1 1 1 100
 
+
+==== Led Power Status Perl Script====
+
+Use the blue and orange LED's under the power button to show battery power status.  Install perl using "opkg install perl" to use this script.  The script will indicate high battery with blue, medium battery by purple (blue + orange), and low battery by orange.  Adjust values for your needs.  
+
+You can have it autostart by saving the script as /etc/init.d/lights.pl<br>
+then creating a shell script /etc/init.d/startlights.sh with just one line:
+ /etc/init.d/lights.pl &
+and then create a symlink to it to auto start by running
+ ln -s /etc/init.d/startlights.sh /etc/rc5.d/S15startlights
+
+lights.pl:
+
+ #!/usr/bin/perl
+ my $high_thresh = 75;
+ my $low_thresh = 30;
+ while(1) {
+     my $command = `apm`;
+     if ($command =~ m/battery .*: (\d*)%/) {
+         print("Value: " . $1 . "\n");
+     }
+     if($1 < $low_thresh) {
+         print("Low Battery\n");
+         $command = `echo 1 > /sys/devices/platform/gta02-led.0/leds/gta02-power:orange/brightness`;
+         $command = `echo 0 > /sys/devices/platform/gta02-led.0/leds/gta02-power:blue/brightness`;
+     } 
+     if($1 > $high_thresh) {
+         print("High Battery\n");
+         $command = `echo 1 > /sys/devices/platform/gta02-led.0/leds/gta02-power:blue/brightness`;
+         $command = `echo 0 > /sys/devices/platform/gta02-led.0/leds/gta02-power:orange/brightness`;
+     }
+     if(($1 <= $high_thresh) && ($1 >= $low_thresh)){
+         print("Mid Battery\n");
+         $command = `echo 1 > /sys/devices/platform/gta02-led.0/leds/gta02-power:blue/brightness`;
+         $command = `echo 1 > /sys/devices/platform/gta02-led.0/leds/gta02-power:orange/brightness`;
+     }
+     sleep(15);
+ }
+
+
+-nvanfossen
+
+
+
+
 [[Category:Neo FreeRunner Hardware]]
