@@ -48,4 +48,77 @@ or you can Run you application on Freerunner by adding Run configuration
 
 --[[User:PipBoy2000|PipBoy2000]] 22:30, 9 September 2008 (UTC)
 
+==Set up Eclipse for development with Qt4==
+
+===Set up Environment with Libraries===
+
+*install [[Toolchain]]
+
+*install Eclipse with C/C++ development plug-in
+
+*add armv4t-feeds to toolchain:
+ echo arch base 50 >> /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/etc/opkg.conf
+ echo src/gz base http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base >> /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/etc/opkg.conf 
+
+then..
+ opkg-target update
+ opkg-target install qt4-x11-free
+ opkg-target install qt4-x11-free-dev qt4-designer qt4-assistant
+
+*Add the repos also on the Neo (Anstrom Repository [[Users Repositories]]) and do:
+ opkg update
+ opkg install qt4-x11-free
+
+===Configure Eclipse Project===
+Project - right click - Properties --> C/C++ Build -- Tab "Tool Settings"
+
+====Configuration: Debug====
+
+*GCC c++ compiler -> Directories --- add
+ /usr/include/qt4
+ /usr/include/qt4/QtGui
+
+*GCC C++ Linker -> Libraries ---add
+**Libraries (-l):    QtCore and QtGui
+**Library search path (-L):    /usr/lib
+
+====Configuration: Freerunner====
+
+Project - right click - Properties --> C/C++ Build -- Tab "Tool Settings"
+
+create Configuration "Freerunner":
+click on 'Configuration'->'Manage' and create new configuration eg. Freerunner (copy settings from 'Relase' configuration) 
+
+*GCC C++ Compiler
+**Command: /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/g++
+*GCC C++ Compiler -> Directories 
+ /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/include/qt4/QtCore
+ /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/include/qt4/QtGui
+ /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/include/qt4
+ /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/include/c++/4.1.2/arm-angstrom-linux-gnueabi
+ /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/include/c++/4.1.2
+ /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/include/c++/4.1.2/backward
+
+*GCC C++ Linker
+**Command:    /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/g++
+
+*GCC C++ Linker -> Libraries --- add
+**Libraries (-l): QtCore and QtGui
+**Library search path (-L):    /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/lib
+
+* GCC Assembler
+**Command: /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/as
+
+go to Tab 'Build Steps' and add ". /usr/local/openmoko/arm/setup-env" to 'Pre-build step'
+
+====workaround to deal with .ui files from Qt-Designer====
+
+mayby somody has a better solution please correct!!
+
+Create a project with properties as mentioned above. 
+To Compile your project take a Terminal in Project-Folder and do
+ qmake-qt4 -project
+ qmake-qt4
+then compile your project with Eclipse Configuration "Freerunner"
+
 [[Category:Application Developer]]
