@@ -23,7 +23,27 @@ When starting ScummVM use the command
 
 This will map '''AUX''' button to the '''F5''' key, which is used to access the ScummVM menu. You should also find an entry on the main menu under ''Games''.
 
-'''Note:''' The AUX button does not work. There is no way to exit the game besides doing a killall scummvm.
+'''Note:''' On the Neo Freerunner the wrong keycode (not '''AUX''') is mapped to '''F5'''. Here is a corrected version of the file ''/usr/bin/openmoko-scummvm'':
+
+ #!/bin/sh
+ 
+ # Save current AUX Key mapping
+ SAVE_KEY="$(xmodmap -pke | grep 'keycode 177')"
+ 
+ # Map AUX Key to F5
+ xmodmap -e "keycode 177 = F5"
+ 
+ # Turn LCD feft
+ xrandr -o right
+ 
+ # Start the scummvm in fullscreen mode
+ scummvm --fullscreen --themepath=/usr/share/scummvm/
+ 
+ # Turn LCD normal
+ xrandr -o normal
+ 
+ # Restore the AUX Key mapping
+ xmodmap -e "$SAVE_KEY"
 
 '''Note:''' It would be great if it where possible to get audio through the headphones and speaker muted.
 
