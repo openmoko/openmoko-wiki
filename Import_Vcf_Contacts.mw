@@ -17,12 +17,12 @@ Evolution can export only to VCF version 3.0, so you need to post-process the ex
 
 <pre>
 sed -r -e 's/"X-EVOLUTION-CALLBACK"/MSG/g' \
-       -e 's/;TYPE=([^,]+),[^;]+([;:])/;TYPE=\1\2/g' \
-       -e 's/;X-EVOLUTION-UI-SLOT=[0-9]//g' old.vcf \
-    | iconv -t ISO-8859-1 > new.vcf
+-e 's/;TYPE=([^,]+),[^;]+([;:])/;TYPE=\1\2/g' \
+-e 's/;X-EVOLUTION-UI-SLOT=[0-9]//g' old.vcf \
+| iconv -t ISO-8859-1 > new.vcf
 </pre>
 
-Note that if you run into errors like 
+Note that if you run into errors like
 
 <pre>found unknown attribute in vobject, TEL </pre>
 
@@ -51,22 +51,22 @@ To export VCF from Outlook, open Outlook, then open the VB editor by pressing AL
 Sub ExportContactsToVCF()
 
 
-    'Cheap and nasty way to export All Contacts to VCF files. 
-    'By Dale Maggee, antisol (at) earthling (dot) net
+'Cheap and nasty way to export All Contacts to VCF files.
+'By Dale Maggee, antisol (at) earthling (dot) net
 
-    Dim CN As ContactItem
-    Dim NS As NameSpace
-    Dim Fld As MAPIFolder    
+Dim CN As ContactItem
+Dim NS As NameSpace
+Dim Fld As MAPIFolder
 
-    Set NS = Application.GetNamespace("MAPI")
-    Set Fld = NS.GetDefaultFolder(olFolderContacts)     
+Set NS = Application.GetNamespace("MAPI")
+Set Fld = NS.GetDefaultFolder(olFolderContacts)
 
-    For Each CN In Fld.Items
-        Debug.Print CN.FullName
-        CN.SaveAs "z:\Openmoko\contacts\" & CN.FullName & ".vcf", olVCard
-    Next CN
+For Each CN In Fld.Items
+Debug.Print CN.FullName
+CN.SaveAs "z:\Openmoko\contacts\" & CN.FullName & ".vcf", olVCard
+Next CN
 
-    MsgBox "Done!"
+MsgBox "Done!"
 
 End Sub
 </pre>
@@ -75,14 +75,14 @@ voila! you now have multiple VCF files in whatever directory you chose, suitable
 
 === Mac OS X Addressbook ===
 
-To export VCF: 
+To export VCF:
 
 # Set the vCard Format to 2.1 in the config dialog
 # Select all contacts and say "export vcard"
 # Despite having selected the charset to be utf-8 you may need to do:
 
 <code>
- iconv -f latin1 -t utf-8 vCards.vcf | sed 's/CHARSET=LATIN1://g' > all.vcf
+iconv -f latin1 -t utf-8 vCards.vcf | sed 's/CHARSET=LATIN1://g' > all.vcf
 </code>
 
 == Import (and export?) on Om 2008.8 and Qtopia ==
@@ -90,12 +90,12 @@ To export VCF:
 The Qtopia addressbook application supports import of VCF files out of the box. However, since there is a bug, if there are non-ASCII characters in your contacts you cannot use the version 3 format, otherwise you get multibyte UTF-8 characters mangled. Use the version 2.1 to get the encoding stated explicitly and thus characters imported correctly. But because there is another bug, when using version 2.1 vCards, the addressbook eats up all memory (and potentionally crashes the system) on ''some'' vCards with multiline entries.
 
 If you're connected via SSH, run the following command first:
-  export DISPLAY=:0
+export DISPLAY=:0
 
 ''(So that the addressbook will show on your phone. If you do not that and try to run addressbook locally on your computer display, you won't be able to use the application since the needed buttons will not show.)''
 
 Then you can simply run:
-  addressbook path_to_vCards_file_to_import.vcf
+addressbook path_to_vCards_file_to_import.vcf
 
 Make sure your contact list has extension .vcf.
 
@@ -103,35 +103,35 @@ You will be asked if you want to import the contacts form addressbook.vcf (the c
 
 To import a huge number of contacts, single .vcf files can be merged together using:
 
- cat *.vcf > all.tmp
- mv all.tmp all.vcf
- 
+cat *.vcf > all.tmp
+mv all.tmp all.vcf
+
 than import all.vcf
 
 ''Tip: If you want to prevent crashing your system if the memory leak occurs, set some limit on memory available to use, so that only the addressbook application dies after reaching the limit. I.e. prior to running the import, do something like:''
-  ulimit -v 50000
+ulimit -v 50000
 
 If the above does not work, here are the original import guidelines:
 
 To import your address book from VCard format (ASU/<=Qtopia 4.3.2-080808 snapshot):
-  LD_LIBRARY_PATH=/opt/Qtopia/lib /opt/Qtopia/bin/addressbook /home/root/addressbook.vcf
+LD_LIBRARY_PATH=/opt/Qtopia/lib /opt/Qtopia/bin/addressbook /home/root/addressbook.vcf
 
 To import your address book from VCard format (>=Qtopia 4.3.2 stable):
-  LD_LIBRARY_PATH=/opt/Nokia/Qtopia/lib /opt/Nokia/Qtopia/bin/addressbook /home/root/addressbook.vcf
+LD_LIBRARY_PATH=/opt/Nokia/Qtopia/lib /opt/Nokia/Qtopia/bin/addressbook /home/root/addressbook.vcf
 
 To import your address book from VCard format (>=QTextended 4.4.1 stable):
-  LD_LIBRARY_PATH=/opt/Trolltech/Qtopia/lib /opt/Trolltech/Qtopia/bin/addressbook /home/root/addressbook.vcf
+LD_LIBRARY_PATH=/opt/Trolltech/Qtopia/lib /opt/Trolltech/Qtopia/bin/addressbook /home/root/addressbook.vcf
 
 
 ===Mass Delete===
 
 The Qtopia addressbook doesn't seem to have a delete all function, which means that botching a vcf import is a painful process to undo through the phone GUI.
 
-If you want to delete your entire addressbook or do other mass edits then you'll need access to a command line or GUI SQLite client (SQLite Database Browser seems to be a good, free one, though the SQLite command line client should be fine). 
+If you want to delete your entire addressbook or do other mass edits then you'll need access to a command line or GUI SQLite client (SQLite Database Browser seems to be a good, free one, though the SQLite command line client should be fine).
 
 ====Qtopia====
 
-* Shutdown Qtopia 
+* Shutdown Qtopia
 * Use the client you have chosen to open up /home/root/Applications/qtopia_sqlite.db.
 * Important tables: contacts, contactphonenumbers, contactaddresses
 * Restart Qtopia when you're done and you should have a reset addressbook.
@@ -142,15 +142,15 @@ If you want to delete your entire addressbook or do other mass edits then you'll
 * Open the database
 * Delete all data from the contacts tables '''This will erase all your contacts and contact categories.'''
 
- opkg install sqlite3
- sqlite3 /home/root/Applications/Qtopia/qtopia_db.sqlite
- 
- delete from contactcategories;
- delete from contactaddresses;
- delete from contactcustom;
- delete from contactphonenumbers;
- delete from contacts;
- .quit
+opkg install sqlite3
+sqlite3 /home/root/Applications/Qtopia/qtopia_db.sqlite
+
+delete from contactcategories;
+delete from contactaddresses;
+delete from contactcustom;
+delete from contactphonenumbers;
+delete from contacts;
+.quit
 
 The first two are shell commands, the ''delete'' commands must by typed in the '''sqlite>''' prompt which appears after the sqlite3 command. Prompt is not included here to allow copy/paste.
 
@@ -158,13 +158,18 @@ The first two are shell commands, the ''delete'' commands must by typed in the '
 
 Does anyone know how to export back to VCF contacts? [[Backup]] page describes where the contacts are, but it does not help when moving eg. to other distribution like FSO.
 
-[[Category:Advanced End User]]
+== Export raw config (including contacts) with Qtopia ==
+
+scp root@192.168.0.202:~/Applications/Qtopia/qtopia_db.sqlite /tmp/
+sqlite3 /tmp/qtopia_db.sqlite .dump
+
+Then you can grep the output for your contacts.
 
 == Import and export for 2007.2 ==
 
 === Basic Information ===
 
-Neo FreeRunner uses Evolution data server (eds) to save contacts. 
+Neo FreeRunner uses Evolution data server (eds) to save contacts.
 However, the specific version used differs from what is probably used on your desktop (if you have Evolution installed).
 
 You ''cannot'' copy your addressbook.db from your desktop to Neo ([http://docs.openmoko.org/trac/ticket/1119 bug 1119]).
@@ -188,12 +193,12 @@ If you have all contacts in seperate vcf files and just want to import all at on
 (please add a .py after the filename, sorry my hoster gives an error if i link to .py files, even .py.txt)
 
 In the simple scripts you need to add the following lines
- ps = os.popen ('ps auxwwwwe | grep -m 1 DBUS_SESSION_BUS_ADDRESS')
- l = ps.read ()
- r = re.compile ('DBUS_SESSION_BUS_ADDRESS=(\S+)')
- m = r.search (l)
- a = m.expand ('\\1')
- os.environ ['DBUS_SESSION_BUS_ADDRESS'] = a
+ps = os.popen ('ps auxwwwwe | grep -m 1 DBUS_SESSION_BUS_ADDRESS')
+l = ps.read ()
+r = re.compile ('DBUS_SESSION_BUS_ADDRESS=(\S+)')
+m = r.search (l)
+a = m.expand ('\\1')
+os.environ ['DBUS_SESSION_BUS_ADDRESS'] = a
 
 === Usage ===
 
@@ -201,7 +206,7 @@ The script is for the 2007.2 Version (default install on Neo FreeRunner), not fo
 
 You need Python to use this script so do a
 
- opkg install python-dbus
+opkg install python-dbus
 
 to install python and the python dbus module
 
@@ -217,11 +222,11 @@ to install python and the python dbus module
 # Fix special chars in your contacts file with you favorite text editor
 # To import the file run on the SSH shell:
 
- python manage-contacts.py load < contacts.txt
+python manage-contacts.py load < contacts.txt
 
 # For a backup your existing contacts on the Neo
 
- python manage-contacts.py dump > contacts.txt
+python manage-contacts.py dump > contacts.txt
 
 ==== Simple Script ====
 
@@ -251,3 +256,5 @@ The script does a listdir and imports ALL files it found in that dir. (i'm a bad
 * Remove all Contacts script / simple script for one big file by Andreas Dalsgaard <andreas.dalsgaard at gmail.com>
 
 Thanks to [[Import_Sim_Contacts]] for the original Python Script.
+
+[[Category:Advanced End User]]
