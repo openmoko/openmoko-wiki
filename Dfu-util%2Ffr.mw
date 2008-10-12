@@ -1,4 +1,4 @@
-{{Languages|Dfu-util}}
+{{languages}}
 
 {{warning|Dfu-util ne fonctionne pas correctement sur les [http://en.wikipedia.org/wiki/Big_endian#Endianness_and_hardware architectures gros-boutistes (big-endian)]}}
 {{warning|Ne mettez pas à jour U-Boot si vous n'êtes pas sûr d'en avoir besoin}}
@@ -11,66 +11,66 @@ dfu-util est un programme qui sert à mettre à jour les logiciels des périphé
 Dans le cadre du projet Openmoko, on utilise ce programme pour communiquer avec notre gestionnaire de démarrage [[u-boot]] qui intègre la partie complémentaire du protocole DFU.
 
 En utilisant dfu-util et votre smartphone, vous pouvez :
-* transférer et mettre à jour des [[Partitions|partitions]] de la mémoire flash interne [[NAND]].
+* transférer et mettre à jour des [[partitions]] de la mémoire flash interne [[NAND]].
 * transférer n'importe quoi vers la mémoire RAM
 ** cela peut être utilisé dans le cadre de cycles de développement rapide de code bas niveau comme les noyaux sans mettre à jour la mémoire flash
-* lire les [[Partitions|partitions]] de la mémoire interne NAND
+* lire les [[partitions]] de la mémoire interne NAND 
 ** c'est un moyen facile et efficace d'effectuer des sauvegardes complètes de votre téléphone
 
 == Code source ==
 En environnement Debian et Ubuntu, vous aurez besoin de libusb-dev :
-sudo apt-get install libusb-dev autogen pkg-config autotools-dev autoconf automake
+ sudo apt-get install libusb-dev autogen pkg-config autotools-dev autoconf automake
 
 En environnement Fedora vous aurez besoin de libusb-devel et libusb-static :
-yum install libusb-devel libusb-static
+ yum install libusb-devel libusb-static
 
 En environnement Gentoo vous pouvez utiliser emerge avec openmoko-dfu-util une fois que vous l'aurez autorisé dans la liste de paquets :
-echo "app-mobilephone/openmoko-dfu-util       **" >> /etc/portage/package.keywords
-emerge -va app-mobilephone/openmoko-dfu-util
+ echo "app-mobilephone/openmoko-dfu-util       **" >> /etc/portage/package.keywords
+ emerge -va app-mobilephone/openmoko-dfu-util
 
 Vous pouvez télécharger et construire la dernière version de dfu-util avec les commandes subversion suivantes :
-svn co http://svn.openmoko.org/trunk/src/host/dfu-util/
-cd dfu-util
-./autogen.sh
-./configure
-make
+ svn co http://svn.openmoko.org/trunk/src/host/dfu-util/
+ cd dfu-util
+ ./autogen.sh
+ ./configure
+ make
 
 L'exécutable généré est dfu-util/src/dfu-util.
 
 == Exécutables ==
 
-Des paquets binaires seront [http://downloads.openmoko.org/releases/Om2008.8-update/dfu-util mis à disposition] via la construction de la distribution Openmoko. Pour le moment, l'outil est disponible pour Linux/i386.
+Binary packages will be [http://downloads.openmoko.org/releases/Om2008.8-update/dfu-util made available] as part of the regular Openmoko builds. Currently, there is a dfu-util for Linux/i386.
 
-Il est nécessaire de rendre le fichier téléchargé (dfu-util) exécutable avec :
+You need to make the downloaded file (dfu-util) executable with:
 <pre>
 chmod +x dfu-util
 </pre>
-vous pouvez alors l'exécuter avec
+you can then run it with
 <pre>
 ./dfu-util
 </pre>
-voir ci-dessous pour des instructions plus complètes.
+see below for full instructions.
 
-[http://packages.debian.org/dfu-util dfu-util est disponible comme paquet] pour Debian ''>= lenny'', il peut être installé avec la commande suivante : <tt>apt-get install dfu-util</tt>
+[http://packages.debian.org/dfu-util dfu-util is packaged] for Debian ''>= lenny'', so can be installed with: <tt>apt-get install dfu-util</tt>
 
-[http://downloads.sourceforge.net/slackfr-packs/dfu-util-svn4686-i686-1cfdev12.1.tgz dfu-util est disponible comme paquet] pour la distribution '''Slackware''' (12.1), il peut être installé avec : <tt>pkgtool</tt>
+[http://sourceforge.net/projects/slackfr-packs/ dfu-util is packaged] for '''Slackware''' (12.1), so can be installed with: <tt>pkgtool</tt>
 
-Il existe actuellement un exécutable expérimental pour les plateformes Win32 (voir [[Dfu-util-windows]]). Les utilisateurs de Windows peuvent consulter la page [[No_Linux]].
+Currently, there is a largely untested binary for Win32 (see [[Dfu-util-windows]]). Windows users can refer to [[No_Linux]] for a more tested approach.
 
-Compiler dfu-util sur Mac:
+Compiling dfu-util on Mac:
 * http://lists.openmoko.org/pipermail/community/2007-July/008438.html
 * [[User:SNMoore]]
 * [[MacOS_X#Flashing_to_your_device]]
 
 == Documentation de réference ==
 
-Pour exécuter dfu-util, il est nécessaire d'avoir monté la partition /proc/bus/usb.  La commande "ls /proc/bus/usb" doit renvoyer un résultat ressemblant à : "001  002  003  004  005  devices". Le résultat de la commande ne doit pas être vide, et si c'est quand même le cas cela signifie que le système de fichiers n'est pas monté et peut être monté avec la commande :
+To run dfu-util, you need to have /proc/bus/usb mounted and working.  The terminal command "ls /proc/bus/usb" should return something similar to, "001  002  003  004  005  devices", it shouldn't be empty. If it is empty, use this command:
 
 <pre>
 sudo mount -t usbfs usbfs /proc/bus/usb
 </pre>
 
-Vous pouvez rajouter la ligne suivante dans votre fichier /etc/fstab pour que le système de fichiers soit automatiquement monté :
+You can permanently add it in your fstab so that it automatically mounts. You can use emacs to edit you fstab using the command "sudo emacs /etc/fstab -nw" in your terminal window. Add the below line to your fstab:
 
 <pre>
 usbfs   /proc/bus/usb   usbfs   defaults
@@ -78,13 +78,13 @@ usbfs   /proc/bus/usb   usbfs   defaults
 
 
 === Avant d'utiliser dfu-util ===
-Vous devrez démarrer votre téléphone avec le menu de démarrage NAND :
-* Vérifiez que votre téléphone est connecté à l'ordinateur via un câble USB (et pas à un chargeur USB !) :)
-* Assurez-vous que vous déclenchez toutes les commandes dfu-util en tant que super-utilisateur
-* Eteignez le téléphone
-* Maintenez le bouton AUX appuyé
-* Appuyez sur le bouton POWER jusqu'à ce que le menu de démarrage apparaisse
-voir aussi [[Booting the Neo FreeRunner]]
+You'll need to boot your phone into the NAND Boot Menu:
+* Ensure your phone is connected directly to the host computer by USB (not the USB-charger! :)
+* Ensure that you execute all dfu-util commands as root
+* Power off the phone
+* Hold down AUX
+* Press POWER until the Boot Menu appears
+see also [[Booting the Neo FreeRunner]]
 
 === Options en ligne de commande ===
 
@@ -95,23 +95,23 @@ dfu-util - (C) 2007 by Openmoko Inc.
 This program is Free Software and has ABSOLUTELY NO WARRANTY
 
 Usage: dfu-util [options] ...
--h --help                     Print this help message
--V --version                  Print the version number
--l --list                     List the currently attached DFU capable USB devices
--d --device vendor:product    Specify Vendor/Product ID of DFU device
--c --cfg config_nr            Specify the Configuration of DFU device
--i --intf intf_nr             Specify the DFU Interface number
--a --alt alt_nr               Specify the Altseting of the DFU Interface
--t --transfer-size            Specify the number of bytes per USB Transfer
--U --upload file              Read firmware from device into <file>
--D --download file            Write firmware from <file> into device
--R --reset                    Issue USB Reset signalling once we're finished
+  -h --help                     Print this help message
+  -V --version                  Print the version number
+  -l --list                     List the currently attached DFU capable USB devices
+  -d --device vendor:product    Specify Vendor/Product ID of DFU device
+  -c --cfg config_nr            Specify the Configuration of DFU device
+  -i --intf intf_nr             Specify the DFU Interface number
+  -a --alt alt_nr               Specify the Altseting of the DFU Interface
+  -t --transfer-size            Specify the number of bytes per USB Transfer
+  -U --upload file              Read firmware from device into <file>
+  -D --download file            Write firmware from <file> into device
+  -R --reset                    Issue USB Reset signalling once we're finished
 </pre>
 
 ==== --list ====
 
-En utilisant l'option --list, vous pouvez voir les périphériques compatibles DFU, leur configuration, l'interface et les paramétrages associés.
-Vous trouverez ci-dessous un exemple pour le téléphone Neo1973 en mode u-boot '''Runtime Mode'''
+Using the --list option, you can list the available DFU capable devices, their configuration, interface and altsettings.
+Below is an example for a current Neo1973 phone in u-boot '''Runtime Mode'''
 <pre>
 # ./dfu-util --list
 dfu-util - (C) 2007 by Openmoko Inc.
@@ -120,7 +120,7 @@ This program is Free Software and has ABSOLUTELY NO WARRANTY
 Found DFU Runtime: [0x1457:0x5119] devnum=0, cfg=0, intf=2, alt=0, name="USB Device Firmware Upgrade"
 </pre>
 
-Vous trouverez ci-dessous un exemple pour le téléphone Neo1973 en mode u-boot '''DFU Mode'''
+Below is an example for a current Neo1973 phone in u-boot '''DFU Mode'''
 <pre>
 # ./dfu-util --list
 dfu-util - (C) 2007 by Openmoko Inc.
@@ -134,29 +134,29 @@ Found DFU: [0x1457:0x5119] devnum=16, cfg=0, intf=0, alt=4, name="splash"
 Found DFU: [0x1457:0x5119] devnum=16, cfg=0, intf=0, alt=5, name="rootfs"
 </pre>
 
-Cela vous montre six interfaces, toutes avec '''configuration 0''' et '''interface 0''', avec altsetting 0...5, pour l'accès à la RAM et chacune des [[Partitions|partition]].
+This shows you six interfaces, all in '''configuration 0''' and '''interface 0''', with altsetting 0...5, for RAM and each [[partition]].  
 
 ==== --device ====
 
-Vous pouvez indiquer les numéros USB de produit et de vendeur du périphérique que vous voulez programmer :
+You can specify the USB Vendor and Product ID of the device you want to program:
 
-dfu-util --device 0x1457:0x5119
+ dfu-util --device 0x1457:0x5119
 
-Si un seul périphérique DFU est connecté à votre ordinateur, il n'est pas nécessaire de préciser cela. Dès que plusieurs périphériques sont détectés, dfu-util le détectera et s'arrêtera en vous demandant lequel il doit utiliser.
+If you only have one standards-compliant DFU device attached to your PC, this is optional.  However, as soon as you have multiple DFU devices, dfu-util will detect this and abort, asking you to specify which device it shall use.
 
 ==== --transfer-size ====
 
-Indique la taille de chaque transfert USB. Si vous ne précisez pas de valeur, la taille maximale compatible avec la combinaison de système d'exploitation et de périphérique USB est choisie (pour obtenir les meilleures performances).
+Specifies the size of each individual USB transfer.  If you don't use it, the maximum possible size for your combination of host operating system and USB device is chosen (for optimal performance).
 
 ==== --download ====
 
-Télécharge le fichier demandé dans le périphérique.
+download the given file into the device.
 
 ==== --upload ====
 
-enregistre le contenu du périphérique DFU dans le fichier dont le nom est indiqué.
+upload from the DFU device into the given file[name].
 
-{{note|L'enregistrement du contenu du périphérique est actuellement défectueux - [http://docs.openmoko.org/trac/ticket/676 #676]}}
+{{note|Upload support is currently broken - [http://docs.openmoko.org/trac/ticket/676 #676]}}
 
 == Commandes fréquemment utilisées ==
 
@@ -164,33 +164,33 @@ Pour l'instant, il n'y a pas de manuel à proprement parler. Mais vous pouvez ut
 
 === Mettre à jour le rootfs ===
 
-dfu-util -a rootfs -R -D /path/to/openmoko-devel-image.jffs2
+ dfu-util -a rootfs -R -D /path/to/openmoko-devel-image.jffs2
 
 === Mettre à jour le noyau ===
 
-dfu-util -a kernel -R -D /path/to/uImage
+ dfu-util -a kernel -R -D /path/to/uImage
 
 === Mettre à jour le gestionnaire de démarrage ===
 
-dfu-util -a u-boot -R -D /path/to/u-boot.bin
+ dfu-util -a u-boot -R -D /path/to/u-boot.bin
 
 === Mettre à jour l'image affichée au démarrage ===
 
-dfu-util -a u-splash -R -D /path/to/splash.gz
+ dfu-util -a u-splash -R -D /path/to/splash.gz
 
 see also [[Configuring_the_boot_splash_screens]]
 
 === Copier un noyau dans la RAM ===
 
-dfu-util -a 0 -R -D /path/to/uImage
+ dfu-util -a 0 -R -D /path/to/uImage
 
-Once this has finished, the kernel will be available at the default load address of 0x32000000 in Neo1973 RAM.
+Once this has finished, the kernel will be available at the default load address of 0x32000000 in Neo1973 RAM. 
 
 {{note|You cannot transfer more than 2MB of data into RAM using this method}}
 
 == Notes de mise à jour ==
 
-If during flashing of an image using dfu-util you're consistently getting an error -110 message, check that the size of the destination NAND [[Partitions|partition]] is big enough to hold the image.  For example the kernel partition is only 2 MB big by default and a kernel with debugging info compiled-in can often exceed this.  It's possible to change the partition layout to enlarge a given partition and shrink other partitions but you have to remember to reflash all partitions whose start offset has changed afterwards.  To adjust partitions layout use the ''mtdparts'' [[Bootloader|u-boot command]].
+If during flashing of an image using dfu-util you're consistently getting an error -110 message, check that the size of the destination NAND [[partition]] is big enough to hold the image.  For example the kernel partition is only 2 MB big by default and a kernel with debugging info compiled-in can often exceed this.  It's possible to change the partition layout to enlarge a given partition and shrink other partitions but you have to remember to reflash all partitions whose start offset has changed afterwards.  To adjust partitions layout use the ''mtdparts'' [[Bootloader|u-boot command]].
 
 If in turn you're facing errors in seemingly random places during the flashing of images, most likely the USB hub or cable through which your Neo1973 is connected, is of too poor quality.  It is recommended that you always connect the phone directly to the host when using dfu-util.
 
