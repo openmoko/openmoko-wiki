@@ -64,13 +64,13 @@ Compiler dfu-util sur Mac:
 
 == Documentation de réference ==
 
-To run dfu-util, you need to have /proc/bus/usb mounted and working.  The terminal command "ls /proc/bus/usb" should return something similar to, "001  002  003  004  005  devices", it shouldn't be empty. If it is empty, use this command:
+Pour exécuter dfu-util, il est nécessaire d'avoir monté la partition /proc/bus/usb.  La commande "ls /proc/bus/usb" doit renvoyer un résultat ressemblant à : "001  002  003  004  005  devices". Le résultat de la commande ne doit pas être vide, et si c'est quand même le cas cela signifie que le système de fichiers n'est pas monté et peut être monté avec la commande :
 
 <pre>
 sudo mount -t usbfs usbfs /proc/bus/usb
 </pre>
 
-You can permanently add it in your fstab so that it automatically mounts. You can use emacs to edit you fstab using the command "sudo emacs /etc/fstab -nw" in your terminal window. Add the below line to your fstab:
+Vous pouvez rajouter la ligne suivante dans votre fichier /etc/fstab pour que le système de fichiers soit automatiquement monté :
 
 <pre>
 usbfs   /proc/bus/usb   usbfs   defaults
@@ -78,13 +78,13 @@ usbfs   /proc/bus/usb   usbfs   defaults
 
 
 === Avant d'utiliser dfu-util ===
-You'll need to boot your phone into the NAND Boot Menu:
-* Ensure your phone is connected directly to the host computer by USB (not the USB-charger! :)
-* Ensure that you execute all dfu-util commands as root
-* Power off the phone
-* Hold down AUX
-* Press POWER until the Boot Menu appears
-see also [[Booting the Neo FreeRunner]]
+Vous devrez démarrer votre téléphone avec le menu de démarrage NAND :
+* Vérifiez que votre téléphone est connecté à l'ordinateur via un câble USB (et pas à un chargeur USB !) :)
+* Assurez-vous que vous déclenchez toutes les commandes dfu-util en tant que super-utilisateur
+* Eteignez le téléphone
+* Maintenez le bouton AUX appuyé
+* Appuyez sur le bouton POWER jusqu'à ce que le menu de démarrage apparaisse
+voir aussi [[Booting the Neo FreeRunner]]
 
 === Options en ligne de commande ===
 
@@ -95,23 +95,23 @@ dfu-util - (C) 2007 by Openmoko Inc.
 This program is Free Software and has ABSOLUTELY NO WARRANTY
 
 Usage: dfu-util [options] ...
-  -h --help                     Print this help message
-  -V --version                  Print the version number
-  -l --list                     List the currently attached DFU capable USB devices
-  -d --device vendor:product    Specify Vendor/Product ID of DFU device
-  -c --cfg config_nr            Specify the Configuration of DFU device
-  -i --intf intf_nr             Specify the DFU Interface number
-  -a --alt alt_nr               Specify the Altseting of the DFU Interface
-  -t --transfer-size            Specify the number of bytes per USB Transfer
-  -U --upload file              Read firmware from device into <file>
-  -D --download file            Write firmware from <file> into device
-  -R --reset                    Issue USB Reset signalling once we're finished
+-h --help                     Print this help message
+-V --version                  Print the version number
+-l --list                     List the currently attached DFU capable USB devices
+-d --device vendor:product    Specify Vendor/Product ID of DFU device
+-c --cfg config_nr            Specify the Configuration of DFU device
+-i --intf intf_nr             Specify the DFU Interface number
+-a --alt alt_nr               Specify the Altseting of the DFU Interface
+-t --transfer-size            Specify the number of bytes per USB Transfer
+-U --upload file              Read firmware from device into <file>
+-D --download file            Write firmware from <file> into device
+-R --reset                    Issue USB Reset signalling once we're finished
 </pre>
 
 ==== --list ====
 
-Using the --list option, you can list the available DFU capable devices, their configuration, interface and altsettings.
-Below is an example for a current Neo1973 phone in u-boot '''Runtime Mode'''
+En utilisant l'option --list, vous pouvez voir les périphériques compatibles DFU, leur configuration, l'interface et les paramétrages associés.
+Vous trouverez ci-dessous un exemple pour le téléphone Neo1973 en mode u-boot '''Runtime Mode'''
 <pre>
 # ./dfu-util --list
 dfu-util - (C) 2007 by Openmoko Inc.
@@ -120,7 +120,7 @@ This program is Free Software and has ABSOLUTELY NO WARRANTY
 Found DFU Runtime: [0x1457:0x5119] devnum=0, cfg=0, intf=2, alt=0, name="USB Device Firmware Upgrade"
 </pre>
 
-Below is an example for a current Neo1973 phone in u-boot '''DFU Mode'''
+Vous trouverez ci-dessous un exemple pour le téléphone Neo1973 en mode u-boot '''DFU Mode'''
 <pre>
 # ./dfu-util --list
 dfu-util - (C) 2007 by Openmoko Inc.
@@ -134,29 +134,29 @@ Found DFU: [0x1457:0x5119] devnum=16, cfg=0, intf=0, alt=4, name="splash"
 Found DFU: [0x1457:0x5119] devnum=16, cfg=0, intf=0, alt=5, name="rootfs"
 </pre>
 
-This shows you six interfaces, all in '''configuration 0''' and '''interface 0''', with altsetting 0...5, for RAM and each [[partition]].  
+Cela vous montre six interfaces, toutes avec '''configuration 0''' et '''interface 0''', avec altsetting 0...5, pour l'accès à la RAM et chacune des [[partition]].
 
 ==== --device ====
 
-You can specify the USB Vendor and Product ID of the device you want to program:
+Vous pouvez indiquer les numéros USB de produit et de vendeur du périphérique que vous voulez programmer :
 
- dfu-util --device 0x1457:0x5119
+dfu-util --device 0x1457:0x5119
 
-If you only have one standards-compliant DFU device attached to your PC, this is optional.  However, as soon as you have multiple DFU devices, dfu-util will detect this and abort, asking you to specify which device it shall use.
+Si un seul périphérique DFU est connecté à votre ordinateur, il n'est pas nécessaire de préciser cela. Dès que plusieurs périphériques sont détectés, dfu-util le détectera et s'arrêtera en vous demandant lequel il doit utiliser.
 
 ==== --transfer-size ====
 
-Specifies the size of each individual USB transfer.  If you don't use it, the maximum possible size for your combination of host operating system and USB device is chosen (for optimal performance).
+Indique la taille de chaque transfert USB. Si vous ne précisez pas de valeur, la taille maximale compatible avec la combinaison de système d'exploitation et de périphérique USB est choisie (pour obtenir les meilleures performances).
 
 ==== --download ====
 
-download the given file into the device.
+Télécharge le fichier demandé dans le périphérique.
 
 ==== --upload ====
 
-upload from the DFU device into the given file[name].
+enregistre le contenu du périphérique DFU dans le fichier dont le nom est indiqué.
 
-{{note|Upload support is currently broken - [http://docs.openmoko.org/trac/ticket/676 #676]}}
+{{note|L'enregistrement du contenu du périphérique est actuellement défectueux - [http://docs.openmoko.org/trac/ticket/676 #676]}}
 
 == Commandes fréquemment utilisées ==
 
