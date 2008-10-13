@@ -24,6 +24,10 @@ This is on a randomly, and partially, upgraded version of OpenSolaris Indiana (2
 
 [http://wikis.sun.com/display/chosug/Installing+a+Linux+Zone Using these directions for setting up the zone].
 
+== Prerequisite Software ==
+
+
+
 Create a user (or the build system will complain that you're "root").  Create /home, and then create the user.  Let's call him 'moko'.
 
 Before doing the su - moko, it's time to install a '''lot''' of software:
@@ -45,7 +49,21 @@ The rest by download, configure, and make. Here's what I've had to install so fa
 # subversion-1.5.3/  -- yum didn't have this.
 # texi2html-1.64/ -- no package for this either.
 # texinfo-4.9/ -- default version didn't have makeinfo
+# make-3.81/ -- seriously
+# tar-1.20/ -- again, seriously.
 
 Actually, whenever you have the option, --disable-nls in the configure scripts seems to make life a lot easier.
 
-This is being written as I do it, so note that it'll change until I've gotten a full build (make image) done.  After that, it's dfu-util!
+
+When they're installed, they'll go in the default prefix setting, namely /usr/local/bin.  Put /usr/local/bin in as the first entry in your path.
+
+
+== Notes ==
+
+The build system will complain if you attempt to run it as root, even if it's the bullshit root in a container (it can't tell the difference).  Create /home, and then create a user (say "moko") to run the build system.  Also, edit /etc/shells and add /usr/local/bin/bash to the list.  Finally, edit /etc/passwd and change moko's shell to /usr/local/bin/bash. 
+
+In that user's .bashrc, pop in this line:
+
+export PATH=/usr/local/bin/:$PATH
+
+So that your new tool versions will get picked up properly.
