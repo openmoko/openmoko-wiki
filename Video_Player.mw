@@ -8,30 +8,30 @@ The default media player doesn't seem to handle video very well, but mplayer doe
 
 === Using standard Mplayer ===
 It can be installed with the following command:
- opkg install mplayer
+opkg install mplayer
 
 === Using the Glamo XV acceleration ===
 TBD, refer to: http://unadventure.wordpress.com/2008/06/08/accelerating-in-my-pocket/
 
 === Controlling MPlayer from the Touchscreen ===
 Create a file in /home/root/.mplayer/input.conf with this content:
- # Freerunner Optimizations
- MOUSE_BTN0 vo_fullscreen
- MOUSE_BTN0_DBL q
+# Freerunner Optimizations
+MOUSE_BTN0 vo_fullscreen
+MOUSE_BTN0_DBL q
 Now, you can toggle the fullscreen by tapping the screen and exit from mplayer by touble-tapping the LCD.
 Accelerometers or hardware buttons could help more.
 
 === Playback helper script ===
 
 Create a script named 'vidplay' in your home directory with the following commands:
- #!/bin/sh
- xrandr -display :0 --output default --mode 240x320
- mplayer -vo fbdev "$1" > /dev/null
- xrandr -display :0 --output default --mode 480x640
- reset
+#!/bin/sh
+xrandr -display :0 --output default --mode 240x320
+mplayer -vo fbdev "$1" > /dev/null
+xrandr -display :0 --output default --mode 480x640
+reset
 
 Make the script executable:
- chmod 755 /home/root/vidplay
+chmod 755 /home/root/vidplay
 
 Known issues with this approach:
 *The output isn't in a proper window, so background stuff sometimes flickers through.
@@ -48,7 +48,7 @@ Despite these issues, it proves that the horsepower is there and it can be done.
 No ssh, no xrandr, no script needed, juste mplayer and qwerty keyboard :
 Like it's said in the "Getting started with FreeRunner" wiki page, you have to install the full qwerty keyboard, see [http://www.ginguppin.de/node/15 these instructions].
 After that, you can go to Terminal and type :
- mplayer vid/my_video.avi
+mplayer vid/my_video.avi
 Mplayer starts in full screen, if your video is optimized like below 240x320 it's work like a charm and to quit just use the power button.
 
 Only issue : You can't forward/backward/pause...
@@ -56,29 +56,29 @@ Only issue : You can't forward/backward/pause...
 ==Example - Big Buck Bunny==
 ===PC===
 Download the source (no need to start with the giant full resolution version)
- cd /tmp
- wget http://proyectos.pixelamigo.com/open/movies/BigBuckBunny/unofficial_PSP/big_buck_bunny_480p_AVC_FW33.mp4
+cd /tmp
+wget http://proyectos.pixelamigo.com/open/movies/BigBuckBunny/unofficial_PSP/big_buck_bunny_480p_AVC_FW33.mp4
 
 Test the video filter settings (-vf crop=...) often omitting the last "rotate=2" (Optional, but recommended for long videos).
- mplayer big_buck_bunny_480p_AVC_FW33.mp4 -vf crop=720:480:-1:-1,scale=320:-2,rotate=2 -zoom
+mplayer big_buck_bunny_480p_AVC_FW33.mp4 -vf crop=720:480:-1:-1,scale=320:-2,rotate=2 -zoom
 
 Transcode it
- mencoder big_buck_bunny_480p_AVC_FW33.mp4 -ovc lavc -lavcopts vcodec=mpeg4:vhq:vbitrate=300 \
- -vf crop=720:480:0:0,scale=320:-2,eq2=1.2:0.5:-0.25,rotate=2 -oac mp3lame -lameopts br=64:cbr \
- -o big_buck_bunny_320.avi
+mencoder big_buck_bunny_480p_AVC_FW33.mp4 -ovc lavc -lavcopts vcodec=mpeg4:vhq:vbitrate=300 \
+-vf crop=720:480:0:0,scale=320:-2,eq2=1.2:0.5:-0.25,rotate=2 -oac mp3lame -lameopts br=64:cbr \
+-o big_buck_bunny_320.avi
 
 === FreeRunner===
 Transfer the resulting 27M file from the PC to the FreeRunner's MicroSD card
- scp user@192.168.0.200:/tmp/big_buck_bunny_320.avi /media/card
+scp user@192.168.0.200:/tmp/big_buck_bunny_320.avi /media/card
 
 Play it
- /home/root/vidplay /media/card/big_buck_bunny_320.avi
+/home/root/vidplay /media/card/big_buck_bunny_320.avi
 
 ==Other Info==
 
 To rotate the screen:
- xrandr -o 0
- xrandr -o 1
+xrandr -o 0
+xrandr -o 1
 
 =Neo1973=
 
@@ -97,17 +97,17 @@ On the positive side.
 
 ==Mode Switching==
 For switching between QVGA and VGA mode do the following with a compatible kernel:
- chvt 4 && echo qvga-normal > /sys/devices/platform/s3c24xx-spi-gpio.1/spi0.0/state && fbset qvga
+chvt 4 && echo qvga-normal > /sys/devices/platform/s3c24xx-spi-gpio.1/spi0.0/state && fbset qvga
 vice versa:
- echo normal > /sys/devices/platform/s3c24xx-spi-gpio.1/spi0.0/state && fbset vga && chvt 3
+echo normal > /sys/devices/platform/s3c24xx-spi-gpio.1/spi0.0/state && fbset vga && chvt 3
 taken from http://lists.openmoko.org/pipermail/neo1973-hardware/2007-October/000267.html
 
 To avoid console blanking type
- echo -e '\033[9;0]' > /dev/ttyX
+echo -e '\033[9;0]' > /dev/ttyX
 where 'X' is your terminal number - for example if you did chvt 4 then /dev/tty4 is your terminal.
 
 To avoid kernel output in vt do
- echo 0 > /proc/sys/kernel/printk
+echo 0 > /proc/sys/kernel/printk
 
 ==User Reports==
 From a conversation with XorA, in the [irc://freenode.com/#openmoko IRC channel].
@@ -121,44 +121,48 @@ There are optimisations for mplayer that look promising to get 25fps with sound.
 ==Playback using 480x640 / 640x480==
 
 To get best speed on GTA01 (best size-speed-resolution-codec trade-off I could find - doesn't mean it's perfect though) crosscode using:
- mencoder <sourcefile> -o <targetfile.avi> -ofps 13 -vf scale -zoom -xy 240 -af channels=1:0:0:1:0 -oac lavc -ovc lavc -lavcopts acodec=mp3:vcodec=h263p:autoaspect=1:vbitrate=300:abitrate=32
+mencoder <sourcefile> -o <targetfile.avi> -ofps 13 -vf scale -zoom -xy 240 -af channels=1:0:0:1:0 -oac lavc -ovc lavc -lavcopts acodec=mp3:vcodec=h263p:autoaspect=1:vbitrate=300:abitrate=32
 
 Also working okay:
- mencoder <sourcefile> -o <targetfile.avi> -ofps 13 -vf scale -zoom -xy 352 -af channels=1:0:0:1:0 -oac lavc -ovc lavc -lavcopts acodec=mp3:vcodec=h263p:autoaspect=1:vbitrate=200:abitrate=32
+mencoder <sourcefile> -o <targetfile.avi> -ofps 13 -vf scale -zoom -xy 352 -af channels=1:0:0:1:0 -oac lavc -ovc lavc -lavcopts acodec=mp3:vcodec=h263p:autoaspect=1:vbitrate=200:abitrate=32
 
 You can playback the file using:
- mplayer -sws 0 -nodouble -vo sdl -fs -framedrop <tagetfile.avi>
+mplayer -sws 0 -nodouble -vo sdl -fs -framedrop <tagetfile.avi>
 
 You may also want to use:
- -autosync 30 -vf scale -zoom -xy 640 -vf rotate=1
+-autosync 30 -vf scale -zoom -xy 640 -vf rotate=1
 
 =Transcoding=
 To make your videos/DVDs compatible use mencoder like this:
 Find out the -vf cropping parameters with
- mplayer input.avi -vf cropdetect
+mplayer input.avi -vf cropdetect
 let it run a few seconds and insert the given cropping values into this command
- mencoder input.avi -ovc lavc -lavcopts vcodec=mpeg4:vhq:vbitrate=300 -vf crop=xx:xx:xx:xx,rotate=2,scale=-2:320 -oac mp3lame -lameopts br=64:cbr -o output2.avi
+mencoder input.avi -ovc lavc -lavcopts vcodec=mpeg4:vhq:vbitrate=300 -vf crop=xx:xx:xx:xx,rotate=2,scale=-2:320 -oac mp3lame -lameopts br=64:cbr -o output2.avi
 To encode a DVD first find out the -vf cropping parameters with
- mplayer -dvd-device /path/to/dvd dvd:// -vf cropdetect -sb 50000000
+mplayer -dvd-device /path/to/dvd dvd:// -vf cropdetect -sb 50000000
 let it run a few seconds and insert the given cropping values into this command
- mencoder -dvd-device /path/to/dvd dvd:// -ovc lavc -lavcopts vcodec=mpeg4:vhq:vbitrate=300 -vf crop=xx:xx:xx:xx,rotate=2,scale=-2:320 -oac mp3lame -lameopts br=64:cbr -o output.avi
+mencoder -dvd-device /path/to/dvd dvd:// -ovc lavc -lavcopts vcodec=mpeg4:vhq:vbitrate=300 -vf crop=xx:xx:xx:xx,rotate=2,scale=-2:320 -oac mp3lame -lameopts br=64:cbr -o output.avi
 This will rotate the video/DVD, scale it and encode it to mpeg4 with a bitrate of 300kBit/s. Works like a charm.
 
 =Frontend=
 ==gnome-mplayer==
-As a nice GUI gnome-mplayer can be recommended. 
+As a nice GUI gnome-mplayer can be recommended.
 
 On Debian you can install it from repository:
- # apt-get install gnome-mplayer
+# apt-get install gnome-mplayer
+
 
 <onlyinclude>
 {{ApplicationBox|
-  Name=[[Video Player|mplayer]]|
-  Description=The popular command line video player.|
-  Screenshot=Mplayer.png|
-  Homepage=http://www.mplayerhq.hu|
-  TestedOn=Om 2008.8 (default repository)|
-  PackageName=mplayer
+Name=[[Video Player|mplayer]]|
+Description=The popular command line video player.|
+Screenshot=Mplayer.png|
+Homepage=http://www.mplayerhq.hu|
+Source Code released:No|
+TestedOn=Om 2008.8 (default repository)|
+PackageName=mplayer|
+
+
 }}
 </onlyinclude>
 
