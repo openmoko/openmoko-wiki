@@ -299,15 +299,49 @@ cs1=0
 sys.stdout.write("\xb5\x62")
 
 for d in sys.argv[1:]:
-	c = binascii.unhexlify(d)
-	sys.stdout.write(c)
-	cs0 += ord(c)
-	cs0 &= 255
-	cs1 += cs0
-	cs1 &= 255
+c = binascii.unhexlify(d)
+sys.stdout.write(c)
+cs0 += ord(c)
+cs0 &= 255
+cs1 += cs0
+cs1 &= 255
 
 sys.stdout.write(chr(cs0)+chr(cs1))
 </pre>
+
+----
+
+==== Configuration for higher sampling rate ====
+
+The GPS chip can be flexibly configured for more than one sample per second. Sometimes I need a good GPS log for experimental projects, and I configure my Neo Freerunner's GPS to take '''4 samples per second''' (the maximum it can do) and to send me nothing more than '''GPRMC (Date+Time+Lat+Lon+Speed+Direction) and GPGGA (...+Altitude+Sats+HDOP) messages''' - I disable the other ones because they are redundant.
+
+These configurations have to be done via the u-blox binary protocol. So I just build the messages using the above "ubxgen.py" script like this:
+<pre>
+
+# disable unnecessary messages:
+ubxgen.py 06 01 03 00 f0 01 00 > CFG-MSG-GPGLL-OFF.ubx
+ubxgen.py 06 01 03 00 f0 02 00 > CFG-MSG-GPGSA-OFF.ubx
+ubxgen.py 06 01 03 00 f0 03 00 > CFG-MSG-GPGSV-OFF.ubx
+ubxgen.py 06 01 03 00 f0 05 00 > CFG-MSG-GPVTG-OFF.ubx
+ubxgen.py 06 01 03 00 f0 08 00 > CFG-MSG-GPZDA-OFF.ubx
+cat CFG-MSG-GP*-OFF.ubx > /dev/ttySAC1
+
+# reduce measurement time and message cycle to 250ms (4Hz):
+ubxgen.py 06 08 06 00 fa 00 01 00 00 00 > CFG-RATE-4HZ.ubx
+cat CFG-RATE-4HZ.ubx > /dev/ttySAC1
+
+# alternatively:
+# reduce measurement time and message cycle to 500ms (2Hz):
+ubxgen.py 06 08 06 00 f4 01 01 00 00 00 > CFG-RATE-2HZ.ubx
+cat CFG-RATE-2HZ.ubx > /dev/ttySAC1
+
+</pre>
+
+Using this setup, the output of "gpspipe -r" will dump around 600 bytes per second (4 GPRMC + 4 GPGGA messages).
+
+To recover the default values, just turn off the GPS or let the FR suspend.
+
+----
 
 == GPS applications ==
 {{main|GPS applications}}
