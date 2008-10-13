@@ -90,12 +90,18 @@ iconv -f latin1 -t utf-8 vCards.vcf | sed 's/CHARSET=LATIN1://g' > all.vcf
 The Qtopia addressbook application supports import of VCF files out of the box. However, since there is a bug, if there are non-ASCII characters in your contacts you cannot use the version 3 format, otherwise you get multibyte UTF-8 characters mangled. Use the version 2.1 to get the encoding stated explicitly and thus characters imported correctly. But because there is another bug, when using version 2.1 vCards, the addressbook eats up all memory (and potentionally crashes the system) on ''some'' vCards with multiline entries.
 
 If you're connected via SSH, run the following command first:
+
+<code>
 export DISPLAY=:0
+</code>
 
 ''(So that the addressbook will show on your phone. If you do not that and try to run addressbook locally on your computer display, you won't be able to use the application since the needed buttons will not show.)''
 
 Then you can simply run:
+
+<code>
 addressbook path_to_vCards_file_to_import.vcf
+</code>
 
 Make sure your contact list has extension .vcf.
 
@@ -103,24 +109,38 @@ You will be asked if you want to import the contacts form addressbook.vcf (the c
 
 To import a huge number of contacts, single .vcf files can be merged together using:
 
+<code>
 cat *.vcf > all.tmp
 mv all.tmp all.vcf
+</code>
 
-than import all.vcf
+then import all.vcf
 
 ''Tip: If you want to prevent crashing your system if the memory leak occurs, set some limit on memory available to use, so that only the addressbook application dies after reaching the limit. I.e. prior to running the import, do something like:''
+
+<code>
 ulimit -v 50000
+</code>
 
 If the above does not work, here are the original import guidelines:
 
 To import your address book from VCard format (ASU/<=Qtopia 4.3.2-080808 snapshot):
+
+<code>
 LD_LIBRARY_PATH=/opt/Qtopia/lib /opt/Qtopia/bin/addressbook /home/root/addressbook.vcf
+</code>
 
 To import your address book from VCard format (>=Qtopia 4.3.2 stable):
+
+<code>
 LD_LIBRARY_PATH=/opt/Nokia/Qtopia/lib /opt/Nokia/Qtopia/bin/addressbook /home/root/addressbook.vcf
+</code>
 
 To import your address book from VCard format (>=QTextended 4.4.1 stable):
+
+<code>
 LD_LIBRARY_PATH=/opt/Trolltech/Qtopia/lib /opt/Trolltech/Qtopia/bin/addressbook /home/root/addressbook.vcf
+</code>
 
 
 ===Mass Delete===
@@ -142,6 +162,7 @@ If you want to delete your entire addressbook or do other mass edits then you'll
 * Open the database
 * Delete all data from the contacts tables '''This will erase all your contacts and contact categories.'''
 
+<pre>
 opkg install sqlite3
 sqlite3 /home/root/Applications/Qtopia/qtopia_db.sqlite
 
@@ -151,6 +172,8 @@ delete from contactcustom;
 delete from contactphonenumbers;
 delete from contacts;
 .quit
+</pre>
+
 
 The first two are shell commands, the ''delete'' commands must by typed in the '''sqlite>''' prompt which appears after the sqlite3 command. Prompt is not included here to allow copy/paste.
 
