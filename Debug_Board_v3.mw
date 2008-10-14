@@ -2,7 +2,7 @@
 
 [[Image:Neo1973 debugboard v3 top.jpg|thumb|Debug Board v3, PCB photograph]]
 
-The Debug Board v3 is the most recent version of the Debug Board for [[Neo 1973]] and [[Neo FreeRunner]]. It is sold seperately from the phones. 
+The Debug Board v3 is the most recent version of the Debug Board for [[Neo 1973]] and [[Neo FreeRunner]]. It is sold seperately from the phones.
 
 You need the debug board to have a serial console and for JTAG.
 The debug board lets you:
@@ -11,7 +11,7 @@ The debug board lets you:
 
 * use JTAG to halt the processor anytime and analyze the system state (this can also be used with the gdb debugger)
 
-* enable write access to the NOR
+* enable write access to the [[NOR Flash|NOR]]
 
 Serial console and JTAG are very useful (actually, indispensable) for kernel debugging.
 
@@ -27,7 +27,7 @@ The [[Debug Board | debug board]] provides these key components.
 
 === USB Hub ===
 
-This bus-powered hub 
+This bus-powered hub
 * attaches to the laptop using its upstream port
 * attaches to the FT2232D for JTAG and serial console on downstream port 1
 * attaches to a free USB-A connector using downstream port 2
@@ -53,7 +53,7 @@ The actual JTAG port is connected with
 === Serial Port ===
 
 Instead of replicating a true RS232 port, we wanted to use a USB serial converter chip,
-such as the FT232 or the PL2303.   
+such as the FT232 or the PL2303.
 
 As it turns out, we can even use the second port of the FT2232 simultaneously with the JTAG.  So no extra FT232 or PL2303 is required.
 
@@ -78,7 +78,7 @@ Only if your board shows up as USB ID 0403:6010, then you will need to flash the
 
 {{note|FIC has done that for you, in case you have officially been supplied with the board.  However, if you are one of the early adopters, the configuration and USB vendorID / productID might have not yet been set correctly.}}
 
-In order to do so, you can use the ftdi_eeprom program from 
+In order to do so, you can use the ftdi_eeprom program from
 http://www.intra2net.com/de/produkte/opensource/ftdi/. Unfortunately, the latest version (0.2) doesn't yet contain support for our FT2232D, so you need the patch from http://people.openmoko.org/laforge/misc/debug_board_v2/ftdi_eeprom/ftdi_eeprom-0.2-moko.patch
 
 You may also need to apply the following patch to libftdi:
@@ -89,7 +89,7 @@ Furthermore, you will need the EEPROM config:
 http://people.openmoko.org/laforge/misc/debug_board_v2/ftdi_eeprom/neo1973_debug_board_v2.ftdi
 
 Once you have compiled ftdi_eeprom, you can run
- ftdi_eeprom --flash-eeprom neo1973_debug_board_v2.ftdi
+ftdi_eeprom --flash-eeprom neo1973_debug_board_v2.ftdi
 
 {{warning|Make sure you don't have any other FTDI FT232 / FT2232 based devices attached to the USB while running ftdi_eeprom.  It might be wise to disconnect everything but the debug board}}
 
@@ -108,31 +108,31 @@ FTDI close: 0
 
 Once the flashing has finished, just disconnect and reconnect, and you should see
 <pre>
-$ lsusb -v -d 0x1457:                                                                                                                                                                                               
-Bus 005 Device 009: ID 1457:5118  
+$ lsusb -v -d 0x1457:
+Bus 005 Device 009: ID 1457:5118
 Device Descriptor:
-  bLength                18
-  bDescriptorType         1
-  bcdUSB               2.00
-  bDeviceClass            0 (Defined at Interface level)
-  bDeviceSubClass         0 
-  bDeviceProtocol         0 
-  bMaxPacketSize0         8
-  idVendor           0x1457 
-  idProduct          0x5118 
-  bcdDevice            5.00
-  iManufacturer           1 Openmoko
-  iProduct                2 Debug Board for Neo1973
-  iSerial                 0 
-  bNumConfigurations      1
-  [...]
+bLength                18
+bDescriptorType         1
+bcdUSB               2.00
+bDeviceClass            0 (Defined at Interface level)
+bDeviceSubClass         0
+bDeviceProtocol         0
+bMaxPacketSize0         8
+idVendor           0x1457
+idProduct          0x5118
+bcdDevice            5.00
+iManufacturer           1 Openmoko
+iProduct                2 Debug Board for Neo1973
+iSerial                 0
+bNumConfigurations      1
+[...]
 </pre>
 
 ===== Flashing with Windows =====
 {{note|FIC has done that for you, in case you have officially been supplied with the board.  However, if you are one of the early adopters, the configuration and USB vendorID / productID might have not yet been set correctly.}}
 
 In order to do so, you can use the FTDI Mprog program from http://www.ftdichip.com/Resources/Utilities/MProg3.0_Setup.exe
- 
+
 You will need
 * The EEPROM Template http://people.openmoko.org/laforge/misc/debug_board_v2/mprog_template/neo1973_debugboard_v2.ept
 
@@ -146,8 +146,8 @@ Furthermore, you will need to do the following:
 
 ====== ftdi_sio module option ======
 
- rmmod ftdi_sio
- modprobe ftdi_sio vendor=0x1457 product=0x5118
+rmmod ftdi_sio
+modprobe ftdi_sio vendor=0x1457 product=0x5118
 
 or the equivalent in your modules.conf
 
