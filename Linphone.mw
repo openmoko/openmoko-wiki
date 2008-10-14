@@ -1,27 +1,29 @@
+'''Note: These instructions most likely don't work for 2008.8/9. See "discussion" tab.'''
+
 Linphone is a Voice over IP ( VoIP ) application. Its purpose is to make phone calls via the Internet, instead of using the telephony network. Here is a way to get the command line linphone working on OE based distros (tested on Qtopia, but should work on 200x.x and others). Ideally this could be interfaced with the dialer somehow.
 
- echo "src/gz celtune http://rabenfrost.net/celtune/ipk/armv4t" >/etc/opkg/general-feed.conf
- opkg update
- opkg install libmediastreamer0
- opkg -nodeps install linphone
- opkg -nodeps install liblinphone2 linphonec linphone-rings
- opkg install libexosip2
+echo "src/gz celtune http://rabenfrost.net/celtune/ipk/armv4t" >/etc/opkg/general-feed.conf
+opkg update
+opkg install libmediastreamer0
+opkg -nodeps install linphone
+opkg -nodeps install liblinphone2 linphonec linphone-rings
+opkg install libexosip2
 
- cd /etc/
- wget http://www.koolu.org/asound.conf
- wget http://www.koolu.org/voip-handset.state
+cd /etc/
+wget http://www.koolu.org/asound.conf
+wget http://www.koolu.org/voip-handset.state
 
- alsactl -f voip-handset.state restore # This step required to set proper audio parameters
+alsactl -f voip-handset.state restore # This step required to set proper audio parameters
 
- linphonec
- soundcard use 0
- proxy add
+linphonec
+soundcard use 0
+proxy add
 
- ''Enter proxy sip address:'' sip:sip.provider.com
- ''Your identity for this proxy:'' sip:xxxxxxxxxx@sip.provider.com
- ''Do you want to register on this proxy (yes/no):'' yes
- ''Specify register expiration time in seconds (default is 600):''
- ''Expiration:'' 600 seconds or so
+''Enter proxy sip address:'' sip:sip.provider.com
+''Your identity for this proxy:'' sip:xxxxxxxxxx@sip.provider.com
+''Do you want to register on this proxy (yes/no):'' yes
+''Specify register expiration time in seconds (default is 600):''
+''Expiration:'' 600 seconds or so
 
 Initial testing of this had the audio routed properly through the earpiece and good audio from the microphone. There was some echo on the non-Freerunner side, and on initial connection, a bit of a beeping sound. Otherwise, it's a go. Linphone uses only about 10-12% CPU (was using a PCM codec). Sound was decent to a cell phone in Canada using a Wifi connected Freerunner based in Costa Rica.
 
