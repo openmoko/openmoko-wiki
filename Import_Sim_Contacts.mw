@@ -3,37 +3,41 @@ Here is a [http://static.frimp.net/neo/addContact python script to import contac
 There was some talk on the mailing lists about apps that delete or update entries from the SIM, etc.  ALL this app does is create a new openmoko-contacts2 entry for each SIM contact entry.  It doesn't remove or change any data in either the SIM or openmoko-contacts2.
 
 Just copy it to your neo, install [http://static.frimp.net/neo/python-dbus_0.81.1-ml1_armv4t.ipk python-dbus], and then run:
-  python addContact sim
+python addContact sim
 
 On my neo, for some reason I can't connect to dbus when running from an ssh session (either USB or over Bluetooth).  So you'll probably have to run the above command in the neo Terminal.
 
 It will import all of the contacts on your SIM into openmoko-contacts.  Unfortunately, my SIM doesn't seem to give a contact type, so I arbitrarily set the first phone number for a given name to Home, the next to Work, and any remaining to Cell numbers.  I figure it's far easier to click the drop-down & correct them as necessary than to type all your contact info in manually on the neo keyboard, which was my option before I wrote this :-)
 
+== Dependencies ==
+This program depends on the libgsmd-tools package:
+
+opkg install libgsmd-tools
 
 ---
 Question:
 
-I am having an issue with the script. 
+I am having an issue with the script.
 
 Everytime i run the script I get a:
 
- Traceback (most recent call last):
-   File "addContact", line 5, in <module>
-     import dbus
-   File "/usr/lib/python2.5/site-packages/dbus/__init__.py", line 96, in <module>
-     from dbus._dbus import Bus, SystemBus, SessionBus, StarterBus
-   File "/usr/lib/python2.5/site-packages/dbus/_dbus.py", line 45, in <module>
-     from dbus.bus import BusConnection
-   File "/usr/lib/python2.5/site-packages/dbus/bus.py", line 33, in <module>
-     from dbus.connection import Connection
-   File "/usr/lib/python2.5/site-packages/dbus/connection.py", line 38, in <module>
-     from dbus.proxies import ProxyObject
-   File "/usr/lib/python2.5/site-packages/dbus/proxies.py", line 31, in <module>
-     from dbus._expat_introspect_parser import process_introspection_data
-   File "/usr/lib/python2.5/site-packages/dbus/_expat_introspect_parser.py", line 22, in <module>
-     from xml.parsers.expat import ExpatError, ParserCreate
- ImportError: No module named xml.parsers.expat
- 
+Traceback (most recent call last):
+File "addContact", line 5, in <module>
+import dbus
+File "/usr/lib/python2.5/site-packages/dbus/__init__.py", line 96, in <module>
+from dbus._dbus import Bus, SystemBus, SessionBus, StarterBus
+File "/usr/lib/python2.5/site-packages/dbus/_dbus.py", line 45, in <module>
+from dbus.bus import BusConnection
+File "/usr/lib/python2.5/site-packages/dbus/bus.py", line 33, in <module>
+from dbus.connection import Connection
+File "/usr/lib/python2.5/site-packages/dbus/connection.py", line 38, in <module>
+from dbus.proxies import ProxyObject
+File "/usr/lib/python2.5/site-packages/dbus/proxies.py", line 31, in <module>
+from dbus._expat_introspect_parser import process_introspection_data
+File "/usr/lib/python2.5/site-packages/dbus/_expat_introspect_parser.py", line 22, in <module>
+from xml.parsers.expat import ExpatError, ParserCreate
+ImportError: No module named xml.parsers.expat
+
 Got any suggestions?
 Cheers!
 
@@ -45,26 +49,26 @@ Cheers!
 Remark from blutsauger:
 The problem, why ssh won't work (you get a message like this one):
 
-  dbus.exceptions.DBusException: org.freedesktop.DBus.Error.Spawn.ExecFailed: dbus-launch failed to     
-  autolaunch D-Bus session: Autolaunch requested, but X11 support not compiled in.
+dbus.exceptions.DBusException: org.freedesktop.DBus.Error.Spawn.ExecFailed: dbus-launch failed to
+autolaunch D-Bus session: Autolaunch requested, but X11 support not compiled in.
 
 dbus could find its session address somehow through X11, but as said, it is not supported. But there is another solution:
 Using the Neo on-screen keyboard type (or source a script):
-  echo -n 'export ' > /home/root/x
-  set | grep DBUS >> /home/root/x
+echo -n 'export ' > /home/root/x
+set | grep DBUS >> /home/root/x
 
 In your ssh session type:
-  . /home/root/x
+. /home/root/x
 
 Then you have the dbus Id from the local X11 console in the ssh session and the addContact script should run fine.
 
 Better still - add the following lines below the import section of the script:
 
- ps = os.popen ('ps auxwwwwe | grep -m 1 DBUS_SESSION_BUS_ADDRESS')
- l = ps.read ()
- r = re.compile ('DBUS_SESSION_BUS_ADDRESS=(\S+)')
- m = r.search (l)
- a = m.expand ('\\1')
- os.environ ['DBUS_SESSION_BUS_ADDRESS'] = a
+ps = os.popen ('ps auxwwwwe | grep -m 1 DBUS_SESSION_BUS_ADDRESS')
+l = ps.read ()
+r = re.compile ('DBUS_SESSION_BUS_ADDRESS=(\S+)')
+m = r.search (l)
+a = m.expand ('\\1')
+os.environ ['DBUS_SESSION_BUS_ADDRESS'] = a
 
-[[category:Advanced End User]]
+[[Category:Advanced End User]]
