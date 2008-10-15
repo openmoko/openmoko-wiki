@@ -37,15 +37,15 @@ mount /media/card
 === Entry in opkg.conf File ===
 
 In your /etc/opkg.conf file, after "dest root /" add a new line:
-dest card /media/card/opkg
+<pre>dest card /media/card/opkg</pre>
 
 Create /media/card/opkg folder
-mkdir /media/card/opkg
+<pre>mkdir /media/card/opkg</pre>
 
 === Installing Packages on the Card ===
 
 When installing a package, use the -d option to have the package installed into the "card" destination:
-opkg install -d card python-core
+<pre>opkg install -d card python-core</pre>
 
 This will put all files (binaries and libraries) on the card, under the folder specified in the ipkg.conf file.
 
@@ -59,17 +59,17 @@ The better solution is to use ipkg-link from the 'ipkg-utils' package, but 'bett
 Ipkg-utils is a package that provides some additional functionality for ipkg.  A very useful tool is ipkg-link, which creates symbolic links for packages installed in non-root locations (such as a card) back to the root file system.
 
 To make this working with Opkg, you've simply to do:
-ln -s /etc/opkg.conf /etc/ipkg.conf
-ln -s /media/card/opkg/usr/lib/opkg /media/card/opkg/usr/lib/ipkg
+<pre>ln -s /etc/opkg.conf /etc/ipkg.conf
+ln -s /media/card/opkg/usr/lib/opkg /media/card/opkg/usr/lib/ipkg</pre>
 
 To get ipkg-utils, run:
-ipkg install ipkg-utils
+<pre>ipkg install ipkg-utils</pre>
 
 To create symbolic links to your root system for a specific package, run: ipkg-link add <package>.  For example, for python-core use:
-ipkg-link add python-core
+<pre>ipkg-link add python-core</pre>
 
 To create symbolic links for all packages installed in a location, run:
-ipkg-link mount /media/card/ipkg
+<pre>ipkg-link mount /media/card/ipkg</pre>
 
 The ''ipkg-link remove'' and ''ipkg-link unmount'' commands remove the symlinks for a package or all packages.
 
@@ -79,10 +79,10 @@ There is a list of the options for the ipkg command under "How do I use it?" [ht
 Another way to add bin and lib files to your system is by modifying your environment variables in /etc/profile as follows:
 
 On the line that defines the PATH variable, add:
-PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin:/media/card/ipkg/usr/bin
+<pre>PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin:/media/card/ipkg/usr/bin</pre>
 
 Then, before the 'export' line add:
-LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/media/card/ipkg/usr/lib
+<pre>LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/media/card/ipkg/usr/lib</pre>
 
 Then modify the 'export' line and add LD_LIBRARY_PATH to the end.
 
