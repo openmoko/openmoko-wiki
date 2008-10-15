@@ -141,14 +141,14 @@ Bluetooth should behave just like our usbnet and provide full TCP/IP access to t
 '''On the laptop'''
 
 * Start bluetooth
- /etc/init.d/bluetooth start
+/etc/init.d/bluetooth start
 
 * Start pand as server
- pand -s
+pand -s
 
 * As soon as pand is started on the phone configure your IP address
- ip a add 10.0.0.1/24 dev bnep0
- ip l set bnep0 up
+ip a add 10.0.0.1/24 dev bnep0
+ip l set bnep0 up
 
 * Configure IP forwarding and masquerading to your liking (see [[USB_Networking]]). You can even set up Udev rules to do this for you once the bnep0 interface appears.
 
@@ -160,21 +160,39 @@ Bluetooth should behave just like our usbnet and provide full TCP/IP access to t
 * Power on bluetooth (see above)
 
 * Scan for the laptop
- root@fic-gta01:~$ hcitool scan
- Scanning ...
-         00:0E:6D:C0:0l:6A       Sho
-         00:20:E0:5A:FE:C8       BlueZ (0)
+root@fic-gta01:~$ hcitool scan
+Scanning ...
+00:0E:6D:C0:0l:6A       Sho
+00:20:E0:5A:FE:C8       BlueZ (0)
 
 * Connect to the laptop pand
- root@fic-gta01:~$ pand -c 00:20:E0:5A:FE:C8
+root@fic-gta01:~$ pand -c 00:20:E0:5A:FE:C8
 
 * Configure your IP address
- ip a add 10.0.0.2/24 dev bnep0
- ip r add default via 10.0.0.1
+ip a add 10.0.0.2/24 dev bnep0
+ip r add default via 10.0.0.1
 
 * Sometimes you may need to bring up the bnep0 on the phone as well:
- ip l set bnep0 up
+ip l set bnep0 up
 * Enjoy
+
+
+*--[[User:Mantis|Mantis]] 18:37, 15 October 2008 (UTC)  Note for use on OpenSuse 11.0 - I was getting a connection failure with 'Host is down(112)' errors in /var/log/messages:
+I found that editing  /etc/bluetooth/hcid.conf  to set  'pscan enable'  instead of 'pscan disable' and making passkey consistent with Neo Freerunner made it work... ie
+------------  begin hcid.conf
+device {
+iscan enable;
+pscan enable;
+name "BlueServerName(%d)";
+class 0x100100;
+}
+options {
+security user;
+passkey "123456etc";
+}
+------------  end hcid.conf
+You should see in the server's /var/log/messages a line like:
+'New connection from 00:02:20:23:23:31 at bnep0'
 
 ===== Bluetooth networking with a MacOS X system =====
 
