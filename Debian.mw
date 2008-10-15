@@ -87,33 +87,41 @@ Issues:
 ** Setting the clock could be done via GPS: [[Getting_GPS_console_output_with_gllin#GPRMC_message]]
 
 == WLAN ==
+=== wifi-radar ===
+
+If you don't want to mess up with configuration files and is looking for an easy gui for wireless configuration, then wifi-radar is what you are looking for.
+
+<pre>apt-get install wifi-radar
+wifi-radar</pre>
+
+If you are looking for more, read on...
 
 === Installing prerequisites ===
 
 Make sure the following packages are installed
- apt-get install wireless-tools wpasupplicant dhcp3-client
+apt-get install wireless-tools wpasupplicant dhcp3-client
 
 === Example configurations ===
 
-==== Single network configuration ==== 
+==== Single network configuration ====
 
-Assuming your wireless router uses WPA security and DHCP, 
+Assuming your wireless router uses WPA security and DHCP,
 edit <code>/etc/network/interfaces</code> to include a section like this:
 <pre>
 auto eth0
 iface eth0 inet dhcp
-       wpa-driver wext
-       wpa-ssid "MyWirelessName"
-       wpa-psk "MyWirelessPassword"
+wpa-driver wext
+wpa-ssid "MyWirelessName"
+wpa-psk "MyWirelessPassword"
 </pre>
 Where, of course, you're using the name of your wireless network and it's password
 instead of ''MyWirelessName'' and ''MyWirelessPassword''.
 
 You can test by running
- # ifup eth0
+# ifup eth0
 
 You can determine your IP address by running
- # ifconfig eth0
+# ifconfig eth0
 
 Issues:
 * only works if in presence of wireless network on boot, or when manually running <code>ifup eth0</code>
@@ -128,73 +136,73 @@ Once wpa_supplicant has begun managing your wifi interface, you should type "wpa
 '''Todo''': Which of the issues that single network configurations suffer from are addressed by WPA roaming mode?  Would ifplugd / guessnet help, or just make things more complicated?
 
 * Roaming from network to network is not automatic.  Instead, you need to manually run "wpa_action eth0 stop; ifup eth0" to switch networks
- 
+
 ===== wpa_supplicant.conf =====
 
 To configure WPA to roam between wireless networks, you will need to create a new configuration file:
 
- /etc/wpa_supplicant/wpa_supplicant.conf
+/etc/wpa_supplicant/wpa_supplicant.conf
 
 a template for this file (and more documentation) is available in:
 
- /usr/share/doc/wpasupplicant/examples/wpa-roam.conf
+/usr/share/doc/wpasupplicant/examples/wpa-roam.conf
 
 You'll need to add networks to this file.  Examples:
 
 WEP:
 
- network={
-        ssid="MySSID"
-        key_mgmt=NONE
-        wep_key0="abcdefghijklm"
- #      wep_key0=6162636465  # <- no quotes, so hex number 
-        wep_tx_keyidx=0
-        id_str="MySSID"
- }
+network={
+ssid="MySSID"
+key_mgmt=NONE
+wep_key0="abcdefghijklm"
+#      wep_key0=6162636465  # <- no quotes, so hex number
+wep_tx_keyidx=0
+id_str="MySSID"
+}
 
 No key:
 
- network={
-        ssid="SomeNetwork"
-        key_mgmt=NONE
- }
+network={
+ssid="SomeNetwork"
+key_mgmt=NONE
+}
 
 WPA:
 
- network={
-       ssid="Example WPA Network"
-       psk="mysecretpassphrase"
-       id_str="home"
- }
+network={
+ssid="Example WPA Network"
+psk="mysecretpassphrase"
+id_str="home"
+}
 
 ===== /etc/network/interfaces =====
 
 Next, you'll need to edit /etc/network/interfaces.  This lets you configure your wireless networks to use dhcp, or other appropriate TCP/IP settings:
 
- auto eth0
- iface eth0 inet manual
-        wpa-driver wext
-        wpa-roam /etc/wpa_supplicant/wpa_supplicant.conf
- 
- # MySSID comes from an id_str above.
- iface MySSID inet dhcp
- 
- # default is what's used if there is no id_str setting.
- # so the 'SomeNetwork' network will use DHCP.
- iface default inet dhcp
- 
- iface home inet static
-       # static interface settings, or whatever...
+auto eth0
+iface eth0 inet manual
+wpa-driver wext
+wpa-roam /etc/wpa_supplicant/wpa_supplicant.conf
+
+# MySSID comes from an id_str above.
+iface MySSID inet dhcp
+
+# default is what's used if there is no id_str setting.
+# so the 'SomeNetwork' network will use DHCP.
+iface default inet dhcp
+
+iface home inet static
+# static interface settings, or whatever...
 
 Finally, if you want attempts to access the internet to default to eth0 (and not usb0), then comment out this line under usb0 adapter configuration:
 
-       gateway 192.168.0.200
+gateway 192.168.0.200
 
 For some reason, I had to reboot for the id_str settings to take effect.  However, you should now be able to use "ifup eth0" to associate with the access point and "wpa_action eth0 stop" to down the wifi adapter.
 
 === Further reading ===
 
-To use all the possibilities of <code>wpasupplicant</code> like roaming and automatic connection to different networks, 
+To use all the possibilities of <code>wpasupplicant</code> like roaming and automatic connection to different networks,
 you should read <code>/usr/share/doc/wpasupplicant/README.Debian.gz</code>
 
 == Bluetooth ==
