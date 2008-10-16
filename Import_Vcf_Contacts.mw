@@ -178,8 +178,34 @@ delete from contacts;
 The first two are shell commands, the ''delete'' commands must by typed in the '''sqlite>''' prompt which appears after the sqlite3 command. Prompt is not included here to allow copy/paste.
 
 ==== Exporting ====
+Make sure you have sqlite3 client installed
+<pre>opkg install sqlite3</pre>
 
-Does anyone know how to export back to VCF contacts? [[Backup]] page describes where the contacts are, but it does not help when moving eg. to other distribution like FSO.
+Now we can play with the PIM database file located at
+<pre>/home/root/Applications/Qtopia/qtopia_db.sqlite</pre>
+
+Exporting to VCF can be done via qtmail's 'send all' function (which only supports sms, bluetooth). Exporting all the contacts to a VCF file has yet to be documented. Here is [http://lists.openmoko.org/pipermail/community/2008-October/033588.html Vasco Névoa's contribution] to export to a comma-delimited file:
+<pre>
+sqlite3 ~/Applications/Qtopia/qtopia_db.sqlite \
+'Select distinct nickname, title, firstname, middlename, lastname, suffix, \
+profession, b_webpage, company, office, department, jobtitle, default_email, \
+phone_number, h_webpage, spouse, gender, birthday, anniversary from contacts, \
+contactphonenumbers where contacts.recid=contactphonenumbers.recid;'\
+| sed 's/|/\t/g' > addressbook.txt
+</pre>
+
+Vasco says:
+<pre>
+Each contact that has more than one phone number will appear multiple
+times because I haven't yet come up with a clean way to show the "join"
+between the "contacts" and "contactphonenumbers" tables, so for now it
+just duplicates the whole line, with the only difference being the phone
+number.
+
+Anyone versed in SQL will be able to hack this into a full VCF file
+generator... or you can just go the Python way (but I prefer to use the
+nice tools already in place)
+</pre>
 
 == Export raw config (including contacts) with Qtopia ==
 
