@@ -285,10 +285,10 @@ download unstable: http://downloads.freesmartphone.org/fso-unstable/images/
 You can install <tt>[http://packages.debian.org/search?keywords=dselect dselect]</tt>(~2.2MB) or <tt>[http://packages.debian.org/search?keywords=aptitude aptitude]</tt>(~12MB) to visually inspect the available debian packages using the desktop's console.<br>
 Also the gtk-based package-manager <tt>[http://packages.debian.org/search?keywords=synaptic synaptic]</tt>(~15.7MB) is probably working.<br>
 Finally, on constrained systems, just issue the command:
- grep -e Package: -e Description /var/lib/dpkg/available|more
+<pre>grep -e Package: -e Description /var/lib/dpkg/available|more</pre>
 == Web Browser ==
 [http://lists.openmoko.org/nabble.html#nabble-td781547 Arne Anka suggested] trying the light-weight webkit-based [http://en.wikipedia.org/wiki/Midori_(browser) midori] browser:
-  apt-get install midori
+<pre>apt-get install midori</pre>
 
 == TangoGPS ==
 {{main|TangoGPS}}
@@ -303,26 +303,26 @@ There is also a hack to convert drm protected adobe ebooks to .cbz files readabl
 
 xfce is small and lightweight and so is quite fast for the FreeRunner.
 
- apt-get install xfce4
- cp /etc/init.d/zhone-session /etc/init.d/xfce
+<pre>apt-get install xfce4
+cp /etc/init.d/zhone-session /etc/init.d/xfce</pre>
 
 Then you may hack /etc/init.d/xfce making
 
- PROG_FSO=/usr/bin/startxfce4
+<pre>PROG_FSO=/usr/bin/startxfce4</pre>
 
 Customize the boot process (this may have to be redone when zhone-session is updated):
 
- update-rc.d -f zhone-session remove
- update-rc.d -f xfce defaults
+<pre>update-rc.d -f zhone-session remove
+update-rc.d -f xfce defaults</pre>
 
 edit your /etc/hosts to have :
 
- 127.0.0.1 localhost debian-gta02
+<pre>127.0.0.1 localhost debian-gta02</pre>
 
 Start XFCE !
 
- /etc/init.d/zhone-session stop
- /etc/init.d/xfce start
+<pre>/etc/init.d/zhone-session stop
+/etc/init.d/xfce start</pre>
 
 The desktop takes a while to start but once up was snappy as can be expected.
 I've not yet looked at the reason for the seemingly too slow start for the desktop.
@@ -332,7 +332,7 @@ The matchbox keyboard is available in "Accessories".
 
 If you want to display the screen on the long side (ie rotated, 4:3 aspect), add the following to the /etc/X11/xorg.conf in both the Device and InputDevice sections :
 
-  Option          "Rotate"                "CCW"
+<pre>Option          "Rotate"                "CCW"</pre>
 
 and then (re)start xfce.
 
@@ -340,15 +340,85 @@ and then (re)start xfce.
 
 XFCE's window manager is poorly configured for use with the FreeRunner.  Fortunately, matchbox's window manager is compatible with xfce.  To use the matchbox window manager, arrange to run the following commands at X startup.  If you followed the instructions above to run X as a normal user, put this in ~/.xinitrc:
 
-#!/bin/sh
+<pre>#!/bin/sh
 
 zhone &
 matchbox-keyboard-toggle &
 exec matchbox-window-manager -use_titlebar no -use_cursor no &
-xfce4-session
+xfce4-session</pre>
 
 
 {{Todo|And if I didn't run X as a normal user?}}
+
+== Using matchbox-window-manager with fbpanel as normal user without gdm ==
+fbpanel is a fast, lightweight, gtk2 desktop panel.
+[[Image:Debian_fbpanel_zhone.png|right|thumb|300px|Debian with fbpanel, matchbox-window-manager and Zhone running]]
+<ol><li>Follow http://wiki.openmoko.org/wiki/Debian#Running_X_as_normal_user</li>
+<li>Customize the boot process:
+<pre>sudo cp /etc/init.d/zhone-session /etc/init.d/xserver
+sudo nano /etc/init.d/xserver</pre>
+Find (all in one line)
+<pre>start-stop-daemon --start --pidfile ${PIDFILE}
+--make-pidfile --background --exec /bin/su --
+--login --command "${PROG_XINIT} ${PROG_XSESSION} ${PROG_FSO}
+-- $X_OPTIONS" $USER</pre>
+Change it to (all in one line):
+<pre>start-stop-daemon --start --pidfile ${PIDFILE}
+--make-pidfile --background --exec /bin/su --
+--login -c "startx" ${USER}</pre>
+Add script to daemons:
+<pre>sudo update-rc.d -f zhone-session remove
+sudo update-rc.d -f startx defaults</pre></li>
+
+<li>Install fbpanel:
+<pre>sudo apt-get install fbpanel</pre></li>
+<li>Customize configs:
+<ol><li><pre>~/.xinitrc</pre>
+<pre>
+#!/bin/sh
+export GTK_MODULES=libgtkstylus.so
+zhone &
+xsetroot -solid black
+matchbox-keyboard-toggle &
+matchbox-window-manager -use_titlebar yes &
+# -use_titlebar yes to minimize & toggle between apps
+# fbpanel's taskbar does not work with matchbox-window-manager
+#~/bin/auxlaunch &
+while true;
+do
+fbpanel;
+sleep 1;
+done;
+</pre></li>
+
+<li>Read http://fbpanel.sourceforge.net/docs.html#config
+<pre>~/.fbpanel/default</pre>
+<pre>
+mkdir ~/.fbpanel
+cp /etc/fbpanel/default ~/.fbpanel/default
+nano ~/.fbpanel/default
+</pre>
+Remove section with 'taskbar' plugin - it's useless with matchbox-window-manager. You may add plugin 'cpu'
+<pre>Plugin {
+type = cpu
+}</pre>
+Also, plugin 'genmon' is useful:
+<pre>Plugin {
+type = genmon
+config {
+Command = echo -e $(grep "MemFree" /proc/meminfo | awk '{printf "%0.2f", $2 / 1024}') "|" $(cat /proc/loadavg | awk '{print $3}') "|" $(apm | awk '{print $5}')
+PollingTime = 60
+TextSize = small
+TextColor = darkblue
+}
+}</pre>
+After 'killall fbpanel' it will show: free mem in megabytes | loadavg | battery % left.</li>
+<li>Default theme is ugly. You can change it and / or make font's bigger:
+<pre>~/.gtkrc-2.0</pre>
+<pre>sudo apt-cache search gtk2-engines
+sudo apt-get install gtk2-engines gtk-theme-switch
+export DISPLAY=:0 gtk-theme-switch2</pre>
+Now choose your theme, font and save it. To see changes do 'killall fbpanel'.</li></ol></li></ol>
 
 = Miscellaneous =
 == Making the cursor invisible ==
