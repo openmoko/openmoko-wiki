@@ -1,4 +1,4 @@
-Openmoko uses '''D-Bus''', a message bus system which provides a simple way for applications to talk to one another and to be available as services in the system. If the application providing the service is not running when a message is sent, the application will be started.
+Openmoko uses '''[http://www.freedesktop.org/wiki/DBus D-Bus]''', a message bus system which provides a simple way for applications to talk to one another and to be available as services in the system. If the application providing the service is not running when a message is sent, the application will be started.
 
 There are two separate busses:
 *a system bus for root which runs whenever the phone is on
@@ -8,7 +8,7 @@ There are two separate busses:
 
 These can at least be defined in /usr/share/dbus-1.0/services/ and /usr/share/dbus-1/services/
 
-* org.openmoko.Dialer
+* org.freesmartphone.Phone
 * org.gnome.evolution.dataserver.AddressBook
 * org.gnome.evolution.dataserver.Calendar
 * org.gnome.GConf
@@ -26,14 +26,22 @@ There is information about these in /etc/dbus-1/system.d/
 
 === Command line ===
 
-For simple uses, there's a command dbus-send. 
+For simple uses, there's a command mdbus. Try
+<pre>
+mdbus -s 
+</pre>
+to explore the DBus environment.
 
-For example, to dial a number:
- dbus-send --print-reply --dest="org.openmoko.Dialer" /org/openmoko/Dialer org.openmoko.Dialer.Dial string:12345
+For example, to dial a number (using FSO milestone 3):
+<pre>
+mdbus -s org.freesmartphone.ogsmd /org/freesmartphone/GSM/Device org.freesmartphone.GSM.Call.Initiate '12345' 'voice'
+</pre>
 
 === Python ===
 
 To use D-Bus in [[Python]], the package python-dbus needs to be compiled and installed.
+
+'''Note: This example does not work! Please update if you know how to get it working. See also 'discussion' tab.'''
 
 To dial a number:
 <pre>
@@ -48,12 +56,18 @@ interface.Dial("12345")
 
 The first "org.openmoko.Dialer" is the ''bus name'' of the service on the bus and "/org/openmoko/Dialer" is an ''object path'' in the service. Before calling a method on the object via the ''proxy object'' we still need to specify which ''interface'' the method belongs to: the second (and third) "org.openmoko.Dialer". Finally "Dial" is the method in the interface.
 
+To run the program use the following:
+<pre>
+dbus-launch python my_program.py
+</pre>
+
 == See also ==
 * [[Dbus device API]]
 
 == External links ==
-* [http://www.freedesktop.org/wiki/Software/dbus dbus homepage]
+* [http://docs.freesmartphone.org/ DBus API documentation]
+* [http://dbus.freedesktop.org/doc/dbus-python/api/ DBus Python API]
 * [http://dbus.freedesktop.org/doc/dbus-python/doc/tutorial.html dbus-python tutorial]
 
-[[Category:D-Bus| ]]
+[[Category:D-Bus|D-Bus]]
 [[Category:Application Developer]]
