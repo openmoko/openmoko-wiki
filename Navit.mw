@@ -23,36 +23,36 @@ Thanks to [[User:Alessandro | Alessandro]], stefan_schmidt, cp15 and all Navit d
 
 I got navit set up and configured to the point where it follows me on the map.  It doesn't have street names or any other information, just the map and the cursor showing the location and direction.  Here's what I did:
 * Install navit ipkg on NEO (because of a bug in opkg it's necessary to wget then install, instead of pointing opkg at the URL):
- wget http://www.acoveo.org/navit_0.1.0+svnrev1255-r0_armv4t.ipk
- opkg install --force-depends navit_0.1.0+svnrev1255-r0_armv4t.ipk
+wget http://www.acoveo.org/navit_0.1.0+svnrev1255-r0_armv4t.ipk
+opkg install --force-depends navit_0.1.0+svnrev1255-r0_armv4t.ipk
 This package includes a patch to navit which improves map panning speeds.
 * Or roll your own from svn using the toolchain (having checked out trunk in the navit directory, and assuming you have written navit_control):
- . /usr/local/openmoko/arm/setup-env
- om-conf navit --disable-samplemap
- om-make-ipkg navit navit_control
+. /usr/local/openmoko/arm/setup-env
+om-conf navit --disable-samplemap
+om-make-ipkg navit navit_control
 You may want to apply the map panning patch from acoveo: http://www.acoveo.org/openmoko/font_scaling_patch.diff
 * Set up your local maps
 ** Openstreetmap - follow directions at http://wiki.navit-project.org/index.php/OpenStreetMaps
 *** There are some up-to-date maps already prepared, e.g.:
- wget -O germany.bin http://maps.navit-project.org/api/map/?bbox=5.185546875,46.845703125,15.46875,55.634765625
+wget -O germany.bin http://maps.navit-project.org/api/map/?bbox=5.185546875,46.845703125,15.46875,55.634765625
 ** Here's an example of what I did to get the maps for the area around Seattle, Wa where I live:
 *** figured out map coordinates using http://informationfreeway.org/?lat=47.520270037501454&lon=-122.20130713167327&zoom=9&layers=B000F000
 *** Downloaded 4 regions from openstreetmaps ([[Navit#Script_to_download_OSM_maps|see below]] for a script to do this for you automatically for largish areas)
- wget -O map1.osm http://www.openstreetmap.org/api/0.5/map?bbox=-122.2,47.5,-122,47.7
- wget -O map2.osm http://www.openstreetmap.org/api/0.5/map?bbox=-122.4,47.5,-122.2,47.7
- wget -O map3.osm http://www.openstreetmap.org/api/0.5/map?bbox=-122.4,47.3,-122.2,47.5
- wget -O map4.osm http://www.openstreetmap.org/api/0.5/map?bbox=-122.2,47.3,-122,47.5
+wget -O map1.osm http://www.openstreetmap.org/api/0.5/map?bbox=-122.2,47.5,-122,47.7
+wget -O map2.osm http://www.openstreetmap.org/api/0.5/map?bbox=-122.4,47.5,-122.2,47.7
+wget -O map3.osm http://www.openstreetmap.org/api/0.5/map?bbox=-122.4,47.3,-122.2,47.5
+wget -O map4.osm http://www.openstreetmap.org/api/0.5/map?bbox=-122.2,47.3,-122,47.5
 *** Made a navit binary map file using the osm2navit binary that comes with the navit package on my linux box (it is also installing to the target from the .ipk)
- cat *.osm | osm2navit --dedupe-ways mymap.bin
+cat *.osm | osm2navit --dedupe-ways mymap.bin
 
 http://downloads.cloudmade.com/ also has up-to-date maps from OpenStreetMap by country.
 
 *** Copied the map to the NEO
- scp mymap.bin root@neo:/home/root/card/map
+scp mymap.bin root@neo:/home/root/card/map
 *** Change the navit.xml file on the NEO to use the new map
- cp /usr/share/navit/navit.xml ~/.navit/navit.xml
- vi ~/.navit/navit.xml
- <map type="binfile" enabled="yes" data="/home/root/card/map/mymap.bin" />
+cp /usr/share/navit/navit.xml ~/.navit/navit.xml
+vi ~/.navit/navit.xml
+<map type="binfile" enabled="yes" data="/home/root/card/map/mymap.bin" />
 * Run navit
 ** Start gllin (for GTA01)
 ** Start gpsd ( gpsd /tmp/nmeaNP )
@@ -66,14 +66,14 @@ http://downloads.cloudmade.com/ also has up-to-date maps from OpenStreetMap by c
 They are now displayed on Openmoko using the CVS version of Navit (20071217).
 
 === Point selection by pen ===
-Easier using the CVS version (20071217). 
+Easier using the CVS version (20071217).
 
 === Route > Destination ===
-The Route > Destination menu item crashes the software (20071217 and 0.04, but fixed in 0.1.0+svnrev1255). 
+The Route > Destination menu item crashes the software (20071217 and 0.04, but fixed in 0.1.0+svnrev1255).
 
 A workaround is to set the LANG variable before calling navit. For example:
 
- LANG=fr_FR.UTF-8 navit
+LANG=fr_FR.UTF-8 navit
 
 Note that a short syntax (e.g. LANG=fr) would not work.
 
@@ -86,71 +86,75 @@ Navit can speak if you install eSpeak + speech-dispatcher and updates your navit
 
 For adventurous people, one way to do this:
 
- * mokoTTS aims to integrate these packages in OM:
- http://projects.openmoko.org/projects/mokotts/
- 
- install espeak, dotconf, and then speech-dispatcher.
- note: running 2008.8 updating from zecke's "testing" repo does not require "dotconf"
- 
- * change the speech tag in navit.xml:
- <speech type="cmdline" data="spd-say '%s'" />
- 
- or "spd-say -l fr '%s'" for using the French voice for example.
+* mokoTTS aims to integrate these packages in OM:
+http://projects.openmoko.org/projects/mokotts/
 
-=== Script to download OSM maps ===
+install espeak, dotconf, and then speech-dispatcher.
+note: running 2008.8 updating from zecke's "testing" repo does not require "dotconf"
+
+* change the speech tag in navit.xml:
+<speech type="cmdline" data="spd-say '%s'" />
+
+or "spd-say -l fr '%s'" for using the French voice for example.
+
+=== Maps ===
+==== Downloadable Maps ====
+Downloadable OSM maps for most areas of the world are available free in Navit format from Cloudmade at [http://downloads.cloudmade.com/ http://downloads.cloudmade.com/]. Simply navigate to  the country or region you want and download the <code>.navit.bin.zip</code> version of the map. You'll have to exatract the <code>.bin</code> file from the ZIP archive before using it with Navit.
+ 
+==== Script to download OSM maps ====
 [[User:Wurp|Wurp]] wrote a little python script to download all OSM maps within a lat/long rectangle.  Just copy the script to a file called dlOSM.sh, chmod +x it, and run it like
- dlOSM.sh <minimum latitude> <maximum latitude> <minimum longitude> <maximum longitude>
+dlOSM.sh <minimum latitude> <maximum latitude> <minimum longitude> <maximum longitude>
 
 It takes a long time for large maps.  I could optimize it some by having it try to get a big section at once, then if it fails, break it into smaller pieces and recurse.  I'm not sure when/if I'll get around to that...
 
 dlOSM.sh:
 <pre>
- #!/usr/bin/python
- 
- import os
- import sys
- #import math
- 
- def doIt(cmd):
-   os.system(cmd)
- 
- def getOsms(basename, minLat, maxLat, minLon, maxLon):
-   '''basename - base name of map, maps are named {basename}{count}.osm
-      minLat - latitude of the west side of the map
-      maxLat - latitude of the east side of the map
-      minLon - longitude of the north side of the map
-      maxLon - longitude of the south side of the map'''
- 
-   wgetCmdTemplate = 'wget -O %s%s.osm http://api.openstreetmap.org/api/0.5/map?bbox=%s,%s,%s,%s'
- 
-   currLat = minLat
-   mapCount = 0
-   while currLat < maxLat:
-     nextLat = min(currLat + 0.1, maxLat)
- 
-     currLon = minLon
-     while currLon < maxLon:
-       nextLon = min(currLon + 0.1, maxLon)
- 
-       doIt(wgetCmdTemplate % (basename, mapCount, currLon, currLat, nextLon, nextLat))
- 
-       currLon = nextLon
-       mapCount = mapCount + 1
- 
-     currLat = nextLat
- 
- (minLat, maxLat, minLon, maxLon) = map(float, sys.argv[1:])
- getOsms('map', minLat, maxLat, minLon, maxLon)
+#!/usr/bin/python
+
+import os
+import sys
+#import math
+
+def doIt(cmd):
+os.system(cmd)
+
+def getOsms(basename, minLat, maxLat, minLon, maxLon):
+'''basename - base name of map, maps are named {basename}{count}.osm
+minLat - latitude of the west side of the map
+maxLat - latitude of the east side of the map
+minLon - longitude of the north side of the map
+maxLon - longitude of the south side of the map'''
+
+wgetCmdTemplate = 'wget -O %s%s.osm http://api.openstreetmap.org/api/0.5/map?bbox=%s,%s,%s,%s'
+
+currLat = minLat
+mapCount = 0
+while currLat < maxLat:
+nextLat = min(currLat + 0.1, maxLat)
+
+currLon = minLon
+while currLon < maxLon:
+nextLon = min(currLon + 0.1, maxLon)
+
+doIt(wgetCmdTemplate % (basename, mapCount, currLon, currLat, nextLon, nextLat))
+
+currLon = nextLon
+mapCount = mapCount + 1
+
+currLat = nextLat
+
+(minLat, maxLat, minLon, maxLon) = map(float, sys.argv[1:])
+getOsms('map', minLat, maxLat, minLon, maxLon)
 </pre>
 
 <onlyinclude>
 {{ApplicationBox|
-  Name=[[Navit]]|
-  Description=Navit is a car navigation system with routing engine.|
-  Screenshot=Screenshot-3.png|
-  Homepage=http://navit.sourceforge.net|
-  TestedOn=|
-  PackageName=
+Name=[[Navit]]|
+Description=Navit is a car navigation system with routing engine.|
+Screenshot=Screenshot-3.png|
+Homepage=http://navit.sourceforge.net|
+TestedOn=|
+PackageName=
 }}
 </onlyinclude>
 
