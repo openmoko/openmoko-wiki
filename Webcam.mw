@@ -17,48 +17,48 @@ To be safe, you just first ensure the webcam works on a regular PC, and Linux in
 The 2.6.24 kernel is provided without video input support enabled. There is a way to add the necessary modules without recompiling everything:
 
 * download the source code for the kernel:
- # wget http://kernel.org/pub/linux/kernel/v2.6/linux-2.6.24.tar.bz2
+# wget http://kernel.org/pub/linux/kernel/v2.6/linux-2.6.24.tar.bz2
 * make sure you have bzip2 and development tools installed:
- # apt-get install bzip2 gcc make libc6-dev libncurses5-dev
+# apt-get install bzip2 gcc make libc6-dev libncurses5-dev
 * uncompress it in /usr/src:
- # cd /usr/src
- # tar -xjvf $OLDPWD/linux-2.6.24.tar.bz2
+# cd /usr/src
+# tar -xjvf $OLDPWD/linux-2.6.24.tar.bz2
 * fix links bluntly in /lib/modules:
- # ln -sf /usr/src/linux-2.6.24 /lib/modules/2.6.24/build
+# ln -sf /usr/src/linux-2.6.24 /lib/modules/2.6.24/build
 * initialize the kernel sources with the current configuration:
- # cd /usr/src/linux-2.6.24
- # gzip -dc /proc/config.gz > .config
- # make oldconfig          # just say "n" to power management debugging support
+# cd /usr/src/linux-2.6.24
+# gzip -dc /proc/config.gz > .config
+# make oldconfig          # just say "n" to power management debugging support
 * add video support:
- # make menuconfig
+# make menuconfig
 Basically, look for "Device drivers", "Multimedia devices", then enable "Video For Linux", "Video For Linux API 1", "Video For Linux API 1 compatible Layer", "Video capture adapters" as modules. If the driver for your webcam is found in the kernel already, also enable it there.
 * compile the relevant kernel modules:
- # make drivers/media/video/v4l1-compat.ko
- # make drivers/media/video/v4l2-common.ko
- # make drivers/media/video/videodev.ko
+# make drivers/media/video/v4l1-compat.ko
+# make drivers/media/video/v4l2-common.ko
+# make drivers/media/video/videodev.ko
 * load the modules:
- # insmod drivers/media/video/v4l1-compat.ko
- # insmod drivers/media/video/v4l2-common.ko
- # insmod drivers/media/video/videodev.ko
+# insmod drivers/media/video/v4l1-compat.ko
+# insmod drivers/media/video/v4l2-common.ko
+# insmod drivers/media/video/videodev.ko
 The errors encountered while loading modules can be obtained with the "dmesg" command. They are typically also logged in /var/log/messages.
 
 == Compile the UVC driver ==
 
 To obtain and compile the latest source tree for the driver:
- # apt-get install subversion
- # svn checkout svn://svn.berlios.de/linux-uvc/linux-uvc/trunk
- # cd trunk/linux-uvc
- # make
+# apt-get install subversion
+# svn checkout svn://svn.berlios.de/linux-uvc/linux-uvc/trunk
+# cd trunk/linux-uvc
+# make
 
 And if all goes well:
- # insmod uvcvideo.ko
+# insmod uvcvideo.ko
 
 == Add the device node ==
 
 In our case, the relevant device node was not created automatically. Here's how to do so:
 
- # mkdir -p /dev/v4l
- # mknod /dev/v4l/video0 c 81 0
+# mkdir -p /dev/v4l
+# mknod /dev/v4l/video0 c 81 0
 
 == Plug the camera itself ==
 
@@ -69,9 +69,11 @@ Again, you can use the command "dmesg" to verify that the camera is properly rec
 == Install and try a viewer ==
 
 A good webcam test application is [http://www.quickcamteam.net/software/linux/v4l2-software/luvcview luvcview]. You can install and test it this way:
- # apt-get install luvcview
- # luvcview -f yuv -d /dev/v4l/video0
+# apt-get install luvcview
+# luvcview -f yuv -d /dev/v4l/video0
 
 == Known problems ==
 
 * the resolution was limited to 160x120 with our Philips SPC620NC
+
+[[Category:Guides]]
