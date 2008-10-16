@@ -1,8 +1,8 @@
 {{Languages|Getting Started with your Neo FreeRunner}}
 
 {| class="wikitable" cellspacing="2" cellpadding="2" style="padding: 0%; margin:0em 0em 1em 0em; background:#eeeeee; width:100%;floating="center"; "
-! style="background:#fcfcfc; width:75% " |  
- <p align="left">
+! style="background:#fcfcfc; width:75% " |
+<p align="left">
 Thank you for purchasing this Developer release of Neo FreeRunner. The [[Neo FreeRunner]] phone is the second hardware platform to take advantage of Openmoko. This guide will help you get to know your Neo FreeRunner and how to start using your Neo FreeRunner.</p>
 
 <p align="left">
@@ -26,6 +26,11 @@ Some Frequently Asked Questions for new owners are featured in the [[FAQ#Getting
 : [[Image:Circle２.gif|10px]]  microSD Card 512MB & SD adapter
 : [[Image:Circle２.gif|10px]]  [[Thank You green card]]
 <div style="clear: both">&nbsp;</div>
+
+== Get the source code == 
+The software included in this product contains copyrighted software that is licensed under the [http://people.openmoko.org/openmoko/src/20080424_source_iso/ GPL]. A complete corresponding source code or CD-ROM ISO image with the GPL license is available for download [http://people.openmoko.org/openmoko/src/20080424_source_iso/ here]. You may also obtain the same corresponding CD-ROM by sending a money order or check for $10 to any one of our [http://people.openmoko.org/openmoko/src/20080424_source_iso/ distributors].
+
+Please write “source for Neo FreeRunner ” in the memo line of your payment.
 
 == Setting up the hardware, getting to know the Neo FreeRunner physically ==
 
@@ -135,7 +140,7 @@ Because the software changes so rapidly, you should review the current list of [
 
 [[Image:Todaypage_reduced_false.png|right|200px|]] The "Today" page is empty, as shown above, when you first start Openmoko. We explain below how to turn on the "full view", displayed to the right. In the full view, a second row of icons give quick links to commonly-used applications such as the dialer, the adressbook, mailbox and calendar. The main body of the screen displays a clock and other useful information.
 
-See [[Today/2007.2]] for more information about the Today page and customization. 
+See [[Today/2007.2]] for more information about the Today page and customization.
 
 <br clear=all />
 
@@ -173,11 +178,11 @@ To start a console from "Today" page, click the middle tab at the bottom of the 
 
 From the terminal, type the following, but replace ''MM'' with the month (01-12); ''DD'' with the day (01-31); ''hhmm'' with the time (0000-2359); ''YYYY'' with the  year (optional); and ''.ss'' with the seconds (optional).
 
- date -s ''MMDDhhmmYYYY.ss''
+date -s ''MMDDhhmmYYYY.ss''
 
 To make the change persist between reboots, sync the hardware clock with the updated system time.
 
- hwclock --systohc
+hwclock --systohc
 
 See [[Setting Date and Time]] for more discussion, including synchronizing with an NTP server.
 
@@ -199,13 +204,13 @@ Naturally, the phone must be connected to your computer with USB cable.
 
 ===Connect with the Neo FreeRunner===
 
-This is discussed in the [[USB_Networking|USB Networking]] section. 
+This is discussed in the [[USB_Networking|USB Networking]] section.
 
 ===Update with the package manager===
 
-In order to keep the FreeRunner up-to-date with the latest features and bug-fixes, it is advisable update the software at regular intervals. 
+In order to keep the FreeRunner up-to-date with the latest features and bug-fixes, it is advisable update the software at regular intervals.
 
-There are two main methods of doing this: 
+There are two main methods of doing this:
 * upgrading with the package manager '''opkg'''
 * or manually flashing the device (see [[Flashing the Neo FreeRunner]]).
 
@@ -219,38 +224,39 @@ Note that ''uboot'', the ''kernel'' and the ''root filesystem'' may all be flash
 
 Warning: UPGRADING TO DAILY KERNELS FROM THE DEVELOPMENT BRANCH MAY BREAK THINGS. That said, assuming that your FreeRunner can access the internet (see above), the kernel and other packages can be updated with
 
- # opkg update
- # opkg -test upgrade
- # opkg upgrade
+# opkg update
+# opkg -test upgrade
+# opkg upgrade
 
 The first updates the repository information, telling opkg what packages are available. The second allows you to see what the package manager wants to do. The third upgrades all packages for which a newer version is available. '''At the moment, some signature files are missing (404 errors), which opkg complains about, but this is cosmetic.'''  The repositories will still update with the missing signature files.
 
-Important:  If you have followed the Getting Started Guide this far, but opkg upgrades do not appear to be happening.  Try checking the .conf files in the /etc/opkg/ directory.  If you see four URLs pointing at <nowiki>http://buildhost.openmoko.org/</nowiki>, this is your problem.  The 2007.2 repository has been moved to http://downloads.openmoko.org/repository/Om2007.2.  Update your .conf files to point at equivalent directories under this repository, e.g.:
+Important:  If you have followed the Getting Started Guide this far, but opkg upgrades do not appear to be happening.  Try checking the .conf files in the /etc/opkg/ directory.  If you see four URLs pointing at
+<nowiki>http://buildhost.openmoko.org/</nowiki> , this is your problem.  The 2007.2 repository has been moved to http://downloads.openmoko.org/repository/Om2007.2.  Update your .conf files to point at equivalent directories under this repository, e.g.:
 
- # sed -i 's/buildhost.openmoko.org\/daily-feed/downloads.openmoko.org\/repository\/Om2007.2/' $(grep -l buildhost /etc/opkg/*.conf)
+# sed -i 's/buildhost.openmoko.org\/daily-feed/downloads.openmoko.org\/repository\/Om2007.2/' $(grep -l buildhost /etc/opkg/*.conf)
 
 Note that running opkg upgrade on a factory-fresh phone will upgrade dropbear (the ssh software) and various xserver packages, and neither upgrades elegantly while in use.  Xserver must be updated over ssh to complete succesfully.  Dropbear can be updated over ssh with the proper command:
- # nohup opkg upgrade dropbear & 
+# nohup opkg upgrade dropbear &
 Or upgrade it directly in the FreeRunner terminal.
- # opkg upgrade dropbear
+# opkg upgrade dropbear
 
 When updating over ssh, the session will be interrupted, but the command should complete successfully(check nohup.out on your device to verify), and you should be able to reconnect within a few seconds.
 
 Another (better) option is to start a screen session before the upgrade with:
 
-  # screen
+# screen
 
 After loosing the ssh connection and login in again via ssh reconnect to the running screen session with:
 
-  # screen -x
+# screen -x
 
 Then connect to the FreeRunner via ssh and type:
- # opkg upgrade
+# opkg upgrade
 
 And run this command :
- # depmod
+# depmod
 
-Alternatively you can upgrade the xserver packages via ssh and then upgrade the rest from the FreeRunner's terminal.  
+Alternatively you can upgrade the xserver packages via ssh and then upgrade the rest from the FreeRunner's terminal.
 
 If you do your first upgrade in two installments like this, it will go more smoothly.
 
@@ -262,35 +268,35 @@ There are many applications you can install - check out the [[Repositories]] for
 
 The calendar can be installed with
 
- opkg install openmoko-dates2
+opkg install openmoko-dates2
 
 For a Media Player:
 
- opkg install openmoko-mediaplayer2
- wget http://abraxa.dyndns.org:81/random/openmoko-mediaplayer-theme.tar.bz2
- tar xjf openmoko-mediaplayer-theme.tar.bz2 -C /usr/share/themes/Moko/gtk-2.0
- rm openmoko-mediaplayer-theme.tar.bz2
+opkg install openmoko-mediaplayer2
+wget http://abraxa.dyndns.org:81/random/openmoko-mediaplayer-theme.tar.bz2
+tar xjf openmoko-mediaplayer-theme.tar.bz2 -C /usr/share/themes/Moko/gtk-2.0
+rm openmoko-mediaplayer-theme.tar.bz2
 
 If you want a basic image viewer, have a look at the one from the gpe suite:
 
- opkg install gpe-icons 
- opkg install gpe-gallery
+opkg install gpe-icons
+opkg install gpe-gallery
 
 To obtain the standard web browser, use:
 
- opkg install openmoko-browser2
+opkg install openmoko-browser2
 
-An alternative browser, minimo, offers many more features.  
+An alternative browser, minimo, offers many more features.
 First download and unpack it on your GNU/Linux host:
 
- wget http://www.ginguppin.de/files/minimo.tar.bz2
- tar jvxf minimo.tar.bz2
+wget http://www.ginguppin.de/files/minimo.tar.bz2
+tar jvxf minimo.tar.bz2
 
 Copy it over to the FreeRunner:
- scp minimo_* root@192.168.0.202:/tmp
+scp minimo_* root@192.168.0.202:/tmp
 
 Then on the FreeRunner:
- opkg install /tmp/minimo_0.02\+cvs20070626-r0_armv4t.ipk
+opkg install /tmp/minimo_0.02\+cvs20070626-r0_armv4t.ipk
 
 You'll probably also want to [[Switching Keyboards|change the keyboard]] including the [[Switching Keyboards#How_to_add_a_keyboard_toggle_button|keyboard toggle applet]]
 
@@ -300,21 +306,21 @@ If you can export your contacts to VCard format, either multiple files or single
 
 ==The next steps==
 
-Congratulations for setting up your Neo FreeRunner. There are many more ressources to help free your phone: 
+Congratulations for setting up your Neo FreeRunner. There are many more ressources to help free your phone:
 
 ===Customize the interface===
 home screen clock, keyboard
 
 The stock [[Openmoko2007.2]] image flashed onto the Neo FreeRunner is really just the bare bones. For example, you don't have the clock and the quick-launch icons showing. Here's how you can change that:
 
- # dbus-launch gconftool-2 -t boolean -s /desktop/poky/interface/reduced false
- # /etc/init.d/xserver-nodm restart
+# dbus-launch gconftool-2 -t boolean -s /desktop/poky/interface/reduced false
+# /etc/init.d/xserver-nodm restart
 
 If you rather have a regular clock instead of the digital one, do this instead:
 
- # dbus-launch gconftool-2 -t boolean -s /desktop/poky/interface/reduced false
- # dbus-launch gconftool-2 -t boolean -s /desktop/poky/interface/digital_clock false
- # /etc/init.d/xserver-nodm restart
+# dbus-launch gconftool-2 -t boolean -s /desktop/poky/interface/reduced false
+# dbus-launch gconftool-2 -t boolean -s /desktop/poky/interface/digital_clock false
+# /etc/init.d/xserver-nodm restart
 
 REMOVE CLICK SOUND VIA /etc/pulse/session
 
@@ -326,20 +332,20 @@ Also, if you prefer having a full keyboard, using matchbox's qwerty keybord, see
 
 Simple guide to get going with '''GPS''':
 
- # opkg install gpsd
- # echo "GPS_DEV=\"/dev/ttySAC1\"" > /etc/default/gpsd
+# opkg install gpsd
+# echo "GPS_DEV=\"/dev/ttySAC1\"" > /etc/default/gpsd
 
 and restart gpsd, the gps daemon, with
 
- # /etc/init.d/gpsd restart
+# /etc/init.d/gpsd restart
 
 To test GPS, you can use agpsui:
 
- # opkg install openmoko-agpsui
+# opkg install openmoko-agpsui
 
 For a nice map, try [[tangoGPS]]:
 
- # opkg install tangogps
+# opkg install tangogps
 
 or download it from [http://www.tangogps.org/downloads/tangogps_0.9.2-r1_armv4t.ipk].
 
@@ -385,7 +391,7 @@ The links on the top-right of this page lead to the sister sites in the Openmoko
 
 To search this wiki with Google, use the following search term:
 
- <search term> site:http://wiki.openmoko.org/wiki/
+<search term> site:http://wiki.openmoko.org/wiki/
 
 [[Category:Neo FreeRunner Hardware]]
 [[Category:Basic End User]]
