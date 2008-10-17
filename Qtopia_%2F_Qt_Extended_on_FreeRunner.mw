@@ -7,7 +7,7 @@ This page provides instructions on how to install Qtopia (proper, not the [[ASU]
 |}
 
 == Current status ==
-On 29 August 2008, Trolltech released the [http://qtextended.org/modules/mydownloads/visit.php?lid=79 Qtopia flash image for the FIC Neo FreeRunner (gta02)] containing the Qtopia 4.3.2 release (Version: 4.3.2-290808) (GPL version). 
+On 29 August 2008, Trolltech released the [http://qtextended.org/modules/mydownloads/visit.php?lid=79 Qtopia flash image for the FIC Neo FreeRunner (gta02)] containing the Qtopia 4.3.2 release (Version: 4.3.2-290808) (GPL version).
 See [http://doc.trolltech.com/qtopia4.3/release-4-3-2.html Release-Notes]
 
 This image can successfully make and receive calls and text messages.  It can read all contacts from the SIM card (which the updated 2007.2 does not appear to be able to do).  It contains apps that appear to be more stable than the ones found in the 2007.2 image.  It has multiple input methods that appear to be more mature.  It does not, however, have a web browser or a GPS application. There are however at least two third-party GPS applications available:
@@ -34,7 +34,7 @@ Download the image mentioned above and follow the instructions here: [[Flashing 
 
 == Option 2: Dual-Booting between Qtopia and 2007.2 (Qtopia boots from MicroSD card) ==
 
-Installation Requirements: 
+Installation Requirements:
 
 # SSH shell access to 2007.2 based image of the FreeRunner through USB interface or WLAN.
 # A Desktop Linux distro (to unpack the .jffs2 image, I ran Ubuntu under VMWare)
@@ -44,11 +44,11 @@ Installation Requirements:
 
 See the [[Booting from SD#Prepare the SD card| Preparing the SD Card]] section of the [[Booting from SD]] page for partitioning and formatting instructions.  After you complete the "Formatting the SD Card" steps, return here and execute the following:
 
-  mount /dev/mmcblk0p1 /media/card
-  mkdir /media/card/boot
+mount /dev/mmcblk0p1 /media/card
+mkdir /media/card/boot
 
-  mkdir /media/mmcblk0p2
-  mount /dev/mmcblk0p2 /media/mmcblk0p2
+mkdir /media/mmcblk0p2
+mount /dev/mmcblk0p2 /media/mmcblk0p2
 
 This will set you up properly for the installation of the root filesystem and the kernel in the steps below.
 
@@ -58,18 +58,18 @@ This will set you up properly for the installation of the root filesystem and th
 
 Download the Qtopia FLASH image from [[Latest Images#Qtopia images]] to your Linux box and extract its contents:
 
-  tar xzf qtopia-4.3.2-gta02-flash-*.tgz
+tar xzf qtopia-4.3.2-gta02-flash-*.tgz
 
-You should now have two files: 
+You should now have two files:
 #uImage-2.6.24+git18+9c058ff0d2641df3c36fc3300acb72078d2c41d4-r0-om-gta02.bin
-#qtopia-4.3.2-gta02-rootfs-07172049.jffs2  
+#qtopia-4.3.2-gta02-rootfs-07172049.jffs2
 Now, mount the root file system from the jffs2 using the commands found [[Userspace root image#Mounting the JFFS2 image on a loop back device (Block Memory MTD Emulation) |here]].  However, in the mount command, substitute the image filename for "/dev/mtdblock0".
 
 ==== Creating a compressed tarball ====
 
 Next, tar up the root filesystem:
 
-  # tar czf qtopia-4.3.2-gta02-rootfs-07172049.tar.gz -C <mountpoint> .
+# tar czf qtopia-4.3.2-gta02-rootfs-07172049.tar.gz -C <mountpoint> .
 
 Where ''<mountpoint>'' is the location where the jff2 filesystem was mounted.  Note the space and the period after the mountpoint.
 
@@ -77,14 +77,14 @@ Where ''<mountpoint>'' is the location where the jff2 filesystem was mounted.  N
 
 Transfer this compressed tarball to the second partition of the MicroSD that is mounted on the FreeRunner:
 
-  scp qtopia-4.3.2-gta02-rootfs-07172049.tar.gz root@192.168.0.202:/media/mmcblk0p2/
+scp qtopia-4.3.2-gta02-rootfs-07172049.tar.gz root@192.168.0.202:/media/mmcblk0p2/
 
 Log in to your FreeRunner and unpack the root filesystem:
 
-  cd /media/mmcblk0p2
-  tar xzf qtopia-4.3.2-gta02-rootfs-07172049.tar.gz
-  rm qtopia-4.3.2-gta02-rootfs-07172049.tar.gz
-  rm -f /media/mmcblk0p2/boot/*
+cd /media/mmcblk0p2
+tar xzf qtopia-4.3.2-gta02-rootfs-07172049.tar.gz
+rm qtopia-4.3.2-gta02-rootfs-07172049.tar.gz
+rm -f /media/mmcblk0p2/boot/*
 
 '''''Note:''''' the last step removes the kernel image from the second partition.  For some reason, U-Boot cannot find the uImage.bin file in the first partition if a kernel image exists in the second partition boot/ directory.
 
@@ -92,31 +92,31 @@ Log in to your FreeRunner and unpack the root filesystem:
 
 From your Linux box, rename <tt>uImage-2.6.24+git18+9c058ff0d2641df3c36fc3300acb72078d2c41d4-r0-om-gta02.bin</tt> to <tt>uImage.bin</tt> and copy it to the boot directory on the first partition of the MicroSD card.  Depending on the version of U-Boot you have installed, this may not work.  To prevent any possible issues, copy it to the <tt>/media/card</tt> directory as well. There is plenty of room on the first partition to have <tt>uImage.bin</tt> in both locations.
 
-  mv uImage-2.6.24+git18+9c058ff0d2641df3c36fc3300acb72078d2c41d4-r0-om-gta02.bin uImage.bin
-  scp uImage.bin root@192.168.0.202:/media/card/boot/
-  scp uImage.bin root@192.168.0.202:/media/card/
+mv uImage-2.6.24+git18+9c058ff0d2641df3c36fc3300acb72078d2c41d4-r0-om-gta02.bin uImage.bin
+scp uImage.bin root@192.168.0.202:/media/card/boot/
+scp uImage.bin root@192.168.0.202:/media/card/
 
 ==== Pointing Qtopia to the SD Card ====
 
 Lorn Potter on the mailing lists pointed this out:
 
-  Qtopia was designed to be run from the root partition on a flash chip, not from a removable sd card.
-  
-  You would have to edit the etc/default/Trolltech/Storage.conf file to make it forget about the sd 
-  /dev node, to be able to run it this way"
+Qtopia was designed to be run from the root partition on a flash chip, not from a removable sd card.
+
+You would have to edit the etc/default/Trolltech/Storage.conf file to make it forget about the sd
+/dev node, to be able to run it this way"
 
 Another user's solution to this is the following:
 
-  Edit this file:     " /opt/Qtopia/etc/default/Trolltech/Storage.conf
-  And change the [MountPoint0] section so it resembles this:
-  -[  
-  [MountPoint0]
-  Name[] = SD Card
-  Path=/dev/mmcblk0p1
-  Removable = 0
-  Applications = 0
-  Documents = 0
-  ContentDatabase = 0
+Edit this file:     " /opt/Qtopia/etc/default/Trolltech/Storage.conf
+And change the [MountPoint0] section so it resembles this:
+-[
+[MountPoint0]
+Name[] = SD Card
+Path=/dev/mmcblk0p1
+Removable = 0
+Applications = 0
+Documents = 0
+ContentDatabase = 0
 
 == Option 3: updating from source ==
 
@@ -124,21 +124,21 @@ Another user's solution to this is the following:
 Original Qtopia images (the distribution released by Trolltech, not ASU) are rarely released as a rootfs image, but the source code is often updated. If you want to reflash your OM with the latest version of Qtopia you might build it from sources. This has been explained in [http://lists.openmoko.org/pipermail/community/2008-August/024785.html this thread] of the community mailing list. Summing up:
 
 * get the latest toolchain released by trolltech: http://www.qtopia.net/modules/mydownloads/singlefile.php?lid=38 and unzip it on your PC (as root)
-  cd /
-  wget http://qtopia.net/downloads/neo/arm920t-eabi-ficgta01-toolchain.tgz
-  tar xvzf arm920t-eabi-ficgta01-toolchain.tgz
+cd /
+wget http://qtopia.net/downloads/neo/arm920t-eabi-ficgta01-toolchain.tgz
+tar xvzf arm920t-eabi-ficgta01-toolchain.tgz
 * get the latest snapshot from trolltech: ftp://ftp.trolltech.com/qtopia/snapshots/
 *  once dowloaded untar it
-   tar xvzf qtopia-opensource-src-4.3.2-snapshot-20080806.tar.gz
-* make a "build" dir 
-   mkdir build
-   cd build
+tar xvzf qtopia-opensource-src-4.3.2-snapshot-20080806.tar.gz
+* make a "build" dir
+mkdir build
+cd build
 * configure and make:
-   ../qtopia-opensource-src-4.3.2-snapshot-20080806/configure -device ficgta01
-   make 
+../qtopia-opensource-src-4.3.2-snapshot-20080806/configure -device ficgta01
+make
 This will take some time (couple hours). Note that the option "-device ficgta01" should work for both neo and freerunner. Then:
 
-  make install
+make install
 
 will make a root directory into the ''build'' directory. There you can find an ''image'' that directory should be copied to /opt/Qtopia of your phone with scp. once done restart qpe or whole phone.
 
@@ -146,21 +146,21 @@ will make a root directory into the ''build'' directory. There you can find an '
 
 Now shutdown the FreeRunner
 
-  shutdown -h now
+shutdown -h now
 
 Log into U-Boot in the NAND Flash to boot from the MicroSD card: (instructions from [[Booting the Neo FreeRunner]])
 
 * Press and hold Power button
-* Then while still pressing the Power button, press and hold AUX button for 5 to 8 seconds. 
-* A boot menu will appear. 
+* Then while still pressing the Power button, press and hold AUX button for 5 to 8 seconds.
+* A boot menu will appear.
 * Press the AUX button to select "[[Boot from sd card|Boot from MicroSD]]" and then press the Power button to execute.
 
 Qtopia should now boot.
 
 '''''Note:''''' you may get a kernel panic which says that "optional features not supported".  If this is the case, boot back into 2007.2 and run
 
-  umount /dev/mmcblk0p2
-  fsck.ext3.e2fsprogs /dev/mmcblk0p2
+umount /dev/mmcblk0p2
+fsck.ext3.e2fsprogs /dev/mmcblk0p2
 
 This will clean up the file system and clear recovery flags in ext3 that ext2 does not support, then try booting from the MicroSD again.
 
@@ -170,7 +170,7 @@ Qtopia comes with support for German and American English, and users from other 
 
 Adding characters to the keyboard requires modifications to the source code, as described [http://www.qtopia.net/modules/newbb_plus/viewtopic.php?topic_id=512&forum=16 here].
 
-[[Category:Qtopia]]
+
 
 == Suspend /Resume ==
 It seems that suspend/resume only works when the FreeRunner has been connected to a powersource (only a few seconds if sufficient). If you boot from battery, it will never suspend until you have plugged it in at least for a couple of seconds.
@@ -182,5 +182,8 @@ See [http://trolltech.org/developer/task-tracker/index_html?method=front Trollte
 Bug reports should be sent to qt-bugs@trolltech.com or by web form at http://trolltech.com/bugreport-form.
 
 == Bugs in 4.4.1 ==
+* Boot and Shutdown Splash will not work because splash-write was not compiled into Busybox
 * Timezone & time on latest Qt 4.4.1
 * The first item in a list is missing the top half
+
+[[Category:Qtopia]]
