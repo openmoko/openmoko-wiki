@@ -1,38 +1,37 @@
 {{Languages|Tichy}}
 
-<!-- WTF no PRE formatting?
 <pre>
+_       _
 _  (_)     | |
 _| |_ _  ____| |__  _   _
-(_   _) |/ ___)  _ \| | | |   Менеджер аплетов
+(_   _) |/ ___)  _ \| | | |   A Python Applets Manager
 | |_| ( (___| | | | |_| |
-\__)_|\____)_| |_|\__  |   для Openmoko
+\__)_|\____)_| |_|\__  |   For Openmoko
 (____/
 </pre>
--->
 
-[[Image:Tichy-main2.png|thumb|Главный экран Tichy]]
-[[Image:Tichy-drawing.png|thumb|Приложение для рисования]]
-[[Image:Tichy-style.png|thumb|Выбор и просмотр стилей]]
-[[Image:Tichy-Media.png|thumb|Приложение Tichy Freedesktop]]
-[[Image:Tichy-Keyboard.png|thumb|Клавиатура Tichy]]
+[[Image:Tichy-main2.png|thumb|tichy main window]]
+[[Image:Tichy-drawing.png|thumb|tichy drawing app]]
+[[Image:Tichy-style.png|thumb|tichy style app]]
+[[Image:Tichy-Media.png|thumb|tichy freedesktop app]]
+[[Image:Tichy-Keyboard.png|thumb|tichy keyboard app]]
 
 == About ==
-Tichy является менеджером аплетов для встраиваемых устройств и написан на языке программирования Python.
+Tichy is a python applets manager for embedded devices.
 
-Цель проекта - облегчить разработку на языке Питон широкого спектра приложений для Openmoko.
+The goal of the project is to make it easy to write many kind of applications for openmoko using the python language.
 
-Tichy предоставляет для разработчиков следующие возможности:
-* Виджеты для графического интерфейса пользователя
-* Систему сервисов, их регистрацию и поиск (например приложение, желающее отправить сообщение, имеет возможность запросить другое приложение, реализующее нужный функционал)
-* Систему задач (tasklets). Она позволит писать процессы, ожидающие обратного вызова и ведущие себя как потоки (threads)
-* Абстракцию Элемента и его Внешнего вида
-* Систему подключаемых модулей (плагинов) для удобного создания новой функциональности и добавления аплетов в систему
+Tichy provides the following things :
+* Graphics User Interface widgets
+* Services registering and Requesting (for example an application that wants to send a message will request for an application implementing  the message sending service)
+* Tasklets system (This allow to write callback waiting process as if they were threads)
+* Abstraction of Item / View
+* A plug in system that make it easy to add new functionalities / applets to tichy
 
-== Как писать аплеты / плагины для Tichy? ==
-К сожалению, документации на этот счёт пока не существует.
+== How to write an applets / plug-ins for tichy ? ==
+Unfortunately There is currently no documentation.
 
-Однако создать новый компонент совсем несложно. Если вы хотите написать новый аплет, просто создайте новую директорию в tichy/test/plugins/apps/ и посмотрите, как устроены другие входящие в поставку программы плагины. Простое приложение выглядит примерно так:
+Fortunately it is very easy to do. If you want to write a new applet, you just need to create a new directory in tichy/test/plugins/apps/. You can have a look at the other plug-ins to get an idea of how to do it. A basic app look like this :
 
 <pre>
 import tichy
@@ -41,69 +40,63 @@ import tichy.item as item
 from tichy.application import Application
 
 class MyApp(Application):
-name = "Моё приложение"
-icon = "icon.png"   # Картинка должна быть в директории нового приложения
+name = "My Application"
+icon = 'icon.png'   # to be found in the app directory
 
 def run(self, parent):
-w = gui.Window(parent, modal = True)   # Мы работаем в новом модальном окне
-# Создаём новый фрейм с кнопкой "Назад" наверху
+w = gui.Window(parent, modal = True)   # We run into a new modal window
+# Create a new frame with a "back" button on top
 frame = gui.ApplicationFrame(w, self, back_button=True)
 
-# В этом контейнере будут храниться виджеты
+# This box is used to store the widgets
 box = gui.Box(frame, axis=1)
 
-# Создаём текстовой элемент
-text = item.Text("Кликните тут для редактирования", editable = True)
-# Показываем этот элемент на экране
+# Create a text item
+text = item.Text('click to edit', editable = True)
+# Put a view of the item on the screen
 text.view(box)
 
-# Добавляем кнопку
+# Add a button
 button = gui.Button(box)
-gui.Label(button, "Нажмите тут")
+gui.Label(button, "click me")
 
 def on_click(b):
-# "yield" работает так: "блокировка до возвращения управления из задачи"
-yield gui.Message(w, "Вы нажали на кнопку")
-# Связывание события и вызываемой функции
-button.connect("clicked", on_click)
+# "yield" means "block until the tasklet returns"
+yield gui.Message(w, you just clicked the button)
+button.connect('clicked', on_click)
 
-yield Wait(frame, "back")     # Ждём пока не будет нажата кнопка "Назад"
-w.close()                     # Не забываем закрывать за собой окна
+yield Wait(frame, 'back')     # Wait until the back button is clicked
+w.close()                     # Don't forget to close the window
 </pre>
 
-== Авторы ==
-* Guillaume "Charlie" Chereau, основной разработчик
+== Authors ==
+* Guillaume "Charlie" Chereau, main developer
 * Michael "Goodwill"
 
-== Исходные коды ==
-Исходники проекта доступны из репозитария SVN по имени project.openmoko:
-<pre>
+== Sources ==
+The sources can be found from svn repository on project.openmoko :
 svn checkout svn://svn.projects.openmoko.org/svnroot/tichy
-</pre>
 
-== Запуск на десктопе ==
-Благодаря упомянутой выше системе сервисов, дающей возможность предоставлять клиентам на выбор несколько реализующих сходный функционал приложений, Tichy можно запускать не только на телефонах Openmoko, но и на настольных компьютерах: когда Tichy работает на десктопе, он имитирует финкционал телефона, а когда в реальном Neo - использует доступное там [[OpenmokoFramework|окружение]].
+== Running on the desktop ==
+Thanks to the service system, that allows to provide several version of the same service, Tichy can run as well on a desktop computer as on the neo. When run on a desktop, tichy will simulate phone functionalities, when run on the neo, it will use the [[OpenmokoFramework | Framework]].
 
-Чтобы запустить Tichy на настольном компьютере, необходимо установить пакет python-pygames:
-<pre>
+
+To run it on the desktop, make sure you have python-pygames installed
 sudo apt-get install python-pygame
-</pre>
 
-Потом просто загрузите исходники, зайдите в директорию test и запустите:
-<pre>
+Then just download the sources, then go into test, and run
 ./tichy
-</pre>
 
-== Запуск на Neo ==
-Нужно будет скомпилировать несколько файлов; читайте README из комплекта поставки Tichy с соответствующими инструкциями.
+== Running on neo ==
+You will need to compile some files, see the README for more information on how to do it.
 
-== Зависимости ==
-Для работы требуется python версии 2.5 и некоторые другие библиотеки:
+== Dependencies ==
+You need python 2.5 and some libraries installed :
 * python-pygame
 * python-dbus
 * python-yaml
 * python-gst
 * python-gobject
 
-== ipkg-пакет Tichy ==
-В лентах Openmoko "testing" и "unstable" есть пакет Tichy. В настоящее время текущая версия проекта неработоспособна из-за ошибки в пакете python-pygame.
+== ipkg package ==
+A package is available for it in Openmoko Testing and unstable feed. Unfortunately tichy won't work yet, because of a bug in python-pygame in openmoko feeds.
