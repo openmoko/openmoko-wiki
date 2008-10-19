@@ -1,6 +1,6 @@
 {{FSO}}
 
-The freesmartphone.org (FSO) image is based on the OpenEmbedded distribution.  OpenEmbedded is not part of Openmoko, and targets many different devices.  
+The freesmartphone.org (FSO) image is based on the OpenEmbedded distribution.  OpenEmbedded is not part of Openmoko, and targets many different devices.
 
 FSO's source tree, documentation and bug tracker are not hosted at openmoko.org.  This wiki page simply points to the relevant portions of OpenEmbedded's documentation.  Openembedded.org and freesmartphone.org contain more complete documentation.
 
@@ -10,10 +10,10 @@ There are two ways to build an FSO image.
 
 The first approach uses FsoMakefile to automatically download and configure the build environment, and is the easiest way to build an image:
 
- wget http://downloads.freesmartphone.org/Makefile 
- make fso-testing-image
+wget http://downloads.freesmartphone.org/Makefile
+make fso-testing-image
 
-This is the process used by the build servers to create new images.  
+This is the process used by the build servers to create new images.
 
 Ubuntu can throw up errors [[Talk:MokoMakefile]]
 
@@ -21,13 +21,14 @@ See http://downloads.freesmartphone.org/ for more information.  Note that FsoMak
 
 You can access the FsoMakefile directly from the git repository with this command (there is no difference between this and the above once the build starts):
 
- git clone git://git.freesmartphone.org/fso-makefile common
- ln -s common/Makefile Makefile
- make fso-testing-image
+git clone git://git.freesmartphone.org/fso-makefile common
+ln -s common/Makefile Makefile
+make fso-testing-image
 
+You can also use [[Alternative FSO GIT repository|alternative FSO git repository]]
 = Building manually =
 
-While convenient, building with FsoMakefile does not tell you much about what is going on under the hood.  FsoMakefile automatically downloads an OpenEmbedded build tree, configures it to build FSO and then builds the image.  
+While convenient, building with FsoMakefile does not tell you much about what is going on under the hood.  FsoMakefile automatically downloads an OpenEmbedded build tree, configures it to build FSO and then builds the image.
 
 OpenEmbedded's manual build directions at http://wiki.openembedded.net/index.php/Getting_Started describe the process in more detail.  They also explain how to build individual packages, and describe bitbake, which manages OpenEmbedded builds.
 
@@ -37,26 +38,26 @@ First, when you edit the targets in local.conf, you need to set it to build an O
 
 If you wanted to build FSO for a Neo1973, you would write this:
 
- BBFILES = "/stuff/org.openembedded.dev/packages/*/*.bb"
- DISTRO = "openmoko"
- MACHINE = "om-gta01"
+BBFILES = "/stuff/org.openembedded.dev/packages/*/*.bb"
+DISTRO = "openmoko"
+MACHINE = "om-gta01"
 
 To build FSO for a FreeRunner, you would write this:
 
- BBFILES = "/stuff/org.openembedded.dev/packages/*/*.bb"
- DISTRO = "openmoko"
- MACHINE = "om-gta02"
+BBFILES = "/stuff/org.openembedded.dev/packages/*/*.bb"
+DISTRO = "openmoko"
+MACHINE = "om-gta02"
 
 If you want to build FSO's unstable branch then include the following two lines at the end of local.conf:
 
- require conf/distro/include/fso-autorev.inc
- require conf/distro/include/moko-autorev.inc
+require conf/distro/include/fso-autorev.inc
+require conf/distro/include/moko-autorev.inc
 
 These two .inc files tell bitbake to use the most recent versions of each package, instead of the (hopefully tested) preferred versions.
 
 Once you've finished setting up the build environment, you can build the FSO image with the command:
 
- cd /stuff/build && bitbake fso-image
+cd /stuff/build && bitbake fso-image
 
 
 = Configuration =
@@ -67,43 +68,43 @@ Currently GTK is not well supported in the FSO build. To use GTK applications yo
 
 '''Step 1) Install the ipk-packages'''
 
- opkg install moko-gtk-theme
- opkg install openmoko-icon-theme-standard2
- opkg install moko-gtk-engine
+opkg install moko-gtk-theme
+opkg install openmoko-icon-theme-standard2
+opkg install moko-gtk-engine
 
 '''Step 2) Enable Theme'''
- 
- vi /etc/gtk-2.0/gtkrc
+
+vi /etc/gtk-2.0/gtkrc
 
 Add this line to the top:
 
- include "/usr/share/themes/Moko/gtk-2.0/gtkrc"
+include "/usr/share/themes/Moko/gtk-2.0/gtkrc"
 
 '''Step 3) Set icon theme'''
 
- vi /etc/gtk-2.0/gtkrc
+vi /etc/gtk-2.0/gtkrc
 
 Add the line:
- gtk-icon-theme-name="openmoko-standard"
+gtk-icon-theme-name="openmoko-standard"
 
 '''Step 4) Third party themes (optional)'''
 
 Add one line per 'third-party' gtk theme you've installed.  For example, openmoko-mediaplayer is not packaged with FSO:
 
- include "/usr/share/themes/Moko/gtk-2.0/openmoko-mediaplayer"
+include "/usr/share/themes/Moko/gtk-2.0/openmoko-mediaplayer"
 
 '''Step 5) Other tweaks
 
 To get "2007.2-style" icons (no text, smaller), so that all the terminal buttons fit on the screen at once:
 
- gtk-toolbar-style = GTK_TOOLBAR_ICONS
- gtk-icon-sizes = "gtk-button=32,32:gtk-small-toolbar=16,16:gtk-large-toolbar=24,24"
+gtk-toolbar-style = GTK_TOOLBAR_ICONS
+gtk-icon-sizes = "gtk-button=32,32:gtk-small-toolbar=16,16:gtk-large-toolbar=24,24"
 
 And make any other changes you like.  I don't like double arrows on the tops and bottoms of sliders:
 
- GtkScrollbar::has_secondary_backward_stepper = 0
- GtkScrollbar::has_secondary_forward_stepper = 0
+GtkScrollbar::has_secondary_backward_stepper = 0
+GtkScrollbar::has_secondary_forward_stepper = 0
 
 Look at existing gtkrc files for more options (if you find the manual, add a link).
 
-[[category:FSO]]
+[[Category:FSO]]
