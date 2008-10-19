@@ -1,21 +1,21 @@
 {{Languages}}
-This page explains how to boot a FreeRunner from the [[Supported_microSD_cards|(micro-)SD card]] rather than from the built-in NAND flash memory. The SD card shares a bus with the GPU, so it may not perform as well, but it is another option.
+Diese Seite erklärt, wie man mit dem FreeRunner von der [[Supported_microSD_cards|(micro-)SD card]] statt vom "Built-in NAND-Flash-Speicher bootet. Die SD-Karte teilt sich einen Bus mit der GPU, wodurch die Performance beeinträchtigt wird.
 
-{{Warning | Booting from SDHC may cause problems at this time (see below).}}
+{{ACHTUNG!!! | Das Booten von SDHC kann derzeit zu Problemen führen (siehe unten).}}
 
-== Booting from SDHC / suspend problems ==
+== Booten von SDHC ==
+Vornweg eine Warnung. Im Linux-Kernel existiert ein Bug der dazu führen kann, daß die Partitionstabelle der SDHC-Karte während des Suspend zerstöhrt wird.
+Ticket: [https://docs.openmoko.org/trac/ticket/1802 #1802]. 
+Thread: [http://thread.gmane.org/gmane.comp.handhelds.openmoko.community/19154/focus=19281] 
+Am Besten legt man sich ein Backup der Partitionstabelle an, um sie im Notfall schnell wieder zur Verfügung zu haben.
 
-First, a warning. There is a longstanding bug, probably somewhere in the Linux kernel, that tends to eat the partition table of high-capacity SD cards when the system suspends. This is ticket [https://docs.openmoko.org/trac/ticket/1802 #1802]. See [http://thread.gmane.org/gmane.comp.handhelds.openmoko.community/19154/focus=19281| this thread] for explanation of the partition table removal on suspend and maybe other problems related to using high capacity SD cards. A safety net is to keep a written copy of the partition table on paper, just in case one needs to recreate it.
+== So funktionierts ==
 
-== How it Works ==
+[[u-boot]] spielt auf dem NEO eine ähnliche Rolle wie der Bootloader 'grub' auf einem PC. U-boot läd ein Kernelimage in den Speicher und übermittelt dem Kernel anschießend eine Reihe vom Parametern. Diese Parameter enthalten unteranderem den Ort an dem sich das Rootfilesystem befindet.
 
-On the Neo, [[u-boot]] performs a similar role to the 'grub' bootloader on a PC. U-boot loads a kernel image into memory and then passes a list of parameters to the kernel. These parameters specify, among other things, the device on which the root filesystem is located.
+Wenn der Kernel bootet, wird die Hardware initialisiert und das Rootfilesystem gemountet. Anschließed startet der Kernel "/sbin/init", welche die restlichen Boot-Up-Sequenzen enthält. (z.B. Startbildschirm und Fortschrittsbalken).
 
-As the kernel boots, it initializes the hardware and then mounts the root filesystem. The kernel then runs "/sbin/init", which handles the rest of the boot-up sequence (such as displaying the splash screen and progress bar).
-
-This sequence is the same whether the device is booting from built-in Flash or from the SD card. The differences are how the kernel is loaded, and which device is mounted as the root filesystem.
-
-The following sections provide additional details.
+Diese Sequenz ist die gleiche, unabhängig davon ob das Gerät von Built-In-Flash oder von der SD-Karte bootet. Die Unterschiede sind, wie der Kernel geladen wird, und welches Device als Rootfilesystem gemountet ist.
 
 === Menu Entries ===
 
