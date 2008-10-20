@@ -1,3 +1,4 @@
+{{Languages|Debian}}
 = Installation =
 There are "official" instructions on how to install [http://wiki.debian.org/DebianOnFreeRunner Debian on FreeRunner] or [http://wiki.debian.org/DebianOnNeo1973 Debian on Neo1973] (see the [http://lists.linuxtogo.org/pipermail/smartphones-standards/2008-August/000232.html original announcement]).
 
@@ -11,7 +12,7 @@ From time to time the Debian packages may be broken, which will cause the instal
 == Password ==
 
 The default root password is blank. You should change that as soon as you can:
- # passwd
+# passwd
 If entering a blank password does not work at first, try rebooting. If still no success, boot to 2008.08/2007.02, chroot to the micro SD card and set a new password.
 
 == Speeding up booting ==
@@ -26,9 +27,9 @@ It changes default booting to quiet-mode and adds another boot-option to boot wi
 '''Note''': As of Sep. 15 2008, suspend works 'out-of-the-box'; installing apm and the idle clock configuration changes do not seem to be necessary any more.  Press the power button for two seconds (in zhone) or run 'apm -s' to suspend.
 
 To make suspend available you have to install apmd:
- apt-get install apmd
+apt-get install apmd
 After that you can suspend your phone with:
- apm -s
+apm -s
 and make it wake up again with pressing the power button.
 
 
@@ -37,49 +38,49 @@ Issues:
 
 * [[User:Phyce|Phyce]] 21:33, 20 August 2008 (UTC)  installed apm without problems; apm -s shutdowns the freerunner but I couldn't wake it up with power button... I had to remove the battery to boot again. suspend/resume was working quite reliably with latest kernels on ASU.
 
-To wake up successfully, the idle-clock of the SD card needs to be enabled right before suspend. It can be disabled again right after resume (this reduces GPS interference). Write into /etc/apm/suspend.d/00sd_idleclk 
- #!/bin/sh 
- echo 1 > /sys/module/glamo_mci/parameters/sd_idleclk 
- touch /home/root/.profile
-and into /etc/apm/resume.d/00sd_idleclk 
- #!/bin/sh
- echo 0 > /sys/module/glamo_mci/parameters/sd_idleclk 
+To wake up successfully, the idle-clock of the SD card needs to be enabled right before suspend. It can be disabled again right after resume (this reduces GPS interference). Write into /etc/apm/suspend.d/00sd_idleclk
+#!/bin/sh
+echo 1 > /sys/module/glamo_mci/parameters/sd_idleclk
+touch /home/root/.profile
+and into /etc/apm/resume.d/00sd_idleclk
+#!/bin/sh
+echo 0 > /sys/module/glamo_mci/parameters/sd_idleclk
 These are from -stacy on the community list.
 
 And anotherone from [[User:Morlac|Morlac]]: (more debianish i think ;) <br />
 etc/apm/scripts.d/sd_idleclk and corresponding link in /etc/apm/event.d<br />
 (don't forget to chmod +x /etc/apm/scripts.d/sd_idleclk)
 
- #!/bin/sh
- SD_IDLECLK="/sys/module/glamo_mci/parameters/sd_idleclk"
- [ -e "${SD_IDLECLK}" ] || exit 0
- 
- case "${1},${2}" in
- (suspend,*)
-     echo 1 > ${SD_IDLECLK}
-     touch /etc
-     ;;
- (resume,suspend)
-     echo 0 > ${SD_IDLECLK}
-     ;;
- esac
- 
- exit 0
+#!/bin/sh
+SD_IDLECLK="/sys/module/glamo_mci/parameters/sd_idleclk"
+[ -e "${SD_IDLECLK}" ] || exit 0
+
+case "${1},${2}" in
+(suspend,*)
+echo 1 > ${SD_IDLECLK}
+touch /etc
+;;
+(resume,suspend)
+echo 0 > ${SD_IDLECLK}
+;;
+esac
+
+exit 0
 
 == Time ==
 
 The default time zone is UTC.  Reconfigure it by running
 
- # dpkg-reconfigure tzdata
+# dpkg-reconfigure tzdata
 
 To set the clock manually do something like
 
- # date -s 00:33
+# date -s 00:33
 
 If you have a network connection, do something like
 
- # apt-get install ntpdate
- # ntpdate-debian
+# apt-get install ntpdate
+# ntpdate-debian
 
 
 Issues:
@@ -118,10 +119,10 @@ Where, of course, you're using the name of your wireless network and it's passwo
 instead of ''MyWirelessName'' and ''MyWirelessPassword''.
 
 You can test by running
-   # ifup eth0
+# ifup eth0
 
 You can determine your IP address by running
-   # ifconfig eth0
+# ifconfig eth0
 
 Issues:
 * only works if in presence of wireless network on boot, or when manually running <code>ifup eth0</code>
@@ -141,11 +142,11 @@ Once wpa_supplicant has begun managing your wifi interface, you should type "wpa
 
 To configure WPA to roam between wireless networks, you will need to create a new configuration file:
 
-  /etc/wpa_supplicant/wpa_supplicant.conf
+/etc/wpa_supplicant/wpa_supplicant.conf
 
 a template for this file (and more documentation) is available in:
 
-  /usr/share/doc/wpasupplicant/examples/wpa-roam.conf
+/usr/share/doc/wpasupplicant/examples/wpa-roam.conf
 
 You'll need to add networks to this file.  Examples:
 
@@ -153,26 +154,26 @@ You'll need to add networks to this file.  Examples:
 <pre>
 network={
 ssid="MySSID"
-       key_mgmt=NONE
-       wep_key0="abcdefghijklm"
+key_mgmt=NONE
+wep_key0="abcdefghijklm"
 #      wep_key0=6162636465  # <- no quotes, so hex number
-       wep_tx_keyidx=0
-       id_str="MySSID"
+wep_tx_keyidx=0
+id_str="MySSID"
 }
 </pre>
 * No key:
 <pre>
 network={
-       ssid="SomeNetwork"
-       key_mgmt=NONE
+ssid="SomeNetwork"
+key_mgmt=NONE
 }
 </pre>
 * WPA:
 <pre>
 network={
-       ssid="Example WPA Network"
-       psk="mysecretpassphrase"
-       id_str="home"
+ssid="Example WPA Network"
+psk="mysecretpassphrase"
+id_str="home"
 }
 </pre>
 
@@ -212,20 +213,20 @@ you should read <code>/usr/share/doc/wpasupplicant/README.Debian.gz</code>
 == Bluetooth ==
 
 The FreeRunner uses the standard Linux bluez stack, installed with
- # apt-get install bluez-utils
+# apt-get install bluez-utils
 
 There is also a module missing from /etc/modules, which is critical to getting your device recognized. (kudos to johnsu01 on irc.freenode.net:#openmoko-debian for the find)
- # echo ohci-hcd >> /etc/modules
+# echo ohci-hcd >> /etc/modules
 
 The first time you try this, you can also
- # modprobe ohci-hcd
+# modprobe ohci-hcd
 
 The only atypical part of using bluetooth on the FreeRunner is turning it on, which can be done with
- # echo 1 > /sys/bus/platform/devices/neo1973-pm-bt.0/power_on
- # echo 0 > /sys/bus/platform/devices/neo1973-pm-bt.0/reset
+# echo 1 > /sys/bus/platform/devices/neo1973-pm-bt.0/power_on
+# echo 0 > /sys/bus/platform/devices/neo1973-pm-bt.0/reset
 
 Then the device should be visible using
- # hcitool dev
+# hcitool dev
 
 == Better Xorg ==
 By default debian uses fbdev... But we can use Xglamo:
@@ -281,9 +282,9 @@ download testing: http://downloads.openmoko.org/daily/
 The new FSO3 kernel works fine and suspend/resume with zhone is also possible. But this kernel still has no loadable usb gadget modules (17-Sep-2008 01:39). :/<br>
 download testing: http://downloads.freesmartphone.org/fso-testing/images/<br>
 download unstable: http://downloads.freesmartphone.org/fso-unstable/images/
-# Download a recent'' kernel'' and ''rootfs'' (tar.gz) from one of the above mentioned sources. It's your decision if you want suspend or usb gadget modules at the moment.  
+# Download a recent'' kernel'' and ''rootfs'' (tar.gz) from one of the above mentioned sources. It's your decision if you want suspend or usb gadget modules at the moment.
 # Backup your running kernel like <code>mv /boot/uImage.bin /boot/uImage.bin.old</code>, then <br>copy the downloaded uImage file to the freerunner as <tt>/boot/uImage.bin</tt>.
-# Backup your actual modules like <code>mv /lib/modules/2.6.24 /lib/modules/2.6.24.old</code>, then <br>extract the downloaded rootfs tar.gz to a temporary directory and copy <tt>lib/modules/2.6.24</tt> from the temp directory to <tt>/lib/modules/2.6.24</tt> on the FreeRunner. 
+# Backup your actual modules like <code>mv /lib/modules/2.6.24 /lib/modules/2.6.24.old</code>, then <br>extract the downloaded rootfs tar.gz to a temporary directory and copy <tt>lib/modules/2.6.24</tt> from the temp directory to <tt>/lib/modules/2.6.24</tt> on the FreeRunner.
 # Run a <code>depmod -a</code>.
 # Do a <code>chown -R root.root /lib/modules/2.6.24</code> because the owner from the tar.gz is something else.
 # This step is only needed for the OM kernel but it doesn't harm the FSO kernel setup. Add "g_ether" Module to /etc/modules like <code>echo g_ether >> /etc/modules</code>. I read in an email, that the module "ohci-hcd" is also needed for some bluetooth functions, but i don't know this for real. I inserted it to my modules file to be on the safe side.
@@ -437,63 +438,63 @@ Now choose your theme, font and save it. To see changes do 'killall fbpanel'.</l
 
 === Using matchbox ===
 
-Matchbox has an option, <code>use_cursor</code>, that can be used to control whether to show the cursor. 
+Matchbox has an option, <code>use_cursor</code>, that can be used to control whether to show the cursor.
 For the default setup, edit <code>/usr/bin/zhone-session</code> and change the matchbox command to
- matchbox-window-manager -use_titlebar no -use_cursor no
+matchbox-window-manager -use_titlebar no -use_cursor no
 
 === Using unclutter ===
 
 Unclutter is a program that hides the cursor after a period of inactivity. To use unclutter, install it
- #apt-get install unclutter
-and choose ''Yes'' to the question <code>Start unclutter automatically?</code>. To change settings edit 
+#apt-get install unclutter
+and choose ''Yes'' to the question <code>Start unclutter automatically?</code>. To change settings edit
 <code>/etc/default/unclutter</code>.
 
 === Changing the cursor ===
 To make the cursor invisible create a file called empty.cursor with this content:
- #define empty.cursor_width 16
- #define empty.cursor_height 16
- static unsigned char empty.cursor_bits[] = {
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+#define empty.cursor_width 16
+#define empty.cursor_height 16
+static unsigned char empty.cursor_bits[] = {
+0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 Now you can execute:
- xsetroot -cursor empty.cursor empty.cursor
+xsetroot -cursor empty.cursor empty.cursor
 and the cursor will be invisible. To make this permanent you have to invent something ;) It must be executed after zhone has finished starting up.
 
 == Running X applications on your desktop in nested X server ==
 Sometimes it is helpful to have a big screen, keyboard and mouse. You can run X applications in a nested X server window.
 On your desktop install the nested X server application Xephyr (better that Xnest)
- apt-get install xserver-xephyr
+apt-get install xserver-xephyr
 Run a nested X server as display :1
- Xephyr :1 -ac -br -screen 480x640 -reset -terminate &
+Xephyr :1 -ac -br -screen 480x640 -reset -terminate &
 Now you are able to run apps on your Neo which will display on your desktop PC. Make sure to set the display, for example if "mydesktop" is your desktop hostname
- DISPLAY=mydesktop:1 xfce4-session &
+DISPLAY=mydesktop:1 xfce4-session &
 
 == Using the mouse and keyboard from your desktop on the OM device ==
 If you are running Linux (or a similar xorg capable operating system) on your Desktop, you can export your xsession to the openmoko device and use your mouse and keyboard on the Neo screen. A little program called x2x makes it even possible to do this simultaneously on the fly. When activated you just move your mouse to the edge of your monitor and then the mouse cursor continues on the screen of your openmoko device. If you select a window on the OM, the input of your keyboard is automatically entered in that window. You can even use the clipboard to copy data from tour desktop to OM and in the reverse direction.
 
 Configure your desktop computer to export your xsession:
- On your desktop (with root permissions):
- Make sure that sshd is installed and in /etc/ssh/sshd_config you have set
- X11Forwarding yes
+On your desktop (with root permissions):
+Make sure that sshd is installed and in /etc/ssh/sshd_config you have set
+X11Forwarding yes
 
 In K/Ubuntu sshd is in the package openssh-server.
 
 On your OM device install x2x (with root permissions)
- apt-get install xauth x2x
+apt-get install xauth x2x
 Now open a new X terminal on your desktop computer. You MUST be the same user that is running the xsession on your desktop (i.e. do not su to root or another user in your x terminal!). Use the same username that is running an xsession on your OM device. Assuming that you have a usb networking connection to OM (with standard configuration) on the user prompt of your desktop type:
- user@desktop:~$ ssh -X openmoko@192.168.0.202 "/usr/bin/x2x -east -to :0.0"
+user@desktop:~$ ssh -X openmoko@192.168.0.202 "/usr/bin/x2x -east -to :0.0"
 Hit return and enter your password. The xterm window will be unresponsive after that, but keep it open until you disconnect your OM device.
 
 Now move your mouse cursor across the right edge of your monitor. It should enter the screen of your OM device from the left. Of course you can also use -west, -north or -south, depending on your preference where you place your OM.
 
 If computer says:
- sh: /usr/X11R6/bin/xauth: No such file or directory
- X11 connection rejected because of wrong authentication.
- x2x - error: can not open display localhost:11.0
+sh: /usr/X11R6/bin/xauth: No such file or directory
+X11 connection rejected because of wrong authentication.
+x2x - error: can not open display localhost:11.0
 
 It means you haven't installed xauth on your OM. So on your OM (with root permissions)
- apt-get install xauth
+apt-get install xauth
 
 = Support =
 
@@ -505,7 +506,7 @@ Debian is supported on the linux to go
 == apt-get segmentation fault ==
 
 Whenever you get a segmentation fault while using apt-get or aptitude, clean the database so it will rebuild it
- rm /var/cache/apt/*.bin
+rm /var/cache/apt/*.bin
 
 = Why use debian =
 
