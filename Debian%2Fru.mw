@@ -361,29 +361,29 @@ xfce4-session</pre>
 
 {{Todo|And if I didn't run X as a normal user?}}
 
-== Using matchbox-window-manager with fbpanel as normal user without gdm ==
-fbpanel is a fast, lightweight, gtk2 desktop panel.
+== Использование matchbox-window-manager с fbpanel под нормальным пользователем без использования gdm ==
+fbpanel это быстрая, легковесная, gtk2 панель десктопная.
 [[Image:Debian_fbpanel_zhone.png|right|thumb|300px|Debian with fbpanel, matchbox-window-manager and Zhone running]]
 <ol><li>Follow http://wiki.openmoko.org/wiki/Debian#Running_X_as_normal_user</li>
 <li>Customize the boot process:
 <pre>sudo cp /etc/init.d/zhone-session /etc/init.d/xserver
 sudo nano /etc/init.d/xserver</pre>
-Find (all in one line)
+Ищем (все в одной строке)
 <pre>start-stop-daemon --start --pidfile ${PIDFILE}
 --make-pidfile --background --exec /bin/su --
 --login --command "${PROG_XINIT} ${PROG_XSESSION} ${PROG_FSO}
 -- $X_OPTIONS" $USER</pre>
-Change it to (all in one line):
+Измените (все в одну строку):
 <pre>start-stop-daemon --start --pidfile ${PIDFILE}
 --make-pidfile --background --exec /bin/su --
 --login -c "startx" ${USER}</pre>
-Add script to daemons:
+Добавим скрипт к демонам:
 <pre>sudo update-rc.d -f zhone-session remove
 sudo update-rc.d -f xserver defaults</pre></li>
 (renzo: Sat Oct 18 08:40:00 CEST 2008. The previous command is wrong, IMHO. Type "xserver" instead of "startx").<br/>
 ([[User:Hiciu|Hiciu]] 23:11, 19 October 2008 (UTC): yes, you are right. Now it is correct.)
 
-<li>Install fbpanel:
+<li>Ставим fbpanel:
 <pre>sudo apt-get install fbpanel</pre></li>
 <li>Customize configs:
 <ol><li><pre>~/.xinitrc</pre>
@@ -404,7 +404,7 @@ sleep 1;
 done;
 </pre></li>
 
-<li>Read http://fbpanel.sourceforge.net/docs.html#config
+<li>Читаем http://fbpanel.sourceforge.net/docs.html#config
 <pre>~/.fbpanel/default</pre>
 <pre>
 mkdir ~/.fbpanel
@@ -425,13 +425,14 @@ TextSize = small
 TextColor = darkblue
 }
 }</pre>
-After 'killall fbpanel' it will show: free mem in megabytes | loadavg | battery % left.</li>
-<li>Default theme is ugly. You can change it and / or make font's bigger:
+После 'killall fbpanel' мы видим: свободную память в мегабайтах | среднюю загрузку процессора | батарейки % слева.</li>
+<li>тема по умолчанию ugly. Вы можете ее сменить и /или   сделать шрифт  bigger:
 <pre>~/.gtkrc-2.0</pre>
 <pre>sudo apt-cache search gtk2-engines
 sudo apt-get install gtk2-engines gtk-theme-switch
 export DISPLAY=:0 gtk-theme-switch2</pre>
 Now choose your theme, font and save it. To see changes do 'killall fbpanel'.</li></ol></li></ol>
+[[[[Заголовок ссылки]]]]
 
 = Miscellaneous =
 == Making the cursor invisible ==
