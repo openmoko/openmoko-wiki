@@ -1,3 +1,5 @@
+{{note| These instructions are for 2008 .  If you are using the FSO stack, see [[GPRS_FSO]].}}
+
 The GPRS connection is made using the PPP protocol to a server identified by an "APN" at the network operator.   Once a GPRS connection is made, it is possible to [[#Sharing_the_GPRS_connection_with_a_computer|share that connection with a connected computer]], allowing that computer to access the internet through the phone!
 
 = Option 1: With GSM multiplexing and with a GUI =
@@ -12,7 +14,7 @@ However, using those instructions, you will encounter a few hurdles.  Do not use
 
 Alternatively, if you simply want to download all the packages, you can get them from here:
 
-http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/gsm0710muxd_0.9.1+r0-gitr3ff86b129640b647ccba3d86eb243d864671b039-r0_armv4t.ipk 
+http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/gsm0710muxd_0.9.1+r0-gitr3ff86b129640b647ccba3d86eb243d864671b039-r0_armv4t.ipk
 
 and the dependencies from here:
 
@@ -24,11 +26,11 @@ The most important step after installing gsm0710muxd is to tell QPE to use the M
 
 in /etc/X11/Xsession.d/89qtopia
 
-  identvar=$(date +%s)
-  ptsvar=$(dbus-send --system --print-reply --type=method_call --dest=org.pyneo.muxer /org/pyneo/Muxer 
-  org.freesmartphone.GSM.MUX.AllocChannel string:$identvar | grep 
-  string | awk -F '"' '{ print $2 }')
-  export QTOPIA_PHONE_DEVICE=$ptsvar
+identvar=$(date +%s)
+ptsvar=$(dbus-send --system --print-reply --type=method_call --dest=org.pyneo.muxer /org/pyneo/Muxer
+org.freesmartphone.GSM.MUX.AllocChannel string:$identvar | grep
+string | awk -F '"' '{ print $2 }')
+export QTOPIA_PHONE_DEVICE=$ptsvar
 
 
 The [[#Some APN names for reference|APN Reference]] table may come in handy when you are looking for the required network specific information for the other scripts.
@@ -122,7 +124,7 @@ You'll need /etc/ppp/peers/gprs:
 #logfile /var/volatile/log/pppd.log
 lock
 /dev/ttySAC0 115200
-crtscts 
+crtscts
 connect /etc/ppp/gprs-connect-chat
 disconnect /etc/ppp/gprs-disconnect-chat
 hide-password
@@ -157,7 +159,7 @@ For example:
 <pre>
 # Secrets for authentication using CHAP
 # client        server  secret                  IP addresses
-"user"         *       "password"                  *  
+"user"         *       "password"                  *
 </pre>
 
 For this you need the following options in /etc/ppp/peers/gprs:
@@ -174,23 +176,23 @@ You'll also need /etc/ppp/gprs-connect-chat (needs "chmod +x"):
 <pre>
 #!/bin/sh -e
 exec chat -v -S -s\
-        TIMEOUT 15\
-        "" "\K\K\K\d+++ATH"\
-        OK-AT-OK ATZ\
-        OK ATE1\
-        ABORT BUSY\
-        ABORT DELAYED\
-        ABORT "NO ANSWER"\
-        ABORT "NO DIALTONE"\
-        ABORT VOICE\
-        ABORT ERROR\
-        ABORT RINGING\
-        TIMEOUT 60\
-        OK AT+CFUN=1\
-        OK AT+COPS\
-        OK AT+CGDCONT=1,\"IP\",\"internet\"\
-        OK ATD*99#\
-        CONNECT /n/d
+TIMEOUT 15\
+"" "\K\K\K\d+++ATH"\
+OK-AT-OK ATZ\
+OK ATE1\
+ABORT BUSY\
+ABORT DELAYED\
+ABORT "NO ANSWER"\
+ABORT "NO DIALTONE"\
+ABORT VOICE\
+ABORT ERROR\
+ABORT RINGING\
+TIMEOUT 60\
+OK AT+CFUN=1\
+OK AT+COPS\
+OK AT+CGDCONT=1,\"IP\",\"internet\"\
+OK ATD*99#\
+CONNECT /n/d
 </pre>
 
 <b>Note:</b> In the 3rd last line, replace the word <i>internet</i> by your provider's APN (listed below).
@@ -204,24 +206,24 @@ Update: On my freerunner the first AT+CFUN=1 always generated ERROR. I managed t
 <pre>
 #!/bin/sh -e
 exec /usr/sbin/chat -v \
-        TIMEOUT 10 \
-        OK-AT-'' ''\
-        ABORT BUSY\
-        ABORT DELAYED\
-        ABORT "NO ANSWER"\
-        ABORT "NO DIALTONE"\
-        ABORT VOICE\
-        ABORT ERROR\
-        ABORT RINGING\
-        TIMEOUT 30 \
-        '' ATZ\
-        OK ATE1\
-        OK AT+CFUN=1\
-        ERROR AT+CPIN=\"XXXX\"\         << USE YOUR OWN
-        OK AT+COPS\
-        OK AT+CGDCONT=1,\"IP\",\"internet\"\
-        OK 'ATDT*99***1#'\
-        CONNECT ''
+TIMEOUT 10 \
+OK-AT-'' ''\
+ABORT BUSY\
+ABORT DELAYED\
+ABORT "NO ANSWER"\
+ABORT "NO DIALTONE"\
+ABORT VOICE\
+ABORT ERROR\
+ABORT RINGING\
+TIMEOUT 30 \
+'' ATZ\
+OK ATE1\
+OK AT+CFUN=1\
+ERROR AT+CPIN=\"XXXX\"\         << USE YOUR OWN
+OK AT+COPS\
+OK AT+CGDCONT=1,\"IP\",\"internet\"\
+OK 'ATDT*99***1#'\
+CONNECT ''
 </pre>
 
 The error seems to vary a bit, sometimes it's before AT+COPS, sometimes as above. I have two versions of the gprs-connect-chat, which I vary between depending on which is needed. Or is there a way to specify two acceptable answers like {OK,ERROR}?
@@ -235,24 +237,24 @@ Also good to have is /etc/ppp/gprs-disconnect-chat (needs "chmod +x"):
 <pre>
 #!/bin/sh -e
 /usr/sbin/chat -v\
-	ABORT OK\
-	ABORT BUSY\
-	ABORT DELAYED\
-	ABORT "NO ANSWER"\
-	ABORT "NO CARRIER"\
-	ABORT "NO DIALTONE"\
-	ABORT VOICE\
-	ABORT ERROR\
-	ABORT RINGING\
-	TIMEOUT 12\
-	"" "\K\K\K\d+++ATH"\
-	"NO CARRIER-AT-OK" "\c"
+ABORT OK\
+ABORT BUSY\
+ABORT DELAYED\
+ABORT "NO ANSWER"\
+ABORT "NO CARRIER"\
+ABORT "NO DIALTONE"\
+ABORT VOICE\
+ABORT ERROR\
+ABORT RINGING\
+TIMEOUT 12\
+"" "\K\K\K\d+++ATH"\
+"NO CARRIER-AT-OK" "\c"
 </pre>
 
 == Starting PPP connection ==
 
 The following script can be used to start the ppp connection. First it stops gsmd because gsmd may put the phone in a unknown state. It then turns on the power to the phone, modifies the ownership, and then creates a tty connection. Finally it starts [[pppd]] with the gprs settings.
- 
+
 <pre>
 /etc/init.d/gsmd stop
 echo "1" > /sys/bus/platform/devices/neo1973-pm-gsm.0/power_on
@@ -261,7 +263,7 @@ stty -F /dev/ttySAC0 crtscts
 pppd call gprs
 </pre>
 
-If you are having problems connecting ensure you have a good GSM signal and replace the last line with the below line. This will allow you to see the details of the connection on the console. 
+If you are having problems connecting ensure you have a good GSM signal and replace the last line with the below line. This will allow you to see the details of the connection on the console.
 
 <pre>
 pppd debug nodetach call gprs
@@ -281,7 +283,7 @@ ln -sf /var/run/resolv.conf /etc
 
 If needed put your nameserver for usb-net into /var/run/resolv.conf, not in /etc.
 
-The image does not set a correct resolv.conf. i do so with an 
+The image does not set a correct resolv.conf. i do so with an
 
 <pre>
 echo  nameserver 192.168.0.201 > /var/run/resolv.conf
@@ -296,13 +298,13 @@ another problem is pppd's /etc/ppp/ip-down.d/92removedns which does not properly
 ACTUALCONF=/var/run/resolv.conf
 PPPCONF=/var/run/ppp/resolv.conf
 if [ -f $PPPCONF ] ; then
-        if [ -f $ACTUALCONF ] ; then
-                if [ ! -h $ACTUALCONF -o ! "`readlink $ACTUALCONF 2>&1`" = "$PPPCONF" ] ; then
-                        mv $ACTUALCONF $ACTUALCONF.ppporig
-                fi
-        fi
+if [ -f $ACTUALCONF ] ; then
+if [ ! -h $ACTUALCONF -o ! "`readlink $ACTUALCONF 2>&1`" = "$PPPCONF" ] ; then
+mv $ACTUALCONF $ACTUALCONF.ppporig
+fi
+fi
 
-        ln -sf $PPPCONF $ACTUALCONF
+ln -sf $PPPCONF $ACTUALCONF
 fi
 </pre>
 
@@ -373,7 +375,7 @@ fido
 | Hungary || T-Mobile || Any || internet / *99***1# || must be empty || must disable chap auth: refuse-chap, refuse-mschap, refuse-mschap-v2
 |-
 | India || AirTel || MobileOffice || airtelgprs.com || ||
-|- 
+|-
 | Italy   || Wind     || Superinternet, public IP  || internet.wind / *99# || wind/wind (any string) || [[Wind pppd scripts]]
 |-
 | Netherlands || Vodafone || Any || live.vodafone.com / *99***1#||  || [[Vodafone pppd scripts]]
@@ -411,13 +413,13 @@ fido
 | USA || Cingular (AT&T) || Less than full internet || wap.cingular / may require *99***1# || ||
 |-
 | USA || T-mobile || Anything less than full internet || wap.voicestream.com ||  || Need to set proxy to 216.155.165.50  T-Mobile docs say "216.155.165.050".  050 octal = 40 decimal and will *not* work.  I think port is 8080 or 9100.  No luck w/ pppd scripts.  GPRS_FSO directions work under FSO though.
-|- 
+|-
 | USA || T-mobile || Regular internet plan || internet2.voicestream.com || || [[T-Mobile pppd scripts]]
-|- 
+|-
 | USA || T-mobile || "VPN" internet plan || internet3.voicestream.com || ||
-|- 
+|-
 | Venezuela || Digitel || Pre- y post-pago || gprsweb.digitel.ve || ||
-|- 
+|-
 |}
 
 [1] connected through a WAP proxy (slower, but the only way to access Vodafone live! and SFR portal)
@@ -450,7 +452,7 @@ Add the following definition to /etc/network/interfaces:
 <pre>
 auto ppp0
 iface ppp0 inet ppp
-        provider gprs
+provider gprs
 </pre>
 
 That should be it. Now you can use 'ifup ppp0' and 'ifdown ppp0' manually too.
