@@ -1,9 +1,9 @@
-{{Languages|TangoGPS}}
-{{Application|TangoGPS}}
+{{Languages|tangoGPS}}
+{{Application|tangoGPS}}
 
 __TOC__
 
-TangoGPS is a map application which can utilize Neo's built-in GPS to show your current location.
+tangoGPS is a map application which can utilize Neo's built-in GPS to show your current location.
 
 [[Image:TangoGPS1.jpg]]
 
@@ -13,41 +13,41 @@ Website: http://www.tangogps.org
 
 From the freerunner connected to the internet:
 
-  opkg install gpsd 
+opkg install gpsd
 {{note|I experienced hangups if gpsd was not installed.}}
-  opkg install http://www.tangogps.org/downloads/tangogps_0.9.3-r1_armv4t.ipk
+opkg install http://www.tangogps.org/downloads/tangogps_0.9.3-r1_armv4t.ipk
 
 If opkg complains about not being able to acquire a lock, try:
 
-  pkill packagekit
+pkill packagekit
 
 To get gpsd working on the FreeRunner you have to change the configuration according to [[Gpsd#GPS_on_GTA02]].
 Then start gpsd by:
 
-  /etc/init.d/gpsd start
+/etc/init.d/gpsd start
 
 If you get an error about no GPS device in /etc/default/gpsd execute:
 
-  echo "GPS_DEV=\"/dev/ttySAC1\"" > /etc/default/gpsd
+echo "GPS_DEV=\"/dev/ttySAC1\"" > /etc/default/gpsd
 
 Now you must power up the GPS-chip by opening the "Settings" application and setting the GPS entry to "on". Now you can run tangoGPS and wait until it get's a GPS fix. This can take up to a few minutes.
 
-== Running TangoGPS on [[debian]] ==
+== Running tangoGPS on [[debian]] ==
 
-Tangogps is a very nice GPS mapping application.  The latest version is available in [[Debian]].
+tangogps is a very nice GPS mapping application.  The latest version is available in [[Debian]].
 
 It depends on gpsd which conflicts with frameworkd in fso-frameworkd, but there is a package available that provides
 the gpsd interface to clients while using the services of the FSO frameworkd daemon, fso-gpsd. To install tangogps run
 
- # apt-get install fso-gpsd tangogps
+# apt-get install fso-gpsd tangogps
 
 To turn the gps on, you have two options.
 You can start the gps application in [[Zhone]], this will turn on the gps device for you or you can manually turn
 on the gps device using
-  # echo 1 >/sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/neo1973-pm-gps.0/pwron
+# echo 1 >/sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/neo1973-pm-gps.0/pwron
 
-Now you should be able to start tangogps from the X-mouse start menu (must have XFCE installed) :
- Start > other > GPS & Map
+Now you should be able to start tangoGPS from the X-mouse start menu (must have XFCE installed) :
+Start > other > GPS & Map
 
 '''Issues:'''
 * Both gpsd and the framework publish GPS data through dbus, though with different interfaces.  This suggests a number of possible solutions.
@@ -56,9 +56,9 @@ Now you should be able to start tangogps from the X-mouse start menu (must have 
 ** the framework could have an option to read data from gpsd.
 ** ogpsd/gypsy could be extended to be backwards compatible with the majority of gps applications.
 
-== Running TangoGPS on FSO Milestone 3 ([[OpenmokoFramework]]) ==
+== Running tangoGPS on FSO Milestone 3 ([[OpenmokoFramework]]) ==
 
-There are two various GPS interfaces -- (1) one provided with default gpsd and (2) the other provided by ogpsd (part of the frameworkd).  TangoGPS requires the ad 1 and it obtains information from gps from the dbus interface provided by gpsd.
+There are two various GPS interfaces -- (1) one provided with default gpsd and (2) the other provided by ogpsd (part of the frameworkd). tangoGPS requires the ad 1 and it obtains information from gps from the dbus interface provided by gpsd.
 
 On FSO milestone 3, there is tangoGPS pre-installed as well as both gpsd and ogpsd (see <code>/etc/frameworkd.conf</code>, section <code>ogpsd</code>).  As mentioned above, there also exists a fso-gpsd package, that converts from ad 2 to ad 1 (unfortunately fso-gpsd is not in default image and must be installed with <code>opkg install fso-gpsd</code>).
 
@@ -84,29 +84,29 @@ If you find that TangoGPS does not remember configuration changes that you make 
 Once you have set the location to a non-volatile path, you can connect your Neo to the internet by USB or WiFi at home and start downloading the maps of your area. Tap the map screen and select "map download". Now on-the-road  tangoGPS will be able to show you maps in different zoom levels even though you are not connected to the internet.
 
 == Downloading Maps via GPRS ==
-I think TangoGPS may have started working after I followed the instructions to get GPRS working with GSM multiplexing here: [[Manually_using_GPRS#Option_1:_With_GSM_multiplexing_and_with_a_GUI]]
+I think tangoGPS may have started working after I followed the instructions to get GPRS working with GSM multiplexing here: [[Manually_using_GPRS#Option_1:_With_GSM_multiplexing_and_with_a_GUI]]
 
 There are steps included in those instructions to improve GPS performance.  The great thing is that once you get GPRS working, you can roam with TangoGPS running and have it download maps as needed over the GPRS connection!
 
-== Using TangoGPS to create tracks for OpenStreetMap.org ==
+== Using tangoGPS to create tracks for OpenStreetMap.org ==
 
 TangoGPS works fine to create track for Openstreetmap. However, it records and stores a track in its native format, use [http://www.tangogps.org/downloads/convert2gpx.pl] (see also: [http://psung.blogspot.com/2008/07/sharing-gps-tracks-from-tangogps-on.html tools]  to convert the track to GPX (i.e to import into JOSM):
 
-    perl convert2gpx.pl 20080903_111508.log > 20080903_111508.gpx
+perl convert2gpx.pl 20080903_111508.log > 20080903_111508.gpx
 
-== Importing Tracks into TangoGPS ==
+== Importing Tracks into tangoGPS ==
 
-TangoGPS does not support the import of tracks. You may help yourself by using [http://relet.net/frog/archives/68 this tool] to import GPX trackpoints as a series of POIs directly into the sqlite database which tangoGPS uses to store POIs.
+tangoGPS does not support the import of tracks. You may help yourself by using [http://relet.net/frog/archives/68 this tool] to import GPX trackpoints as a series of POIs directly into the sqlite database which tangoGPS uses to store POIs.
 
-== Using Google Maps with TangoGPS ==
+== Using Google Maps with tangoGPS ==
 
 Go to Config and create a new repository.
 Set the url to
- http://mt.google.com/mt?&x=%d&y=%d&zoom=%d 
-for street-maps or  
- http://khm.google.com/kh?&x=%d&y=%d&zoom=%d
+http://mt.google.com/mt?&x=%d&y=%d&zoom=%d
+for street-maps or
+http://khm.google.com/kh?&x=%d&y=%d&zoom=%d
 for satellit-maps.
- http://mt.google.com/mt?v=app.81&x=%d&y=%d&zoom=%d
+http://mt.google.com/mt?v=app.81&x=%d&y=%d&zoom=%d
 for topographic-maps.
 
 Check the "Inverted Zoom" box. Press save Repository Configuration and you're ready to go.
@@ -115,12 +115,12 @@ Check the "Inverted Zoom" box. Press save Repository Configuration and you're re
 
 <onlyinclude>
 {{ApplicationBox|
-  Name=[[TangoGPS]]|
-  Description=    TangoGPS is a map application which can utilize Neo's built-in GPS to show your current location. It automatically downloads maps from http://openstreetmap.com and you can download map tiles for offline use too.|
-  Screenshot=TangoGPS1.jpg|
-  Homepage=http://www.tangogps.org|
-  TestedOn=Om 2008.8|
-  PackageName=tangogps
+Name=[[TangoGPS]]|
+Description=    TangoGPS is a map application which can utilize Neo's built-in GPS to show your current location. It automatically downloads maps from http://openstreetmap.com and you can download map tiles for offline use too.|
+Screenshot=TangoGPS1.jpg|
+Homepage=http://www.tangogps.org|
+TestedOn=Om 2008.8|
+PackageName=tangogps
 }}
 </onlyinclude>
 
