@@ -1,28 +1,28 @@
 {{Languages|Debian}}
-= Установка =
-"Официальная" инструкция по установке [http://wiki.debian.org/DebianOnFreeRunner Debian on FreeRunner|] или [http://wiki.debian.org/DebianOnNeo1973 Debian on Neo1973] (смотри [http://lists.linuxtogo.org/pipermail/smartphones-standards/2008-August/000232.html original announcement]).
+= Installation =
+There are "official" instructions on how to install [http://wiki.debian.org/DebianOnFreeRunner Debian on FreeRunner] or [http://wiki.debian.org/DebianOnNeo1973 Debian on Neo1973] (see the [http://lists.linuxtogo.org/pipermail/smartphones-standards/2008-August/000232.html original announcement]).
 
-Предыдущая информация (сейчас частично обновлена) как вручную ставить Debian перемещена [[Manual Debian]].
+Previous information (partly outdated, now) on how to install Debian manually has been moved to [[Manual Debian]].
 
-Смотри также : http://www.debian.org/ чтобы узнать о Debian.
+See also : http://www.debian.org/ to know more about Debian.
 
 From time to time the Debian packages may be broken, which will cause the install.sh script to fail. Since waiting for the packages to be fixed can take quite a lot of patience, [http://dgym.homeunix.net/projects/freerunner/debian-install/ here] is an alternative method of getting Debian installed on the FreeRunner.
 
-= Система =
-== Пароль ==
+= System =
+== Password ==
 
-Пароль у root пустой. Вы можете его сменить через команду:
+The default root password is blank. You should change that as soon as you can:
 # passwd
-Если пароль не пустой, перегрузитесь. Если не помогло, загрузитесь в 2008.08/2007.02, chroot на карточку micro SD и установите новый пароль.
+If entering a blank password does not work at first, try rebooting. If still no success, boot to 2008.08/2007.02, chroot to the micro SD card and set a new password.
 
-== Ускорение загрузки ==
-'''Note''': По умолчанию, Debian уже настроен на показ минимум сообщений в консоли при загрузки. Все равно хотите сократить время загрузки?
+== Speeding up booting ==
+'''Note''': By default, Debian is already configured to write limited messages to the console during boot.  Does this actually speed things up anymore?
 
 What's good for every linux booting is also good for our debian on the freerunner: booting in quiet mode. To do so by default just boot your Neo FreeRunner in NOR-Flash and execute this configure-script: [http://paste.ubuntuusers.de/391456/ configure-uboot.sh].
 
 It changes default booting to quiet-mode and adds another boot-option to boot without quiet-mode for debugging purpose.
 
-== Засыпание ==
+== Suspend ==
 
 '''Note''': As of Sep. 15 2008, suspend works 'out-of-the-box'; installing apm and the idle clock configuration changes do not seem to be necessary any more.  Press the power button for two seconds (in zhone) or run 'apm -s' to suspend.
 
@@ -67,7 +67,7 @@ esac
 
 exit 0
 
-== Время ==
+== Time ==
 
 The default time zone is UTC.  Reconfigure it by running
 
@@ -88,7 +88,7 @@ Issues:
 ** Setting the clock could be done via GPS: [[Getting_GPS_console_output_with_gllin#GPRMC_message]]
 
 == WLAN ==
-=== wifi-радар ===
+=== wifi-radar ===
 
 If you don't want to mess up with configuration files and is looking for an easy gui for wireless configuration, then wifi-radar is what you are looking for.
 
@@ -102,9 +102,9 @@ If you are looking for more, read on...
 Make sure the following packages are installed
 apt-get install wireless-tools wpasupplicant dhcp3-client
 
-=== пример конфигурации ===
+=== Example configurations ===
 
-==== Если сеть одна ====
+==== Single network configuration ====
 
 Assuming your wireless router uses WPA security and DHCP,
 edit <code>/etc/network/interfaces</code> to include a section like this:
@@ -132,7 +132,7 @@ Issues:
 
 Once wpa_supplicant has begun managing your wifi interface, you should type "wpa_action eth0 stop" instead of "ifdown eth0".
 
-==== Конфигурация с роумингом ====
+==== Roaming configuration ====
 
 '''Todo''': Which of the issues that single network configurations suffer from are addressed by WPA roaming mode?  Would ifplugd / guessnet help, or just make things more complicated?
 
@@ -228,8 +228,8 @@ The only atypical part of using bluetooth on the FreeRunner is turning it on, wh
 Then the device should be visible using
 # hcitool dev
 
-== Улучшение Xorg ==
-По умолчанию debian использует fbdev... Но мы будем использовать Xglamo:
+== Better Xorg ==
+By default debian uses fbdev... But we can use Xglamo:
 <pre>apt-get install xserver-xglamo</pre>
 after that edit /etc/X11/xorg.conf and change the line
 <pre>Driver          "fbdev"</pre>
@@ -243,28 +243,28 @@ with that you:
 *don't have the pointer callibration bug with the rotated mode
 *have better performances
 
-== Запуск X от нормального пользователя ==
-1. Создаем нового пользователя - freerunner
+== Running X as normal user ==
+1. Create a new user
 <pre>
-# useradd -m -G audio,dialout,floppy,video,staff freerunner
-# passwd freerunner
+# useradd -m -G audio,dialout,floppy,video,staff username
+# passwd username
 </pre>
 
-2. Редактируем /etc/init.d/zhone-session (или /etc/init.d/xfce если вы используете xfce, see over) и меняем USER=root на USER=freerunner. Когда вы сделаете изменения, чтобы их не потерять при апгрейде, запустите
+2. Edit /etc/init.d/zhone-session (or /etc/init.d/xfce if you are using xfce, see over) and change USER=root to USER=username in it. Then to make sure changes are not lost on upgrade, run
 <pre>
 dpkg-divert --add /etc/init.d/zhone-session
 </pre>
-Это создат новую версию /etc/init.d/zhone-session записанную в /etc/init.d/zhone-session.distrib
+This will make new versions of /etc/init.d/zhone-session be written to /etc/init.d/zhone-session.distrib
 
-3. Редактируем <code>/etc/X11/Xwrapper.config</code> and change <code>allowed_users=console</code> to <code>allowed_users=anybody</code>
+3. Edit <code>/etc/X11/Xwrapper.config</code> and change <code>allowed_users=console</code> to <code>allowed_users=anybody</code>
 
-4. Делаем apm setuid root so that zhone can do suspend and make it only executable for users in the staff group
+4. Make apm setuid root so that zhone can do suspend and make it only executable for users in the staff group
 <pre>
 dpkg-statoverride --update --add root staff 4750 /usr/bin/apm
 </pre>
 It would also be possible to use sudo, but then you would have to edit /usr/bin/zhone.
 
-== Звук ==
+== Sound ==
 Make sure to put your user in the audio group ("adduser <username> audio").
 
 If there is no error but no sound, try these state files:
@@ -292,7 +292,7 @@ download unstable: http://downloads.freesmartphone.org/fso-unstable/images/
 --[[User:Pini]] Sun Sep 28 15:01:46 UTC 2008
 * Actually suspend/resume doesn't work anymore on the Neo Freerunner with the FSO3 kernel starting from september 16th. It does work with the Om2008.8 kernel from september 3rd.
 
-= Программы =
+= Software =
 You can install <tt>[http://packages.debian.org/search?keywords=dselect dselect]</tt>(~2.2MB) or <tt>[http://packages.debian.org/search?keywords=aptitude aptitude]</tt>(~12MB) to visually inspect the available debian packages using the desktop's console.<br>
 Also the gtk-based package-manager <tt>[http://packages.debian.org/search?keywords=synaptic synaptic]</tt>(~15.7MB) is probably working.<br>
 Finally, on constrained systems, just issue the command:
@@ -312,25 +312,25 @@ There is also a hack to convert drm protected adobe ebooks to .cbz files readabl
 
 == XFCE ==
 
-xfce это маленькая и легковесная оболочка которая быстра для  FreeRunner.
+xfce is small and lightweight and so is quite fast for the FreeRunner.
 
 <pre>apt-get install xfce4
 cp /etc/init.d/zhone-session /etc/init.d/xfce</pre>
 
-Сделайте изменения в /etc/init.d/xfce 
+Then you may hack /etc/init.d/xfce making
 
 <pre>PROG_FSO=/usr/bin/startxfce4</pre>
 
-Настроим загрузочный процесс (this may have to be redone when zhone-session is updated):
+Customize the boot process (this may have to be redone when zhone-session is updated):
 
 <pre>update-rc.d -f zhone-session remove
 update-rc.d -f xfce defaults</pre>
 
-Можеет отредактировать свое имя /etc/hosts :
+edit your /etc/hosts to have :
 
 <pre>127.0.0.1 localhost debian-gta02</pre>
 
-Запуск XFCE !
+Start XFCE !
 
 <pre>/etc/init.d/zhone-session stop
 /etc/init.d/xfce start</pre>
@@ -341,15 +341,15 @@ I've not yet looked at the reason for the seemingly too slow start for the deskt
 zhone is available from the "Office" menu in xfce.
 The matchbox keyboard is available in "Accessories".
 
-Если вы хотите видеть экран в горизонтальном виде (повернуть, 4:3 aspect), add the following to the /etc/X11/xorg.conf in both the Device and InputDevice sections (у меня не работает):
+If you want to display the screen on the long side (ie rotated, 4:3 aspect), add the following to the /etc/X11/xorg.conf in both the Device and InputDevice sections :
 
 <pre>Option          "Rotate"                "CCW"</pre>
 
 and then (re)start xfce.
 
-=== Использование matchbox-window-manager с XFCE ===
+=== Using matchbox-window-manager with XFCE ===
 
-XFCE's оконный менеджер сконфигурирован для вашего NEO.  matchbox's оконный менеджер тоже совместим с  xfce.  Для использования  matchbox window manager, необходимо выполнить следующие команды при старте X . Если вы следовалили инструкциям по настройке запуска под нормальным пользователем, поместите в ~/.xinitrc:
+XFCE's window manager is poorly configured for use with the FreeRunner.  Fortunately, matchbox's window manager is compatible with xfce.  To use the matchbox window manager, arrange to run the following commands at X startup.  If you followed the instructions above to run X as a normal user, put this in ~/.xinitrc:
 
 <pre>#!/bin/sh
 
@@ -361,31 +361,31 @@ xfce4-session</pre>
 
 {{Todo|And if I didn't run X as a normal user?}}
 
-== Использование matchbox-window-manager с fbpanel под нормальным пользователем без использования gdm ==
-fbpanel это быстрая, легковесная, gtk2 панель десктопная.
+== Using matchbox-window-manager with fbpanel as normal user without gdm ==
+fbpanel is a fast, lightweight, gtk2 desktop panel.
 [[Image:Debian_fbpanel_zhone.png|right|thumb|300px|Debian with fbpanel, matchbox-window-manager and Zhone running]]
-<ol><li>Детально http://wiki.openmoko.org/wiki/Debian#Running_X_as_normal_user</li>
-<li>Настройка процесса загрузки:
+<ol><li>Follow http://wiki.openmoko.org/wiki/Debian#Running_X_as_normal_user</li>
+<li>Customize the boot process:
 <pre>sudo cp /etc/init.d/zhone-session /etc/init.d/xserver
 sudo nano /etc/init.d/xserver</pre>
-Ищем (все в одной строке)
+Find (all in one line)
 <pre>start-stop-daemon --start --pidfile ${PIDFILE}
 --make-pidfile --background --exec /bin/su --
 --login --command "${PROG_XINIT} ${PROG_XSESSION} ${PROG_FSO}
 -- $X_OPTIONS" $USER</pre>
-Измените (все в одну строку):
+Change it to (all in one line):
 <pre>start-stop-daemon --start --pidfile ${PIDFILE}
 --make-pidfile --background --exec /bin/su --
 --login -c "startx" ${USER}</pre>
-Добавим скрипт к демонам:
-<pre>update-rc.d -f zhone-session remove
-update-rc.d -f xserver defaults</pre></li>
+Add script to daemons:
+<pre>sudo update-rc.d -f zhone-session remove
+sudo update-rc.d -f xserver defaults</pre></li>
 (renzo: Sat Oct 18 08:40:00 CEST 2008. The previous command is wrong, IMHO. Type "xserver" instead of "startx").<br/>
 ([[User:Hiciu|Hiciu]] 23:11, 19 October 2008 (UTC): yes, you are right. Now it is correct.)
 
-<li>Ставим fbpanel:
+<li>Install fbpanel:
 <pre>sudo apt-get install fbpanel</pre></li>
-<li>Настройка конфигов:
+<li>Customize configs:
 <ol><li><pre>~/.xinitrc</pre>
 <pre>
 #!/bin/sh
@@ -404,18 +404,18 @@ sleep 1;
 done;
 </pre></li>
 
-<li>Читаем http://fbpanel.sourceforge.net/docs.html#config
+<li>Read http://fbpanel.sourceforge.net/docs.html#config
 <pre>~/.fbpanel/default</pre>
 <pre>
 mkdir ~/.fbpanel
 cp /etc/fbpanel/default ~/.fbpanel/default
 nano ~/.fbpanel/default
 </pre>
-Удаляем секцию с 'taskbar' плагином - это неользовательский matchbox-window-manager. Вы можеет добавить плагин 'cpu'
+Remove section with 'taskbar' plugin - it's useless with matchbox-window-manager. You may add plugin 'cpu'
 <pre>Plugin {
 type = cpu
 }</pre>
-Также, плагин 'genmon' удобный:
+Also, plugin 'genmon' is useful:
 <pre>Plugin {
 type = genmon
 config {
@@ -425,14 +425,13 @@ TextSize = small
 TextColor = darkblue
 }
 }</pre>
-После 'killall fbpanel' мы видим: свободную память в мегабайтах | среднюю загрузку процессора | батарейки % слева.</li>
-<li>тема по умолчанию ugly. Вы можете ее сменить и /или   сделать шрифт  bigger:
+After 'killall fbpanel' it will show: free mem in megabytes | loadavg | battery % left.</li>
+<li>Default theme is ugly. You can change it and / or make font's bigger:
 <pre>~/.gtkrc-2.0</pre>
 <pre>sudo apt-cache search gtk2-engines
 sudo apt-get install gtk2-engines gtk-theme-switch
 export DISPLAY=:0 gtk-theme-switch2</pre>
-Теперь меняем тему, шрифт и сохраняем это. Чтобы увидеть изменения выполните команду 'killall fbpanel'.</li></ol></li></ol>
-[[[[Заголовок ссылки]]]]
+Now choose your theme, font and save it. To see changes do 'killall fbpanel'.</li></ol></li></ol>
 
 = Miscellaneous =
 == Making the cursor invisible ==
