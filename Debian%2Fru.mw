@@ -8,21 +8,21 @@
 
 From time to time the Debian packages may be broken, which will cause the install.sh script to fail. Since waiting for the packages to be fixed can take quite a lot of patience, [http://dgym.homeunix.net/projects/freerunner/debian-install/ here] is an alternative method of getting Debian installed on the FreeRunner.
 
-= System =
-== Password ==
+= Система =
+== Пароль ==
 
-The default root password is blank. You should change that as soon as you can:
+По у root пустой. Сы можеет его сменить через команду:
 # passwd
-If entering a blank password does not work at first, try rebooting. If still no success, boot to 2008.08/2007.02, chroot to the micro SD card and set a new password.
+Если пароль не пустой, перегрузитесь. Если не помогло, , загрузитесь в 2008.08/2007.02, chroot на карточку micro SD и установите новый пароль.
 
-== Speeding up booting ==
-'''Note''': By default, Debian is already configured to write limited messages to the console during boot.  Does this actually speed things up anymore?
+== Ускорение загрузки ==
+'''Note''': По умолчанию, Debian уже настроен на показ минимум сообщений в консоли при загрузки. Все равно хотите сократить время загрузки?
 
 What's good for every linux booting is also good for our debian on the freerunner: booting in quiet mode. To do so by default just boot your Neo FreeRunner in NOR-Flash and execute this configure-script: [http://paste.ubuntuusers.de/391456/ configure-uboot.sh].
 
 It changes default booting to quiet-mode and adds another boot-option to boot without quiet-mode for debugging purpose.
 
-== Suspend ==
+== Засыпание ==
 
 '''Note''': As of Sep. 15 2008, suspend works 'out-of-the-box'; installing apm and the idle clock configuration changes do not seem to be necessary any more.  Press the power button for two seconds (in zhone) or run 'apm -s' to suspend.
 
@@ -67,7 +67,7 @@ esac
 
 exit 0
 
-== Time ==
+== Время ==
 
 The default time zone is UTC.  Reconfigure it by running
 
@@ -88,7 +88,7 @@ Issues:
 ** Setting the clock could be done via GPS: [[Getting_GPS_console_output_with_gllin#GPRMC_message]]
 
 == WLAN ==
-=== wifi-radar ===
+=== wifi-радар ===
 
 If you don't want to mess up with configuration files and is looking for an easy gui for wireless configuration, then wifi-radar is what you are looking for.
 
@@ -102,9 +102,9 @@ If you are looking for more, read on...
 Make sure the following packages are installed
 apt-get install wireless-tools wpasupplicant dhcp3-client
 
-=== Example configurations ===
+=== пример конфигурации ===
 
-==== Single network configuration ====
+==== Если сеть одна ====
 
 Assuming your wireless router uses WPA security and DHCP,
 edit <code>/etc/network/interfaces</code> to include a section like this:
@@ -132,7 +132,7 @@ Issues:
 
 Once wpa_supplicant has begun managing your wifi interface, you should type "wpa_action eth0 stop" instead of "ifdown eth0".
 
-==== Roaming configuration ====
+==== Конфигурация с роумингом ====
 
 '''Todo''': Which of the issues that single network configurations suffer from are addressed by WPA roaming mode?  Would ifplugd / guessnet help, or just make things more complicated?
 
@@ -228,8 +228,8 @@ The only atypical part of using bluetooth on the FreeRunner is turning it on, wh
 Then the device should be visible using
 # hcitool dev
 
-== Better Xorg ==
-By default debian uses fbdev... But we can use Xglamo:
+== Улучшение Xorg ==
+По умолчанию debian использует fbdev... Но мы будем использовать Xglamo:
 <pre>apt-get install xserver-xglamo</pre>
 after that edit /etc/X11/xorg.conf and change the line
 <pre>Driver          "fbdev"</pre>
@@ -243,14 +243,14 @@ with that you:
 *don't have the pointer callibration bug with the rotated mode
 *have better performances
 
-== Running X as normal user ==
-1. Create a new user
+== Запуск X от нормального пользователя ==
+1. Создаем нового пользователя - freerunner
 <pre>
-# useradd -m -G audio,dialout,floppy,video,staff username
-# passwd username
+# useradd -m -G audio,dialout,floppy,video,staff freerunner
+# passwd freerunner
 </pre>
 
-2. Edit /etc/init.d/zhone-session (or /etc/init.d/xfce if you are using xfce, see over) and change USER=root to USER=username in it. Then to make sure changes are not lost on upgrade, run
+2. Htlfrnbhetv /etc/init.d/zhone-session (or /etc/init.d/xfce if you are using xfce, see over) and change USER=root to USER=username in it. Then to make sure changes are not lost on upgrade, run
 <pre>
 dpkg-divert --add /etc/init.d/zhone-session
 </pre>
@@ -264,7 +264,7 @@ dpkg-statoverride --update --add root staff 4750 /usr/bin/apm
 </pre>
 It would also be possible to use sudo, but then you would have to edit /usr/bin/zhone.
 
-== Sound ==
+== Звук ==
 Make sure to put your user in the audio group ("adduser <username> audio").
 
 If there is no error but no sound, try these state files:
