@@ -1,0 +1,40 @@
+Qi is a boot manager. It is designed to replace uBoot. But Qi will be simpler and faster.
+
+Qi's concept is it leaves everything possible to Linux, that includes even the video init. Therefore Qi does NOT provide a boot menu. The usual NOR uBoot menu you use to flash your Neo (Aux first, power second, wait for menu) of course works fine, but if you try the usual procedure to fire up NAND uBoot (Power first, aux second, wait for menu) you get no response.  (not even the 'backlighted black screen')
+
+Qi will boot from any kernel named 'uImage.bin' in the /boot folder in the root of an ext2/ext3 partition - first partition - on the uSD. Failing to
+find that, it will boot from the kernel in NAND (if the kernel works of course, see below). Failing to find that, it will blink the blue Power LED a fraction of a second every 10 secs or so to say ''nothing valid to boot''.
+
+= Testing speed improvements =
+
+Stopwatch results on Qi (error is approx ±1/2 second):
+
+Booting SHR image with uBoot:
+0:00 power button held down
+0:07 splash screen appears
+0:15 drops to console showing kernel messages scrolling by for ~1 minute
+1:18 Openmoko 'please wait' splash
+1:31 desktop animated splash
+2:38 finished booting
+
+Booting identical setup with Qi flashed over uBoot:
+0:00 power button held down
+0:06 backlit black
+0:13 please wait booting... (only this text on console for next 38 seconds)
+0:51 Angstrom console message (at the end of kernel output with uBoot, but
+ONLY text display to appear throughout this stage with Qi)
+0:54 Openmoko 'please wait' splash
+1:05 desktop animated splash
+1:54 finished booting
+
+So for this particular configuration, it reduced time-to-desktop by about 28%, about 44 seconds.  Surprisingly, the later segments of booting (desktop) were also noticeably faster than with uBoot - One would have expected just the fist stages up until init (kernel finished establishing itself) to be faster.
+
+= Bugs =
+
+* Qi won't boot the 'first try' after power restored - the tester didn't count that first 10 seconds for Qi to be fair to its booting speed, not penalize it for what appears to be a bug that bears no relation to actual boot speed).
+* The current (Oct. 12, 2008) 2.6.27 kernel does not boot from the build-in flash NAND. It only works from the uSD boot on ext3. If one tries to boot it from the flash, then AUX red LED blinks ~4/sec. This means kernel panic... It's panicking because it has no rootfs because it can't mount the jffs2 because of the CRC errors because there is a bug that the mtd are not done properly.
+
+= LED codes summary =
+
+* One Blue shine every ~10 second: did not found any valid kernel to boot
+* About four RED shines per second: kernel panic.
