@@ -1,290 +1,40 @@
-{{Languages|Qi}}
-{{Bootloader}}
-[[image:Screenshot-Qi.png|frame|Qi Boot messages]] Qi is a lightweight replacement for the [[U-Boot]] bootloader with everything that doesn't assist "loading" and "booting" Linux stripped out. Distributions provide tar.gz-images of their root file system, that can be uncompressed on a MicroSD-card and Qi boots stable that distribution just by inserting the MicroSD in your freerunnner. E.g. changing the distribution from [[SHR]] to [[QtMoko]] can be done just by replacing one MicroSD (SHR) with an other MicroSD card (QtMoko) without using the boot menu.    
+Qi is a boot manager. It is designed to replace uBoot. But Qi will be simpler and faster.
 
-{| cellspacing="0" class="sortable wikitable" border="1" style="font-size: 85%; text-align: left; width: auto; background:#CCCCC;"
-|-
-! Distrubtion
-! Availability tar.gz-Image
-! Download
-! Comments
-|-
-|SHR
-| style="background:#88FF88;"|YES
-|[http://build.shr-project.org/shr-testing/images/om-gta02/ full-om-gta02.tar.gz]
-|Download Link contains an appropriate Qi version too 
-|-
-|Debian
-|??
-|apt-get install qi
-|[http://packages.debian.org/qi package page], [http://anonscm.debian.org/gitweb/?p=pkg-fso/qi.git GIT]
-|-
-|QtMoko
-|style="background:#88FF88;"|YES
-|[http://sourceforge.net/projects/qtmoko/files/ qtmoko-debian-v26.tar.gz]
-|Download Link contains a Qi version for experimental release 
-|-
-|Android
-| style="background:#FF8888;"|NO
-|see [http://wiki.openmoko.org/wiki/Manuals/Android Android Manual] for further information
-|Installer is available, that installs Qi
-|-
-|Hackable
-|???
-|
-|
-|-
-|Qt Extended Improved
-|??
-|
-|
-|-
-|}
+Qi's concept is it leaves everything possible to Linux, that includes even the video init. Therefore Qi does NOT provide a boot menu. The usual NOR uBoot menu you use to flash your Neo (Aux first, power second, wait for menu) of course works fine, but if you try the usual procedure to fire up NAND uBoot (Power first, aux second, wait for menu) you get no response.  (not even the 'backlighted black screen')
 
-==About Qi==
-===Advantages of Qi===
-Its advantages comparing to the [[Uboot|u-boot Openmoko port]] are:
-* actively developed (u-boot on GTA02 is deprecated)<br/>ATM qi is not developed, but supported, but main u-boot branch is really developed
-* easier configuration, more robust and predictable actually it needs to be recompile to change kernel parameters, nothing really robust or predictable
-* SD and SDHC cards supported properly with partitions of any size as in u-boot
-* kernel size is detected by checking the start of the kernel image, so large (>2M) kernels are supported without tweaking or loading more than needed procedure of changing kernel size in u-boot is not 'tweaking', just configuration
-* Very fast, simple boot direct to Linux
+Qi will boot from any kernel named 'uImage.bin' in the /boot folder in the root of an ext2/ext3 partition - first partition - on the uSD. Failing to
+find that, it will boot from the kernel in NAND (if the kernel works of course, see below). Failing to find that, it will blink the blue Power LED a fraction of a second every 10 secs or so to say ''nothing valid to boot''.
 
-===Disadvantages of Qi===
-* No boot menu -> you have to press keys to boot from sd for example
-* Impossible to change kernel parameters for NAND without recompilation.
-* Bootlog disabled by default
-* If any error happens, you should decode LEDs, in u-boot you can just read message
-* Complete non-flexible setup. Impossible to change default behavior without recompilation, so if it is compiled to boot from nand, you always have to press key to boot sd.
-* Bootloader unique to openmoko, while U-Boot is universal widely used software, so methods 
-of working with other devices are applicable to openmoko, like newer patches.
-* u-boot supports dfu so you can flash anything anywhere, qi doesn't support it, so qi is useless without NOR u-boot.
-
-===Requirements===
-There is a [[Neo1973|GTA01]] build of Qi, but using it without a debug board is not recommended because Qi itself does not support DFU, so updating or going back to U-Boot is a difficult process.
-
-[[Freerunner|GTA02 Hardware]] has NOR U-Boot always available, so updating to Qi is safe to try it out.
-
-{{Note|The below Qi are for Openmoko. E.g. for SHR - use Qi from the SHR directory if newer.}}
-
-===Download===
-
-*GTA01 -> [http://people.openmoko.org/andy/ qi-s3c2410]
-*GTA02 -> [http://people.openmoko.org/andy/ qi-s3c2442]
-
-====New Versions====
-
-These are the versions we are getting ready for release
-
-Download from either the Neo1973 or NeoFreerunner directory.
-
-http://downloads.openmoko.org/distro/testing
-
-====Unstable and Experimental Versions====
-
-These are the latest versions from svn.
-
-Download from either the Neo1973 or NeoFreerunner directory.
-
-http://downloads.openmoko.org/distro/unstable
-
-http://downloads.openmoko.org/distro/experimental
-
-====Older Versions====
-
-The download is a ''qi-s3cXXXX-andy_somenumber.udfu'' file at http://people.openmoko.org/andy/ .
-Use the file appropriate to your device:
-
-===Installation===
-* Connect Freerunner (e.g GTA02 Hardware) with USB-cable
-* Download [[dfu-util]] via package manager (e.g. YAST with OpenSuse) to your computer (not the Neo).
-* Download Qi image (e.g. for GTA02 which is [http://people.openmoko.org/andy/ 'qi-s3c2442-master-hist_3b8513d8b3d9615e.udfu'])
-* Switch off you freerunner (if necessary) and start NOR uBoot by pressing AUX and Power-On at the same time and then start [[dfu-util]] on your computer with the following parameters:
-  # dfu-util -a u-boot -R -D qi-s3c2442-master-hist_3b8513d8b3d9615e.udfu
-See [[Flashing the Neo FreeRunner]] or [[Flashing the Neo 1973]] for more details on flashing your phone.
-
-===Features===
-* booting from primary SD partitions (1st, 2nd or 3rd) in /boot directory
-* booting from NAND (compatible with U-Boot's dynparts scheme)
-* configuration per rootfs, by files in /boot in the rootfs
-* automatically choose correct kernel for device hardware so rootfs can be used on multiple device types
-* automatically tell kernel correct root= for rootfs kernel image came from, simplifying update
-* ext2/3 are supported
-* symlinks are supported
-* parses identity partition and appends kernel commandline with device identity information
-* zero "environment" or private persistent state - operation is completely deterministic
-* You can always boot from [http://wiki.openmoko.org/wiki/Boot#Log_into_U-Boot_in_the_NOR_Flash NOR menu]
-
-===Use Case===
-If you want to install [[Android]] on you OpenMoko you can use Qi. The [[Android on Freerunner]] kernel image can be more than 2MB in size. The UBoot environment that comes with your FreeRunner is only able to boot a kernel of 2MB in size or less. Qi support kernel images greater than 2MB out of the box.
-
-====NAND Memory as Backup-OS====
-Qi boots from MicroSD partition e.g. from a ext2-Partition. If your root filesystem on your SD get corrupted you can boot another distribtion from NAND memory (e.g. removing SD card).
-
-====NAND Memory as Home-Directory====
-You can use Qi if you want to exchange the distribution on your Freerunner just by exchanging the MicroSD card.
-If you do not use the NAND memory as an backup distribution you can mount the NAND-memory as a home-directory or as documents. This helps to keep all the personalized data on the freerunner/mobile phone when you exchange distrubtion via exchanging MicroSD-card.
-
-===Limitations===
-* no DFU-Mode - USB is not initialized at all (but you can always boot [http://wiki.openmoko.org/wiki/Boot#Log_into_U-Boot_in_the_NOR_Flash from NOR])
-* no boot menu (but you can always boot [http://wiki.openmoko.org/wiki/Boot#Log_into_U-Boot_in_the_NOR_Flash from NOR])
-* FAT partitions are ignored
-
-Both the lack of DFU and the boot menu are planned to be addressed by the backup / recovery rootfs.
-
-FAT is not supported because it can't provide a rootfs, and Qi wants the kernel to come from the rootfs.
-
-===Defaults===
-If the kernel is found on uSD, Qi assumes the rootfs to be on the same partition as the kernel. In case of boot from NAND, it assumes that rootfs is also on NAND (just as u-boot does). See [[#/boot-Partition|below]] for help with an extra /boot-partition. The default rootdelay is 1 second.
-
-===Files===
-; /boot/uImage-GTA0[123].bin
-: Kernel images, Qi will look for (can be in either uImage (u-boot image) or zImage format, file name should still be uImage-GTA0[123].bin) 
-; /boot/append-GTA0[123]
-: Additional kernel arguments. All arguments should be on the first and the only line separated by spaces, for example: "<tt>loglevel=8 rootdelay=5 </tt>" . Make sure you have an extra space after the last argument (space is no longer needed if the version is from 31 Jan or older)!
-; /boot/noboot-GTA0[123]
-: make Qi skip this partition
-
-===Speed up kernel resume for SHR===
-Since SHR (and perhaps other distributions as well) ouput log messages during resume which slow down the resume process by ca. 3 seconds it make sense there to append the following settings to /boot/append-GTA0[123]:
-: loglevel=1 quiet 
-The disadvantage of this speedup is that you won't see any lifesign of your phone until it starts the graphical user interface after adding these files, though.
-===Boot Order===
-[[image:Qi-drawings-bootsequence.png|frame|Qi GTA02 Booting order]]
-# SD Partition 1
-# SD Partition 2
-# SD Partition 3
-# NAND
-# Memory Test
-
-Qi will try to mount each SD partition as ext2 / 3, if that succeeds it will look for the kernel as /boot/uImage-GTA02.bin.  If that is found, it'll be fetched, its CRC is checked and then it's booted into with a generated kernel commandline.
-
-===Kernel Commandline Generation===
-[[image:Qi-commandline-composition.png‎|frame|Qi commandline composition]] Because Qi has no private stored state, it infers and composes a suitable kernel commandline on each boot.
-
-One of its tasks is to scan NAND memory using the U-Boot dynparts rules to determine the start offset of the NAND partitions on this device, from that it forms the mtdparts kernel parameter that sets Linux's view of NAND partitioning.
-
-The other thing it does is mount the "identity" partition and get from there the globally unique MAC address for the USB over Ethernet function instead of the random one that is otherwise used (If this doesn't work (like with a GTA01) you may use kernel-commandline parameters g_ether.dev_addr= and g_ether.host_addr= for the mac in device and host mode of the usb-ether module).
-
-===LED and Vibrator Signals===
-* AUX LED is turned on either on:
-** Successful partition mount
-** Successful kernel pull
-** Successful initramfs pull
-* AUX LED is turned off and vibrator runs briefly either on:
-** Fail of kernel pull
-** Fail of initramfs pull
-** Fail of mount partition
-** Skipping of current boot possibility
-* AUX LED is turned off either on:
-** Start of the kernel
-** Start of the mem test
-** Start of the kernel pull
-** Start of the initramfs pull
-* One Blue shine every ~10 second: did not find any valid kernel to boot
-* About four RED shines per second: kernel panic.
-
-===Booting===
-A short press on the power button is enough to make Qi start booting. In a few seconds the backlight will be lit, but the kernel will not spew any console messages unless something is wrong. It may take up to 2 minutes (depends on distribution) until X is started during which there will be no visual feedback. Please be patient.
-
-You can force debug messages on the LCM console by holding in the power button before Linux starts.
-
-===Choosing a Kernel===
-If a user presses the AUX button after successful partition mount and before start of the kernel pull (that is, while the red LED is on), this boot possibility is skipped (and GTA02 owners can feel vibration). So press power, release power, press aux, wait for vibration, release aux.
-
-On versions newer than Jan 18 if a user holds the POWER button just before start of the kernel,
-debugging parameters are added to the kernel command line and a lot of information is output to the screen.
-
-===Boot Menu===
-Qi's concept is to leave everything possible to Linux, that includes even the video init. Therefore Qi does NOT provide a boot menu. This should rather be implemented by a minimal Kernel, initramfs and menu system. It may be more comfortable for some users and may get them to switch from uboot to Qi. 
-
-Such system is already implemented for some Angstrom-supported devices and for Zaurus (see [http://projects.linuxtogo.org/projects/kexecboot/ kexecboot]).
-
-Since 2009-11-16, a such project was initialized by Marc Andre Tanner. The project is called [http://www.brain-dump.org/projects/qi-bootmenu/ qi-bootmenu].
-
-http://www.brain-dump.org/projects/qi-bootmenu/screenshot.png
-
-===Source code===
-Dedicated code for openmoko has its [http://git.openmoko.org/?p=qi.git;a=summary own Git repo]. 
-
-  git clone git://git.openmoko.org/git/qi.git
-
-Qi is also [http://gitorious.org/0xlab-bootloader maintained on gitorious].
-
-One can also just use strings(1) on the .udfu file to get an idea of where Qi currently looks for files.
-
-===README===
-The latest README file can be found in the git as well:http://git.openmoko.org/?p=qi.git;a=blob;f=README;hb=HEAD
-
-==Tips, Tricks, Tweaks==
-===General troubleshooting===
-Qi does not bring up the LCD backlight.  If the backlight is lit, it means you have succeeded to boot into Linux.
-
-If nothing else is happening or there is a panic, enable debugging messages as described below.
-
-===Enabling console messages===
-
-You can just hold in the power button, this automatically appends verbose debugging to the kernel commandline (loglevel=8).
-
-If you always want verbose "dmesg" type debugging messages, you can do it like this:
-
-[http://lists.openmoko.org/pipermail/openmoko-kernel/2008-November/006812.html]
-If it's SD Card boot, just create a text file, e.g., for a [[GTA02]] use
- /boot/append-GTA02
-on the rootfs in question, put in there
- loglevel=8
-and you'll see the messages on boot.
-
-If it's NAND, according to [http://www.mail-archive.com/community@lists.openmoko.org/msg39256.html] you need to copy the uImage-GTA02.bin under /boot/ directory also under NAND and then create /boot/append-GTA02 there as well. The other way, as that guide does not seem to work per se (fix this wiki if it should work and works for you) is to edit the default commandline in Qi for gta02 and recompile Qi.
-
-===/boot-Partition===
-If you have a separate partition for /boot, so that your kernel and rootfs are not in fact on the same partition, you will need to append a root= entry on the kernel commandline to override the default action of trying to use the partition where the kernel came from as the rootfs.
-
-Add this in /boot/append-GTA0[123]:
- root=/dev/mmcblk0p2
-for a rootfs on the second partition.
-
-Note that a default Debian installation puts the kernel straight in the root of /dev/mmcblk0p1, not in a boot subdirectory, expecting u-boot to mount it as /boot. In order for Qi to recognise this, create a boot subdirectory with a symlink to the kernel.
-
-===SD Initialisation===
-If you don't specify loglevel=8 in append-GTAXX, and booting fails with a "VFS: Cannot open root device "mmcblk0p1" or unknown-block(2,0)", the SD card needs a little bit more time to initialise.
-
-Put a "rootdelay=5" in append-GTAXX like so:
- rootdelay=5
-
-== Testing speed improvements ==
-
- This measurement is inappropriate. Modern qtmoko boots under 1 minute with any bootloader, 
- and bootloader in general has no relation to boot speed expect may 
- be 5 seconds pause before booting kernel
+= Testing speed improvements =
 
 Stopwatch results on Qi (error is approx ±1/2 second):
 
-PLEASE, perform comparable tests !!!!!!!!!!!!
-
 Booting SHR image with uBoot:
-* 0:00 power button held down
-:: On mine, it apears at 0:05 ... (custom splash)
-* 0:07 splash screen appears
-:: Here, changing the bootdelay (uboot environnement variable) can improve the delay here
-* 0:15 drops to console showing kernel messages scrolling by for ~1 minute
-:: This can be improved a lot by using the quiet option on the kernel command line !!!!!!!!!
-* 1:18 Openmoko 'please wait' splash
-* 1:31 desktop animated splash
-* 2:38 finished booting
- Why 1'20 min from OM splash to end of boot here
- and only 1'00 for the Qi version ???
- Qi has no relation to this !!!!!!!!!
+0:00 power button held down
+0:07 splash screen appears
+0:15 drops to console showing kernel messages scrolling by for ~1 minute
+1:18 Openmoko 'please wait' splash
+1:31 desktop animated splash
+2:38 finished booting
 
 Booting identical setup with Qi flashed over uBoot:
-* 0:00 power button held down
-* 0:06 backlit black
-* 0:13 please wait booting... (only this text on console for next 38 seconds)
-* 0:51 Angstrom console message (at the end of kernel output with uBoot, but ONLY text display to appear throughout this stage with Qi)
-* 0:54 Openmoko 'please wait' splash
-* 1:05 desktop animated splash
-* 1:54 finished booting
+0:00 power button held down
+0:06 backlit black
+0:13 please wait booting... (only this text on console for next 38 seconds)
+0:51 Angstrom console message (at the end of kernel output with uBoot, but
+ONLY text display to appear throughout this stage with Qi)
+0:54 Openmoko 'please wait' splash
+1:05 desktop animated splash
+1:54 finished booting
 
-So for this particular configuration, it reduced time-to-desktop by about 28%, about 44 seconds.  Surprisingly, the later segments of booting (desktop) were also noticeably faster than with uBoot - One would have expected just the first stages up until init (kernel finished establishing itself) to be faster.
+So for this particular configuration, it reduced time-to-desktop by about 28%, about 44 seconds.  Surprisingly, the later segments of booting (desktop) were also noticeably faster than with uBoot - One would have expected just the fist stages up until init (kernel finished establishing itself) to be faster.
 
-[[Category:Bootloaders]]
+= Bugs =
+
+* Qi won't boot the 'first try' after power restored - the tester didn't count that first 10 seconds for Qi to be fair to its booting speed, not penalize it for what appears to be a bug that bears no relation to actual boot speed).
+* The current (Oct. 12, 2008) 2.6.27 kernel does not boot from the build-in flash NAND. It only works from the uSD boot on ext3. If one tries to boot it from the flash, then AUX red LED blinks ~4/sec. This means kernel panic... It's panicking because it has no rootfs because it can't mount the jffs2 because of the CRC errors because there is a bug that the mtd are not done properly.
+
+= LED codes summary =
+
+* One Blue shine every ~10 second: did not found any valid kernel to boot
+* About four RED shines per second: kernel panic.
