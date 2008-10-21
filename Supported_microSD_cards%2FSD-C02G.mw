@@ -1,4 +1,4 @@
-'''Kingston SD-C02G''' works fine at good GSM coverage with the following kernel parameters here (GTA02 with GPS capacitor fix on uSD slot):
+'''Kingston SD-C02G''' works fine '''at good GSM coverage''' with the following kernel parameters here (GTA02 with GPS capacitor fix on uSD slot):
 
 glamo_mci.sd_max_clk=10000000 glamo_mci.sd_drive=2
 
@@ -8,14 +8,18 @@ Sep 15 14:15:20 debian-gta02 kernel: mmcblk0: error -84 sending read/write comma
 
 Sep 15 14:15:20 debian-gta02 kernel: glamo-mci glamo-mci.0: Error after cmd: 0x4304
 
-Drive strength of 0 at glamo_mci.sd_max_clk=10000000 is pretty reliable at normal operation (at good GSM reception), but still fails sometimes when GPRS is activated. Drive strength of 2 still fails repeatably when using GSM in less populated area.
+Drive strength of 0 at glamo_mci.sd_max_clk=10000000 is pretty reliable at normal operation (at good GSM reception), but still fails sometimes when GPRS is activated. Drive strength of 2 still fails repeatably when using GSM in less populated area or when accessing SD card directly after entering PIN.
 
 (last verified using 2008.8 and newer daily kernel versions)
+
+Tested:
+* SD idle clock = on does not prevent the errors
+* Errors occur almost every time when loading things from SD card while entering PIN, even at drive strength of 3 and clock speed of 2.5 Mhz
 
 TODO:
 * Verify the card is indeed the only one affected (ruling out FreeRunner HW problems is hard, only got one)
 * Try to reproduce that GSM affects SD data lines themselves, not only the card
 * Verify that screen sometimes filling with random data when card fails is related to failing card, and not to failing glamo which in turn results in card errors.
-* See if SD idle clock = on prevents card from getting confused
+* Find out if it also happens in areas without GSM buzz.
 
 [[Category:Neo FreeRunner Hardware]]
