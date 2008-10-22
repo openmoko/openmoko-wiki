@@ -214,27 +214,27 @@ You can export all your contact's phone numbers on the same line with this SQL q
 <pre>
 Select distinct nickname, title, firstname, middlename, lastname, suffix,
 profession, b_webpage, company, office, department, jobtitle, default_email,
-cpn1.phone_number as Home_Phone, 
-cpn2.phone_number as Home_Mobile, 
-cpn3.phone_number as Home_VOIP, 
-cpn4.phone_number as Home_Fax, 
-cpn5.phone_number as Business_Phone, 
-cpn6.phone_number as Business_Mobile, 
-cpn7.phone_number as Business_VOIP, 
-cpn8.phone_number as Business_Fax, 
+cpn1.phone_number as Home_Phone,
+cpn2.phone_number as Home_Mobile,
+cpn3.phone_number as Home_VOIP,
+cpn4.phone_number as Home_Fax,
+cpn5.phone_number as Business_Phone,
+cpn6.phone_number as Business_Mobile,
+cpn7.phone_number as Business_VOIP,
+cpn8.phone_number as Business_Fax,
 cpn9.phone_number as Business_Pager,
 h_webpage, spouse, gender, birthday, anniversary from contacts
 
-left outer join contactphonenumbers as cpn1 
+left outer join contactphonenumbers as cpn1
 on contacts.recid=cpn1.recid and cpn1.phone_type=1
 
-left outer join contactphonenumbers as cpn2 
+left outer join contactphonenumbers as cpn2
 on contacts.recid=cpn2.recid and cpn2.phone_type=257
 
-left outer join contactphonenumbers as cpn3 
+left outer join contactphonenumbers as cpn3
 on contacts.recid=cpn3.recid and cpn3.phone_type=769
 
-left outer join contactphonenumbers as cpn4 
+left outer join contactphonenumbers as cpn4
 on contacts.recid=cpn4.recid and cpn4.phone_type=513
 
 left outer join contactphonenumbers as cpn5
@@ -243,15 +243,52 @@ on contacts.recid=cpn5.recid and cpn5.phone_type=2
 left outer join contactphonenumbers as cpn6
 on contacts.recid=cpn6.recid and cpn6.phone_type=258
 
-left outer join contactphonenumbers as cpn7 
+left outer join contactphonenumbers as cpn7
 on contacts.recid=cpn7.recid and cpn7.phone_type=770
 
-left outer join contactphonenumbers as cpn8 
+left outer join contactphonenumbers as cpn8
 on contacts.recid=cpn8.recid and cpn8.phone_type=514
 
-left outer join contactphonenumbers as cpn9 
+left outer join contactphonenumbers as cpn9
 on contacts.recid=cpn9.recid and cpn9.phone_type=1026;
 </pre>
+
+I needed the vcf file for other purposes and found a script [http://sourceforge.net/projects/tsv2vcf/] on SF.net to convert a tab seperated value to a vcf file.
+So I used this ugly thing:
+<pre>
+sqlite3 $1 'Select distinct firstname, lastname, middlename, \
+nickname, default_email,title,  \
+cpn5.phone_number as Business_Phone,\
+cpn1.phone_number as Home_Phone, \
+cpn8.phone_number as Business_Fax, \
+cpn9.phone_number as Business_Pager, \
+cpn2.phone_number as Home_Mobile from contacts \
+left outer join contactphonenumbers as cpn1 \
+on contacts.recid=cpn1.recid and cpn1.phone_type=1 \
+left outer join contactphonenumbers as cpn2 \
+on contacts.recid=cpn2.recid and cpn2.phone_type=257 \
+left outer join contactphonenumbers as cpn3 \
+on contacts.recid=cpn3.recid and cpn3.phone_type=769 \
+left outer join contactphonenumbers as cpn4 \
+on contacts.recid=cpn4.recid and cpn4.phone_type=513 \
+left outer join contactphonenumbers as cpn5 \
+on contacts.recid=cpn5.recid and cpn5.phone_type=2 \
+left outer join contactphonenumbers as cpn6 \
+on contacts.recid=cpn6.recid and cpn6.phone_type=258 \
+left outer join contactphonenumbers as cpn7 \
+on contacts.recid=cpn7.recid and cpn7.phone_type=770 \
+left outer join contactphonenumbers as cpn8 \
+on contacts.recid=cpn8.recid and cpn8.phone_type=514 \
+left outer join contactphonenumbers as cpn9 \
+on contacts.recid=cpn9.recid and cpn9.phone_type=1026;'\
+| sed 's/|/\t/g' > addressbook.tsv
+</pre>
+put the output through tsv2vcf:
+<pre>
+perl tsv2vcf addressbook.tsv addressbook.vcf
+</pre>
+
+and got a usable vcf File, with some problems with special chars.
 
 == Export raw config (including contacts) with Qtopia ==
 
