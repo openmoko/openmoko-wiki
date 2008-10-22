@@ -7,7 +7,7 @@ MokoMakefile 是在設立Openmoko Build 環境時儲存所有工作的Makefile�
 
 它會為BUILD 環境產物提供相同的重覆性，並且可以像BitBake script放入[[OpenEmbedded]] 般輕鬆維護，並且提供建立OpenEmbedded的標準化過程。
 
-它不像是在[[Building Openmoko 2007.1 from scratch|Building Openmoko from scratch]]中所提到的手動設定過程。MokiMakefile並不會安裝任何程式到你的系統裡(即使是一般的使用者也可以使用)。
+它不像是在[[Building Openmoko 2007.1 from scratch|Building Openmoko from scratch]]中所提到的手動設定過程。MokoMakefile並不會安裝任何程式到你的系統裡(即使是一般的使用者也可以使用)。
 
 MokoMakefile是一個可以將所有東西包裝起來，讓開發人員能透過Openmoko設定指引的過程，完成編譯，並且在開發環境下，它易於設定及維護。
 
@@ -41,37 +41,37 @@ OpenEmbedded 用來控制系統的版本是[http://monotone.ca monotone]，它�
 
 你的套件必須能提供以下的指令，以便於OpenEmbedded開始建立build：
 
- subversion texi2html texinfo help2man
+subversion texi2html texinfo help2man
 
 Openmoko須要開發套件(搭配header檔案、開發程式庫及工具) 以利於完成BUILD：
 
- ncurses zlib (or libz) OpenSSL GTK++
+ncurses zlib (or libz) OpenSSL GTK++
 
 因為在與QEMU及GCC-4互動時產生問題，你也必須安裝gcc-3.x 。
 
 
 ===== Debian / Ubuntu =====
-  apt-get install subversion monotone build-essential help2man diffstat texi2html texinfo cvs gawk cogito
+apt-get install subversion monotone build-essential help2man diffstat texi2html texinfo cvs gawk cogito
 
-  apt-get install libncurses5-dev zlib1g-dev libssl-dev libgtk2.0-dev 
-  # To prevent errors in host validation
-  apt-get install ca-certificates
-  # For Openmoko 2007.2 using BitBake-1.8.8:
-  apt-get install python-pysqlite2 sqlite3 sqlite3-doc python-pysqlite2-dbg
-  # For building faster
-  apt-get install quilt python-psyco ccache
-  # For qemu, install a second compiler for bug avoidance; MokoMakefile knows to look for it.
-  apt-get install gcc-3.4 g++-3.4 libsdl1.2-dev lynx netpbm dosfstools
+apt-get install libncurses5-dev zlib1g-dev libssl-dev libgtk2.0-dev
+# To prevent errors in host validation
+apt-get install ca-certificates
+# For Openmoko 2007.2 using BitBake-1.8.8:
+apt-get install python-pysqlite2 sqlite3 sqlite3-doc python-pysqlite2-dbg
+# For building faster
+apt-get install quilt python-psyco ccache
+# For qemu, install a second compiler for bug avoidance; MokoMakefile knows to look for it.
+apt-get install gcc-3.4 g++-3.4 libsdl1.2-dev lynx netpbm dosfstools
 
 ===== SuSE =====
 要在10.3上建立Openmoko，你必須要使用：
 
- gcc-c++ ncurses-devel zlib-devel libopenssl-devel gtk2-devel subversion diffstat texinfo help2man and [http://download.opensuse.org/repositories/devel:/tools:/scm/openSUSE_Factory/repodata/repoview/Development.Tools.group.html monotone]
+gcc-c++ ncurses-devel zlib-devel libopenssl-devel gtk2-devel subversion diffstat texinfo help2man and [http://download.opensuse.org/repositories/devel:/tools:/scm/openSUSE_Factory/repodata/repoview/Development.Tools.group.html monotone]
 
 為了讓MokoMakefile不要在編譯QUMU-USER時失敗，你必須使用gcc33：
 
- wget download.opensuse.org/repositories/devel:/tools:/gcc/openSUSE_Factory/i586/{cpp,gcc}33-3.3.3-41.8.i586.rpm
- rpm -Uhv {cpp,gcc}33-3.3.3-41.8.i586.rpm
+wget download.opensuse.org/repositories/devel:/tools:/gcc/openSUSE_Factory/i586/{cpp,gcc}33-3.3.3-41.8.i586.rpm
+rpm -Uhv {cpp,gcc}33-3.3.3-41.8.i586.rpm
 
 你可以在[[Talk:MokoMakefile#Building_on_SuSE_Linux_10.3-AMD64|Talk page on Building on SuSE Linux 10.3-AMD64]]中找到它的內容。
 
@@ -82,32 +82,32 @@ Openmoko須要開發套件(搭配header檔案、開發程式庫及工具) 以利
 
 在編譯 QEMU 的過程若你有任何問題，或者是你不需要用到它，你可以藉由在build/conf/local.conf 檔案中加入下列的指令，來停用QEMU。
 
- ENABLE_BINARY_LOCALE_GENERATION = "0"
+ENABLE_BINARY_LOCALE_GENERATION = "0"
 
 == 使用MokoMakefile建立Openmoko套件  ==
 
 1 - 建立你的 $OMDIR 目錄 (請注意你可以將 ~/moko 目錄修改為任何你喜歡的目錄。如果你已經從不同的檔案系統掛載了 ~moko 目錄，請確認你有編輯 /etc/mtab目錄，為檔案系統加入'執行'權限，否則 bitbake則會出現錯誤訊息：
 
-   mkdir ~/moko ; cd ~/moko
+mkdir ~/moko ; cd ~/moko
 2 - 取得MokoMakefile:
 
-   wget http://www.rwhitby.net/files/openmoko/Makefile
+wget http://www.rwhitby.net/files/openmoko/Makefile
 
-如果它無法使用的話，請試著使用下面的指令： 
+如果它無法使用的話，請試著使用下面的指令：
 
-   wget http://svn.projects.openmoko.org/svnroot/mokomakefile/trunk/Makefile
+wget http://svn.projects.openmoko.org/svnroot/mokomakefile/trunk/Makefile
 
-   note: 如果你想要從舊版的 2007.1 開始編譯，而不是使用新版的內容編譯Makefile，請從如下的內容開始編輯： 
-             OPENMOKO_GENERATION = 2007.1
-             #OPENMOKO_GENERATION = 2007.2
+note: 如果你想要從舊版的 2007.1 開始編譯，而不是使用新版的內容編譯Makefile，請從如下的內容開始編輯：
+OPENMOKO_GENERATION = 2007.1
+#OPENMOKO_GENERATION = 2007.2
 
 {{note|為了要建立2007.2，MokoMakefile使用的BitBake 1.8.8必須使用需要python-sqlite2 及 sqlite-3.3或之後的版本。SUSE Linux 10.1的使用者可以從 [http://download.opensuse.org/pub/opensuse/distribution/10.2/repo/oss/suse/i586/sqlite-3.3.8-14.i586.rpm 這裡更新openSUSE 10.2]}}
 
 3 - 設定環境：
-   make setup
+make setup
 4 - 開始building。在程序開始之前，請查看Tips一節，取得Make multicore aware。你可能想要修改build/conf/local.conf 檔案到你的目的地 (emulation/chroot) 環境：
 
-   make openmoko-devel-image
+make openmoko-devel-image
 
 ''Hint:'' 使用這個指令建立的映像檔可以在下面的路徑下找到{$OMDIR}/build/tmp/deploy/images/neo1973
 
@@ -121,34 +121,34 @@ Openmoko須要開發套件(搭配header檔案、開發程式庫及工具) 以利
 
 1 - 將MokoMakefile更新到最近的版本：
 
-   make update-makefile 
+make update-makefile
 
 2 - 確認建立的目錄架構是否有任何新的變更：
 
-   make setup 
+make setup
 
 3 - 要更新放置Openmoko原始碼及檔案的儲存位置及MokoMakefile patches到最近的版本：
 
-   make update
+make update
 
 以最後變更的項目來重建新映像檔的最快方法：
 
-   make update-makefile && make setup update openmoko-devel-image
+make update-makefile && make setup update openmoko-devel-image
 
 ==與製作映像檔相關的問題==
 首先，確認在執行下面指令後，問題是可以重新製作：
 
- make update-makefile && make setup && make update
+make update-makefile && make setup && make update
 
 之後，執行：
 
- make clean-package-<foo>
+make clean-package-<foo>
 
 ( <foo> 替代為失敗的軟體名稱)
 
 最後，
 
- make openmoko-devel-image
+make openmoko-devel-image
 
 如果好運的話--你應該會在 $omdir/build/tmp/deploy/glibc/images/neo1973/ 目錄下找到映像檔。
 接著，你可以參考 [[Flashing openmoko||Flashing openmoko更新這些內容]]
@@ -158,13 +158,13 @@ Openmoko須要開發套件(搭配header檔案、開發程式庫及工具) 以利
 ===已知的MokoMakefile錯誤 ===
 從OM-2007.1 更新到 OM-2007.2，你會歷經下列過程：
 
- Patch bitbake-1.6.6-om3.patch does not apply (enforce with -f)
+Patch bitbake-1.6.6-om3.patch does not apply (enforce with -f)
 
 然後，鍵入 "make clobber-patches" 修復它。若在MokoMakefile中有BUG的話，它可能會進行約24小時。一旦patches遭到破壞，他們將會重新下載，並且這個問題就不會再發生。
 
 如果你看到下列訊息：
 
- ERROR: No providers of build target u-boot-openmoko (for [])
+ERROR: No providers of build target u-boot-openmoko (for [])
 
 查看日誌記錄來查看你是否遇到了與建立openmoko-devel-image 相同的錯誤，上面的錯誤是MokoMakefile的邏輯性的邊際效應，只要將"uboot-openmoko" 重新以 "u-boot-openmoko"命名即可。
 
@@ -175,29 +175,29 @@ Openmoko須要開發套件(搭配header檔案、開發程式庫及工具) 以利
 ==Tips==
 *你可以藉由下列指令，減少消耗的磁碟空間：
 
-   INHERIT += "rm_work"
+INHERIT += "rm_work"
 
 將這行指令加到 local.conf (e.g. ~/moko/build/conf/local.conf)。 在相對應的軟體套件正確建立後，它將會移除T每一個映像檔中的/tmp/work/*/<package> 目錄。在10/16/07中，預設的情況下，它會出現在local.conf中。
 
 *如果你在monotone中遇到了如下的錯誤：
-   mtn: misuse: database /home/''username''/moko/OE.mtn is laid out according to an old schema
+mtn: misuse: database /home/''username''/moko/OE.mtn is laid out according to an old schema
 
 接著，你須要昇級OE.mtn。在~/moko中使用以下的內容：
-   # mtn --db OE.mtn db migrate
+# mtn --db OE.mtn db migrate
 
 * 如果特定的套裝軟體，因為下載中斷或者是試圖移動原始碼及重建它而沒有進行建立映像檔的工作：
- rm sources/<package>*
- cd build
- . ../setup-env
- bitbake -crebuild <package>
+rm sources/<package>*
+cd build
+. ../setup-env
+bitbake -crebuild <package>
 
 之後，你的BUILD可能必須重新運作一次。
 
 *針對擁有多個CPU的使用者(或者dual-core)而言，這個小的patch對於加速建立映像檔的工作，會有些作用。
 
 編輯local.conf 並且加入下列指令列：
- PARALLEL_MAKE = "-j 4"
- BB_NUMBER_THREADS = "4"
+PARALLEL_MAKE = "-j 4"
+BB_NUMBER_THREADS = "4"
 
 變更PARALLEL_MAKE 及 BB_NUMBER_THREADS 值，以配合裝置。
 
@@ -207,10 +207,10 @@ Openmoko須要開發套件(搭配header檔案、開發程式庫及工具) 以利
 
 * 要避免locales過大，在local.conf中加入以下的指令：
 
- GLIBC_GENERATE_LOCALES = "en_US.UTF-8 nl_NL.UTF-8"
+GLIBC_GENERATE_LOCALES = "en_US.UTF-8 nl_NL.UTF-8"
 
 * 為了不要建立二位元的locale，請加入以下的內容到local.conf:
- ENABLE_BINARY_LOCALE_GENERATION = "0"
+ENABLE_BINARY_LOCALE_GENERATION = "0"
 
 * 若你想要重建軟體的索引 (如，在編譯新版的軟體時)而不要建立 <code>openmoko-devel-image</code>，請執行run <code>make build-package-package-index</code>。
 
@@ -226,7 +226,7 @@ Openmoko須要開發套件(搭配header檔案、開發程式庫及工具) 以利
 
 ; make openmoko-toolchain ： 建立[[toolchain]]
 
-; make qemu：建立qemu，從正式的下載點下載更新映像檔，更新qemu模擬的Neo1973並且執行模擬器(請參考[[Openmoko under QEMU]])。 
+; make qemu：建立qemu，從正式的下載點下載更新映像檔，更新qemu模擬的Neo1973並且執行模擬器(請參考[[Openmoko under QEMU]])。
 
 ; make qemu-local ：與''make qemu''，但是使用本機建立的映像檔，而不是官方的映像檔。
 
@@ -239,7 +239,7 @@ Openmoko須要開發套件(搭配header檔案、開發程式庫及工具) 以利
 ; make clean-package-<foo>: 清除 "<foo>" 套件
 
 ; make setup : 確認目錄結構中任何最近的更新是否被套用。
-   
+
 ; make update : 要更新Openmoko repository checkout and the MokoMakefile patches to the latest version
 
 ==使用MokoMakefile開發程式==
@@ -251,50 +251,50 @@ Openmoko須要開發套件(搭配header檔案、開發程式庫及工具) 以利
 
 要讓in-tree 變更，並且讓它們可以被qemu使用：
 
-  cd $OMDIR/openmoko
-  quilt new descriptive-patch-name.patch
-  quilt add trunk/src/name-of-file-to-change # do this for every file you are about to modify
-  ...make the changes...
-  quilt refresh # this creates a file in $OMDIR/patches/openmoko-HEAD/ and updates the quilt series file there
+cd $OMDIR/openmoko
+quilt new descriptive-patch-name.patch
+quilt add trunk/src/name-of-file-to-change # do this for every file you are about to modify
+...make the changes...
+quilt refresh # this creates a file in $OMDIR/patches/openmoko-HEAD/ and updates the quilt series file there
 
 Note:  Do'''NOT'''  absolute paths as this confuses quilt and will get you a diff of the file against /dev/null!
 
 要建立變更內容，並且 讓他們可以被qemu使用：
 
-  make build-qemu
-  make flash-qemu-local
-  make run-qemu
+make build-qemu
+make flash-qemu-local
+make run-qemu
 
 如果你想要修改應用程式，而不是Openmoko toolchain，它是你必須做的工作(如：openmoko-messages):
 
-  cd $OMDIR/build
-  . ../setup-env
-  bitbake -c unpack openmoko-messages
-  cd tmp/work/armv4t-linux/openmoko-messages-0.0.1+svnnow-r2_2276/openmoko-messages/
-  ''...make the changes...''
-  cd -
-  bitbake openmoko-messages
+cd $OMDIR/build
+. ../setup-env
+bitbake -c unpack openmoko-messages
+cd tmp/work/armv4t-linux/openmoko-messages-0.0.1+svnnow-r2_2276/openmoko-messages/
+''...make the changes...''
+cd -
+bitbake openmoko-messages
 
 然後，繼續使用MokoMakefile。
 
 如果你想要在Openmoko套件中加入應用程式，請進行下列工作：
 所有的檔案編輯都應該使用quilt。這樣patch就可以輕鬆的送到openmoko專案當中。
 首先，建立一個與套件相對應的路徑，並且編輯這個路徑下的 '''.bb''' 檔案。
-  cd $OMDIR/openmoko/
-  quilt new mycoolpackage.patch
-  mkdir trunk/oe/packages/mycoolpackage
-  quilt add trunk/oe/packages/mycoolpackage/mycoolpackage_1.bb
-  quilt edit trunk/oe/packages/mycoolpackage/mycoolpackage_1.bb
+cd $OMDIR/openmoko/
+quilt new mycoolpackage.patch
+mkdir trunk/oe/packages/mycoolpackage
+quilt add trunk/oe/packages/mycoolpackage/mycoolpackage_1.bb
+quilt edit trunk/oe/packages/mycoolpackage/mycoolpackage_1.bb
 
 這個檔案應該有下面的內容：
 
-  DESCRIPTION = "This is a cool package"
-  SECTION = "username/mycoolpackage"
-  PV = "1"
-  
-  inherit autotools
-  
-  SRC_URI = "http://www.example.com/download/mycoolpackage-1.tar.gz"
+DESCRIPTION = "This is a cool package"
+SECTION = "username/mycoolpackage"
+PV = "1"
+
+inherit autotools
+
+SRC_URI = "http://www.example.com/download/mycoolpackage-1.tar.gz"
 
 Explanation:
 * DESCRIPTION - 解釋套件用途的簡短說明。
@@ -305,16 +305,16 @@ Explanation:
 
 這並不是全部，我們也會需要告訴MokoMakfile它需要被建立，並且在映像檔中包含軟體套件。要完成這個工作，請執行下面的指令：
 
-  $OMDIR/openmoko# quilt edit trunk/oe/packages/tasks/task-openmoko.bb
+$OMDIR/openmoko# quilt edit trunk/oe/packages/tasks/task-openmoko.bb
 
 在這裡，在讀入'''#  update-alternatives \'''.
 程式行前，加入 '''PR''' 及 '''mycoolpackage \''' (使用\符號)
 
 現在，執行
 
-  quilt refresh
-  cd ..
-  make update openmoko-devel-image
+quilt refresh
+cd ..
+make update openmoko-devel-image
 
 如果每一件事都順利的話，你應該建立好了可以更新到手機的Openmoko映像檔，並且可以在qemu 執行。
 
@@ -330,6 +330,3 @@ MokoMakefile被#openmoko開發人員所推崇：
 
 專案網頁：
 http://mokomakefile.projects.openmoko.org/
-
-[[Category:System Developers/zh tw]]
-[[Category:Application Developer/zh tw]]
