@@ -1,4 +1,4 @@
-{{Languages|Flashing Openmoko}}
+{{Languages|Flashing the Neo 1973}}
 This describes how to update your Neo1973 to the latest software. We'll update the kernel, the root filesystem and optionally u-boot [[partitions]] in the internal flash memory.
 
 {{Note|
@@ -29,7 +29,7 @@ Changelogs can be found at:
 
 
 Get:
-* [[dfu-util]] 
+* [[dfu-util]]
 ** (this is the part that runs on the PC, that pushes the files across the USB to the phone)
 * openmoko-devel-image-fic-gta01-2007********.rootfs.jffs2
 * uImage-2.6.21.*-moko*-r*_0_****_0-fic-gta01.bin
@@ -72,7 +72,7 @@ cu -l /dev/ttyACM0
 GTA01Bv4 # setenv boot_menu_timeout 65000
 GTA01Bv4 # saveenv
 </pre>
-For those that are unfamiliar with cu, to exit you need to press "~." 
+For those that are unfamiliar with cu, to exit you need to press "~."
 
 (You may have to install the uucp package to have access to cu, and maybe also "<code>chown uucp:uucp /dev/ttyACM0</code>" as root before it will work)
 
@@ -97,41 +97,41 @@ I you own a FreeRunner don't be too scared, though: Unlike nearly any other devi
 * start the cellular phone by pressing power whilst pressing the aux button.
 * Run the following command, but Note especially that the image used in the line below is for GTA02_v5.
 
- dfu-util -a u-boot -R -D uboot-gta02v5-latest.bin
+dfu-util -a u-boot -R -D uboot-gta02v5-latest.bin
 
-The u-boot of a GTA01B_v03 (And only of a GTA01B_V03, not for example a GTA01B_v04) can be flashed with the following image: 
- ./dfu-util -a u-boot -R -D u-boot-gta01bv3-latest.bin
+The u-boot of a GTA01B_v03 (And only of a GTA01B_V03, not for example a GTA01B_v04) can be flashed with the following image:
+./dfu-util -a u-boot -R -D u-boot-gta01bv3-latest.bin
 
-* The device is now flashed: 
- dfu-util - (C) 2007 by Openmoko Inc.
- This program is Free Software and has ABSOLUTELY NO WARRANTY
- 
- Opening USB Device 0x0000:0x0000...
- Claiming USB DFU Runtime Interface...
- Determining device status: state = appIDLE, status = 0
- Device really in Runtime Mode, send DFU detach request...
- Resetting USB...
- Opening USB Device...
- Found Runtime: [0x1d50:0x5119] devnum=9, cfg=0, intf=0, alt=1, name="u-boot"
- Claiming USB DFU Interface...
- Setting Alternate Setting ...
- Determining device status: state = dfuIDLE, status = 0
- dfuIDLE, continuing
- Transfer Size = 0x1000
- bytes_per_hash=4316
- Starting download: [##################################################] finished!
- state(2) = dfuIDLE, status(0) = No error condition is present 
- Done!
- Resetting USB to switch back to runtime mode
+* The device is now flashed:
+dfu-util - (C) 2007 by Openmoko Inc.
+This program is Free Software and has ABSOLUTELY NO WARRANTY
+
+Opening USB Device 0x0000:0x0000...
+Claiming USB DFU Runtime Interface...
+Determining device status: state = appIDLE, status = 0
+Device really in Runtime Mode, send DFU detach request...
+Resetting USB...
+Opening USB Device...
+Found Runtime: [0x1d50:0x5119] devnum=9, cfg=0, intf=0, alt=1, name="u-boot"
+Claiming USB DFU Interface...
+Setting Alternate Setting ...
+Determining device status: state = dfuIDLE, status = 0
+dfuIDLE, continuing
+Transfer Size = 0x1000
+bytes_per_hash=4316
+Starting download: [##################################################] finished!
+state(2) = dfuIDLE, status(0) = No error condition is present
+Done!
+Resetting USB to switch back to runtime mode
 * The last message (status(0)) tells us everything just worked fine - at the next boot the device will be started by the newest uboot loader.
 
 
 To update the kernel:
- ./dfu-util -a kernel -R -D ./uImage-2.6.21.1-moko10-r0_0_1883_0-fic-gta01.bin
+./dfu-util -a kernel -R -D ./uImage-2.6.21.1-moko10-r0_0_1883_0-fic-gta01.bin
 Flashing the kernel will probably take less than 1 minute. If you're having trouble, you may want to compare the output that you see to a "known good" [[Flashing openmoko/Known good kernel flash U-Boot output | U-Boot]]/[[Flashing openmoko/Known good kernel flash dmesg output | dmesg]]/[[Flashing openmoko/Known good kernel flash dfu-util output | dfu-util]] output. The phone display should show "Starting DFU DOWNLOAD to partition 'kernel'.
 
 To update the root filesystem:
- ./dfu-util -a rootfs -R -D ./Openmoko-devel-image-fic-gta01-20070501054014.rootfs.jffs2
+./dfu-util -a rootfs -R -D ./Openmoko-devel-image-fic-gta01-20070501054014.rootfs.jffs2
 
 Flashing the root filesystem will probably take around 13 minutes. Note that it can take over an hour if you are using a XEN VM for doing the flash.
 
@@ -143,7 +143,7 @@ Now, you'll end up with system that boots, but does not see audio/SD card. You'l
 
 === Important Notes for early adopters: ===
 Some old U-Boot versions are very buggy:
- 
+
 For U-Boot versions until somewhere in 2007 if you uploaded your rootfs image that is smaller that previous one it wouldn't work - you needed to attach to the u-boot bootloader first, erase NAND partition that would contain the rootfs later and then upload your rootfs:
 
 <pre>
@@ -163,19 +163,19 @@ You probably want to set up [[USB_Networking]] and then configure your Neo1973 s
 
 Do not forget to update your Neo1973 using
 
- ipkg update && ipkg upgrade
+ipkg update && ipkg upgrade
 
 or (newer versions)
 
- opkg update && opkg upgrade
+opkg update && opkg upgrade
 
 
 and have a look at additional ipkg [[repositories]].
 
 
-Question to anybody who knows: The kernel the openmoko boots from is in a different partition than the root file system in most setups right now. In former times there always was a warning that ipkg updates /boot/uImage - the location where the kernel that matches the current rootfs can be found - but didn't update the partition the kernel is loaded from in the default setup. The following line manually updates the kernel on this partition: 
- cat /boot/uImage >/dev/mtdblock3
- 
+Question to anybody who knows: The kernel the openmoko boots from is in a different partition than the root file system in most setups right now. In former times there always was a warning that ipkg updates /boot/uImage - the location where the kernel that matches the current rootfs can be found - but didn't update the partition the kernel is loaded from in the default setup. The following line manually updates the kernel on this partition:
+cat /boot/uImage >/dev/mtdblock3
+
 Is typing this line still necessary?
 [[User:Peterpall]]
 
@@ -199,4 +199,4 @@ See other notes on [[Dfu-util]] page.
 
 DFUScript developed to assist users who have multiple devices in using dfu-util via the command line. Information on where to download and use DFUScript can be found on [[DFUScript]]
 
-[[Category:Flashing Openmoko| ]]
+[[Category:Flashing Openmoko|Flashing Openmoko]]
