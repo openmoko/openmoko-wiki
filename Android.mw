@@ -1,81 +1,56 @@
-{{Languages|Android}}
-{{Distributions|Android}}
+= Introduction =
 
-{|align=right
-|__TOC__
-|}
-[[Image:Android-logo.png]]
-= Introduction = 
-'''[[Android usage]]''' provides a brief overview to get started.
+As [http://benno.id.au Ben Leslie] had pointed out on his [http://benno.id.au/blog/2007/11/21/android-neo1973 blog] far before the source code was released, Android was originally designed to work with the ARMv5TE [http://en.wikipedia.org/wiki/Instruction_set_architecture instruction set architecture] (ISA), which allows for [http://en.wikipedia.org/wiki/ARM_architecture#DSP_Enhancement_Instructions DSP enhanced instructions]. Contrary to the ARMv5TE ISA, the Neo1973 and FreeRunner handsets both feature an arm920t core, which comply to the ARMv4T ISA.
 
-{{Note|The Android for [[Neo_FreeRunner_GTA02_Hardware|FreeRunner]] development is hosted on [http://code.google.com/p/android-on-freerunner/ http://code.google.com/p/android-on-freerunner/].}}
+Before the source code was released, kernel trap handlers were implemented to 'emulate' the ARMv5TE ISA. Although the results worked in many cases, trapping is costly and performance suffered as a result. Moreover, without explicitly knowing which conditions were set by various instructions, such as Thumb Mode execution, the result became nondeterministic. 
 
-This page is the central place for documentation about Android on the [[Neo_FreeRunner_GTA02_Hardware|FreeRunner]] handsets.
+With the release of the Android source code, the Open Source community is no longer limited to dealing with a binary-only product. The Open Handset Alliance (OHA) has let their source code become a part of their product for everyone to benefit from and enrich.
 
-[http://code.google.com/android/ Android] is a software stack for mobile devices developed by the [http://www.openhandsetalliance.com/ The Open Handset Alliance.] Although Android is publicized as being [http://en.wikipedia.org/wiki/Open_source open source software] (most of the source code has been released) parts of the code have not been released yet.
+Since the [Android OS http://www.android.com] was [http://source.android.com/posts/opensource  publically released] on 20081021, [http://benno.id.au/blog/2007/11/21/android-neo1973 work] [http://perpetual-notion.blogspot.com/search/label/android is] [http://groups.google.com/group/android-porting currently underway] to port Android to the [http://wiki.openmoko.org/wiki/Neo1973_Hardware Neo 1973] and [http://wiki.openmoko.org/wiki/Neo_FreeRunner_GTA02_Hardware FreeRunner] handsets. 
 
-A stable and working version of Android Cupcake is available for the Feerunner. The Froyo version is also available and continuously being improved. It is likely, in the near future, to be the distribution most suited for using the FreeRunner as a phone.
+= How to Help =
 
-= Usage =
-See: '''[[Android usage]]''' for detailed instructions on using Android on the FreeRunner.
+You can start by following the instructions to download and build the Android source from scratch. Please see [http://source.android.com/download http://source.android.com/download] and follow the instructions for your architecture.
 
-= Installation =
+== Porting Strategy ==
 
-[http://code.google.com/p/android-on-freerunner/wiki/GetIt Installing Android on Openmoko Freerunner]
+* Analysis and leverage of the existing build system
+** buid/core/combo/arm-linux.mk
+*** -D__ARCH_ARM_4__ -D__ARCH_ARM_4T__
+*** -march=armv4t -mcpu=arm920t
+** fix various static references to 'armv5'
+* Isolating ARMv5TE ISA dependent code
+** e.g. grep -n -R -i "${armv5te_isa_pattern}" ~/android
+* Abstracting 
+** ( C/C++ ) Use inlined functions / #ifdef statments to implement functions in a portable manner
+** ( ASM ) #ifdef statements ?
 
-= Development =
-Currently the development is done on [http://code.google.com/p/android-on-freerunner/ Android-on-Freerunner] (http://code.google.com/p/android-on-freerunner/)
+For each ARMv5TE instruction, one could potentially 
+* Implement the instruction using general registers instead of DSP calls (i.e. eabi / softfloat)
+* If that is a) nondeterministic, or b) slow, then sections of code need to be analyzed and hand-optimized for the ARMv4T isa
 
-See: [[Android porting]]
+= Important Links =
+(Please Update Me)
 
-= News =
-* 01 Oct 09 - new Home http://code.google.com/p/android-on-freerunner/   ( including googlegroup,IRC,mailinglist,... )
-* 19 Sept 09 - from Koolu-Forum:   ..."So I'm glad to announce a new Android Cupcake release for Freerunner! It's basically a merge of the Koolu code with Michael Trimarchi's enhancements and a few bug fixes and cosmetic things I've added. You can download it at our new Google Code site: http://code.google.com/p/android-on-freerunner/downloads/list "...
-* 22 May 09 - Koolu Releases Beta7 [http://trac.koolu.org/wiki/Releases]
-* 15 April 09 - Koolu Releases Beta6 [http://trac.koolu.org/wiki/Releases]
-* 07 March 09 - Panicking released a cupcake [http://panicking.kicks-ass.org/download/ rootfs]
-* 26 February 09 - As promised, Sean McNeil has released source code to [[GSM]] libraries [https://review.source.android.com/Gerrit#change,9013 Source]
-* 20090204 Koolu releases its Beta3 Android [http://freerunner.android.koolu.com/release-files release].
-** Changelog:
-*** Added GPS library that supports GPS under Android
-*** MAX_PROCESSES patch to enable more background processes to be run (fixes Pictures application)
-*** Added Dalvik optimization setting
-*** Started including 3rd party applications
-*** Updated user interfaces for GPS and Bluetooth to match new kernel
-*** Now report RSSI of Wifi signals to upper application layer
-*** Enable libsoundpool compilation to support audible clicks
+== Documentation ==
+[http://source.android.com/documentation Android Documentation] - Bring yourself up to speed
 
-* 20090122 Koolu releases its Beta2 Android [http://freerunner.android.koolu.com/release-files release].
+== Hardware Reference ==
 
-* 20081219 Koolu releases its Beta Android [http://forum.koolu.org/files/androidfs-koolu-1_0.jffs2 Image] and [http://forum.koolu.org/files/uImage-android-patched_bc2caff9cdef8a16.bin kernel].
+[Neo1973 Hardware] - 
+[Neo FreeRunner GTA02 Hardware] - 
 
-* 20081202 [http://www.koolu.com Koolu], a Freerunner distributor, has released the source code of their Android port at [http://git.koolu.org http://git.koolu.org]. For details on the project source and some real detailed instructions on building the source, see the [http://trac.koolu.org/ the Koolu Trac Website for Android].  TODO: Find out where this link supposed to go->See the [[Android_porting#Building the Koolu Android Source]] instructions below for how to build an Android image for Freerunner.
+== Communities ==
+[http://http://source.android.com/discuss Android Public Mailing Lists]
+[http://forum.koolu.org/viewforum.php?f=10 Android on FreeRunner] at KoolU.com
+[Openmoko Local Groups]
+[Openmoko:Community_Portal]
 
-* 20081104 The first Android-image has been successfully created by Sean McNeil!  - sms and calling works, wifi and bluetooth doesn't. [http://onlinedev.blogspot.com/2008/11/porting-android-phase-3-done.html ''news-source'']
+== Buy a Handset and Debug Board ==
 
-= See also =
-* http://code.google.com/p/android-on-freerunner/
-* [http://wiki.openmoko.org/wiki/User:Seanmcneil3 Sean McNeil] user page for some historical info
+[http://wwww.koolu.com KoolU.com] - North American distributor of the OpenMoko, backed by [http://koolu.com/component/option,com_mojo/Itemid,225/ John "Mad Dog" Hall]. 
+[http://us.direct.openmoko.com/collections/frontpage] - [Debug Board v3]
 
-== Usage ==
+== References ==
 
-* [http://code.google.com/p/android-on-freerunner/wiki/Applications List of applications] known to be working on AoF
-
-* [http://digg.com/linux_unix/Video_demo_of_Freerunner_running_Android_Cupcake_Tutorial Short Video demo of Android] on [[FreeRunner]] to show how usable it is.
-
-* [http://braydon.com/blog/2009/5/1/koolu-android-on-neo-freerunner-video Koolu beta6 on Neo Freerunner Video]
-
-* http://www.freewarelovers.com/android
-
-* http://andappstore.com/
-
-* http://slideme.org/
-
-* http://www.openintents.org/
-
-== Videos ==
-* Videos : [http://digg.com/linux_unix/Video_demo_of_Freerunner_running_Android_Cupcake_Tutorial]
-* [http://youtube.com/watch?v=m4NbsLmF9j0 YouTube Video 1]
-* [http://youtube.com/watch?v=r6Op-7tNTiw YouTube Video 2]
-
-[[Category:Android| ]]
+== External Links ==
