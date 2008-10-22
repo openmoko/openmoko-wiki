@@ -1,5 +1,3 @@
-{{Languages|Automatic emulation in Ubuntu}}
-
 == 安裝 ==
 
 我們必須知道，在linux上已經有一個好用的工具[[MokoMakefile]]。它包裝了一些指令使開發環境能夠輕易的設定與維護 若我們建構完整的[[MokoMakefile]]，需要大約12G的硬碟空間，1G的記憶體與耗費五個小時。build Qemu只需耗費890mb與十五分鐘的時間。
@@ -10,21 +8,18 @@
 ** Community-maintained Open Source software (universe)
 * 開啟終端機(Applications -> Accessories -> Terminal)。
 * 輸入下列指令，當詢問是否安裝dash(/bim/dash)時選擇no(必須輸入密碼)：
-
- sudo dpkg-reconfigure dash
-
+sudo dpkg-reconfigure dash
 * 在Hardy Heron 8.04上安裝需要的程式(必須輸入密碼)：
+sudo apt-get install monotone git-core git-svn git-email \
+git-cvs git-arch gitk python-dev ccache m4 sed bison make cvs gawk \
+libc6-dev g++ subversion sharutils docbook openjade quilt libmpfr-dev \
+libpcre3-dev texinfo texi2html libboost-date-time-dev libboost-filesystem-dev \
+libboost-regex-dev libboost-test-dev libboost-dev zlib1g-dev build-essential \
+dh-make debhelper devscripts gcc-3.4 lynx netpbm libsdl1.2-dev dosfstools \
+help2man python-psyco lynx
 
- sudo apt-get install monotone git-core git-svn git-email \
- git-cvs git-arch gitk python-dev ccache m4 sed bison make cvs gawk \
- libc6-dev g++ subversion sharutils docbook openjade quilt libmpfr-dev \
- libpcre3-dev texinfo texi2html libboost-date-time-dev libboost-filesystem-dev \
- libboost-regex-dev libboost-test-dev libboost-dev zlib1g-dev build-essential \
- dh-make debhelper devscripts gcc-3.4 lynx netpbm libsdl1.2-dev dosfstools \
- help2man python-psyco lynx
 
-
-* 針對較早的版本 (git-svn git-email git-cvs git-arch gitk are replaced by cogito)
+*For older versions (git-svn git-email git-cvs git-arch gitk are replaced by cogito)
 sudo apt-get install monotone git-core cogito python-dev ccache m4 sed bison \
 make cvs gawk libc6-dev g++ subversion sharutils docbook openjade quilt \
 libmpfr-dev libpcre3-dev texinfo texi2html libboost-date-time-dev \
@@ -33,94 +28,54 @@ zlib1g-dev build-essential dh-make debhelper devscripts gcc-3.4 netpbm \
 libsdl1.2-dev dosfstools help2man python-psyco lynx
 
 
-瞧！你的系統環境已經準備好，可以開始安裝Openmoko了。
+Voila your system is ready to get the install Openmoko.
 
-現在，我們使用下載MokoMakefile並建立它的方法，把Openmoko裝在一個目錄中。
-
-* 建立目錄，並且切換到那個目錄下：
-
+Now we will install Openmoko in a directory by downloading the MokoMakefile in it and build it.
+* Create a directory and go into the directory:
 mkdir openmoko
-
 cd openmoko
-
-* 取得 MokoMakefile：
-
+* Get the MokoMakefile (Currently down due to fires in California. Use the link below instead):
 wget http://www.rwhitby.net/files/openmoko/Makefile
 
-若它無法下載的話，請試著使用下面的路徑：
+If that doesn't work, try
 
 wget http://svn.projects.openmoko.org/svnroot/mokomakefile/trunk/Makefile
 
 * Make the MokoMakefile and tell it, you want to install it for qemu:
 make qemu
 
-這樣可以下載最近釋出的必要檔案，並且使用它們。之後，你就可以開始使用它，並且開始使用它們。瞧，你現在已經成功的把Openmoko安裝到你的Ubuntu下了。
+This will download the necessary files of the latest release and build them following the MokoMakefile. After that it will start into the emulator for the first time. Voila you have now successfully installed openmoko onto your ubuntu system.
 
-===建立Openmoko的選單項目(選擇性使用)===
+===Creating a menu item for Openmoko (optional)===
 
-你可以藉由下面的操作，建立啟動Openmoko時的選單項目：
+You can create a menu item for starting Openmoko by doing the following:
 
-*開啟終端機(Applications->Accessories->Terminal)
+*Open the terminal (Applications->Accessories->Terminal)
 
-*切換到Openmoko的目錄：
+*Go to the openmoko directory:
 
 cd ~/openmoko
 
-*使用gedit 開啟 moko.sh 檔案：
+*open the file moko.sh with '''gedit''':
 
 gedit moko.sh
 
-*將下面的文字寫入該檔：
+*insert the following text into the file:
 
 #!/bin/bash
 cd ~/openmoko
 make run-qemu
 
-*按下儲存，並關閉 gedit
+*Press "save" and close gedit
 
-* 接著，執行下面的指令：
+*then run the following commands:
 chmod +x moko.sh
 alacarte
 
-*接著以下面的輸入值，輸入選單項目：
-
+*and add a menu item with these values:
 **Name: Openmoko
 **Command: ~/openmoko/moko.sh
 
-** 如果你想要的話，你也可以藉由點擊左上方的圖示，加入圖示。你也可以透過下面的位置，下載一些好用的圖片：
-
+**If you want to you can add an appropriate icon by clicking on the image on the top left. You can download some useful images here:
 ***[http://wiki.openmoko.org/wiki/Artwork Artwork in the Openmoko wiki]
 ***[http://openclipart.org/media/tags/openmoko Openmoko at the Open Clip Art Library]
-
-
-==讓Openmoko在Qemu上執行==
-
-如果你已經建立了一個選單項目，你可以透過Ubuntu上的應用程式選單啟動Openmoko。若你還沒開始進行的話，你可以透過以下方式進行：
-
-* 開啟你的終端機程式(Applications->Accessories->Terminal).
-* 切換到目錄下：
-
-cd openmoko
-
-* 在MokoMakefile 下啟動
-
-make run-qemu
-
-出現的第一個畫面將會看到Openmoko 的logo ，接著就會看到啟動選單，這是透過 bootloader進行的。
-
-在 BOOT MENU 選單中，你可以選擇不同的選項。要選擇一個你要的項目，你可以按下 enter (=aux) ，並且執行它，按下space (等同按下電源按鈕)。預設的選項將會啟動 Openmoko。
-
-若出現 BOOT MENU 選單的話，你必須按下space，接著手機軟體就會載入進來。
-
-在啟動Openmoko的程序完全後，它將會顯示文字模式。依照你的電腦效能，它會有不等長的等待時間 (有時長達數分鐘) to complete the boot. When complete you will see the graphical interface as will be shown on the phone itself (but slightly larger due to  the larger pixelsize of your screen).
-
-A few pointers on using Openmoko:
-* You can select the icon that looks like "+" for a list of applications you can run.
-* You can select the icon that looks like "three gears" for a list of applications that are running now. Here you can also terminate unwanted applications when you are unable to do so from within the application itself.
-* You can select the icon that looks like a "house" to get back to the first home screen.
-* The statusbar at the top is always shown and by clicking on the top-left corner you can switch to another application that is already running. The "Home" application is always running and clicking on it will bring you back to the home screen.
-
-See [[Qemu]] for more advanced information on running Openmoko in Qemu.
-'''Bold text'''
-
-[[Category:Emulation/zh tw]]
