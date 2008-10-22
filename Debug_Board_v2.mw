@@ -1,7 +1,7 @@
 {{Dboard}}
 
 
-This page provides information on the architecture of the second version of the Neo1973 debug board (the one shipped with the "Advanced" [[Neo 1973]] kits). 
+This page provides information on the architecture of the second version of the Neo1973 debug board (the one shipped with the "Advanced" [[Neo 1973]] kits).
 
 [[Image:Debugboard v2 diagram.png|left|500px|Architecture Diagram]]
 
@@ -23,7 +23,7 @@ The Schematics of this board can be found at http://people.openmoko.org/laforge/
 
 === USB Hub ===
 
-This bus-powered hub 
+This bus-powered hub
 * attaches to the laptop using its upstream port
 * attaches to the FT2232D for JTAG and serial console on downstream port 1
 * attaches to USB-A connectors using downstream ports 2 and 3
@@ -48,7 +48,7 @@ The actual JTAG port is connected with
 === Serial Port ===
 
 Instead of replicating a true RS232 port, we wanted to use a USB serial converter chip,
-such as the FT232 or the PL2303.   
+such as the FT232 or the PL2303.
 
 As it turns out, we can even use the second port of the FT2232 simultaneously with the JTAG.  So no extra FT232 or PL2303 is required.
 
@@ -74,8 +74,8 @@ Please make sure you have libftdi-0.8 or later.  Earlier versions are known to c
 
 This module must be loaded with parameters that identify the debug board:
 
- rmmod ftdi_sio
- modprobe ftdi_sio vendor=0x1457 product=0x5118
+rmmod ftdi_sio
+modprobe ftdi_sio vendor=0x1457 product=0x5118
 
 or the equivalent in your modules.conf
 
@@ -168,19 +168,19 @@ The /dev/ttyUSB1 device node will be removed if the debug-board USB cable is unp
 
 After Neo's boot, this last line will be displayed at the console:
 
- gta01-pm-gsm gta01-pm-gsm.0: powering up GSM, thus disconnecting serial console
+gta01-pm-gsm gta01-pm-gsm.0: powering up GSM, thus disconnecting serial console
 
 for reconnecting your serial console, please stop the gsmd daemon from ssh :
 
- /etc/init.d/gsmd stop
+/etc/init.d/gsmd stop
 
-and respawn getty on ttySAC0. 
+and respawn getty on ttySAC0.
 
 For example, if getty is on tty1 (given by: '''ps -aux | grep getty''') then you could type:
- cd /dev
- mv tty1 tty10
- ln -s ttySAC0 tty1
- pkill getty
+cd /dev
+mv tty1 tty10
+ln -s ttySAC0 tty1
+pkill getty
 
 if kernel messages on the console are too verbose, use klogd or dmesg (e.g. '''klogd -c 4''').
 
@@ -188,31 +188,31 @@ if kernel messages on the console are too verbose, use klogd or dmesg (e.g. '''k
 
 Once you have connected the hardware as described above, run "openocd" from the diretory containing its configuration file. You should see output similar to the following:
 
- linux$ ./openocd
- Info:    openocd.c:93 main(): Open On-Chip Debugger 1.0 (2007-12-13-14:05) svn:226M
- Info:    openocd.c:94 main(): $URL: svn://svn.berlios.de/openocd/trunk/src/openocd.c $
- Info:    jtag.c:1291 jtag_examine_chain(): JTAG device found: 0x0032409d (Manufacturer: 0x04e, Part: 0x0324, Version: 0x0)
+linux$ ./openocd
+Info:    openocd.c:93 main(): Open On-Chip Debugger 1.0 (2007-12-13-14:05) svn:226M
+Info:    openocd.c:94 main(): $URL: svn://svn.berlios.de/openocd/trunk/src/openocd.c $
+Info:    jtag.c:1291 jtag_examine_chain(): JTAG device found: 0x0032409d (Manufacturer: 0x04e, Part: 0x0324, Version: 0x0)
 
 Note that the Neo1973 must be powered on for this step to succeed. Otherwise, you will see:
 
- Error:   jtag.c:1253 jtag_examine_chain(): JTAG communication failure, check connection, JTAG interface, target power etc.
- Error:   jtag.c:1440 jtag_init(): trying to validate configured JTAG chain anyway...
- Error:   jtag.c:1346 jtag_validate_chain(): Error validating JTAG scan chain, IR mismatch, scan returned 0x00
+Error:   jtag.c:1253 jtag_examine_chain(): JTAG communication failure, check connection, JTAG interface, target power etc.
+Error:   jtag.c:1440 jtag_init(): trying to validate configured JTAG chain anyway...
+Error:   jtag.c:1346 jtag_validate_chain(): Error validating JTAG scan chain, IR mismatch, scan returned 0x00
 
 Once openocd is running, open another terminal window and connect to its telnet port:
 
- linux$ telnet localhost 4444
- Trying 127.0.0.1...
- Connected to localhost.
- Escape character is '^]'.
- Open On-Chip Debugger
- >
+linux$ telnet localhost 4444
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+Open On-Chip Debugger
+>
 
-You may now reset the device, set breakpoints, upload images, etc. 
+You may now reset the device, set breakpoints, upload images, etc.
 
 ===== Unbricking Procedure =====
 
-Refer to [[Neo1973 Debug Board v2/Unbricking]] for a manual procedure to re-flash a "bricked" phone (one with a damaged u-boot or environment, where the normal [[Flashing_openmoko]] update procedure cannot be used). 
+Refer to [[Neo1973 Debug Board v2/Unbricking]] for a manual procedure to re-flash a "bricked" phone (one with a damaged u-boot or environment, where the normal [[Flashing the Neo 1973]] update procedure cannot be used).
 
 ===== Further Reading =====
 
