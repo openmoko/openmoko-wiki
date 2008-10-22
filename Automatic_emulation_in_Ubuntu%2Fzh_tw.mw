@@ -1,0 +1,81 @@
+== 安裝 ==
+
+我們必須知道，在linux上已經有一個好用的工具[[MokoMakefile]]。它包裝了一些指令使開發環境能夠輕易的設定與維護 若我們建構完整的[[MokoMakefile]]，需要大約12G的硬碟空間，1G的記憶體與耗費五個小時。build Qemu只需耗費890mb與十五分鐘的時間。
+
+為了能夠正常運作，我們需要稍微調整ubuntu(這不會影響到其他的程式)。
+* 設定sources(System -> Administration -> Software Sources)，加入：
+** Canonical-supported Open Source software (main)
+** Community-maintained Open Source software (universe)
+* 開啟終端機(Applications -> Accessories -> Terminal)。
+* 輸入下列指令，當詢問是否安裝dash(/bim/dash)時選擇no(必須輸入密碼)：
+sudo dpkg-reconfigure dash
+* 在Hardy Heron 8.04上安裝需要的程式(必須輸入密碼)：
+sudo apt-get install monotone git-core git-svn git-email \
+git-cvs git-arch gitk python-dev ccache m4 sed bison make cvs gawk \
+libc6-dev g++ subversion sharutils docbook openjade quilt libmpfr-dev \
+libpcre3-dev texinfo texi2html libboost-date-time-dev libboost-filesystem-dev \
+libboost-regex-dev libboost-test-dev libboost-dev zlib1g-dev build-essential \
+dh-make debhelper devscripts gcc-3.4 lynx netpbm libsdl1.2-dev dosfstools \
+help2man python-psyco lynx
+
+
+*For older versions (git-svn git-email git-cvs git-arch gitk are replaced by cogito)
+sudo apt-get install monotone git-core cogito python-dev ccache m4 sed bison \
+make cvs gawk libc6-dev g++ subversion sharutils docbook openjade quilt \
+libmpfr-dev libpcre3-dev texinfo texi2html libboost-date-time-dev \
+libboost-filesystem-dev libboost-regex-dev libboost-test-dev libboost-dev \
+zlib1g-dev build-essential dh-make debhelper devscripts gcc-3.4 netpbm \
+libsdl1.2-dev dosfstools help2man python-psyco lynx
+
+
+Voila your system is ready to get the install Openmoko.
+
+Now we will install Openmoko in a directory by downloading the MokoMakefile in it and build it.
+* Create a directory and go into the directory:
+mkdir openmoko
+cd openmoko
+* Get the MokoMakefile (Currently down due to fires in California. Use the link below instead):
+wget http://www.rwhitby.net/files/openmoko/Makefile
+
+If that doesn't work, try
+
+wget http://svn.projects.openmoko.org/svnroot/mokomakefile/trunk/Makefile
+
+* Make the MokoMakefile and tell it, you want to install it for qemu:
+make qemu
+
+This will download the necessary files of the latest release and build them following the MokoMakefile. After that it will start into the emulator for the first time. Voila you have now successfully installed openmoko onto your ubuntu system.
+
+===Creating a menu item for Openmoko (optional)===
+
+You can create a menu item for starting Openmoko by doing the following:
+
+*Open the terminal (Applications->Accessories->Terminal)
+
+*Go to the openmoko directory:
+
+cd ~/openmoko
+
+*open the file moko.sh with '''gedit''':
+
+gedit moko.sh
+
+*insert the following text into the file:
+
+#!/bin/bash
+cd ~/openmoko
+make run-qemu
+
+*Press "save" and close gedit
+
+*then run the following commands:
+chmod +x moko.sh
+alacarte
+
+*and add a menu item with these values:
+**Name: Openmoko
+**Command: ~/openmoko/moko.sh
+
+**If you want to you can add an appropriate icon by clicking on the image on the top left. You can download some useful images here:
+***[http://wiki.openmoko.org/wiki/Artwork Artwork in the Openmoko wiki]
+***[http://openclipart.org/media/tags/openmoko Openmoko at the Open Clip Art Library]
