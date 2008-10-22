@@ -1,4 +1,4 @@
-{{Languages|Flashing Openmoko}}
+{{Languages|Flashing the Neo 1973}}
 本篇文章的内容主要教导您如何将你的Neo 1973更新到最新的版本。在这里，我们将会在内建的闪存中选择性 的更新kernel、root filesystem。
 {{warning|如果你更新了u-boot，并且没有[[Debug Board|除错板]],在更新程序进行被中断时，你可能必须要放弃更新。}}
 
@@ -27,7 +27,7 @@
 
 请取得以下档案：
 
-* [[dfu-util]] 
+* [[dfu-util]]
 ** (这部份将于个人计算机上执行，将会把档案透过USB传到手机上)
 * openmoko-devel-image-fic-gta01-2007********.rootfs.jffs2
 * uImage-2.6.21.*-moko*-r*_0_****_0-fic-gta01.bin
@@ -43,7 +43,7 @@
 * 拔除HOST上的USB装置
 * 按住手机的[[Neo1973 AUX Button | AUX 按钮]] 接着按住手机[[Neo1973 Power Button | 电源按钮]].
 ** 在装置正式被启动前，你必须按住电源按钮约4分钟。否则，屏幕只会呈现白色启动模式，但并不会启动电源。
-* 屏幕上会出现u-boot 选单： 
+* 屏幕上会出现u-boot 选单：
 <pre>
 U-Boot ..
 
@@ -69,7 +69,7 @@ GTA01Bv4 # setenv boot_menu_timeout 65000
 GTA01Bv4 # saveenv
 </pre>
 
-若您不熟悉cu，要离开的话你必须按下"~." 
+若您不熟悉cu，要离开的话你必须按下"~."
 
 (你可能必须安装uucp 套件来存取cu，之前也可能必须要使用"<code>chown uucp:uucp /dev/ttyACM0</code>")
 
@@ -85,20 +85,20 @@ Note: 为了避免一个以上的use装置成为作用中装置，请使用-d 0x
 更新u-boot：
 {{Warning| 除非你有[[debug board|除错板装置]]或者，你真的对更新程序有非常深入的暸解，不然不要轻易更新u-boot。更新到错误的 u-boot 映像档将会brick your device! 特别是映像档被放在GTA01B_v03上，而不是GTA01B_v04。
 
- ./dfu-util -a u-boot -R -D u-boot-gta01bv3-r8_70124c2602ae2d4c5d3dba05b482d91548242de8_0_2040.bin}}
+./dfu-util -a u-boot -R -D u-boot-gta01bv3-r8_70124c2602ae2d4c5d3dba05b482d91548242de8_0_2040.bin}}
 
 更新kernel：
- ./dfu-util -a kernel -R -D ./uImage-2.6.21.1-moko10-r0_0_1883_0-fic-gta01.bin
+./dfu-util -a kernel -R -D ./uImage-2.6.21.1-moko10-r0_0_1883_0-fic-gta01.bin
 
-更新kernel至少必须需要一分钟的时间，如果你遇到困难，你可能需要比较一下输出 " [[Flashing openmoko/Known good kernel flash U-Boot output | U-Boot]]/[[Flashing openmoko/Known good kernel flash dmesg output | dmesg]]/[[Flashing openmoko/Known good kernel flash dfu-util output | dfu-util]] 。
+更新kernel至少必须需要一分钟的时间，如果你遇到困难，你可能需要比较一下输出 " [[Flashing the Neo 1973/Known good kernel flash U-Boot output | U-Boot]]/[[Flashing the Neo 1973/Known good kernel flash dmesg output | dmesg]]/[[Flashing the Neo 1973/Known good kernel flash dfu-util output | dfu-util]] 。
 手机应该会显示"Starting DFU DOWNLOAD to partition 'kernel'.
 
 更新root 档案系统：
- ./dfu-util -a rootfs -R -D ./Openmoko-devel-image-fic-gta01-20070501054014.rootfs.jffs2
+./dfu-util -a rootfs -R -D ./Openmoko-devel-image-fic-gta01-20070501054014.rootfs.jffs2
 
 更新root 档案系统可能会花费约13分钟左右的时间。请注意若你使用XEN VM 进行更新工作，它将会花费更久的时间。
 
-这里是已知无误的输出 [[Flashing openmoko/Known good rootfs flash dfu-util output|U-Boot]]、[[Flashing openmoko/Known good rootfs flash dmesg output|dmesg]]及 [[Flashing openmoko/Known good rootfs flash dfu-util output | dfu-util]]。手机的屏幕将会显示"Starting DFU DOWNLOAD to partition 'rootfs'。
+这里是已知无误的输出 [[Flashing the Neo 1973/Known good rootfs flash dfu-util output|U-Boot]]、[[Flashing the Neo 1973/Known good rootfs flash dmesg output|dmesg]]及 [[Flashing the Neo 1973/Known good rootfs flash dfu-util output | dfu-util]]。手机的屏幕将会显示"Starting DFU DOWNLOAD to partition 'rootfs'。
 
 请注意一般它不需要再更新任何东西。只有特殊需求才需要更新其它内容。
 
@@ -121,7 +121,7 @@ Good luck!
 
 你可能必须要设定[[USB_Networking]]并且进一步的设定你的Neo1973。请不要忘记使用下列指令更新你的Neo1973 ：
 
- ipkg update && ipkg upgrade
+ipkg update && ipkg upgrade
 
 并且参考ipkg [[repositories]].
 
@@ -132,11 +132,11 @@ Good luck!
 <pre>
 Resetting USB...
 not at least 2 device changes found ?!?
-Lost device after RESET?</pre> 
+Lost device after RESET?</pre>
 请重新试着键入上述的指令—它应该会重新执行。
 而上述讯息也可能在出现bookloader选单时，连接到usb 接线时出现。你必须小心的依照本篇文章中所提到的顺序着手进行，不要太早的连接USB接线。
 
 dfu-util 无法在Windows 操作系统所仿真的linux 环境下执行。
 请参考[[Dfu-util|Dfu-util]]页面取得更多信息。
 
-[[Category:Flashing Openmoko/zh cn| ]]
+[[Category:Flashing Openmoko/zh cn|Flashing Openmoko/zh cn]]
