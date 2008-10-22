@@ -24,7 +24,7 @@ Before closing the cover, insert the battery by pushing it against the three met
 
 ==== SIM卡（可选） ====
 
-[[SIM card]]从蜂窝网络运营商那里获得。SIM卡插槽在电池下面。在金属安装架上有箭头和文字标明了锁和解锁的方法 - 不要强力打开，否则可能导致金属架折断.  
+[[SIM card]]从蜂窝网络运营商那里获得。SIM卡插槽在电池下面。在金属安装架上有箭头和文字标明了锁和解锁的方法 - 不要强力打开，否则可能导致金属架折断.
 
 Click the holder unlocked and open it up. To remove the SIM card, slide it out of the holder.
 
@@ -80,7 +80,7 @@ If the battery is not sufficiently charged, the phone will not turn on, even if 
 === 刷机 Neo1973 GTA01Bv4 ===
 The GTA01Bv4 devices that are currently shipping do not boot out of the box.  Flashing the phone with the latest kernel and [[Userspace root image|supporting file system ("rootfs")]] is required before the phone will successfully boot.
 
-Read more information at about [[Flashing openmoko]]. MacOS X users please also refer to [[MacOS_X]].
+Read more information at about [[Flashing the Neo 1973]]. MacOS X users please also refer to [[MacOS_X]].
 
 === 手机关机 ===
 
@@ -106,16 +106,16 @@ However, using the u-boot console you can manually enable fast charging. See [[U
 
 ==== 在 Linux 模式====
 
-As soon as the phone is connected via USB cable, it will charge.  However, the default charging current is only 100mA, way too little if you want to operate the phone and charge at the same time. 
+As soon as the phone is connected via USB cable, it will charge.  However, the default charging current is only 100mA, way too little if you want to operate the phone and charge at the same time.
 
 If your USB upstream port is capable of supplying 500mA, then it will configure the Neo1973 accordingly and use 500mA charging mode.  You can notice this by the following line in the kernel log (/var/log/messages) of the Neo1973:
- usb0: full speed config #1: 500 mA, Ethernet Gadget, using CDC Ethernet
+usb0: full speed config #1: 500 mA, Ethernet Gadget, using CDC Ethernet
 
 == Getting shell access on the phone ==
 
 === By using the terminal emulator and on-screen keyboard ===
 
-In [[Today]] (the main screen the phone boots to and which can always be accessed by pressing the [[AUX button]]), selecting (with a stylus or a thumb) the "+" tab in the center bottom of the screen shows the application launcher. Make sure the filter at the top of the window is set at "Applications" or "All", then drag upward on the list to scroll it until the Terminal application appears. Alternatively, you can toggle the magnifier glass in the filter and type "terminal" to the text box that appears. Click the application in the list to make it turn yellow and start - this might be difficult a first since any movement is interpreted as dragging rather than clicking. 
+In [[Today]] (the main screen the phone boots to and which can always be accessed by pressing the [[AUX button]]), selecting (with a stylus or a thumb) the "+" tab in the center bottom of the screen shows the application launcher. Make sure the filter at the top of the window is set at "Applications" or "All", then drag upward on the list to scroll it until the Terminal application appears. Alternatively, you can toggle the magnifier glass in the filter and type "terminal" to the text box that appears. Click the application in the list to make it turn yellow and start - this might be difficult a first since any movement is interpreted as dragging rather than clicking.
 
 The on-screen keyboard should appear whenever you choose a text entry. It can also be toggled by clicking on the tiny keyboard icon in the panel at the very top of the screen. More options are available via Input Manager which can be started in the application launcher filtered by "Utilities" or "All". A white box appears in the panel. It also can be used to toggle the keyboard. You can choose between different keyboard layouts and the stroke recognizer by dragging from the white box to the right of the box, which should make a menu appear.
 
@@ -125,20 +125,20 @@ The standard Neo1973 Linux [[kernel]] has support for the "cdc_ether USB gadget"
 
 The following description is for generic *NIX system. For setting up connectivity specifically on a MacOS X machine, refer to [[MacOS_X]] (because there is no usb0 and you need a special kernel driver first).
 
-As soon as the kernel is up and running, and you have the phone connected via USB, you should get a '''usb0''' device on your host.  
+As soon as the kernel is up and running, and you have the phone connected via USB, you should get a '''usb0''' device on your host.
 
 The Phone will have the IPv4 address 192.168.0.202/24.  You can run `ifconfig` in the terminal on the phone to verify this (this is optional, just check it if it doesn't work given the instructions below)
 
 If you plug a USB cable into a laptop running Linux, you'll likely see the "cdc_ether" kernel module being loaded and a usb0 network interface appear. If not, see [[USB_Networking]] for more details.
 
 On the '''host PC''', you should then configure your interface to 192.168.0.200 by using
- # ifconfig usb0 192.168.0.200 netmask 255.255.255.0
+# ifconfig usb0 192.168.0.200 netmask 255.255.255.0
 
 Then you should be able to
- # ping 192.168.0.202
+# ping 192.168.0.202
 
 and last, but not least
- # ssh root@192.168.0.202
+# ssh root@192.168.0.202
 
 Once you press 'enter' (empty password), you should now have a root login.
 
@@ -146,8 +146,8 @@ See [[USB_Networking]] for more details, including instructions on how to automa
 
 Note: If you have a power management profile enabled on your device your ssh connection might appear to freeze when your phone tries to sleep.  To stop this from occuring you need to hold the power button down for a few seconds until you get the menu with the "Power Off" option at the bottom.  Once you do, you should select the "Profile: No PM" option.  If your shell died and you want it back, you can do the following:
 
- # modprobe -r cdc_ether 
- # modprobe -r cdc_acm
+# modprobe -r cdc_ether
+# modprobe -r cdc_acm
 
 Then unplug the device and plug it back in after turning power-management off.
 
@@ -163,17 +163,17 @@ Please see [[u-boot#Using_usbtty_from_Linux]]
 === Enable Internal Speaker and Mic in Phone Calls ===
 If you got no Speaker and Mic during a Call you need to load the "gsmhandset.state" alsa-configfile
 
- alsactl -f /etc/alsa/gsmhandset.state restore
+alsactl -f /etc/alsa/gsmhandset.state restore
 
 Maybe you need to load another .state file for playing mp3 or a BT-Headset see in /etc/alsa/
 
 To hear something you can find an .au file (or convert a .wav into an .au by using the sox tool):
 
- sox ringtone_thereisnophone.wav -t raw -r 8012 -u -b -c 1 rigtone_thereisnophone.au
+sox ringtone_thereisnophone.wav -t raw -r 8012 -u -b -c 1 rigtone_thereisnophone.au
 
 copy it to the device and run
 
- cat ringtone_thereisnophone.au > /dev/dsp
+cat ringtone_thereisnophone.au > /dev/dsp
 
 == Useful commands in Linux ==
 
@@ -182,11 +182,11 @@ copy it to the device and run
 Writing "mem" into ''/sys/power/state'' tells Linux to suspend - it will enter a low power mode where only the GSM and RAM are powered up and the CPU sleeps.  It will persist in this state until a wake-up event arrives.  Some currently enabled wake-up events are: AUX or POWER key press, USB cable detect.
 
 If you're connected over ssh, sshd will stop responding when the OS suspends, so to avoid locking up your ssh client, use the command
- # (sleep 1; echo mem > /sys/power/state) & exit
+# (sleep 1; echo mem > /sys/power/state) & exit
 
 === Initial backup ===
 
-After getting your new Neo1973 booted for the first time you might want to make a back up of the original flash chip contents on your PC, before you overwrite the flash with a custom image or just update to a newer build.  
+After getting your new Neo1973 booted for the first time you might want to make a back up of the original flash chip contents on your PC, before you overwrite the flash with a custom image or just update to a newer build.
 
 {{note|For phase 0 developers only (GTA01Bv4 shippment 0, '''not &gt; 0 '''): This is a good idea because there are parts in the root filesystem that can't be distributed over internet so they are only found in the shipped ROM (see the [[GPS]] driver).}}
 
@@ -216,13 +216,13 @@ This stores the five NAND partitions in files named mtdblock*.  Knowing the part
 
 To set the date and time you need to open a terminal or ssh to the device. To set the date and time to August 9 19:02 2007 type:
 
- # date -s 080919022007
+# date -s 080919022007
 
 The screensaver might turn on as you execute this command - just tap the screen to get back.
 
 Now, you need to synchronize the time with the hardware date/time by typing:
 
- # hwclock --systohc
+# hwclock --systohc
 
 === Where to from here ===
 
@@ -230,4 +230,4 @@ You'll probably want to play with some of the interesting hardware in this devic
 
 <span id="bottom">{{Languages|Getting_Started_with_your_Neo1973}}</span>
 
-[[Category:Neo1973_Phase_1_related/zh cn]]
+[[Category:Neo1973 Phase 1 related/zh cn]]
