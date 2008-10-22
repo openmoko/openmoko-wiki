@@ -2,7 +2,7 @@
 
 [[Image:GTA01-U-Boot.JPG|thumb|300px|u-boot menu on Neo1973]] [[Image:Neo1973 uboot splash closeup.jpg|thumb|300px|u-boot splash screen on Neo1973]]
 
-The bootloader used on the smartphones is called '''U-Boot'''. It takes care of device functionality until Openmoko is booted. This includes [[USB DFU]] for [[flashing Openmoko]], a splash screen, a boot menu, a console for [[bootloader commands]], configuration via [[bootloader environment]], and loading a [[kernel]]. 
+The bootloader used on the smartphones is called '''U-Boot'''. It takes care of device functionality until Openmoko is booted. This includes [[USB DFU]] for [[flashing Openmoko]], a splash screen, a boot menu, a console for [[bootloader commands]], configuration via [[bootloader environment]], and loading a [[kernel]].
 
 There are various [[bootloader versions]] available.
 
@@ -21,12 +21,12 @@ There are various [[bootloader versions]] available.
 
 All versions of the OM smartphone use the [http://u-boot.sourceforge.net/ u-boot] bootloader.
 
-More information on u-boot can be found at 
+More information on u-boot can be found at
 * http://www.denx.de/wiki/DULG
 * http://www.gumstix.org/tikiwiki/tiki-index.php?page=U-Boot
 * http://linuxdevices.com/articles/AT5085702347.html
 
-Additions to the vanilla u-boot already implemented include: 
+Additions to the vanilla u-boot already implemented include:
 * Support for boot from NAND flash using [[S3C2410 Steppingstone]]
 * Support for S3C2410 NAND flash
 * Support for downloading programs via S3C2410 USB Device Controller
@@ -39,11 +39,11 @@ However, u-boot still doesn't support many of the features that GTA01 needs, suc
 
 == Bootloader source code ==
 
-The current bootloader source can be found at http://git.openmoko.org/?p=u-boot.git;a=shortlog;h=stable . 
+The current bootloader source can be found at http://git.openmoko.org/?p=u-boot.git;a=shortlog;h=stable .
 
 To get u-boot by git:
 
- git clone git://git.openmoko.org/git/u-boot.git openmoko/u-boot
+git clone git://git.openmoko.org/git/u-boot.git openmoko/u-boot
 
 To build u-boot:
 * Clone the git tree and check out the stable branch
@@ -58,7 +58,7 @@ The latest bootloader binary builds can be found under http://downloads.openmoko
 All versions of the GTA02 (Neo FreeRunner) that have been sold to the public are version 5 hardware, so look for a file with "gta02" and "v5" in the name, for example:
 uboot-gta02v5-latest.bin
 
-The file should be written to the NAND flash address 0x00000000 (size 0x30000) (the first [[partition]]).
+The file should be written to the NAND flash address 0x00000000 (size 0x30000) (the first [[Partitions|partition]]).
 
 == Bootloader development ==
 
@@ -92,7 +92,7 @@ MMU: disabled, D-Cache: disabled, I-Cache: disabled
 
 * Download a small piece of code for low-level SDRAM timing initialization (overwrite 4k SRAM of steppingstone)
 <pre>
-> load_binary /space/misc/gta01/u-boot.git/board/gta01/lowlevel_foo.bin 0            
+> load_binary /space/misc/gta01/u-boot.git/board/gta01/lowlevel_foo.bin 0
 downloaded 332 byte in 0s 21899us
 </pre>
 
@@ -135,8 +135,8 @@ NAND:  64 MiB
 In:    serial
 Out:   serial
 Err:   serial
-Hit any key to stop autoboot:  0 
-GTA01Bv2 # 
+Hit any key to stop autoboot:  0
+GTA01Bv2 #
 </pre>
 
 == Creating bootable images ==
@@ -160,7 +160,7 @@ You can access the boot menu by pressing and holding the [[Neo1973 AUX Button]] 
 
 === Using the boot menu ===
 
-By pressing the [[Neo1973 AUX Button]] you can cycle through the menu items.  Use the ''POWER'' button to select one item. 
+By pressing the [[Neo1973 AUX Button]] you can cycle through the menu items.  Use the ''POWER'' button to select one item.
 
 == Bootloader prompt ==
 
@@ -177,10 +177,10 @@ The bootloader is currently configured to wait for three seconds.  If a key pres
 Just by connecting the phone in u-boot mode to your Linux pc should make it detect a [[CDC ACM]] device, and you should get a new tty device called /dev/ttyACM0. If not, enable the CONFIG_USB_ACM (Device Drivers -> USB support -> USB Modem (CDC ACM) support). (Instructions for MacOS users are [[MacOS_X#USB_Serial|here]])
 
 Use your favourite terminal emulator (minicom, cu, zc, screen ...) to access it like any other serial port. If you don't have a favorite, try just: (cu is in the taylor-uucp package, use "apt-get install cu" if it is not yet installed)
- cu -l /dev/ttyACM0
+cu -l /dev/ttyACM0
 
-You might need to 
- chown uucp.uucp /dev/ttyACM0
+You might need to
+chown uucp.uucp /dev/ttyACM0
 
 to get the necessary rights (even as root).
 
@@ -188,111 +188,111 @@ A nice alternative for cu is Werner Almesberger's [[NeoCon|neocon]].
 
 First, you should try to check whether the USB device shows up in 'lsusb' while you're running in u-boot mode:
 
- # lsusb -d 1457:5119
- Bus 005 Device 079: ID 1457:5119  
+# lsusb -d 1457:5119
+Bus 005 Device 079: ID 1457:5119
 
 Second, let's see some more details about the available endpoints and configurations:
 
 <pre>
 # lsusb -v -d 1457:5119
-Bus 005 Device 079: ID 1457:5119  
+Bus 005 Device 079: ID 1457:5119
 Device Descriptor:
-  bLength                18
-  bDescriptorType         1
-  bcdUSB               1.10
-  bDeviceClass            2 Communications
-  bDeviceSubClass         0 
-  bDeviceProtocol         0 
-  bMaxPacketSize0        16
-  idVendor           0x1457 
-  idProduct          0x5119 
-  bcdDevice            0.00
-  iManufacturer           1 Openmoko, Inc
-  iProduct                2 Neo1973 Bootloader U-Boot 1.2.0-g6c7cac8c-dirty-moko3
-  iSerial                 3 0000000
-  bNumConfigurations      1
-  Configuration Descriptor:
-    bLength                 9
-    bDescriptorType         2
-    wTotalLength           85
-    bNumInterfaces          3
-    bConfigurationValue     1
-    iConfiguration          4 TTY via USB
-    bmAttributes         0xc0
-      Self Powered
-    MaxPower                0mA
-    Interface Descriptor:
-      bLength                 9
-      bDescriptorType         4
-      bInterfaceNumber        0
-      bAlternateSetting       0
-      bNumEndpoints           1
-      bInterfaceClass         2 Communications
-      bInterfaceSubClass      2 Abstract (modem)
-      bInterfaceProtocol      1 AT-commands (v.25ter)
-      iInterface              6 Control Interface
-      CDC Header:
-        bcdCDC               0.6e
-      CDC Call Management:
-        bmCapabilities       0x00
-        bDataInterface          1
-      CDC ACM:
-        bmCapabilities       0x00
-      CDC Union:
-        bMasterInterface        0
-        bSlaveInterface         1 
-      Endpoint Descriptor:
-        bLength                 7
-        bDescriptorType         5
-        bEndpointAddress     0x81  EP 1 IN
-        bmAttributes            3
-          Transfer Type            Interrupt
-          Synch Type               None
-          Usage Type               Data
-        wMaxPacketSize     0x0010  1x 16 bytes
-        bInterval             255
-    Interface Descriptor:
-      bLength                 9
-      bDescriptorType         4
-      bInterfaceNumber        1
-      bAlternateSetting       0
-      bNumEndpoints           2
-      bInterfaceClass        10 CDC Data
-      bInterfaceSubClass      0 Unused
-      bInterfaceProtocol      0 
-      iInterface              5 Bulk Data Interface
-      Endpoint Descriptor:
-        bLength                 7
-        bDescriptorType         5
-        bEndpointAddress     0x02  EP 2 OUT
-        bmAttributes            2
-          Transfer Type            Bulk
-          Synch Type               None
-          Usage Type               Data
-        wMaxPacketSize     0x0010  1x 16 bytes
-        bInterval             255
-      Endpoint Descriptor:
-        bLength                 7
-        bDescriptorType         5
-        bEndpointAddress     0x83  EP 3 IN
-        bmAttributes            2
-          Transfer Type            Bulk
-          Synch Type               None
-          Usage Type               Data
-        wMaxPacketSize     0x0010  1x 16 bytes
-        bInterval             255
-    Interface Descriptor:
-      bLength                 9
-      bDescriptorType         4
-      bInterfaceNumber        2
-      bAlternateSetting       0
-      bNumEndpoints           0
-      bInterfaceClass       254 Application Specific Interface
-      bInterfaceSubClass      1 Device Firmware Update
-      bInterfaceProtocol      1 
-      iInterface              7 USB Device Firmware Upgrade
+bLength                18
+bDescriptorType         1
+bcdUSB               1.10
+bDeviceClass            2 Communications
+bDeviceSubClass         0
+bDeviceProtocol         0
+bMaxPacketSize0        16
+idVendor           0x1457
+idProduct          0x5119
+bcdDevice            0.00
+iManufacturer           1 Openmoko, Inc
+iProduct                2 Neo1973 Bootloader U-Boot 1.2.0-g6c7cac8c-dirty-moko3
+iSerial                 3 0000000
+bNumConfigurations      1
+Configuration Descriptor:
+bLength                 9
+bDescriptorType         2
+wTotalLength           85
+bNumInterfaces          3
+bConfigurationValue     1
+iConfiguration          4 TTY via USB
+bmAttributes         0xc0
+Self Powered
+MaxPower                0mA
+Interface Descriptor:
+bLength                 9
+bDescriptorType         4
+bInterfaceNumber        0
+bAlternateSetting       0
+bNumEndpoints           1
+bInterfaceClass         2 Communications
+bInterfaceSubClass      2 Abstract (modem)
+bInterfaceProtocol      1 AT-commands (v.25ter)
+iInterface              6 Control Interface
+CDC Header:
+bcdCDC               0.6e
+CDC Call Management:
+bmCapabilities       0x00
+bDataInterface          1
+CDC ACM:
+bmCapabilities       0x00
+CDC Union:
+bMasterInterface        0
+bSlaveInterface         1
+Endpoint Descriptor:
+bLength                 7
+bDescriptorType         5
+bEndpointAddress     0x81  EP 1 IN
+bmAttributes            3
+Transfer Type            Interrupt
+Synch Type               None
+Usage Type               Data
+wMaxPacketSize     0x0010  1x 16 bytes
+bInterval             255
+Interface Descriptor:
+bLength                 9
+bDescriptorType         4
+bInterfaceNumber        1
+bAlternateSetting       0
+bNumEndpoints           2
+bInterfaceClass        10 CDC Data
+bInterfaceSubClass      0 Unused
+bInterfaceProtocol      0
+iInterface              5 Bulk Data Interface
+Endpoint Descriptor:
+bLength                 7
+bDescriptorType         5
+bEndpointAddress     0x02  EP 2 OUT
+bmAttributes            2
+Transfer Type            Bulk
+Synch Type               None
+Usage Type               Data
+wMaxPacketSize     0x0010  1x 16 bytes
+bInterval             255
+Endpoint Descriptor:
+bLength                 7
+bDescriptorType         5
+bEndpointAddress     0x83  EP 3 IN
+bmAttributes            2
+Transfer Type            Bulk
+Synch Type               None
+Usage Type               Data
+wMaxPacketSize     0x0010  1x 16 bytes
+bInterval             255
+Interface Descriptor:
+bLength                 9
+bDescriptorType         4
+bInterfaceNumber        2
+bAlternateSetting       0
+bNumEndpoints           0
+bInterfaceClass       254 Application Specific Interface
+bInterfaceSubClass      1 Device Firmware Update
+bInterfaceProtocol      1
+iInterface              7 USB Device Firmware Upgrade
 Device Status:     0x0001
-  Self Powered
+Self Powered
 </pre>
 
 Next, you can access it using your favourite terminal program.
@@ -317,7 +317,7 @@ USB:   S3C2410 USB Deviced
 In:    serial
 Out:   serial
 Err:   serial
-Hit any key to stop autoboot:  0 
+Hit any key to stop autoboot:  0
 GTA01Bv3 #
 </pre>
 
@@ -332,21 +332,21 @@ Found a solution here:
 
 It works the following way:
 * Get the devirginator:
- svn co http://svn.openmoko.org/trunk/src/host/devirginator
- cd devirginator
+svn co http://svn.openmoko.org/trunk/src/host/devirginator
+cd devirginator
 * Read the u-boot environment from the device:
- dfu-util -a u-boot_env -R -U env.in
+dfu-util -a u-boot_env -R -U env.in
 * Create a file that contains everything you want to change in your u-boot environment or get it by issuing the following command:
- wget http://svn.openmoko.org/trunk/src/host/devirginator/environment.in
+wget http://svn.openmoko.org/trunk/src/host/devirginator/environment.in
 * Now let devirginator generate a new u-boot_env partition for us, - that contains the partition table from our u-boot_env, - and all changes we wanted to make; Note that the -D GTA02 is needed for the neo FreeRunner only, and has to come before the other options.
- ./envedit.pl -D GTA02 -i env.in -f environment.in -o env.out
+./envedit.pl -D GTA02 -i env.in -f environment.in -o env.out
 * On my box the partition layout didn't seem to match the idea of envedit.pl, so it issued 2 warnings:
- warning: environment is 262144 bytes, expected 16384
- CRC error: expected 0xc33e35fc, got 0x93097bfb
+warning: environment is 262144 bytes, expected 16384
+CRC error: expected 0xc33e35fc, got 0x93097bfb
 * In this case jut add an additional argument to the command line - that has to be the 1st argument, though, and that contains the size information we got from the warning:
- ./envedit.pl -s 262144 -D GTA02 -i env.in -f environment.in  -o env.out
+./envedit.pl -s 262144 -D GTA02 -i env.in -f environment.in  -o env.out
 * Now the perl script should produce no more output anything but write a new u-boot_env partition that we can upload to the device by:
- dfu-util -a u-boot_env -R -D env.out
+dfu-util -a u-boot_env -R -D env.out
 
 == Device Firmware Upgrade ==
 
@@ -354,21 +354,21 @@ Our version of u-boot also implements [[USB DFU]]. This can be useful to
 load files and kernel for quick testing.
 
 To find out whether your version of u-boot supports this, use the output of
- $ lsusb -v -d 1457:5119
+$ lsusb -v -d 1457:5119
 while the phone is in u-boot mode.
 
 If it supports DFU, you should see the following snippet towards the end of the output:
 <pre>
-    Interface Descriptor:
-      bLength                 9
-      bDescriptorType         4
-      bInterfaceNumber        2
-      bAlternateSetting       0
-      bNumEndpoints           0
-      bInterfaceClass       254 Application Specific Interface
-      bInterfaceSubClass      1 Device Firmware Update
-      bInterfaceProtocol      1 
-      iInterface              0 
+Interface Descriptor:
+bLength                 9
+bDescriptorType         4
+bInterfaceNumber        2
+bAlternateSetting       0
+bNumEndpoints           0
+bInterfaceClass       254 Application Specific Interface
+bInterfaceSubClass      1 Device Firmware Update
+bInterfaceProtocol      1
+iInterface              0
 </pre>
 
 For information on how to do firmware upgrades, please see [[dfu-util]]. For neo 1973 you may see [[Flashing_Openmoko#Actually_flashing_things_into_the_device]], and for the FreeRunner : [[Flashing the Neo FreeRunner]].
@@ -395,29 +395,29 @@ cmd1 = "neo backlight off\n"
 cmd2 = "bootelf 0x32000000\n"
 
 def output(tty, str):
-    for x in str:
-        tty.write(x)
-        tty.flush()
+for x in str:
+tty.write(x)
+tty.flush()
 
 if len(sys.argv) == 2:
-    print "Loading %s..." % sys.argv[1]
+print "Loading %s..." % sys.argv[1]
 
-    loadfile = "dfu-util -a 0 -D %s -R" % sys.argv[1]
+loadfile = "dfu-util -a 0 -D %s -R" % sys.argv[1]
 
-    os.system(loadfile)
+os.system(loadfile)
 
-    time.sleep(3)
+time.sleep(3)
 
-    tty = open("/dev/ttyACM0", "a")
+tty = open("/dev/ttyACM0", "a")
 
-    output(tty, cmd1)
-    output(tty, cmd2)
+output(tty, cmd1)
+output(tty, cmd2)
 
-    tty.close()
+tty.close()
 else:
-    print "Usage: %s elffile" % sys.argv[0]
-    print ""
-    sys.exit(2)
+print "Usage: %s elffile" % sys.argv[0]
+print ""
+sys.exit(2)
 </pre>
 
 == Troubleshooting ==
@@ -426,17 +426,17 @@ else:
 
 I once got errors like this (in dmesg or /var/log/messages) on the host side while connecting the neo in u-boot:
 
- usb 2-1: device descriptor read/64, error -110
- usb usb2: Controller not stopped yet!
+usb 2-1: device descriptor read/64, error -110
+usb usb2: Controller not stopped yet!
 
 or
 
- hub 4-0:1.0: port 1 disabled by hub (EMI?), re-enabling...
- usb 4-1: USB disconnect, address 2
+hub 4-0:1.0: port 1 disabled by hub (EMI?), re-enabling...
+usb 4-1: USB disconnect, address 2
 
-A possible solution is given below. Please note that if you have a usb keyboard or mouse then the command might cause trouble. 
+A possible solution is given below. Please note that if you have a usb keyboard or mouse then the command might cause trouble.
 
- rmmod uhci_hcd ; modprobe uhci_hcd
+rmmod uhci_hcd ; modprobe uhci_hcd
 
 Another option is to plug the FR into a different USB port on the host, preferably one on the Motherboard not the hub.
 
