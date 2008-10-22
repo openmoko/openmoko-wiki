@@ -1,6 +1,6 @@
 == NAND basics ==
 
-NAND memory has quite unique characteristics.  
+NAND memory has quite unique characteristics.
 
 * When it is erased, all bits are set to 1' (you will see 0xff on all bytes in a hexdump)
 * You can change as many bits as you want to '0'
@@ -24,7 +24,7 @@ A erase block consists of multiple pages.  In the Neo1973 GTA01 case, every eras
 
 === Bad Blocks ===
 
-NAND memory apparently gets shipped with blocks that are already bad.  The vendor just marks those blocks as bad, thus resulting in higher yield and lower per-unit cost.  
+NAND memory apparently gets shipped with blocks that are already bad.  The vendor just marks those blocks as bad, thus resulting in higher yield and lower per-unit cost.
 
 The flash contains four kinds of blocks (16kBytes):
 * Factory-Default bad blocks
@@ -48,9 +48,9 @@ The solution is split into various pieces, one at each level.
 
 ==== first-stage ====
 
-The boot loader itself contains a small first-stage boot loader for the [[S3C2410 Steppingstone]]. 
+The boot loader itself contains a small first-stage boot loader for the [[S3C2410 Steppingstone]].
 
-This code (mostly written in ARM assembly) was altered to detect and skip bad blocks.  This means, the first stage bootloader can itself extend over bad blocks.  
+This code (mostly written in ARM assembly) was altered to detect and skip bad blocks.  This means, the first stage bootloader can itself extend over bad blocks.
 
 This also means that the  flashing routine needs to detect and skip bad blocks, resulting in a u-boot image that can have gaping holes ;)  The existing "traditional" [[sjf2410-linux]] JTAG flashing program is not detecting bad blocks (Note: this might be changed through a compile option, see below)
 
@@ -66,7 +66,7 @@ The u-boot "dynenv get" command can be used to read out a pre-programmed Environ
 
 ==== Partition Table ====
 
-:''See also [[partitions]].''
+:''See also [[Partitions]].''
 
 Since those up to 80 factory-bad blocks can be located about anywhere in NAND, we have to accomodate for this worst case.  However, we cannot just make every partition 1.3MB larger than it needs to be, since this would waste a lot of otherwise good flash.
 
@@ -74,7 +74,7 @@ The only solution to this (that Harald could think of) is to dynamically calcula
 
 So as an example, let's assume we have a 0x30000 (196k) bytes sized partition for u-boot, starting at address 0 in NAND.  If there were no bad blocks, it would extend from 0x00000 to 0x30000.  From 0x30000 to 0x230000 (2MB) we have the kernel partition.
 
-Let's now assume that blocks 0x20000 and 0x28000 (each 0x4000 in size) are marked as factory-bad.  Thus, in order to have 0x30000 bytes of usable storage, the uboot partition actually extends from 0x00000 to 0x38000.  This shifts the start address of the kernel partition to 0x38000.  
+Let's now assume that blocks 0x20000 and 0x28000 (each 0x4000 in size) are marked as factory-bad.  Thus, in order to have 0x30000 bytes of usable storage, the uboot partition actually extends from 0x00000 to 0x38000.  This shifts the start address of the kernel partition to 0x38000.
 
 If the kernel partition contains more bad blocks, the start address of the rootfs partition (following the e kernel partition) is further shifted down to the end.
 
@@ -97,14 +97,14 @@ The BBT is created once a BBT-implementing u-boot is started for the first time.
 ==== Flashing kernel/rootfs from u-boot ====
 
 The kernel is contained in its own [[partition]].  We have to flash it using the
- nand write.e
+nand write.e
 command, and read it later again via
- nand read.e
+nand read.e
 command.  Those two variants (as opposed to their non-".e"-postfixed versions) simply skip bad blocks
 
 As opposed to using fixed NAND flash addresses, we can use the mtd partition names.  Thus, the magic of device-specific dynamic partition layout is all hidden neatly from the user.  A flash command using a partiton name looks like:
 
- nand write.e 0x32000000 kernel
+nand write.e 0x32000000 kernel
 
 Where 0x32000000 is the source address in RAM, and 'kernel' is the name of the kernel partition.
 
@@ -124,7 +124,7 @@ However, even if the bad-block skipping works,  sjf2410-linux only supports the 
 
 ==== JTAG / OpenOCD / u-boot RAM based ====
 
-This method is actually quite neat, and based on [[Bootloader#Using_JTAG_to_boot_from_RAM]].  
+This method is actually quite neat, and based on [[Bootloader#Using_JTAG_to_boot_from_RAM]].
 
 The idea is to use JTAG to download and execute a special version of u-boot.  This u-boot then automatically scans the whole NAND and creates the BBT.  The process can be monitored and controlled by the developer (or some script).  The chronological steps are
 
@@ -139,7 +139,7 @@ MMU: disabled, D-Cache: disabled, I-Cache: disabled
 
 # Use JTAG to download lowlevel bootup code to address 0
 <pre>
-> load_binary /space/misc/gta01/u-boot.git/foo.bin 0            
+> load_binary /space/misc/gta01/u-boot.git/foo.bin 0
 downloaded 332 byte in 0s 21899us
 </pre>
 
@@ -187,8 +187,8 @@ NAND:
 In:    serial
 Out:   serial
 Err:   serial
-Hit any key to stop autoboot:  0 
-GTA01Bv2 # 
+Hit any key to stop autoboot:  0
+GTA01Bv2 #
 </pre>
 
 # Execute 'dynpart' command to calculate [[partition]] offsets
