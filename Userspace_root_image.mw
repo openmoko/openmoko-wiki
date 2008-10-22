@@ -2,7 +2,7 @@
 
 To create a root file system image for storage in NAND flash, we use the mkfs.jffs2 program contained in the Debian package ''mtd-tools''.
 
- mkfs.jffs2 --pad=0x700000 -o rootfs.jffs2 -e 0x4000 -n -d/tmp/jffsroot/
+mkfs.jffs2 --pad=0x700000 -o rootfs.jffs2 -e 0x4000 -n -d/tmp/jffsroot/
 
 is a typical command.  It creates a FS image for our erase block size of 16k, padded to 0x700000 bytes in length from the files contained in the ''/tmp/jffsroot'' directory and stores the FS image in ''rootfs.jffs2''.
 
@@ -20,7 +20,7 @@ Once the build server is running, it will create root filesystem images for us.
 
 === demo JFFS2 root image ===
 
-Check the [[Flashing openmoko]] page for pre-built root images. Please note that this image may take long to boot the first time, since this boot finishes the installation process.
+Check the [[Flashing the Neo Freerunner]] page for pre-built root images. Please note that this image may take long to boot the first time, since this boot finishes the installation process.
 
 === Mounting the JFFS2 image on a loop back device (Block Memory MTD Emulation) ===
 ==== Configure the kernel for support ====
@@ -43,30 +43,30 @@ For a 2.6.25 kernel:
 
 losetup is an application to manage loop devices, if you have the "losetup -f" option (for instance debian etch does not has such option) you can use the following commands:
 
- export loop=$(losetup -f)
- losetup $loop <rootfs.jffs2>
- modprobe block2mtd block2mtd=$loop,131072
- modprobe jffs2
- modprobe mtdblock
- mkdir <mountpoint>
- mount -t jffs2 -o ro /dev/mtdblock0 <mountpoint>
+export loop=$(losetup -f)
+losetup $loop <rootfs.jffs2>
+modprobe block2mtd block2mtd=$loop,131072
+modprobe jffs2
+modprobe mtdblock
+mkdir <mountpoint>
+mount -t jffs2 -o ro /dev/mtdblock0 <mountpoint>
 
 "losetup -f" just returns the first unused loop device, if your system do not comes with "losetup -f" just chose the first /dev/loop* device that is unused and change the first line with:
 
- export loop=/dev/loop0
+export loop=/dev/loop0
 
-if loop0 is unused  
+if loop0 is unused
 
 Here is a simple script to do the above automatically, complete with sanity checking: [[Media:Mntjffs.sh|JFFS2-Mount-Script]]
 
-Download it, make it executable and run it: 
- 
- # chmod +x Mntjffs.sh
- # ./Mntjffs.sh <image.jffs2> </mountpoint>
+Download it, make it executable and run it:
+
+# chmod +x Mntjffs.sh
+# ./Mntjffs.sh <image.jffs2> </mountpoint>
 
 Make sure you run the script as root, because it needs to modprobe
 
- $ ./Mntjffs.sh -h | --help 
+$ ./Mntjffs.sh -h | --help
 
 gives you a short summary of usage.
 
@@ -74,13 +74,13 @@ gives you a short summary of usage.
 Based on this [http://www.internettablettalk.com/forums/showthread.php?p=192475#post192475 script by fanoush].
 
 The following is an alternate way of doing the above.
- modprobe mtdcore
- modprobe jffs2
- modprobe mtdram total_size=59024  # default is 4 MByte - set to max. available size
- modprobe mtdchar
- modprobe mtdblock
- dd if=<rootfs.jffs2> of=/dev/mtd0
- mount -t jffs2 /dev/mtdblock0 <mountpoint>
+modprobe mtdcore
+modprobe jffs2
+modprobe mtdram total_size=59024  # default is 4 MByte - set to max. available size
+modprobe mtdchar
+modprobe mtdblock
+dd if=<rootfs.jffs2> of=/dev/mtd0
+mount -t jffs2 /dev/mtdblock0 <mountpoint>
 
 === Mounting the JFFS2 image on a loopback device (Kernel Memory MTD Emulation) ===
 
@@ -88,11 +88,11 @@ As mounting the JFFS2 image from /dev/loop0 device is not supported, use the mtd
 
 (On Fedora the first module to load is mtd, not mtdcore and you need to set e.g. vmalloc=256m as a kernel boot parameter for this to work.)
 
- modprobe mtdcore
- modprobe jffs2
- modprobe mtdram total_size=59024  # default is 4 MByte - set to max. available size
- modprobe mtdchar
- modprobe mtdblock
+modprobe mtdcore
+modprobe jffs2
+modprobe mtdram total_size=59024  # default is 4 MByte - set to max. available size
+modprobe mtdchar
+modprobe mtdblock
 
 Using ''total_size=59024'' will set the filesystem size to the available space on /dev/mtd4 of the GTA1 device. So when you copy the image back it will be about 58 MB. You can set this to smaller values though.
 
@@ -100,28 +100,28 @@ Using ''total_size=59024'' will set the filesystem size to the available space o
 Be careful to really use the mtd-ram-disk (maybe there is a real Flash-device somewhere in your development system)
 
 So check for that looking into /proc/mtd:
- cat /proc/mtd 
- # dev:    size   erasesize  name
- # mtd0: 039a4000 00020000 "mtdram test device"
+cat /proc/mtd
+# dev:    size   erasesize  name
+# mtd0: 039a4000 00020000 "mtdram test device"
 
 Then write the image to that device and mount it:
 
- dd if=<rootfs.jffs2> of=/dev/mtd0
- mount -t jffs2 /dev/mtdblock0 <mountpoint>
+dd if=<rootfs.jffs2> of=/dev/mtd0
+mount -t jffs2 /dev/mtdblock0 <mountpoint>
 
 The image is an Little Endian jffs2 image. To mount it on Big Endian architectures (like PowerPC) it'll have to be converted:
 
- jffs2dump -l -c -e <rootfs.jffs2.be> <rootfs.jffs2> # only needed on non little endian archs
+jffs2dump -l -c -e <rootfs.jffs2.be> <rootfs.jffs2> # only needed on non little endian archs
 
 ==== create the new image ====
 To get the changed image back there are two ways. The obvious one is to unmount it and copy the data back from the MTD block device (the image will be 58 MB):
 
- umount /dev/mtdblock0
- dd if=/dev/mtdblock0 of=<rootfs.jffs2>
+umount /dev/mtdblock0
+dd if=/dev/mtdblock0 of=<rootfs.jffs2>
 
 You can also create a new image using the mounted file system and the method described [[Userspace_root_image#Creating_a_root_filesystem_from_scratch | above]] (the image will have the size of its data):
- 
- mkfs.jffs2 --pad=0x700000 -o new_rootfs.jffs2 -e 0x4000 -n -d <mountpoint>
+
+mkfs.jffs2 --pad=0x700000 -o new_rootfs.jffs2 -e 0x4000 -n -d <mountpoint>
 
 == Flashing a root filesystem into NAND ==
 
@@ -129,21 +129,21 @@ See [[U-boot#Writing_rootfs_to_NAND]]
 
 == Converting a GTA02 image for GTA01 ==
 
-The techniques on this page may be used to convert a GTA02 (FreeRunner) image for use on a GTA01, provided that it is small enough to fit into the GTA01's flash. 
+The techniques on this page may be used to convert a GTA02 (FreeRunner) image for use on a GTA01, provided that it is small enough to fit into the GTA01's flash.
 
 The steps I used are shown below (corrections welcome). Please read all of this page before executing these commands, in particular the warning to make sure that /dev/mtd0 does not map to a real flash device on your system.
 
- modprobe jffs2
- modprobe mtdchar
- modprobe mtdblock
- modprobe mtdram erase_size=128 total_size=262144
- dd if=gta02_image.jffs2 of=/dev/mtd0
- mount -t jffs2 -o ro /dev/mtdblock0 /mnt
- mkfs.jffs2 --little-endian -e 16 -x lzo --pad -n -r /mnt -o for_gta01.jffs2
+modprobe jffs2
+modprobe mtdchar
+modprobe mtdblock
+modprobe mtdram erase_size=128 total_size=262144
+dd if=gta02_image.jffs2 of=/dev/mtd0
+mount -t jffs2 -o ro /dev/mtdblock0 /mnt
+mkfs.jffs2 --little-endian -e 16 -x lzo --pad -n -r /mnt -o for_gta01.jffs2
 
 To clean up when you're done:
- umount /mnt
- rmmod mtdram
+umount /mnt
+rmmod mtdram
 
 
 {{Languages|Userspace_root_image}}
