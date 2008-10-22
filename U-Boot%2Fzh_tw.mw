@@ -21,30 +21,30 @@
 == 一般 ==
 GTA01 使用[http://u-boot.sourceforge.net/ u-boot] bootloader.
 
-關於u-boot的更多資訊，可以參考下列網址： 
+關於u-boot的更多資訊，可以參考下列網址：
 * http://www.denx.de/wiki/DULG
 * http://www.gumstix.org/tikiwiki/tiki-index.php?page=U-Boot
 * http://linuxdevices.com/articles/AT5085702347.html
 
-您也可以參考下面的內容，得到其它u-boot的資訊： 
+您也可以參考下面的內容，得到其它u-boot的資訊：
 * 使用[[S3C2410 Steppingstone]]支援從NAND 中啟動
 * 支援S3C2410 NAND 記憶體
 * 支援透過S3C2410 USB 裝置控制器下載程式
-* 支援在S3C2410 Framebuffer中顯示啟動logo / 狀態 
+* 支援在S3C2410 Framebuffer中顯示啟動logo / 狀態
 然而，u-boot並不會支援GTA01所需要的功能，如
-*支援從SD/Transflash讀取kernel/initrd 
+*支援從SD/Transflash讀取kernel/initrd
 
 [[User:HaraldWelte|HaraldWelte]]目前正在進行這項工作，事實上，已完成大部份的工作。
 
 == Bootloader 源碼==
-目前的bootloader patche 可以在[http://svn.openmoko.org/trunk/src/target/u-boot/patches/| http://svn.openmoko.org/trunk/src/target/u-boot/patches/這個位置]]下位置取得。. 
+目前的bootloader patche 可以在[http://svn.openmoko.org/trunk/src/target/u-boot/patches/| http://svn.openmoko.org/trunk/src/target/u-boot/patches/這個位置]]下位置取得。.
 
 將源碼解壓縮縮，套用到patch，執行"make gta01bv3_config" (或gta01bv2_config, 或你擁有的任何硬體版本)，執行"make"。你將會得到"u-boot.bin" 映像檔，你可以在NAND中直接更新 (也可以使用現有的bootloader 或 [[sjf2410-linux]])。
 
 
 == Bootloader 二進位檔==
 
-最新的bootloader 二進位檔可以在以下的位置中找到under http://buildhost.openmoko.org/snapshots in the subdirectory 200X.XX/images/。它應該被寫入NAND 0x00000000的位置 (大小為0x30000) (第一個 [[partition|分割區]]).
+最新的bootloader 二進位檔可以在以下的位置中找到under http://buildhost.openmoko.org/snapshots in the subdirectory 200X.XX/images/。它應該被寫入NAND 0x00000000的位置 (大小為0x30000) (第一個 [[Partitions|分割區]]).
 
 == 開發Bootloader ==
 
@@ -73,7 +73,7 @@ MMU: disabled, D-Cache: disabled, I-Cache: disabled
 
 * 針對低階SDRAM啟動下載程式片段 (做為4k的sram踏腳石)
 <pre>
-> load_binary /space/misc/gta01/u-boot.git/board/gta01/lowlevel_foo.bin 0            
+> load_binary /space/misc/gta01/u-boot.git/board/gta01/lowlevel_foo.bin 0
 downloaded 332 byte in 0s 21899us
 </pre>
 
@@ -116,8 +116,8 @@ NAND:  64 MiB
 In:    serial
 Out:   serial
 Err:   serial
-Hit any key to stop autoboot:  0 
-GTA01Bv2 # 
+Hit any key to stop autoboot:  0
+GTA01Bv2 #
 </pre>
 
 == 建立可啟動的映像檔 ==
@@ -155,10 +155,10 @@ bootloader 命令提示可以在序列控制台上進行 (透過[[Debug Board]])
 藉由在u-boot模式下連接電話到Linux 主機上，它會讓它偵測到 [[CDC ACM]] 裝置，你會擁有一個名為/dev/ttyACM0的新tty裝置。若沒有的話，請啟用CONFIG_USB_ACM (Device Drivers -> USB support -> USB Modem (CDC ACM) support)。 (MacOS 的使用者請參考[[MacOS_X#USB_Serial|這裡取得更多資訊]])
 
 使用你熟悉的模擬器 (minicom, cu, zc, screen ...) 像使用任何序列埠般存取。如果你並沒有熟悉的模擬器，可以試試看： (位於taylor-uucp 中的cu，使用"apt-get 安裝 cu" 如果它還未安裝話。
- cu -l /dev/ttyACM0
+cu -l /dev/ttyACM0
 
-你會需要用到 
- chown uucp.uucp /dev/ttyACM0
+你會需要用到
+chown uucp.uucp /dev/ttyACM0
 
 取得必要的權限(甚至是root)
 
@@ -166,111 +166,111 @@ bootloader 命令提示可以在序列控制台上進行 (透過[[Debug Board]])
 
 首先，你必須試著去查看在你執行u-boot模式時，USB裝置是否出現了'lsusb' 。
 
- # lsusb -d 1457:5119
- Bus 005 Device 079: ID 1457:5119  
+# lsusb -d 1457:5119
+Bus 005 Device 079: ID 1457:5119
 
 接著，讓我們來查看更多可用的endpoint及設定：
 
 <pre>
 # lsusb -v -d 1457:5119
-Bus 005 Device 079: ID 1457:5119  
+Bus 005 Device 079: ID 1457:5119
 Device Descriptor:
-  bLength                18
-  bDescriptorType         1
-  bcdUSB               1.10
-  bDeviceClass            2 Communications
-  bDeviceSubClass         0 
-  bDeviceProtocol         0 
-  bMaxPacketSize0        16
-  idVendor           0x1457 
-  idProduct          0x5119 
-  bcdDevice            0.00
-  iManufacturer           1 Openmoko, Inc
-  iProduct                2 Neo1973 Bootloader U-Boot 1.2.0-g6c7cac8c-dirty-moko3
-  iSerial                 3 0000000
-  bNumConfigurations      1
-  Configuration Descriptor:
-    bLength                 9
-    bDescriptorType         2
-    wTotalLength           85
-    bNumInterfaces          3
-    bConfigurationValue     1
-    iConfiguration          4 TTY via USB
-    bmAttributes         0xc0
-      Self Powered
-    MaxPower                0mA
-    Interface Descriptor:
-      bLength                 9
-      bDescriptorType         4
-      bInterfaceNumber        0
-      bAlternateSetting       0
-      bNumEndpoints           1
-      bInterfaceClass         2 Communications
-      bInterfaceSubClass      2 Abstract (modem)
-      bInterfaceProtocol      1 AT-commands (v.25ter)
-      iInterface              6 Control Interface
-      CDC Header:
-        bcdCDC               0.6e
-      CDC Call Management:
-        bmCapabilities       0x00
-        bDataInterface          1
-      CDC ACM:
-        bmCapabilities       0x00
-      CDC Union:
-        bMasterInterface        0
-        bSlaveInterface         1 
-      Endpoint Descriptor:
-        bLength                 7
-        bDescriptorType         5
-        bEndpointAddress     0x81  EP 1 IN
-        bmAttributes            3
-          Transfer Type            Interrupt
-          Synch Type               None
-          Usage Type               Data
-        wMaxPacketSize     0x0010  1x 16 bytes
-        bInterval             255
-    Interface Descriptor:
-      bLength                 9
-      bDescriptorType         4
-      bInterfaceNumber        1
-      bAlternateSetting       0
-      bNumEndpoints           2
-      bInterfaceClass        10 CDC Data
-      bInterfaceSubClass      0 Unused
-      bInterfaceProtocol      0 
-      iInterface              5 Bulk Data Interface
-      Endpoint Descriptor:
-        bLength                 7
-        bDescriptorType         5
-        bEndpointAddress     0x02  EP 2 OUT
-        bmAttributes            2
-          Transfer Type            Bulk
-          Synch Type               None
-          Usage Type               Data
-        wMaxPacketSize     0x0010  1x 16 bytes
-        bInterval             255
-      Endpoint Descriptor:
-        bLength                 7
-        bDescriptorType         5
-        bEndpointAddress     0x83  EP 3 IN
-        bmAttributes            2
-          Transfer Type            Bulk
-          Synch Type               None
-          Usage Type               Data
-        wMaxPacketSize     0x0010  1x 16 bytes
-        bInterval             255
-    Interface Descriptor:
-      bLength                 9
-      bDescriptorType         4
-      bInterfaceNumber        2
-      bAlternateSetting       0
-      bNumEndpoints           0
-      bInterfaceClass       254 Application Specific Interface
-      bInterfaceSubClass      1 Device Firmware Update
-      bInterfaceProtocol      1 
-      iInterface              7 USB Device Firmware Upgrade
+bLength                18
+bDescriptorType         1
+bcdUSB               1.10
+bDeviceClass            2 Communications
+bDeviceSubClass         0
+bDeviceProtocol         0
+bMaxPacketSize0        16
+idVendor           0x1457
+idProduct          0x5119
+bcdDevice            0.00
+iManufacturer           1 Openmoko, Inc
+iProduct                2 Neo1973 Bootloader U-Boot 1.2.0-g6c7cac8c-dirty-moko3
+iSerial                 3 0000000
+bNumConfigurations      1
+Configuration Descriptor:
+bLength                 9
+bDescriptorType         2
+wTotalLength           85
+bNumInterfaces          3
+bConfigurationValue     1
+iConfiguration          4 TTY via USB
+bmAttributes         0xc0
+Self Powered
+MaxPower                0mA
+Interface Descriptor:
+bLength                 9
+bDescriptorType         4
+bInterfaceNumber        0
+bAlternateSetting       0
+bNumEndpoints           1
+bInterfaceClass         2 Communications
+bInterfaceSubClass      2 Abstract (modem)
+bInterfaceProtocol      1 AT-commands (v.25ter)
+iInterface              6 Control Interface
+CDC Header:
+bcdCDC               0.6e
+CDC Call Management:
+bmCapabilities       0x00
+bDataInterface          1
+CDC ACM:
+bmCapabilities       0x00
+CDC Union:
+bMasterInterface        0
+bSlaveInterface         1
+Endpoint Descriptor:
+bLength                 7
+bDescriptorType         5
+bEndpointAddress     0x81  EP 1 IN
+bmAttributes            3
+Transfer Type            Interrupt
+Synch Type               None
+Usage Type               Data
+wMaxPacketSize     0x0010  1x 16 bytes
+bInterval             255
+Interface Descriptor:
+bLength                 9
+bDescriptorType         4
+bInterfaceNumber        1
+bAlternateSetting       0
+bNumEndpoints           2
+bInterfaceClass        10 CDC Data
+bInterfaceSubClass      0 Unused
+bInterfaceProtocol      0
+iInterface              5 Bulk Data Interface
+Endpoint Descriptor:
+bLength                 7
+bDescriptorType         5
+bEndpointAddress     0x02  EP 2 OUT
+bmAttributes            2
+Transfer Type            Bulk
+Synch Type               None
+Usage Type               Data
+wMaxPacketSize     0x0010  1x 16 bytes
+bInterval             255
+Endpoint Descriptor:
+bLength                 7
+bDescriptorType         5
+bEndpointAddress     0x83  EP 3 IN
+bmAttributes            2
+Transfer Type            Bulk
+Synch Type               None
+Usage Type               Data
+wMaxPacketSize     0x0010  1x 16 bytes
+bInterval             255
+Interface Descriptor:
+bLength                 9
+bDescriptorType         4
+bInterfaceNumber        2
+bAlternateSetting       0
+bNumEndpoints           0
+bInterfaceClass       254 Application Specific Interface
+bInterfaceSubClass      1 Device Firmware Update
+bInterfaceProtocol      1
+iInterface              7 USB Device Firmware Upgrade
 Device Status:     0x0001
-  Self Powered
+Self Powered
 </pre>
 
 接下來，你可以使用你最喜歡的終端機程式存取它。之後，若環境仍然不正確的話，你必須使用目前的控制台(如序列控制台(serial console)) 來變更[[bootloader environment#console|控制台環境下的輸入選項]]：
@@ -293,7 +293,7 @@ USB:   S3C2410 USB Deviced
 In:    serial
 Out:   serial
 Err:   serial
-Hit any key to stop autoboot:  0 
+Hit any key to stop autoboot:  0
 GTA01Bv3 #
 </pre>
 
@@ -306,21 +306,21 @@ GTA01Bv3 #
 
 u-boot也可以使用[[USB DFU]]做為更新工具。對於快速測試下的載入檔案及kernel而言，是很有效的一個方法。
 要找出你的u-boot版本是否支援這個USB DFU，請使用下面的方法：
- $ lsusb -v -d 1457:5119
+$ lsusb -v -d 1457:5119
 當裝置目前使用的是u-boot模式。
 
 如果它支援DFU，你可以在輸出的訊息後面看到以下的內容：
 <pre>
-    Interface Descriptor:
-      bLength                 9
-      bDescriptorType         4
-      bInterfaceNumber        2
-      bAlternateSetting       0
-      bNumEndpoints           0
-      bInterfaceClass       254 Application Specific Interface
-      bInterfaceSubClass      1 Device Firmware Update
-      bInterfaceProtocol      1 
-      iInterface              0 
+Interface Descriptor:
+bLength                 9
+bDescriptorType         4
+bInterfaceNumber        2
+bAlternateSetting       0
+bNumEndpoints           0
+bInterfaceClass       254 Application Specific Interface
+bInterfaceSubClass      1 Device Firmware Update
+bInterfaceProtocol      1
+iInterface              0
 </pre>
 
 要查看韌體如何更新，請參考[[dfu-util]]。
@@ -346,29 +346,29 @@ cmd1 = "neo backlight off\n"
 cmd2 = "bootelf 0x32000000\n"
 
 def output(tty, str):
-    for x in str:
-        tty.write(x)
-        tty.flush()
+for x in str:
+tty.write(x)
+tty.flush()
 
 if len(sys.argv) == 2:
-    print "Loading %s..." % sys.argv[1]
+print "Loading %s..." % sys.argv[1]
 
-    loadfile = "dfu-util -a 0 -D %s -R" % sys.argv[1]
+loadfile = "dfu-util -a 0 -D %s -R" % sys.argv[1]
 
-    os.system(loadfile)
+os.system(loadfile)
 
-    time.sleep(3)
+time.sleep(3)
 
-    tty = open("/dev/ttyACM0", "a")
+tty = open("/dev/ttyACM0", "a")
 
-    output(tty, cmd1)
-    output(tty, cmd2)
+output(tty, cmd1)
+output(tty, cmd2)
 
-    tty.close()
+tty.close()
 else:
-    print "Usage: %s elffile" % sys.argv[0]
-    print ""
-    sys.exit(2)
+print "Usage: %s elffile" % sys.argv[0]
+print ""
+sys.exit(2)
 </pre>
 
 == 問題排除 ==
@@ -382,6 +382,6 @@ usb usb2: Controller not stopped yet!
 
 利用下面的指令，我解決掉上述的問題。請注意，如果你沒有USB鍵盤或者是滑鼠，用這些指令可能會造成問題。 我只有PS/2界面的裝置，所以，並無法測試這個問題。
 
- rmmod uhci_hcd ; modprobe uhci_hcd
+rmmod uhci_hcd ; modprobe uhci_hcd
 
 [[Category:System Developers/zh tw]]
