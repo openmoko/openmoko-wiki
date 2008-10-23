@@ -96,8 +96,18 @@ Using the above list of opcodes, one can scan the Android source code for ARMv4T
 
 '''Code:'''
 {{scroll box|height=110px|text=
+<nowiki>
+opcodes="blx clz ldrd pld smlabb smlabt smlatt smlal smlawb smlawt smulbb smulbt smull smultt smulwb smulwt qadd qdadd qsub qdsub strd"
 
-<nowiki>for i in `grep -R -i "\(blx\|clz\|ldrd\|pld\|smlabb\|smlabt\|smlatt\|smlal\|smlawb\|smlawt\|smulbb\|smulbt\|smull\|smultt\|smulwb\|smulwt\|qadd\|qdadd\|qsub\|qdsub\|strd\) " * 2>/dev/null | grep -v "^\(Binary file\|kernel\)" | sed -e 's/:.*//' | grep -i -v "\(README\|\.txt$\)" | sort -u`; do echo "* ${i}"; done
+opcodePat=$(echo ${opcodes} | sed -e s: :\\\|:g)
+
+fileList="$(grep -R -i \"\(${opcodePat}\)\" * 2>/dev/null | grep -v \"^Binary file\" | sed -e 's/:.*//' | sort -u)"
+
+fileList="$(echo ${fileList} | grep -v "README\|^\(kernel/)\|\(\.txt\)$" | grep -v "" )"
+
+for i in ${fileList}; do 
+  echo "* ${i}"
+done
  </nowiki> 
 }}
 
