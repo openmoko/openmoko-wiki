@@ -1,7 +1,7 @@
 {{Languages}}
 Diese Seite erklärt, wie man mit dem FreeRunner von einer [[Supported_microSD_cards|(Micro-)SD Karte]] statt vom eingebauten NAND-Flash-Speicher bootet. Die SD-Karte teilt sich einen Bus mit der GPU, wodurch die Performance beeinträchtigt wird.
 
-ACHTUNG!!! | Das Booten von SDHC kann derzeit zu Problemen führen (siehe unten).
+{{Note| Das Booten von SDHC kann derzeit noch zu Problemen führen (siehe unten).}}
 
 == Booten von SDHC ==
 Vorweg eine Warnung. Im Linux-Kernel existiert ein Bug der dazu führen kann, daß die Partitionstabelle der SDHC-Karte während des Suspend zerstöhrt wird.
@@ -17,22 +17,27 @@ Wenn der Kernel bootet, wird die Hardware initialisiert und das Rootfilesystem g
 
 Diese Sequenz ist die gleiche, unabhängig davon ob das Gerät von Built-In-Flash oder von der SD-Karte bootet. Die Unterschiede sind, wie der Kernel geladen wird, und welches Device als Rootfilesystem gemountet ist.
 
-=== Menu Entries ===
+=== U-Boot-Menü-Einträge ===
 
-U-boot menu entries are defined by environment variables named "menu_X" (where X is a number). The value of the environment variable is a string "<label>:<commands>", where <label> is the text shown on the screen, and <commands> is a sequence of u-boot commands (delimited by ';' characters) to be executed when the menu item is selected. When entering a string of commands, the ';' and '$' characters must be backslash-escaped ("\;" and "\$").
+U-boot-Menü-Einträge werden über Umgebungsvariablen definiert. Diese sind nach dem Muster "menu_X" (wobei X eine Zahl ist) aufgebaut. Der Wert dieser Umgebungsvariable ist ein String nach dem Muster "<label>:<commands>", wobei <label> der Text ist, der auf dem Display angezeigt wird und <commands> eine Abfolge der U-boot-Befehle (getrennt durch ';') welche ausgefürht werden wenn der Menüpunkt auswählt wird
+Beim Eingeben einer Befehlsabfolge müssen ';' und '$' durch "\;" und "\$" ersetzt werden.
 
-=== Loading the Kernel ===
+=== Laden des Kernels ===
 
-A pair of u-boot commands must be used to load the kernel from SD. First is "mmcinit", which will cause u-boot to detect the card. Next is a command to load a file into memory - either "fatload" or "ext2load" depending on whether the kernel is on a FAT filesytem or an ext2/ext3 filesystem.
+Zum Laden des Kernels von der SD-Karte müssen folgende U-Boot-Befehle ausgeführt werden:
+Die SD-Karte mit "mmcinit" initialisieren.
+Den Kernel in den Arbeitsspeicher laden:
 
-The command syntax is:
-
+Kernel befindet sich auf einem FAT-Filesystem:
 fatload mmc 1:&lt;p&gt; 0x32000000 &lt;filepath&gt;
+
+Kernel befindet sich auf einem ext2/ext3-Filesystem:
 ext2load mmc 1:&lt;p&gt; 0x32000000 &lt;filepath&gt;
 
-where &lt;p&gt; is the partition number, and &lt;filepath&gt; is the path to the file that is to be loaded.
+Hierbei entspricht &lt;p&gt; der Partitionsnummer und &lt;filepath&gt; dem Pfad zu dem zu ladendem Kernel.
 
-{{Note| The "ext2load" command is broken on u-boot binary earlier than "20080723", including the one shipped with the first batch of FreeRunners, are affected by bug [http://docs.openmoko.org/trac/ticket/799 #799]. If you update your U-Boot and kernel packages you can use direct ext2 / 3 boot all in one partition.}}
+{{Note| Der "ext2load"-Befehl funktioniert nicht bei U-boot-Versionen kleiner "20080723". Diese sind vom folgendem Bug betroffen: [http://docs.openmoko.org/trac/ticket/799 #799]
+Nach einem Update der U-Boot und Kernel Pakete kann man direkt von ext2/ext3 booten.}}
 
 {{Warning | Be careful when updating u-boot on a Neo1973 as there is a risk of bricking the device (unless you have a debug board). This is not an issue for the FreeRunner as it has a protected copy of u-boot in the NOR flash }}
 
