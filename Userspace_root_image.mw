@@ -136,6 +136,7 @@ The techniques on this page may be used to convert a GTA02 (FreeRunner) image fo
 
 The steps I used are shown below (corrections welcome). Please read all of this page before executing these commands, in particular the warning to make sure that /dev/mtd0 does not map to a real flash device on your system.
 
+<pre>
 modprobe jffs2
 modprobe mtdchar
 modprobe mtdblock
@@ -143,9 +144,12 @@ modprobe mtdram erase_size=128 total_size=262144
 dd if=gta02_image.jffs2 of=/dev/mtd0
 mount -t jffs2 -o ro /dev/mtdblock0 /mnt
 mkfs.jffs2 --little-endian -e 16 -x lzo --pad -n -r /mnt -o for_gta01.jffs2
+</pre>
 
 To clean up when you're done:
+<pre>
 umount /mnt
 rmmod mtdram
+</pre>
 
 [[Category:System Developers]]
