@@ -50,11 +50,13 @@ For each ARMv5TE instruction, one could potentially
 
 == List of Unsupported Instructions ==
 
-This is a list of opcodes that are unsupported for ARMv4T compliant processors (specifically the arm920t). The opcodes represent instructions available for ARMv5, ARMv5T, and ARMv5TE architectures, which are not present in the ARMv4T ISA. The list was obtained by exhaustively editing the recompiling the Android source code (there might be errors).
+This is a list of opcodes, extracted from the Android source, that are unsupported for ARMv4T compliant processors (specifically the arm920t). The opcodes represent instructions available for ARMv5, ARMv5T, and ARMv5TE architectures, which are not present in the ARMv4T ISA. The list was obtained by exhaustively editing the recompiling the Android source code until it compiled without error.
 
 Please keep in mind, that in some cases, translating these instructions into a sequence of ARMv4T instructions will be impossible and / or result in nondeterministic execution because of
 * the requirement of additional context
 * the tendencies of certain opcodes to change condition registers that may or may not be present in the arm920t core
+
+=== Opcodes ===
 
 {{scroll box|height=150px|text=
 * blx
@@ -88,9 +90,15 @@ Please keep in mind, that in some cases, translating these instructions into a s
 
 TODO: Turn the list into a table with short descriptions of the opcodes.
 
-Using the list of opcodes, one can scan the Android source code for ARMv4T-incompatible instruction sequences.
+=== Scanning for Files That Use the ARMv5TE ISA ===
 
-e.g. grep -R -i "\(blx\|clz\|ldrd\|pld\|smlabb\|smlabt\|smlatt\|smlal\|smlawb\|smlawt\|smulbb\|smulbt\|smull\|smultt\|smulwb\|smulwt\|qadd\|qdadd\|qsub\|qdsub\|strd\) " * 2>/dev/null | grep -v "^\(Binary file\|kernel\)" | sed -e 's/:.*//' | sort -u
+Using the above list of opcodes, one can scan the Android source code for ARMv4T-incompatible instruction sequences.
+
+e.g. for i in `grep -R -i "\(blx\|clz\|ldrd\|pld\|smlabb\|smlabt\|smlatt\|smlal\|smlawb\|smlawt\|smulbb\|smulbt\|smull\|smultt\|smulwb\|smulwt\|qadd\|qdadd\|qsub\|qdsub\|strd\) " * 2>/dev/null | grep -v "^\(Binary file\|kernel\)" | sed -e 's/:.*//' | sort -u`; do echo "* ${i}"; done
+
+=== Source Files in Android that Use the ARMv5TE ISA ===
+
+The list of files below may or may not be complete. There might also be some assembly code that is generated with a python script (verification?). 
 
 {{scroll box|height=150px|text=
 * bionic/libc/arch-arm/bionic/memcmp.S
