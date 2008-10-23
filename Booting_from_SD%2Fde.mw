@@ -4,7 +4,7 @@ Diese Seite erklärt, wie man mit dem FreeRunner von einer [[Supported_microSD_c
 {{Note| Das Booten von SDHC kann derzeit noch zu Problemen führen (siehe unten).}}
 
 == Booten von SDHC ==
-Vorweg eine Warnung. Im Linux-Kernel existiert ein Bug der dazu führen kann, daß die Partitionstabelle der SDHC-Karte während des Suspend zerstöhrt wird.
+Vorweg eine Warnung: Ein Bug im Linux-Kernel kann dazu führen, daß die Partitionstabelle der SDHC-Karte während des Suspend zerstöhrt wird.
 Ticket: [https://docs.openmoko.org/trac/ticket/1802 #1802].
 Thread: [http://thread.gmane.org/gmane.comp.handhelds.openmoko.community/19154/focus=19281]
 Am Besten legt man sich ein Backup der Partitionstabelle an, um sie im Notfall schnell wieder zur Verfügung zu haben.
@@ -29,9 +29,11 @@ Die SD-Karte mit "mmcinit" initialisieren.
 Den Kernel in den Arbeitsspeicher laden:
 
 Kernel befindet sich auf einem FAT-Filesystem:
+
 fatload mmc 1:&lt;p&gt; 0x32000000 &lt;filepath&gt;
 
 Kernel befindet sich auf einem ext2/ext3-Filesystem:
+
 ext2load mmc 1:&lt;p&gt; 0x32000000 &lt;filepath&gt;
 
 Hierbei entspricht &lt;p&gt; der Partitionsnummer und &lt;filepath&gt; dem Pfad zu dem zu ladendem Kernel.
@@ -39,25 +41,26 @@ Hierbei entspricht &lt;p&gt; der Partitionsnummer und &lt;filepath&gt; dem Pfad 
 {{Note| Der "ext2load"-Befehl funktioniert nicht bei U-boot-Versionen kleiner "20080723". Diese sind vom folgendem Bug betroffen: [http://docs.openmoko.org/trac/ticket/799 #799]
 Nach einem Update der U-Boot und Kernel Pakete kann man direkt von ext2/ext3 booten.}}
 
-{{Warning | Be careful when updating u-boot on a Neo1973 as there is a risk of bricking the device (unless you have a debug board). This is not an issue for the FreeRunner as it has a protected copy of u-boot in the NOR flash }}
+{{Warning | Beim U-Boot-Update auf dem NEO1973 ist Vorsicht geboten! Es besteht die Gefahr sich aus dem NEO auszuschließen, wenn man kein Debug-Board zur Verfügung hat. Dies betrifft nicht  den Freerunner, da dieser eine Kopie von U-Boot im NOR-Flasch hat!}}
 
-{{Note| U-Boot supports SDHC protocol on the FreeRunner only: on the Neo1973, u-boot is unable to access SDHC cards (4G or larger). The kernel does have SDHC support on Neo1973, so it is possible to have the root filesystem on SDHC and the kernel on NAND flash to work around it. }}
+{{Note| U-Boot unterstützt das SDHC-Protocol nur auf dem FreeRunner: Auf dem Neo1973, ist U-Boot nicht in der Lage mit SDHC-Karten (4G oder größer) zu arbeiten. Der Kernel unterstützt SDHC auf dem NEO1973, dadurch ist es möglich den Kernel auf dem NAND-Flash und das Root-Filesystem auf der SDHC-Karte laufen zu lassen. }}
 
-=== Root Filesystem Parameters ===
+=== Root-Filesystem Parameter ===
 
-The contents of the "bootargs" environment variable are passed to the kernel. Bootargs is a space-delimited list of "name=value" definitions. The items relevant to SD-booting are "root", "rootfstype", and "rootdelay".
+Der Inhalt der "bootargs" Umgebungsvariable die an den Kernel übergeben wird, ist eine durch Leerzeichen getrennte Liste bestehend aus "name=value"-Definitionen. Relevante Elemente für  das Booten von einer SD-Karte sind "root", "rootfstype" und "rootdelay".
 
-For example, the following parameters would tell the kernel to mount the third partition of the SD-card as an ext3 filesystem:
+Beispiel: Folgende Parameter veranlassen den Kernel die dritte Partition der SD-Karte zu mounten:
 
 root=/dev/mmcblk0p3 rootfstype=ext3 rootdelay=5
 
-The "rootdelay" parameter allows time for the card to be properly initialized before it is accessed.
+Der "rootdelay"-Parameter gibt der SD-Karte die nötige Zeit um sich zu initialisieren bevor auf sie zugegriffen wird.
 
-Note that the kernel must have built-in support (i.e. not a module) for the filesystem specified in "rootfstype". The default Openmoko kernel configs as of [http://git.openmoko.org/?p=kernel.git;a=commit;h=642cbda5f3b7e7a61512426e1d30a41ab4691123| 2008-07-17] have built-in support for both ext2 and ext3. You can check the available filesystems with the Linux command
+Es ist zu beachten, dass der Kernel das Root-Filesystem auch unterstützen muss.
+Der Default-Openmoko-Kernel [http://git.openmoko.org/?p=kernel.git;a=commit;h=642cbda5f3b7e7a61512426e1d30a41ab4691123| 2008-07-17] unterstützt ext2 und ext3. Überprüfen kann man die unterstützte Filesysteme mit folgendem Linux-Befehl:
 
 less /proc/filesystems
 
-It is not possible to use VFAT for the root filesystem.
+Es ist nicht möglich, VFAT als Root-Filesystem zu benutzen.
 
 ==== ext2 vs. ext3 ====
 
