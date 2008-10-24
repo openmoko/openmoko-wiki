@@ -77,23 +77,23 @@ As early as you can, build gettext and install it.  Then setup LD_LIBRARY_PATH, 
 
 When they're installed, they'll go in the default prefix setting, namely /usr/local/bin.  Put /usr/local/bin in as the first entry in your path.
 
+
+= Hacking up the system to make it work =
+
 Go into /usr/include, and
 
 <tt>ln -s /usr/local/src/linux-2.6.18/include/linux .</tt>
 
-== Notes ==
+In /usr/bin, rename python to old_python, and link /usr/local/bin/python here.
+
 
 The build system will complain if you attempt to run it as root, even if it's the bullshit root in a container (it can't tell the difference).  Create /home, and then create a user (say "moko") to run the build system.  Also, edit /etc/shells and add /usr/local/bin/bash to the list.  Finally, edit /etc/passwd and change moko's shell to /usr/local/bin/bash.
 
 In both root's and that user's .bashrc, pop in these lines:
 
- export PATH=/usr/local/bin/:$PATH
- export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+export PATH=/usr/local/bin/:$PATH
+export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 
 So that your new tool versions & shared libs will get picked up properly.
 
 Also, add /usr/local/lib to /etc/ld.so.conf (in the zone, obviously), and do an ldconfig after installing gettext.
-
-[[Category:Application Developer]]
-[[Category:Host OSes]]
-[[Category:In progress]]
