@@ -45,8 +45,13 @@ If you create something new and have the ability to designate the license for it
 * Isolating ARMv5TE ISA dependent code
 ** e.g. grep -n -R -i "${armv5te_isa_pattern}" ~/android
 * Abstracting
-** ( C/C++ ) Use inlined functions / #ifdef statments to implement functions in a portable manner
-** ( ASM ) #ifdef (preprocessor) statements ?
+** ( C/C++ ) 
+*** Use inlined functions / #ifdef statments to implement functions in a portable manner
+*** For inlined assembler calls, it's acceptable for now to use generic C code instead, so long as later on we optimize it by hand.
+** ( ASM ) 
+*** Proprocessor statements based on ISA / architecture, e.g. #ifdef __ARCH_ARM_5__ ... #endif #ifdef __ARCH_ARM_4__ ... #endif
+*** It's highly suggested that preprocessor statements should not be nested (i.e. make them mutually exclusive)
+*** Some people have suggested that we should not do #ifdef's based on ARCH or ISA, but rather based on an AndroidConfig.h which would define macros like PLD(...) #ifdef HAVE_ARM_PLD pld #else ... #endif .
 
 For each ARMv5TE instruction, one could potentially
 * Implement the instruction using general registers instead of DSP calls (i.e. eabi / softfloat)
