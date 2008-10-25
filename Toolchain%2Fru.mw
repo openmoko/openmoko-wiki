@@ -233,25 +233,24 @@ Note: This is will only last for your current session. Add it to your shell star
 
 * убедитесь в том, что вместо main.c подставлены все ваши .c и .h файлы, а все символы '-' в именах переменных заменены на '_'
 
-==Packaging your application==
+==Создание пакета с вашим приложением==
 
-We have included a script to make an ipkg out of your application. Note that this is not needed to test your application on the Neo (for that you can just scp the resulting binary and data over), however it's very handy if you want to distribute your application to others.
+Скрипт для создания ipkg-пакета из вашего приложения включен в состав toolchain. Отметим, что его использование не обязательно для тестирования вашго приложения (для этого вы просто можете скопировать необходимые данные и бинарники на Neo при помощи scp), тем не менее, этот скрипт очень удобен, если вы собираетесь поделиться вашим приложением с другими пользователями.
 
  om-make-ipkg openmoko-sample2
 
-Now you got openmoko-sample2_0.1_armv4t.ipk , you can `scp' it to your
-Neo and install it:
+Теперь у вас есть пакет openmoko-sample2_0.1_armv4t.ipk , можно скопировать его на Neo при помощи `scp', а потом установить:
 
  scp openmoko-sample2_0.1_armv4t.ipk root@192.168.0.202:
  ssh root@192.168.0.202 opkg install openmoko-sample2_0.1_armv4t.ipk
 
-Note that while you can redistribute the generated ipkg, be aware that this is a bare-bones ipk that contains no further information, i.e. you will lack library dependencies. See below how to fix this.
+Обратите внимание, что хотя вы и можете распространять сгенерированный ipkg-пакет, он, в сущности, - всего-лишь голый костяк, не содержащий никакой дополнительной информации, такой как, например, библиотечные зависимости. Ниже описано как это исправить.
 
-You can also supply the version number, a description, and an author / contacts string in a control file:
+Информацию о версии приложения, описание, имя автора и контактнуя информацию вы можете добавить в control-файл:
 
  om-make-ipkg myapp myapp_control
 
-A template of myapp_control:
+Шаблон для файла myapp_control:
 
  Package: $appname
  Version: 0.1
@@ -261,7 +260,7 @@ A template of myapp_control:
  Maintainer: $USER
  Architecture: armv4t
  Homepage: http://www.openmoko.org/
- Depends: 
+ Depends:
  Source: ${SRC}
 
 ==Что делать дальше==
