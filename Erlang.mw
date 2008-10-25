@@ -61,8 +61,7 @@ When everything is installed you can try this "hello World" code to verify the p
 <pre>
 -module(test).
 -export([start/0]).
--import(ex11_lib,[eMapWindow/1,xDo/2,xFlush/1,xColor/2,xCreateSimpleWindow/7,xCreatePixmap/4,ePolyFillRectangle/3,
-mkRectangle/4]).
+-import(ex11_lib,[eMapWindow/1,xDo/2,xFlush/1,xColor/2,xCreateSimpleWindow/7]).
 -include("ex11_lib.hrl").
 -define (WT,480).
 -define (HT,640).
@@ -70,17 +69,17 @@ mkRectangle/4]).
 start() -> spawn(fun win/0).
 
 win() ->
-Pid = self(),
-{ok, Display} = ex11_lib:xStart("3.1"),
-Win = xCreateSimpleWindow(Display, 0, 0, ?WT, ?HT, ?XC_arrow, xColor(Display, ?black)),
-xDo(Display, eMapWindow(Win)),
-xFlush(Display),
-loop().
+  Pid = self(),
+  {ok, Display} = ex11_lib:xStart("3.1"),
+  Win = xCreateSimpleWindow(Display, 0, 0, ?WT, ?HT, ?XC_arrow, xColor(Display, ?black)),
+  xDo(Display, eMapWindow(Win)),
+  xFlush(Display),
+  loop().
 
 loop() ->
-receive
-Any -> io:format("Unknown Event~p~n",[Any]), loop()
-end.
+  receive
+    Any -> io:format("Unknown Event~p~n",[Any]), loop()
+  end.
 </pre>
 Put this code in a file named test.erl Compile the file with
 <pre>
