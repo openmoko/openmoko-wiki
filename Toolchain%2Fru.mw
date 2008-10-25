@@ -271,8 +271,8 @@ Note: This is will only last for your current session. Add it to your shell star
 * Использованием [[Host-based_development_with_Xoo_and_Xephyr|host-based development/ru]] для повышения вашей продуктивности
 * Использованием [[OpenEmbedded/ru]] для адаптации образа дистрибутива к вашим специфическим нуждам.
 
-=Advanced topics=
-==Building Openmoko Kernel from git repo using Toolchain==
+=Расширенные возмжности=
+==Сборка ядра Openmoko из git репозитория при помощи Toolchain==
 
  git clone git://git.openmoko.org/git/kernel.git linux-2.6
  cd linux-2.6
@@ -280,15 +280,15 @@ Note: This is will only last for your current session. Add it to your shell star
  cp defconfig-gta02 .config
  ./build
 
-Will fail with error message "arm-angstrom-linux-gnueabi-ld: unrecognized option '-Wl,-rpath-link,/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/lib'" until /usr/local/openmoko/arm/setup-env is modified. LDFLAGS should be changed from:
+Это не будет работать и выдаст ошибку "arm-angstrom-linux-gnueabi-ld: unrecognized option '-Wl,-rpath-link,/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/lib'" пока вы не исправите /usr/local/openmoko/arm/setup-env is modified. LDFLAGS нужно поменять с:
 
  export LDFLAGS="-L${OMTOOL_DIR}/arm/arm-angstrom-linux-gnueabi/lib -Wl,-rpath-link,${OMTOOL_DIR}/arm/arm-angstrom-linux-gnueabi/lib -Wl,-O1"
 
-to:
+на:
 
  export LDFLAGS="-L${OMTOOL_DIR}/arm/arm-angstrom-linux-gnueabi/lib -rpath-link ${OMTOOL_DIR}/arm/arm-angstrom-linux-gnueabi/lib -O1"
 
-I also had to change the 'build' script to hardcode the path to the compiler.
+Возможно, вам также прийдется изменить сборочный скрипт и прописать в нем путь к компилятору.
 
 ==Использование библиотек из toolchain==
 Добавьте необходимые библиотеки к полю _LDADD в src/Makefile.am, например:
@@ -313,56 +313,56 @@ I also had to change the 'build' script to hardcode the path to the compiler.
 
 Вот и все.
 
-==Getting your application packaged by OE==
+==Как сделать, чтобы ваше приложение попало в пакеты OE==
 
-If you have written a cool application which you want to share with others, the best way to do that is to
+Если вы написали что-то неимоверно клёвое и хотите поделиться с остальными, то лучший способ сделать это
 
-# upload your application source code to a public location
-# submit a [[BitBake]] recipe to [[OpenEmbedded]], preferably via the [http://bugzilla.openembedded.org OpenEmbedded bugtracker].
+# закачать исходные коды вашего приложения туда, где они будут общедоступны
+# отошлите рецепт [[BitBake]] в [[OpenEmbedded]], желательно через [http://bugzilla.openembedded.org OpenEmbedded bugtracker].
 
-See also [[Customizing the Openmoko Distribution]].
+Смотрите также [[Customizing the Openmoko Distribution]].
 
-==Troubleshooting==
+==Решение проблем==
 
-* Some Versions of the Toolchain have corrupt .la files. If you compile an application using the Toolchain and you receive a '/space/fic/openmoko-daily/neo1973/work/armv4t-angstrom-linux-gnueabi/pango-1.18.3-r0/pango-1.18.3/pango/libpangoft2-1.0.la' error, you are affected. To fix that you should go to your "/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/lib" directory and open the affected .la files and change "/space/fic..." to "/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/lib". You have to fix more than one .la file. For the pango error you have to change "libpangocairo-1.0.la", but there are more corrupt .la files.
+* Некоторые версии toolchain содержат испорченные .la файлы. Если при компиляции вы получаетее сообщение об ошибке '/space/fic/openmoko-daily/neo1973/work/armv4t-angstrom-linux-gnueabi/pango-1.18.3-r0/pango-1.18.3/pango/libpangoft2-1.0.la', то это ваш случай. Чтобы исправить положение, перейдите в каталог "/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/lib" и отредактируйте соответствующие .la файлы, заменив "/space/fic..." на "/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/lib". Вам прийдется исправить несколько .la файлов. Для ошибки с pango, например, нужно поменять "libpangocairo-1.0.la", но кроме него там есть и другие .la файлы с ошибками.
 
-Attached is a beta fix for the .la problem. Untar the .tar.bz2 as root, and execute the following bash script as root:
+Ниже приведен beta fix для этой проблемы. Выполните приведенный ниже скрипт под пользователем root:
 
-        #!/bin/sh
-        DIR=/usr/local/openmoko/arm
-        for la in `find $DIR -iname \*.la`; do
-         dependency_libs=
-         . $la
-         for lib in $dependency_libs ; do
-         delib=`echo $lib | grep -E .la$`
-         if [ -z $delib ] ; then
-          echo -n
-         elif [ -f $delib ]; then
-          echo -n
-         else
-          basedelib=`basename $delib`
-          replacedelibs=`find $DIR -iname $basedelib`
-          found=0
-          for replacedelib in $replacedelibs ; do
-          if [ $replacedelib == $delib ]; then
-           found=1
-          fi
-          done
-          if [ $found -gt 0 ] ; then
-           echo -n
-          else
-            sed_delib=`echo $delib | sed 's/\//\\\\\//g'`
-            sed_replacedelib=`echo $replacedelib | sed 's/\//\\\\\//g'`
-            # A bit slow, we could chain expressions for speed. :)
-            cp $la $la.old
-            cat $la | sed "s/$sed_delib/$sed_replacedelib/g" > $la.new
-            mv $la.new $la
-            rm $la.old
-          fi
-         fi
-         done
-        done
+ #!/bin/sh
+ DIR=/usr/local/openmoko/arm
+ for la in `find $DIR -iname \*.la`; do
+ dependency_libs=
+ . $la
+ for lib in $dependency_libs ; do
+ delib=`echo $lib | grep -E .la$`
+ if [ -z $delib ] ; then
+ echo -n
+ elif [ -f $delib ]; then
+ echo -n
+ else
+ basedelib=`basename $delib`
+ replacedelibs=`find $DIR -iname $basedelib`
+ found=0
+ for replacedelib in $replacedelibs ; do
+ if [ $replacedelib == $delib ]; then
+ found=1
+ fi
+ done
+ if [ $found -gt 0 ] ; then
+ echo -n
+ else
+ sed_delib=`echo $delib | sed 's/\//\\\\\//g'`
+ sed_replacedelib=`echo $replacedelib | sed 's/\//\\\\\//g'`
+ # A bit slow, we could chain expressions for speed. :)
+ cp $la $la.old
+ cat $la | sed "s/$sed_delib/$sed_replacedelib/g" > $la.new
+ mv $la.new $la
+ rm $la.old
+ fi
+ fi
+ done
+ done
 
-* Please use the [http://lists.openmoko.org/mailman/listinfo/openmoko-devel Openmoko-Devel] mailing list.
+* Пользуйтесь почтовым списком рассылки [http://lists.openmoko.org/mailman/listinfo/openmoko-devel Openmoko-Devel].
 
 [[Category:Application Developer]]
