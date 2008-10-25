@@ -39,55 +39,58 @@ Reboot to get the new menu_4 title to show up.
 
 
 === Install the GUI package ex11 ===
-This is an example of what you can do with ex11 [http://projects.openmoko.org/docman/view.php/59/22/MAQ01113.MP4]
+Take a look at this example of what you can do with ex11 [http://projects.openmoko.org/docman/view.php/59/22/MAQ01113.MP4]
 
-Download from here [http://www.sics.se/~joe/work_in_progress/] or [http://www.sics.se/~joe/ex11]
-Take some additional GUI lib files from here [http://projects.openmoko.org/frs/?group_id=59]
+Download from here [http://projects.openmoko.org/frs/?group_id=59]
 
 In home directory file .profile
- export DISPLAY=:0
-
+<code>
+export DISPLAY=:0
+</code>
 Remove "-nolisten tcp" from /etc/X11/xinit/xservrrc
 
 Install xauth package and create .Xauthenticate file
-
- debian-gta01:~# apt-get install xauth
- debian-gta01:~# xauth
- xauth:  creating new authority file /root/.Xauthority
- Using authority file /root/.Xauthority
- xauth> q
-
+<code>
+debian-gta01:~# apt-get install xauth
+debian-gta01:~# xauth
+xauth:  creating new authority file /root/.Xauthority
+Using authority file /root/.Xauthority
+xauth> q
+</code>
 When everything is installed you can try this "hello World" code to verify the platform. It will create an empty window.
+<code>
+-module(test).
+-export([start/0]).
+-import(ex11_lib,[eMapWindow/1,xDo/2,xFlush/1,xColor/2,xCreateSimpleWindow/7,xCreatePixmap/4,ePolyFillRectangle/3,
+    mkRectangle/4]).
+-include("ex11_lib.hrl").
+-define (WT,480).
+-define (HT,640).
 
- -module(test).
- -export([start/0]).
- -import(sw, [xStart/1]).
- -import(ex11_lib,[xFlush/1]).
- -include("../../lib/ex11_lib.hrl").
-   
- start() -> spawn(fun win/0).
-   
- win() ->
-   Display = xStart("3.1"),
-   Win = swTopLevel:make(Display,480, 640, ?grey),
-   xFlush(Display),
-   loop().
-   
- loop() ->
-   receive
-     Any -> 
-       io:format("Unknown Event~p~n",[Any]),
-       loop()
- end.
+start() -> spawn(fun win/0).
 
+win() ->
+    Pid = self(),
+    {ok, Display} = ex11_lib:xStart("3.1"),
+    Win = xCreateSimpleWindow(Display, 0, 0, ?WT, ?HT, ?XC_arrow, xColor(Display, ?black)),
+    xDo(Display, eMapWindow(Win)),
+    xFlush(Display),
+    loop().
+
+loop() ->
+receive
+    Any -> io:format("Unknown Event~p~n",[Any]), loop()
+end.
+</code>
 Put this code in a file named test.erl Compile the file with
-
- erlc test.erl
-
+<code>
+erlc test.erl
+</code>
 Run from erlang console.
-
-  erl
-  test:start().
+<code>
+erl
+test:start().
+</code>
 
 === Install the dbus package ===
 
