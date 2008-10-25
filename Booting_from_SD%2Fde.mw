@@ -1,5 +1,5 @@
 {{Languages}}
-Diese Seite erklärt, wie man mit dem FreeRunner von einer [[Supported_microSD_cards|(Micro-)SD Karte]] statt vom eingebauten NAND-Flash-Speicher bootet. Da sich die SD-Karte einen Bus mit der GPU teilt, kann jedoch die Performance beeinträchtigt werden.
+Diese Seite beschreibt, wie man mit dem FreeRunner von einer [[Supported_microSD_cards|(Micro-)SD Karte]] statt vom eingebauten NAND-Flash-Speicher bootet. Da sich die SD-Karte einen Bus mit der GPU teilt, kann jedoch die Performance beeinträchtigt werden.
 
 {{Note| Das Booten von SDHC kann derzeit noch zu Problemen führen (siehe unten).}}
 
@@ -66,7 +66,7 @@ Es ist nicht möglich, VFAT als Root-Filesystem zu benutzen.
 
 Ext2 oder ext3 als Root-Filesystem verwenden? Das Journaling-Dateisystem Ext3 ist prinzipiell die bessere Wahl, da hier nach einem unsauberen Shutdown des Systems kein "fsck" (Datei-System-Check) durchgeführt werden muss. Jedoch unterstützt ext3 kein wear-leveling (schonende Schreibweise für Flash-Speicher).
 
-	
+
 == Rootfs ==
 
 Es gibt zwei Möglichkeiten an ein Rootfs-Image heran zu kommen. Entweder man baut sich mit der OpenEmbedded Distribution sein einges Rootfs-Image oder man läd es sich ein fertiges Image vom OpenMoko buildhost herunter.
@@ -77,87 +77,106 @@ Aktuelles Rootfs und Kernel einfach unter [[Latest Images]] downloaden.
 
 === Möglichkeit 2: Mit OpenEmbedded selber ein tar-File erstellen ===
 
-Another possibility to get a tar archive of your rootfs is to build it on your own with the OpenEmbedded environment.
+Eine weitere Möglichkeit besteht darin, sich selber mit der OpenEmbedded Umgebung ein Rootfs-tar-Archiv zu erstellen.
 
-To build OM-2007.2 you need to add "tar" to the image types in your ''local.conf'':
+Um OM-2007.2 zu erstellen, muss man "tar" zu den Image-Typen in seiner ''local.conf'' hinzudügen:
 
 IMAGE_FSTYPES = "jffs2 tar"
 
-After that build a new image by issuing:
+Jetzt kann man das neue Image erstellen:
 
 bitbake openmoko-devel-image
 
-or if you are using the MokoMakefile:
+oder mit MokoMakefile:
 
 make openmoko-devel-image
 
-After the process finished there will be a ''Openmoko-....tar'' in the deploy directory, which is your newly created rootfs archive
+Das ''Openmoko-....tar'' findet sich anschließend im Out-Pfad.
 
-=== Possibility 3 : Convert a jff2 image to a tarfile ===
+=== Möglichkeit 3 : Ein jff2-Image in ein tar-File konvertieren ===
 
-See [[Userspace root image]] for more details on how to access contents of a jffs2 image.
+Siehe [[Userspace root image]].
 
-== Prepare the SD card ==
+== Vorbereiten der SD-Karte ==
 
-=== Partioning the SD card ===
+=== Partitionieren der SD-Karte ===
 
-u-boot pre-2008-07-23 can only boot from FAT filesystems; if you update u-boot, you can boot from FAT or ext2.
-This example shows how to do an example partition using the fdisk utility. Feel free to use the partitioning utility of your liking for this task.
+U-Boot vor 2008-07-23 kan ausschließlich von FAT-Filesystemen booten. Nach einem U-Boot-Update kann auch von ext2/ext3 gebootet werden.
+Dieses Beispiel zeigt wie man mit fdisk Partitionen erstellt.
 
 fdisk /dev/mmcblk0
 
-'''''Note:''''' The device file might differ on your system. If you are not sure about it, you may check your kernel message log by calling ''dmesg'' to find the correct device.
-
-We will now create a 8 MB partition for our kernel and another one for the rootfs which will take up all the remaining space.
+'''''Achtung:''''' Der Gerätename kann variieren. Um sicher zu gehen, ob man den richtigen Gerätenamen hat, liest man die Kernel-Message-Log durch den Aufruf von ''dmesg''.
+Jetzt erstellt man eine 8MB Partition für den Kernel und eine Partition mit dem restlichen Speicherplatz für das Root-Filesyetem.
 
 Command (m for help): d
+
 Selected partition 1
+
 Command (m for help): n
+
 Command action
+
 e   extended
+
 p   primary partition (1-4)
+
 p
+
 Partition number (1-4): 1
+
 First cylinder (1-983, default 1):
+
 Using default value 1
+
 Last cylinder or +size or +sizeM or +sizeK (1-983, default 983): +8M
+
 Command (m for help): n
+
 Command action
+
 e   extended
+
 p   primary partition (1-4)
+
 p
+
 Partition number (1-4): 2
+
 First cylinder (18-983, default 18):
+
 Using default value 18
+
 Last cylinder or +size or +sizeM or +sizeK (18-983, default 983):
+
 Using default value 983
+
 Command (m for help): w
+
 The partition table has been altered!
 Calling ioctl() to re-read partition table.
 Syncing disks.
 
-''Should probably need to change type of first partition to FAT 16 too ?''
-
-if it exits with something like
+bei folgender Fehlermeldung:
 
 Calling ioctl() to re-read partition table
 fdisk: WARNING: rereading partition table failed, kernel still uses old table:   Device or resource busy
 
-do
+einfach das Gerät aushängen:
 
 umount /dev/mmcblk0p1
 
-on another shell and try again.
+und nocheinmal von vorn beginnen.
 
-=== Formatting the SD card ===
+=== Formatieren der SD-Karte ===
 
-Just issue the following command to create at FAT filesystem:
+Folgender Befehl formatiert die erste Partition der SD-Karte mit dem FAT-Filesystem:
 
 mkfs.vfat /dev/mmcblk0p1
-{{Note|if you do not have mkfs.vfat you must find and install the "dosfstools" package. This package does not seem to be in the official feeds, but an unofficial build may be downloaded from http://members.shaw.ca/mmontour/neo/dosfstools_2.11-r0_armv4t.ipk}}
 
+{{Note| Sollte mkfs.vfat nicht installiert sein muss das "dosfstools"-Packet nachinstalliert werden. DIeses Paket ist zwar nicht in der offiziellen Software enthalten kann aber unter http://members.shaw.ca/mmontour/neo/dosfstools_2.11-r0_armv4t.ipk heruntergeladen werden.}}
 
-The second partition is about to be formatted with ext3 (for ext2 to work you need to make sure you compiled the kernel with the correct configuration):
+Die zweite Partition wird mit dem ext3-Filesystem formatiert:
 
 mkfs.ext3 /dev/mmcblk0p2
 
