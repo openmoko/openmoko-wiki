@@ -107,7 +107,7 @@ Dieses Beispiel zeigt wie man mit fdisk Partitionen erstellt.
 fdisk /dev/mmcblk0
 
 '''''Achtung:''''' Der Gerätename kann variieren. Um sicher zu gehen, ob man den richtigen Gerätenamen hat, liest man die Kernel-Message-Log durch den Aufruf von ''dmesg''.
-Jetzt erstellt man eine 8MB Partition für den Kernel und eine Partition mit dem restlichen Speicherplatz für das Root-Filesyetem.
+Jetzt erstellt man eine 8MB Partition für den Kernel und eine Partition mit dem restlichen Speicherplatz für das Root-Filesystem.
 
 Command (m for help): d
 
@@ -180,34 +180,36 @@ Die zweite Partition wird mit dem ext3-Filesystem formatiert:
 
 mkfs.ext3 /dev/mmcblk0p2
 
-== Populate SD card ==
+== Bespielen der SD-Karte ==
 
-Your sd card is now ready to be filled up with the rootfs and the needed kernel to boot.
+Die SD-Karte ist jetzt bereit mit dem Rootfs und dem Kernel bespielt zuwerden.
 
-Mount the second partition of your SD card somewhere and put the image on it:
+Zuerst wird die zweite Patrtition der SD-Karte gemountet und das Rootfs-Image aufgespielt:
 
 mount /dev/mmcblk0p2 /mnt/moko
 tar -C /mnt/moko/ -xzvf openmoko-devel-image-fic-gta01-20070313022035.rootfs.tar.gz
 
-'''''Note:''''' As always in this guide the device name as well as the rootfs name needs to be adjusted to your device and filename structure
+'''''Achtung:''''' Die Pfade und Dateinamen müssen entsprechend angepasst werden.
 
-'''''Note:''''' There's a nice gotcha to take care about if you use your host OS automount.  Some hosts mount these removable devices with "nodev" option by default for security.  If the image you are unpacking has a populated /dev directory, the nodes will fail to create as devices then.  If automounting the SD on your host, confirm there are no unexpected mount options by using "mount" command alone to list the mounts.
-
-The next step is to mount the first partition of the sd card and install the kernel on it.
+Als nächstes wird die erste Partition der SD-Karte gemountet und der Kernel darauf installiert:
 
 mount /dev/mmcblk0p1 /mnt/mokokernel
 cp uImage-fic-gta01-latest.bin /mnt/mokokernel/uImage.bin
 
-Or, for some versions of NOR u-boot:
+Bei einigen Versionen des NOR U-boot:
 
 mount /dev/mmcblk0p1 /mnt/mokokernel
 cp uImage-fic-gta01-latest.bin /mnt/mokokernel/uimage
 
-(Yes, lower case i and no extension.)
+(Ja, kleines i und keine Dateierweiterung.)
 
-Make sure your kernel is called ''uImage.bin'' (or ''uimage'' for some versions of NOR u-boot). If the u-boot doesn't find the kernel image during boot, [[Bootloader#Using usbtty from Linux|log into the bootloader]] with ''[http://www.airs.com/ian/uucp.html cu]'', mount the partition with mmcinit and check the presence and the name of the kernel image with ''fatls mmc 1:1'' for FAT filesystem or ''ext2ls mmc 1:1'' for ext2 filesystem. Compare this carefully with the result of ''printenv sd_image_name''. Remember that you can modify the environment in NAND FLASH, but not in NOR FLASH, so if you plan to boot from NOR FLASH you have to modify the file name to match the environment variable.
+Es ist sicherzustellen, daß der Kernel ''uImage.bin'' (oder ''uimage'' bei einigen Versionen des NOR U-boot) heisst. Sollte U-Boot das Kernel-Image nicht finden: [[Bootloader#Using usbtty from Linux|im Bootloader anmelden]] mit ''[http://www.airs.com/ian/uucp.html cu]''
+Die Partition mit mmcinit mounten und prüfen, ob der Kernel vorhanden und richtig benannt ist: 
+Das geht mit ''fatls mmc 1:1'' bei FAT-Filesystemen oder ''ext2ls mmc 1:1'' bei ext2-Filesystemen. 
 
-Unmount both the rootfs partition and the kernel partition and make sure all remaining buffers are written to it:
+Anschließend mit dem Ergebnis von ''printenv sd_image_name'' vergleichen. Es ist zu beachten, daß das die Umgebungsvariable im NAND-Flash aber nicht im NOR-Flash geändert werden kann. Wenn  also aus dem NOR-Flash gebootet werden soll muss der Dateiname an die Umgebungsvariable angepasst werden.
+
+Jetzt beide Partitionen aushängen und sicherstellen, daß alle Buffer geschrieben wurden:
 
 umount /mnt/moko
 umount /mnt/mokokernel
