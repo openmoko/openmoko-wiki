@@ -105,47 +105,30 @@ void clz( uint32_t * Rd, uint32_t * Rm )
 {
 uint32_t mask = 0x80000000;
 
+// in case Rd == Rm
+uint32_t dummy = 0;
+
 if ( *Rm == 0 )
 {
 
-*Rd = 32;
+*dummy = 32;
 
 } else {
 
-for ( 	(*Rd) = 0 ;
-(*Rd) < 32 &&
+for ( 	dummy = 0 ;
+dummy < 32 &&
 ( ! ( mask & (*Rm) ) ) ;
-(*Rd)++, mask >>= 1
+dummy++, mask >>= 1
 );
 
 }
+
+(*Rd) = dummy;
+
 }
 </pre>
 </TD>
 <TD>
-[[User:Cfriedt]] 20081026
-<pre>
-clz:
-ldr	r3, [r1]
-cmp	r3, #0
-movne	r3, #0
-addeq	r3, r3, #32
-streq	r3, [r0]
-movne	r2, r3
-movne	ip, #0x80000000
-strne	r3, [r0]
-bxeq	lr
-b	34 <clz+0x34>
-cmp	r2, #32
-str	r2, [r0]
-bxeq	lr
-ldr	r3, [r1]
-add	r2, r2, #1
-tst	ip, r3
-lsr	ip, ip, #1
-beq	28 <clz+0x28>
-bx	lr
-</pre>
 </TD>
 </TR>
 
