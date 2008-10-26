@@ -7,7 +7,7 @@ This page provides instructions on how to install Qtopia (proper, not the [[ASU]
 |}
 
 == Current status ==
-On 3 October 2008, Trolltech released the [http://qtextended.org/modules/mydownloads/visit.php?lid=86 Qtopia ROM flash image containing the footfs] for the FIC Neo FreeRunner (gta02) containing the Qtopia 4.4.1 release (GPL version). This runs on the [http://qtextended.org/modules/mydownloads/visit.php?lid=91 mwebster ROM flash image containing the kernel].
+On 3 October 2008, Trolltech released the [http://qtextended.org/modules/mydownloads/visit.php?lid=86 qtextended-4.4.1-gta02-rootfs-release-10022309.jffs2 Qtopia ROM flash image containing the rootfs] for the FIC Neo FreeRunner (gta02) containing the Qtopia 4.4.1 release (GPL version). This runs on the [http://qtextended.org/modules/mydownloads/visit.php?lid=91 uImage-gta02-g291a9d50_mwester-stable.bin mwebster ROM flash image containing the kernel].
 
 This image can successfully make and receive calls and text messages. It can read all contacts from the SIM card (which the updated 2007.2 does not appear to be able to do). It contains apps that appear to be more stable than the ones found in the 2007.2 image.  It has multiple input methods that appear to be more mature.  It does not, however, have a web browser or a GPS application. There are however at least two third-party GPS applications available:
 * [http://blog.wolfman.com/articles/2008/08/27/porting-xgps-to-qtopia-for-the-freerunner xgps here]
@@ -43,11 +43,11 @@ Installation Requirements:
 
 See the [[Booting from SD#Prepare the SD card| Preparing the SD Card]] section of the [[Booting from SD]] page for partitioning and formatting instructions.  After you complete the "Formatting the SD Card" steps, return here and execute the following:
 
-  mount /dev/mmcblk0p1 /media/card
-  mkdir /media/card/boot
+mount /dev/mmcblk0p1 /media/card
+mkdir /media/card/boot
 
-  mkdir /media/mmcblk0p2
-  mount /dev/mmcblk0p2 /media/mmcblk0p2
+mkdir /media/mmcblk0p2
+mount /dev/mmcblk0p2 /media/mmcblk0p2
 
 This will set you up properly for the installation of the root filesystem and the kernel in the steps below.
 
@@ -76,14 +76,14 @@ Where ''<mountpoint>'' is the location where the jff2 filesystem was mounted.  N
 
 Transfer this compressed tarball to the second partition of the MicroSD that is mounted on the FreeRunner:
 
-  scp qtopia-4.3.2-gta02-rootfs-07172049.tar.gz root@192.168.0.202:/media/mmcblk0p2/
+scp qtopia-4.3.2-gta02-rootfs-07172049.tar.gz root@192.168.0.202:/media/mmcblk0p2/
 
 Log in to your FreeRunner and unpack the root filesystem:
 
-  cd /media/mmcblk0p2
-  tar xzf qtopia-4.3.2-gta02-rootfs-07172049.tar.gz
-  rm qtopia-4.3.2-gta02-rootfs-07172049.tar.gz
-  rm -f /media/mmcblk0p2/boot/*
+cd /media/mmcblk0p2
+tar xzf qtopia-4.3.2-gta02-rootfs-07172049.tar.gz
+rm qtopia-4.3.2-gta02-rootfs-07172049.tar.gz
+rm -f /media/mmcblk0p2/boot/*
 
 '''''Note:''''' the last step removes the kernel image from the second partition.  For some reason, U-Boot cannot find the uImage.bin file in the first partition if a kernel image exists in the second partition boot/ directory.
 
@@ -91,9 +91,9 @@ Log in to your FreeRunner and unpack the root filesystem:
 
 From your Linux box, rename <tt>uImage-2.6.24+git18+9c058ff0d2641df3c36fc3300acb72078d2c41d4-r0-om-gta02.bin</tt> to <tt>uImage.bin</tt> and copy it to the boot directory on the first partition of the MicroSD card.  Depending on the version of U-Boot you have installed, this may not work.  To prevent any possible issues, copy it to the <tt>/media/card</tt> directory as well. There is plenty of room on the first partition to have <tt>uImage.bin</tt> in both locations.
 
-  mv uImage-2.6.24+git18+9c058ff0d2641df3c36fc3300acb72078d2c41d4-r0-om-gta02.bin uImage.bin
-  scp uImage.bin root@192.168.0.202:/media/card/boot/
-  scp uImage.bin root@192.168.0.202:/media/card/
+mv uImage-2.6.24+git18+9c058ff0d2641df3c36fc3300acb72078d2c41d4-r0-om-gta02.bin uImage.bin
+scp uImage.bin root@192.168.0.202:/media/card/boot/
+scp uImage.bin root@192.168.0.202:/media/card/
 
 ==== Pointing Qtopia to the SD Card ====
 
@@ -107,14 +107,14 @@ Another user's solution to this is the following:
 
 Edit this file:     " /opt/Qtopia/etc/default/Trolltech/Storage.conf
 And change the [MountPoint0] section so it resembles this:
-  -[
-  [MountPoint0]
-  Name[] = SD Card
-  Path=/dev/mmcblk0p1
-  Removable = 0
-  Applications = 0
-  Documents = 0
-  ContentDatabase = 0
+-[
+[MountPoint0]
+Name[] = SD Card
+Path=/dev/mmcblk0p1
+Removable = 0
+Applications = 0
+Documents = 0
+ContentDatabase = 0
 
 == Option 3: updating from source ==
 
