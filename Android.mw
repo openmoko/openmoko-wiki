@@ -67,37 +67,139 @@ Please keep in mind, that in some cases, translating these instructions into a s
 
 === Opcodes ===
 
-{{scroll box|height=150px|text=
-* blx
-* clz
-* ldrd
-* pld
-* smla
-** smlabb
-** smlabt
-** smlatt
-* smlal
-* smlaw
-** smlawb
-** smlawt
-* smul
-** smulbb
-** smulbt
-** smull
-** smultt
-* smulw
-** smulwb
-** smulwt
-* qadd
-* qdadd
-* qsub
-* qdsub
-* strd
+{{scroll box|text=
+<TABLE>
+	<THEAD>
+		<TH>Opcode</TH>
+		<TH>Desription</TH>
+		<TH>[[http://www.arm.com/miscPDFs/14128.pdf PDF]] Page Number</TH>
+		<TH>Resolution</TH>
+	</THEAD>
+	<TBODY>
+		<TR>
+			<TH>BLX(1)</TH>
+			<TD>Branch, Link, and Exchange</TD>
+			<TD>166</TD>
+			<TD></TD>
+		</TR>
+		<TR>
+			<TH>BLX(2)</TH>
+			<TD>Branch, Link, and Exchange</TD>
+			<TD>168</TD>
+			<TD></TD>
+		</TR>
+		<TR>
+			<TH>CLZ</TH>
+			<TD>Count Leading Zeros</TD>
+			<TD>175</TD>
+			<TD>
+<pre>
+#include <stdint.h>
+
+void clz( uint32_t * Rd, uint32_t * Rm ) 
+{
+	uint32_t mask = 0x80000000;
+
+	if ( *Rm == 0 ) 
+	{ 
+		*Rd = 32; 
+		goto retLabel;
+	}
+
+	for ( 	(*Rd) = 0 ; 
+		(*Rd) < 32 && 
+			( ! ( mask & (*Rm) ) ) ; 
+		(*Rd)++, mask >>= 1 
+	    );
+
+      retLabel:
+	return;
+}
+</pre>
+</TD>
+		</TR>
+
+		<TR>
+			<TH>LDRD</TH>
+			<TD>Load Registers Doubleword</TD>
+			<TD>200</TD>
+			<TD></TD>
+		</TR>
+		<TR>
+			<TH>PLD</TH>
+			<TD>Preload Data</TD>
+			<TD>240</TD>
+			<TD>Remove</TD>
+		</TR>
+		<TR>
+			<TH>SMLA&lt;x&gt;&lt;y&gt;</TH>
+			<TD>Signed Multiply-Accumulate</TD>
+			<TD>291</TD>
+			<TD></TD>
+		</TR>
+		<TR>
+			<TH>SMLAL</TH>
+			<TD>Signed Multiply Accumulate Long</TD>
+			<TD>296</TD>
+			<TD></TD>
+		</TR>
+		<TR>
+			<TH>SMLAW&lt;x&gt;</TH>
+			<TD>Signed Multiply-Accumulate Word</TD>
+			<TD>302</TD>
+			<TD></TD>
+		</TR>
+		<TR>
+			<TH>SMULL</TH>
+			<TD>Signed Multiply Long</TD>
+			<TD>318</TD>
+			<TD></TD>
+		</TR>
+		<TR>
+			<TH>SMUL&lt;x&gt;&lt;y&gt;</TH>
+			<TD>Signed Multiply</TD>
+			<TD>316</TD>
+			<TD></TD>
+		</TR>
+		<TR>
+			<TH>SMULW&lt;y&gt;</TH>
+			<TD>Signed Multiply Word</TD>
+			<TD>320</TD>
+			<TD></TD>
+		</TR>
+		<TR>
+			<TH>QADD</TH>
+			<TD>Saturating Add</TD>
+			<TD>242</TD>
+			<TD></TD>
+		</TR>
+		<TR>
+			<TH>QDADD</TH>
+			<TD>Saturating Double and Add</TD>
+			<TD>249</TD>
+			<TD></TD>
+		</TR>
+		<TR>
+			<TH>QSUB</TH>
+			<TD>Saturating Subtract</TD>
+			<TD>253</TD>
+			<TD></TD>
+		</TR>
+		<TR>
+			<TH>QDSUB</TH>
+			<TD>Saturating Double and Subtract</TD>
+			<TD>251</TD>
+			<TD></TD>
+		</TR>
+		<TR>
+			<TH>STRD</TH>
+			<TD>Store Registers Doubleword</TD>
+			<TD>349</TD>
+			<TD></TD>
+		</TR>
+	</TBODY>
+</TABLE>
 }}
-
-(Please keep the opcode list in alphabetical order)
-
-TODO: Turn the list into a table with short descriptions of the opcodes.
 
 === Scanning for Files That Use the ARMv5TE ISA ===
 
