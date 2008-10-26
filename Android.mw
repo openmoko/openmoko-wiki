@@ -260,6 +260,12 @@ done
 </pre>
 
 === Discussion ===
+* For work in .S files, it's probably best to do implement the equivalent ARMv4T sequence as a subroutine. That way, it's only necessary to edit the file once for any given number of uses. 
+* Something like <pre>#define CLZ(dest,src)... </pre>
+** This becomes tricky when 'dest' and 'src' can potentially be several different registers (or even the same register)
+** Does anyone know how this should be done?
+* There are several norms that must be conformed to when doing subroutines on the ARM architecture - namely the ARM Procedure Call Standard (APCS). The original android code also conforms to standards.
+* The subroutine is responsible for protecting the contents of working registers - i.e. the subroutine should push them / pop them as necessary.
 
 === Source Files in Android that Use the ARMv5TE ISA ===
 
