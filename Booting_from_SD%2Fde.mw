@@ -204,8 +204,8 @@ cp uImage-fic-gta01-latest.bin /mnt/mokokernel/uimage
 (Ja, kleines i und keine Dateierweiterung.)
 
 Es ist sicherzustellen, daß der Kernel ''uImage.bin'' (oder ''uimage'' bei einigen Versionen des NOR U-boot) heisst. Sollte U-Boot das Kernel-Image nicht finden: [[Bootloader#Using usbtty from Linux|im Bootloader anmelden]] mit ''[http://www.airs.com/ian/uucp.html cu]''
-Die Partition mit mmcinit mounten und prüfen, ob der Kernel vorhanden und richtig benannt ist: 
-Das geht mit ''fatls mmc 1:1'' bei FAT-Filesystemen oder ''ext2ls mmc 1:1'' bei ext2-Filesystemen. 
+Die Partition mit mmcinit mounten und prüfen, ob der Kernel vorhanden und richtig benannt ist:
+Das geht mit ''fatls mmc 1:1'' bei FAT-Filesystemen oder ''ext2ls mmc 1:1'' bei ext2-Filesystemen.
 
 Anschließend mit dem Ergebnis von ''printenv sd_image_name'' vergleichen. Es ist zu beachten, daß das die Umgebungsvariable im NAND-Flash aber nicht im NOR-Flash geändert werden kann. Wenn  also aus dem NOR-Flash gebootet werden soll muss der Dateiname an die Umgebungsvariable angepasst werden.
 
@@ -215,42 +215,42 @@ umount /mnt/moko
 umount /mnt/mokokernel
 sync
 
-== Add uboot boot entry ==
-Depending on the revision of the phone and the partition type (ext2/ext3) you are using, it might be necessary to add an entry to the bootmenu to be able to boot the system off your SD card.
-If you are using a FreeRunner and have created an FAT kernel/ext2 rootfs partition you should be able to boot from the card right out of the box, because a boot menu entry for this should already exist in the NOR/NAND boot menu.
-In any other case you should at least make sure the needed entry exists in your menu before proceeding.
-You will need to enter the uboot shell of the NAND boot menu for this. A description on how to connect to the uboot loader shell can be found in this article: [[Uboot#Bootloader_prompt]]. Details on howto get into the NAND boot menu can be found [[Booting#Log_into_U-Boot_in_the_NAND_Flash|here]].
+== U-Boot-Menü-Eintrag hinzufügen ==
 
-After you read these two references you should be connected to your NAND uboot shell right now. The first thing to do is to set the boot menu timeout to a really high value. Unfortunately if you don't do this, the boot loader will continue booting after the default timeout (60 seconds) even if you are connected to the uboot shell. Just enter the following command to the menu prompt:
+Je nach Revision des NEO und des verwendeten Partitionstyps (ext2/ext3) kann es notwendig sein, daß ein dem BootMenü ein Eintraghinzugefügt werden muss, um das System von der SD-Karte booten zu können.
+
+Beim einem FreeRunner mit einer FAT-Partition (Kernel) und einer ext2-Partition (rootfs) sollte es möglich sein direkt von der SD-Karte zu booten, da der Boot-Menü-Eintrag für bereits im NOR- und NAND-Boot-Menü enthalten ist.
+In allen anderen Fällen muss der benötigte Menü-Eintrag erst hinzugefügt werden.
+Eine Beschreibung dazu findet sich hier: [[Bootloader/de#Bootlader_Kommandozeile]]
+Wie man in das Bootmenü gelangt steht hier: [[Getting_Started_with_your_Neo_FreeRunner/de#Anschalten_des_Neo_FreeRunner]].
+
+Als erstes empfiehlt es sich, das U-Boot-TimeOut(60s) auf einen realistischen Wert zu setzen. Hierzu aus der UBoot-Kommandoeile folgenden Befehl ausführen:
 
 setenv boot_menu_timeout 99999
 
-This will set the timeout to 99999 seconds which should definitely enough time for us finish whatever work we want accomplish in the boot loader shell.
+Der TimeOut-Wert wird so auf 99999s gesetzt, was für alle weiteren Vorhaben ausreichen sollte.:-)
 
-Now we will make sure a appropriate menu item for booting from sd exists, or create it otherwise. You can print the defined boot loader environment by issuing the command:
+
+Jetzt wird geprüft, ob ein geeigneter Menü-Eintrag zum booten von der SD-Karte vorhanden ist:
 
 printenv
 
-If it shows a line beginning with ''menu_'' followed by the commands which are just to follow in this guide, you do not need to create a new menu entry. In any other case please proceed with the following.
+Wenn eine Zeile existiert, die mit ''menu_'' beginnt und auch die folgende Befehle enthält braucht kein neuer Menü-Eintrag erstellt werden.
 
-Please make sure you are using the correct configuration based on the decisions you made earlier.  For more information on the uboot prompt, see
-help
-help <command>
-and [[Bootloader]] and [[Bootloader commands]].
+{{Note| Die Backslashs (\) sind wichtig für UBoot um den Befehl als neue Umgebungsvariable (menu_9) einzutragen. Durch einfaches drücken der Enter-Taste würde der Befehl lediglich ausgeführt werden.}}
 
-{{Note| The backslashes (\) are important for uboot to set the command as new environment variable (menu_9) instead of just executing them as soon as enter is pressed.}}
+{{Note| Kopieren und Einfügen funktioniert bei einigen Emulatoren nicht.
+Copy and paste may not work depending on your terminal emulator. Commi funktioniert alternativ kann auch der Terminal-Emulator [[NeoCon|NeoCon]]. Ansonsten muss alles manuell in die Kommandozeile eingetippt werden.}}
 
-{{Note| Copy and paste may not work depending on your terminal emulator. Commi just works or you can use [[NeoCon|neocon]] terminal emulator and add a per-character delay.  Otherwise, you will have to type in the commandline manually.}}
+An dieser Stelle ist es wichtig zwischen FAT- und ext2-Kernel und zwischen ext2 und ext3 rootfs zu unterscheiden.
 
-It is important to distinguish between FAT or ext2 kernel partitions and ext2 or ext3 root partitions at this point.
+Möglicherweise müssen die Nummern in root=/dev/mmcblk0p'''#''' (rootfs) und fatload mmc '''#''' oder ext2load mmc '''#''' (Kernel) geändert werden.
 
-Please watch partition numbers in the following commands.  In particular, you may need to change root=/dev/mmcblk0p'''#''' and fatload mmc '''#''' or ext2load mmc '''#''' depending on which partition number your root and kernel, respectively, are located.  Number starts from unity.
-
-'''Boot entry for FAT kernel+ext3 rootfs partitions:'''
+'''Boot-Eintrag für FAT-Kernel mit ext3-Rootfs Partition:'''
 
 setenv menu_9 Boot from microSD (FAT+ext3): setenv bootargs \${bootargs_base} rootfstype=ext3 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
 
-'''Boot entry for FAT kernel+ext2 rootfs partitions:'''
+'''Boot-Eintrag für FAT-Kernel mit ext2-Rootfs Partition:'''
 
 setenv menu_9 Boot from microSD (FAT+ext2): setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
 
