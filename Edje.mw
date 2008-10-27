@@ -58,7 +58,52 @@ To recompile, you can use edje_cc, but most theme files have a build.sh bundled 
 root@om-gta02:/usr/share/enlightenment/data/themes/illume# ./build.sh
 
 = Example: changing wallpaper =
-This is discussed in a separate wiki article: [[Changing wallpaper]]
+
+This walkthrough example is divided into two sections. The first one describes how to get a background image if one has not set one before. In this case, also the second section must be performed, which describes, how you can exchange an already set background image if you followed this tutorial.
+
+== First time to set a background image ==
+* ssh to your freerunner
+* Install edje-utils:
+opkg install edje-utils libevas-loader-jpeg libevas-loader-png libevas-saver-jpeg libevas-saver-png
+* cd to the theme directory and decompile the default theme with edje_dcc:
+root@om-gta02:~# cd /usr/share/enlightenment/data/themes
+root@om-gta02:/usr/share/enlightenment/data/themes# edje_decc illume.edj
+* now you have a new directory "illume". Edit the file ''freerunner.edc'' inside it.
+* there, add the following code (Please note, that this works for an image with 480x640 pixels. If you have other sizes, adjust min/max/align/aspect):
+<pre>
+/*** DEFAULT WALLPAPER ***/
+group { name: "e/desktop/background";
+images{
+image: "background.png" COMP;
+}
+parts {
+part {
+name: "base";
+description {
+state: "default" 0.0;
+color: 238 238 236 255;
+image.normal: "background.png";
+min: 480 640;
+max: 480 640;
+align: 0.0 1.0;
+aspect: 1.0 1.0;
+}
+}
+}
+}
+</pre>
+* prepare a symlink so updating is more easy if you want to change again later:
+root@om-gta02:/usr/share/enlightenment/data/themes# ln -s illume/illume.edj illume_mytheme.edj
+* replace the theme symlink to point to your one:
+root@om-gta02:/usr/share/enlightenment/data/themes# rm illume.edj; ln -s illume_mytheme.edj illume.edj
+
+== Exchanging background again ==
+* scp your ''background.png'' image from host-pc to freerunner:
+scp background.png moko:/usr/share/enlightenment/data/themes/illume/
+* on freerunner, recompile the theme
+root@om-gta02:/usr/share/enlightenment/data/themes/illume# ./build.sh
+* restart x and enjoy your new background. If you want to change it again, you only need to copy over the new image, recompile the Edje file and reload X:
+root@om-gta02:~# /etc/init.d/xserver-nodm restart
 
 = Example: hiding the "Install" Bar =
 
