@@ -93,12 +93,13 @@ test:start().
 === Use mdbus in erlang ===
 <pre>
 Dbus = open_port({spawn,"mdbus -s"}, [stream, use_stdio, binary]),
+loop(Dbus).
 </pre>
 And get the response
 <pre>
-loop() ->
+loop(Dbus) ->
 receive
-{Dbus,Msg} -> io:format("Dbus msg:~p~n",[Msg]),loop()
+{Dbus,Msg} -> io:format("Dbus msg:~p~n",[Msg]),loop(Dbus)
 end.
 </pre>
 
