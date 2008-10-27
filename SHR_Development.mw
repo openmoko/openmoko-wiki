@@ -5,34 +5,39 @@
 
 * Download the FSO/SHR ''Makefile'' from [http://shr.bearstech.com/ Bearstech] (see README for details):
 
- $ wget <nowiki>http://shr.bearstech.com/Makefile</nowiki>
+$ wget
+<nowiki>http://shr.bearstech.com/Makefile</nowiki> 
 
 * Run:
 
- $ make setup
+$ make setup
 
 make setup will download FSO, bitbake and SHR in the shr directory (SHR root directory from now on).
 
 === Set up your local.conf ===
 
-Before building the image, you might want to update ''shr-unstable/conf/local.conf'' (buildhost uses shr-testing!) to tweak your build.
+Before building the image, you might want to update ''shr-testing/conf/local.conf'' to tweak your build.
+In order to get the right package version, you want to include the following files:
+
+require conf/distro/include/sane-srcrevs.inc
+require conf/distro/include/shr-autorev.inc
 
 ==== Speed up the building process ====
 
 If your machine has multiple CPU's (or dual-core) this will help:
 
- PARALLEL_MAKE = "-j 4"
- BB_NUMBER_THREADS = "4"
+PARALLEL_MAKE = "-j 4"
+BB_NUMBER_THREADS = "4"
 
 ==== Disable/Minimize locales generation ====
 
 To avoid multiple locales generation, add:
 
- GLIBC_GENERATE_LOCALES = "en_US.UTF-8"
+GLIBC_GENERATE_LOCALES = "en_US.UTF-8"
 
 or to disable locale generation at all:
 
- ENABLE_BINARY_LOCALE_GENERATION = "0"
+ENABLE_BINARY_LOCALE_GENERATION = "0"
 
 this will also speed up the whole build.
 
@@ -40,14 +45,14 @@ this will also speed up the whole build.
 
 You are now ready to build the SHR image:
 
- $ cd shr-unstable
- $ make image
+$ cd shr-testing
+$ make image
 
 By default, this will build the image for OM-GTA02. If you want to build the image for OM-GTA01:
 
- $ cd shr-unstable
- $ make setup-machine-om-gta01
- $ make image
+$ cd shr-testing
+$ make setup-machine-om-gta01
+$ make image
 
 you can change it back to OM-GTA02 with ''make setup-machine-om-gta02''.
 
@@ -55,10 +60,10 @@ you can change it back to OM-GTA02 with ''make setup-machine-om-gta02''.
 
 Make changes to an SHR project (e.g. openmoko-dialer3, under the SHR root directory), then under the top directory:
 
- $ cd shr-unstable
- $ . setup-env  (only once per session)
- $ bitbake -c clean openmoko-dialer3
- $ bitbake -c build openmoko-dialer3
+$ cd shr-testing
+$ . setup-env  (only once per session)
+$ bitbake -c clean openmoko-dialer3
+$ bitbake -c build openmoko-dialer3
 
 There is no need to check-in the changes to the SHR repo, because the system now looks for SHR packages in the local filesystem. The problem is that it is necessary to '''always''' clean the packages so bitbake gets the new changes next time you compile.
 
@@ -66,21 +71,21 @@ Also, note that we are using ''bitbake -c build'', this is because bitbake needs
 
 When you are satisfied with your changes and want to create a new SHR image:
 
- $ make image
+$ make image
 
 === Updating from other people's changes ===
 
 Under the top directory:
 
- $ make update-shr
+$ make update-shr
 
 Or under the SHR root directory:
 
- $ svn update
+$ svn update
 
 If you want to update everything (FSO, bitbake and SHR), from the top directory:
 
-  $ make update
+$ make update
 
 === Troubleshooting ===
 
