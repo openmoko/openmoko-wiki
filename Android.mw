@@ -99,9 +99,29 @@ For now, so that the code is clearer, I would just suggest using C instead of as
 <TH VALIGN="TOP">BLX(2)</TH>
 <TD>Branch, Link, and Exchange</TD>
 <TD>168</TD>
-<TD>N/A</TD>
 <TD>
+[[User:Cfriedt]] 20081028 
+Remove from inline assembly with something like 
 <pre>
+#ifdef HAVE_BLX
+... (inline asm) ...
+#else 
+... (inline asm with equivalent blx code, as shown to the right) ...
+#endif
+</pre>
+</TD>
+<TD>
+[[User:Cfriedt]] 20081028 
+Substitute with a macro reference such as 
+<pre>
+#ifdef HAVE_BLX
+#define BLX(a) \
+  blx a
+#else
+#define BLX(a) \
+  mov pc,lr \
+  bx a
+#endif
 BLX Rm ==> MOV PC,LR; BX Rm
 </pre>
 </TD>
@@ -143,6 +163,9 @@ dummy++, mask >>= 1
 </pre>
 </TD>
 <TD>
+[[User:Cfriedt]] 20081028 
+* An AAPCS-compliant, globally defined subroutine in ASM (Save space)
+* A macro definition to be inserted inline (needs to preserve working variables) (Speed)
 </TD>
 </TR>
 
@@ -157,8 +180,31 @@ dummy++, mask >>= 1
 <TH VALIGN="TOP">PLD</TH>
 <TD>Preload Data</TD>
 <TD>240</TD>
-<TD>Remove</TD>
-<TD>Remove</TD>
+<TD>
+[[User:Cfriedt]] 20081028 
+Remove from inline assembly with something like 
+<pre>
+#ifdef HAVE_PLD
+... (inline asm) ...
+#else 
+... (inline asm with pld removed) ...
+#endif
+</pre>
+</TD>
+<TD>
+[[User:Cfriedt]] 20081028 
+Remove or substitute with a macro reference such as 
+<pre>
+#ifdef HAVE_PLD
+#define PLD(a,b) \
+  pld [a,b]
+#else
+#define PLD(a,b)
+#endif
+...
+PLD(r0,#0)
+</pre>
+</TD>
 </TR>
 <TR>
 <TH VALIGN="TOP">SMLA&lt;x&gt;&lt;y&gt;</TH>
