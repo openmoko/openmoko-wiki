@@ -1,0 +1,186 @@
+{{Languages|Qtopia_on_FreeRunner}}
+
+本页的内容将提供您关于在 GTA02 (FreeRunner) 上如何安装 Qtopia/Qt Extended (proper, not the [[ASU]] or [[QtopiaOnX11]] efforts)，它与[[Qtopia on Neo1973]]中的内容相当类似。
+
+{|align=right
+|__TOC__
+|}
+
+== 目前状态 ==
+2008年的十月三日，Trolltech公司释出了针对Openmoko Neo FreeRunner使用的，包含Qtopia 4.4.1版本的 [http://qtextended.org/modules/mydownloads/visit.php?lid=86 Qtopia ROM flash image containing the rootfs]。这个版本可以为 [http://qtextended.org/modules/mydownloads/visit.php?lid=91 mwebster 含了kernel的ROM flash image]。
+
+这个映像档可以成功的发送及接收通话及文字讯息。它可以读取sim卡上的所有通讯簿(它更新了2007.2 无法显示通讯簿的功能)。 它包含了较2007.2 映像档中更为稳定的映应用程序。它拥有更为成熟的多重输入的方法。但它并没有web浏览器或者是GPS 应用程序。 但你可以使用协力厂商的 GPS 应用程序：
+* [http://blog.wolfman.com/articles/2008/08/27/porting-xgps-to-qtopia-for-the-freerunner xgps here]
+* [http://www.linux4.be/fr/roadmap.html RoadMap(experimental) here]
+
+在2008年的9月2日，Trolltech也释出了4.3.3-snapshot，它修正了一些问题 (sms 讯息无法在重新开始后接收讯息，Qtopia 会在接收二通电话间处生问题、预设的通话音量及麦克风输出；回音修正)。You can find all the Qtopia images [http://qtextended.org/modules/mydownloads/viewcat.php?cid=6 here] (including Qtextended/Qtopia 4.4 for FreeRunner and Neo1973!)
+
+=== 最后一版中有什么内容？(Qtopia 4.4) ===
+Qtopia 4.4 以 [http://doc.trolltech.com/qtextended4.4/release-4-4-1.html QtExtended 4.4]的名称释出。
+* a [http://n2.nabble.com/qtopia-update-tp832851p832888.html browser] based on webkit
+* [http://n2.nabble.com/-qtopia--rotate-screen--tp841805p841841.html screen rotation in the settings application] (so no automatic rotation)
+* [http://n2.nabble.com/Echo-issue-on-OM2008.08-potentially-solved-tp791642.html noise reduction]
+* GPS api
+* usb net/storage switching
+* Gtalk support
+* [http://n2.nabble.com/forum/Permalink.jtp?root=841805&post=1083388&page=y better support for non-english languages in the keyboard]
+
+== Option 1: 将 Qtopia 烧录到 FreeRunner ==
+
+下载之前提到的映像档，并且依照下面的操作方法进行：
+[[Flashing the Neo FreeRunner]]
+
+== Option 2: 介于Qtopia 与2007.2之间的双启动系统 (自SD卡中启动Qtopia) ==
+
+安装需求：
+
+# SSH shell access to 2007.2 based image of the FreeRunner through USB interface or WLAN.
+# A Desktop Linux distro (to unpack the .jffs2 image, I ran Ubuntu under VMWare)
+
+
+=== 准备好你的SD卡 ===
+
+请查看[[Booting from SD|自SD卡中启动]]中的 [[Booting from SD#Prepare the SD card| 准备SD卡]]一节暸解如何进行磁盘分割及格式化等工作。在你完成"格式化SD Card"的操作步骤后，请回到这个步骤，并执行下面的操作内容：
+
+mount /dev/mmcblk0p1 /media/card
+mkdir /media/card/boot
+
+mkdir /media/mmcblk0p2
+mount /dev/mmcblk0p2 /media/mmcblk0p2
+
+这些指令将会帮助你适当的安装接下来会使用到的档案系统及核心系统。
+
+=== 安装Qtopia ===
+
+==== 解开Qtopia Root Filesystem 映像档 ====
+
+从 [[Latest Images#Qtopia images]] 下载Qtopia FLASH image到你的 Linux系统下，并解压缩它的内容：
+
+tar xzf qtopia-4.3.2-gta02-flash-*.tgz
+
+你会有二个档案：
+#uImage-2.6.24+git18+9c058ff0d2641df3c36fc3300acb72078d2c41d4-r0-om-gta02.bin
+#qtopia-4.3.2-gta02-rootfs-07172049.jffs2
+
+现在使用[[Userspace root image#Mounting the JFFS2 image on a loop back device (Block Memory MTD Emulation) |这个连结]]从jffs2下挂载(mount)root file system。然而，在mount指令中，从"/dev/mtdblock0"下取代映像档名。
+
+==== 建立压缩的tarball ====
+
+接下来，压缩 root filesystem:
+
+# tar czf qtopia-4.3.2-gta02-rootfs-07172049.tar.gz -C <mountpoint> .
+
+在这个指令中 ''<mountpoint>'' 指的是挂载上的 jff2 filesystem。请注意，在挂载点后的.号。
+
+==== 安装 Root Filesystem ====
+
+转换这个压缩的 tarball到sd卡上，已经挂载到FreeRunner的第二个分割区。
+
+scp qtopia-4.3.2-gta02-rootfs-07172049.tar.gz root@192.168.0.202:/media/mmcblk0p2/
+
+登入你的 FreeRunner并且解开(unpack)root filesystem：
+
+cd /media/mmcblk0p2
+tar xzf qtopia-4.3.2-gta02-rootfs-07172049.tar.gz
+rm qtopia-4.3.2-gta02-rootfs-07172049.tar.gz
+rm -f /media/mmcblk0p2/boot/*
+
+'''''Note:''''' 最后一个步骤是将 kernel image自第二个分割区中移除。基于某些理由，若kernel映像档被放置在第二个分割区中的boot/ 目录下，U-Boot并无法在第一个分割区中找到uImage.bin 档案。
+
+==== 安装Kernel ====
+
+从你的LINUX系统上，将 <tt>uImage-2.6.24+git18+9c058ff0d2641df3c36fc3300acb72078d2c41d4-r0-om-gta02.bin</tt>重新命名为 <tt>uImage.bin</tt> ，并将它复制到SD卡中的第一个分割区中的boot目录下。 依照你所安装使用的U-boot版本，它可能无法运作，要防止任何可能问题，将它复制到 <tt>/media/card</tt> 目录下。 There is plenty of room on the first partition to have <tt>uImage.bin</tt> in both locations.
+
+mv uImage-2.6.24+git18+9c058ff0d2641df3c36fc3300acb72078d2c41d4-r0-om-gta02.bin uImage.bin
+scp uImage.bin root@192.168.0.202:/media/card/boot/
+scp uImage.bin root@192.168.0.202:/media/card/
+
+==== 将 Qtopia 指向 SD Card ====
+
+Lorn Potter 在寄件清单中提出以下的意见：
+
+Qtopia 被设定为从flash chip中执行的root分割区，而不是从可移除的sd记忆卡中执行。
+
+你可能己经编辑过 etc/default/Trolltech/Storage.conf 档案，让它会忘记关于 sd /dev 节点。
+
+其它的使用者所使用的方法下如下：
+
+编辑这个档案：    " /opt/Qtopia/etc/default/Trolltech/Storage.conf
+将[MountPoint0] 本节进行重组：
+-[
+[MountPoint0]
+Name[] = SD Card
+Path=/dev/mmcblk0p1
+Removable = 0
+Applications = 0
+Documents = 0
+ContentDatabase = 0
+
+== Option 3: 自源码中更新 ==
+
+{{note|此动作将更新 opt/Qtopia 目录，你应该使用 opkg update/upgrade 进行其余的工作}}
+
+原始的 Qtopia 映像档 (Trolltech所释出的套件，而不是ASU) 显少被以rootfs映像档释出，但它的源码则是经常性的被更新。若你希望重新将你的OM更新为最近的 Qtopia 版本，你可以利用源码来建立映像档。你可以参考 explained in [http://lists.openmoko.org/pipermail/community/2008-August/024785.html ]社群的邮件清单。并得到以下的结论：
+
+* 你可以自http://www.qtopia.net/modules/mydownloads/singlefile.php?lid=38 取得Trolltech 所释出的toolchain ，并且将它解压缩到你的个人计算机(解压缩到root)
+cd /
+wget http://qtopia.net/downloads/neo/arm920t-eabi-ficgta01-toolchain.tgz
+tar xvzf arm920t-eabi-ficgta01-toolchain.tgz
+
+* 从trolltech: ftp://ftp.trolltech.com/qtopia/snapshots/ 取得snapshot
+*  下载并解压缩：
+tar xvzf qtopia-opensource-src-4.3.2-snapshot-20080806.tar.gz
+* 建立 "build" 目录
+mkdir build
+cd build
+* 设定并制作映像档：
+
+../qtopia-opensource-src-4.3.2-snapshot-20080806/configure -device ficgta01
+make
+This will take some time (couple hours). Note that the option "-device ficgta01" should work for both neo and freerunner. Then:
+
+make install
+
+这将会在build目录下建立一个root目录，在那个目录下，你可以找到一个''映像档''，并且你可以使用SCP将它复制到手机上的/opt/Qtopia 。完成后，重新启动 qpe 或整支手机。
+
+== 自Qtopia下启动 ==
+
+现在请关闭FreeRunner
+
+shutdown -h now
+
+自NAND FLASH中的U-Boot登入，选择自MicroSD card中启动： (参考[[Booting the Neo FreeRunner]]取得操作说明)
+
+* 按下电源按钮
+* 在按下电源按钮的同时，按下AUX按钮约5 -  8 秒。
+* 启动选单会出现在屏幕上。
+* 按下AUX按钮选择 "[[Boot from sd card|Boot from MicroSD]]" ，再按下电源按钮执行。
+
+Qtopia 现在应该被启动了。
+
+'''''Note:''''' you may get a kernel panic which says that "optional features not supported".  If this is the case, boot back into 2007.2 and run
+
+umount /dev/mmcblk0p2
+fsck.ext3.e2fsprogs /dev/mmcblk0p2
+
+This will clean up the file system and clear recovery flags in ext3 that ext2 does not support, then try booting from the MicroSD again.
+
+== 语系 ==
+
+Qtopia 支持德语，美语及英语等语系，因此使用者会发现要使用键盘撰写其它国的语言几乎是不可能。要停用键盘的方法是将 /opt/Qtopia/etc/dict/en_US/common.dawg 替换为空白的档案 (在备份之后)。 Qtopia 一般会使用这些档案寻找建议使用的文字，若是找不到的话，则会显示你们撰写的内容。
+
+将文字加入键盘需要修改源码，你可以参考 [http://www.qtopia.net/modules/newbb_plus/viewtopic.php?topic_id=512&forum=16 此处]取得信息。
+
+== 中断 /重新开启 ==
+It seems that suspend/resume only works when the FreeRunner has been connected to a powersource (only a few seconds if sufficient). If you boot from battery, it will never suspend until you have plugged it in at least for a couple of seconds.
+
+== Bugs ==
+
+请参考 [http://trolltech.org/developer/task-tracker/index_html?method=front Trolltech's tracker] ([http://trolltech.org/developer/task-tracker/index_html?method=advsearch&searchstr=&bugs=on&sugs=on&product=2&functionalarea=&versionfound=&versionfixed=&priority=-1&status=0&resolution=-1 Qtopia Tracker]).
+
+Bug reports 可以传送到 qt-bugs@trolltech.com 或者是从 http://trolltech.com/bugreport-form中存取。
+
+== Bugs in 4.4.1 ==
+* Boot and Shutdown Splash无法运作，因为splash-write并没有被编译到Busybox
+* Timezone & time on latest Qt 4.4.1
+* The first item in a list is missing the top half
