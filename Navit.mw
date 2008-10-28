@@ -21,6 +21,7 @@ Thanks to [[User:Alessandro | Alessandro]], stefan_schmidt, cp15 and all Navit d
 
 ==Setting up Navit==
 
+===Install Navit===
 I got navit set up and configured to the point where it follows me on the map.  It doesn't have street names or any other information, just the map and the cursor showing the location and direction.  Here's what I did:
 * Install navit ipkg on NEO (because of a bug in opkg it's necessary to wget then install, instead of pointing opkg at the URL):
 wget http://www.acoveo.org/navit_0.1.0+svnrev1255-r0_armv4t.ipk
@@ -31,7 +32,17 @@ This package includes a patch to navit which improves map panning speeds.
 om-conf navit --disable-samplemap
 om-make-ipkg navit navit_control
 You may want to apply the map panning patch from acoveo: http://www.acoveo.org/openmoko/font_scaling_patch.diff
-* Set up your local maps
+
+===Set up the maps you want===
+
+====The Easy Way====
+Use [http://maps.navit-project.org/download/ Navit pre-processed OSM maps].  Navigate to the region you want, and click select to select it, select the region you want, then click download
+
+If you just want the entire planet (as of this writing, ~1.6 GB), it's [http://maps.navit-project.org/planet.bin here].
+
+[http://downloads.cloudmade.com/ CloudMade] also has up-to-date maps from OpenStreetMap by country (by state in the US).
+
+====From the command line====
 ** Openstreetmap - follow directions at http://wiki.navit-project.org/index.php/OpenStreetMaps
 *** There are some up-to-date maps already prepared, e.g.:
 wget -O germany.bin http://maps.navit-project.org/api/map/?bbox=5.185546875,46.845703125,15.46875,55.634765625
@@ -45,9 +56,7 @@ wget -O map4.osm http://www.openstreetmap.org/api/0.5/map?bbox=-122.2,47.3,-122,
 *** Made a navit binary map file using the osm2navit binary that comes with the navit package on my linux box (it is also installing to the target from the .ipk)
 cat *.osm | osm2navit --dedupe-ways mymap.bin
 
-http://downloads.cloudmade.com/ also has up-to-date maps from OpenStreetMap by country.
-
-*** Copied the map to the NEO
+===Copied the map to the NEO===
 scp mymap.bin root@neo:/home/root/card/map
 *** Change the navit.xml file on the NEO to use the new map
 cp /usr/share/navit/navit.xml ~/.navit/navit.xml
@@ -100,7 +109,7 @@ or "spd-say -l fr '%s'" for using the French voice for example.
 === Maps ===
 ==== Downloadable Maps ====
 Downloadable OSM maps for most areas of the world are available free in Navit format from Cloudmade at [http://downloads.cloudmade.com/ http://downloads.cloudmade.com/]. Simply navigate to  the country or region you want and download the <code>.navit.bin.zip</code> version of the map. You'll have to exatract the <code>.bin</code> file from the ZIP archive before using it with Navit.
- 
+
 ==== Script to download OSM maps ====
 [[User:Wurp|Wurp]] wrote a little python script to download all OSM maps within a lat/long rectangle.  Just copy the script to a file called dlOSM.sh, chmod +x it, and run it like
 dlOSM.sh <minimum latitude> <maximum latitude> <minimum longitude> <maximum longitude>
