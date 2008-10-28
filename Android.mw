@@ -1,5 +1,11 @@
 {{Distributions|Android}}
 
+= Updates =
+
+* 20081021 [[User:Cfriedt]] Android -> FreeRunner updates on my [http://perpetual-notion.blogspot.com/search/label/android blog]
+* 20081022 [[User:Cfriedt]] I was able to 'trivially' compile all of the Android source code without error for the ARMv4T architecture by removing v5TE instructions. Although it will definitely not run anything predictably, at least now that I know the build system will work with a few simple substitutions in build/core/combo/arm-linux.mk. At this point I am able to go ahead and re-implement v5TE instructions as v4T instruction sequences instead (or re-implement entire sections of assembly with hand-optimized v4T instructions).
+* 20081023 [[User:Bricode]] To track the status of which parts of the Android source tree contain ARMv5 specific code, I've created a table of where it is contained, and the status of patches. It can be found at: http://spreadsheets.google.com/pub?key=pzDEXnU19gkeTjpD28t-7fw
+
 = Introduction =
 This page is dedicated to porting the [http://www.android.com Android OS] to the [[Neo 1973]] and [[Neo FreeRunner]] handsets. Since the Android OS was [http://source.android.com/posts/opensource  publically released] on 20081021, [http://benno.id.au/blog/2007/11/21/android-neo1973 work] [http://perpetual-notion.blogspot.com/search/label/android is] [http://groups.google.com/group/android-porting currently underway] to port Android to the [[Neo1973 Hardware|Neo 1973]] and [[Neo_FreeRunner_GTA02_Hardware|FreeRunner]] handsets.
 
@@ -45,10 +51,10 @@ If you create something new and have the ability to designate the license for it
 * Isolating ARMv5TE ISA dependent code
 ** e.g. grep -n -R -i "${armv5te_isa_pattern}" ~/android
 * Abstracting
-** ( C/C++ ) 
+** ( C/C++ )
 *** Use inlined functions / #ifdef statments to implement functions in a portable manner
 *** For inlined assembler calls, it's acceptable for now to use generic C code instead, so long as later on we optimize it by hand.
-** ( ASM ) 
+** ( ASM )
 *** Proprocessor statements based on ISA / architecture, e.g. #ifdef __ARCH_ARM_5__ ... #endif #ifdef __ARCH_ARM_4__ ... #endif
 *** It's highly suggested that preprocessor statements should not be nested (i.e. make them mutually exclusive)
 *** Some people have suggested that we should not do #ifdef's based on ARCH or ISA, but rather based on an AndroidConfig.h which would define macros like PLD(...) #ifdef HAVE_ARM_PLD pld #else ... #endif .
@@ -343,14 +349,6 @@ The list of files below may or may not be complete. There might also be some ass
 === Discussion ===
 === Notes ===
 * (ASM) In order to return from a subroutine, use methods that are known to work from ARMv4T onwards <pre>mov pc,lr ==> bx lr</pre>
-
-== Updates ==
-
-Feel free to post a link to any of your work in the list below
-
-* 20081021 [[User:Cfriedt]] Android -> FreeRunner updates on my [http://perpetual-notion.blogspot.com/search/label/android blog]
-* 20081022 [[User:Cfriedt]] I was able to 'trivially' compile all of the Android source code without error for the ARMv4T architecture by removing v5TE instructions. Although it will definitely not run anything predictably, at least now that I know the build system will work with a few simple substitutions in build/core/combo/arm-linux.mk. At this point I am able to go ahead and re-implement v5TE instructions as v4T instruction sequences instead (or re-implement entire sections of assembly with hand-optimized v4T instructions).
-* 20081023 [[User:Bricode]] To track the status of which parts of the Android source tree contain ARMv5 specific code, I've created a table of where it is contained, and the status of patches. It can be found at: http://spreadsheets.google.com/pub?key=pzDEXnU19gkeTjpD28t-7fw
 
 == Suggestions ==
 * [[User:Cfriedt]] 20081024 I'm not sure how feasible this is, given that the [http://wiki.openmoko.org/wiki/Neo_FreeRunner_Hardware_Issues#SMedia_3362_Documentation_.26_OpenGL_ES_Drivers SMedia 3362 is heavily NDA'd]. However, since the arm920t lacks a floating-point unit / DSP core, is it possible to use the SMedia chip for general-purpose math? This would help in the Android platform, at least, for things like audio and video codecs. Aside from an OpenGL ES driver, OpenMoko documentation for the SMedia would be highly appreciated.
