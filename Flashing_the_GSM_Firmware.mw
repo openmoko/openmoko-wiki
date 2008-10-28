@@ -1,0 +1,80 @@
+==Introduction==
+
+This is a step-by-step description of how the firmware is upgraded on a GTA02 with FLUID running on the device. Note that this process tolerates almost no variations. Stray from the instructions at your own peril.
+
+==Phase 1: Preparations==
+
+* Download and install a distribution to your device that gives you SSH access. We recommend the fso-console image:
+<pre>
+mickey@amethyst$ cd /tmp
+mickey@amethyst$ wget http://people.openmoko.org/mickey/images/openmoko-fso-console-image-glibc-ipk--20081028-om-gta02.rootfs.jffs2.summary
+mickey@amethyst$ dfu-util -a rootfs -R -D ./openmoko-fso-console-image-glibc-ipk--20081028-om-gta02.rootfs.jffs2.summary
+mickey@amethyst$ wget http://people.openmoko.org/mickey/images/uImage-2.6.24+r10+gitr75999+54524f4531c8b262431b794fea610d81bb351c86-r10-om-gta02.bin
+mickey@amethyst$ dfu-util -a kernel -R -D ./uImage-2.6.24+r10+gitr75999+54524f4531c8b262431b794fea610d81bb351c86-r10-om-gta02.bin
+</pre>
+* Install http://people.openmoko.org/joerg/calypso_moko_FW/fluid_0.0+svn20070817-r2_armv4t_eabi.ipk on your device:
+<pre>
+root@om-gta02:~# opkg install http://people.openmoko.org/joerg/calypso_moko_FW/fluid_0.0+svn20070817-r2_armv4t_eabi.ipk
+</pre>
+* Install http://people.openmoko.org/joerg/calypso_moko_FW/s3c24xx-gpio_1.0+svnr4130-r2.1_armv4t.ipk on your device:
+<pre>
+root@om-gta02:~# opkg install http://people.openmoko.org/joerg/calypso_moko_FW/s3c24xx-gpio_1.0+svnr4130-r2.1_armv4t.ipk
+</pre>
+* Download http://people.openmoko.org/joerg/calypso_moko_FW/gsm_ac_gp_fd_pu_em_cph_ds_vc_cal35_ri_36_amd8_ts0-moko9-beta1.m0 and place it into the /home/root directory:
+<pre>
+root@om-gta02:~# cd $HOME
+root@om-gta02:~# wget http://people.openmoko.org/joerg/calypso_moko_FW/gsm_ac_gp_fd_pu_em_cph_ds_vc_cal35_ri_36_amd8_ts0-moko9-beta1.m0
+</pre>
+
+==Phase 2: The Lobotomy==
+
+* Make sure '''nothing''' is accessing the GSM modem. If you're using the fso-console image from the link above, this will happen automagically on boot. On other systems, kill processes as you see fit.
+
+* Powercycle the modem:
+<pre>
+root@om-gta02:~# echo 0 >/sys/bus/platform/devices/neo1973-pm-gsm.0/power_on
+root@om-gta02:~# echo 1 >/sys/bus/platform/devices/neo1973-pm-gsm.0/power_on
+root@om-gta02:~# s3c24xx-gpio b7=0
+root@om-gta02:~# echo "AT@POFF" >/dev/ttySAC0
+</pre>
+
+* Launch the FLUID binary:
+<pre>
+root@om-gta02:~# cd /usr/sbin
+root@om-gta02:/usr/sbin# FLUID_PORT=/dev/ttySAC0 FLUID_FLOWCONTROL=h fluid.exe \
+-oO -b 115200 \
+-f $HOME/gsm_ac_gp_fd_pu_em_cph_ds_vc_cal35_ri_36_amd8_ts0-moko9-beta1.m0
+</pre>
+It should say something like this (takes a few seconds to load the file):
+<pre>
+FLUID Revision 2.27, ...
+Bootloader: (reset target)
+</pre>
+
+* Start a second SSH session and start the modem:
+<pre>
+root@om-gta02:~# s3c24xx-gpio b7=1
+</pre>
+
+FLUID should now say something like this:
+
+<pre>
+(fluid, version 3) ok
+Checksumming (269 * 8kB = 2152kB):  ok
+Flash Detect: (0xEC, 0x22A0) Samsung K5A3240CT ok
+Program: (34 sectors, 267*8k=2136k) (*******************) ok
+</pre>
+
+'''Note: If you get his instead: MESSAGE: File 'cmd.m0' not found
+Then you didn't do the cd /usr/sbin. Please pay attention ;-)'''
+
+If FLUID does nothing, curse your bad luck and repeat the reset sequence.
+
+* To verify that everything went well, do this in either of the two sessions:
+<pre>
+root@om-gta02:~# cat /dev/ttySAC0 &
+root@om-gta02:~# echo -en 'AT\r' >/dev/ttySAC0
+root@om-gta02:~# echo -en 'AT+CGMR\r' >/dev/ttySAC0
++CGMR: "HW: GTA, GSM: gsm_ac_gp_fd_pu_em_cph_ds_vc_cal_amd8_ts0-Moko9-beta1"
+root@om-gta02:~# kill %1
+</pre>
