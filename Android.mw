@@ -120,7 +120,6 @@ blx a
 mov pc,lr \
 bx a
 #endif
-BLX Rm ==> MOV PC,LR; BX Rm
 </pre>
 </TD>
 </TR>
@@ -171,8 +170,28 @@ dummy++, mask >>= 1
 <TH VALIGN="TOP">LDRD</TH>
 <TD>Load Registers Doubleword</TD>
 <TD>200</TD>
-<TD></TD>
-<TD></TD>
+<TD>
+[[User:Cfriedt]] 20081028
+Substitute different inline assembly code with something like
+<pre>
+#ifdef HAVE_LDRD
+... (inline asm) ...
+#else
+... (inline asm with ldrd substituted) ...
+#endif
+</pre>
+</TD>
+<TD>
+[[User:Cfriedt]] 20081028
+Substitute with a macro reference such as
+<pre>
+#ifdef HAVE_LDRD
+#define LDRD(a,b) \
+  ldrd a,b
+#else
+#define LDRD(a,b) \
+...
+#endif</TD>
 </TR>
 <TR>
 <TH VALIGN="TOP">PLD</TH>
@@ -278,7 +297,17 @@ PLD(r0,#0)
 <TH VALIGN="TOP">STRD</TH>
 <TD>Store Registers Doubleword</TD>
 <TD>349</TD>
-<TD></TD>
+<TD>
+[[User:Cfriedt]] 20081028
+Substitute different inline assembly code with something like
+<pre>
+#ifdef HAVE_STRD
+... (inline asm) ...
+#else
+... (inline asm without strd) ...
+#endif
+</pre>
+</TD>
 <TD></TD>
 </TR>
 </TABLE>
