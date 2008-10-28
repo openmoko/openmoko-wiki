@@ -115,6 +115,15 @@ Download from here http://www.scintilla.org/SciTE.html
 
 === Seting up SciTE for openmoko development ===
 Before you start configuring SciTE, make sure ssh, scp and rsh works from a terminal window.
+I have to run this script whenever I connect the neo to the host
+<pre>
+#!/bin/bash
+ifconfig usb0 192.168.0.200 netmask 255.255.255.0
+/sbin/route add -host 192.168.0.202/32 dev usb0
+echo 1 > /proc/sys/net/ipv4/ip_forward
+iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
+iptables -P FORWARD ACCEPT
+</pre>
 
 Create a file named SciTE.properties in your erlang source directory.
 <pre>
@@ -162,7 +171,7 @@ ssh phone
 </pre>
 to get a terminal window and type
 <pre>
-tail -f /debug.txt 
+tail -f /debug.txt
 </pre>
 to read shell printout from the erlang process.
 
