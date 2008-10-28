@@ -1,98 +1,9 @@
-{{Languages|GSM/Flashing}}
+==Introduction==
 
-----
-'''This is NOT a community driven page, please be reluctant and careful with edits. Refer to discussion and history tabs.
-'''
-----
+This is a step-by-step description of how the firmware is upgraded on a GTA02 with FLUID running on the device. Note that this process tolerates almost no variations. Stray from the instructions at your own peril.
 
-== Introduction ==
-To see the version of your GSM firmware, run the following command on a FSO-based distribution like OM2009, SHR, Debian.. 
- mdbus -s org.freesmartphone.ogsmd /org/freesmartphone/GSM/Device org.freesmartphone.GSM.Device.GetInfo
-It'll result something like this. Check the end of the revision line to see the version.
- {   'imei': '3546598764672894',
-     'manufacturer': 'FIC/OpenMoko',
-     'model': '"Neo1973 GTA01/GTA02 Embedded GSM Modem"',
-     'revision': '"GSM: gsm_ac_gp_fd_pu_em_cph_ds_vc_cal35_ri_36_amd8_ts0-Moko11"'}
+==Phase 1: Preparations==
 
-'''All users are recommended to update to a new GSM firmware version. All GTA02 users are recommended to use the easy [[GSM/Flashing#µSD-card_Image_.28GTA02_only.29|µSD method]]
-
-Some distributions like shr don't use mdbus but mdbus2. This command returns the same information, but formated in a different way.
-
-SHR  image 20101122:
- mdbus2 -s org.freesmartphone.ogsmd /org/freesmartphone/GSM/Device org.freesmartphone.Info.GetInfo
-
-* see http://people.openmoko.org/joerg/calypso_moko_FW for more recent FW-images.
-* see http://people.openmoko.org/joerg/calypso_moko_FW/all_version__CHANGELOG.txt
-* see http://lists.openmoko.org/pipermail/devel/2008-November/003150.html for more information
-
-== Moko11 ==
-Moko11 should fix [http://docs.openmoko.org/trac/ticket/666 #666] (compatibility with some 3G sim cards), and also has a new command AT+CSIM. It also includes fixes related to hardware flow control and wakeup interrupt [http://docs.openmoko.org/trac/ticket//2231 #2231].
-
-This version is not supposed to fix [http://docs.openmoko.org/trac/ticket/1024 #1024] (constant re-registrations leading to lost calls and messages). For a workaround use a distro where deep sleep mode can be deactivated.
-
-GTA02 users are suggested to update using [[GSM/Flashing#µSD-card_Image_.28GTA02_only.29|µSD method]]. 
-
-The GSM-firmware didn't differ from GTA01 to GTA02, as the GSM-hardware didn't either. This means you can flash MOKO11 (or any other recent GSM-FW) to GTA01 as well but only using the [[GSM/Flashing#Manual_Update_.28GTA01.2C_GTA02.29_.2F_geek_way|manual way]] instructed below.
-
-'''Warning: there are chances to _irrecoverably_ damage your GSM modem calibration data, thus rendering it useless on messing around with FLUID! Use only the commands from this wiki page! Never downgrade to a version earlier than Moko6, or you will render the GSM unusable (certain internal data structures changed between Moko5 and Moko6).'''
-
-Any reports on successful update, as well as problems encountered, or SIMs seen to work after update, all highly appreciated. Please add to the "discussion" tab of this wikipage. Thanks!
-
-== µSD-card Image (GTA02 only) ==
-'''We recommend to update all devices by using this µSD-image for flashing MOKO11 to GTA02 Freerunner only (not suitable for GTA01 Neo1973).'''
-
-NOTE: there are reports the uSD has to be <4GB. See talk page of this wiki page.
-
-This works by starting the FreeRunner from a system installed on the µSD, which will automatically apply all needed instructions to flash the GSM firmware to the chip. The µSD image will have to be written on a µSD, which will overwrite all its content, so as to make sure it is repartitioned correctly and that it contains the correct bootable system.
-The procedure has proven to do a reliable job on flashing MOKO11 to GTA02. Chances anything fails are minimal if you '''strictly''' follow the instructions. There's no way to do any harm to your device by using this method.
- 
-'''Take special care though about the destination of `dd`, it has to be the *physical* device (e.g. foo0) of your µSD-card, *not* any partition (e.g. foo0p1). Also make sure there are *no* mounted partitions left on the µSD when starting `dd`!'''
-
-''Triple-check you are not accidentally overwriting your system-HD, by e.g using /dev/sda instead of /dev/sdc! Double-check once more! This is the one-typo-kills-system case ;-) You've been warned.''
-
-<ol>
-<li>Download and <tt>untar</tt> http://people.openmoko.org/joerg/calypso_moko_FW/moko11/flash-moko11_uSD-image.tar.gz on your desktop computer. Read the <tt>README.txt</tt> file that came with the tarball.</li>
-
-<li>Insert a µSD to your computer's reader, and unmount all µSD-partitions that might have been automounted (use <tt>mount</tt> or <tt>df -h</tt> to check). Do not use "safely remove" for this.</li>
-
-<li>Use <tt>dd</tt> to write the image <tt>flash-moko11-2.image</tt> to the '''physical'''(!) µSD-device (this will erase all data from your µSD, including previous partition table and partitions! ''It will as well erase all data from your computer's HD, in case you accidentally `dd` to this device instead of µSD''). Log in as root or use sudo to get root privileges needed to write to the µSD card. For example:</li>
-
- % sudo dd if=flash-moko11-2.image of=/dev/mmcblk0
-
-<li>Execute <tt>sync</tt> or <tt>eject <device></tt> to make sure everything is flushed to the µSD before physically removing it from the reader.</li>
-
-<li>Insert the µSD to your FreeRunner, boot from '''[[Booting_the_Neo_FreeRunner#Log_into_U-Boot_in_the_NOR_Flash|NOR-U-Boot]]''' and select the "Boot from microSD" option.</li>
-
-<li>See the boot and flashing process happen, and wait until a green "d_o_n_e" message shows on screen (takes some 6 min). You may can now remove the µSD or login via ssh and use <tt>mickeyterm</tt> to access the modem and check the firmware version is indeed moko11. Right after flashing, pressing the power button will suspend/resume the Neo, but ''not'' shut it down. If you want to do so, you can either remove the battery by hand, or (more gentle way) log in as root into it through the USB cable (root password is blank), and issue:</li>
-  
-  # shutdown -h now
-</ol>
-
-=== NOTE ===
-If you don't have a µSD reader on your PC, you can <tt>dd</tt> from the Neo: install <tt>task-base-smbfs</tt>, u(n)mount <tt>/media/card</tt>, mount the directory in which you have the <tt>flash-moko11-2.image</tt> file and do the <tt>dd</tt> stuff. This will take about 12 minutes.
-
-You can speed this up by re-gziping just the image file and using the following command to decompress it directly to the flash card:
-
-  % gzip -d < flash-moko11-2.image.gz > /dev/mmcblk0
-
-Using this gzip method, you can actually do the update with an in place image as long as it is shell enabled and has 92M free on the main file system (all but Android and Neovento right now). Just get the 92M gzip file to the phone, use the above line to extract it to the card after unmounting.
-
-Or, maybe in a more simpler manner:
-  root@om-gta02 ~ $ umount /media/card
- and then from desktop:
-  scp flash-moko11-2.image root@192.168.0.202:/dev/mmcblk0
-
-=== NOTE 2 ===
-Whether you have [[Qi]] installed or not (see above) as your boot loader, you must power up to the NoR menu (Hold AUX Key, press Power button) and select "Boot from microSD (fat/ext2)" to begin the installation process (per DocScrutinizer in #openmoko). '''Do not''' let Qi boot the µSD. Although it still seems to flash OK, the green "d_o_n_e" does not show up, to give you the warm feeling that everything is OK.
-
-You can confirm the firmware version number using the [[OpenmokoFramework/mickeyterm|mickeyterm]] (cmd: "AT+CGMR"). In SHR-Settings, Phone/Modem Information will supply the same number.
-
-== Manual Update (GTA01, GTA02) / geek way ==
-We recommend you don't update by following this procedure, unless you feel very comfortable with commandline. Don't miss-spell any FLUID command!
-
-According to mwester, this worked for him to update from MOKO1 on a GTA01Bv4 to MOKO10b2, by following the steps described herein (if the main firmware can't be started, see troubleshooting section for additional instructions).
-
-=== Phase 1: Preparations ===
 * Download and install a distribution to your device that gives you SSH access. We recommend the fso-console image:
 <pre>
 mickey@amethyst$ cd /tmp
@@ -109,47 +20,43 @@ root@om-gta02:~# opkg install http://people.openmoko.org/joerg/calypso_moko_FW/f
 <pre>
 root@om-gta02:~# opkg install http://people.openmoko.org/joerg/calypso_moko_FW/s3c24xx-gpio_1.0+svnr4130-r2.1_armv4t.ipk
 </pre>
-* Download 
-http://people.openmoko.org/joerg/calypso_moko_FW/moko11/calypso-moko11.m0
-and place it into the /home/root directory:
+* Download http://people.openmoko.org/joerg/calypso_moko_FW/gsm_ac_gp_fd_pu_em_cph_ds_vc_cal35_ri_36_amd8_ts0-moko9-beta1.m0 and place it into the /home/root directory:
 <pre>
 root@om-gta02:~# cd $HOME
-root@om-gta02:~# wget http://people.openmoko.org/joerg/calypso_moko_FW/moko11/calypso-moko11.m0
+root@om-gta02:~# wget http://people.openmoko.org/joerg/calypso_moko_FW/gsm_ac_gp_fd_pu_em_cph_ds_vc_cal35_ri_36_amd8_ts0-moko9-beta1.m0
 </pre>
 
-=== Phase 2: The Lobotomy ===
-* Make sure '''nothing''' is accessing the GSM modem. If you're using the fso-console image from the link above, this will happen automagically on boot. On other systems, kill processes as you see fit (for FSO it's zhone, frameworkd and gsm0710muxd; for SHR it's ophonekitd, frameworkd and gsm0710muxd -Also note in 2009 that newer version of these distros could have replaced gsm0710muxd by fso-abyss, and then on fso2, ophonekitd is replaced by phonefsod and phoneuid). If you're using a stable (or andy-tracking) kernel from Feb 26 or later on GTA02, see below for simplified instructions on powering the modem on/off (if you use the simplified method to turn it off, you must also use the simplified method to turn it on; no s3c24xx-gpio invocations are needed).
+==Phase 2: The Lobotomy==
 
-* Power off the modem:
+* Make sure '''nothing''' is accessing the GSM modem. If you're using the fso-console image from the link above, this will happen automagically on boot. On other systems, kill processes as you see fit.
+
+* Powercycle the modem:
 <pre>
 root@om-gta02:~# echo 0 >/sys/bus/platform/devices/neo1973-pm-gsm.0/power_on
 root@om-gta02:~# echo 1 >/sys/bus/platform/devices/neo1973-pm-gsm.0/power_on
 root@om-gta02:~# s3c24xx-gpio b7=0
-root@om-gta02:~# stty 0:4:18b2:8a00:0:0:7f:15:4:0:0:0:0:0:0:0:12:f:17:16:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0 -F /dev/ttySAC0
-root@om-gta02:~# stty 0:4:18b2:8a00:0:0:7f:15:4:0:0:0:0:0:0:0:12:f:17:16:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0 -F /dev/ttySAC0
-root@om-gta02:~# echo -en "AT@POFF\r" >/dev/ttySAC0; sleep 1; echo -en "AT@POFF\r" >/dev/ttySAC0
+root@om-gta02:~# echo "AT@POFF" >/dev/ttySAC0
 </pre>
 
 * Launch the FLUID binary:
 <pre>
 root@om-gta02:~# cd /usr/sbin
-root@om-gta02:/usr/sbin# FLUID_PORT=/dev/ttySAC0 fluid.exe \
--oo -od13,13 -b 115200 \
--f $HOME/calypso-moko11.m0
+root@om-gta02:/usr/sbin# FLUID_PORT=/dev/ttySAC0 FLUID_FLOWCONTROL=h fluid.exe \
+-oO -b 115200 \
+-f $HOME/gsm_ac_gp_fd_pu_em_cph_ds_vc_cal35_ri_36_amd8_ts0-moko9-beta1.m0
 </pre>
 It should say something like this (takes a few seconds to load the file):
 <pre>
 FLUID Revision 2.27, ...
 Bootloader: (reset target)
 </pre>
-(this fluid command works even if the previous flashing was aborted and you have a broken and non-functional gsm-firmware due to this, as it uses the calypso ROM bootloader instead of the firmware bootloader. But in the case of non-functional gsm-firmware there's no way to power off the modem with AT@POFF command, therefore GTA02 users need to follow "modern kernel" (they might work even with older kernels) instructions and GTA01 users the troubleshooting section. Changing the -b to some lower baudrate might improve stability of flashing-process - the bootloader does autobaud, so you're free to use any rate)
 
 * Start a second SSH session and start the modem:
 <pre>
 root@om-gta02:~# s3c24xx-gpio b7=1
 </pre>
 
-FLUID should now say something like this (it will take a couple of minutes to finish):
+FLUID should now say something like this:
 
 <pre>
 (fluid, version 3) ok
@@ -158,88 +65,16 @@ Flash Detect: (0xEC, 0x22A0) Samsung K5A3240CT ok
 Program: (34 sectors, 267*8k=2136k) (*******************) ok
 </pre>
 
-Congratulations, the update was successful!
+'''Note: If you get his instead: MESSAGE: File 'cmd.m0' not found
+Then you didn't do the cd /usr/sbin. Please pay attention ;-)'''
 
-'''Note: If you get this instead: MESSAGE: File cmd.m0 not found, then you didn't do the ''cd /usr/sbin''. Please pay attention ;-)'''
+If FLUID does nothing, curse your bad luck and repeat the reset sequence.
 
-If FLUID does nothing, curse your bad luck and repeat the reset sequence, this is the whole 'echo 0/1, b7=0/1 stuff'.
-
-* To verify that everything went well, do this in either of the two sessions (this doesn't always work but you can be sure that if fluid didn't report any errors, everything went well; you can check AT+CGMR output later with mickeyterm):
+* To verify that everything went well, do this in either of the two sessions:
 <pre>
-root@om-gta02:~# stty crtscts -F /dev/ttySAC0
 root@om-gta02:~# cat /dev/ttySAC0 &
-root@om-gta02:~# echo -en 'AT\r' >/dev/ttySAC0; sleep 1; echo -en 'AT+CGMR\r' >/dev/ttySAC0
-+CGMR: "GSM: gsm_ac_gp_fd_pu_em_cph_ds_vc_cal35_ri_36_amd8_ts0-Moko11"
-...
+root@om-gta02:~# echo -en 'AT\r' >/dev/ttySAC0
+root@om-gta02:~# echo -en 'AT+CGMR\r' >/dev/ttySAC0
++CGMR: "HW: GTA, GSM: gsm_ac_gp_fd_pu_em_cph_ds_vc_cal_amd8_ts0-Moko9-beta1"
 root@om-gta02:~# kill %1
 </pre>
-
-==== Hints ====
-In some case you may receive this:
-
-<pre>
-(fluid, version 3) ok
-Checksumming (269 * 8kB = 2152kB):  ok
-Flash Detect: (0xEC, 0x22A0) Samsung K5A3240CT ok
-Program: (0 sectors, 0*8k=0k) () ok
-</pre>
-
-It means the checksums of all sectors in calypso's FW and the new file to flash are identical. Probably you're trying to flash same version of FW that's already installed.
-
-With modern kernels on GTA02 you can use this single command to "Power off the modem":
-<pre>
-echo 0 >/sys/bus/platform/devices/neo1973-pm-gsm.0/power_on
-</pre>
-
-Now you can start fluid as described above.
-
-To "start the modem" you need to issue:
-<pre>
-echo 1 >/sys/bus/platform/devices/neo1973-pm-gsm.0/power_on
-</pre>
-
-----
-
-=== Troubleshooting ===
-Some users weren't able to complete the upgrade since they got an error while the firmware was uploading in the GSM chip (like ''Flash operation timeout'').
-
-However a solution [http://n2.nabble.com/problems-with-calypso-firmware-update-tp1565196p1566012.html has been found] and it allows to use again the GSM modem.
-(please note this topic resides on [http://lists.openmoko.org/pipermail/devel/2008-November/003150.html devel-ML]. Don't spread over multiple lists please, as it won't help in getting a response to your request just in time, and most people following the main thread likely will miss your postings anyway)
-
-Use the following fluid command:
-
-<pre>
-cd /usr/sbin
-FLUID_PORT=/dev/ttySAC0 fluid.exe -oo -od13,13 -b 115200 -f $HOME/calypso-moko11.m0
-</pre>
-(Without FLOWCONTROL and with -oo to choose the ROM bootloader)
-
-Then on a ''second ssh session'' please use this instead of the gpio command:
-<pre>
-echo 0 > /sys/bus/platform/devices/neo1973-pm-gsm.0/power_on
-echo 1 > /sys/bus/platform/devices/neo1973-pm-gsm.0/power_on
-</pre>
-The firmware download should start now.
-
-=== Half-flashed GTA01bv4 GSM Modem ===
-
-For GTA01 the process of flashing when the main firmware is absent is more complicated as we have no easy way to power-cycle the modem.
-
-I recently had to do a special process to recover my GTA01bv4 after breaking the gsm modem with a failed flash. The process is actually fairly simple.
-
-* Unplug USB and remove the battery for about 10s to ensure that the GSM chipset is powered off, then replace the battery and re-connect the USB
-* boot up from a distro that is neutered so that it does not access or turn on the gsm modem at all (this is a really important prerequisitive, as nothing should turn on the modem by touching MODEM_ON line until fluid is ready to connect to it); one can do that simply by disabling start of ophonekitd (and to be on the safe side framworkd too) on SHR
-* issue this stty command twice:
-  stty 0:4:18b2:8a00:0:0:7f:15:4:0:0:0:0:0:0:0:12:f:17:16:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0 -F /dev/ttySAC0
-* cd /usr/sbin
-* issue this fluid command (replace $HOME/filename.m0 with path to firmware you want to flash):
-  FLUID_PORT=/dev/ttySAC0 fluid.exe -oo -od13,13 -b115200 -f $HOME/filename.m0
-* in another ssh session, issue this command:
-  echo 1 > /sys/bus/platform/devices/neo1973-pm-gsm.0/power_on
-
-After this, the flashing proceeded as expected. You don't need to do any special checks to ensure you have successfully flashed; if fluid reports everything is ok, it is actually ok.
-
-==See also==
-* [[Osmocom on TI Calypso]]
-
-[[Category:GSM]]
