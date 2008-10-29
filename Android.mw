@@ -128,44 +128,31 @@ bx a
 <TD>Count Leading Zeros</TD>
 <TD>175</TD>
 <TD>
-[[User:Cfriedt]] 20081026
+[[User:Cfriedt]] 20081028
+Remove from inline assembly with something like
 <pre>
-#include <stdint.h>
-
-void clz( uint32_t * Rd, uint32_t * Rm )
-{
-uint32_t mask = 0x80000000;
-
-// in case Rd == Rm
-uint32_t dummy = 0;
-
-if ( *Rm == 0 )
-{
-
-dummy = 32;
-
-} else {
-
-for ( 	dummy = 0 ;
-dummy < 32 &&
-( ! ( mask & (*Rm) ) ) ;
-dummy++, mask >>= 1
-);
-
-}
-
-(*Rd) = dummy;
-
-}
+#ifdef HAVE_CLZ
+... (inline asm) ...
+#else
+... (inline asm with equivalent clz code, as shown to the right) ...
+#endif
 </pre>
 </TD>
+<pre>
+[[User:Cfriedt]] 20081029
+#ifdef HAVE_CLZ
+#define CLZ(Rd,Rm) \
+clz Rd,Rm
+#else
+#define CLZ(Rd,Rm) \
+...
+#endif
+...
+CLZ(Rd,Rm)
+</pre>
 <TD>
-[[User:Cfriedt]] 20081028
-* An AAPCS-compliant, globally defined subroutine in ASM (Save space)
-* A macro definition to be inserted inline (needs to preserve working variables) (Speed)
 </TD>
 </TR>
-
 <TR>
 <TH VALIGN="TOP">LDRD</TH>
 <TD>Load Registers Doubleword</TD>
