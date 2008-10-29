@@ -1,0 +1,47 @@
+{{Languages| Development Environment}}
+如果你想要建立一个新的应用程序，若您想要建立一个新的应用程序，你可能必须要先暸解[[Toolchain]]。然后，若它的相关设定相当的复杂，或者你想要修改一些在系统中已经存在的东西，目前最容易的方法就是使用[[OpenEmbedded]]。
+
+= 新的应用程序 =
+* [[Toolchain]]
+* [[OpenmokoFramework]]
+* Anjuta plugin[http://free-opensource.qvantel.net/mediawiki/index.php/Preity-plugin]
+* [[Host-based development with Xoo and Xephyr]]
+
+= 使用OE进行开发 =
+在完成OE (OpenEmbedded) 的环境设定之后，让它可以 build 最新的 Openmoko 组件，在避免重复性上是必要的。你可以参考[[Openmoko2007.2#How_to_enable_autorev|如何启动autorev]] 查看如何完成上述的工作。第一个Build将会花费很多时间，并且耗用掉相当大的磁盘空间，但在完成这个工作后，它将会执行的较为快速。你也会需要 '''移除''' local.conf 中的 INHERIT += "rm_work (如果设定中有相关的内容时)。
+
+现在，举个例子来说，若你希望修改openmoko-sample2，你可以使用以下的方法，先build 它：
+
+bitbake openmoko-sample2
+
+接着，
+
+bitbake openmoko-sample2 -c devshell
+
+你可以进入一个建立build套件的shell 环境。在完成修改之后，通常可以使用 `make' 。若你使用的是autotools 你可以在新的隐藏的.libs目录下找到这个新的 binary。
+
+== 使用 quilt ==
+我们可以使用`quilt' 进行修改及整理。
+
+$ # 不需要 mkdir patches.  它已经存在
+$ 使用quilt 修改 foo.patch
+$ 使用 quilt 新增 to_be_changed.c
+$ 使用vi 开启 to_be_changed.c
+''<coding monkey is working...>''
+$ make
+$ scp foobar neo:   # 将它复制到Neo
+''<test... wow it works>''
+$ quilt refresh
+$ cp -r patches ~/miracle  # 将它保留在其它地方
+
+== Tips ==
+* 一旦你对OE更加的暸解之后，你可能会发现将源目录取代为连结，连接到你的Openmoko svn目录会更为方便。但使用这个方法，你必须patch 及设定 source。
+
+* 若你并不想要使用 devshell，将目录变更到 ${WORKDIR}  (一般会放在较devshell高的目录)，将它进行修改，并且呼叫 ./temp/run.do_compile.xxxx ，也会将原始码再编译一次。
+
+
+
+== 制作ipkg文件，分享你的程序 ==
+有几个方法可以完成这个工作：
+* 使用 quilt patches 并且将它加到 bb 档案。Rebuild.
+* bitbake openmoko-sample2 -c package_write
