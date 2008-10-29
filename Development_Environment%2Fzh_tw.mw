@@ -1,47 +1,43 @@
 {{Languages| Development Environment}}
-如果你想要建立一個新的應用程式，若您想要建立一個新的應用程式，你可能必須要先暸解[[Toolchain]]。然後，若它的相關設定相當的複雜，或者你想要修改一些在系統中已經存在的東西，目前最容易的方法就是使用[[OpenEmbedded]]。
+If you want to create a new application, you might want to look at [[Toolchain]] first.  However, if the dependency is complex or you want to modify something already in system, currently the easiest way to go is still using [[OpenEmbedded]].
 
-= 新的應用程式 =
+= New Application =
 * [[Toolchain]]
 * [[OpenmokoFramework]]
 * Anjuta plugin[http://free-opensource.qvantel.net/mediawiki/index.php/Preity-plugin]
 * [[Host-based development with Xoo and Xephyr]]
 
-= 使用OE進行開發 =
-在完成OE (OpenEmbedded) 的環境設定之後，讓它可以 build 最新的 Openmoko 元件，在避免重複性上是必要的。你可以參考[[Openmoko2007.2#How_to_enable_autorev|如何啟動autorev]] 查看如何完成上述的工作。第一個Build將會花費很多時間，並且耗用掉相當大的磁碟空間，但在完成這個工作後，它將會執行的較為快速。你也會需要 '''移除''' local.conf 中的 INHERIT += "rm_work (如果設定中有相關的內容時)。
+= Develop with OE =
+After setting up the OE (OpenEmbedded) environment, making it build the latest component of Openmoko is necessary to avoid duplicated work.  Refer to [[Openmoko2007.2#How_to_enable_autorev|How to enable autorev]] to find out how to do this.  The first build will take a lot of time and occupy a good deal of disk space, but after that it will be faster.  You will also need to '''remove''' the
+INHERIT += "rm_work
+line in your local.conf if it exists.
 
-現在，舉個例子來說，若你希望修改openmoko-sample2，你可以使用以下的方法，先build 它：
-
+Now, for example, if you want to modify openmoko-sample2, you can do this to build it first:
 bitbake openmoko-sample2
-
-接著，
-
+After that:
 bitbake openmoko-sample2 -c devshell
+You will be dropped to a shell that the environment is set to build the package.  After the modification, usually a simple `make' will do the trick.  You should be able to find the new binary under a hidden .libs directory if this package uses autotools.
 
-你可以進入一個建立build套件的shell 環境。在完成修改之後，通常可以使用 `make' 。若你使用的是autotools 你可以在新的隱藏的.libs目錄下找到這個新的 binary。
+== Use quilt ==
+We could make modification and manage it by `quilt'.
 
-== 使用 quilt ==
-我們可以使用`quilt' 進行修改及整理。
-
-$ # 不需要 mkdir patches.  它已經存在
-$ 使用quilt 修改 foo.patch
-$ 使用 quilt 新增 to_be_changed.c
-$ 使用vi 開啟 to_be_changed.c
+$ # no need to mkdir patches.  already exists.
+$ quilt new foo.patch
+$ quilt add to_be_changed.c
+$ vi to_be_changed.c
 ''<coding monkey is working...>''
 $ make
-$ scp foobar neo:   # 將它複製到Neo
+$ scp foobar neo:   # copy it to neo
 ''<test... wow it works>''
 $ quilt refresh
-$ cp -r patches ~/miracle  # 將它保留在其它地方
+$ cp -r patches ~/miracle  # keep it somewhere
 
 == Tips ==
-* 一旦你對OE更加的暸解之後，你可能會發現將原始目錄取代為連結，連接到你的Openmoko svn目錄會更為方便。但使用這個方法，你必須patch 及設定 source。
+* You might find it convenient to replace the source directory with a symlink to the same directory under your Openmoko svn tree, once you get more understanding of OE.  You need to patch and configure the source again if you go this route.
 
-* 若你並不想要使用 devshell，將目錄變更到 ${WORKDIR}  (一般會放在較devshell高的目錄)，將它進行修改，並且呼叫 ./temp/run.do_compile.xxxx ，也會將原始碼再編譯一次。
+* If you don't want to use devshell, change directory to ${WORKDIR} directly (usually one level higher than the directory that devshell drops you to), do the modification, and invoke ./temp/run.do_compile.xxxx will also compile the source again.
 
-[[Category:Application Developer]]
-
-== 製作ipkg檔，分享你的程式 ==
-有幾個方法可以完成這個工作：
-* 使用 quilt patches 並且將它加到 bb 檔案。Rebuild.
+== Make ipkg for distributing ==
+Multiple ways to do this:
+* Use quilt patches and add it to the bb file.  Rebuild.
 * bitbake openmoko-sample2 -c package_write
