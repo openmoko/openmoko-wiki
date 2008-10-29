@@ -50,25 +50,43 @@ bitbake qt4-x11-free
 After that you'll have staging Qt arm libraries and x86 tools to build your application.
 ==Using a devshell==
 You may use a modified environment to build your application interactively. At first you have to bitbake the dev shell:
- bitbake devshell
+<pre>bitbake devshell</pre>
 Now create a text file 'qt-arm.env' as this:
- . /oe_tmp_dir_path/deploy/glibc/addons/arm-angstrom-linux/gnueabi-openmoko-om-gta02-devshell
- export QMAKESPEC="/oe/openmoko-fso/tmp/cross/armv4t/share/qt4/mkspecs/linux-gnueabi-oe-g++"
- export OE_QMAKE_UIC="/oe/openmoko-fso/tmp/staging/i686-linux/usr/bin/uic4"
- export OE_QMAKE_MOC="/oe/openmoko-fso/tmp/staging/i686-linux/usr/bin/moc4"
- export OE_QMAKE_CC=$CC
- export OE_QMAKE_CXX=$CXX
- export OE_QMAKE_INCDIR_QT="/oe/openmoko-fso/tmp/staging/armv4t-angstrom-linux-gnueabi/usr/include/qt4/"
- export OE_QMAKE_LINK=$CXX
- export OE_QMAKE_LIBDIR_QT="/oe/openmoko-fso/tmp/staging/armv4t-angstrom-linux-gnueabi/usr/lib"
- export PS1="\[\033[01;33m\]cross-compile-qt-shell\[\033[01;34m\] \w \$\[\033[00m\] "
+<pre>
+. /oe/openmoko-fso/tmp/deploy/glibc/addons/arm-angstrom-linux/gnueabi-openmoko-om-gta02-devshell
+export QMAKESPEC="/oe/openmoko-fso/tmp/cross/armv4t/share/qt4/mkspecs/linux-gnueabi-oe-g++"
+export OE_QMAKE_UIC="/oe/openmoko-fso/tmp/staging/i686-linux/usr/bin/uic4"
+export OE_QMAKE_MOC="/oe/openmoko-fso/tmp/staging/i686-linux/usr/bin/moc4"
+export OE_QMAKE_CC=$CC
+export OE_QMAKE_CXX=$CXX
+export OE_QMAKE_INCDIR_QT="/oe/openmoko-fso/tmp/staging/armv4t-angstrom-linux-gnueabi/usr/include/qt4/"
+export OE_QMAKE_LINK=$CXX
+export OE_QMAKE_LIBDIR_QT="/oe/openmoko-fso/tmp/staging/armv4t-angstrom-linux-gnueabi/usr/lib"
+export PS1="\[\033[01;33m\]cross-compile-qt-shell\[\033[01;34m\] \w \$\[\033[00m\] "
+</pre>
+''Sostitute /oe/openmoko-fso with your oe tree path''
 
 Now change your current directory to your qt .pro file path and type:
- . /path/to/qt-arm.env
- qmake
- make
+<pre>
+. /path/to/qt-arm.env
+qmake
+make
+</pre>
 
 That's all! :)))
+
+You may now create an alias or a simple batch like this to deploy and run your application:
+<pre>
+#!/bin/bash
+scp arm-executable root@neo-ip:/tmp/
+ssh -Y root@neo-ip "/tmp/executable
+</pre>
+
+to have X11 forwarding or
+<pre>ssh -Y root@neo-ip "DISPLAY=:0 /tmp/executable"</pre>
+to launch it on the device display with local stdout/stderr
+
+''consider to enable ssh public authentication''
 
 ==Using an OE bitbake recipie==
 If you want to build your application in batch mode you have to create a bitbake .bb recipie file. This is not suitable to fast build/debug cycles but is a necessary step if you want to insert your project in official feed/distributions like angstrom, fso based images, 2008.x and so on. It is a quickway to create a .opkg file too!
