@@ -13,10 +13,9 @@ A discussion of this is [http://lists.openmoko.org/pipermail/support/2008-August
 
 Try this first (as root on your desktop, with FreeRunner attached via USB cable and booted properly, not at the Boot Menu).  If it works, then you can add permanent configuration or use more sophisticated setups below.
 
-iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
-sysctl -w net.ipv4.ip_forward=1
-ip addr add 192.168.0.200/24 dev usb0
-
+iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24<br>
+sysctl -w net.ipv4.ip_forward=1<br>
+ip addr add 192.168.0.200/24 dev usb0<br>
 
 If your Internet connection is also in the range 192.168.0.x then instead you might want to use:
 
@@ -34,12 +33,12 @@ The default password is blank.
 
 Due to the fact that in most cases your Neo will use the same dns servers as your computer uses, you can automate the process of writing dns servers to your phone:
 
-#! /bin/sh
-/sbin/route add -host 192.168.0.202/32 dev usb0
-iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
-iptables -P FORWARD ACCEPT
-sysctl -w net.ipv4.ip_forward=1
-su `whoami` -c "scp /etc/resolv.conf root@192.168.0.202:/etc/resolv.conf"
+#! /bin/sh<br>
+/sbin/route add -host 192.168.0.202/32 dev usb0<br>
+iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24<br>
+iptables -P FORWARD ACCEPT<br>
+sysctl -w net.ipv4.ip_forward=1<br>
+su `whoami` -c "scp /etc/resolv.conf root@192.168.0.202:/etc/resolv.conf"<br>
 
 This simple script will set up routing for your Freerunner and than copy resolv.conf with dns addresses straight to the phone.
 All you have to do is connect phone to the computer, run the script and enjoy internet connection from your phone.
