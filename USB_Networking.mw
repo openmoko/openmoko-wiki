@@ -34,12 +34,15 @@ The default password is blank.
 
 Due to the fact that in most cases your Neo will use the same dns servers as your computer uses, you can automate the process of writing dns servers to your phone:
 
-#! /bin/sh<br>
+#!/bin/sh<br>
 /sbin/route add -host 192.168.0.202/32 dev usb0<br>
 iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24<br>
 iptables -P FORWARD ACCEPT<br>
 sysctl -w net.ipv4.ip_forward=1<br>
 su `whoami` -c "scp /etc/resolv.conf root@192.168.0.202:/etc/resolv.conf"<br>
+
+Again if your net already is 192.168.0.0, replace one statement with
+iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/28
 
 This simple script will set up routing for your Freerunner and than copy resolv.conf with dns addresses straight to the phone.
 All you have to do is connect phone to the computer, run the script and enjoy internet connection from your phone.
