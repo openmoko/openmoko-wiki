@@ -1,0 +1,83 @@
+These scripts work with Yoigo (Spain) using [[FDOM]] and the this script http://freeyourphone.de/portal_v1/viewtopic.php?f=21&t=295.
+
+=== /etc/ppp/peers/gprs ===
+<pre>
+connect /etc/ppp/gprs-connect-chat
+disconnect /etc/ppp/gprs-disconnect-chat
+crtscts
+lock
+#hide-password
+defaultroute
+usepeerdns
+ipcp-accept-local
+noauth
+noipdefault
+novj
+novjccomp
+replacedefaultroute
+lcp-echo-interval 3
+lcp-echo-failure 12
+#user ""
+mtu 472
+persist
+holdoff 15
+</pre>
+----
+
+=== /etc/ppp/gprs-connect-chat ===
+<pre>
+#!/bin/sh
+exec chat -v\
+        ABORT BUSY\
+        ABORT DELAYED\
+        ABORT "NO ANSWER"\
+        ABORT "NO DIALTONE"\
+        ABORT VOICE\
+        ABORT ERROR\
+        ABORT RINGING\
+        TIMEOUT 20\
+        "" +++\
+        OK ATZ\
+        OK ATE1\
+        OK AT+CFUN=1\
+        OK AT+COPS\
+        OK AT+CGDCONT=1,\"IP\",\"internet\"\
+        OK ATD*99#\
+        CONNECT /n/d
+</pre>
+----
+
+=== /etc/ppp/gprs-disconnect-chat ===
+<pre>
+#!/bin/sh -e
+/usr/sbin/chat -v\
+        ABORT OK\
+        ABORT BUSY\
+        ABORT DELAYED\
+        ABORT "NO ANSWER"\
+        ABORT "NO CARRIER"\
+        ABORT "NO DIALTONE"\
+        ABORT VOICE\
+        ABORT ERROR\
+        ABORT RINGING\
+        TIMEOUT 12\
+        "" \\k\\k\\k\\d+++ATH\
+        "NO CARRIER-AT-OK" ""
+</pre>
+----
+
+=== /etc/ppp/pap-secrets ===
+<pre>
+# Secrets for authentication using PAP
+# client        server  secret                  IP addresses
+*               *       ""                      *
+</pre>
+=== /etc/ppp/chap-secrets ===
+<pre>
+# Secrets for authentication using CHAP
+# client        server  secret                  IP addresses
+*               *       ""                      *
+</pre>
+----
+
+[[Category:GPRS]]
