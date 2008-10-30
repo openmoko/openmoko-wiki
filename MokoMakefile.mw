@@ -296,22 +296,28 @@ For the following explanations $OMDIR is the directory where there Makefile puts
 
 To make in-tree changes and have them built and used by qemu:
 
+<pre>
 cd $OMDIR/openmoko
 quilt new descriptive-patch-name.patch
 quilt add trunk/src/name-of-file-to-change # do this for every file you are about to modify
 ...make the changes...
-quilt refresh # this creates a file in $OMDIR/patches/openmoko-HEAD/ and updates the quilt series file there
+quilt refresh # this creates a file in $OMDIR/patches/openmoko-HEAD/ and updates the
+# quilt series file there
+</pre>
 
 Note: Do '''NOT''' use absolute paths as this confuses quilt and will get you a diff of the file against /dev/null!
 
 To build the changes and have them used by qemu:
 
+<pre>
 make build-qemu
 make flash-qemu-local
 make run-qemu
+</pre>
 
 If you want to modify applications instead of the openmoko toolchain, this is what you have to do (example: openmoko-messages):
 
+<pre>
 cd $OMDIR/build
 . ../setup-env
 bitbake -c patch openmoko-messages
@@ -320,6 +326,7 @@ cd tmp/work/armv4t-linux/openmoko-messages-0.0.1+svnnow-r2_2276/openmoko-message
 cd -
 bitbake -c compile openmoko-messages
 bitbake -c build openmoko-messages
+</pre>
 
 Note: The compile step is only necessary if you already had the package compiled before patching it.
 
@@ -332,13 +339,18 @@ Then continue with MokoMakefile usage.
 If you want to add an application to your openmoko distribution, do this:
 All file edits should be done using quilt as described above. That way a patch can easily be submitted to the openmoko project.
 First, create a directory that will correspond to your package and edit a '''.bb''' file in there:
+
+<pre>
 cd $OMDIR/openmoko/
 quilt new mycoolpackage.patch
 mkdir trunk/openembedded/packages/mycoolpackage
 quilt add trunk/openembedded/packages/mycoolpackage/mycoolpackage_1.bb
 quilt edit trunk/openembedded/packages/mycoolpackage/mycoolpackage_1.bb
+</pre>
 
 The file should have the following content:
+
+<pre>
 DESCRIPTION = "This is a cool package"
 SECTION = "username/mycoolpackage"
 PV = "1"
@@ -346,6 +358,7 @@ PV = "1"
 inherit autotools
 
 SRC_URI = "http://www.example.com/download/mycoolpackage-1.tar.gz"
+</pre>
 
 Explanation:
 * DESCRIPTION - Just a short text explaining the package
@@ -355,13 +368,20 @@ Explanation:
 * SRC_URI = ... - This is the download location of the package source. It's imperative that the tar.gz contains a directory called '''packagename-packageversion''' (in this case: mycoolpackage-1) so that MokoMakefile can find it automatically or the build will fail.
 
 This is not all. We also need to tell MokoMakfile that it needs to build and include the package in the image. To do this, do
-$OMDIR/openmoko# quilt edit trunk/openembedded/packages/tasks/task-openmoko.bb
+
+<pre>
+$OMDIR/openmoko $ quilt edit trunk/openembedded/packages/tasks/task-openmoko.bb
+</pre>
+
 Here, increase the value '''PR''' by one and add '''mycoolpackage \''' (with the backslash!) just before the line reading '''#  update-alternatives \'''.
 
 Now run
+
+<pre>
 quilt refresh
 cd ..
 make update image
+</pre>
 
 And if everything's alright you should now have an Openmoko image to flash to your phone or run in qemu as described above.
 
