@@ -314,17 +314,42 @@ strd a,b
 Using the above list of opcodes, one can scan the Android source code for ARMv4T-incompatible instruction sequences.
 
 '''Code:'''
+{{scroll box|height=240px|text=
 <pre>
-opcodes="blx clz ldrd pld smlabb smlabt smlatt smlal smlawb smlawt smulbb smulbt smultt smulwb smulwt qadd qdadd qsub qdsub strd"
+#!/bin/sh
 
-opcodePat="$(echo ${opcodes} | sed -e 's/ /\\\|/g')"
+# $1 is the android directory
 
-fileList="$(grep -R -i "\(${opcodePat}\) " * 2>/dev/null | grep -v "^Binary file" | sed -e 's/:.*//' | grep -v "CREDITS\|README\|^\(kernel/\)\|\(\.txt\)$" | sort -u)"
+if [ $# -ne 1 ]; then
+exit -1
+fi
 
-for i in ${fileList}; do
-echo "* ${i}"
+cd "${1}"
+
+opcodes="blx clz ldrd pld smlabb smlabt smlatt smlal smlawb smlawt smulbb smulbt smultt smulwb smulwt qadd qdadd qdsub qsub strd"
+
+for op in ${opcodes}; do
+
+echo "* =================================== ${op} ====================================="
+
+if [ ! -e .files.${op} ]; then
+
+files="$(grep -R -i "${op} " * 2>/dev/null | grep -v "^Binary file" | sed -e 's/:.*//' | grep -v "CREDIT\|README\|^\(kernel/\|.git/\)\|\(\.txt\)$" | sort -u)"
+
+echo "${files}" > .files.${op}
+
+else
+files="$(cat .files.${op})"
+fi
+
+for fil in ${files}; do
+lines="$(grep -n -i "${op} " ${fil} | sed -e 's/:.*//g' )"
+lines="$(echo $lines | sed -e 's/ /,/g')"
+echo "** ${fil}: lines {${lines}}"
+done
 done
 </pre>
+}}
 
 === Source Files in Android that Use the ARMv5TE ISA ===
 
