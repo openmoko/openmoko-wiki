@@ -314,7 +314,7 @@ strd a,b
 Using the above list of opcodes, one can scan the Android source code for ARMv4T-incompatible instruction sequences.
 
 '''Code:'''
-{{scroll box|height=240px|width=320|text=
+{{scroll box|height=240px|text=
 <pre>
 #!/bin/sh
 
@@ -326,7 +326,8 @@ fi
 
 cd "${1}"
 
-opcodes="blx clz ldrd pld smlabb smlabt smlatt smlal smlawb smlawt smulbb smulbt smultt smulwb smulwt qadd qdadd qdsub qsub strd"
+opcodes="blx clz ldrd pld smlabb smlabt smlatt 
+smlal smlawb smlawt smulbb smulbt smultt smulwb smulwt qadd qdadd qdsub qsub strd"
 
 for op in ${opcodes}; do
 
@@ -334,7 +335,9 @@ echo "* =================================== ${op} ==============================
 
 if [ ! -e .files.${op} ]; then
 
-files="$(grep -R -i "${op} " * 2>/dev/null | grep -v "^Binary file" | sed -e 's/:.*//' | grep -v "CREDIT\|README\|^\(kernel/\|.git/\)\|\(\.txt\)$" | sort -u)"
+files="$(grep -R -i "${op} " * 2>/dev/null)"
+file="$(echo $files | grep -v "^Binary file" | sed -e 's/:.*//')"
+files="$(echo $files| grep -v "CREDIT\|README\|^\(kernel/\|.git/\)\|\(\.txt\)$" | sort -u)"
 
 echo "${files}" > .files.${op}
 
