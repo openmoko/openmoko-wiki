@@ -13,41 +13,42 @@ To get it running, you will have to tweak your ubuntu a little bit (This will no
 ** Community-maintained Open Source software (universe)
 * Open your terminal (Applications -> Accessories -> Terminal).
 * Enter following command and select NO when it asks to install dash as /bin/sh (You will have to enter your password)
-    sudo dpkg-reconfigure dash
+sudo dpkg-reconfigure dash
 * Install the needed programs on Hardy Heron 8.04 (You will have to enter your password):
-     sudo apt-get install monotone git-core git-svn git-email \
- git-cvs git-arch gitk python-dev ccache m4 sed bison make cvs gawk \
- libc6-dev g++ subversion sharutils docbook openjade quilt libmpfr-dev \
- libpcre3-dev texinfo texi2html libboost-date-time-dev libboost-filesystem-dev \
- libboost-regex-dev libboost-test-dev libboost-dev zlib1g-dev build-essential \
- dh-make debhelper devscripts gcc-3.4 lynx netpbm libsdl1.2-dev dosfstools \
- help2man python-psyco lynx
-  
+sudo apt-get install monotone git-core git-svn git-email \
+git-cvs git-arch gitk python-dev ccache m4 sed bison make cvs gawk \
+libc6-dev g++ subversion sharutils docbook openjade quilt libmpfr-dev \
+libpcre3-dev texinfo texi2html libboost-date-time-dev libboost-filesystem-dev \
+libboost-regex-dev libboost-test-dev libboost-dev zlib1g-dev build-essential \
+dh-make debhelper devscripts gcc-3.4 lynx netpbm libsdl1.2-dev dosfstools \
+help2man python-psyco lynx
 
-*For older versions (git-svn git-email git-cvs git-arch gitk are replaced by cogito)
-    sudo apt-get install monotone git-core cogito python-dev ccache m4 sed bison \
- make cvs gawk libc6-dev g++ subversion sharutils docbook openjade quilt \
- libmpfr-dev libpcre3-dev texinfo texi2html libboost-date-time-dev \
- libboost-filesystem-dev libboost-regex-dev libboost-test-dev libboost-dev \
- zlib1g-dev build-essential dh-make debhelper devscripts gcc-3.4 netpbm \
- libsdl1.2-dev dosfstools help2man python-psyco lynx
+* Looks like for 8.10 libgnutls-dev also needs to be added, when you see vnc compile errors. sudo apt-get install libgnutls-dev
+
+* For older versions (git-svn git-email git-cvs git-arch gitk are replaced by cogito)
+sudo apt-get install monotone git-core cogito python-dev ccache m4 sed bison \
+make cvs gawk libc6-dev g++ subversion sharutils docbook openjade quilt \
+libmpfr-dev libpcre3-dev texinfo texi2html libboost-date-time-dev \
+libboost-filesystem-dev libboost-regex-dev libboost-test-dev libboost-dev \
+zlib1g-dev build-essential dh-make debhelper devscripts gcc-3.4 netpbm \
+libsdl1.2-dev dosfstools help2man python-psyco lynx
 
 
 Voila your system is ready to get the install Openmoko.
 
 Now we will install Openmoko in a directory by downloading the MokoMakefile in it and build it.
 * Create a directory and go into the directory:
-    mkdir openmoko
-    cd openmoko
+mkdir openmoko
+cd openmoko
 * Get the MokoMakefile (Currently down due to fires in California. Use the link below instead):
-    wget http://www.rwhitby.net/files/openmoko/Makefile 
+wget http://www.rwhitby.net/files/openmoko/Makefile
 
-If that doesn't work, try 
+If that doesn't work, try
 
-    wget http://svn.projects.openmoko.org/svnroot/mokomakefile/trunk/Makefile
+wget http://svn.projects.openmoko.org/svnroot/mokomakefile/trunk/Makefile
 
 * Make the MokoMakefile and tell it, you want to install it for qemu:
-    make qemu
+make qemu
 
 This will download the necessary files of the latest release and build them following the MokoMakefile. After that it will start into the emulator for the first time. Voila you have now successfully installed openmoko onto your ubuntu system.
 
@@ -59,23 +60,23 @@ You can create a menu item for starting Openmoko by doing the following:
 
 *Go to the openmoko directory:
 
- cd ~/openmoko
+cd ~/openmoko
 
 *open the file moko.sh with '''gedit''':
 
- gedit moko.sh
+gedit moko.sh
 
 *insert the following text into the file:
 
- #!/bin/bash
- cd ~/openmoko
- make run-qemu
+#!/bin/bash
+cd ~/openmoko
+make run-qemu
 
 *Press "save" and close gedit
 
 *then run the following commands:
- chmod +x moko.sh
- alacarte
+chmod +x moko.sh
+alacarte
 
 *and add a menu item with these values:
 **Name: Openmoko
@@ -91,9 +92,9 @@ If you have created a menu item you can start Openmoko through the applications 
 
 * Open your terminal (Applications->Accessories->Terminal).
 * Go to the directory:
-    cd openmoko
+cd openmoko
 * starting with the MokoMakefile
-    make run-qemu
+make run-qemu
 
 The first screen of Openmoko will show a nice picture of the Openmoko logo which will be followed
 almost immediately by the BOOT MENU, this is done by the bootloader.
@@ -117,10 +118,10 @@ First you need a xxx.ipk package, see [[toolchain]] on how to compile an applica
 Note that if at this point you have the Openmoko Qemu running, it is probably wise to terminate it first.
 Then you can install the xxx.ipk package for access by the Qemu emulator with:
 
- cd openmoko
- mkdir -p build/tmp/deploy/glibc/ipk/a
- cp xxx.ipk build/tmp/deploy/glibc/ipk/a/xxx_a.ipk
- make qemu-copy-package-xxx
+cd openmoko
+mkdir -p build/tmp/deploy/glibc/ipk/a
+cp xxx.ipk build/tmp/deploy/glibc/ipk/a/xxx_a.ipk
+make qemu-copy-package-xxx
 
 ''Note: for some reason qemu-copy-package-xxx looks for above source file.
 Maybe this part can be improved, or a different command can overcome the problem of creating this directory.''
@@ -130,17 +131,17 @@ you still need to make the installed application available in the application li
 For this you can select from within Openmoko the terminal application
 (Select icon that looks like "+" for the list of available applicaitons, select "Applications" and select the "Terminal").
 In this terminal double-click, so you can type in the commands:
- opkg install /media/mmcblk0/xxx_a.ipk
- exit
+opkg install /media/mmcblk0/xxx_a.ipk
+exit
 After the "exit" command you should return to the Task list, in which the newly
 added application should be listed under a name which was choosen when building the ipk package.
 
 == Updating Openmoko==
 * Open your terminal (Applications->Accessories->Terminal).
 * Go to the directory:
-    cd openmoko
+cd openmoko
 * Update with the MokoMakefile
-    make qemu
+make qemu
 
 == Configurations/OS ==
 
@@ -148,14 +149,14 @@ added application should be listed under a name which was choosen when building 
 
 I'm running the Neo-Qemu in the Qtopia-Image in VMWare Fusion on a MacBook Pro (2x2.6GHz, 4GB), so it's an emulator in an emulator. Speed is acceptable. Be sure to look at the end of this page for the right filesystem image to flash. A main point in compiling Neo-Qemu is the gcc 3.x. For some reason it did not install on my Mac, but I think I can live with the emu-in-emu solution for a while.
 
---[[User:Cweise|moerkby]] 11:00, 9 October 2008 (UTC) 
+--[[User:Cweise|moerkby]] 11:00, 9 October 2008 (UTC)
 
 == Problems ==
 If you have any problems, just add it here<br>
 --[[User:Twistedclone|Twistedclone]]
 
 OS: Ubuntu 8.04
-I run the following sequence of commands to run my QEMU 
+I run the following sequence of commands to run my QEMU
 <pre>
 $ svn checkout https://svn.openmoko.org/trunk/src/host/qemu-neo1973
 $ cd qemu-neo1973
@@ -213,14 +214,14 @@ Does anyone has any idea how to fix this up?
 
 After issuing the command 'make qemu' in Gutsy, the installation eventually borks with
 <pre>
-    make[2]: Leaving directory `/usr/local/src/openmoko/build/qemu/arm-softmmu'
-    make[1]: Leaving directory `/usr/local/src/openmoko/build/qemu'
-    [ -e images/openmoko ] || mkdir -p images/openmoko
-    ln -sf `pwd`/openmoko/trunk/src/host/qemu-neo1973/openmoko/env images/openmoko/env
-    ( cd images && ../openmoko/trunk/src/host/qemu-neo1973/openmoko/download.sh )
-        Retrieving available builds list...
-        Kernel is... not found
-    make: *** [download-images] Error 255
+make[2]: Leaving directory `/usr/local/src/openmoko/build/qemu/arm-softmmu'
+make[1]: Leaving directory `/usr/local/src/openmoko/build/qemu'
+[ -e images/openmoko ] || mkdir -p images/openmoko
+ln -sf `pwd`/openmoko/trunk/src/host/qemu-neo1973/openmoko/env images/openmoko/env
+( cd images && ../openmoko/trunk/src/host/qemu-neo1973/openmoko/download.sh )
+Retrieving available builds list...
+Kernel is... not found
+make: *** [download-images] Error 255
 </pre>
 [[User:BioGeek|BioGeek]] 02:03, 27 March 2008 (CET)
 
@@ -229,7 +230,7 @@ Do you still have the problem?
 [[User:Dolfje|Dolfje]] 20:54, 9 April 2008 (CEST)
 
 I tested this today (uImage-2.6.24+svnr4301-r4251-r5-om-gta01.bin) on '''hardy'''. Qemu doesn't compile with gcc4 you need:
-    sudo aptitude install gcc-3.4
+sudo aptitude install gcc-3.4
 After the init process started, became the emulation extremely slow. It takes more than 15 minutes
 to boot the GUI on 2GHz CPU and you have to klick & hold the mouse several seconds to see
 any visual response. It would be great if there was a easy way to get a shell,
@@ -255,12 +256,12 @@ Thomas, I got the same thing when I tried.  On the #openmoko IRC channel, lindi 
 1. After building qemu with "make qemu", close the emulator and:
 
 2. modify the file: build/qemu/openmoko/env as follows (you may need to adjust these values as time goes by for different images):
-    kernel_wildcard="testing-om-gta01-20081008.uImage.bin"
-    # rootfs_wildcard="Open?oko-openmoko-*image*-om-gta01.rootfs.jffs2"
-    rootfs_wildcard="testing-om-gta01-20081008.rootfs.jffs2"
-    uboot_wildcard="gta01bv4-u-boot.bin"
-    #download_dir="http://buildhost.openmoko.org/daily/neo1973/deploy/glibc/images/neo1973/"
-    download_dir="http://downloads.openmoko.org/daily/"
+kernel_wildcard="testing-om-gta01-20081008.uImage.bin"
+# rootfs_wildcard="Open?oko-openmoko-*image*-om-gta01.rootfs.jffs2"
+rootfs_wildcard="testing-om-gta01-20081008.rootfs.jffs2"
+uboot_wildcard="gta01bv4-u-boot.bin"
+#download_dir="http://buildhost.openmoko.org/daily/neo1973/deploy/glibc/images/neo1973/"
+download_dir="http://downloads.openmoko.org/daily/"
 
 3. Download the above .jffs2 file (build the URL with the download_dir and the rootfs_wildcard values) to images/openmoko/
 
@@ -301,8 +302,8 @@ ditto, still. can I just make all or sumpin and make it locally from source?
 --[[User:Wolfsolver]]
 Hi all,
 I found the file on http://buildhost.automated.it/OM2007.2/, so use following lines in file build/qemu/openmoko/env
-  rootfs_wildcard="Openmoko-openmoko-devel-image-glibc-ipk-P1-Snapshot-20080721-om-gta01.rootfs.jffs2"
-  download_dir="http://buildhost.automated.it/OM2007.2/"
+rootfs_wildcard="Openmoko-openmoko-devel-image-glibc-ipk-P1-Snapshot-20080721-om-gta01.rootfs.jffs2"
+download_dir="http://buildhost.automated.it/OM2007.2/"
 and all works....
 
 [[Category:Emulation]]
