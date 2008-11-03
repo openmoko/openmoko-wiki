@@ -1,0 +1,39 @@
+Bryan de Luca wrote this shell script that uses enlightenment_remote and xmodmap to change AUX bindings.
+
+Download: http://www.bryandeluca.com/OM/omkey_functions
+
+As Raster says you don't have to program to make changes to the mappings. It looks like Enlightenment saves the current keybindings on exit.  There is probably some other way to have E save its settings though.
+
+With a little more wrapping, this script can be used to remap AUX when you launch an app, then restore the old mapping when the app terminates. Here is an example.
+
+== Tutorial: mapping AUX to F5 in evince ==
+
+You will to be able to run evince from a desktop icon and use the AUX button to pop in and out of presentation mode (that would be F5 on a keyboard).  When you exit evince, the old xmodmap and enlightenment mappings for AUX will be restored. We assume you have installed the evince package and know how to edit text files.
+
+1.  Download omkey_functions (link above) and copy in to ''/home/root'' on your Freerunner.
+2.  On your FreeRunner create a text file ''/usr/bin/evince.sh'' containing the following:
+
+<pre>
+#!/bin/sh
+. /home/root/omkey_functions
+om_key_mod 177 F5
+
+evince $@
+
+om_key_ restore
+</pre>
+
+3.   Set the execution bits:
+<pre>
+chmod 755 /usr/bin/evince.sh
+</pre>
+
+4.  Edit the ''.desktop'' file at ''/usr/share/applications/evince.desktop'' modify the line starting with ''Exec='' to:
+
+<pre>
+Exec=evince.sh %U
+</pre>
+
+To make evince show up in the desktop menu, open the file ''/usr/share/applications/evince.desktop'', and edit the line beginning with ''Categories='' to remove ''System;'' from the list. Save your changes, Illume should update the icons on the desktop otherwise restart X.
+
+[[Category:Application Developer]]
