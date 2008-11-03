@@ -113,18 +113,26 @@ usb 5-2: usbfs: USBDEVFS_CONTROL failed cmd dfu-util rqt 161 rq 2 len 4096 ret -
 === Backing-up flash images (alternative) ===
 
 On the device:
+<pre>
 mkdir /var/tmp/root
 mount /dev/root /var/tmp/root
+</pre>
 
 If you have om2008.9 you have to use:
+<pre>
 mount -t jffs2 /dev/mtdblock6 /var/tmp/root
+</pre>
 
 On your workstation:
+<pre>
 ssh root@192.168.0.202 "mkfs.jffs2 -d /var/tmp/root -e 128 --pad --no-cleanmarkers -x lzo" | pv -W > rootfs.jffs2
+</pre>
 (The "| pv -W" is optional, it just gives you something to watch as the bytes fly by.)
 
 On the device:
+<pre>
 umount /var/tmp/root
+</pre>
 
 === Backing-up in a tar archive ===
 
