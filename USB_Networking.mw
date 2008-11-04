@@ -6,8 +6,7 @@ Normally, your desktop machine will know how to reach the Internet, having had i
 
 Normally, none of this is an issue, but problems can arise when the subnet between the FreeRunner and your desktop overlap with the desktop to the router (which forms a second LAN), since your desktop might not know how to route traffic properly.
 
-In other words: if your existing router and desktop have addresses 192.168.0.(something) changing them to e.g. 192.168.1.(something) might save you a lot of troubleshooting later. The guides to set up USB networking for your FreeRunner assume that your router/desktop IP range differs from the USB network IP range.
-A discussion of this is [http://lists.openmoko.org/pipermail/support/2008-August/thread.html#1277 here].
+In other words: if your existing router and desktop have addresses 192.168.0.(something) changing them to e.g. 192.168.1.(something) might save you a lot of troubleshooting later. A discussion of this is [http://lists.openmoko.org/pipermail/support/2008-August/thread.html#1277 here].
 
 = Simple Manual Linux Configuration =
 
@@ -22,6 +21,12 @@ If your Internet connection is also in the range 192.168.0.x then instead you mi
 <pre>ip addr add 192.168.0.200/28 dev usb0</pre>
 
 (This will just map the net from 192.168.0.192 to 192.168.0.207 onto usb0. If you get the error 'Cannot find device "usb0"', double-check that your FreeRunner is turned on and connected by USB.)
+
+And in this case you should enable ARP proxy on internet facing interface INSTEAD of using iptables:
+
+<pre>sysctl net.ipv4.conf.eth2.proxy_arp=1</pre>
+
+This assuming that eth2 is connected to ISP.
 
 Then
 <pre>ifconfig usb0 up</pre>
