@@ -59,19 +59,28 @@ Here are a couple ways to do that. You can use a network connection to pull data
 Using gpsd requires a program that understands its protocol, such as GPSdrive.
 Using Bluetooth would allow using just about any program that understands the NMEA protocol.
 
-=== Using gpsd with a network connection ===
+=== GPS Daemons ===
 
-{{Warning|The gpsd has been obsoleted by the ogpsd which offers a DBUS interface. Do not run these two daemons side by side. If backward compatibility is needed, use ogpsd with fso-gpsd.}}
+The GPS uses a single serial connection for communication, and this cannot be shared directly by applications. To provide simultaneous access to GPS data for multiple applications, and to provide a consistent interface for the applications, we use a daemon as an intermediary. There are two daemons you are likely to meet on the Openmoko phones:
+
+==== gpsd ====
+This is used on Om 2008.x and FDOM. It implements the widely used gpsd protocol and can share gps data over a network.
+==== ogpsd/fso-gpsd ====
+Ogpsd is used on FSO and SHR, and implements the Gypsy dbus protocol. For compatibility with applications needing the gpsd protocol there is a helper daemon, fso-gpsd, which translates ogpsd output to the gpsd protocol.
+
+{{Warning|Do not run more than one gps daemon at a time. They will both try to talk to the gps serial port, and neither will work properly.}}
+
+=== Using gpsd with a network connection ===
 
 This procedure depends upon being able to set up a network connection between your Neo and your laptop. The connection can be over either WiFi or USB cable.
 
-First be sure you have gpsd installed. Some Neo FreeRunner images don't have gpsd, they use a different GPS stack called gypsy. 
+First be sure you have gpsd installed. Some Neo FreeRunner images don't have gpsd, they use a different GPS stack called gypsy.
 
 # On host type: '''nc -vvn -l -p 5000 > /tmp/nmeaNP''' (Host starts listening on port 5000 for GPS-signals and sends them to /tmp/nmeaNP)
-# On the Neo type:   '''nc 192.168.0.200 5000 < /dev/ttySAC1''' (Signals from device will be send to port 5000 on host.) If your host is connected to the neo via wifi, change the IP address in the command to the one of the host. 
-# On the host PC install GPSD, your GPS is attached as /tmp/nmeaNP 
+# On the Neo type:   '''nc 192.168.0.200 5000 < /dev/ttySAC1''' (Signals from device will be send to port 5000 on host.) If your host is connected to the neo via wifi, change the IP address in the command to the one of the host.
+# On the host PC install GPSD, your GPS is attached as /tmp/nmeaNP
 # start gpsd on host with: '''gpsd -p /tmp/nmeaNP'''
-# run your application! I used gpsdrive and it works better than my stand-alone GPS. 
+# run your application! I used gpsdrive and it works better than my stand-alone GPS.
 
 Tested with RoadNav. Works great!
 
