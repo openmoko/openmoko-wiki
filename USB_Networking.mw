@@ -579,31 +579,35 @@ Following is based on [http://www.enricozini.org/2008/tips/autodock-freerunner.h
 
 Create a new udev rules file <tt>/etc/udev/rules.d/91-openmoko.rules</tt>:
 
-SUBSYSTEM=="net", ACTION=="add",    ATTRS{idVendor}=="1457", ATTRS{idProduct}=="5122", RUN+="/etc/openmoko/openmoko-usb $env{INTERFACE} start"
-SUBSYSTEM=="net", ACTION=="remove", ENV{INTERFACE}=="usb[0-9]", RUN+="/etc/openmoko/openmoko-usb $env{INTERFACE} stop"
+<pre>
+ SUBSYSTEM=="net", ACTION=="add", ATTRS{idVendor}=="1457", ATTRS{idProduct}=="5122", RUN+="/sbin/om-usb $env{INTERFACE} start"
+ SUBSYSTEM=="net", ACTION=="remove", ENV{INTERFACE}=="usb[0-9]", RUN+="/sbin/om-usb $env{INTERFACE} stop"
+</pre>
 
-Then create the script <tt>/etc/openmoko/openmoko-usb</tt>:
+Then create the script <tt>/sbin/om-usb</tt>:
 
-#!/bin/sh
-INTERFACE=$1
-ACTION=$2
-
-# udev fails silently when the script fails, e.g. due to commands not
-# being found
-PATH=/usr/sbin:/sbin:/usr/bin:/bin
-
-case $ACTION in
-'start')
-# Put all your setup here
-;;
-'stop')
-# Put all your tear down here
-;;
-*)
-echo "Usage: $0 {start|stop}"
-exit 1
-;;
-esac
+<pre>
+ #!/bin/sh
+ INTERFACE=$1
+ ACTION=$2
+ 
+ # udev fails silently when the script fails, e.g. due to commands not
+ # being found
+ PATH=/usr/sbin:/sbin:/usr/bin:/bin
+ 
+ case $ACTION in
+     'start')
+         # Put all your setup here
+         ;;
+     'stop')
+         # Put all your tear down here
+         ;;
+     *)
+         echo "Usage: $0 {start|stop}"
+         exit 1
+         ;;
+ esac
+</pre>
 
 The <tt>INTERFACE</tt> will be <tt>usb0</tt> in most cases.
 
