@@ -1,13 +1,13 @@
 {{Languages|Tichy}}
 
 <pre>
-       _       _           
-   _  (_)     | |             
- _| |_ _  ____| |__  _   _    
+_       _
+_  (_)     | |
+_| |_ _  ____| |__  _   _
 (_   _) |/ ___)  _ \| | | |   A Python Applets Manager
-  | |_| ( (___| | | | |_| |
-   \__)_|\____)_| |_|\__  |   For Openmoko
-                    (____/ 
+| |_| ( (___| | | | |_| |
+\__)_|\____)_| |_|\__  |   For Openmoko
+(____/
 </pre>
 
 [[Image:Tichy-main2.png|thumb|tichy main window]]
@@ -23,10 +23,10 @@ The goal of the project is to make it easy to write many kind of applications fo
 
 Tichy provides the following things :
 * Graphics User Interface widgets
-* Services registering and Requesting (for example an application that wants to send a message will request for an application implementing  the message sending service) 
+* Services registering and Requesting (for example an application that wants to send a message will request for an application implementing  the message sending service)
 * Tasklets system (This allow to write callback waiting process as if they were threads)
 * Abstraction of Item / View
-* A plug in system that make it easy to add new functionalities / applets to tichy 
+* A plug in system that make it easy to add new functionalities / applets to tichy
 
 == How to write an applets / plug-ins for tichy ? ==
 Unfortunately There is currently no documentation.
@@ -40,33 +40,33 @@ import tichy.item as item
 from tichy.application import Application
 
 class MyApp(Application):
-    name = "My Application"
-    icon = 'icon.png'   # to be found in the app directory
+name = "My Application"
+icon = 'icon.png'   # to be found in the app directory
 
-    def run(self, parent):
-        w = gui.Window(parent, modal = True)   # We run into a new modal window
-        # Create a new frame with a "back" button on top
-        frame = gui.ApplicationFrame(w, self, back_button=True)
-        
-        # This box is used to store the widgets
-        box = gui.Box(frame, axis=1)
-        
-        # Create a text item
-        text = item.Text('click to edit', editable = True)
-        # Put a view of the item on the screen
-        text.view(box)
-        
-        # Add a button
-        button = gui.Button(box)
-        gui.Label(button, "click me")
-        
-        def on_click(b):
-            # "yield" means "block until the tasklet returns"
-            yield gui.Message(w, you just clicked the button)
-        button.connect('clicked', on_click) 
-            
-        yield Wait(frame, 'back')     # Wait until the back button is clicked
-        w.close()                     # Don't forget to close the window
+def run(self, parent):
+w = gui.Window(parent, modal = True)   # We run into a new modal window
+# Create a new frame with a "back" button on top
+frame = gui.ApplicationFrame(w, self, back_button=True)
+
+# This box is used to store the widgets
+box = gui.Box(frame, axis=1)
+
+# Create a text item
+text = item.Text('click to edit', editable = True)
+# Put a view of the item on the screen
+text.view(box)
+
+# Add a button
+button = gui.Button(box)
+gui.Label(button, "click me")
+
+def on_click(b):
+# "yield" means "block until the tasklet returns"
+yield gui.Message(w, you just clicked the button)
+button.connect('clicked', on_click)
+
+yield Wait(frame, 'back')     # Wait until the back button is clicked
+w.close()                     # Don't forget to close the window
 </pre>
 
 == Authors ==
@@ -74,18 +74,20 @@ class MyApp(Application):
 * Michael "Goodwill"
 
 == Sources ==
-The sources can be found from svn repository on project.openmoko :
- svn checkout svn://svn.projects.openmoko.org/svnroot/tichy
+The sources can be found from git repository on git.openmoko.org :
+ git clone git://git.openmoko.org/git/tichy
+Or, if you have access to the git machine and want to commit :
+ git clone ssh://git@git.openmoko.org:/var/cache/git/tichy.git
 
 == Running on the desktop ==
 Thanks to the service system, that allows to provide several version of the same service, Tichy can run as well on a desktop computer as on the neo. When run on a desktop, tichy will simulate phone functionalities, when run on the neo, it will use the [[OpenmokoFramework | Framework]].
 
 
 To run it on the desktop, make sure you have python-pygames installed
-  sudo apt-get install python-pygame
+sudo apt-get install python-pygame
 
-Then just download the sources, then go into test, and run 
- ./tichy
+Then just download the sources, then go into test, and run
+./tichy
 
 == Running on neo ==
 You will need to compile some files, see the README for more information on how to do it.
