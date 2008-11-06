@@ -1,11 +1,11 @@
 {{Languages| Development with Eclipse}}
-Графические приложения Openmoko снованы на среде Gnome. Их легко создавать, запускать и отлаживать как программы для настольных ПК или загружать в мобильный телефон только на финальной стадии отладки. Используя мобильный телефон, можно использовать экран, клавиатуру и мышь настольного комьютера, и это работает. Данная статья предоставляет инструкции для Debian, но они подходят для любых (не сломанных) Linux-дистрибутивов.
+Графические приложения Openmoko снованы на среде Gnome. Их легко создавать, запускать и отлаживать как программы для настольных ПК, а загружать в мобильный телефон только на финальной стадии отладки. Используя мобильный телефон, для манипуляции им и большего удобства работы можно задействовать экран, клавиатуру и мышь настольного комьютера. Данная статья предоставляет инструкции для Debian, но они подходят и для любых Linux-дистрибутивов.
 
-Eclipse включает в себя модуль для разработки на C/C++. Вам необходима последняя версия Eclipse, плагин для C/C++ и, возможно, обновление пакета разработчика GTK. Самый лёгкий способ заставить простое приложение выполняться - это создать проект C и добавить в флаги компилятора и линковщика флаги `pkg-config --cflags --libs gtk+-2.0`. После этого посетите страницу [http://library.gnome.org/devel/gtk-tutorial/stable/ GTK tutorial] и, следуя этим инструкциям, создайте простое приложение.
+Eclipse включает в себя модуль для разработки на C/C++. Вам необходима последняя версия Eclipse, плагин для C/C++ и, возможно, обновление пакета разработчика GTK. Самый лёгкий способ заставить простое приложение выполняться - это создать проект C и добавить во флаги компилятора и линковщика флаги `pkg-config --cflags --libs gtk+-2.0`. После этого зайдите на страницу [http://library.gnome.org/devel/gtk-tutorial/stable/ GTK tutorial] и, следуя данным там инструкциям, создайте простое приложение.
 
 Данное решение не только сокращает время разработки, но также позволяет использовать отладчик Eclipse для разработки на C.
 
-Исполняемый файл для мобильного телефона создаётся из тех же самых исходных кодов, используя средства разработки Openmoko. Так как процессы сборки под настольный компьютер и под Openmoko различиаются, самым лучшим вариантом является создание двух окружений разработки и создание символических ссылок для них.
+Исполняемый файл для мобильного телефона обычно создаётся из тех же самых исходных кодов, что и при отдадке на настольном компьютере, с использованием [[Toolchain|средств разработки Openmoko]]. Так как процессы сборки под настольный компьютер и под телефон Openmoko различаются, самым лучшим вариантом является создание двух окружений разработки и создание символических ссылок для них.
 
 After producing the Openmoko executable, it may be reasonable to try it via X, using the keyboard, mouse and screen of the desktop computer. All you need is to use the  -X option in the ssh command when you log in into the connected mobile phone. After that, you should be able to run the application inside the phone but have its X window on a screen of the desktop machine. This way you can check the actual execution speed and have access to the mobile phone devices that are not present on PC.
 
@@ -13,17 +13,17 @@ Eclipse allows to add the custom builder to the project. These builders can be e
 
 == Установка конфигурации создания Freerunner==
 
-# установите [[Toolchain]]
-# откройте 'Properties' для вашего проекта C или C++
-# выберите 'C/C++ Build'->'Tool Settings'
-# Кликните на 'Configuration'->'Manage' и создайте новую конфигурацию например. Freerunner (скопируйте настройки с конфигурации 'Relase' )
+# Установите [[Toolchain]]
+# Откройте 'Properties' для вашего проекта C или C++
+# Выберите 'C/C++ Build'->'Tool Settings'
+# Выберите 'Configuration'->'Manage' и создайте новую конфигурацию, например "Freerunner" (скопируйте настройки с конфигурации 'Release')
 # измените GCC C||C++||Assembler Compiler command на /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/gcc||g++||as
 # измените GCC Linker Command на /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/gcc (g++ для проектов C++)
-# идите 'Build Steps' и добавьте ". /usr/local/openmoko/arm/setup-env" к 'Pre-build step'
-# щелкните на Ok и выберите 'Freerunner' в 'Active Build Configuration' для вашего проекта
+# Перейдите в 'Build Steps' и добавьте ". /usr/local/openmoko/arm/setup-env" к 'Pre-build step'
+# Щелкните на Ok и выберите 'Freerunner' в 'Active Build Configuration' для вашего проекта
 
 ----
-Поправки для Eclipse Ganymed (3.4)
+Поправки для Eclipse Ganymede (3.4)
 
 There are three places where you have to change settings as above in Project Properties -> C/C++ Build -> Settings -> Tool Settings
 #GCC C Compiler -> Command: /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/gcc
@@ -33,12 +33,11 @@ There are three places where you have to change settings as above in Project Pro
 --[[User:Perty|Perty]] 20:22, 18 September 2008 (UTC)
 ----
 
-
-вы можеет скопировать свои бинарники на Freerunner через добавление команды Post-Build в 'Build Steps' так.
+Вы можеет скопировать свои бинарники на Freerunner через добавление команды Post-Build в 'Build Steps':
 
 scp ${имя_проекта} root@neo:/home/root/dev_app/
 
-или вы можете запустить ваше приложение на Freerunner добавив в конфигурацию Run
+или же запустить ваше приложение на Freerunner, добавив в конфигурацию Run:
 
 C/C++ Application: /usr/bin/ssh
 Arguments: root@neo "cd dev_app && DISPLAY=:0 ./${project_name}"
@@ -47,77 +46,85 @@ Arguments: root@neo "cd dev_app && DISPLAY=:0 ./${project_name}"
 
 ==Настройка Eclipse для разработки с Qt4==
 
-===Настройка Environment с Libraries===
+===Настройка Environment и Libraries===
 
-*Установите [[Toolchain]]
-
-*Установите Eclipse с C/C++ development plug-in
-
-*Добавьте Anstrom Repository в '''Host'''-toolchain и также '''FreeRunner'''
-**Добавьте Anstrom Repository в '''Host'''-toolchain:
+* Установите [[Toolchain]]
+* Установите Eclipse с C/C++ development plug-in
+* Добавьте Anstrom Repository в '''Host'''-toolchain и также '''FreeRunner'''
+** Добавьте Anstrom Repository в '''Host'''-toolchain:
+<pre>
 echo arch base 50 >> /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/etc/opkg.conf
 echo src/gz base http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base >> /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/etc/opkg.conf
+</pre>
 
-и тогда ..
+Затем:
+
+<pre>
 opkg-target update
 opkg-target install qt4-x11-free
 opkg-target install qt4-x11-free-dev qt4-designer qt4-assistant
+</pre>
 
-**Add the [[Users Repositories|Anstrom Repository]] also to the '''FreeRunner''' and do:
+**Также добавьте [[Users Repositories|Anstrom Repository]] в '''FreeRunner''', после чего выполните:
+<pre>
 opkg update
 opkg install qt4-x11-free
+</pre>
 
 ===Конфигурирование проекта Eclipse ===
-Project - right click - Properties --> C/C++ Build -- Tab "Tool Settings"
+Project - Properties --> C/C++ Build -- Закладка "Tool Settings"
 
 ====Конфигурация: Debug====
 
-*GCC c++ compiler -> Directories --- add
-/usr/include/qt4
-/usr/include/qt4/QtGui
-
-*GCC C++ Linker -> Libraries ---add
-**Libraries (-l):    QtCore and QtGui
-**Library search path (-L):    /usr/lib
+*GCC c++ compiler -> Directories - добавить "/usr/include/qt4" и "/usr/include/qt4/QtGui"
+*GCC C++ Linker -> Libraries - установить:
+**Libraries (-l): "QtCore" и "QtGui"
+**Library search path (-L): "/usr/lib"
 
 ====Конфигурация: Freerunner====
 
-Project - right click - Properties --> C/C++ Build -- Tab "Tool Settings"
+Project - Properties --> C/C++ Build -- Закладка "Tool Settings"
 
-Создаем конфигурацию "Freerunner":
-кликнув 'Configuration'->'Manage' и создав новую конфигурацию например Freerunner (скопируйте настройки из конфигурации 'Relase')
+Создаём конфигурацию "Freerunner", выбрав 'Configuration'->'Manage' и создав новую конфигурацию, например "Freerunner" (скопируйте настройки из конфигурации 'Release')
 
 *GCC C++ Compiler
-**Command: /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/g++
+<pre>
+/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/g++
+</pre>
 *GCC C++ Compiler -> Directories
+<pre>
 /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/include/qt4/QtCore
 /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/include/qt4/QtGui
 /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/include/qt4
 /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/include/c++/4.1.2/arm-angstrom-linux-gnueabi
 /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/include/c++/4.1.2
 /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/include/c++/4.1.2/backward
-
+</pre>
 *GCC C++ Linker
-**Command:    /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/g++
-
+<pre>
+/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/g++
+</pre>
 *GCC C++ Linker -> Libraries --- add
-**Libraries (-l): QtCore and QtGui
-**Library search path (-L):    /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/lib
-
+**Libraries (-l): "QtCore" и "QtGui"
+**Library search path (-L): "/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/lib"
 * GCC Assembler
-**Command: /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/as
+<pre>
+/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/as
+</pre>
 
-перейдем к закладке 'Build Steps' и добавим ". /usr/local/openmoko/arm/setup-env" к 'Pre-build step'
+Затем переходим к закладке 'Build Steps' и добавляем ". /usr/local/openmoko/arm/setup-env" к 'Pre-build step'
 
 ====workaround to deal with .ui файлы с Qt-Designer====
 
-mayby somody has a better solution please correct!!
+Если у кого-то есть решение получше, не держите это в себе, расскажите здесь о нём!
 
-Create a project with properties as mentioned above.
-Для компилирования вашего проекта вызовите терминал в Project-Folder и введите там
+Создайте новый проект с вышеперечисленными свойствами.
+Для компилирования вашего проекта вызовите терминал в Project - Folder и введите:
+<pre>
 qmake-qt4 -project
 qmake-qt4
 make
-и теперь собирайте ваш проект с Eclipse Configuration "Freerunner"
+</pre>
+и собирайте ваш проект с конфигурацией "Freerunner".
 
 [[Category:Application Developer/ru]]
