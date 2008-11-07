@@ -195,61 +195,90 @@ You will need to enter the uboot shell of the NAND boot menu for this. A descrip
 
 After you read these two references you should be connected to your NAND uboot shell right now. The first thing to do is to set the boot menu timeout to a really high value. Unfortunately if you don't do this, the boot loader will continue booting after the default timeout (60 seconds) even if you are connected to the uboot shell. Just enter the following command to the menu prompt:
 
- setenv boot_menu_timeout 99999
+<pre>
+setenv boot_menu_timeout 99999
+</pre>
 
 This will set the timeout to 99999 seconds which should definitely enough time for us finish whatever work we want accomplish in the boot loader shell.
 
-Now we will make sure a appropriate menu item for booting from sd exists, or create it otherwise. You can print the defined boot loader environment by issuing the command: 
+Now we will make sure a appropriate menu item for booting from sd exists, or create it otherwise. You can print the defined boot loader environment by issuing the command:
 
- printenv
+<pre>
+printenv
+</pre>
 
 If it shows a line beginning with ''menu_'' followed by the commands which are just to follow in this guide, you do not need to create a new menu entry. In any other case please proceed with the following.
 
-Please make sure you are using the correct configuration based on the decisions you made earlier.  For more information on the uboot prompt, see 
- help 
- help <command>
-and [[Bootloader]] and [[Bootloader commands]].
+Please make sure you are using the correct configuration based on the decisions you made earlier.  For more information on the uboot prompt, see
+* help
+* help <command>
+* and [[Bootloader]] and [[Bootloader commands]].
 
 {{Note| The backslashes (\) are important for uboot to set the command as new environment variable (menu_9) instead of just executing them as soon as enter is pressed.}}
 
 {{Note| Copy and paste may not work depending on your terminal emulator. Commi just works or you can use [[NeoCon|neocon]] terminal emulator and add a per-character delay.  Otherwise, you will have to type in the commandline manually.}}
 
-It is important to distinguish between FAT or ext2 kernel partitions and ext2 or ext3 root partitions at this point. 
+It is important to distinguish between FAT or ext2 kernel partitions and ext2 or ext3 root partitions at this point.
 
-Please watch partition numbers in the following commands.  In particular, you may need to change root=/dev/mmcblk0p'''#''' and fatload mmc '''#''' or ext2load mmc '''#''' depending on which partition number your root and kernel, respectively, are located.  Number starts from unity.
+Please watch partition numbers in the following commands.  In particular, you may need to change some of
+<pre>
+root=/dev/mmcblk0p#
+fatload mmc#
+ext2load mmc#
+</pre>
+depending on which partition number your root and kernel, respectively, are located.  Number starts from unity.
 
 '''Boot entry for FAT kernel+ext3 rootfs partitions:'''
 
- setenv menu_9 Boot from microSD (FAT+ext3): setenv bootargs \${bootargs_base} rootfstype=ext3 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
+<pre>
+setenv menu_9 Boot from microSD (FAT+ext3): setenv bootargs \${bootargs_base} rootfstype=ext3 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
+</pre>
 
 '''Boot entry for FAT kernel+ext2 rootfs partitions:'''
 
- setenv menu_9 Boot from microSD (FAT+ext2): setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
+<pre>
+setenv menu_9 Boot from microSD (FAT+ext2): setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
+</pre>
 
-or : with additional 'init=/sbin/init' kernel parameter (may be needed for some images) :
- setenv menu_9 Boot 200808 from microSD (FAT+ext2): setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} init=/sbin/init ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
+or: with additional 'init=/sbin/init' kernel parameter (may be needed for some images):
+
+<pre>
+setenv menu_9 Boot 200808 from microSD (FAT+ext2): setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} init=/sbin/init ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
+</pre>
 
 '''Boot entry for ext2 kernel+ext2 rootfs partitions: (requires newer u-boot)'''
 
- setenv menu_2 Boot from microSD part2 (ext2+ext2): setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; ext2load mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
+<pre>
+setenv menu_2 Boot from microSD part2 (ext2+ext2): setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; ext2load mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
+</pre>
 
 '''Boot entry for kernel and rootfs on same ext2 partition (tested with Qtopia/requires newer u-boot)'''
- setenv menu_3 QTopia: setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p1 rootdelay=5 \${mtdparts} ro\; mmcinit\; ext2load mmc 1:1 0x32000000 \${sd_image_name}\; bootm 0x32000000
+
+<pre>
+setenv menu_3 QTopia: setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p1 rootdelay=5 \${mtdparts} ro\; mmcinit\; ext2load mmc 1:1 0x32000000 \${sd_image_name}\; bootm 0x32000000
+</pre>
+
 You are nearly done. Just issue a
 
- printenv
+<pre>
+printenv
+</pre>
 
-and verify that your newly created entry is correctly displayed (This time the backslashes are not displayed anyone).
+and verify that your newly created entry is correctly displayed (This time the backslashes are not displayed anymore).
 
 If everything looks fine enter
 
- saveenv
+<pre>
+saveenv
+</pre>
 
 into the prompt and press enter. The new configuration should now be saved to the NAND.
 
 Shutdown your neo with the following command:
 
- neo1973 power-off
+<pre>
+neo1973 power-off
+</pre>
 
 After you restarted the Neo and got back to the NAND boot menu you should be able to select your newly created menu entry and successfully boot into the rootfs from your SD card.
 
