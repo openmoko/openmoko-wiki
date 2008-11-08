@@ -1,0 +1,34 @@
+__NOTOC__
+= SanDisk SDSDQ-016G-E11M =
+
+Tested with an Freerunner (GTA02v6).
+Other software setups may work too. Important in any case is to have a recent [[Flashing_the_Neo_FreeRunner#Flashing_the_boot_loader_to_the_NAND|u-boot in your NAND]].
+
+== Setup ==
+* QtExtend 4.4.2 on flash, Debian on microSD
+* Kernel 2.6.24 from [http://moko.mwester.net/dl.html#kernels here]
+* The card was formatted with ext2 filesystems during Debian installation:
+<pre>
+root@om-gta02:~# fdisk -l /dev/mmcblk0
+
+Disk /dev/mmcblk0: 15.9 GB, 15931539456 bytes
+4 heads, 16 sectors/track, 486192 cylinders
+Units = cylinders of 64 * 512 = 32768 bytes
+
+Device Boot              Start         End      Blocks  Id System
+/dev/mmcblk0p1               1         245        7832  83 Linux
+/dev/mmcblk0p2             246      486192    15550304  83 Linux
+</pre>
+* '''Most important''': Add extra settle time for sd card, see posting (section references) for a how to.
+
+== Pending Issues ==
+* mmcinit reports false card size [https://docs.openmoko.org/trac/ticket/1815 1815]. But works fine once booted.
+* [[Booting_from_SD#Booting_from_SDHC_.2F_suspend_problems|Suspend]] may mangle your filesystem. Workaround: Disable suspend or, once mangled: Boot from flash and then issue:
+
+<pre>fsck.ext2 -y /dev/mmcblk0p2</pre>
+* Running halt after booted from sd card may mangle your filesystem too. Workaround: add extra sync:
+<pre>
+sync; halt
+</pre>
+== References ==
+* [http://lists.openmoko.org/pipermail/community/2008-November/035412.html Original posting]
