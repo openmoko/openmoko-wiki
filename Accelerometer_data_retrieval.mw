@@ -52,26 +52,26 @@ in which the data is provided.
 The structure of the given data is based on the kernel input event message
 system which exports the following data structure:
 
- struct input_event {
-     struct timeval time;
-     __u16 type;
-     __u16 code;
-     __s32 value;
- };
+struct input_event {
+struct timeval time;
+__u16 type;
+__u16 code;
+__s32 value;
+};
 
 The data is written to the stream message by message. Therefore the minimal
-used blocksize is 128 bit (16 byte). 
+used blocksize is 128 bit (16 byte).
 
 Lets have a look at an example readout of the accelerometer data, divided into
 the used sections.
 
- |----- time ------|  |type| |code|  |-value-|
- 8c66 4819 721c 0006   0002   0002   03a8 0000
- 8c66 4819 7222 0006   0000   0000   0000 0000
- 8c66 4819 99e6 0006   0002   0000   0048 0000
- 8c66 4819 9a36 0006   0002   0001   0024 0000
- 8c66 4819 9a50 0006   0002   0002   0396 0000
- 8c66 4819 9a57 0006   0000   0000   0000 0000
+|----- time ------|  |type| |code|  |-value-|
+8c66 4819 721c 0006   0002   0002   03a8 0000
+8c66 4819 7222 0006   0000   0000   0000 0000
+8c66 4819 99e6 0006   0002   0000   0048 0000
+8c66 4819 9a36 0006   0002   0001   0024 0000
+8c66 4819 9a50 0006   0002   0002   0396 0000
+8c66 4819 9a57 0006   0000   0000   0000 0000
 
 
 I think the time structure does not need further explaination. A lot more
@@ -137,48 +137,48 @@ signal the end of the block.
 The following example is such a message block with detailed explanation of its
 different messages and data sections.
 
- 8c66 4819 99e6 0006   0002   0000   0048 0000
- |------Time-------|  EV_REL  REL_X  |-Value-|
- (Measured acceleration in x axis direction of 72)
- 
- 8c66 4819 9a36 0006   0002   0001   0024 0000
- |------Time-------|  EV_REL  REL_Y  |-Value-|
- (Measured acceleration in y axis direction of 36)
- 
- 8c66 4819 9a50 0006   0002   0002   0396 0000
- |------Time-------|  EV_REL  REL_Z  |-Value-|
- (Measured acceleration in z axis direction of 918)
- 
- 8c66 4819 9a57 0006   0000   0000        0000 0000
- |------Time-------|  EV_SYN  SYN_REPORT  |-Value-|
- (The transmitted data block is complete you may process the given data)
+8c66 4819 99e6 0006   0002   0000   0048 0000
+|------Time-------|  EV_REL  REL_X  |-Value-|
+(Measured acceleration in x axis direction of 72)
+
+8c66 4819 9a36 0006   0002   0001   0024 0000
+|------Time-------|  EV_REL  REL_Y  |-Value-|
+(Measured acceleration in y axis direction of 36)
+
+8c66 4819 9a50 0006   0002   0002   0396 0000
+|------Time-------|  EV_REL  REL_Z  |-Value-|
+(Measured acceleration in z axis direction of 918)
+
+8c66 4819 9a57 0006   0000   0000        0000 0000
+|------Time-------|  EV_SYN  SYN_REPORT  |-Value-|
+(The transmitted data block is complete you may process the given data)
 
 
 ==Test application==
 
 A simple test application written in ruby:
- #!/usr/bin/env ruby
- x = 0
- y = 0
- z = 0
- File.open("/dev/input/event3") do |f|
-   while true
-     event = f.read(16).unpack("llSSl")
-     time = event[0] + event[1] / 1000000.0
-     type = event[2]
-     code = event[3]
-     value = event[4]
-     if type == 2
-       x = value if code == 0
-       y = value if code == 1
-       z = value if code == 2
-     end
-     if type == 0 && code == 0
-       sum = Math::sqrt(x*x + y*y + z*z).to_i
-       printf("%5d %5d %5d %5d\n", x, y, z, sum)
-     end
-   end
- end
+#!/usr/bin/env ruby
+x = 0
+y = 0
+z = 0
+File.open("/dev/input/event3") do |f|
+while true
+event = f.read(16).unpack("llSSl")
+time = event[0] + event[1] / 1000000.0
+type = event[2]
+code = event[3]
+value = event[4]
+if type == 2
+x = value if code == 0
+y = value if code == 1
+z = value if code == 2
+end
+if type == 0 && code == 0
+sum = Math::sqrt(x*x + y*y + z*z).to_i
+printf("%5d %5d %5d %5d\n", x, y, z, sum)
+end
+end
+end
 
 Equivalent version in python:
 
@@ -197,37 +197,62 @@ fmt = 'iihhi'
 in_file = open(secondsensorfile,"rb")
 event = in_file.read(16)
 while event:
-	(time1,time2, type, code, value) = \
-		struct.unpack(fmt,event)
-	time = time1 + time2 / 1000000.0
+(time1,time2, type, code, value) = \
+struct.unpack(fmt,event)
+time = time1 + time2 / 1000000.0
 
-	if type == 2:
-		if code == 0:
-			x = value
-		if code == 1:
-			y = value
-		if code == 2:
-			z = value
-	if type == 0 and code == 0:
-		sum = int(sqrt(x*x + y*y + z*z))
-		print x, y, z, sum
-	event = in_file.read(16)
+if type == 2:
+if code == 0:
+x = value
+if code == 1:
+y = value
+if code == 2:
+z = value
+if type == 0 and code == 0:
+sum = int(sqrt(x*x + y*y + z*z))
+print x, y, z, sum
+event = in_file.read(16)
 in_file.close()
 
 </pre>
 
+Equivalent version in perl:
+<pre>
+#!/usr/bin/perl
+
+$x = 0;
+$y = 0;
+$z = 0;
+
+$secondsensorfile = "/dev/input/event3";
+#open file in binary mode
+open FILE, $secondsensorfile;
+binmode FILE;
+
+while (read FILE, $buf,16) {
+    ($t1,$t2,$type,$code,$value)=unpack "iissi",$buf;
+    if ($type==2) {
+	if ($code==0) {$x=$value};
+	if ($code==1) {$y=$value};
+	if ($code==2) {$z=$value};
+    }
+    if (($type==0) && (code==0)) {
+        printf "%f %05d %05d %05d\n",$t1+$t2/1000000,$x,$y,$z;
+    }
+}
+</pre>
 == The /sys interface ==
 
 To get the sampling rate of the first accelerometer ''spi0.0'' :
 
- # cat /sys/bus/spi/drivers/lis302dl/spi0.0/sample_rate
- 100
+# cat /sys/bus/spi/drivers/lis302dl/spi0.0/sample_rate
+100
 
 To set the sampling rate :
 
- # echo 400 > /sys/bus/spi/drivers/lis302dl/spi0.0/sample_rate
- # cat /sys/bus/spi/drivers/lis302dl/spi0.0/sample_rate
- 400
+# echo 400 > /sys/bus/spi/drivers/lis302dl/spi0.0/sample_rate
+# cat /sys/bus/spi/drivers/lis302dl/spi0.0/sample_rate
+400
 
 The other one is ''spi0.1''. See [[GTA02 sysfs#Accelerometers]] for the other options.
 
@@ -241,5 +266,6 @@ The other one is ''spi0.1''. See [[GTA02 sysfs#Accelerometers]] for the other op
 * [http://dev.borza.ro/demo/Motion-based%20Gesture%20Recognition%20with%20an%20Accelerometer/Paper.pdf Motion-based Gesture Recognition with an Accelerometer - Paper]
 * [http://www.youtube.com/watch?v=s5QMW8k5nis YouTube video: Playing with Accelerometers]
 * [http://westhoffswelt.de/blog/my_first_openmoko_application.html Magic Eightball Application using the Accelerometers]
+
 [[Category:Accelerometer]]
 [[Category:Application Developer]]
