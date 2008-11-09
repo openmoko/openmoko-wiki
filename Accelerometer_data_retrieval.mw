@@ -185,6 +185,7 @@ File.open("/dev/input/event3") do |f|
   end
 end
 
+
 </pre>
 
 Equivalent version in python:
@@ -220,6 +221,35 @@ while event:
 		print x, y, z, sum
 	event = in_file.read(16)
 in_file.close()
+
+
+</pre>
+
+Equivalent in Perl
+
+<pre>
+#!/usr/bin/perl
+
+$x = 0;
+$y = 0;
+$z = 0;
+
+$secondsensorfile = "/dev/input/event3";
+#open file in binary mode
+open FILE, $secondsensorfile;
+binmode FILE;
+
+while (read FILE, $buf,16) {
+    ($t1,$t2,$type,$code,$value)=unpack "iissi",$buf;
+    if ($type==2) {
+	if ($code==0) {$x=$value};
+	if ($code==1) {$y=$value};
+	if ($code==2) {$z=$value};
+    }
+    if (($type==0) && (code==0)) {
+        printf "%f %05d %05d %05d\n",$t1+$t2/1000000,$x,$y,$z;
+    }
+}
 
 </pre>
 
