@@ -36,6 +36,27 @@ To track the status of which parts of the Android source tree contain ARMv5 spec
 
 Ben Leslie mentioned on the android-porting list that he was able to get the 'Android' logo to appear on his Neo 1973.
 
+=== Windows Connectivity ===
+
+It is possible to get Windows to at least recognize the Android "Ethernet Gadget" and charge the FreeRunner using the Android USB Windows driver (http://dl.google.com/android/android_usb_windows.zip) by modifying the android_usb.inf file in that package before attempting to install the driver.  The following modifications are required:
+
+Add the following to the [Google.NTx86] section of the android_usb.inf file:
+
+<pre>
+; Neo FreeRunner
+%USB\VID_1457&PID_5117.DeviceDescRelease%=androidusb.Dev, USB\VID_1457&PID_5117
+%USB\VID_1457&PID_5117&MI_01.DeviceDescRelease%=androidusb.Dev, USB\VID_1457&PID_5117&MI_01
+</pre>
+
+and add the following to the to the [Strings] section of the android_usb.inf file:
+
+<pre>
+USB\VID_1457&PID_5117.DeviceDescRelease="Neo FreeRunner"
+USB\VID_1457&PID_5117&MI_01.DeviceDescRelease="Neo FreeRunner Composite ADB Interface"
+</pre>
+
+The Windows version of adb does not appear to recognize the connected device yet but at least the FreeRunner charges and the device driver indicates that "This device is working properly."
+
 = How to Help =
 
 == Getting Started ==
