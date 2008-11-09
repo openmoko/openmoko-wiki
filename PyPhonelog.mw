@@ -1,109 +1,26 @@
 {{Languages|PyPhonelog}}
 
-This page now manily discusses the PyPhonelog gtk+ gui.
-
-If you want the gui to work with finger scrolling, download:
-[http://downloads.tuxfamily.org/3v1deb/openmoko/python-mokoui2_0.1.0+svnr4342_armv4t.ipk python-mokoui2]
-
-SHR users are suggested not to install this daemon as the default in the config (changeable) uses the SHR daemon.
-
-Please check out the config file which resides at:
-~/.phonelog/phonelog.conf
-for a couplef of interesting config options.
-
-About the daemon:
-
 This daemon uses the framework to track and log all the calls made to and from the moko.
-Because it uses the framework, it's limited to [[FSO]] supporting distributions only. The daemon uses sqlite and currently (Read: Has to change) keeps the database in "/home/root/.phonelog.db". It has a dbus interface which enables pulling out incoming/outgoing and missed calls including the time the call was placed at.
+Because it's uses the framework, it's limited to [[FSO]] supporting distributions only. The daemon uses sqlite and currently (Read: Has to change) keeps the database in "/home/root/.phonelog.db". It has a dbus interface which enables pulling out incoming/outgoing and missed calls including the time the call was placed at.
+There might (Read: will) be changes with the datatypes used by the dbus interface since the dbus return signature is now aas which isn't suitable for sending timestamps (current hack: converting the linux time to string and then back), and furthermore, using a dictionary is far more elegant.
 
-This daemon uses the "org.smartphone.opimd" dbus bus name. It's by no means the expected opimd, it's just a daemon that uses this name because it makes sense!
+This daemon uses the "org.smartphone.opimd" dbus bus name.
 
-= Installation =
-* Install the pyphonelog (gui) package.
-* Install pyphonelogd (daemon) as well.
-'''Notice:''' (If you use [[SHR]] you don't have to install this daemon.)
+This package also includes a working gtk+ gui for use with the daemon.
 
-I strongly suggest adding the following configs to your gtkrc:
- style "treeview"
- {   
-     GtkTreeView::expander-size = 40
- }
- widget_class "*TreeView*" style "treeview"
-
-= Files =
+= Package =
 * author: Tom Hacohen <available_at_profile>
-* code is at: [http://shr.bearstech.com/git/?p=pyphonelog.git;a=tree;hb=HEAD git]
-* gui: [http://shr.bearstech.com/shr-testing/ipk/armv4t/pyphonelog_0.15.10-r0.1_armv4t.ipk package] 
-* daemon: [http://www.stosb.com/openmoko/pyphonelogd_0.11.0_armv4t.ipk package]
-
-= Important Notices =
-* The gui and the daemon are now in different packages, and the packages no longer comply with the older package name. To install this version please first 'opkg remove fso-phonelog' if you had a version older than 0.9.0 before.
-* The gui now supports the SHR phone logger so users that run SHR should not install the pyphonelogd. (Actually they should if they don't use the latest git generated package, the logger isn't yet up stream).
-
-=Change Log=
-This changelog is now mainly for the legacy daemon, for pyphonelog's changelog please refer to the git commit log.
-(Major changes may still be listed here)
+* this is a python script so code resides in /usr/bin/phonelogd and /usr/bin/phonelog untill I open a proper place for it.
+* link: [http://stosb.com/openmoko/fso-phonelog_0.1_armv4t.ipk package]
 
 
-'''DAEMON: 0.11.0'''
-* It now supports limiting the lists sizes though only it requires the newest pyphonelog (0.15.1-r2)
-'''0.15.1'''
-* Fixed a major issue causing the fallback to legacy daemon not to work..
-'''0.15.0'''
-* Added support for config vars of all types, and added many new configuration options
-'''0.14.0'''
-* Added a configuration file, it now only supports one option 'phonekitd = True/False' (True by default, falls back to the legacy if phonekitd isn't found, change to False to force legacy use) this option must reside in the configuration file, though many will be added in the future. The configuration now resides in ~/.phonelog/phonelog.conf also moved the time file.
-'''0.13.2'''
-* Fixed the bug concerning the daemon with empty lists.
-'''0.13.1'''
-* Fixed some major bugs rendering 0.13 useless with the legacy daemon.
-'''0.10.0 - DAEMON'''
-* The done now conforms with gui completely, every gui feature is supported.
-'''0.13.0'''
-* Added the general list tab.
+== TODO ==
+* add integration with phonebook so it will get the name as well as the number
+* fix the dbus interface to work with dictionaries and fix the idiotic to string conversion.
+* add a limit to x records and erase log options
+* find out where to get the libmokoui2 python bindings from
 
-
-'''NOTICE:''' all of the other changes were removed to improve page readability, if you want to view them, please go to this page's history.
-
-= TODO =
-Watch the TODO file in the git tree.
-
-= Known Issues =
-1.
- sqlite3.OperationalError: no such table: calls
-This means your ophonekitd's version is too old and you should update it!
-If you already have and the problem still consists, do the following:
- killall ophonekitd
- rm /var/db/phonelog.db
- DISPLAY=:0.0 ophonekitd & > /dev/null
-
-2. 
- ERROR:dbus.connection:Unable to set arguments ('incoming', 50) according to signature u's': <type 'exceptions.TypeError'>: Fewer items found in D-Bus signature than in Python arguments
-This means you are using an old version of the legacy daemon with an new version of pyphonelog, please upgrade the daemon.
-
-3.
- dbus.exceptions.DBusException: org.freedesktop.DBus.Error.ServiceUnknown: The name org.smartphone.opimd was not provided by any .service files
-This means you are trying to run the gui without any backend daemon installed please install the daemon, or if you use shr, please update ophonekitd to the latest.
-
-4.
-You see the numbers as "234234" instead of just 3224234 in the numbers tab, this is the (frameworks?) double quotes bug, please just install version >= 0.15.3 where a workaround is added.
-
-6. You get a very small expand groups triangles, that's an issue with the gtkrc you are using, please refer to the [[PyPhonelog#Installation|Installation]] section.
-
-=Screeshots=
-'''TODO: These pictures are old, should add new ones!'''
-
-
-[[Image:pyphonelog1.png]]
-[[Image:pyphonelog2.png]]
-[[Image:pyphonelog3.png]]
-[[Image:pyphonelog4.png]]
-
-This one is newer than the others, their list structure (expanding and stuff) is still there, though you can now change the tab names to icons or to different texts, and you can also show the call duration.
-
-[[Image:pyphonelog5.png]]
 [[Category:FSO]]
 [[Category:Debian]]
 [[Category:SHR]]
-[[Category:Middleware]]
 [[Category:Telephony]]
