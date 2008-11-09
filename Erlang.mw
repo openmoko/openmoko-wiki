@@ -90,9 +90,42 @@ Copy Xauthority from host
 scp .Xauthority phone:/home/root
 </pre>
 
-Test your setup by issuing the command ./cean/start.sh and in erlang shell type hello_buttons:start(). Note that the dot is mandatory after each erlang statement.
+When everything is installed you can try this "hello World" code to verify the platform. It will create an empty window.
+<pre>
+-module(test).
+-export([start/0]).
+-import(ex11_lib,[eMapWindow/1,xDo/2,xFlush/1,xColor/2,xCreateSimpleWindow/7]).
+-include("ex11_lib.hrl").
+-define (WT,480).
+-define (HT,640).
 
-You should get a window with two small buttons at the top.
+start() -> spawn(fun win/0).
+
+win() ->
+{ok, Display} = ex11_lib:xStart("3.1"),
+Win = xCreateSimpleWindow(Display,0,0,?WT,?HT,?XC_arrow,xColor(Display,?blue)),
+xDo(Display, eMapWindow(Win)),
+xFlush(Display),
+loop().
+
+loop() ->
+receive
+Any -> io:format("Unknown Event~p~n",[Any]), loop()
+end.
+</pre>
+Put this code in a file named test.erl Start erlang console
+
+<pre>
+./cean/start.sh
+</pre>
+
+and compile and run the file with
+<pre>
+c(test).
+test:start().
+</pre>
+
+Note that it is ok to create and compile the file on your host and copy the compiled file "test.beam" to the phone.
 
 == Installation on Debian distribution ==
 
