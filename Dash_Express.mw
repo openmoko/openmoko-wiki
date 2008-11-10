@@ -1,8 +1,8 @@
-[[DashExpress]] is a device developed by a 3rdparty. For more information about phones developed by openmoko or are based on openmoko products, visit [[Phone Development]]. 
+The '''Dash Express''' ('''HXD8''') is a networked collaborative automotive GPS unit from http://dash.net/ which was developped by Openmoko.
 
-The Dash Express is based off of the legendary [[HXD8]]. The FCC ID is: EUNHXD8V2. It does have a debug port that is compatible with the Openmoko [[Debug Board v3]]. It is fairly hard to get to (for a FR). It sits underneath the screen.
+The FCC ID is: EUNHXD8V2. It does have a debug port that is compatible with the Openmoko [[Debug Board v3]]. It is fairly hard to get to (for a FR). It sits underneath the screen.
 
-It has 3GB of internal flash. The DFU map is below: 
+It has 3GB of internal flash. The DFU map is below:
 
 <pre>
 Found DFU: [0x1cd8:0x511a] devnum=13, cfg=0, intf=0, alt=1, name="u-boot"
@@ -20,7 +20,51 @@ Found Runtime: [0x0a5c:0x2110] devnum=5, cfg=0, intf=3, alt=0, name="UNDEFINED"
 
 The serial interface is available only for u-boot. You can put it into DFU mode, and change the authorized_keys file to log into the unit.
 
-I need to add more information to this page. I'm lazy. Hit me on irc: Sargun.
---[[User:Sdhillon|Sdhillon]] 18:20, 11 August 2008 (UTC)
+==Hardware==
+From the information found in the [https://svn.openmoko.org/trunk/doc/hardware/HXD8v011/ hardware documentation] and [https://svn.openmoko.org/trunk/src/target/kernel/patches/ kernel patches] parts of the subversion repositories, the following specifications can be predicted. The HXD8v2 has shipped under the FCC ID [https://fjallfoss.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500 EUNHXD8V2]
+
+===Processor===
+According to https://svn.openmoko.org/trunk/src/target/kernel/patches/s3c2440-nand-disable-hwecc.patch the HXD8 will feature an [http://www.samsung.com/Products/Semiconductor/common/product_list.aspx?family_cd=MSC0102 S3C2440], capable of running up to 400MHz. The features are the same as the [http://www.samsung.com/products/semiconductor/MobileSoC/ApplicationProcessor/ARM9Series/S3C2410/S3C2410.htm S3C2410] plus a camera interface.
+*GPIO Assignments: https://svn.openmoko.org/trunk/doc/hardware/HXD8v011/gpio.txt
+
+===Flash===
+According to a currently available hardware patch, the device supports 1 NAND Flash device of up to 4G. (uncertain about what kind of G that is. Could be 4Gb (which makes about 0,5GB), could be 4GB).
+
+The DE has 3G of Flash, and there is no NOR.
+
+Some other patch implies that there is the possibility of connecting 3 NAND Flash chips.
+
+===RAM===
+128MB Random Access Memory, of which 2MB is used as a Framebuffer. https://svn.openmoko.org/trunk/src/target/u-boot/patches/uboot-hxd8.patch
+
+===GSM/GPRS===
+Using same GSM modem on GTA01 and GTA02, TI Calypso with 850/1800/1900 configuration.
+
+=== SD-Card ===
+The HXD8 features either an SD, miniSD or microSD-card slot.
+* Connected to: S3C2410 MMC/SD controller
+* Driver: https://svn.openmoko.org/trunk/src/target/kernel/patches/s3c_mci.patch
+
+===LCD Module (LCM)===
+The HXD8 features a 480x272 pixel LCD (which is a widescreen (16:9) ratio) with PWM-controlled backlight.
+
+
+
+===Light Sensor===
+The HXD8 features a light sensor by TAOS Inc. (Texas Advanced Optoelectronic Solutions). It's either a [http://www.taosinc.com/product_detail.asp?cateid=4&proid=59 TLS2560] or a [http://www.taosinc.com/product_detail.asp?cateid=4&proid=60 TLS2561]. This light sensor will be included to measure ambient illuminance to control the LCM backlight illumination, or for exposure control for the camera (depends on location of the chip).
+*Datasheet: [http://www.taosinc.com/images/product/document/tsl2560-e53.pdf tsl2560-e53.pdf]
+
+===Power Management===
+A Philips PCF50606 is used for power management.
+
+* Data Sheet: [http://www.nxp.com/acrobat/literature/9397/75009763.pdf PCF50606/605]
+* User Manual: [http://www.rockbox.org/twiki/pub/Main/DataSheets/pcf50606.pdf pcf50606.pdf]
+* Connected to: S3C2440 via I2C.
+
+===WiFi===
+HXD8 features an SPI-connected Marvell 8686 based WiFi module.
+
+===GPS===
+The PMU chip's config contains a voltage group called GPS_3V3, and the [https://svn.openmoko.org/trunk/doc/hardware/HXD8v011/gpio.txt gpio.txt] a set of GPS UART data pins. HXD8 using SirfSTAR III based module solution
 
 [[Category:Hardware]]
