@@ -62,7 +62,7 @@ Builds from the last days of August tend to suspend after 30s no matter what you
 
 Alex reportedly solved the problem going into Illume Settings, then Power, and setting to OFF the 2 parameters. He still gets the screensaver, but can reactivate easily just by touching.
 
-If resume breaks audio (the ringing of the phone or for calling someone) a very probable reason is that the pulseaudio sound server is installed. This happens e.G. when openmoko-mediaplayer2 is installed. There seems to be [http://lists.openmoko.org/pipermail/openmoko-kernel/2008-August/004877.html activity to fix this application] already, though.
+If resume breaks audio (the ringing of the phone or for calling someone) a very probable reason is that the pulseaudio sound server is installed. This happens e.G. when openmoko-mediaplayer2 is installed. There seems to be [http://lists.openmoko.org/pipermail/openmoko-kernel/2008-August/004877.html activity to fix this application] already, though. ([[User:John|John]]: Already fixed in testing repo, waiting for the next release. See #1831, #1614, #1192)
 
 '''GSM'''
 
@@ -71,14 +71,14 @@ If resume breaks audio (the ringing of the phone or for calling someone) a very 
 * [http://docs.openmoko.org/trac/ticket/1832 Cannot dial numbers starting with * or #]
 
 '''WiFi'''
- 
+
 * [http://docs.openmoko.org/trac/ticket/1929 WiFi can only connect once]
 
 '''Audio quality'''
 
 * [http://docs.openmoko.org/trac/ticket/1640 Improve overall audio]
 
-'''System Software''' 
+'''System Software'''
 
 * [http://docs.openmoko.org/trac/ticket/1736 Boot screen goes into sleep and never wake up if not touch during booting]
 * [http://docs.openmoko.org/trac/ticket/1597 After long suspend, kernel thread events]
@@ -92,22 +92,22 @@ If resume breaks audio (the ringing of the phone or for calling someone) a very 
 * No Updates/Installation are possible or pings to domains because DNS is not working. This problem occurs because the /etc/resolv.conf is empty by default.
 Add these lines in /etc/network/interfaces:
 
- up echo nameserver 208.67.222.222 > /etc/resolv.conf
- up echo nameserver 208.67.220.220 >> /etc/resolv.conf
+up echo nameserver 208.67.222.222 > /etc/resolv.conf
+up echo nameserver 208.67.220.220 >> /etc/resolv.conf
 This is to be inserted below gateway address and above the bluetooth networking. After this it will be set on every reboot.
 
 For resolving DNS without restarting, run the following commands:
 
- echo nameserver 208.67.222.222 > /etc/resolv.conf
- echo nameserver 208.67.220.220 >> /etc/resolv.conf
+echo nameserver 208.67.222.222 > /etc/resolv.conf
+echo nameserver 208.67.220.220 >> /etc/resolv.conf
 This should solve most of your moko side networking issues. If you need any other help please refer to [[USB Networking]]
 
-{{note| [http://en.wikipedia.org/wiki/Resolvconf resolvconf] is installed so should probably be used 
+{{note| [http://en.wikipedia.org/wiki/Resolvconf resolvconf] is installed so should probably be used
 
 '''Problem''': parts of resolvconf are missing:  without the scripts under /etc/network/if-{up,down}.d, and /etc/resolvconf/run/enable-updates and /lib/resolvconf/list-records it does nothing, and even then, /etc/resolvconf/run should probably be a symlink to /var/run, or /etc/resolv.conf needs to be pointed at /etc/resolvconf/run/resolv.conf -- once all that's done, it seems to work as long as you add something like this to /etc/network/interfaces at the end of the usb0 stanza:
 
-    dns-nameservers 192.168.0.200
-    dns-search example.com
+dns-nameservers 192.168.0.200
+dns-search example.com
 
 and add <tt>usb*</tt> above <tt>eth*</tt> in <tt>/etc/resolvconf/interface-order</tt>
 
@@ -117,7 +117,10 @@ and add <tt>usb*</tt> above <tt>eth*</tt> in <tt>/etc/resolvconf/interface-order
 <code>touch /etc/resolvconf/run/enable-updates</code><br>
 <code>cd /etc ; rm resolv.conf ; ln -s /etc/resolvconf/run/resolv.conf .</code><br>
 <code>mkdir /lib/resolvconf/ ; cd /lib/resolvconf/</code><br>
-<code><nowiki>wget http://87.227.108.179/list-records</nowiki></code><br>
+<code>
+
+
+<nowiki>wget http://87.227.108.179/list-records</nowiki> </code><br>
 <code>chmod +x list-records</code><br>
 Edit <code>/etc/network/interfaces</code> and remove the lines:<br>
 <code>       network 192.168.0.0</code><br>
@@ -128,7 +131,7 @@ If we need to use the usb network more then just locally from the computer in th
 
 * Usb-networking will not work until rebooted after initial boot.
 
-'''Usability''' 
+'''Usability'''
 
 * The Pin-Dialog by default just shows letters. You have to slide your finger up/down over the keyboard to make the numbers/uppercase/special characters appear.
 * The installer app doesn't release administrative rights which results in not being able to use opkg. Solution: run "killall packagekitd" (on the freerunner or when ssh'ed in).
