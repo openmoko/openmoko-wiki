@@ -62,7 +62,7 @@ Builds from the last days of August tend to suspend after 30s no matter what you
 
 Alex reportedly solved the problem going into Illume Settings, then Power, and setting to OFF the 2 parameters. He still gets the screensaver, but can reactivate easily just by touching.
 
-If resume breaks audio (the ringing of the phone or for calling someone) a very probable reason is that the pulseaudio sound server is installed. This happens e.G. when openmoko-mediaplayer2 is installed. There seems to be [http://lists.openmoko.org/pipermail/openmoko-kernel/2008-August/004877.html activity to fix this application] already, though. ([[User:John|John]]: Already fixed in testing repo, waiting for the next release. See #1831, #1614, #1192)
+If resume breaks audio (the ringing of the phone or for calling someone) a very probable reason is that the pulseaudio sound server is installed. This happens e.G. when openmoko-mediaplayer2 is installed. There seems to be [http://lists.openmoko.org/pipermail/openmoko-kernel/2008-August/004877.html activity to fix this application] already, though.
 
 '''GSM'''
 
@@ -86,7 +86,15 @@ If resume breaks audio (the ringing of the phone or for calling someone) a very 
 * [http://docs.openmoko.org/trac/ticket/1682 Neo turns off before reaching x]
 
 '''QPE high cpu usage'''
-* qpe does scan whole filesystem ( including SD card ) for documents , mp3 files , etc. If you don't want it you can edit <tt>/opt/Qtopia/etc/default/Trolltech/Storage.conf</tt> and disable Sd Card scanning ( overwrite 1 by 0 ).
+* qpe does scan whole filesystem ( including SD card ) for documents , mp3 files , etc. If you don't want it you can edit <tt>/opt/Qtopia/etc/default/Trolltech/Storage.conf</tt> and disable Sd Card scanning ( overwrite 1 by 0 ), i.e. the section in the file should read like this after aplying the change to Om2008.9:
+ <br><code>[MountPoint0]</code>
+ <br><code>Name[] = SD Card</code>
+ <br><code>Path=/dev/mmcblk0p1</code>
+ <br><code>Removable = 1</code>
+ <br><code>Applications = 0</code>
+ <br><code>Documents = 0</code>
+ <br><code>ContentDatabase = 0</code>
+
 
 '''Networking'''
 * No Updates/Installation are possible or pings to domains because DNS is not working. This problem occurs because the /etc/resolv.conf is empty by default.
@@ -118,8 +126,6 @@ and add <tt>usb*</tt> above <tt>eth*</tt> in <tt>/etc/resolvconf/interface-order
 <code>cd /etc ; rm resolv.conf ; ln -s /etc/resolvconf/run/resolv.conf .</code><br>
 <code>mkdir /lib/resolvconf/ ; cd /lib/resolvconf/</code><br>
 <code>
-
-
 <nowiki>wget http://87.227.108.179/list-records</nowiki> </code><br>
 <code>chmod +x list-records</code><br>
 Edit <code>/etc/network/interfaces</code> and remove the lines:<br>
@@ -164,5 +170,3 @@ You choose: consume, create, or both.
 
 Either way you create your own meaning. It's about you.
 </pre>
-
-[[Category:Om 2008.8| ]]
