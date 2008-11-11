@@ -20,7 +20,7 @@ If your Internet connection is also in the range 192.168.0.x then instead you mi
 
 <pre>ip addr add 192.168.0.200/28 dev usb0</pre>
 
-(This will just map the net from 192.168.0.192 to 192.168.0.207 onto usb0. If you get the error 'Cannot find device "usb0"', double-check that your FreeRunner is turned on and connected by USB.)
+(This will just map the net from 192.168.0.192 to 192.168.0.207 onto usb0. If you get the error 'Cannot find device "usb0"', double-check that your FreeRunner is turned on and connected by USB. If that doesn't work, try unplugging and replugging the USB cable.)
 
 And in this case you should enable ARP proxy on internet facing interface INSTEAD of using iptables:
 
@@ -608,33 +608,33 @@ Following is based on [http://www.enricozini.org/2008/tips/autodock-freerunner.h
 Create a new udev rules file <tt>/etc/udev/rules.d/91-openmoko.rules</tt>:
 
 <pre>
- SUBSYSTEM=="net", ACTION=="add", ATTRS{idVendor}=="1457", ATTRS{idProduct}=="5122", RUN+="/sbin/om-usb $env{INTERFACE} start"
- SUBSYSTEM=="net", ACTION=="remove", ENV{INTERFACE}=="usb[0-9]", RUN+="/sbin/om-usb $env{INTERFACE} stop"
+SUBSYSTEM=="net", ACTION=="add", ATTRS{idVendor}=="1457", ATTRS{idProduct}=="5122", RUN+="/sbin/om-usb $env{INTERFACE} start"
+SUBSYSTEM=="net", ACTION=="remove", ENV{INTERFACE}=="usb[0-9]", RUN+="/sbin/om-usb $env{INTERFACE} stop"
 </pre>
 
 Then create the script <tt>/sbin/om-usb</tt>:
 
 <pre>
- #!/bin/sh
- INTERFACE=$1
- ACTION=$2
- 
- # udev fails silently when the script fails, e.g. due to commands not
- # being found
- PATH=/usr/sbin:/sbin:/usr/bin:/bin
- 
- case $ACTION in
-     'start')
-         # Put all your setup here
-         ;;
-     'stop')
-         # Put all your tear down here
-         ;;
-     *)
-         echo "Usage: $0 {start|stop}"
-         exit 1
-         ;;
- esac
+#!/bin/sh
+INTERFACE=$1
+ACTION=$2
+
+# udev fails silently when the script fails, e.g. due to commands not
+# being found
+PATH=/usr/sbin:/sbin:/usr/bin:/bin
+
+case $ACTION in
+'start')
+# Put all your setup here
+;;
+'stop')
+# Put all your tear down here
+;;
+*)
+echo "Usage: $0 {start|stop}"
+exit 1
+;;
+esac
 </pre>
 
 The <tt>INTERFACE</tt> will be <tt>usb0</tt> in most cases.
