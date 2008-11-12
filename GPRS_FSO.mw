@@ -12,26 +12,26 @@ The implementation should not interfer with other phone functionality, such as p
 Currently, there's no GUI available but it's fairly easy to use the methods available using any dbus tool.
 
 The methods available:
-  [METHOD]    org.freesmartphone.GSM.PDP.ActivateContext( s:apn, s:user, s:password )
-  [METHOD]    org.freesmartphone.GSM.PDP.DeactivateContext()
-  [METHOD]    org.freesmartphone.GSM.PDP.GetCurrentGprsClass()
-  [METHOD]    org.freesmartphone.GSM.PDP.ListAvailableGprsClasses()
-  [METHOD]    org.freesmartphone.GSM.PDP.SetCurrentGprsClass( s:class_ )
-  [SIGNAL]    org.freesmartphone.GSM.PDP.ContextStatus( i:index, s:status, a{sv}:properties )
+[METHOD]    org.freesmartphone.GSM.PDP.ActivateContext( s:apn, s:user, s:password )
+[METHOD]    org.freesmartphone.GSM.PDP.DeactivateContext()
+[METHOD]    org.freesmartphone.GSM.PDP.GetCurrentGprsClass()
+[METHOD]    org.freesmartphone.GSM.PDP.ListAvailableGprsClasses()
+[METHOD]    org.freesmartphone.GSM.PDP.SetCurrentGprsClass( s:class_ )
+[SIGNAL]    org.freesmartphone.GSM.PDP.ContextStatus( i:index, s:status, a{sv}:properties )
 
 Use ''mdbus -s -l'' to monitor the emitted signals.  Signals will look like this:
 
 :ActivateContext( s:apn, s:user, s:password )
-  [SIGNAL]    org.freesmartphone.GSM.PDP.ContextStatus    from :1.3 /org/freesmartphone/GSM/Device
-  (dbus.Int32(1), dbus.String(u'outgoing'), dbus.Dictionary({}, signature=dbus.Signature('sv')))</code>
+[SIGNAL]    org.freesmartphone.GSM.PDP.ContextStatus    from :1.3 /org/freesmartphone/GSM/Device
+(dbus.Int32(1), dbus.String(u'outgoing'), dbus.Dictionary({}, signature=dbus.Signature('sv')))</code>
 :Once the connection is established (takes 3-4 seconds for me) a new signal is emited
-  [SIGNAL]    org.freesmartphone.GSM.PDP.ContextStatus    from :1.3 /org/freesmartphone/GSM/Device
-  (dbus.Int32(1), dbus.String(u'active'), dbus.Dictionary({}, signature=dbus.Signature('sv')))
+[SIGNAL]    org.freesmartphone.GSM.PDP.ContextStatus    from :1.3 /org/freesmartphone/GSM/Device
+(dbus.Int32(1), dbus.String(u'active'), dbus.Dictionary({}, signature=dbus.Signature('sv')))
 :DeactivateContext
-  [SIGNAL]    org.freesmartphone.GSM.PDP.ContextStatus    from :1.3 /org/freesmartphone/GSM/Device
-  (dbus.Int32(1), dbus.String(u'release'), dbus.Dictionary({}, signature=dbus.Signature('sv')))
+[SIGNAL]    org.freesmartphone.GSM.PDP.ContextStatus    from :1.3 /org/freesmartphone/GSM/Device
+(dbus.Int32(1), dbus.String(u'release'), dbus.Dictionary({}, signature=dbus.Signature('sv')))
 
-== Until there's a GUI ==
+== Using scripts ==
 
 While we wait for the preferences part of FSO to be completed (and a GUI), we can use two shell scripts. You need to know three things to successfully connect via GPRS (your carrier should provide this information to you):
 * the APN to use,
@@ -41,22 +41,22 @@ If your APN has no username or password, you must still provide a string to sati
 
 To connect, put the following in a file and make it executable (<code>chmod +x gprs-on.sh</code>):
 
- #!/bin/sh
- APN="internet.parlino.se"
- USERNAME="x"
- PASSWORD="x"
- BUSNAME="org.freesmartphone.frameworkd"
- OBJECTPATH="/org/freesmartphone/GSM/Device"
- METHODNAME="org.freesmartphone.GSM.PDP.ActivateContext"
- mdbus -s $BUSNAME $OBJECTPATH $METHODNAME $APN "$USERNAME" "$PASSWORD"
+#!/bin/sh
+APN="internet.parlino.se"
+USERNAME="x"
+PASSWORD="x"
+BUSNAME="org.freesmartphone.frameworkd"
+OBJECTPATH="/org/freesmartphone/GSM/Device"
+METHODNAME="org.freesmartphone.GSM.PDP.ActivateContext"
+mdbus -s $BUSNAME $OBJECTPATH $METHODNAME $APN "$USERNAME" "$PASSWORD"
 
 To disconnect, use the following method instead (<code>chmod +x gprs-off.sh</code>):
 
- #!/bin/sh
- BUSNAME="org.freesmartphone.frameworkd"
- OBJECTPATH="/org/freesmartphone/GSM/Device"
- METHODNAME="org.freesmartphone.GSM.PDP.DeactivateContext"
- mdbus -s $BUSNAME $OBJECTPATH $METHODNAME
+#!/bin/sh
+BUSNAME="org.freesmartphone.frameworkd"
+OBJECTPATH="/org/freesmartphone/GSM/Device"
+METHODNAME="org.freesmartphone.GSM.PDP.DeactivateContext"
+mdbus -s $BUSNAME $OBJECTPATH $METHODNAME
 
 The ''on'' script, using the ActivateContext method, will:
 * setup a ppp interface (normally ppp0) (and assign IP address)
@@ -65,7 +65,8 @@ The ''on'' script, using the ActivateContext method, will:
 with settings received from the ISP.
 
 For a list of known APN:s, see the [[GPRS#Some_APN_names_for_reference|main GPRS page]].
-
+== Using a GUI ==
+[Framework-settings]
 == See also ==
 * [[GPRS]]
 * [[OpenmokoFramework/mdbus]]
