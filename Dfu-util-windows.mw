@@ -91,37 +91,26 @@ Apply the following patch to the source code:
 <pre>
 Index: main.c
 ===================================================================
---- main.c	(revision 4553)
+--- main.c	(revision 4759)
 +++ main.c	(working copy)
-@@ -26,8 +26,10 @@
- #include <getopt.h>
- #include <usb.h>
- #include <errno.h>
-+#ifndef __MINGW32__
- #include <byteswap.h>
- #include <endian.h>
-+#endif
- 
- #include "dfu.h"
- #include "usb_dfu.h"
-@@ -37,6 +39,10 @@
- #include "config.h"
- #endif
- 
+@@ -35,6 +35,10 @@
+#include "config.h"
+#endif
+
 +#ifdef __MINGW32__
 +#define sleep(seconds) Sleep((seconds)*1000)
 +#endif
 +
- #ifdef HAVE_USBPATH_H
- #include <usbpath.h>
- #endif
-@@ -579,6 +585,20 @@
- 
- 		/* FIXME: check if the selected device really has only one */
- 
+#ifdef HAVE_USBPATH_H
+#include <usbpath.h>
+#endif
+@@ -579,6 +583,20 @@
+
+/* FIXME: check if the selected device really has only one */
+
 +#ifdef __MINGW32__
 +		int configuration = dif->configuration;
-+    
++
 +		if (configuration == 0) {
 +			dif->configuration = 1;
 +		}
@@ -133,53 +122,54 @@ Index: main.c
 +		dif->configuration = configuration;
 +#endif
 +
- 		printf("Claiming USB DFU Runtime Interface...\n");
- 		if (usb_claim_interface(_rt_dif.dev_handle, _rt_dif.interface) < 0) {
- 			fprintf(stderr, "Cannot claim interface: %s\n", usb_strerror());
-@@ -700,12 +720,18 @@
- 		exit(1);
- 	}
- 
+printf("Claiming USB DFU Runtime Interface...\n");
+if (usb_claim_interface(_rt_dif.dev_handle, _rt_dif.interface) < 0) {
+fprintf(stderr, "Cannot claim interface: %s\n",
+@@ -712,13 +730,19 @@
+exit(1);
+}
+
 -#if 0
 +#ifdef __MINGW32__
 +	int configuration = dif->configuration;
-+  
++
 +	if (configuration == 0) {
 +		dif->configuration = 1;
 +	}
- 	printf("Setting Configuration %u...\n", dif->configuration);
- 	if (usb_set_configuration(dif->dev_handle, dif->configuration) < 0) {
- 		fprintf(stderr, "Cannot set configuration: %s\n", usb_strerror());
- 		exit(1);
- 	}
+printf("Setting Configuration %u...\n", dif->configuration);
+if (usb_set_configuration(dif->dev_handle, dif->configuration) < 0) {
+fprintf(stderr, "Cannot set configuration: %s\n",
+usb_strerror());
+exit(1);
+}
 +	dif->configuration = configuration;
- #endif
- 	printf("Claiming USB DFU Interface...\n");
- 	if (usb_claim_interface(dif->dev_handle, dif->interface) < 0) {
+#endif
+printf("Claiming USB DFU Interface...\n");
+if (usb_claim_interface(dif->dev_handle, dif->interface) < 0) {
 Index: sam7dfu.c
 ===================================================================
---- sam7dfu.c	(revision 4553)
+--- sam7dfu.c	(revision 4759)
 +++ sam7dfu.c	(working copy)
-@@ -20,6 +20,11 @@
- #define O_BINARY 0
- #endif
- 
+@@ -22,6 +22,11 @@
+#define O_BINARY 0
+#endif
+
 +#ifdef __MINGW32__
 +#define sleep(seconds) Sleep((seconds)*1000)
 +#define usleep(microseconds) Sleep((microseconds)/1000)
 +#endif
 +
- int sam7dfu_do_upload(struct usb_dev_handle *usb_handle, int interface, 
- 		      int xfer_size, const char *fname)
- {
+int sam7dfu_do_upload(struct usb_dev_handle *usb_handle, int interface,
+int xfer_size, const char *fname)
+{
 Index: usb_dfu.h
 ===================================================================
---- usb_dfu.h	(revision 4553)
+--- usb_dfu.h	(revision 4759)
 +++ usb_dfu.h	(working copy)
 @@ -12,6 +12,13 @@
- 
- #include <sys/types.h>
- 
+
+#include <sys/types.h>
+
 +#ifdef __MINGW32__
 +#include <stdint.h>
 +#define u_int8_t uint8_t
@@ -187,9 +177,9 @@ Index: usb_dfu.h
 +#define u_int32_t uint32_t
 +#endif
 +
- #define USB_DT_DFU			0x21
- 
- struct usb_dfu_func_descriptor {
+#define USB_DT_DFU			0x21
+
+struct usb_dfu_func_descriptor {
 </pre>
 
 === Build dfu-util ===
