@@ -55,4 +55,40 @@ Then add your custom header to the OpenEmbedded recipe (org.openembedded.dev/pac
 
 The X server accepts a -root-ppm option, which takes a plain old (raw) ppm file.  Replace /usr/share/pixmaps/xsplash-vga.ppm on the phone or org.openembedded.dev/packages/xserver-kdrive-common/xserver-kdrive-common/openmoko/xsplash-vga.ppm in OpenEmbedded.
 
+With more gory details, ''/etc/X11/Xserver'' ends with the lines:
+<pre>
+# start off server in conventional location.                               
+                                                               
+ARGS="$ARGS -dpi 285 -screen 480x640 -hide-cursor -root-ppm
+/usr/share/pixmaps/jsplash-vga.ppm vt1"                                    
+   
+#ARGS="$ARGS -dpi 285 -screen 480x640 -hide-cursor vt1"                    
+                                                               
+DISPLAY=':0'                                                               
+                                                               
+exec xinit /etc/X11/Xsession -- $XSERVER $DISPLAY $ARGS $* >/tmp/x.log 2>&1
+</pre>
+
+The '-root-ppm' is the static splash screen.  
+
+Following that, Xsession starts enlightenment, passing it $E_PROFILE as
+defined in ''/etc/enlightenment/default_profile''.
+
+== E splash ==
+
+''/usr/share/enlightenment/data/init'' contains one or more .edj files
+that each define an animated splash init that appears next, and until
+enlightenment finishes loading.  The .edj file used is determined by
+$E_PROFILE.  So if default_profile contains E_PROFILE='-profile illume'
+then enlightenment will try to start up with ''illume_init.edj'' for the splash
+(the 'cylon' animated blip, or various other animations depending on image)
+and will try to use ''/usr/share/enlightenment/data/themes/illume.edj'' as the
+theme for illume.  If it's E_PROFILE='-profile fso' then it looks for
+''fso_init.edj'' splash and ''fso.edj'' theme, etc.
+
+== See also ==
+
+* [[Themes]]
+* [[Edje]]
+
 [[Category:Application Developer]]
