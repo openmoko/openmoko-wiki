@@ -333,7 +333,29 @@ In this mode, Neo would behave like any other phone which can be used from a PC 
 
 ===== Sharing existing Neo's connection =====
 
-In this mode, Neo would already have a network connection (GPRS, WLAN, ...), and it should get shared to the PC.
+In this mode, Neo already has a network connection (GPRS, WLAN, ...), and it should get shared to the PC. This guide is general on how to forward network connection from a machine running Linux to another machine. If interested, please see more information for example at http://www.gentoo.org/doc/en/bluetooth-guide.xml.
+
+On the PC
+# Check with hciconfig you have working Bluetooth
+On the Neo
+(if on Debian etc., remember modprobe ohci_hcd hci_usb)
+# Initialize Bluetooth as told before:
+## echo 1 > /sys/bus/platform/devices/neo1973-pm-bt.0/power_on
+## echo 0 > /sys/bus/platform/devices/neo1973-pm-bt.0/reset
+# install iptables: opkg install http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/iptables_1.3.8-r4.1_armv4t.ipk
+# mopdprobe bnep
+# Check that hcid is running both on Neo and PC (Bluetooth 4.x: install bluez-compat)
+# Use default passkey "1234" in /etc/bluetooth/hcid.conf
+# pand --listen --role NAP --master --autozap
+# ifconfig bnep0 10.0.5.2 up
+# echo 1 > /proc/sys/net/ipv4/ip_forward
+# iptables -t nat -A POSTROUTING -j MASQUERADE -o ppp0
+On the PC:
+# sudo pand --connect <your bluetooth mac address> --service NAP --autozap
+# ifconfig bnep0 10.0.5.1 up
+# You can test the connection with ping 10.0.5.2
+# sudo ip route add default via 10.0.5.2 dev bnep0
+# [not automated yet] add GPRS connection's nameservers to /etc/resolv.conf
 
 == Advanced Audio Distribution Profile (A2DP) ==
 
