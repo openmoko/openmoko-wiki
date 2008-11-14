@@ -2,152 +2,25 @@
 
 This project is daemon which listens to dbus signals and runs applications accordingly.
 The signals, application to run and some rules that will be evaluated against incoming dbus signals can be easily changed in the configuration file.
-This application is mainly intended to work with the openmoko framework so end users will be able to run application upon events without too much effort, though that isn't a limitation.
+This application is mainly intended to work with the openmoko framework so end users will be able to run application uppon events without too much effort, though that isn't a limitation.
 For example, one can set the aux button to launch the dialer and the other can set a sound when screen is dimmed with as little as no effort.
 
-(The default config file is set to run the profile-changer when the aux button is pressed for more than a second)
-
-'''IMPORTANT NOTICE:''' The [http://projects.openmoko.org/projects/siglaunchd/ project page] in projects.openmoko.org is finally up. Hope you all will participate. From now on, that's the place to post bugs/suggestions. Hopefuly, I will start using it completely soon (when the problems are fixed)
-
+(The default config file is set so open moko terminal will be run when the aux button is pressed for two or more seconds)
 
 = Package =
 * author: Tom Hacohen <available_at_profile>
-* the code resides at the projects page
-* link available at the [http://projects.openmoko.org/projects/siglaunchd/ project page]
-
-= How To Use =
-siglaunchd connects to dbus signals set in the config file and compares the signal's parameters to the expected parameters in the config file, every dbus signal in the config file has a "app to launch" that's launched when the signal is matched.
-
-This daemon reads the configuration file looking for records of the type:
-"app"=interface;busname;path;signal;rule1,rule2... <br>
-While:
-* app is the app to run (and parameters) enclosed with "
-* interface, busname, path and signal are the signals descriptors.
-* rules are separated by a ',' and look like arg[index][opt-sub_index](=|<|>|~)value. arg[] is a configuration file pattern and shouldn't be changed. <br>
-The value field can't contain ',' (reserved char) unless the whole value is enclosed in "" (i.e "test, test!"). Enclosing with " doesn't assure matching as strings, as explained later. <br>
-The [opt-sub_index] is used to determine the index/key to compare in arg[index] if it's an array/dictionary.
-
-For instance, comparing the second argument's 1st cell will look as follows: arg[1][0] = test
-
-And comparing the 3rd argument's 'peer' key will look like this: arg[2][peer] = test2
-
-When the argument is neither expected to be an array or a dictionary you should just drop the second [] i.e: arg[2] = test3
+* this is a python script so code resides in /usr/bin/siglaunchd (hopefuly in a public svn soon)
+* link: [http://stosb.com/openmoko/siglaunchd_0.1_armv4t.ipk package]
 
 
-'''Evaluation types:'''
-# = is for string/number comparison
-# > and < are for number/string comparison
-# ~ is used for standard python regex evaluation.
-
-For example if I a rule to check if the first parameter got from the dbus
-signal equals to "test" the rule will be: arg[0]=test
-
-
-'''Launch string:'''
-# The launch string must be enclosed with " and in the string \ is used for escaping, i.e: \" is a regular " \\ is a regular \ and any character a results in \a is a.
-# You can use $# (# is an integer bigger than 0) to use the value got from matching to the dbus rule. $1 corresponds to the first argument matched against, $2 to the second. values are permitted from 1 to n where n is the number of comparisons in a specific rule.
-
-
-Example configuration file line:
- "DISPLAY=:0.0 openmoko-terminal2"=org.freesmartphone.Device.Input;org.freesmartphone.oeventsd;/org/freesmartphone/Device/Input;Event;arg[0]=AUX,arg[1]=released,arg[2]>1
-
-
-I used this configuration to run the openmoko-terminal2 every time I
-held the aux button for 2 seconds or more.
-
-Example configuration file line #2:
- "echo $1 > /home/root/click.txt"=org.freesmartphone.Device.Input;org.freesmartphone.oeventsd;/org/freesmartphone/Device/Input;Event;arg[2]>1, arg[0]=AUX,arg[1]=released
-
-will enter the value of arg[2] (the first argument compared) to the file /home/root/click.txt
-
-You can actually add as many lines you want to the config and associate as many
-applications needed to a single signal with different/same rules (in different lines).
-
-Another example:
-the "Event" signal form the "org.freesmartphone.Device.Input" interface in the framework sends looks like this:
-Event ( ssi )
-where the arguments are:
-the first s = name of input device
-the second s = the action took place
-i = duration of the event.
-We can then tell the daemon to "echo hi" (not very useful) every time an Event signal of any kind arrives like this:
-
- "echo hi"=org.freesmartphone.Device.Input;org.freesmartphone.oeventsd;/org/freesmartphone/Device/Input;Event; 
-
-Notice: the last ';' is optional since this rule_line doesn't have any comparison rules so it can be dropped.
-
-If we want it only to occur when the aux button is released (doesn't matter how much time it was held) we will do the following:
-
- "echo hi"=org.freesmartphone.Device.Input;org.freesmartphone.oeventsd;/org/freesmartphone/Device/Input;Event;arg[0]=AUX, arg[1]=released
-
-Mind the fact that there is no ; at the end!!! (only needed before the rules)
-
-
-Now, if we want, we can tell it to echo hi only if the button was released after i seconds where 4<i<7, i.e, i =5,6
-we will do the following:
-
- "echo hi"=org.freesmartphone.Device.Input;org.freesmartphone.oeventsd;/org/freesmartphone/Device/Input;Event;arg[0]=AUX, arg[1]=released, arg[2]>4, arg[2]<7
-
-The same argument can be evaluated as many times you like, use it.
-
-
-Btw, all the rules are logicaly connected with an AND operation, so they all must match!
-If you want an OR logical connection you must add a brand new line differing in what you want it to differ.
-IMPORTANT NOTICE: All parameters not evaluated are accepted by default. So when writing bad config lines, i.e comparing with an argument that does not exist, will be accepted as if it was matched.
-
-All dbus types are supported (byte was never tested and struct/objectpath aren't supported yet), and when comparing to booleans, 0 is false 1 is true, true and false are read as the strings "true" and "false" accordingly.
-
-All rules are compared according to the type of the parameter of the dbus signal so a rule that compares to the number 88 will compare as the double 88 when compared with double, as an unsigned int 16 bit when compared to one and as a string when compared to one.
-
-
-This daemon is designed for use with the openmoko framework (though it's by now means a must), read
-about the framework dbus signals at:
-http://git.freesmartphone.org/?p=specs.git;a=blob_plain;f=html/index.html
-
-
-Please send me feedback about bugs/suggestions. Enjoy.
-
-Tips:
-# SIGHUP is now supported to reload the config file so restarting the daemon is no longer needed in order to test your config. 
-# -c is used to check the configuration without running the daemon, use it to verify your rules aren't broken!!!
-# having 'mdbus -l -s' open while testing a broken rule is a good idea.
-
-= Change Log =
-The changelog is available for each release at the projects site.
-
-= TODO =
-* available in the source code
-
-= List of users configs =
-This is a list of config lines users added. If you use any custom config yourself (you should, the stock config is a demo) please add it here so others may use them as well.
-== AUX button - Launch The profile-changer (STOCK) ==
-"DISPLAY=:0.0 /usr/share/siglaunchd/scripts/profile-changer"=org.freesmartphone.Device.Input;org.freesmartphone.oeventsd;/org/freesmartphone/Device/Input;Event;arg[0]=AUX,arg[1]=released,arg[2]>0
-== AUX button - Launch Terminal ==
-"DISPLAY=:0.0 openmoko-terminal2"=org.freesmartphone.Device.Input;org.freesmartphone.oeventsd;/org/freesmartphone/Device/Input;Event;arg[0]=AUX,arg[1]=released,arg[2]>1
-== AUX button - Launch [[Framework-settings]] ==
-"DISPLAY=:0.0 python fso-settings"=org.freesmartphone.Device.Input;org.freesmartphone.oeventsd;/org/freesmartphone/Device/Input;Event;arg[0]=AUX,arg[1]=released,arg[2]>1
-
-== Power button - Launch Flashlight ==
-Although the power button is set to be the suspend on fso/shr and when held for more than 10 seconds it will shut down the device, in the area between, I set it to launch the flashlight app, because I don't like messing with stuff when I need my flashlight on!
-(you can easily change it to run anything else, so this is also a good example for using the power button)
-
-"DISPLAY=:0.0 /usr/bin/flashlight"=org.freesmartphone.Device.Input;org.freesmartphone.oeventsd;/org/freesmartphone/Device/Input;Event;arg[0]=POWER, arg[1]=released, arg[2]>1, arg[2]<8
-
-== Incoming Caller Matching ==
-This config line matches the caller's number and acts according to a specific caller, it is possible to regex match the number, so you can match for calls from a certain city/country/phone-prefix and act accordingly.
-
-For instance all the calls from private numbers will automatically close/recorded, the options are unlimited.
-
-just replace the echo message with the script (popup?) you want to run.
-
-"DISPLAY=:0.0 echo message"=org.freesmartphone.GSM.Call;org.freesmartphone.ogsmd;/org/freesmartphone/GSM/Device;CallStatus;arg[1]=incoming, arg[2][peer]~555111333
-
-== Incoming message alert ==
-When a new sms arrives the content is put into /home/root/sms.txt.
-
-"DISPLAY=:0.0 echo $1 > /home/root/sms.txt"=org.freesmartphone.GSM.SMS;org.freesmartphone.ogsmd;/org/freesmartphone/GSM/Device;IncomingMessage;arg[1]~.*
-
-NOTE: it seems that there's no IncomingMessage signal (also specified in the fso specs) so  
-org.freesmartphone.GSM.SIM.IncomingStoredMessage should be used instead and the first parameter there is the id of the sms which can be used as a parameter to a script that gets out the content.
-
-[[Category:System Applications]]
+== TODO ==
+* upgrade the rules system
+* add errors (and a log file?) when the configuration file is broken
+* build sample applications to go with it
+* change it to store the configuration in both ~ and /etc so people will
+be able to define system actions as well as user actions. (of course
+will have to run twice because we don't want the user to run with root
+permissions)
+* support for comments in the configuration file
+* comparison only supports floats, add more to that.
+* add more complex variable types for comparison in the rules
