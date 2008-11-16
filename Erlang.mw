@@ -248,16 +248,18 @@ command.name.5.*.erl=erl evaluate
 command.5.*.erl= erl -eval '$(CurrentSelection)' -noshell -s init stop
 command.subsystem.6.*.erl=0
 command.name.6.*.erl=copy to neo1973
-command.6.*.erl= scp $(FileName).beam   phone:/root/erlang/trunk/
+#command.6.*.erl= scp $(FileName).beam   phone:/root/erlang/trunk/ #Debian
+command.6.*.erl= scp $(FileName).beam   phone:/home/root/trunk/
 command.subsystem.7.*.erl=0
 command.name.7.*.erl=add to subversion
 command.7.*.erl= svn add $(FileNameExt)
 command.subsystem.8.*.erl=0
 command.name.8.*.erl=stop X
-command.8.*.erl= rsh root@192.168.0.202 /etc/init.d/zhone-session stop
-command.subsystem.9.*.erl=0
-command.name.9.*.erl=start X
-command.9.*.erl= rsh root@192.168.0.202 /etc/init.d/zhone-session start
+command.8.*.erl= rsh root@192.168.0.202 /etc/init.d/xserver-nodm restart
+#command.8.*.erl= rsh root@192.168.0.202 /etc/init.d/zhone-session stop #Debian
+#command.subsystem.9.*.erl=0 #Debian
+#command.name.9.*.erl=start X #Debian
+#command.9.*.erl= rsh root@192.168.0.202 /etc/init.d/zhone-session start #Debian
 </pre>
 
 I am developing a vertical market product based on Openmoko, so I want my erlang platform alone to run (no window manager or Zhone) when the phone is switched on.
@@ -280,8 +282,8 @@ exit 0
 </pre>
 
 
-====Debian====
-This is my /usr/bin/zhone-session. I keep my erlang beam files at /root/erlang/trunk
+
+For Debian users it's /usr/bin/zhone-session. I keep my erlang beam files at /root/erlang/trunk
 <pre>
 #zhone &
 #matchbox-keyboard-toggle &
@@ -289,7 +291,7 @@ erl -noshell -pa /root/erlang/trunk -s main start > debug.txt
 #exec matchbox-window-manager -use_titlebar no
 </pre>
 
-====endDebian====
+
 
 Replace "-s main start" with "-s your_module_name your_function_name"
 
