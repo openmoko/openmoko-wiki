@@ -260,13 +260,39 @@ command.name.9.*.erl=start X
 command.9.*.erl= rsh root@192.168.0.202 /etc/init.d/zhone-session start
 </pre>
 
-I am developing a vertical market product based on Openmoko, so I want my erlang platform alone to run (no window manager or Zhone) when the phone is switched on. This is my /usr/bin/zhone-session. I keep my erlang beam files at /root/erlang/trunk
+I am developing a vertical market product based on Openmoko, so I want my erlang platform alone to run (no window manager or Zhone) when the phone is switched on.
+
+Move /etc/X11/Xsession.d/90xXWindowManager away from its current directory.
+
+<pre>
+cd /etc/X11/Xsession.d
+mv 90xXWindowManager ..
+</pre>
+
+This is my /etc/X11/Xsession.d/80zhone. I keep my erlang beam files at /home/root/trunk.
+
+<pre>
+#!/bin/sh -e
+#zhone > /tmp/zhone.log 2>&1 &
+/home/root/cean/start.sh -noshell -pa /home/root/trunk -s main start > debug.txt
+renice -3 $!
+exit 0
+</pre>
+
+
+==Debian==
+This is my /usr/bin/zhone-session. I keep my erlang beam files at /root/erlang/trunk
 <pre>
 #zhone &
 #matchbox-keyboard-toggle &
 erl -noshell -pa /root/erlang/trunk -s main start > debug.txt
 #exec matchbox-window-manager -use_titlebar no
 </pre>
+==endDebian==
+
+Replace "-s main start" with "-s your_module_name your_function_name"
+
+Use tail -f /debug.txt to read erlang shell printouts
 
 All I have to do now is to re-start X whenever I want to run an uploaded app. This is what the last two menu buttons do in SciTe - stop X on the phone, and start X on the phone.
 [[Image:Scite.jpg]]
