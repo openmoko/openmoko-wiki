@@ -1,5 +1,5 @@
 {{Languages|Flashing_the_Neo_FreeRunner}}
-Openmoko regularly releases updated versions of the Openmoko root filesystem, the [[kernel]], and the [[Bootloader| U-Boot]] as binary images. These may be programmed into the Flash memory (NAND) of Neo FreeRunner. For that, you can use the USB cable and another computer which will run an Openmoko provided tool to flash the Neo FreeRunner "through" USB.
+Openmoko регулярно выпускает обновлённые версии Openmoko корневой файловой системы, [[ядра]], и [[Загрузчик| U-Boot]] в двоичных образах. Всё это может быть записано в Flash память(NAND)Neo FreeRunner. Для этого, вы можете использовать USB кабель и другой комьютер чтобы прошить Neo FreeRunner "через" USB.
 
 == Обзор ==
 All the components of the software in the FreeRunner are bundled together into binary images.
@@ -13,7 +13,7 @@ The NAND Flash is divided into 3 partitions for the bootloader, kernel, and root
 * '''bootloader''': a small program that runs first and starts everything else when the FreeRunner is powered on or reset (depending on [[Booting the Neo FreeRunner|how you reset it]], the version from NOR or NAND is booted).
 * '''kernel''': the central component in the Linux operating system.
 * '''root filesystem''': contains all the files that make up the commands and applications that you can run.
- 
+
 '''Before you start: Erasing the root filesystem or flashing the uboot are radical measures. Take the time to ponder the necessity. Sometimes problems can be fixed by updating only the kernel.'''
 
 == Альтернатива : запуск с карточки microSD ==
@@ -38,7 +38,7 @@ There are some ubuntu64 interpid packages which work just fine for me in hardy t
 
 Using 32-bit chroot (on amd64 debian) worked for me --[[User:Bubak|Bubak]] 16:54, 4 September 2008 (UTC).
 
-'''Windows:''' http://projects.openmoko.org/frs/?group_id=166&release_id=162 
+'''Windows:''' http://projects.openmoko.org/frs/?group_id=166&release_id=162
 
 See additional driver installation instructions for Windows at [[Dfu-util-windows]]
 
@@ -61,7 +61,7 @@ Please read [[Distributions]] for choosing the distribution which fits your need
 ## See also [[Booting the Neo FreeRunner]]
 # Stay in NOR uBoot menu, do not select or enter any item in menu. Now you will be able to flash, make backups of your FreeRunner or query the FreeRunner with dfu-util.
 # The FreeRunner only stays at the NOR boot prompt for about 30 seconds and then shuts off unless you do something.
-# Connect your Neo to the GNU/Linux or Windows host via a USB cable. 
+# Connect your Neo to the GNU/Linux or Windows host via a USB cable.
 # Now you can enter the dfu-util commands on your PC as described below.
 # If the Neo FreeRunner turns off before you press start flashing ('''screen goes black'''), go back to step 2. If you start flashing in time, the phone will not turn off meanwhile.
 
@@ -71,7 +71,7 @@ Note that the dfu-util connection does '''not''' use Ethernet over USB - that is
 
 After connecting the FreeRunner to your host via USB cable, you can test whether dfu-util "sees" the FreeRunner by executing:
 
-   dfu-util -l
+dfu-util -l
 
 If you get error messages from the dfu-util command then try again. Often it works on the second try.
 
@@ -87,7 +87,7 @@ dfu-util can be used to read flash memory, write memory, and get information fro
 
 This is the general command format to write an image file to a (predefined) "partition name" (referred to as ''altsetting'' in dfu-util help/manual) :
 
- dfu-util -a ''altsetting'' -R -D ''file_name''
+dfu-util -a ''altsetting'' -R -D ''file_name''
 
 where:<br>
 -a ''altsetting'' : Specify the altsetting of the DFU interface by name or by number<br>
@@ -103,17 +103,17 @@ More detailed manual for gfu-util is available here : [[Dfu-util]]
 
 == Прошивка ядра ==
 
- Note: The phone needs to be in the U-boot bootup menu for this to work.
-       Get there by holding down the aux button while powering up the device.
+Note: The phone needs to be in the U-boot bootup menu for this to work.
+Get there by holding down the aux button while powering up the device.
 
-The command format is 
+The command format is
 
- dfu-util -a kernel -R -D ''/path/to/uImage''
+dfu-util -a kernel -R -D ''/path/to/uImage''
 
 When flashing succeeds the following will be shown:
 
- status(0) = No error condition is present
- Done!
+status(0) = No error condition is present
+Done!
 
 Flashing may fail with an error -110. This indicates that the kernel is too big for the default kernel partition. uboot can be used to change the size of the default partitions on the device. It may also mean that you are trying to put the wrong thing in the kernel space.
 
@@ -123,22 +123,22 @@ The root filesystem has to be an image in jffs2 format. If the file you download
 
 The command format is
 
- dfu-util -a rootfs -R -D ''rootfs_filename.jffs2''
+dfu-util -a rootfs -R -D ''rootfs_filename.jffs2''
 
 where ''rootfs_filename.jffs2'' is the name of the file containing the root filesystem.
 
 When flashing succeeds the following will be shown:
 
- status(0) = No error condition is present
- Done!
+status(0) = No error condition is present
+Done!
 
 == Прошивка загрузчика в NAND==
 
 The boot loader (U-boot) file should have a .bin extension. As with the root filesystem, if the file you downloaded is zipped or compressed (has a .gz or .zip extension) you have to uncompress it first.
 
-The command format is 
+The command format is
 
- dfu-util -a u-boot -R -D ''uboot.bin''
+dfu-util -a u-boot -R -D ''uboot.bin''
 
 where ''uboot.bin'' is the name of the boot loader binary image file.
 
@@ -146,12 +146,12 @@ where ''uboot.bin'' is the name of the boot loader binary image file.
 
 <!-- Taken from posts by Mikael Berthe <mikael.berthe@lilotux.net> and Torfinn Ingolfsen <tingox@gmail.com> to Support list, subject: Re: Upgrading u-boot needed ? -->
 (Optional) After an upgrade, you may wish to check that the u-boot version matches the one you have just flashed. You can use 'grep  Bootloader /dev/mtdblock1' from a shell on the FreeRunner (and possibly the 1973 as well) to get the '''NAND''' u-boot version, like this:
-   root@om-gta02:~# grep Bootloader /dev/mtdblock1
-   Neo1973 Bootloader U-Boot 1.3.2+gitr18+64eb10cab8055084ae25ea4e73b66dd03cc1a0cb
+root@om-gta02:~# grep Bootloader /dev/mtdblock1
+Neo1973 Bootloader U-Boot 1.3.2+gitr18+64eb10cab8055084ae25ea4e73b66dd03cc1a0cb
 
 You can grep for the same string in /dev/mtdblock0 to retrieve the '''NOR''' u-boot version:
-   root@om-gta02:~# grep  Bootloader /dev/mtdblock0
-   Neo1973 Bootloader U-Boot 1.3.2-moko12
+root@om-gta02:~# grep  Bootloader /dev/mtdblock0
+Neo1973 Bootloader U-Boot 1.3.2-moko12
 
 <!-- ENDS ... subject: Re: Upgrading u-boot needed ? -->
 
@@ -167,4 +167,4 @@ The boot menu should be labelled '''*** BOOT MENU (NAND) ***''' this time (see [
 
 ... в разработке, смотри [http://lists.openmoko.org/pipermail/community/2008-September/029731.html this thread] и [http://lists.openmoko.org/pipermail/community/2008-September/030257.html that update]. Скачать http://users.on.net/~antisol/frutil
 
-[[Category:Flashing Openmoko| ]]
+[[Category:Flashing Openmoko|Flashing Openmoko]]
