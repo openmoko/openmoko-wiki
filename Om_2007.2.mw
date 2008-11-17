@@ -89,7 +89,7 @@ headphones and not out of the speaker.
 = Installing =
 
 If you want install this software distribution to your device, you have to follow these steps:
-* Download the recent image of Om2007.2 on the [[Downloads#Openmoko_2007.2_images_.28GTK.29|Downloads]] page
+* Download the recent image of Om2007.2 .
 * [[Flashing the Neo FreeRunner|Flash]] to your Neo FreeRunner
 
 [[Image:Openmoko2007.2 home screen.png|thumb|right|home screen of Om 2007.2]]
@@ -110,22 +110,22 @@ Follow the [http://wiki.openembedded.net/index.php/Getting_Started getting start
 
 Put the following in your local.conf
 
- BBFILES = "${HOME}/oe/org.openembedded.dev/packages/*/*.bb"
- 
- MACHINE = "om-gta01"
- DISTRO = "openmoko"
- 
- ENABLE_BINARY_LOCALE_GENERATION = "1"
- GLIBC_GENERATE_LOCALES = "en_GB.UTF-8"
+BBFILES = "${HOME}/oe/org.openembedded.dev/packages/*/*.bb"
+
+MACHINE = "om-gta01"
+DISTRO = "openmoko"
+
+ENABLE_BINARY_LOCALE_GENERATION = "1"
+GLIBC_GENERATE_LOCALES = "en_GB.UTF-8"
 
 For multi-core machines, the following additions can be used for a speed-up (numbers should be tweaked based on the actual number of cores):
 
- PARALLEL_MAKE = "-j 4"
- BB_NUMBER_THREADS = "4"
+PARALLEL_MAKE = "-j 4"
+BB_NUMBER_THREADS = "4"
 
 To free disk space after builds, add:
 
- INHERIT += "rm_work"
+INHERIT += "rm_work"
 
 Replace "${HOME}/oe" with the path to where your "org.openembedded.dev" folder lives. For the other entries have a look at ''conf/local.conf.sample'' about their meaning.
 
@@ -139,7 +139,7 @@ http://lists.linuxtogo.org/pipermail/openembedded-devel/2007-September/003035.ht
 
 Add the following line to your local.conf
 
-  require conf/distro/include/moko-autorev.inc
+require conf/distro/include/moko-autorev.inc
 
 Then run bitbake as normal. Openmoko will now build with latest SVN checkouts.
 
@@ -148,33 +148,33 @@ Then run bitbake as normal. Openmoko will now build with latest SVN checkouts.
 ==== Wrong certificate ====
 You may get something like this while the bitbake recipes are parsed:
 
- Error validating server certificate for 'https://libw100.svn.sf.net:443':
-  - The certificate hostname does not match.
-  Certificate information:
-   - Hostname: *.svn.sourceforge.net
-   - Valid: from Fri, 27 Oct 2006 12:05:58 GMT until Sun, 28 Oct 2007 13:05:58 GMT
-   - Issuer: Equifax Secure Certificate Authority, Equifax, US
-   - Fingerprint: f2:6c:fe:bb:82:92:30:09:72:dd:1c:b3:e7:56:69:c7:7a:df:67:3e
+Error validating server certificate for 'https://libw100.svn.sf.net:443':
+- The certificate hostname does not match.
+Certificate information:
+- Hostname: *.svn.sourceforge.net
+- Valid: from Fri, 27 Oct 2006 12:05:58 GMT until Sun, 28 Oct 2007 13:05:58 GMT
+- Issuer: Equifax Secure Certificate Authority, Equifax, US
+- Fingerprint: f2:6c:fe:bb:82:92:30:09:72:dd:1c:b3:e7:56:69:c7:7a:df:67:3e
 
 That is an issue in a bitbake file. One should not use the short-name for sourceforge (sf.net) when certificates are only for exact host names. Accept the certificate and everything is fine for now.
 
 ==== openmoko-libs FTBFS ====
 Some applications have not been fully modified to build with the new libraries of Openmoko and still need the old-style ''openmoko-libs'' package. ''libmokogsm'' which is needed for ''openmoko-libs'' then fails to build. As a workaround you can remove the not yet ported applications that need ''openmoko-libs'' making it unneccessary itself. To do this edit ''packages/tasks/openmoko-taks.bb'' and find the following lines:
 
- .
- .
- .
-  openmoko-terminal \
-  matchbox-panel-2 \
-  matchbox-panel-2-applets \
-  matchbox-applet-inputmanager \
- #  openmoko-appmanager \
-  matchbox-keyboard \
-  matchbox-stroke \
-  openmoko-keyboard \
- .
- .
- .
+.
+.
+.
+openmoko-terminal \
+matchbox-panel-2 \
+matchbox-panel-2-applets \
+matchbox-applet-inputmanager \
+#  openmoko-appmanager \
+matchbox-keyboard \
+matchbox-stroke \
+openmoko-keyboard \
+.
+.
+.
 
 Now put a hash (''#'') before ''openmoko-terminal'' and ''openmoko-keyboard''. You can verify that ''openmoko-libs'' is not needed any more by issuing ''bitbake -g openmoko-devel-image'' (= creates a dependency graph). There should be no mentioning of ''openmoko-libs'' in the file ''task-depends.dot''. '''Please note that the graphicall terminal and the virtual keyboard will be missing now.''' You can still have terminal access by following the [[USB Networking]] guide. For keyboard input in Qemu add the ''-usbdevice keyboard'' switch.
 
@@ -183,87 +183,87 @@ Now put a hash (''#'') before ''openmoko-terminal'' and ''openmoko-keyboard''. Y
 
 If you get these errors:
 
- gtkcombobox.c: In function 'gtk_combo_box_size_request':
- gtkcombobox.c:1859: warning: unused variable 'font_desc'
- gtkcombobox.c:1858: warning: unused variable 'metrics'
- gtkcombobox.c:1857: warning: unused variable 'context'
- gtkcombobox.c:1855: warning: unused variable 'arrow_size'
- gtkcombobox.c:1854: warning: unused variable 'font_size'
- gtkcombobox.c: In function 'gtk_combo_box_size_allocate':
- gtkcombobox.c:1962: error: 'arrow_size' undeclared (first use in this function)
- gtkcombobox.c:1962: error: (Each undeclared identifier is reported only once
- gtkcombobox.c:1962: error: for each function it appears in.)
- gtkcombobox.c:1965: error: 'font_desc' undeclared (first use in this function)
- gtkcombobox.c:1966: error: 'context' undeclared (first use in this function)
- gtkcombobox.c:1967: error: 'metrics' undeclared (first use in this function)
- gtkcombobox.c:1969: error: 'font_size' undeclared (first use in this function) 
+gtkcombobox.c: In function 'gtk_combo_box_size_request':
+gtkcombobox.c:1859: warning: unused variable 'font_desc'
+gtkcombobox.c:1858: warning: unused variable 'metrics'
+gtkcombobox.c:1857: warning: unused variable 'context'
+gtkcombobox.c:1855: warning: unused variable 'arrow_size'
+gtkcombobox.c:1854: warning: unused variable 'font_size'
+gtkcombobox.c: In function 'gtk_combo_box_size_allocate':
+gtkcombobox.c:1962: error: 'arrow_size' undeclared (first use in this function)
+gtkcombobox.c:1962: error: (Each undeclared identifier is reported only once
+gtkcombobox.c:1962: error: for each function it appears in.)
+gtkcombobox.c:1965: error: 'font_desc' undeclared (first use in this function)
+gtkcombobox.c:1966: error: 'context' undeclared (first use in this function)
+gtkcombobox.c:1967: error: 'metrics' undeclared (first use in this function)
+gtkcombobox.c:1969: error: 'font_size' undeclared (first use in this function)
 
 Go to your /build/tmp/work/fic-gta01-angstrom-linux-gnueabi/gtk+-2.10.14-r3/gtk+-2.10.14/gtk directory, and patch gtkcombobox.c with the following:
 
 Thanks to rmoravcik in #openmoko (patch was taken from http://pastebin.ca/654717 )
 
- --- gtkcombobox.c       2007-08-12 20:30:07.000000000 +0200
- +++ gtkcombobox.c       2007-08-12 20:29:58.000000000 +0200
- @@ -1948,6 +1948,12 @@
-  gtk_combo_box_size_allocate (GtkWidget     *widget,
-                              GtkAllocation *allocation)
-  {
- +  gint font_size;
- +  gint arrow_size;
- +  PangoContext *context;
- +  PangoFontMetrics *metrics;
- +  PangoFontDescription *font_desc;
- +
-    GtkComboBox *combo_box = GTK_COMBO_BOX (widget);
-    gint focus_width, focus_pad;
-    GtkAllocation child;
+--- gtkcombobox.c       2007-08-12 20:30:07.000000000 +0200
++++ gtkcombobox.c       2007-08-12 20:29:58.000000000 +0200
+@@ -1948,6 +1948,12 @@
+gtk_combo_box_size_allocate (GtkWidget     *widget,
+GtkAllocation *allocation)
+{
++  gint font_size;
++  gint arrow_size;
++  PangoContext *context;
++  PangoFontMetrics *metrics;
++  PangoFontDescription *font_desc;
++
+GtkComboBox *combo_box = GTK_COMBO_BOX (widget);
+gint focus_width, focus_pad;
+GtkAllocation child;
 
 
 ==== Building glibc fails with a segfault in QEMU ====
 
 If your build aborts and you see something like this:
 
- NOTE: package glibc-2.5: started
- NOTE: package glibc-2.5-r6: task do_package: started
- NOTE: preparing tree for binary locale generation
- NOTE: generating locale en_US (UTF-8)
- qemu: uncaught target signal 11 (Segmentation fault) - exiting
- 
- ...
- 
- NOTE: Tasks Summary: Attempted 271 tasks of which 0 didn't need to be rerun and 1 failed.
- ERROR: '/home/moko/oe/org.openembedded.dev/packages/glibc/glibc_2.5.bb' failed
+NOTE: package glibc-2.5: started
+NOTE: package glibc-2.5-r6: task do_package: started
+NOTE: preparing tree for binary locale generation
+NOTE: generating locale en_US (UTF-8)
+qemu: uncaught target signal 11 (Segmentation fault) - exiting
+
+...
+
+NOTE: Tasks Summary: Attempted 271 tasks of which 0 didn't need to be rerun and 1 failed.
+ERROR: '/home/moko/oe/org.openembedded.dev/packages/glibc/glibc_2.5.bb' failed
 
 Try editing your local.conf file.  Change:
 
- ENABLE_BINARY_LOCALE_GENERATION = "1"
+ENABLE_BINARY_LOCALE_GENERATION = "1"
 
 to
 
- ENABLE_BINARY_LOCALE_GENERATION = "0"
+ENABLE_BINARY_LOCALE_GENERATION = "0"
 
 and restart the build.  This may have some effect on internationalization (you will see a warning indicating that), but at least the build will continue.  Thanks to rwhitby for the tip.
 
 Alternatively, as suggested by XorA in #openmoko, if you are running a 64-bit host distribution, try forcing a different QEMU rev, also in local.conf:
 
- PREFERRED_VERSION_qemu-native = "0.9.0+cvs20070701"
- SRCDATE_qemu-native = 20070701
+PREFERRED_VERSION_qemu-native = "0.9.0+cvs20070701"
+SRCDATE_qemu-native = 20070701
 
 
 ==== libxml2-native fails with xmlCatalogPtr errors ====
 
 Go to your build/tmp/work/i686-linux/libxml2-native-2.6.29-r1/libxml2-2.6.29/include/libxml/ directory and patch xmlversion.h with the following:
 
- --- xmlversion.h        2007-08-17 10:45:42.000000000 +0100
- +++ xmlversion.h        2007-08-17 10:51:36.000000000 +0100
- @@ -219,7 +219,7 @@
-   *
-   * Whether the Catalog support is configured in
-   */
- -#if 0
- +#if 1
-  #define LIBXML_CATALOG_ENABLED
-  #endif
+--- xmlversion.h        2007-08-17 10:45:42.000000000 +0100
++++ xmlversion.h        2007-08-17 10:51:36.000000000 +0100
+@@ -219,7 +219,7 @@
+*
+* Whether the Catalog support is configured in
+*/
+-#if 0
++#if 1
+#define LIBXML_CATALOG_ENABLED
+#endif
 
 On my system the libxml2-native-2.6.29-r1 directory is in a directory named i686-linux, yours may be different. I believe this patch to be a workaround to make libxml2-native build. I am not yet sure what the consequences of enabling XML catalogue support are.
 
@@ -286,7 +286,7 @@ Now that you have a functional 2007.2 image on your Neo, you will want to keep i
 
 On the phone, in the terminal (or via ssh), if you have a live internet connection and DNS resolution set up in /etc/resolv.conf:
 
- ipkg update && ipkg upgrade
+ipkg update && ipkg upgrade
 
 will bring your installed packages up to the most recent versions. Also have a look at alternative/additional ipkg sources at [[downloads]].
 
@@ -294,15 +294,15 @@ If you are also building your own images and packages, you can also run a simple
 
 On the build host, for example:
 
- thttpd -d <path_to_moko/tmp/deploy/glibc/ipk> -p 8080
+thttpd -d <path_to_moko/tmp/deploy/glibc/ipk> -p 8080
 
 will serve your packages on port 8080.
 
 Then, on the neo, make a new file at /etc/ipkg/local-feed.conf with these contents:
 
- src/gz local-all http://192.168.0.200:8080/all
- src/gz local-armv4t http://192.168.0.200:8080/armv4t
- src/gz local-om-gta01 http://192.168.0.200:8080/om-gta01
+src/gz local-all http://192.168.0.200:8080/all
+src/gz local-armv4t http://192.168.0.200:8080/armv4t
+src/gz local-om-gta01 http://192.168.0.200:8080/om-gta01
 
 and ipkg on the Neo (update-upgrade) will pick up files from your local build host's repository (assuming its IP address is 192.168.0.200, as is default in the [[USB Networking]] setup) in addition to the openmoko buildhost.
 
@@ -312,13 +312,13 @@ Also if you are building your own packages or packages from the OE database that
 
 On the build host:
 
- bitbake <name_of_package>
- bitbake -crebuild package-index
+bitbake <name_of_package>
+bitbake -crebuild package-index
 
 Then on the Neo:
 
- ipkg update
- ipkg install <name_of_package>
+ipkg update
+ipkg install <name_of_package>
 
 The new package might not show up in the program menu until you reboot or restart X.
 
@@ -340,13 +340,13 @@ The new package might not show up in the program menu until you reboot or restar
 === Q: My mrxvt (terminal) fonts are huge. ===
 
 Edit src/feature.h to set MIN_XFT_FONT_SIZE to lower value:
- #define MIN_XFT_FONT_SIZE           (2)
+#define MIN_XFT_FONT_SIZE           (2)
 and rebuild mrxvt & openmoko-devel-image.
 
 End edit /etc/mrxvt/mrxvt.conf
- Mrxvt.xftSize: 4
- Mrxvt.xftHint: 1
+Mrxvt.xftSize: 4
+Mrxvt.xftHint: 1
 
 {{Languages|Om 2007.2}}
 
-[[Category:Om 2007.2| ]]
+[[Category:Om 2007.2|Om 2007.2]]
