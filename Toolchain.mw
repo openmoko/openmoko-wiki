@@ -307,40 +307,42 @@ See also [[Customizing the Openmoko Distribution]].
 
 Attached is a beta fix for the .la problem. Untar the .tar.bz2 as root, and execute the following bash script as root:
 
-        #!/bin/sh
-        DIR=/usr/local/openmoko/arm
-        for la in `find $DIR -iname \*.la`; do
-         dependency_libs=
-         . $la
-         for lib in $dependency_libs ; do
-         delib=`echo $lib | grep -E .la$`
-         if [ -z $delib ] ; then
-          echo -n
-         elif [ -f $delib ]; then
-          echo -n
-         else
-          basedelib=`basename $delib`
-          replacedelibs=`find $DIR -iname $basedelib`
-          found=0
-          for replacedelib in $replacedelibs ; do
-          if [ $replacedelib == $delib ]; then
-           found=1
-          fi
-          done
-          if [ $found -gt 0 ] ; then
-           echo -n
-          else
-            sed_delib=`echo $delib | sed 's/\//\\\\\//g'`
-            sed_replacedelib=`echo $replacedelib | sed 's/\//\\\\\//g'`
-            # A bit slow, we could chain expressions for speed. :)
-            cp $la $la.old
-            cat $la | sed "s/$sed_delib/$sed_replacedelib/g" > $la.new
-            mv $la.new $la
-            rm $la.old
-          fi
-         fi
-         done
-        done
+#!/bin/sh
+DIR=/usr/local/openmoko/arm
+for la in `find $DIR -iname \*.la`; do
+dependency_libs=
+. $la
+for lib in $dependency_libs ; do
+delib=`echo $lib | grep -E .la$`
+if [ -z $delib ] ; then
+echo -n
+elif [ -f $delib ]; then
+echo -n
+else
+basedelib=`basename $delib`
+replacedelibs=`find $DIR -iname $basedelib`
+found=0
+for replacedelib in $replacedelibs ; do
+if [ $replacedelib == $delib ]; then
+found=1
+fi
+done
+if [ $found -gt 0 ] ; then
+echo -n
+else
+sed_delib=`echo $delib | sed 's/\//\\\\\//g'`
+sed_replacedelib=`echo $replacedelib | sed 's/\//\\\\\//g'`
+# A bit slow, we could chain expressions for speed. :)
+cp $la $la.old
+cat $la | sed "s/$sed_delib/$sed_replacedelib/g" > $la.new
+mv $la.new $la
+rm $la.old
+fi
+fi
+done
+done
+
+* If you can't get the toolchain working in your distro (for example if you keep bumping into strange autotools issues), you can set up the toolchain inside a Debian chroot, which should provide reasonably standard environment. There's a guide for it: http://linux.fjfi.cvut.cz/~zub/debian-chroot-toolchain.txt
 
 * Please use the [http://lists.openmoko.org/mailman/listinfo/openmoko-devel Openmoko-Devel] mailing list.
 
