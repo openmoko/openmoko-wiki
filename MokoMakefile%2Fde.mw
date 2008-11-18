@@ -2,7 +2,7 @@
 ==MokoMakefile==
 Das MokoMakefile ist ein wertvolles Tool um neuen Entwicklern möglichst schnell eine einheitliche Entwicklungsumgebung an die Hand zu geben. Es garantiert die einfache Reproduzierbarkeit und Wartung der Entwicklungsumbgebung ähnich wie OpenEmbedded eine generelle Plattform zur Entwicklung von Embedded-Distributionen darstellt.
 
-'''Hinweis:''' 
+'''Hinweis:'''
 *Das MokoMakefile ist '''kein''' Ersatz für bitbake, SVN, monotone, OpenEmbedded, qmake und dergleichen. Es dient vielmehr als Rahmen für die einfache Wartung und Instandhaltung einer Entwicklungsumgebung die den Regeln des Openmoko-Projekts entspricht.
 *Die Entwicklungsumgebung benötigt ca. 7GB Festplattenspeicher
 *MokoMakefile wird von [[User:RodWhitby|Rod Whitby]] entwickelt und ist kein offizielles Produkt von Openmoko. Sollte es Widersprüche bzw. Probleme zwischen der [[Openmoko2007.2/de|offiziellen Build Openmoko Anleitung]] ([[Openmoko2007.2|eng]]) und der MokoMakefile selbst geben gilt die offizielle Anleitung als Standard.
@@ -27,48 +27,49 @@ rm -f  build/tmp/stamps/i686-linux/perl*
 So läufts:
 
 1 - Überprüfe ob dein Rechner den folgenden Anforderungen entspricht:
-[http://wiki.openembedded.net/index.php/OEandYourDistro http://wiki.openembedded.net/index.php/OEandYourDistro]
+ [http://wiki.openembedded.net/index.php/OEandYourDistro http://wiki.openembedded.net/index.php/OEandYourDistro]
 2 - Erstelle das $OMDIR Verzeichnis:
-mkdir /home/moko ; cd /home/moko
+ mkdir /home/moko ; cd /home/moko
 3 - Hole das MokoMakefile:
-wget http://www.rwhitby.net/files/openmoko/Makefile
+ wget http://www.rwhitby.net/files/openmoko/Makefile
 4 - Die Entwicklungsumgebung erstellen:
-make setup
+ make setup
 5 - Mit dem kompilieren anfangen (bevor du mit dem langen Kompilierprozess anfängst solltest du dich in der [[#Tips|Tips]]-Sektion darüber schlau machen wie man Multicore aktiviert):
-make openmoko-devel-image
+ make openmoko-devel-image
+
 
 Das Makefile erstellt die Ordnerstruktur wie sie in [[Openmoko2007.2/de|Openmoko2007.2]] vorgegeben ist, lädt die benötigten Programme (von den richtigen Quellen und in der richtigen Version) herunter und fängt sofort an das Image zu bauen.
 
 Danach kannst du das MokoMakefile dazu verwenden nachträgliche Builds laufen zu lassen oder im build-Verzeichnis mit ''bitbake'' die einzelnen Schritte durchführen.
 
-===Entwicklungsumgebung updaten=== 
+===Entwicklungsumgebung updaten===
 Zur einfachen Wartung der Entwicklungsumgebung stehen folgende Befehle zur Verfügung:
 
 1 - Um das MokoMakfile auf die neuste Version zu bringen:
-   make update-makefile 
+make update-makefile
 
 2 - Um den Paket-Pool zu aktualisieren und die entsprechenden Patches herunterzuladen:
-   make update
+make update
 
 3 - Um sicherzustellen dass kürzlich vorgenommene Änderungen an der Build-Verzeichnisstruktur übernommen wurden:
-   make setup 
+make setup
 
 Eine Möglichkeit ein neues Image mit den aktuellen Updates zu bauen:
-   make update-makefile && make update && make setup && make openmoko-devel-image
+make update-makefile && make update && make setup && make openmoko-devel-image
 
 
 ===Fehler melden===
 
 Überprüfe, ob der Fehler wiederholt auftritt und reproduzierbar ist:
- make update-makefile ; make update ; make setup
+make update-makefile ; make update ; make setup
 
 danach:
- make clean-package-<foo>
+make clean-package-<foo>
 
 (<foo> ist der Name des defekten Pakets)
 
 danach:
- make all
+make all
 
 Wenn der Fehler nach dem diese Sequenz zum dritten Mal '''in Folge''' durchlaufen wurde auftritt, bitte bei rwhitby in #openmoko [http://wiki.openmoko.org/wiki/Development_resources#IRC IRC] melden.
 
@@ -77,26 +78,26 @@ Wenn der Fehler nach dem diese Sequenz zum dritten Mal '''in Folge''' durchlaufe
 Work-arounds für vorübergehende oder isolierte Probleme können auf der [[Talk:MokoMakefile|Diskussions-Seite]] gefunden bzw hinzugefügt werden. Wenn das Problem behoben wurde wird das entsprechende Work-around entfernt.
 
 
-===Tips=== 
-* Die Menge an benötigten Festplattenspeicher kann durch hinzufügen folgender Zeile in der 'local.conf' (idR /home/moko/build/conf/local.conf) erheblich verringert werden: 
-   INHERIT += "rm_work"
+===Tips===
+* Die Menge an benötigten Festplattenspeicher kann durch hinzufügen folgender Zeile in der 'local.conf' (idR /home/moko/build/conf/local.conf) erheblich verringert werden:
+INHERIT += "rm_work"
 Diese Einstellung bewirkt dass der Inhalt jedes build/tmp/work/*/<package>-Verzeichnisses gelöscht wird wenn das Packet erfolgreich erstellt wurde.
 
 * Sollte ein Fehler im Zusammenhang mit Monotone auftreten der in etwa so aussieht:
-   mtn: misuse: database /home/moko/OE.mtn is laid out according to an old schema
+mtn: misuse: database /home/moko/OE.mtn is laid out according to an old schema
 Muss OE.mtn mit dem folgendem Befehl, ausgeführt in /home/moko geupdated werden:
-   mtn --db OE.mtn db migrate
+mtn --db OE.mtn db migrate
 
 * Sollte ein Paket wegen eines kaputten Downloads etc nicht kompiliert werden können hilft es normalerweise wenn man die Quellen löscht und es per Hand versucht:
- rm sources/<package>*
- cd build
- . ../setup-env
- bitbake -crebuild <package>
+rm sources/<package>*
+cd build
+. ../setup-env
+bitbake -crebuild <package>
 danach sollte der Build-Vorgang wieder normal ablaufen
 
 * Für Maschinen mit mehreren Prozessoren (bzw Dual-Core) sollten diese zwei Zeilen in der local.conf das ganze etwas beschleunigen:
- PARALLEL_MAKE = "-j 4"
- BB_NUMBER_THREADS = "4"
+PARALLEL_MAKE = "-j 4"
+BB_NUMBER_THREADS = "4"
 
 ''Sollte der Rechner das nicht verkraften kann man die Werte auch verringern.''
 
@@ -106,7 +107,7 @@ danach sollte der Build-Vorgang wieder normal ablaufen
 ===QEMU===
 Das MokoMakefile unterstützt jetzt auch das automatische Kompilieren, Flashen und Starten des neuen [[Openmoko under QEMU/de|Neo1973 Emulators]] ([[Openmoko under QEMU|eng]] - basierend auf QEMU).
 
- make qemu
+make qemu
 
 kompiliert qemu-neo1973, lädt die neusten offiziellen Openmoko-Images herunter, brennt sie in den virtuellen NAND-Speicher und startet den Emulator.
 ''Die Makefiles müssen trotzdem wie oben beschrieben installiert werden''
@@ -114,15 +115,15 @@ kompiliert qemu-neo1973, lädt die neusten offiziellen Openmoko-Images herunter,
 
 Weitere make-Ziele sind:
 * Lädt die aktuellen Official-Images herunter:
- make download-images
+make download-images
 * Images in den virtuellen Speicher flahen:
- make flash-qemu-official
+make flash-qemu-official
 * Die lokal erzeugten Images in den Emulator-Speicher flashen:
 make flash-qemu-local
 * Den Emulator starten
- make run-qemu 
+make run-qemu
 bzw
-  make run-qemu-snapshot
+make run-qemu-snapshot
 
 '''Hinweis''':
 Die Pakete "lynx" und "netpbm" müssen auf dem Build-Rechner installiert sein bevor der Emulator gestartet werden kann.
@@ -134,22 +135,22 @@ Weitere Informationen über QEMU gibt es in der Sektion [[Openmoko under QEMU/de
 Um im Pakete-Pool Veränderungen zu übernehmen, kompiliern und in QEMU einzuspielen benötigt man folgende Befehle:
 
 *Übernehmen
- cd /home/moko/openmoko
- quilt new beschreibender-name.patch
- quilt add trunk/src/Name-der-zu-ändernden-Datei
-  (Schritte für jede geänderte Datei wiederholen)
- ...Änderungen JETZT machen...
- quilt refresh
- ''(Erstellt eine neue Datei in /home/moko/patches/openmoko-HEAD/ und 
- aktualisiert die quilt-Serien)''
+cd /home/moko/openmoko
+quilt new beschreibender-name.patch
+quilt add trunk/src/Name-der-zu-ändernden-Datei
+(Schritte für jede geänderte Datei wiederholen)
+...Änderungen JETZT machen...
+quilt refresh
+''(Erstellt eine neue Datei in /home/moko/patches/openmoko-HEAD/ und
+aktualisiert die quilt-Serien)''
 
 *Kompilieren und in QEMU einspielen:
- make build-qemu
- make flash-qemu-local
- make run-qemu
+make build-qemu
+make flash-qemu-local
+make run-qemu
 
 
-===Anhang=== 
+===Anhang===
 
 Project page:
 http://mokomakefile.projects.openmoko.org/
