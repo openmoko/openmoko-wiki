@@ -1,0 +1,78 @@
+{{ApplicationBox|
+Name=Pythm|
+Description=Pythm is a media player frontend, designed to control mplayer or mpd with one GUI on the FreeRunner. As of writing, you need to download [https://docs.openmoko.org/trac/ticket/2011 python-mokoui] separately.|
+Screenshot=Pythm.png|
+Homepage=http://projects.openmoko.org/projects/pythm/|
+TestedOn=-|
+PackageName=-
+}}
+
+==Introduction==
+Pythm is a gui that can be used to play music. At the moment there are two "backends" supported:
+* Using the mplayer program on the device. 
+* Using the music player daemon (mpd) on any host in the network via wifi or GPRS.
+Other Backends can be written and integrated into the application, if needed or wanted.
+
+==Configuring Pythm==
+Pythm can be configured using a simple config-file (ini-like syntax). This file can be found here:
+ /etc/pythm.conf
+You can edit the file in place or copy it to
+ ~/.pythm/pythm.conf
+The file is splitted in three sections:
+
+===Global Settings===
+Here you can configure, what backends shall be used. one of them could be the default backend that is loaded on program start. If you do not specify a default backend, no backend is started, but you can choose to start one on the gui then, or both.
+ [pythm]
+ # backends to show in backend list
+ backends=mpd,mplayer
+ # the default backend to use, can be either
+ # mpd or mplayer, or omitted
+ # backend=mpd
+
+===MPD specific settings===
+In this section you can specify where your mpd server runs and how to authenticate with the server.
+ [mpd]
+ # mpd host
+ host=localhost
+ # mpd port
+ port=6600
+ # mpd password if used.
+ #password=verysecret
+
+===Mplayer settings===
+For Mplayer usage, you can define your directory that contains your music files. You can define valid file endings, so the file browser will filter out not matched items. The filters can be used to hide specific items. Be careful when you use them, errors will not be handled if a regular expression is invalid. The renice-value is used to change the process priority mplayer that will be started in the background.
+ [mplayer]
+ # renice val for mplayer process
+ renice=19
+ # directory containing music (the start folder for the browser)
+ musicdir=~
+ # allowed file endings in browse mode, comma separated
+ endings=ogg,mp3
+ # filters to exclude in file browser. applied to files and directories
+ # using regular expressions. use filtersN for more entries
+ # default is to ignore all elements that start with a ".".
+ filters0=\..*
+
+
+==Screenshots==
+* [http://projects.openmoko.org/docman/view.php/198/480/play-view.png Playback controls view]
+* [http://projects.openmoko.org/docman/view.php/198/481/playlist-view.png Playlist]
+* [http://projects.openmoko.org/docman/view.php/198/482/browsing-view.png File/Library Browsing]
+* [http://projects.openmoko.org/docman/view.php/198/483/backend-view.png Backend View]
+
+==Ideas, Feature Requests==
+Here you can put your Feature-ideas.
+* configure Pythm using the gui, not the config file.
+* mpd package for the freerunner, perhaps someone can do this?
+* build a gui using efl/etk
+
+==Known Problems==
+* bug in pygtk on the FreeRunner: http://docs.openmoko.org/trac/ticket/1718 - This is fixed, but some old Distributions still have this problem.
+* i18n: gettext support not implemented, planning
+* mplayer-backend: random mode not implemented
+
+==Reporting Bugs==
+Report bugs using the gforge-bugtracker-system:
+https://projects.openmoko.org/tracker/?group_id=198
+
+[[Category:Audio Applications]]
