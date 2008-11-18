@@ -14,6 +14,7 @@ Literal curly brace test:
 
 
 
+
 <nowiki>device {
          iscan enable;
          pscan enable;
@@ -23,5 +24,44 @@ Literal curly brace test:
 hello
 
 with a space
+
+Attached is a beta fix for the .la problem. Untar the .tar.bz2 as root, and execute the following bash script as root:
+
+#!/bin/sh
+DIR=/usr/local/openmoko/arm
+for la in `find $DIR -iname \*.la`; do
+dependency_libs=
+. $la
+for lib in $dependency_libs ; do
+delib=`echo $lib | grep -E .la$`
+if [ -z $delib ] ; then
+echo -n
+elif [ -f $delib ]; then
+echo -n
+else
+basedelib=`basename $delib`
+replacedelibs=`find $DIR -iname $basedelib`
+found=0
+for replacedelib in $replacedelibs ; do
+if [ $replacedelib == $delib ]; then
+found=1
+fi
+done
+if [ $found -gt 0 ] ; then
+echo -n
+else
+sed_delib=`echo $delib | sed 's/\//\\\\\//g'`
+sed_replacedelib=`echo $replacedelib | sed 's/\//\\\\\//g'`
+# A bit slow, we could chain expressions for speed. :)
+cp $la $la.old
+cat $la | sed "s/$sed_delib/$sed_replacedelib/g" > $la.new
+mv $la.new $la
+rm $la.old
+fi
+fi
+done
+done
+
+* Please use the [http://lists.openmoko.org/mailman/listinfo/openmoko-devel Openmoko-Devel] mailing list.
 
 [[Category:Test]]
