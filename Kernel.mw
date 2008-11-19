@@ -18,9 +18,9 @@ Some additional patches are required for
 
 == Obtaining the kernel source ==
 The openmoko "version" of the kernel can be obtained using git
- git clone git://git.openmoko.org/git/kernel.git linux-2.6
- cd linux-2.6
- git checkout origin/stable
+git clone git://git.openmoko.org/git/kernel.git linux-2.6
+cd linux-2.6
+git checkout origin/stable
 According to [http://git.openmoko.org/?p=kernel.git;a=summary OpenMoko git web interface] you should checkout origin/andy, but according to Andy Green himself it is "normally nowadays you want to checkout origin/stable".
 
 The web interface also contains a list of other heads (branches) available.
@@ -31,7 +31,7 @@ Before you start the build of the kernel you need to configure it.
 
 A good place to start are the predefined configurations. ''defconfig-gta01'' and ''defconfig-gta02'' are some of the more interesting configurations. They are available inside the checkout of the source.
 
-You just copy one of the configuration files into .config 
+You just copy one of the configuration files into .config
 
 To customize the configuration use ''make menuconfig''
 
@@ -42,13 +42,12 @@ The kernel build is executed as normal.  We actually only need the "vmlinux" tar
 == Prebuilt kernel images ==
 
 Prebuilt bootable kernel images called ''uImage*'' are available from:
-* http://downloads.openmoko.org/releases/Om2007.11/images/
-
+* http://downloads.openmoko.org/releases/Om2008.9/
 For full operation on the currently supported platforms you need some modules inside the rootfs. You can either get a ''modules*'' archive from the above mentioned location (with the same version number) which contains many more modules then you might need.
 
-Alternatively you can check the following location 
+Alternatively you can check the following location
 for prepackaged modules for the kernel version and install them using ipkg:
-* http://downloads.openmoko.org/releases/Om2007.11/
+* http://downloads.openmoko.org/releases/
 
 Latest images can always be found here: http://downloads.openmoko.org/releases/
 
@@ -98,10 +97,10 @@ root@fic-gta01:/$ ls -l /sys/bus/platform/devices/gta01-pm-gsm.0/
 
 ===== Powering up/down =====
 <pre>
-root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/power_on 
+root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/power_on
 gta01-pm-gsm gta01-pm-gsm.0: powering up GSM, thus disconnecting serial console
 
-root@fic-gta01:~$ echo "0" > /sys/bus/platform/devices/gta01-pm-gsm.0/power_on 
+root@fic-gta01:~$ echo "0" > /sys/bus/platform/devices/gta01-pm-gsm.0/power_on
 gta01-pm-gsm gta01-pm-gsm.0: powered down GSM, thus enabling serial console
 </pre>
 
@@ -109,8 +108,8 @@ Note that powering up GSM <b>disables</b> the console.
 
 ===== Resetting =====
 <pre>
-root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/reset 
-root@fic-gta01:~$ echo "0" > /sys/bus/platform/devices/gta01-pm-gsm.0/reset 
+root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/reset
+root@fic-gta01:~$ echo "0" > /sys/bus/platform/devices/gta01-pm-gsm.0/reset
 </pre>
 
 ===== Activating GSM baseband download mode =====
@@ -129,7 +128,7 @@ root@fic-gta01:~$ echo "0" > /sys/bus/platform/devices/gta01-pm-gsm.0/download
 
 The gta01_pm_gps kernel driver offers a sysfs based interface:
 <pre>
-root@fic-gta01:~$ ls -l /sys/bus/platform/devices/gta01-pm-gps.0/     
+root@fic-gta01:~$ ls -l /sys/bus/platform/devices/gta01-pm-gps.0/
 -rw-r--r--    1 root     root         4096 Feb  1 09:14 power_avdd_3v
 -rw-r--r--    1 root     root         4096 Feb  1 09:14 power_lp_io_3v3
 -rw-r--r--    1 root     root         4096 Feb  1 09:14 power_pll_core_2v5
@@ -144,9 +143,9 @@ The power_avdd_3v, power_lp_io_3v3, power_pll_core_2v5, power_vtxco_2v8, pwron a
 The <b>power_sequence</b> file implements power-up/power-down sequence in accordance with the GlobalLocate data sheet.
 
 ===== Powering up =====
- root@fic-gta01:~$ echo "power_up" > /sys/bus/platform/devices/gta01-pm-gps.0/power_sequence 
+root@fic-gta01:~$ echo "power_up" > /sys/bus/platform/devices/gta01-pm-gps.0/power_sequence
 ===== Powering down =====
- root@fic-gta01:~$ echo "power_down" > /sys/bus/platform/devices/gta01-pm-gps.0/power_sequence
+root@fic-gta01:~$ echo "power_down" > /sys/bus/platform/devices/gta01-pm-gps.0/power_sequence
 
 === Asound driver ===
 
@@ -202,19 +201,19 @@ usb 1-1: configuration #1 chosen from 1 choice
 
 ===== Powering down the device =====
 <pre>
-root@fic-gta01:/$ echo "0" > /sys/bus/platform/devices/gta01-pm-bt.0/power_on 
+root@fic-gta01:/$ echo "0" > /sys/bus/platform/devices/gta01-pm-bt.0/power_on
 usb 1-1: USB disconnect, address 3
 </pre>
 
 ===== Asserting reset (low-active) =====
 <pre>
-root@fic-gta01:/$ echo "0" >  /sys/bus/platform/devices/gta01-pm-bt.0/reset 
+root@fic-gta01:/$ echo "0" >  /sys/bus/platform/devices/gta01-pm-bt.0/reset
 root@fic-gta01:/$ usb 1-1: USB disconnect, address 2
 </pre>
 
 ===== De-asserting reset (low-active) =====
 <pre>
-root@fic-gta01:/$ echo "1" >  /sys/bus/platform/devices/gta01-pm-bt.0/reset 
+root@fic-gta01:/$ echo "1" >  /sys/bus/platform/devices/gta01-pm-bt.0/reset
 s3c2410-ohci s3c2410-ohci: wakeup
 usb 1-1: new full speed USB device using s3c2410-ohci and address 3
 usb 1-1: configuration #1 chosen from 1 choice
@@ -226,31 +225,31 @@ usb 1-1: configuration #1 chosen from 1 choice
 root@fic-gta01:~$ hciconfig hci0 up
 root@fic-gta01:~$ hcitool  scan
 Scanning ...
-        00:14:9A:77:A2:02       A780
-root@fic-gta01:~$ hcitool inq 00:14:9A:77:A2:02 
+00:14:9A:77:A2:02       A780
+root@fic-gta01:~$ hcitool inq 00:14:9A:77:A2:02
 Inquiring ...
-        00:14:9A:77:A2:02       clock offset: 0x55df    class: 0x502204
-root@fic-gta01:~$ hcitool cc 00:14:9A:77:A2:02 
-root@fic-gta01:~$ hcitool con                 
+00:14:9A:77:A2:02       clock offset: 0x55df    class: 0x502204
+root@fic-gta01:~$ hcitool cc 00:14:9A:77:A2:02
+root@fic-gta01:~$ hcitool con
 Connections:
-        < ACL 00:14:9A:77:A2:02 handle 42 state 1 lm MASTER 
+< ACL 00:14:9A:77:A2:02 handle 42 state 1 lm MASTER
 root@fic-gta01:~$ hcitool info 00:14:9A:77:A2:02
 Requesting information ...
-        BD Address:  00:14:9A:77:A2:02
-        Device Name: A780
-        LMP Version: 1.1 (0x1) LMP Subversion: 0x700
-        Manufacturer: Broadcom Corporation (15)
-        Features: 0xff 0xff 0x0d 0x00 0x00 0x00 0x00 0x00
-                <3-slot packets> <5-slot packets> <encryption> <slot offset> 
-                <timing accuracy> <role switch> <hold mode> <sniff mode> 
-                <park state> <RSSI> <channel quality> <SCO link> <HV2 packets> 
-                <HV3 packets> <u-law log> <A-law log> <CVSD> <power control> 
-                <transparent SCO> 
+BD Address:  00:14:9A:77:A2:02
+Device Name: A780
+LMP Version: 1.1 (0x1) LMP Subversion: 0x700
+Manufacturer: Broadcom Corporation (15)
+Features: 0xff 0xff 0x0d 0x00 0x00 0x00 0x00 0x00
+<3-slot packets> <5-slot packets> <encryption> <slot offset>
+<timing accuracy> <role switch> <hold mode> <sniff mode>
+<park state> <RSSI> <channel quality> <SCO link> <HV2 packets>
+<HV3 packets> <u-law log> <A-law log> <CVSD> <power control>
+<transparent SCO>
 </pre>
 
 === AUX Button ===
 
-The AUX button (formerly 911 button) is supported via the "gta01kbd" driver in the kernel (drivers/input/keyboard/gta01kbd.c).  
+The AUX button (formerly 911 button) is supported via the "gta01kbd" driver in the kernel (drivers/input/keyboard/gta01kbd.c).
 
 It creates an input event device that only issues "KEY_PHONE" press/unpress events.
 
@@ -300,7 +299,7 @@ root@fic-gta01:/sys/devices/platform/s3c2410-i2c/i2c-0/0-0008$ cat voltage_dcd
 The battery voltage (in millivolts) can be read via sysfs
 
 <pre>
-root@fic-gta01:~$ cat /sys/bus/i2c/devices/0-0008/battvolt 
+root@fic-gta01:~$ cat /sys/bus/i2c/devices/0-0008/battvolt
 3767
 </pre>
 
@@ -309,7 +308,7 @@ root@fic-gta01:~$ cat /sys/bus/i2c/devices/0-0008/battvolt
 The battery charging current (in milliamperes) can be read via sysfs
 
 <pre>
-root@fic-gta01:~$ cat /sys/bus/i2c/devices/0-0008/chgcur 
+root@fic-gta01:~$ cat /sys/bus/i2c/devices/0-0008/chgcur
 0
 </pre>
 
