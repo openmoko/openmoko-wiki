@@ -351,6 +351,7 @@ Ubuntu Feisty, Gutsy and Hardy reportedly have a bug where ifdown is not run whe
 
 One can patch /etc/udev/rules.d/85-ifupdown.rules. Moving the DRIVERS=="*?" out of the top GOTO, to ACTION=="add" line fixes the problem.
 
+<pre>
 SUBSYSTEM=="net", GOTO="net_start"
 GOTO="net_end"
 
@@ -363,6 +364,7 @@ ACTION=="add", DRIVERS=="?*",       RUN+="/sbin/start-stop-daemon --start --back
 ACTION=="remove",       RUN+="/sbin/start-stop-daemon --start --background --pidfile /var/run/network/bogus --startas /sbin/ifdown -- --allow auto $env{INTERFACE}"
 
 LABEL="net_end"
+</pre>
 
 The bug is that the DRIVERS variable isn't set at all when the device is unplugged.
 
