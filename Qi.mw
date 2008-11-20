@@ -2,22 +2,21 @@ Qi is a boot manager. It is designed to replace [[Uboot|uBoot]]. But Qi will be 
 
 Qi's concept is it leaves everything possible to Linux, that includes even the video init. Therefore Qi does NOT provide a boot menu. The usual NOR uBoot menu you use to flash your Neo (Aux first, power second, wait for menu) of course works fine, but if you try the usual procedure to fire up NAND uBoot (Power first, aux second, wait for menu) you get no response.  (not even the 'backlighted black screen')
 
-Qi will boot from any kernel named <del>uImage.bin</del> uImage-GTA02.bin (others too?) in the /boot folder in the root of an ext2/ext3 (either OK 11/2008)
-partition - first partition - on the uSD.
-(Note, Qi expects the / (root) filesystem to be on the same partition as /boot!)
-Failing to
-find that, it will try the second and then third partitions.
-Failing that, it will boot from the kernel in NAND (if the kernel works of course, see below). Failing to find that, it will blink the blue Power LED a fraction of a second every 10 secs or so to say ''nothing valid to boot''.
+Qi will boot from any kernel named uImage-GTA0[123...].bin in the /boot folder in the root of an ext2 or ext3
+partition on the uSD card. (Note: Qi expects the / (root) filesystem to be on the same partition as /boot!) It
+tries the it will try first, second and then third partitions. Failing to find that, it will boot from the
+kernel in NAND (if the kernel works of course, see below). Failing to find that, it will blink the blue Power
+LED a fraction of a second every 10 secs or so to say ''nothing valid to boot''.
 
-= Download and installation =
+== Download and installation ==
 
-The daily download is a ''qi-s3c2442-andy_somenumber.udfu'' file at http://people.openmoko.org/andy/ .
+The daily download is a ''qi-s3cXXXX-andy_somenumber.udfu'' file at http://people.openmoko.org/andy/ .
 (look at your dmesg output for the CPU to pick the right s3c* version.)
 
 The installation should be flashing like;
-./dfu-util -a u-boot -R -D qi-s3c6410-andy_8589b40295653557.udfu
+ # dfu-util -a u-boot -R -D qi-s3c6410-andy_8589b40295653557.udfu
 
-= Testing speed improvements =
+== Testing speed improvements ==
 
 Stopwatch results on Qi (error is approx ±1/2 second):
 
@@ -40,14 +39,14 @@ Booting identical setup with Qi flashed over uBoot:
 
 So for this particular configuration, it reduced time-to-desktop by about 28%, about 44 seconds.  Surprisingly, the later segments of booting (desktop) were also noticeably faster than with uBoot - One would have expected just the fist stages up until init (kernel finished establishing itself) to be faster.
 
-= Bugs =
+== Bugs ==
 
 * Qi won't boot the 'first try' after power restored - the tester didn't count that first 10 seconds for Qi to be fair to its booting speed, not penalize it for what appears to be a bug that bears no relation to actual boot speed).
 * The current (Oct. 12, 2008) 2.6.27 kernel does not boot from the build-in flash NAND. It only works from the uSD boot on ext3. If one tries to boot it from the flash, then AUX red LED blinks ~4/sec. This means kernel panic... It's panicking because it has no rootfs because it can't mount the jffs2 because of the CRC errors because there is a bug that the mtd are not done properly.
 * {{Ticket|2095}} describes sound trouble (=no sound at all) on 2.6.24 kernel
 * Qi often doesn't want to resume after suspend.
 
-= LED codes summary =
+== LED codes summary ==
 
 * One Blue shine every ~10 second: did not found any valid kernel to boot
 * About four RED shines per second: kernel panic.
