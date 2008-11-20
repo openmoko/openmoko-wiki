@@ -1,15 +1,18 @@
-Qi is a boot manager. It is designed to replace uBoot. But Qi will be simpler and faster.
+Qi is a boot manager. It is designed to replace [[Uboot|uBoot]]. But Qi will be simpler and faster.
 
 Qi's concept is it leaves everything possible to Linux, that includes even the video init. Therefore Qi does NOT provide a boot menu. The usual NOR uBoot menu you use to flash your Neo (Aux first, power second, wait for menu) of course works fine, but if you try the usual procedure to fire up NAND uBoot (Power first, aux second, wait for menu) you get no response.  (not even the 'backlighted black screen')
 
-Qi will boot from any kernel named 'uImage.bin' (or e.g., uImage-GTA02.bin ?) in the /boot folder in the root of an ext2/ext3 (ext3 only as of 11/2008)
-partition - first partition - on the uSD. Failing to
-find that, it will boot from the kernel in NAND (if the kernel works of course, see below). Failing to find that, it will blink the blue Power LED a fraction of a second every 10 secs or so to say ''nothing valid to boot''.
+Qi will boot from any kernel named <del>uImage.bin</del> uImage-GTA02.bin (others too?) in the /boot folder in the root of an ext2/ext3 (either OK 11/2008)
+partition - first partition - on the uSD.
+(Note, Qi expects the / (root) filesystem to be on the same partition as /boot!)
+Failing to
+find that, it will try the second and then third partitions.
+Failing that, it will boot from the kernel in NAND (if the kernel works of course, see below). Failing to find that, it will blink the blue Power LED a fraction of a second every 10 secs or so to say ''nothing valid to boot''.
 
 = Download and installation =
 
 The daily download is a ''qi-s3c2442-andy_somenumber.udfu'' file at http://people.openmoko.org/andy/ .
-(look at you dmesg output for the CPU to pick the right s3c* version.)
+(look at your dmesg output for the CPU to pick the right s3c* version.)
 
 The installation should be flashing like;
 ./dfu-util -a u-boot -R -D qi-s3c6410-andy_8589b40295653557.udfu
