@@ -3,13 +3,28 @@
 '''neocon''' has a few graving advantages over some other terminal apps:
 
 * You don't have to be <code>root</code> to access <code>/dev/ttyACM0</code> with '''neocon'''. Beeing member of <code>dialout</code> should give you sufficient privileges. 
-* '''neocon''' can be started without <code>/dev/ttyACM0</code> being available. It will automatically connect as soon as you start [[Bootloader|u-boot]] on the Neo. 
 * by specifying a delay  on keyboard input(as shown below), '''neocon''' will allow you to paste commands directly from clipboard without making [[Bootloader|u-boot]] choke on it. 
+* '''neocon''' can be started without <code>/dev/ttyACM0</code> being available. It will automatically connect as soon as you start [[Bootloader|u-boot]] on the Neo:
 
+The main feature of neocon is actually that you can give it a list
+of devices and it will pick one that works, e.g.,
+
+ # neocon /dev/ttyUSB{0,1,2}
+
+If you don't like the one it picked, you can switch to the next with
+ ~n
+
+This is useful for dynamically allocated devices, such as ttyUSBn
+or ttyACMn. You can of course also use them with other communication
+programs - there's certainly no shortage of them - but then you have
+to handle reconnects manually.
+
+==Installation==
 Download the source from http://svn.openmoko.org/developers/werner/neocon/ to a directory of your choice and build '''neocon''' by issuing 
 
  make
 
+==Usage==
 To connect to the [[bootloader]] use
 
  ./neocon -t 30 /dev/ttyACM0
