@@ -51,14 +51,14 @@ Der Inhalt der "bootargs" Umgebungsvariable die an den Kernel übergeben wird, i
 
 Beispiel: Folgende Parameter veranlassen den Kernel die dritte Partition der SD-Karte zu mounten:
 
-root=/dev/mmcblk0p3 rootfstype=ext3 rootdelay=5
+ root=/dev/mmcblk0p3 rootfstype=ext3 rootdelay=5
 
 Der "rootdelay"-Parameter gibt der SD-Karte die nötige Zeit um sich zu initialisieren bevor auf sie zugegriffen wird.
 
 Wichtig ist, daß der Kernel das Root-Filesystem auch unterstützt.
 Der Default-Openmoko-Kernel [http://git.openmoko.org/?p=kernel.git;a=commit;h=642cbda5f3b7e7a61512426e1d30a41ab4691123| 2008-07-17] unterstützt ext2 und ext3. Überprüfen kann man die unterstützten Filesysteme mit folgendem Linux-Befehl:
 
-less /proc/filesystems
+ less /proc/filesystems
 
 Es ist nicht möglich, VFAT als Root-Filesystem zu benutzen.
 
@@ -81,15 +81,15 @@ Eine weitere Möglichkeit besteht darin, sich selber mit der OpenEmbedded Umgebu
 
 Um OM-2007.2 zu erstellen, muss man "tar" zu den Image-Typen in seiner ''local.conf'' hinzudügen:
 
-IMAGE_FSTYPES = "jffs2 tar"
+ IMAGE_FSTYPES = "jffs2 tar"
 
 Jetzt kann man das neue Image erstellen:
 
-bitbake openmoko-devel-image
+ bitbake openmoko-devel-image
 
 oder mit MokoMakefile:
 
-make openmoko-devel-image
+ make openmoko-devel-image
 
 Das ''Openmoko-....tar'' findet sich anschließend im Out-Pfad.
 
@@ -104,87 +104,62 @@ Siehe [[Userspace root image]].
 U-Boot vor 2008-07-23 kan ausschließlich von FAT-Filesystemen booten. Nach einem U-Boot-Update kann auch von ext2/ext3 gebootet werden.
 Dieses Beispiel zeigt wie man mit fdisk Partitionen erstellt.
 
-fdisk /dev/mmcblk0
+ fdisk /dev/mmcblk0
 
 '''''Achtung:''''' Der Gerätename kann variieren. Um sicher zu gehen, ob man den richtigen Gerätenamen hat, liest man die Kernel-Message-Log durch den Aufruf von ''dmesg''.
 Jetzt erstellt man eine 8MB Partition für den Kernel und eine Partition mit dem restlichen Speicherplatz für das Root-Filesystem.
 
-Command (m for help): d
-
-Selected partition 1
-
-Command (m for help): n
-
-Command action
-
-e   extended
-
-p   primary partition (1-4)
-
-p
-
-Partition number (1-4): 1
-
-First cylinder (1-983, default 1):
-
-Using default value 1
-
-Last cylinder or +size or +sizeM or +sizeK (1-983, default 983): +8M
-
-Command (m for help): n
-
-Command action
-
-e   extended
-
-p   primary partition (1-4)
-
-p
-
-Partition number (1-4): 2
-
-First cylinder (18-983, default 18):
-
-Using default value 18
-
-Last cylinder or +size or +sizeM or +sizeK (18-983, default 983):
-
-Using default value 983
-
-Command (m for help): w
-
-The partition table has been altered!
-
-Calling ioctl() to re-read partition table.
-Syncing disks.
+ Command (m for help): d
+ Selected partition 1
+ Command (m for help): n
+ Command action
+ e   extended
+ p   primary partition (1-4)
+ p
+ Partition number (1-4): 1
+ First cylinder (1-983, default 1):
+ Using default value 1
+ Last cylinder or +size or +sizeM or +sizeK (1-983, default 983): +8M
+ Command (m for help): n
+ Command action
+ e   extended
+ p   primary partition (1-4)
+ p
+ Partition number (1-4): 2
+ First cylinder (18-983, default 18):
+ Using default value 18
+ Last cylinder or +size or +sizeM or +sizeK (18-983, default 983):
+ Using default value 983
+ Command (m for help): w
+ The partition table has been altered!
+ Calling ioctl() to re-read partition table.
+ Syncing disks.
 
 Bei folgender Fehlermeldung:
 
-Calling ioctl() to re-read partition table
-
-fdisk: WARNING: rereading partition table failed, kernel still uses old table:   Device or resource busy
+ Calling ioctl() to re-read partition table
+ fdisk: WARNING: rereading partition table failed, kernel still uses old table:   Device or resource busy
 
 einfach das Gerät aushängen:
 
-umount /dev/mmcblk0p1
+ umount /dev/mmcblk0p1
 
 und anschließend die Partitionstabellen nocheinmal schreiben:
 
-fdisk /dev/mmcblk0
-
-Command (m for help): w
+ fdisk /dev/mmcblk0
+ Command (m for help): w
 
 === Formatieren der SD-Karte ===
 
 Folgender Befehl formatiert die erste Partition der SD-Karte mit dem FAT-Filesystem:
 
-mkfs.vfat /dev/mmcblk0p1
+ mkfs.vfat /dev/mmcblk0p1
 
 {{Note| Sollte mkfs.vfat nicht installiert sein, muss das "dosfstools"-Packet nachinstalliert werden. Dieses Paket ist zwar nicht in der offiziellen Software enthalten, kann aber unter http://members.shaw.ca/mmontour/neo/dosfstools_2.11-r0_armv4t.ipk heruntergeladen werden.}}
 
 Die zweite Partition wird mit dem ext3-Filesystem formatiert:
 
-mkfs.ext3 /dev/mmcblk0p2
+ mkfs.ext3 /dev/mmcblk0p2
 
 == Bespielen der SD-Karte ==
 
@@ -192,23 +167,21 @@ Die SD-Karte ist jetzt bereit mit dem Rootfs und dem Kernel bespielt zuwerden.
 
 Zuerst wird die zweite Patrtition der SD-Karte gemountet und das Rootfs-Image aufgespielt:
 
-mount /dev/mmcblk0p2 /mnt/moko
+ mount /dev/mmcblk0p2 /mnt/moko
 
-tar -C /mnt/moko/ -xzvf openmoko-devel-image-fic-gta01-20070313022035.rootfs.tar.gz
+ tar -C /mnt/moko/ -xzvf openmoko-devel-image-fic-gta01-20070313022035.rootfs.tar.gz
 
 '''''Achtung:''''' Die Pfade und Dateinamen müssen entsprechend angepasst werden.
 
 Als nächstes wird die erste Partition der SD-Karte gemountet und der Kernel darauf installiert:
 
-mount /dev/mmcblk0p1 /mnt/mokokernel
-
-cp uImage-fic-gta01-latest.bin /mnt/mokokernel/uImage.bin
+ mount /dev/mmcblk0p1 /mnt/mokokernel
+ cp uImage-fic-gta01-latest.bin /mnt/mokokernel/uImage.bin
 
 Bei einigen Versionen des NOR U-boot:
 
-mount /dev/mmcblk0p1 /mnt/mokokernel
-
-cp uImage-fic-gta01-latest.bin /mnt/mokokernel/uimage
+ mount /dev/mmcblk0p1 /mnt/mokokernel
+ cp uImage-fic-gta01-latest.bin /mnt/mokokernel/uimage
 
 (Ja, kleines i und keine Dateierweiterung.)
 
@@ -220,11 +193,9 @@ Anschließend mit dem Ergebnis von ''printenv sd_image_name'' vergleichen. Es is
 
 Jetzt beide Partitionen aushängen und sicherstellen, daß alle Buffer geschrieben wurden:
 
-umount /mnt/moko
-
-umount /mnt/mokokernel
-
-sync
+ umount /mnt/moko
+ umount /mnt/mokokernel
+ sync
 
 == U-Boot-Menü-Eintrag hinzufügen ==
 
@@ -237,14 +208,14 @@ Wie man in das Bootmenü gelangt steht hier: [[Getting_Started_with_your_Neo_Fre
 
 Als erstes empfiehlt es sich, das U-Boot-TimeOut(60s) auf einen realistischen Wert zu setzen. Hierzu aus der UBoot-Kommandoeile folgenden Befehl ausführen:
 
-setenv boot_menu_timeout 99999
+ setenv boot_menu_timeout 99999
 
 Der TimeOut-Wert wird so auf 99999s gesetzt, was für alle weiteren Vorhaben ausreichen sollte.:-)
 
 
 Jetzt wird geprüft, ob ein geeigneter Menü-Eintrag zum booten von der SD-Karte vorhanden ist:
 
-printenv
+ printenv
 
 Wenn eine Zeile existiert, die mit ''menu_'' beginnt und auch die folgende Befehle enthält braucht kein neuer Menü-Eintrag erstellt werden.
 
@@ -259,35 +230,40 @@ Möglicherweise müssen die Nummern in root=/dev/mmcblk0p'''#''' (rootfs) und fa
 
 '''Boot-Eintrag für FAT-Kernel mit ext3-Rootfs Partition:'''
 
-setenv menu_9 Boot from microSD (FAT+ext3): setenv bootargs \${bootargs_base} rootfstype=ext3 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
+setenv menu_9 Boot from microSD (FAT+ext3): 
+ setenv bootargs \${bootargs_base} rootfstype=ext3 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
 
 '''Boot-Eintrag für FAT-Kernel mit ext2-Rootfs Partition:'''
 
-setenv menu_9 Boot from microSD (FAT+ext2): setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
+setenv menu_9 Boot from microSD (FAT+ext2): 
+ setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
 
 or : with additional 'init=/sbin/init' kernel parameter (may be needed for some images) :
-setenv menu_9 Boot 200808 from microSD (FAT+ext2): setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} init=/sbin/init ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
+setenv menu_9 Boot 200808 from microSD (FAT+ext2): 
+ setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} init=/sbin/init ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
 
 '''Boot-Eintrag für ext2-Kernel mit ext2-Rootfs Partition: (requires newer u-boot)'''
 
-setenv menu_2 Boot from microSD part2 (ext2+ext2): setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; ext2load mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
+setenv menu_2 Boot from microSD part2 (ext2+ext2): 
+ setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; ext2load mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
 
 '''Boot-Eintrag für Kernel und Rootfs auf der gleichen ext2 Partition (getestet mit Qtopia/ benötigt ein neues U-boot)'''
-setenv menu_3 QTopia: setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p1 rootdelay=5 \${mtdparts} ro\; mmcinit\; ext2load mmc 1:1 0x32000000 \${sd_image_name}\; bootm 0x32000000
+setenv menu_3 QTopia:
+ setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p1 rootdelay=5 \${mtdparts} ro\; mmcinit\; ext2load mmc 1:1 0x32000000 \${sd_image_name}\; bootm 0x32000000
 
 Jetzt nur noch prüfen, ob der neue Menü-Eintrag richtig angezeigt wird.:
 
-printenv
+ printenv
 
 Wenn alles passt dann speichern:
 
-saveenv
+ saveenv
 
 Die neue Konfiguration wird jetzt im NAND gespeichert.
 
 Herunterfahren des NEO:
 
-neo1973 power-off
+ neo1973 power-off
 
 Nach dem Neustart in das NAND-Boot-Menü gehen und den neu erstellten Menü-Eintrag wählen um von der SD-Karte zu booten.
 
@@ -310,8 +286,8 @@ Folgen sie Schritt 1, um einen Kernel-Image mit MMC-und ext2-Unterstützung zu b
 Jetzt können Sie mit Schritt 2 fortfahren (wie schon erwähnt,  nicht das uImage auf die Rootfs kopieren) und den Anweisungen bis zu Schritt 3 folgen.
 Anstelle der setenv-Befehle in Schritt 3 führen Sie die folgenden Schritte aus: 
 
-GTA01Bv4 # setenv menu_5 Boot from SDHC: setenv  bootargs root=/dev/mmcblk0p1 console=tty0 rootdelay=5 neo1973-nand:0x00040000(u-boot),0x00004000(u-boot_env),0x00200000(kernel),0x000a0000(splash)\; nand read.e 0x32000000 kernel\; bootm 0x32000000
-GTA01Bv4 # saveenv
+ GTA01Bv4 # setenv menu_5 Boot from SDHC: setenv  bootargs root=/dev/mmcblk0p1 console=tty0 rootdelay=5 neo1973-nand:0x00040000(u-boot),0x00004000(u-boot_env),0x00200000(kernel),0x000a0000(splash)\; nand read.e 0x32000000 kernel\; bootm 0x32000000
+ GTA01Bv4 # saveenv
 
 Jetzt kann der neue Menü-Eintrag "Boot from SDHC" benutzt werden um den interen kernel zu booten und dabei das Root-Filesystem auf der SDHC-Karte zu laden.
 
@@ -320,13 +296,13 @@ Jetzt kann der neue Menü-Eintrag "Boot from SDHC" benutzt werden um den interen
 Wenn automatisch von der SDHC-Karte gebootet werden soll:	 	
 Zuerst einen neue Bootmenü Eintrag für das Booten von NAND erstellen:
 
-GTA01Bv4 # setenv menu_6 Boot from NAND: setenv bootargs \${bootargs_base} \${mtdparts}\; nand read.e 0x32000000 kernel\; bootm 0x32000000
-GTA01Bv4 # saveenv
+ GTA01Bv4 # setenv menu_6 Boot from NAND: setenv bootargs \${bootargs_base} \${mtdparts}\; nand read.e 0x32000000 kernel\; bootm 0x32000000
+ GTA01Bv4 # saveenv
 
 Danach neustarten und im Bootmenü den neuen Eintrag testen. Wenn dieser funktioniert wieder herrunterfahren, das Bootmenü starten, Bootloader verbinden und das autoboot-Komando zum booten von der SDHC-Karte erstellen:
 
-GTA01Bv4 # setenv bootcmd setenv bootargs root=/dev/mmcblk0p1 rootdelay=10 console=tty0 neo1973-nand:0x00040000(u-boot),0x00004000(u-boot_env),0x00200000(kernel),0x000a0000(splash)\; nand read.e 0x32000000 kernel\; bootm 0x32000000
-GTA01Bv4 # saveenv
+ GTA01Bv4 # setenv bootcmd setenv bootargs root=/dev/mmcblk0p1 rootdelay=10 console=tty0 neo1973-nand:0x00040000(u-boot),0x00004000(u-boot_env),0x00200000(kernel),0x000a0000(splash)\; nand read.e 0x32000000 kernel\; bootm 0x32000000
+ GTA01Bv4 # saveenv
 
 Jetzt wird immer von der SDHC-Karte gebootetwenn der Power-Knopf gedrückt oder reboot ausgeführt wird. Wenn vom NAND gebootet werden soll muss das Bootmenü benutzt werden.
 
@@ -336,7 +312,7 @@ Jetzt wird immer von der SDHC-Karte gebootetwenn der Power-Knopf gedrückt oder 
 Udev mountet die SD-Karte automatisch unter /media/mmcblk0p1/ .
 Dies kann geändert werden:
 
-echo /dev/mmcblk >> /etc/udev/mount.blacklist
+ echo /dev/mmcblk >> /etc/udev/mount.blacklist
 
 === Bemerkung zu Kernel Parametern ===
 
@@ -344,7 +320,7 @@ echo /dev/mmcblk >> /etc/udev/mount.blacklist
 
 Einige Leute empfehlen folgendes zur KernelBefehlsZeile hinzuzufügen:
 
-loglevel=8
+ loglevel=8
 
 Wenn Sie "console=tty0" in der KernelBefehlsZeile aufrufen verlangsamt das den Bootprozess extrem da der Framebuffer (Neo-Display im Text-Modus) unmengen von DebugInformationen schreiben muss. 
 
