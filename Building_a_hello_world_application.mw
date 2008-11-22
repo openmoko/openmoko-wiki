@@ -29,7 +29,7 @@ This sequence of commands ought to give you a nice ''Hello World'', btw. the def
 Building a GDK application the wrong way is slightly more complex, but is still fun to try.  It requires using pkg-config to specify including and linking with the ARM header files and libraries.
 
 Given the following program as main.c:
-
+<pre>
 #include <gtk/gtk.h>
 
 gchar *hello = "Howdy";
@@ -66,20 +66,21 @@ gtk_main();
 
 return 0;
 }
+</pre>
 
 You must first point pkg-config to the proper directory:
 
-export PKG_CONFIG_PATH=/home/username/moko/build/tmp/staging/arm-linux/lib/pkgconfig
+  export PKG_CONFIG_PATH=/home/username/moko/build/tmp/staging/arm-linux/lib/pkgconfig
 
 And set up an environment variable to make things easier:
 
-export OMDIR=/home/username/moko
+  export OMDIR=/home/username/moko
 
 The compile/link line is rather long - you will only want to do this once before you decide to create a shell script or make file:
 
-$OMDIR/build/tmp/cross/arm-angstrom-linux-gnueabi/bin/gcc -L $OMDIR/build/tmp/staging/arm-angstrom-linux-gnueabi/lib/ \
--Wl, rpath-link, $OMDIR/build/tmp/staging/arm-angstrom-linux-gnueabi/lib/ -Wl, -O1 -g -o hw main.c \
-'$OMDIR/build/tmp/staging/i686-linux/bin/pkg-config --cflags --libs openmoko-libs gtk+-2.0'
+  $OMDIR/build/tmp/cross/arm-angstrom-linux-gnueabi/bin/gcc -L $OMDIR/build/tmp/staging/arm-angstrom-linux-gnueabi/lib/ \
+  -Wl, rpath-link, $OMDIR/build/tmp/staging/arm-angstrom-linux-gnueabi/lib/ -Wl, -O1 -g -o hw main.c \
+  '$OMDIR/build/tmp/staging/i686-linux/bin/pkg-config --cflags --libs openmoko-libs gtk+-2.0'
 
 
 Then copy and run as in the original hello world command line program above.
