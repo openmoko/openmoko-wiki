@@ -128,7 +128,7 @@ What is to be said to this section is that I included some requirements like gno
 If anybody doesn't like this approach - feel free to edit this wiki.
 ====== autogen.sh ======
 This file is a shell script that calls all autotools in the right order and with the right parameters so they will in the end generate the standard configure script that will detect how to build our program.
-
+<pre>
 #! /bin/sh
 #
 # Most if not all of the contents of this file was taken from the openmoko
@@ -153,11 +153,12 @@ exit 1
 }
 
 REQUIRED_AUTOMAKE_VERSION=1.7 USE_GNOME2_MACROS=0 REQUIRED_GETTEXT_VERSION=0.10.36 . gnome-autogen.sh
-
+</pre>
 ====== configure.ac ======
 This file tells what the configure script has to do - and which parts of the intelligence delivered with the tools that generate the configure script we need.
 
 I documented every line of which I found out what it actually does. The first line is for to tell the emacs text editor that it has to treat this file as an autoconf file.
+<pre>
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
@@ -254,11 +255,12 @@ AC_CONFIG_FILES([Makefile src/Makefile src/images/Makefile po/Makefile.in]) #hel
 
 # Tell autoconf to start outputting whatever it has to.
 AC_OUTPUT
-
+</pre>
 ===== Makefile.am =====
 This file is a template top-level-Makefile that will be filled with life by the configure script.
 
 One thing that is added to the standard Makefile is code for automatically generate the '''_control'''-file mentioned above on a '''make dist'''
+<pre>
 # A list of all subdirectories.
 SUBDIRS = src po # help
 
@@ -282,11 +284,12 @@ echo "Architecture: armv4t">>$@
 echo "Homepage: (The homepage of this project)">>$@
 echo "Depends: gtk+ alsa-lib libogg libvorbis gnome-vfs libgnomeui">>$@
 echo "Source: \$${SRC}">>$@
-
+</pre>
 ===== src/Makefile.am =====
 This file is a template Makefile that when filled with life by the configure script will compile our code.
 
 The most important step here is to tell which files our program consists of.
+<pre>
 AM_CFLAGS = $(DEPEND_CFLAGS) -Wall
 
 AM_LDFLAGS = $(DEPEND_LIBS)
@@ -295,11 +298,13 @@ LDADD = $(LIBINTL)
 
 bin_PROGRAMS = hello
 hello_SOURCES = hello.c
-
+</pre>
 ===== Internationalization =====
 Now the instructions on how to generate a gnome build system for our application should be nearly working. In order to generate a .tar.gz- archieve of the complete project that contains the full build system just type the following two lines:
+<pre>
 ./autogen.sh
 make dist
+</pre>
 
 What still has to be done is internationalization: A very fine feature of open-source software is that it is possible to translate them to nearlly all languages - and normally sooner or later somebody will have done this.
 
@@ -309,6 +314,7 @@ The only thing that has to be done so our program can easily be internationalize
 * add an '''_(''' in front of all strings that might be translated and an ''')''' after the string.
 
 Our source file looks now like this:
+<pre>
 #include <stdio.h>
 #include "gettext.h"
 
@@ -317,6 +323,7 @@ int main()
 printf (_("Hello World\n"));
 return 0;
 }
+</pre>
 
 ==== Building our new package ====
 I never used the offical openmoko toolchain, so no documentation for this for now - even if I don't think there is any magic there. Since the documentation of the MokoMakefile is rather good, I will document this approach - that I actually used - neither.
