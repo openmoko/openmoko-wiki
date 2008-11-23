@@ -668,32 +668,32 @@ You might want to use keys to bypass the login prompt too.
 
 To generate ssh keys for use as a login mechanism type:
 
-user@host$ ssh-keygen -t rsa
+ user@host$ ssh-keygen -t rsa
 
 When prompted for a password either hit enter for no password (''not really a good idea'') or enter a password for this key. ssh into the phone and create ~/.ssh:
 
-root@phone# mkdir ~/.ssh
+ root@phone# mkdir ~/.ssh
 
 Then from your desktop copy the '''.pub''' file to the phone.
 
-user@host$ scp ~/.ssh/id_rsa.pub root@phone:~/.ssh/authorized_keys
+ user@host$ scp ~/.ssh/id_rsa.pub root@phone:~/.ssh/authorized_keys
 
 You should now be able to ssh directly into the phone without a password prompt using a command like 'ssh root@phone' from the account user@host because the public key in the file user@host:~/.ssh/id_rsa.pub is contained in the list of keys which have access in the file root@phone:~/.ssh/authorized_keys (since scp is used, only one key exists, but you can grant access to the phone from more than one account, for example user@host, user@laptop).
 
 To make ssh login as root by default, add the following lines to ~/.ssh/config:
 
-Host phone
-User root
+ Host phone
+ User root
 
 Replace ''phone'' with the hostname or ip of your phone. You should now be able to ssh into the phone without having to type ''root@'' every time.
 
 To disable password logins ('''after setting up key access''') edit /etc/init.d/dropbear and change the following line:
 
-DROPBEAR_EXTRA_ARGS=
+ DROPBEAR_EXTRA_ARGS=
 
 to
 
-DROPBEAR_EXTRA_ARGS="-s"
+ DROPBEAR_EXTRA_ARGS="-s"
 
 You will need to restart dropbear for this to take effect.
 
@@ -701,35 +701,35 @@ You will need to restart dropbear for this to take effect.
 
 Generate the key:
 
-dropbearkey -t rsa -f id_rsa
+ dropbearkey -t rsa -f id_rsa
 
 The output will look something like this:
 
-Will output 1024 bit rsa secret key to 'id_rsa'
-Generating key, this may take a while...
-Public key portion is:
-ssh-rsa AAAAB3Nza[...]
-Fingerprint: md5 ca:e8:f0:b7:f6:7b:c2:b6:b9:71:e4:45:86:a9:ff:b8
+ Will output 1024 bit rsa secret key to 'id_rsa'
+ Generating key, this may take a while...
+ Public key portion is:
+ ssh-rsa AAAAB3Nza[...]
+ Fingerprint: md5 ca:e8:f0:b7:f6:7b:c2:b6:b9:71:e4:45:86:a9:ff:b8
 
 Copy and paste the one line (in this example, starting with 'ssh-rsa' onto the end of the host's authorized_keys file (often in ~/.ssh/).
 
 From the phone, ssh with -i:
 
-ssh -i id_rsa user@host
+ ssh -i id_rsa user@host
 
 === Changing host keys ===
 
 If you reflash, your hosts keys will change.  Try this ~/.ssh/config snippet:
 
-Host moko
-HostName 192.168.0.202
-StrictHostKeyChecking no
-UserKnownHostsFile /dev/null
-User root
+ Host moko
+ HostName 192.168.0.202
+ StrictHostKeyChecking no
+ UserKnownHostsFile /dev/null
+ User root
 
 This is suggested because ssh on your desktop may complain if the key matching a certain IP changes (stored in .ssh/known_hosts). Now you have set this, you can issue the following command to connect to your moko :
 
-ssh root@moko
+ ssh root@moko
 
 == GUI on desktop through SSH ==
 
