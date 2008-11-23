@@ -6,21 +6,21 @@ The mini-USB port on both the Neo 1973 and the Neo FreeRunner supports both USB 
 
 By default, the mini-USB port is in device mode. To tell the Neo that it is logically a host¹):
 
-echo "host" > /sys/devices/platform/s3c2410-ohci/usb_mode
+ # echo host > [[GTA02 sysfs|/sys]]/devices/platform/s3c2410-ohci/usb_mode
 
 Independent of the logical mode of the USB port, the Neo FreeRunner can provide 5 volt USB power to an attached USB device. To enable this (not available on Neo 1973):
 
-echo "1" > /sys/devices/platform/neo1973-pm-host.0/hostmode
+ # echo 1 > /sys/devices/platform/neo1973-pm-host.0/hostmode
 
 Note: You may want to run <code>ifconfig usb0 down</code> prior to switching to USB host mode, as the Neo's USB networking may not like having its USB port disappear. You'll probably want to ssh into your Neo over WiFi or Bluetooth before starting all of this, alternatively use an on screen keyboard.
 
 Note that in full USB host mode the FreeRunner will power the external device. To avoid draining the battery use a powered USB hub, then on the FreeRunner enable logical host mode:
 
-~ - echo host > /sys/devices/platform/s3c2410-ohci/usb_mode
+ # echo host > /sys/devices/platform/s3c2410-ohci/usb_mode
 
 but NOT electrical host mode
 
-~ - echo 0 > /sys/devices/platform/neo1973-pm-host.0/hostmode
+ # echo 0 > /sys/devices/platform/neo1973-pm-host.0/hostmode
 
 Note that powered USB hubs do not send power upstream, that is, into the host. If you wish to power or charge the FreeRunner, you will need a [[Specialized USB cables|special USB cable]].
 
@@ -28,7 +28,6 @@ Note that powered USB hubs do not send power upstream, that is, into the host. I
 modprobe ohci-hcd
 
 * NOTE: with [FSO] based distributions one should use the dbus APIs and not the method stated above.
-
 
 ==== Returning to USB device mode ====
 After doing whatever is needed to safely remove your device and unplugging it you can remove the provision of 5 volt power and return to device mode.
