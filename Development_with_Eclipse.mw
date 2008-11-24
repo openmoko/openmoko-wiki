@@ -130,12 +130,18 @@ go to Tab 'Build Steps' and add ". /usr/local/openmoko/arm/setup-env" to 'Pre-bu
 mayby somody has a better solution please correct!!
 
 Create a project with properties as mentioned above.
-To Compile your project take a Terminal in Project-Folder and do
+To Compile your project create a bash-file in your Project-Folder (sed commands are necessary if you're using QtDbus libraries):
 
+ #!/bin/bash
+ make clean
+ rm Makefile.sed*
  qmake-qt4 -project
  qmake-qt4
+ sed 's/INCPATH       =/INCPATH       = -I\/usr\/include\/qt4\/QtDBus/g' Makefile > Makefile.sed1
+ sed 's/LIBS          = $(SUBLIBS)/LIBS          = $(SUBLIBS) -lQtDBus/g' Makefile.sed1 > Makefile.sed2
+ cp Makefile.sed2 Makefile
  make
 
-then compile your project with Eclipse Configuration "Freerunner"
+Run it...then compile your project with Eclipse Configuration "Freerunner"
 
 [[Category:Application Developer]]
