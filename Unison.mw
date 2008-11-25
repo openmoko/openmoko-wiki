@@ -17,3 +17,37 @@ For this to work, ssh may not output any text itself, because unison parses the 
 * Create a key pair on the desktop PC
 * Configure the desktop PC for public key authentication
 * Add the public key of the desktop PC to ~/.ssh/authorized_keys on the Neo
+
+We need to install the text version of unison on the neo. Since there's no native opkg file available currently, we take the [http://packages.debian.org/lenny/armel/unison/download debian package]. Extract the file unison-2.27.57 and copy it to /usr/bin on neo. Create a symlink by the name of unison.
+
+A unison configuration on the desktop PC (~/.unison/Openmoko.prf) might look like this
+<pre>
+# Unison preferences file
+
+label      = Syncing Openmoko
+
+# the directories on the desktop and on the neo
+root       = /home/user/Openmoko/data
+root       = ssh://root@192.168.0.202//media/mmc4
+
+# common options
+include Common.opt
+
+
+# Do not compare modification time
+times      = false
+
+########### Music ##############
+path       =      music
+
+########### GPS Data ###########
+path       =      gps
+ignore     = Path gps/Maps/*
+ignorenot  = Path gps/Maps/OSM
+ignore     = Path gps/log/*
+
+</pre>
+
+On first execution of unison on the desktop, unison will create hashes for the entire directory tree. This may take a while.
+
+Unison supports various preferences to interactively include programs for comparing and merging files during synchronization (see the [http://www.cis.upenn.edu/~bcpierce/unison/download/releases/stable/unison-manual.html manual]).
