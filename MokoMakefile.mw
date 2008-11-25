@@ -1,6 +1,5 @@
 {{Languages|MokoMakefile}}
 
-
 MokoMakefile is a Makefile which saves lots of work when setting up an Openmoko build environment.
 By automating the setup process of a new Openmoko build environment, it provides an environment which is configured the same for all the existing developers and should therefore be preferred over manual procedures or individual setup procedures.
 It brings the same repeatability to build environment creation and maintenance as that which the BitBake scripts bring to [[OpenEmbedded]] ease and standardize the process of building OpenEmbedded.
@@ -35,13 +34,14 @@ Your distribution needs to provide these commands in order for OpenEmbedded to s
 subversion texi2html texinfo help2man
 
 Openmoko needs the development packages (with header files, development libraries and tools) in order to finish building:
-ncurses zlib (or libz) OpenSSL GTK++
+
+<pre>ncurses zlib (or libz) OpenSSL GTK++</pre>
 
 Because there are bugs in the interaction of QEMU and GCC-4, you'll need a copy of gcc-3.x installed as well.
 
 ===== Debian / Ubuntu =====
-sudo apt-get install subversion build-essential help2man diffstat texi2html texinfo cvs gawk zip unzip cogito bzip2
 
+<pre>sudo apt-get install subversion build-essential help2man diffstat texi2html texinfo cvs gawk zip unzip cogito bzip2
 sudo apt-get install libncurses5-dev zlib1g-dev libssl-dev libgtk2.0-dev
 # To prevent errors in host validation
 sudo apt-get install ca-certificates
@@ -59,14 +59,17 @@ sudo dpkg-reconfigure dash
 # Select No when it asks you to install dash as /bin/sh.
 
 # This may be needed only for ASU
-sudo apt-get install libxtst-dev
+sudo apt-get install libxtst-dev</pre>
 
 ===== SuSE =====
 For building Openmoko on 10.3, you need
-gcc-c++ ncurses-devel zlib-devel libopenssl-devel gtk2-devel subversion diffstat texinfo help2man
+
+<pre>gcc-c++ ncurses-devel zlib-devel libopenssl-devel gtk2-devel subversion diffstat texinfo help2man</pre>
+
 For MokoMakefile to not fail on compiling qemu-user, you need to use gcc33:
-wget download.opensuse.org/repositories/devel:/tools:/gcc/openSUSE_Factory/i586/{cpp,gcc}33-3.3.3-41.8.i586.rpm
-rpm -Uhv {cpp,gcc}33-3.3.3-41.8.i586.rpm
+
+<pre>wget download.opensuse.org/repositories/devel:/tools:/gcc/openSUSE_Factory/i586/{cpp,gcc}33-3.3.3-41.8.i586.rpm
+rpm -Uhv {cpp,gcc}33-3.3.3-41.8.i586.rpm</pre>
 
 See also the [[Talk:MokoMakefile#Building_on_SuSE_Linux_10.3-AMD64|Talk page on Building on SuSE Linux 10.3-AMD64]]
 
@@ -74,58 +77,71 @@ See also the [[Talk:MokoMakefile#Building_on_SuSE_Linux_10.3-AMD64|Talk page on 
 
 ===== Mandriva =====
 
-<pre>
-urpmi git help2man diffstat texi2html texinfo
-</pre>
+<pre>urpmi git help2man diffstat texi2html texinfo</pre>
+
 (Tested with Mandriva 2009.0. <tt>kernel-desktop-devel</tt> of the current kernel is installed in advance, which installs compilers, binutils and many other general compilation tools.)
 
 ==== For all distributions ====
+
 As the QEMU-based neo1973 emulator is also built as part of the build process started by MokoMakefile, so you need gcc-3.3 and other packages for building QEMU installed. See [[Using QEMU with MokoMakefile#Build requirements|the build requirements section]] in [[Using QEMU with MokoMakefile]] for information on the required software.
 
 If you are having problems compiling QEMU and do not need it, you can disable building of QEMU by adding following line to build/conf/local.conf file:
-ENABLE_BINARY_LOCALE_GENERATION = "0"
+
+<pre>ENABLE_BINARY_LOCALE_GENERATION = "0"</pre>
 
 ===== Proxy =====
+
 Users behind a proxy should ensure that their proxy is configured in their wgetrc file as the http_proxy environment variable is unset by MokoMakefile.
 
 == Building Openmoko with MokoMakefile ==
 
 === Preparations ===
 Create your $OMDIR directory (note that you can change ~/moko to any directory you like):
-mkdir ~/moko ; cd ~/moko
+
+<pre>mkdir ~/moko ; cd ~/moko</pre>
+
 If you have your ~moko dir mounted from a different file system, be sure to edit /etc/mtab to add the 'exec' permission to the file system, else bitbake will fail with error messages stating that /usr/bin/env is an invalid interpreter.
 If you ever want to move your $OMDIR to another location, you must run
-make clobber ; make setup
+
+<pre>make clobber ; make setup</pre>
+
 to reinitialize the environment.  Yes, this will take a long time, so choose $OMDIR carefully.
 
 === MokoMakefile ===
+
 Grab MokoMakefile:
-wget http://www.rwhitby.net/files/openmoko/Makefile
+
+<pre>wget http://www.rwhitby.net/files/openmoko/Makefile</pre>
 
 If that doesn't work, try
 
-wget http://svn.projects.openmoko.org/svnroot/mokomakefile/trunk/Makefile
+<pre>wget http://svn.projects.openmoko.org/svnroot/mokomakefile/trunk/Makefile</pre>
 
 {{note|MokoMakefile uses BitBake 1.8.8 which requires python-sqlite2 and sqlite-3.3 or later. Users of SUSE Linux 10.1 can update to [http://download.opensuse.org/pub/opensuse/distribution/10.2/repo/oss/suse/i586/sqlite-3.3.8-14.i586.rpm the version of openSUSE 10.2]}}
 
 === Environment ===
+
 If you want to make the "Bleeding Edge" (org.openmoko.dev, openmoko-base-image) image instead of the Om2008.8 image, see [[Distributions]], you need to edit your Makefile.  Read the top of the Makefile for details.
 
 Note that if you want to build FSO, you should use the FSO Makefile at http://downloads.freesmartphone.org rather than the MokoMakefile.
 
 Set up the environment with:
 
-make setup
+<pre>make setup</pre>
 
 If you are building for the Neo1973 GTA01, then also do this
-make setup-machine-om-gta01
+
+<pre>make setup-machine-om-gta01</pre>
+
 If you are building for the FreeRunner GTA02, then also do this
-make setup-machine-om-gta02
+
+<pre>make setup-machine-om-gta02</pre>
 
 === Building ===
+
 Before starting a lengthy make process, check the [[#Tips|Tips]] section below for how to make Make multicore aware. You may want to modify the build/conf/local.conf file for your target (emulation/chroot) environment.
 
-make image
+<pre>make image</pre>
 
 ''Hint:'' The images build with this command can be found under {$OMDIR}/build/tmp/deploy/glibc/images/neo1973
 
@@ -134,64 +150,75 @@ This will set up the recommended directory structure as described in [[Building 
 Once you have done this, you can choose to continue using the MokoMakefile to initiate your subsequent builds, or you can go into the build directory and run bitbake commands manually.  The choice is yours.
 
 ==Updating the environment==
+
 For easy maintenance of your build environment the following commands are available.
 
 1 - To update the MokoMakefile to the latest version:
-make update-makefile
+
+<pre>make update-makefile</pre>
 
 Be aware that any changes you previously made to the Makefile (like the git branch to use) are lost when executing ''update-makefile''.
 
 2 - To make sure that any recent changes to the build directory structure have been applied:
-make setup
+
+<pre>make setup</pre>
 
 3 - To update the Openmoko repository checkout and the MokoMakefile patches to the latest version:
-make update
+
+<pre>make update</pre>
 
 A quick way to rebuild a new image with the latest updates:
-make update-makefile && make setup update image
+
+<pre>make update-makefile && make setup update image</pre>
 
 ==Build issues==
+
 First, make sure that the problem is reproducible after running
 
-make update-makefile && make setup && make update
+<pre>make update-makefile && make setup && make update</pre>
 
 then run
 
-make clean-package-<foo>
+<pre>make clean-package-<foo></pre>
 
 (where you replace <foo> with the name of the package which is failing)
 
 and finally
 
-make image
+<pre>make image</pre>
 
-With luck - you should now have images in your $omdir/build/tmp/deploy/glibc/images/neo1973/ directory.
-You can then [[Flashing the Neo FreeRunner|flash these]].
-
+With luck - you should now have images in your $omdir/build/tmp/deploy/glibc/images/neo1973/ directory. You can then [[Flashing the Neo FreeRunner|flash these]].
 
 If not, and you can get the error to occur three times in a row after running that sequence of commands (including the update and setup steps) three times, then feel free to report it to rwhitby in #openmoko on [[Development_resources#IRC|IRC]].
 
-If you have chronic build problems, cleaning your environment variables and re-running the build from scratch may help.  The following script should remove all non-essential variables; you should also manually trim your path to the minimum.
-`env | grep -Ev '^(SHELL|TERM|OLDPWD|USER|USERNAME|PATH|EDITOR|LANG|HOME|DISPLAY|_)=' \
-| sed 's/^\(.*\)=.*/unset \1/'`
+If you have chronic build problems, cleaning your environment variables and re-running the build from scratch may help. The following script should remove all non-essential variables; you should also manually trim your path to the minimum.
+
+<pre>`env | grep -Ev '^(SHELL|TERM|OLDPWD|USER|USERNAME|PATH|EDITOR|LANG|HOME|DISPLAY|_)=' \
+| sed 's/^\(.*\)=.*/unset \1/'`</pre>
 
 (you must include the backticks).
+
 Note that on some boxes it is necessary to call "make" by typing "/usr/bin/make" afterwards.
 
+On current Ubuntu/Debian unstable/testing boxes another trick is necessary. glibc_2.6.1 fails to build since it is unable to generate the necessary locales until you type in the following line:
 
-On current Ubuntu/Debian unstable/testing boxes another trick is necessary:
-glibc_2.6.1 fails to build since it is unable to generate the necessary locales until you type in the following line:
-sudo sysctl -w vm.mmap_min_addr=0
+<pre>sudo sysctl -w vm.mmap_min_addr=0</pre>
+
 Note that this temporarily disables a new security vulnerability check that has entered /etc/sysctrl - but that makes problems with loads of applications.
+
 To re-enable this check do the following:
-sudo sysctl -w vm.mmap_min_addr=65536
+
+<pre>sudo sysctl -w vm.mmap_min_addr=65536</pre>
+
 See the talk page of this article for more details on this solution.
 
 ===Known MokoMakefile errors ===
+
 ==== SVN Server Certificate Errors ====
+
 If you get an error like the following:
-<pre>
-NOTE: Fetch svn://svn.projects.openmoko.org/svnroot/;module=assassin;proto=https
+
+<pre>NOTE: Fetch svn://svn.projects.openmoko.org/svnroot/;module=assassin;proto=https
 Error validating server certificate for 'https://svn.projects.openmoko.org:443':
 - The certificate is not issued by a trusted authority. Use the
 fingerprint to validate the certificate manually!
@@ -200,45 +227,43 @@ Certificate information:
 - Valid: from Thu, 05 Jun 2008 01:02:42 GMT until Tue, 02 Dec 2008 01:02:42 GMT
 - Issuer: http://www.cacert.org, Root CA
 - Fingerprint: a5:7d:4e:37:e8:94:ee:ba:c1:e8:e9:4b:33:cb:34:91:a9:6d:d3:84
-(R)eject, accept (t)emporarily or accept (p)ermanently? svn: OPTIONS of 'https://svn.projects.openmoko.org/svnroot/assassin': Server certificate verification failed: issuer is not trusted (https://svn.projects.openmoko.org)
-</pre>
+(R)eject, accept (t)emporarily or accept (p)ermanently?
+svn: OPTIONS of 'https://svn.projects.openmoko.org/svnroot/assassin':
+Server certificate verification failed: issuer is not trusted (https://svn.projects.openmoko.org)</pre>
 
 It means you haven't yet accepted the server certificate for the SVN server.  To remedy this, execute the following commands, and hit "p" (to permanently accept the certificate) when prompted:
-<pre>
-cd /tmp
+
+<pre>cd /tmp
 svn co https://svn.projects.openmoko.org/svnroot/assassin
 rm -rf assassin
-cd -
-</pre>
+cd -</pre>
 
 ==== exposure_svn and Subversion 1.5.0 ====
 
 If you get an error like this:
 
-<code>
-"NameError: global name 'log' is not defined"
-</code>
+<code>"NameError: global name 'log' is not defined"</code>
 
 There's a bug with subversion 1.5.0 -- downgrade to 1.4.x (or check out the latest subversion sources and use those as they're fixed) and re-fetch the sources.
 
-===Fixes for distribution/environment-specific or isolated issues===
+=== Fixes for distribution/environment-specific or isolated issues ===
 
 Work-arounds for temporary or isolated problems can be found and should be added to the [[Talk:MokoMakefile|Discussion page]] which is associated with this page.  As they are fixed, they will be removed from that page.
 
 ==Tips==
-*Make sure umask is set to 0022 before you run "make setup"
 
-*If a certain package does not build due to corrupted download or some such try to remove the sources and rebuild it.
-rm sources/<package>*
+* Make sure umask is set to 0022 before you run "make setup"
+* If a certain package does not build due to corrupted download or some such try to remove the sources and rebuild it.
+<pre>rm sources/<package>*
 cd build
 . ../setup-env
-bitbake -crebuild <package>
-after that your build might just work again.
+bitbake -crebuild <package></pre>
+After that your build might just work again.
 
-*For people with multiple CPU's (or dual-core ones) this small patch might be useful to build things faster.
+* For people with multiple CPU's (or dual-core ones) this small patch might be useful to build things faster.
 Edit the local.conf and add the following lines:
-PARALLEL_MAKE = "-j 4"
-BB_NUMBER_THREADS = "4"
+<pre>PARALLEL_MAKE = "-j 4"
+BB_NUMBER_THREADS = "4"</pre>
 
 Change the PARALLEL_MAKE and BB_NUMBER_THREADS values to something that suits better if it chokes your machine.
 
@@ -247,10 +272,10 @@ Change the PARALLEL_MAKE and BB_NUMBER_THREADS values to something that suits be
 * If you encounter an error related with the qemu-native package and not compiling for the qemu, you can edit the build/conf/local.conf file and add ENABLE_BINARY_LOCALE_GENERATION = "0" line to avoid the error.
 
 * To prevent building tons of locales, add a line like this to local.conf:
-GLIBC_GENERATE_LOCALES = "en_US.UTF-8 nl_NL.UTF-8"
+<pre>GLIBC_GENERATE_LOCALES = "en_US.UTF-8 nl_NL.UTF-8"</pre>
 
 * To not build any binary locales at all, add this to local.conf:
-ENABLE_BINARY_LOCALE_GENERATION = "0"
+<pre>ENABLE_BINARY_LOCALE_GENERATION = "0"</pre>
 
 * If you want to rebuild the package indexes (for instance, after compiling a new version of a package) without building the whole <code>image</code>, run <code>make build-package-package-index</code>.
 
@@ -260,6 +285,7 @@ ENABLE_BINARY_LOCALE_GENERATION = "0"
 * Make sure you do not have . in your PATH, this causes an "unrecognized option -Qy" error when building g++spec
 
 === Useful commands ===
+
 Here is the list (not complete) of useful MokoMakefile commands (actually make targets) and a short description of each one. These should be run inside $OMDIR directory.
 
 ; make image : build the full development image
@@ -290,43 +316,37 @@ Here is the list (not complete) of useful MokoMakefile commands (actually make t
 
 ; make build-package-package-index : Rebuild the package index
 
-==Developing with MokoMakefile==
+== Developing with MokoMakefile ==
 
 For the following explanations $OMDIR is the directory where there Makefile puts all the stuff.
 
 To make in-tree changes and have them built and used by qemu:
 
-<pre>
-cd $OMDIR/openmoko
+<pre>cd $OMDIR/openmoko
 quilt new descriptive-patch-name.patch
 quilt add trunk/src/name-of-file-to-change # do this for every file you are about to modify
 ...make the changes...
 quilt refresh # this creates a file in $OMDIR/patches/openmoko-HEAD/ and updates the
-# quilt series file there
-</pre>
+# quilt series file there</pre>
 
 Note: Do '''NOT''' use absolute paths as this confuses quilt and will get you a diff of the file against /dev/null!
 
 To build the changes and have them used by qemu:
 
-<pre>
-make build-qemu
+<pre>make build-qemu
 make flash-qemu-local
-make run-qemu
-</pre>
+make run-qemu</pre>
 
 If you want to modify applications instead of the openmoko toolchain, this is what you have to do (example: openmoko-messages):
 
-<pre>
-cd $OMDIR/build
+<pre>cd $OMDIR/build
 . ../setup-env
 bitbake -c patch openmoko-messages
 cd tmp/work/armv4t-linux/openmoko-messages-0.0.1+svnnow-r2_2276/openmoko-messages/
 ''...make the changes...''
 cd -
 bitbake -c compile openmoko-messages
-bitbake -c build openmoko-messages
-</pre>
+bitbake -c build openmoko-messages</pre>
 
 Note: The compile step is only necessary if you already had the package compiled before patching it.
 
@@ -340,25 +360,21 @@ If you want to add an application to your openmoko distribution, do this:
 All file edits should be done using quilt as described above. That way a patch can easily be submitted to the openmoko project.
 First, create a directory that will correspond to your package and edit a '''.bb''' file in there:
 
-<pre>
-cd $OMDIR/openmoko/
+<pre>cd $OMDIR/openmoko/
 quilt new mycoolpackage.patch
 mkdir trunk/openembedded/packages/mycoolpackage
 quilt add trunk/openembedded/packages/mycoolpackage/mycoolpackage_1.bb
-quilt edit trunk/openembedded/packages/mycoolpackage/mycoolpackage_1.bb
-</pre>
+quilt edit trunk/openembedded/packages/mycoolpackage/mycoolpackage_1.bb</pre>
 
 The file should have the following content:
 
-<pre>
-DESCRIPTION = "This is a cool package"
+<pre>DESCRIPTION = "This is a cool package"
 SECTION = "username/mycoolpackage"
 PV = "1"
 
 inherit autotools
 
-SRC_URI = "http://www.example.com/download/mycoolpackage-1.tar.gz"
-</pre>
+SRC_URI = "http://www.example.com/download/mycoolpackage-1.tar.gz"</pre>
 
 Explanation:
 * DESCRIPTION - Just a short text explaining the package
@@ -369,19 +385,15 @@ Explanation:
 
 This is not all. We also need to tell MokoMakfile that it needs to build and include the package in the image. To do this, do
 
-<pre>
-$OMDIR/openmoko $ quilt edit trunk/openembedded/packages/tasks/task-openmoko.bb
-</pre>
+<pre>$OMDIR/openmoko $ quilt edit trunk/openembedded/packages/tasks/task-openmoko.bb</pre>
 
 Here, increase the value '''PR''' by one and add '''mycoolpackage \''' (with the backslash!) just before the line reading '''#  update-alternatives \'''.
 
 Now run
 
-<pre>
-quilt refresh
+<pre>quilt refresh
 cd ..
-make update image
-</pre>
+make update image</pre>
 
 And if everything's alright you should now have an Openmoko image to flash to your phone or run in qemu as described above.
 
@@ -389,7 +401,8 @@ And if everything's alright you should now have an Openmoko image to flash to yo
 
 There is a [[Building a hello world application|Hello World!]] tutorial available too.
 
-==Testimonials==
+== Testimonials ==
+
 MokoMakefile is recommended by 4 out of 4 new developers on #openmoko, with testimonials such as "For some reason last night I couldn't get my manual install of everything to work (bb complained about my bbpath I think) ... but with your makefile, it works great!", "MokoMakefile rocks!", "Wow this build system is nice - it just seems more polished than my gumstix toolchain buildroot system", "make openmoko-devel-image :) - no magic there", and "I have never been able to get a build to complete in the pure OE environment, whereas Mokomakefile for some reason builds fine."
 
 Project page:
