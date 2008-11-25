@@ -10,17 +10,23 @@ Unison can sync
 * between two directory trees on the same computer or 
 * between directory trees on two separate machines.
 For syncing desktop machine and Neo we use the latter. The recommended way to do this is the [http://www.cis.upenn.edu/~bcpierce/unison/download/releases/stable/unison-manual.html#rshmeth remote shell method]:
+
 We start unison or unison-gtk on the desktop PC. The program will connect to the Neo via ssh and start a text-only instance of unison on the Neo to retrieve new files or deltas and to modify files on the Neo.
 
-For this to work, ssh may not output any text itself, because unison parses the first line of console output to determine the version of unison on the remote computer. So we setup ssh for public key authentication:
+For this to work, ssh must not output any text itself, because unison parses the first line of console output to determine the version of unison on the remote computer: 
 
-* Create a key pair on the desktop PC
-* Configure the desktop PC for public key authentication
-* Add the public key of the desktop PC to ~/.ssh/authorized_keys on the Neo
+* So we should setup ssh for public key authentication as described under [http://wiki.openmoko.org/wiki/USB_Networking#SSH_Keys USB Networking].
+* If you are working with more than one distribution to boot from or even with more than one device, I found it convenient to make them all use the same host key (/etc/dropbear/dropbear_rsa_host_key).
 
-We need to install the text version of unison on the neo. Since there's no native opkg file available currently, we take the [http://packages.debian.org/lenny/armel/unison/download debian package]. Extract the file unison-2.27.57 and copy it to /usr/bin on neo! Create a symlink by the name of unison!
+On the Neo we use the text version of unison. Since there's no native opkg file available currently, we take the [http://packages.debian.org/lenny/armel/unison/download debian package]. Extract the file unison-2.27.57, copy it to /usr/bin on neo and create a symlink by the name of unison! 
 
-A unison configuration on the desktop PC (~/.unison/Openmoko.prf) might look like this
+When calling Unison via ssh, the console must only show the unison version information:
+<pre>
+user@desktoppc:~$ ssh moko unison -version
+unison version 2.27.57
+</pre>
+
+Unison allows for multiple configuration profiles on the desktop PC (~/.unison/Openmoko.prf). Mine look like this:
 <pre>
 # Unison preferences file
 
@@ -28,7 +34,7 @@ label      = Syncing Openmoko
 
 # the directories on the desktop and on the neo
 root       = /home/user/Openmoko/data
-root       = ssh://root@192.168.0.202//media/mmc4
+root       = ssh://root@moko//media/mmc4
 
 # common options
 include Common.opt
