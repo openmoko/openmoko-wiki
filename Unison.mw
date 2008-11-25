@@ -1,4 +1,4 @@
-== Unison File Synchronizer ==
+== Overview ==
 
 [http://www.cis.upenn.edu/~bcpierce/unison Unison] is a file-synchronization tool for Unix and Windows. It determines all differences between two directory trees and lets the user decide, how to proceed with every differing file.
 
@@ -9,14 +9,22 @@ Unison comes in two flavors:
 Unison can sync 
 * between two directory trees on the same computer or 
 * between directory trees on two separate machines.
+
 For syncing desktop machine and Neo we use the latter. The recommended way to do this is the [http://www.cis.upenn.edu/~bcpierce/unison/download/releases/stable/unison-manual.html#rshmeth remote shell method]:
 
 We start unison or unison-gtk on the desktop PC. The program will connect to the Neo via ssh and start a text-only instance of unison on the Neo to retrieve new files or deltas and to modify files on the Neo.
+
+{{note|The following deals with Unsion on '''Linux'''. It should apply for a [http://wiki.openmoko.org/wiki/Neo1973_and_Windows#USB_Ethernet_emulation network connection from a Windows machine] as well. Check [http://www.cis.upenn.edu/~bcpierce/unison/download/releases/stable/unison-manual.html#ssh-win unison manual] for details!}}
+
+
+== SSH Setup ==
 
 For this to work, ssh must not output any text itself, because unison parses the first line of console output to determine the version of unison on the remote computer: 
 
 * So we should setup ssh for public key authentication as described under [http://wiki.openmoko.org/wiki/USB_Networking#SSH_Keys USB Networking].
 * If you are working with more than one distribution to boot from or even with more than one device, I found it convenient to make them all use the same host key (/etc/dropbear/dropbear_rsa_host_key).
+
+== Installation ==
 
 On the Neo we use the text version of unison. Since there's no native opkg file available currently, we take the [http://packages.debian.org/lenny/armel/unison/download debian package]. Extract the file unison-2.27.57, copy it to /usr/bin on neo and create a symlink by the name of unison! 
 
@@ -26,7 +34,9 @@ user@desktoppc:~$ ssh moko unison -version
 unison version 2.27.57
 </pre>
 
-Unison allows for multiple configuration profiles on the desktop PC (~/.unison/Openmoko.prf). Mine look like this:
+== Configuration ==
+
+Unison allows for multiple configuration profiles on the desktop PC. My ~/.unison/moko.prf looks like this:
 <pre>
 # Unison preferences file
 
@@ -53,6 +63,12 @@ ignorenot  = Path gps/Maps/OSM
 
 </pre>
 
-On first execution of unison on the desktop, unison will create hashes for the entire directory tree. This may take a while.
+== Using Unison ==
 
-Unison supports various preferences to interactively include programs for comparing and merging files during synchronization (see the [http://www.cis.upenn.edu/~bcpierce/unison/download/releases/stable/unison-manual.html manual]).
+On first execution of unison on the desktop with the above profile
+<pre>
+unison-gtk moko
+</pre>
+unison will create hashes for the entire directory tree. This may take a while.
+
+Unison can integrate programs for comparing and merging files during synchronization and offers a great number of other usefull options (see the [http://www.cis.upenn.edu/~bcpierce/unison/download/releases/stable/unison-manual.html manual]).
