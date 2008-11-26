@@ -259,9 +259,11 @@ Using the external toolchain is an easy way to build applications for your Neo. 
  cd linux-2.6
  git checkout -b mystable origin/stable
  cp defconfig-gta02 .config
- ./build
+ ./build dummy
 
-Will fail with error message "arm-angstrom-linux-gnueabi-ld: unrecognized option '-Wl,-rpath-link,/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/lib'" until /usr/local/openmoko/arm/setup-env is modified. LDFLAGS should be changed from:
+The ''dummy'' option is required for the modules to be nicely packaged into a .tar.gz package that can be extracted on the target, in addition to flashing/installing the kernel. The "dummy" just means "some parameter given", for which there is a check in the code eventually for some reason...
+
+If it fails with error message "arm-angstrom-linux-gnueabi-ld: unrecognized option '-Wl,-rpath-link,/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/lib'" until /usr/local/openmoko/arm/setup-env is modified. LDFLAGS should be changed from:
 
  export LDFLAGS="-L${OMTOOL_DIR}/arm/arm-angstrom-linux-gnueabi/lib -Wl,-rpath-link,${OMTOOL_DIR}/arm/arm-angstrom-linux-gnueabi/lib -Wl,-O1"
 
