@@ -111,5 +111,26 @@ Program: (0 sectors, 0*8k=0k) () ok
 If so reflash some older firmware that can be found here (http://people.openmoko.org/joerg/calypso_moko_FW/) -- but never downgrade to a version earlier than Moko6, or you will render the GSM unusable (certain internal data structures changed between Moko5 and Moko6).
 Also PLEASE DON 'T USE moko9beta1, as there is at least one report on reflashing to another FW gets difficult from moko9b1.
 
+
+==Troubleshooting==
+
+Some users wasn't able to complete the upgrade since they got an error while the firmware was uploading in the GSM chip (like ''Flash operation timeout'').
+
+However a solution [http://n2.nabble.com/problems-with-calypso-firmware-update-tp1565196p1566012.html has been found] and it allows to use again the GSM modem.
+
+Use the following fluid command:
+
+<pre>
+FLUID_PORT=/dev/ttySAC0 fluid.exe -oO -b 115200 -f $HOME/gsm_ac_gp_fd_pu_em_cph_ds_vc_cal35_ri_36_amd8_ts0-moko10.m0
+</pre>
+(Without FLOWCONTROL and with -oo to choose the ROM bootloader)
+
+Then on a ''second ssh session'' please use this instead of the gpio command:
+<pre>
+echo 0 > /sys/bus/platform/devices/neo1973-pm-gsm.0/power_on
+echo 1 > /sys/bus/platform/devices/neo1973-pm-gsm.0/power_on
+</pre>
+The firmware download should start now.
+
 [[Category:GSM]]
 [[Category:GSM]]
