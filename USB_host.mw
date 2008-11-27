@@ -32,8 +32,8 @@ modprobe ohci-hcd
 ==== Returning to USB device mode ====
 After doing whatever is needed to safely remove your device and unplugging it you can remove the provision of 5 volt power and return to device mode.
 
-echo "0" > /sys/devices/platform/neo1973-pm-host.0/hostmode<BR>
-echo "device" > /sys/devices/platform/s3c2410-ohci/usb_mode
+echo 0 > /sys/devices/platform/neo1973-pm-host.0/hostmode<BR>
+echo device > /sys/devices/platform/s3c2410-ohci/usb_mode
 <BR><BR>
 You can now safely restart USB networking.
 
@@ -46,13 +46,13 @@ These simple script is useful to switch the USB-Modes:
 grep -q 'host' /sys/devices/platform/s3c2410-ohci/usb_mode<BR>
 if [ $? -eq 0 ]<BR>
 then<BR>
-echo "0" > /sys/devices/platform/neo1973-pm-host.0/hostmode<BR>
-echo "device" > /sys/devices/platform/s3c2410-ohci/usb_mode<BR>
+echo 0 > /sys/devices/platform/neo1973-pm-host.0/hostmode<BR>
+echo device > /sys/devices/platform/s3c2410-ohci/usb_mode<BR>
 echo USB-Port is in device-mode now.<BR>
 else<BR>
 ifconfig usb0 down<BR>
-echo "host" > /sys/devices/platform/s3c2410-ohci/usb_mode<BR>
-echo "1" > /sys/devices/platform/neo1973-pm-host.0/hostmode<BR>
+echo host > /sys/devices/platform/s3c2410-ohci/usb_mode<BR>
+echo 1 > /sys/devices/platform/neo1973-pm-host.0/hostmode<BR>
 echo USB-Port is in host-mode now.<BR>
 fi<BR>
 <BR>
@@ -85,11 +85,11 @@ To recap, the direction of power can be controlled:
 
 Set to 0 (default), no power is provided at the USB port, charging is enabled, and host 15K pulldowns are removed from D+ and D-:
 
-echo "0" > /sys/devices/platform/neo1973-pm-host.0/hostmode
+echo 0 > /sys/devices/platform/neo1973-pm-host.0/hostmode
 
 Set to 1, provides up to 500mA USB power at the USB port (FreeRunner only), disables charging from USB, and applies 15K pulldowns to USB D+ and D-:
 
-echo "1" > /sys/devices/platform/neo1973-pm-host.0/hostmode
+echo 1 > /sys/devices/platform/neo1973-pm-host.0/hostmode
 
 Next, power must somehow be injected. An unmodified powered USB hub only provides power to the connected devices, but not to the connected host, so the only solution here is to modify a USB-hub¹) or to create a custom cable which will inject power into the host. See [[specialized_USB_cables]] for some examples.
 
@@ -108,7 +108,7 @@ You can manually set the charge rate. See [[Forcing_fast_charge_mode]]
 === Power Concerns ===
 You'll need to force the Neo to go into fast charge mode, since it can't do its usual power negotiation over USB.
 
-echo -n "fast_cccv" >  /sys/devices/platform/s3c2410-i2c/i2c-adapter/i2c-0/0-0008/chgmode
+echo -n fast_cccv >  /sys/devices/platform/s3c2410-i2c/i2c-adapter/i2c-0/0-0008/chgmode
 
 (Also this should be done by kernel when seeing 47K at ID-pin)
 
