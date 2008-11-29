@@ -1,0 +1,58 @@
+<onlyinclude>
+{{ApplicationBox|
+Name=[[Gnuboy]]|
+Homepage=http://wiki.openmoko.org/wiki/Gnuboy|
+Description= An emulator for the handheld gaming all-time bestseller.|
+Screenshot= gnuboy.png|
+PackageName =  no package yet|
+TestedOn=Om 2008.8}}
+</onlyinclude>
+'''Source Code released:http://www.thomasbertani.it/files/gnuboy-1.0.3.tar.gz'''
+
+==What works==
+When removing the illume keyboard and installing the matchbox-keyboard (See also: [[Switching_Keyboards]]) it's possible to use the matchbox keyboard as input method (tested only on 2007.2, please verify).
+You need to create a ~/.matchbox/keyboard.xml file:
+
+ mkdir /home/root/.matchbox
+ cp /usr/share/matchbox-keyboard/keyboard.xml ~/.matchbox/
+
+PieterC created added a profile to this file to change the layout to a game-boy lay-out (browsing the layouts can easily be done by pushing the > butten in the left bottom corner): add this to ~/.matchbox/keyboard.xml:
+
+ <layout id="GameBoy">
+ <row> 
+ <space width="500"/>
+ <key>  <default display="b" action="s"/> </key> 
+ <key> <default display="a" action="d" /> </key> 
+ <space width="300"/>
+ <key> <default display="↑" action="up" /> </key>
+ <space width="4000" extended="true" />
+ </row>
+ <row>
+ <key> <default display=">" action="modifier:layout"/> </key>
+ <key fill="true"><default display="start" action="return"/> </key>
+ <key> <default display="slt" action="space" /> </key> 
+ <space width="500" extended="true"/> 
+ <key> <default display="←" action="left" />  </key>
+ <key> <default display="↓" action="down" /> </key>
+ <key> <default display="→" action="right" /> </key>
+ </row>
+ </layout>
+
+After untarring gnuboy to the openmoko, you can launch your favorite rom-file by running 
+
+ ./sdlgnuboy --fullscreen=0 --scale=2 pg.gbc
+
+ 
+==Some work has to be done...==
+Using the matchbox keyboard is clearly only a temporary solution: we need an input method that works out of the box. Since it uses sdl, we can check out the code of duke3d and simply port it into the put_events() function in the main.c. Some of us tried yet to implement this but no one succeeded to implement it, due to this[http://lists.openmoko.org/nabble.html#nabble-td1304780|a1304780] issue.
+
+If we're trying to implement the touchscreen as an input device for gnuboy, we won't be able to do multi touching (strike 2 buttons at a time). Since this is mandatory to some games (mostly fighting games) on the gameboy (color), we micht not use the touchscreen for all events. I propose to use the accelerometers as up down left & right, and use the touchscreen as A, B, start & select.
+
+==External links that might be interesting==
+[http://lists.openmoko.org/nabble.html#nabble-td1304780|a1304780] - SDL touchscreen issue
+
+[http://brightrain.aerifal.cx/~laguna/src/] - the source of gnuboy as released in 2001 by Laguna
+
+[http://fz.hobby-site.org/om/duke-nukem-3d/] - sourcecode of duke3d, to steal code from...
+
+[[Category:Gaming]]
