@@ -239,4 +239,78 @@ Erin worked on a qtopia camping problem.  She will take a look at bluetooth stat
 
 We are having an internal debate regarding the release now, so there is not much I can say about this at the moment.
 
+
+==Weekly update 11/23 ~ 11/29, Nov==
+
+John Lee posted the following in the community mailing list
+
+Dear Community,
+
+As Sushama (our new testing team member) indicated in
+http://lists.openmoko.org/pipermail/devel/2008-November/003493.html ,
+we won't have a release in Nov.  Currently the testing team is going
+to do a full test on the latest testing image.  It has all the goodies
+we did and a lot of improvements over Om2008.9, so please try it and
+report any error you find.
+
+
+Upgrade howto:
+
+>From Om2008.9 it's recommanded to upgrade with the following steps:
+
+sed -i -e 's%Om2008.8%testing%' /etc/opkg/*.conf
+/etc/init.d/xserver-nodm stop
+screen -DR
+opkg update
+opkg -force-overwrite upgrade
+# (please ans Y to all questions)
+# (the sshd (dropbear) will restart, so you need to reconnect and do
+# 'screen -DR' again)
+opkg upgrade
+shutdown -r now
+
+To get the fastest boot time you also need to remove the following
+packages:
+
+opkg remove task-base-nfs task-base-smbfs task-base-bluetooth \
+task-base-usbgadget avahi-daemon avahi-autoipd blueprobe \
+usb-gadget-mode portmap exquisite exquisite-theme-freerunner \
+exquisite-themes
+
+
+Known issues:
+
+* GTK redraw problem
+* some obsolete kernel modules still left in system
+* must remove 'ro' in kernel boot parameter if you use sd boot.
+* will purge your incompatible e config, so you might need to set stuffs like suspend time again.
+
+
+Echo:
+
+Since there are different hw versions out there (a5, a6, a7), it's
+impossible to provide one alsa state file that suits all models.
+However, it seems you can always find appropriate values for your
+neo.  My way is to adjust
+control.4 Speaker Playback Volume in
+/usr/share/openmoko/scenarios/gsmhandset.state
+
+the max value is 127, 95 works best on my a5.  With volume level 3 or
+4 in qtopia dialer, the other side can hear no echo while I get good
+audio quality.
+
+
+Team update:
+
+Tick helped to put his touchscreen improvement into stable-tracking,
+he will work on opkg internals next.  Olv moved to look into kernel
+and fso.  Erin will try bluetooth.  Julian is working on the GTK
+redraw issue, please help him out.  Jeremy will fix some qtopia bugs
+and keep working on suspend/resume issues.
+
+
+Regards,
+John
+
+
 [[Category:Community]]
