@@ -130,6 +130,151 @@ Confirm the connect:
 If you have nothing better to do, you can now pinpoint my office :-).
 
 === OBEX ===
+OBEX (abbreviation of OBject EXchange, also termed IrOBEX) is a communications protocol that facilitates the exchange of binary objects between devices.
+
+1. power on bluetooth:
+
+root@om-gta02:~# dbus-send --system --dest=org.freesmartphone.odeviced --type=method_call --print-reply /org/freesmartphone/Device/PowerControl/Bluetooth org.freesmartphone.Device.PowerControl.SetPower int32:1
+
+2. make sure hcid.conf http://linux.die.net/man/5/hcid.conf
+/etc/bluetooth/hcid.conf
+
+#
+# HCI daemon configuration file.
+#
+
+# HCId options
+options {
+	# Automatically initialize new devices
+	autoinit yes;
+
+	# Security Manager mode
+	#   none - Security manager disabled
+	#   auto - Use local PIN for incoming connections
+	#   user - Always ask user for a PIN
+	#
+	security user;
+
+	# Pairing mode
+	#   none  - Pairing disabled
+	#   multi - Allow pairing with already paired devices
+	#   once  - Pair once and deny successive attempts
+	pairing multi;
+
+	# Default PIN code for incoming connections
+	passkey "1234";
+}
+
+# Default settings for HCI devices
+device {
+	# Local device name
+	#   %d - device id
+	#   %h - host name
+	name "%h-%d";
+
+	# Local device class
+	class 0x000100;
+
+	# Default packet type
+	pkt_type DH1,DM1,HV1;
+
+	# Inquiry and Page scan
+	iscan enable; pscan enable;
+
+	# Default link mode
+	#   none   - no specific policy 
+	#   accept - always accept incoming connections
+	#   master - become master on incoming connections,
+	#            deny role switch on outgoing connections
+	lm accept;
+
+	# Default link policy
+	#   none    - no specific policy
+	#   rswitch - allow role switch
+	#   hold    - allow hold mode
+	#   sniff   - allow sniff mode
+	#   park    - allow park mode
+	lp rswitch,hold,sniff,park;
+}
+
+3. all paired devices info are stored in this folder http://linux.die.net/man/8/hcid
+root@om-gta02:/var/lib/bluetooth/00:06:6E:16:EB:C7# ls
+classes        features       lastused       names          panu
+config         gn             manufacturers  nap
+
+4. Display local devices
+root@om-gta02:/# hcitool dev
+Devices:
+	hci0	00:06:6E:16:EB:C7
+
+5. Scan all nearby bluetooth devices
+root@om-gta02:~# hcitool scan
+Scanning ...
+	00:11:67:C8:F3:23	daydreamer-0
+	00:18:C5:42:18:78	Erin Nokia N73
+	00:1A:92:7A:1E:C2	CHELSEA-PC
+	00:1D:FD:04:E6:24	Dkay
+	00:17:83:48:B3:66	HTC_TyTN_II
+
+6. Browse what kind of services in this device
+sdptool browse 00:16:20:60:7C:36
+
+root@om-gta02:~# sdptool browse 00:18:C5:42:18:78
+Browsing 00:18:C5:42:18:78 ...
+
+Service Name: OBEX File Transfer
+Service RecHandle: 0x1005b
+Service Class ID List:
+  "OBEX File Transfer" (0x1106)
+Protocol Descriptor List:
+  "L2CAP" (0x0100)
+  "RFCOMM" (0x0003)
+    Channel: 11
+  "OBEX" (0x0008)
+Language Base Attr List:
+  code_ISO639: 0x454e
+  encoding:    0x6a
+  base_offset: 0x100
+Profile Descriptor List:
+  "OBEX File Transfer" (0x1106)
+    Version: 0x0100
+
+Service Name: OBEX Object Push
+Service RecHandle: 0x1005e
+Service Class ID List:
+  "OBEX Object Push" (0x1105)
+Protocol Descriptor List:
+  "L2CAP" (0x0100)
+  "RFCOMM" (0x0003)
+    Channel: 9
+  "OBEX" (0x0008)
+Language Base Attr List:
+  code_ISO639: 0x454e
+  encoding:    0x6a
+  base_offset: 0x100
+Profile Descriptor List:
+  "OBEX Object Push" (0x1105)
+    Version: 0x0100
+
+7. pair with device, default pin is 1234
+http://wiki.bluez.org/wiki/PasskeyAgent
+
+* Changing to discoverable mode and setting the timeout to 60 seconds
+$dbus-send --system --type=method_call --print-reply --dest=org.bluez /org/bluez/hci0 org.bluez.Adapter.SetMode string:discoverable
+$dbus-send --system --type=method_call --print-reply --dest=org.bluez /org/bluez/hci0 org.bluez.Adapter.SetDiscoverableTimeout uint32:60
+
+CREATE BONDING:
+$dbus-send --system --type=method_call --print-reply --dest=org.bluez /org/bluez/hci0 org.bluez.Adapter.CreateBonding string:00:18:C5:42:18:78
+$dbus-send --system --type=method_call --print-reply --dest=org.bluez /org/bluez/hci0 org.bluez.Adapter.RemoveBonding string:00:18:C5:42:18:78
+$dbus-send --system --type=method_call --print-reply --dest=org.bluez /org/bluez/hci0 org.bluez.Adapter.ListBondings
+
+8. install obexpush, obexftp packages
+opkg install obexpush, obexftp
+
+http://www.go2linux.org/linux-command-line-obexftp-man-page
+
+obexpush: it would lauanch opd, use OBEX, channel 10, store received files in /home/root/ folder
+obexftp: list folders, download files, upload files
 
 === Networking ===
 
