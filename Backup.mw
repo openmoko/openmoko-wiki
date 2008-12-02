@@ -301,7 +301,34 @@ exit 0
 
 [[NeoTool]] is a zenity-based script which allows you to both backup and Flash your device from a pretty GUI. It uses both the dfu-util method and the alternate method described on this page, and can produce flashable images of everything including rootfs. Check it out.
 
-== rsync ==
+== Backing up the incremental rsync hardlink way ==
+
+Following is a very simple implementation of
+[http://www.mikerubel.org/computers/rsync_snapshots/ incremental rsync
+snapshots with hardlinks]. Just put it to /etc/cron.daily/backup-neo
+on your PC and setup ssh keys between your PC and neo. It will then
+daily try to backup all files in the / partition. Each successful
+backup is hardlinked under a timestamped directory so you can access
+old backups easily. In fact, you can even NFS mount /backup/neo to
+phone and then chroot inside the backups to run programs in the
+backup'ed environment.
+ #!/bin/bash
+ # /etc/cron.daily/backup-neo
+ rsync --delete -ax --numeric-ids 192.168.0.202:/ /backup/neo/latest 2>  /dev/null
+ ret=$?
+ 
+ case $ret in
+ 0)
+         # backup done, let's save it
+         cp -al /backup/neo/latest /backup/neo/`date -I`
+         ;;
+ 12)
+         # neo was not at home
+         ;;
+ *)
+         echo "backup failed with return value $ret"
+         ;;
+ esac
 
 [[category:Advanced End User]]
 [[Category:Flashing Openmoko]]
