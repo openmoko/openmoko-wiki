@@ -55,4 +55,61 @@ Since HTTP is the most commonly available and mostly allowed protocol on the Int
 
 When not available, information will be stored and transmitted later in the following way. Send package t=now, send package t=0, send package t=now-1, send package t=1, package t=now-2, send package t=2, ... This increases data richness when the device is not continuously connected via that particular medium.
 
+==Example implementation of remotely a activable GPRS backdoor with fso-frameworkd==
+
+When somebody steals your phone, call it from a preconfigured number and it will initiate GPRS connection to do one HTTP request to a preconfigured web site. From the log files of the web site you can see the IP address of the phone and SSH to it to activate GPS.
+
+* ~/bin/remote-wakeup runs remote-wakeup-script when somebody calls the phone from a preconfigured number
+  #!/usr/bin/python
+  import dbus
+  import dbus.mainloop
+  import dbus.mainloop.glib
+  import gobject
+  import subprocess
+  
+  
+  actions = { "PRECONFIGURED_NUMBER" : "remote-wakeup-script" }
+  
+  def onCallStatus( index, status, properties ):
+      if status == "incoming":
+          try:
+               action = actions[properties["peer"]]
+          except KeyError:
+               pass
+          else:
+                obj = bus.get_object( "org.freesmartphone.ogsmd", "/org/freesmartphone/GSM/Device" )
+                callInterface = dbus.Interface( obj, "org.freesmartphone.GSM.Call" )
+                callInterface.Release( index )
+                subprocess.Popen( action, shell=True )
+  
+  dbus.mainloop.glib.DBusGMainLoop( set_as_default=True )
+  mainloop = gobject.MainLoop()
+  bus = dbus.SystemBus()
+  bus.add_signal_receiver( onCallStatus,
+                           "CallStatus",
+                           "org.freesmartphone.GSM.Call",
+                           "org.freesmartphone.ogsmd",
+                           "/org/freesmartphone/GSM/Device" )
+  mainloop.run()
+* ~/bin/remote-wakeup-script does
+  #!/bin/sh
+  (gprs-start; report-ip) &
+* where gprs-start starts a GPRS connection (see [[GPRS_FSO]])
+* and ~/bin/report-ip simply waits until ppp0 has an IP address and then uses wget to do a HTTP request to a preconfigured URL
+
+  #!/bin/bash
+  
+  while true; do
+      ip="$(/sbin/ifconfig ppp0|grep "inet addr:"|cut -d':' -f2|cut -d' ' -f1|head -n1)"
+      if [ "$ip" != "" ]; then
+          wget -O /dev/null "CENSORED_URL"
+          ret=$?
+          if [ $ret -eq 0 ]; then
+              exit
+          fi
+      fi
+      sleep 10
+  done
+
+
 [[Category:Software ideas]]
