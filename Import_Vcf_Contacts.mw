@@ -286,6 +286,38 @@ left outer join contactphonenumbers as cpn9 \
 on contacts.recid=cpn9.recid and cpn9.phone_type=1026;'\
 | sed 's/|/\t/g' > addressbook.tsv
 </pre>
+
+or the following ugly thing as the previous one was throwing an error (SQL error: unrecognized token: "\"):
+
+<pre>
+sqlite3 ~/Applications/Qtopia/qtopia_db.sqlite $1 'Select distinct firstname, lastname, middlename,
+nickname, default_email,title,
+cpn5.phone_number as Business_Phone,
+cpn1.phone_number as Home_Phone,
+cpn8.phone_number as Business_Fax,
+cpn9.phone_number as Business_Pager,
+cpn2.phone_number as Home_Mobile from contacts
+left outer join contactphonenumbers as cpn1
+on contacts.recid=cpn1.recid and cpn1.phone_type=1
+left outer join contactphonenumbers as cpn2
+on contacts.recid=cpn2.recid and cpn2.phone_type=257
+left outer join contactphonenumbers as cpn3
+on contacts.recid=cpn3.recid and cpn3.phone_type=769
+left outer join contactphonenumbers as cpn4
+on contacts.recid=cpn4.recid and cpn4.phone_type=513
+left outer join contactphonenumbers as cpn5
+on contacts.recid=cpn5.recid and cpn5.phone_type=2
+left outer join contactphonenumbers as cpn6
+on contacts.recid=cpn6.recid and cpn6.phone_type=258
+left outer join contactphonenumbers as cpn7
+on contacts.recid=cpn7.recid and cpn7.phone_type=770
+left outer join contactphonenumbers as cpn8
+on contacts.recid=cpn8.recid and cpn8.phone_type=514
+left outer join contactphonenumbers as cpn9
+on contacts.recid=cpn9.recid and cpn9.phone_type=1026;'| sed 's/|/\t/g' > addressbook.tsv
+
+</pre>
+
 put the output through tsv2vcf:
 <pre>
 perl tsv2vcf addressbook.tsv addressbook.vcf
