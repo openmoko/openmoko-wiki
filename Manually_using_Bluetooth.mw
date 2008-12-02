@@ -220,7 +220,7 @@ Scan all nearby bluetooth devices
  root@om-gta02:~# hcitool scan
 
 Browse what kind of services in this device
- sdptool browse 00:16:20:60:7C:36
+ root@om-gta02:~# sdptool browse 00:18:C5:42:18:78
 
 <pre>
 Browsing 00:18:C5:42:18:78 ...
@@ -263,12 +263,16 @@ Profile Descriptor List:
 
  How to pair with a bluetooth device, check [http://wiki.bluez.org/wiki/bluez wiki]
 
-Changing to discoverable mode and setting the timeout to 60 seconds
- $dbus-send --system --type=method_call --print-reply --dest=org.bluez /org/bluez/hci0 org.bluez.Adapter.SetMode string:discoverable
- $dbus-send --system --type=method_call --print-reply --dest=org.bluez /org/bluez/hci0 org.bluez.Adapter.SetDiscoverableTimeout uint32:60
+Changing to discoverable mode and setting the timeout to 60 seconds 
+ root@om-gta02:~# dbus-send --system --type=method_call --print-reply --dest=org.bluez /org/bluez/hci0 \
+ org.bluez.Adapter.SetMode string:discoverable
+ 
+ root@om-gta02:~# dbus-send --system --type=method_call --print-reply --dest=org.bluez /org/bluez/hci0 \
+ org.bluez.Adapter.SetDiscoverableTimeout uint32:60
 
-CREATE BONDING:
- $dbus-send --system --type=method_call --print-reply --dest=org.bluez /org/bluez/hci0 org.bluez.Adapter.CreateBonding     string:00:18:C5:42:18:78
+Create Bonding: eg. another bluetooth device hw address is 00:18:C5:42:18:78
+ root@om-gta02:~# dbus-send --system --type=method_call --print-reply --dest=org.bluez \
+ /org/bluez/hci0 org.bluez.Adapter.CreateBonding    string:00:18:C5:42:18:78
  
 Use obexpush and obexftp tools
  
