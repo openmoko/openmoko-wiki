@@ -134,7 +134,8 @@ OBEX (abbreviation of OBject EXchange, also termed IrOBEX) is a communications p
 
 power on bluetooth: 
 if you use FSO image
- root@om-gta02:~# dbus-send --system --dest=org.freesmartphone.odeviced --type=method_call --print-reply /org/freesmartphone/Device/PowerControl/Bluetooth org.freesmartphone.Device.PowerControl.SetPower int32:1
+ root@om-gta02:~# dbus-send --system --dest=org.freesmartphone.odeviced --type=method_call --print-reply 
+ /org/freesmartphone/Device/PowerControl/Bluetooth org.freesmartphone.Device.PowerControl.SetPower int32:1
 else: (GTA02 only)
  root@om-gta02:~# echo 1 > /sys/bus/platform/devices/neo1973-pm-bt.0/reset
  root@om-gta02:~# echo 0 > /sys/bus/platform/devices/neo1973-pm-bt.0/reset
@@ -202,29 +203,26 @@ device {
 }
 </pre>
 
-3. all paired devices info are stored in this folder http://linux.die.net/man/8/hcid
+[http://linux.die.net/man/8/hcid hcid] - Bluetooth Host Controller Interface Daemon 
+
+All paired devices information are stored in /var/lib/bluetooth/BT HW addr folder 
+eg. 
+<pre>
 root@om-gta02:/var/lib/bluetooth/00:06:6E:16:EB:C7# ls
 classes        features       lastused       names          panu
 config         gn             manufacturers  nap
+</pre>
 
-4. Display local devices
-root@om-gta02:/# hcitool dev
-Devices:
-	hci0	00:06:6E:16:EB:C7
+Display local devices
+ root@om-gta02:/# hcitool dev
 
-5. Scan all nearby bluetooth devices
-root@om-gta02:~# hcitool scan
-Scanning ...
-	00:11:67:C8:F3:23	daydreamer-0
-	00:18:C5:42:18:78	Erin Nokia N73
-	00:1A:92:7A:1E:C2	CHELSEA-PC
-	00:1D:FD:04:E6:24	Dkay
-	00:17:83:48:B3:66	HTC_TyTN_II
+Scan all nearby bluetooth devices
+ root@om-gta02:~# hcitool scan
 
-6. Browse what kind of services in this device
-sdptool browse 00:16:20:60:7C:36
+Browse what kind of services in this device
+ sdptool browse 00:16:20:60:7C:36
 
-root@om-gta02:~# sdptool browse 00:18:C5:42:18:78
+<pre>
 Browsing 00:18:C5:42:18:78 ...
 
 Service Name: OBEX File Transfer
@@ -261,25 +259,21 @@ Profile Descriptor List:
   "OBEX Object Push" (0x1105)
     Version: 0x0100
 
-7. pair with device, default pin is 1234
-http://wiki.bluez.org/wiki/PasskeyAgent
+</pre>
 
-* Changing to discoverable mode and setting the timeout to 60 seconds
-$dbus-send --system --type=method_call --print-reply --dest=org.bluez /org/bluez/hci0 org.bluez.Adapter.SetMode string:discoverable
-$dbus-send --system --type=method_call --print-reply --dest=org.bluez /org/bluez/hci0 org.bluez.Adapter.SetDiscoverableTimeout uint32:60
+ How to pair with a bluetooth device, check [http://wiki.bluez.org/wiki/bluez wiki]
+
+Changing to discoverable mode and setting the timeout to 60 seconds
+ $dbus-send --system --type=method_call --print-reply --dest=org.bluez /org/bluez/hci0 org.bluez.Adapter.SetMode string:discoverable
+ $dbus-send --system --type=method_call --print-reply --dest=org.bluez /org/bluez/hci0 org.bluez.Adapter.SetDiscoverableTimeout uint32:60
 
 CREATE BONDING:
-$dbus-send --system --type=method_call --print-reply --dest=org.bluez /org/bluez/hci0 org.bluez.Adapter.CreateBonding string:00:18:C5:42:18:78
-$dbus-send --system --type=method_call --print-reply --dest=org.bluez /org/bluez/hci0 org.bluez.Adapter.RemoveBonding string:00:18:C5:42:18:78
-$dbus-send --system --type=method_call --print-reply --dest=org.bluez /org/bluez/hci0 org.bluez.Adapter.ListBondings
-
-8. install obexpush, obexftp packages
-opkg install obexpush, obexftp
-
-http://www.go2linux.org/linux-command-line-obexftp-man-page
-
-obexpush: it would lauanch opd, use OBEX, channel 10, store received files in /home/root/ folder
-obexftp: list folders, download files, upload files
+ $dbus-send --system --type=method_call --print-reply --dest=org.bluez /org/bluez/hci0 org.bluez.Adapter.CreateBonding     string:00:18:C5:42:18:78
+ 
+Use obexpush and obexftp tools
+ 
+install obexpush, obexftp packages
+ opkg install obexpush, [http://www.go2linux.org/linux-command-line-obexftp-man-page obexftp]
 
 === Networking ===
 
