@@ -100,4 +100,30 @@ If you are lucky something as simple as
  dpkg-buildpackage -aarmel -rfakeroot -us -uc
 might work. See http://iki.fi/lindi/debian/pool/main/a/agps-online for an example of such a simple package.
 
+== Building experimental kernels ==
+
+If you are on debian the follow the step 1 under qemu+distcc instructions to obtain arm-linux-gnueabi-gcc. Then use
+
+ 1) git clone git://git.openmoko.org/git/kernel.git linux-2.6
+ 2) git branch your-name origin/stable-tracking
+ 3) modify ./build to use your compiler:
+ -export CROSS_COMPILE=../../cross/bin/arm-angstrom-linux-gnueabi-
+ +export CROSS_COMPILE=arm-linux-gnueabi-
+ 4) ./build dummy
+
+to build a kernel from stable-tracking branch. Note that you might want to change the build script to also save your zImage and .config file with versions:
+
+ @@ -52,6 +52,8 @@ if make -j5 ARCH=arm CONFIG_DEBUG_SECTION_MISMATCH=y  EXTRAVERSION=$VERSION; then
+         if [ ! -z "`grep CONFIG_USB_USBNET=y .config`" ] ; then
+                 rm -f uImage-moredrivers*-$PRODUCT.bin modules-*$PRODUCT.tar.gz
+                 cp uImage-$PRODUCT.bin uImage-moredrivers$VERSION.bin
+ +               cp arch/arm/boot/zImage zImage$VERSION
+ +               cp .config config$VERSION
+                 rm -rf staging
+                 mkdir -p staging
+                 if [ ! -z "$1" ] ; then
+ 
+
+
+
 [[Category:Application Developer]]
