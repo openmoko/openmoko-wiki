@@ -126,8 +126,58 @@ GPX would accommodate everything we need but it's ASCII XML and that means 1/2 t
 
 === Audio clips ===
 
-It would be useful to be able to capture short audio comments, especially when collecting data for Openstreetmap. This can be easily done by starting recording when AUX is pressed and stopping it when it is released. However, AUX is not easy to press when the phone is inside water-proof case and a large button on touchscreen is more suitable in that case.
+It would be useful to be able to capture short audio comments, especially when collecting data for Openstreetmap. This can be easily done by starting recording when AUX is pressed and stopping it when it is released. However, AUX is not easy to press when the phone is inside water-proof case and a large button on touchscreen is more suitable in that case. Here is a really simple proof-of-concept of such an UI:
 
+ #!/usr/bin/python
+ import gobject
+ import time
+ import os
+ import sys
+ import pygtk
+ import gtk
+ import pango
+ 
+ def dbg(s):
+     print("%s %s" % (time.strftime("%H:%M:%S"), s))
+ 
+ class UI:
+     def __init__(self, loop):
+         self.loop = loop
+ 
+         w = gtk.Window(gtk.WINDOW_TOPLEVEL)
+         w.set_default_size(480, 300)
+         w.connect("delete_event", (lambda w,e: False))
+         w.connect("destroy", (lambda w: self.loop.quit()))
+         w.set_border_width(0)
+         w.show()
+ 
+         vbox = gtk.VBox(False, 0)
+         w.add(vbox)
+         vbox.show()
+ 
+         b = gtk.Button("Record")
+         b.connect("pressed", self.cbRecordStart)
+         b.connect("released", self.cbRecordStop)
+         b.set_focus_on_click(False)
+         b.set_size_request(480, 400)
+         self.record_button = b
+         self.record_button.modify_bg(gtk.STATE_ACTIVE, gtk.gdk.color_parse('red'))
+         vbox.pack_start(b)
+         b.show()
+ 
+     def cbRecordStart(self, w):
+         dbg("cbRecordStart")
+         os.system("start-arecord")
+ 
+     def cbRecordStop(self, w):
+         dbg("cbRecordStop")
+         os.system("stop-arecord")
+ 
+ if __name__ == "__main__":
+     loop = gobject.MainLoop()
+     UI(loop)
+     loop.run()
+ 
 === Laser rangefinder ===
 
 There is another common situtaion where people use a laser rangefinder in conjunction with GPS, to get the location of an object that is not reachable (for example a boat) or a tree trunk (under heavy canopy).
