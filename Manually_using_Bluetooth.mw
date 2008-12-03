@@ -11,7 +11,7 @@ Power up the adapter by clicking on the bluetooth icon in the top bar and select
 
 The old way to do it is a shell command (for kernels before 2.6.24):
 
- root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-bt.0/power_on
+ root@fic-gta01:~# echo 1 > /sys/bus/platform/devices/gta01-pm-bt.0/power_on
 
 For kernel 2.6.24 (or later) use
 
@@ -50,6 +50,8 @@ There should be a passkey agent built into openmoko, but for now you can start u
  passkey-agent --default 0000 &
 
 Note: the passkey-agent is not required in Openmoko 2007.2 with kernel 2.6.21.6 as of at least since August 27 (maybe earlier).
+
+In debian there is no passkey-agent binary but the package bluez-utils has its source code at /usr/share/doc/bluez-utils/examples/passkey-agent.c.gz.
 
 === HID (Human Input Device) ===
 
@@ -662,6 +664,12 @@ You may also be able to listen to system audio given the right state file:
      device <headset mac>
      profile "voice"
  }
+
+== Debugging ==
+
+If anything goes wrong, capture the bluetooth traffic with
+ sudo hcidump -l 4096 -w bt.dump
+and attach bt.dump to your bug reports etc.
 
 == Further reading ==
 
