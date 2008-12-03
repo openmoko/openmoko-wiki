@@ -242,5 +242,28 @@ or remotely by something like:
 
 '''rsync -avz --delete git@git.openmoko.org:/var/cache/git/<project>.git <project>-backup'''
 
+=Useful scripts=
+==Check a patch for correctness==
+
+ #!/bin/sh
+ PATCH=$1
+ echo `pwd`
+ if [ -z "$1" ] ; then
+  stg refresh
+  PATCH=`stg top`
+  echo "*** checking top patch $PATCH"
+ fi
+ while [ ! -f ./scripts/checkpatch.pl ]; do
+   cd ..
+   echo looking for checkpatch.pl, cd `pwd`
+ done
+ if [ -f ./scripts/checkpatch.pl ]; then
+   stg export $PATCH && \
+   ./scripts/checkpatch.pl -strict patches-`stg branch`/$PATCH
+ else
+   echo "./scripts/checkpatch.pl not found."
+   echo "Please cd to the kernel tree!"
+ fi
+
 [[Category:System Developers]]
 [[Category:Application Developer]]
