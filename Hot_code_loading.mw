@@ -1,64 +1,15 @@
-== To change a running [[Erlang]] system ==
-For most of us it's a cool experience to be able to inject compiled code into a running VM and instantly watch the system change.
-
-=== Start an erlang node on your neo===
-This is my /etc/X11/Xsession.d/80zhone. As you can see the erlang node's got a name "-name neo@192.168.0.202" (a running erlang virtual machine is called an erlang node). And it's got a cookie "-setcookie SFEWRG34AFDSGAFG35235". This is all that's needed on the neo.
+This is my /etc/X11/Xsession.d/80zhone. As you can see the erlang node's got a name "-sname moko" (a running erlang virtual machine is called an erlang node). And it's got a cookie "-setcookie SFEWRG34AFDSGAFG35235".
 
 <pre>
 #!/bin/sh -e
 #zhone > /tmp/zhone.log 2>&1 &
-/home/root/cean/start.sh -setcookie SFEWRG34AFDSGAFG35235 -name neo@192.168.0.202 -noshell -pa /home/root/trunk -s main start > debug.txt
+/home/root/cean/start.sh -setcookie SFEWRG34AFDSGAFG35235 -sname moko -noshell -pa /home/root/trunk -s main start > debug.txt
 renice -3 $!
 exit 0
 </pre>
 
-=== Start an erlang node on your host===
-Every erlang node in your network should have a unique name, and a common cookie. Start an erlang node on your host PC with a unique name and the common cookie:
-<pre>
-erl -setcookie SFEWRG34AFDSGAFG35235 -name 'host@192.168.0.200'
-</pre>
 
-Once again - first make sure you can access your neo from the host with ping, ssh ,rcp etc. Then, from your host erlang console try
-<pre>
-net_adm:ping('neo@192.168.0.202'). 
-</pre>
-The response should be 'pong' if you have a successful connection - if not, the response is 'pang'
+Every erlang node in your network should have a unique name, and a common cookie.
 
-Then try the shell command
-<pre>
-nodes().
-</pre>
-The response should be a list of all known nodes in your network.
 
-=== HotLoad the code ===
-Make sure erlang can find the compiled module 'your_modulename' on the local file system.
-
-To carry out Hot Code Loading type (on your host erlang console):
-<pre>
-net_adm:ping('neo@192.168.0.202'). 
-nl(your_modulename).
-</pre>
-nl() is short for network_load and will remotely load a compiled erlang module on every connected node on your network.
-
-Substitute your_modulename with the name of the module you want to load into the virtual machine on your neo. The response should be 'abcast' if sucessful. If not the response is 'error'.
-
-The ping command is only necessary the first time to let your host node find your neo node. When you are finished, don't forget to copy the compiled erlang file to your neo, hot code loading does not copy your beam file to the remote file system.
-
-==Example Code==
-There is only one thing you must know when using hot code loading, and that is what makes your code reload. Every time the erlang VM finds a module_name:function_name() in your code it looks for (and uses) the most recent version it has loaded. So - just export your loop function and preface it in your calls with the module name or with the macro ?MODULE:
-
-<pre>
--export([start/0,loop/10]).
-
-loop(Pid,Display,Win,Buttons,Dbus,F_hash,Pos,Number,Spot,Hotspots) ->
-    receive
-        {event,_,configureNotify,_} ->
-            ?MODULE:loop(Pid,Display,Win,Buttons,Dbus,F_hash,Pos,Number,Spot,Hotspots);
-	{event,_, buttonPress, {_,X,Y,_,_}} ->
-            Spot1 = finger_at({X,Y},Hotspots),
-            Pid ! {touching,Spot1},
-            ?MODULE:loop(Pid,Display,Win,Buttons,Dbus,F_hash,Pos,Number,Spot1,Hotspots)
-end.
-</pre>
-
-[[Category:Application Developer]]
+To carry out Hot Code Loading you start a an erlang node on your host (remember to set a different name and to use the same cookie) and from the remote erlang shell type nl(your_modulename). Substitute your_modulename with the name of the module you want to load into the virtual machine.
