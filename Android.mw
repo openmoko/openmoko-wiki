@@ -49,6 +49,74 @@ Ben Leslie mentioned on the android-porting list that he was able to get the 'An
 # After the build finishes you can put together a root file system by editing and running Sean McNeil's scripts, which are attached to [http://lists.openmoko.org/pipermail/community/2008-December/036982.html this message]. The first script (cp_android_OS) is used to copy the newly built files into a staging area. The second one (mkjffs2) makes a jffs2 image from the staging area. Be sure to edit the paths in the two files to match your environment.
 # The output of the second script is a file, <tt>androidfs.jffs2</tt>, which may be flashed to your Freerunner.
 
+==== Building an jffs2 image ====
+You can use this script:
+<pre>
+#!/bin/sh
+
+currentdir=`pwd`
+
+ANDROID_OUT=out
+ANDROID_DEVICE=freerunner
+EXPORT_ROOT=$currentdir/build_jffs2_tmp
+
+Usage()
+{
+	echo "Usage: $0 release|debug jffs2filename"
+}
+
+BuildImage()
+{
+
+	if [ -d $1 ]
+	then
+		echo "[INFO] Copying from... $1"
+
+		sudo rm -rf $EXPORT_ROOT
+		mkdir $EXPORT_ROOT
+		mkdir $EXPORT_ROOT/root
+
+		# Copy the image...
+		cd $1
+		tar cf - root | (cd $EXPORT_ROOT; sudo tar xf -)
+		tar cf - system | (cd $EXPORT_ROOT/root; sudo tar xf -)
+
+		# Change owner and permissions...
+		cd $EXPORT_ROOT
+		sudo chown -R root:root root
+		sudo chmod -R 777 root
+		
+		cd $currentdir
+
+		# Make the JFFS2 file
+		mkfs.jffs2 --pad=0x700000 -o $2 -e 0x20000 -n -d$EXPORT_ROOT/root/
+		echo "[INFO] Image written to $2"
+		
+		sudo rm -rf $EXPORT_ROOT
+	else
+		echo "$1 does not exist!"
+	fi
+}
+
+if [ $# != 2 ]
+then
+	Usage
+else
+
+	case $1 in
+	    release)
+		BuildImage $ANDROID_OUT/target/product/$ANDROID_DEVICE $2
+		;;
+	    debug)
+		BuildImage $ANDROID_OUT/debug/target/product/$ANDROID_DEVICE $2
+		;;
+	    *)
+		Usage
+	esac
+fi
+
+</pre>
+
 There is currently no documented way to build a Freerunner/Android kernel. [[User:Seanmcneil3|Sean McNeil]] has been releasing kernels at http://people.openmoko.org/sean_mcneil/. Most of the patches required to run Android have be incorporated into the <tt>andy-tracking</tt> kernel branch, which will eventually be the new stable kernel. Once all the patches are in the kernel, it should be possible to run Android with a stock kernel.
 
 === Windows Connectivity ===
