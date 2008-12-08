@@ -1,0 +1,93 @@
+ PlayWithFreerunner   
+
+#How to play LSCD with Neo Freerunner
+Introduction
+
+In this page we will discuss how to play LSCD with Neo Freerunner. Neo Freerunner is a Linux programmable cell phone from Openmoko.
+
+It has:
+
+    * mini usb,
+    * wifi,
+    * bluetooth,
+    * GPS,
+    * GSM,
+    * GPRS,
+    * and 2 3D accelerometers. 
+
+This page describes how to play LSCD with Neo.
+Details
+
+1. cross compile LSCD.
+
+    a.1 Using OE: the bb file is at
+
+        * The compiled opk file: http://lscd.googlecode.com/files/liblscd0_armv4t.opk
+        * ssh to neo then:
+             1. wget http://lscd.googlecode.com/files/liblscd0_armv4t.opk
+             2. opkg install liblscd0_armv4t.opk 
+
+    a.2 Cross compile:
+
+        * You will need cross-compiler, cython, pyrex
+        * svn checkout http://lscd.googlecode.com/svn/trunk/ lscd
+        * cd lscd; ./autogen --host=arm-angstrom-linux-gnueabi --prefix=/usr
+        * mkdir temp; env DESTDIR=pwd/temp make install
+        * cd temp; scp -r usr root@192.168.0.202:
+
+              PS. Neo's default IP is 192.168.0.202 
+
+2. connect to Neo other than USB network.
+
+    a.1 Via Wifi
+
+        * http://wiki.openmoko.org/wiki/Wifi 
+
+    a.2 Via Bluetooth
+
+        * http://wiki.openmoko.org/wiki/Bt-net-script 
+
+3. connect Neo with LSC-10 chip
+
+    * LSC chip has USB B type female interface, therefore all we have to do is finding a USB line with mini USB type A male head and USB type B male head
+    * You can also assemble few lines together. For example I used:
+
+          mini USB male
+
+          <---->
+
+          USB A male | USB A female
+
+          <---->
+
+          USB A female | USB A male
+
+          <---->
+
+          USB B male 
+
+          to assemble this line. 
+
+4. Switch Neo to USB host mode
+
+    * Neo is default on USB device mode, and if you want to control something with Neo you will have to switch it to host mode. 
+
+   1. ifconfig usb0 down
+   2. echo "host" > /sys/devices/platform/s3c2410-ohci/usb_mode
+   3. echo "1" > /sys/devices/platform/neo1973-pm-host.0/hostmode 
+
+    * of course you can write them in script 
+
+5. Play with LSC chip with python binding
+
+    * you may take http://code.google.com/p/lscd/source/browse/trunk/tests/robot.py or http://code.google.com/p/lscd/source/browse/trunk/tests/pylsc_init.py as examples 
+
+Pylsc is python binding. You can for sure using C code to control the LSC chip. And you can write script for this very easily.
+
+Happy Hacking.
+
+Comment by ticktock35, Nov 10, 2008
+
+Pictures: http://picasaweb.google.com/ticktock35/NeoLSCRobot#
+
+Videos: http://tw.youtube.com/watch?v=SG3fAHFNs2c
