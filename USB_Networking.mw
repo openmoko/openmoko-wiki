@@ -459,37 +459,37 @@ This setup is probably over-complex:
 
 /etc/sysconfig/network-scripts/ifcfg-usb0:
 
-DEVICE=usb0
-IPADDR=192.168.0.200
-NETMASK=255.255.255.0
+ DEVICE=usb0
+ IPADDR=192.168.0.200
+ NETMASK=255.255.255.0
 
 /etc/sysconfig/network-scripts/ifup-usb:
 
-#!/bin/bash
+ #!/bin/bash
+ 
+ . /etc/init.d/functions
+ 
+ cd /etc/sysconfig/network-scripts
+ . ./network-functions
 
-. /etc/init.d/functions
+ [ -f ../network ] && . ../network
 
-cd /etc/sysconfig/network-scripts
-. ./network-functions
+ CONFIG=${1}
 
-[ -f ../network ] && . ../network
+ need_config ${CONFIG}
 
-CONFIG=${1}
+ source_config
 
-need_config ${CONFIG}
-
-source_config
-
-NETBITS=`ipcalc -p ${IPADDR} ${NETMASK} | awk -F'=' '{print $2;}'`
-
-/sbin/ip addr flush dev ${DEVICE} 2>/dev/null
-/sbin/ip link set dev ${DEVICE} up
-/sbin/ip addr add dev ${DEVICE} ${IPADDR}/${NETBITS}
-
-/sbin/iptables -I POSTROUTING -t nat -j MASQUERADE -s ${IPADDR}/${NETBITS}
-/sbin/sysctl net.ipv4.ip_forward=1
-/sbin/iptables -I FORWARD -s ${IPADDR}/${NETBITS} -j ACCEPT
-/sbin/iptables -I FORWARD -d ${IPADDR}/${NETBITS} -j ACCEPT
+ NETBITS=`ipcalc -p ${IPADDR} ${NETMASK} | awk -F'=' '{print $2;}'`
+ 
+ /sbin/ip addr flush dev ${DEVICE} 2>/dev/null
+ /sbin/ip link set dev ${DEVICE} up
+ /sbin/ip addr add dev ${DEVICE} ${IPADDR}/${NETBITS}
+ 
+ /sbin/iptables -I POSTROUTING -t nat -j MASQUERADE -s ${IPADDR}/${NETBITS}
+ /sbin/sysctl net.ipv4.ip_forward=1
+ /sbin/iptables -I FORWARD -s ${IPADDR}/${NETBITS} -j ACCEPT
+ /sbin/iptables -I FORWARD -d ${IPADDR}/${NETBITS} -j ACCEPT
 
 Set /etc/sysconfig/network-scripts/ifdown-usb:
 
@@ -521,6 +521,7 @@ NETBITS=`ipcalc -p ${IPADDR} ${NETMASK} | awk -F'=' '{print $2;}'`
 If you are using NetworkManager, restart it and enable the usb device from its menu, otherwise it will disable your connection shortly after you enable it.
 
 /sbin/service NetworkManager restart
+
 === Option C - tested on F9 ===
 (worked on FC8 too, can this be called "tested"?)
 
