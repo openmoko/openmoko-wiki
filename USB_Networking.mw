@@ -589,21 +589,23 @@ ln -s net.lo net.usb0
 
 Put iptables into use:
 
+<pre>
 iptables -I INPUT 1 -s 192.168.0.202 -j ACCEPT
 iptables -I OUTPUT 1 -s 192.168.0.200 -j ACCEPT
 iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
+</pre>
 
 Store them:
 
-/etc/init.d/iptables save
+ /etc/init.d/iptables save
 
 If you want the routing by default:
 
-rc-update add iptables default
+ rc-update add iptables default
 
 You must also inform the kernel, to start forwarding.
 
-echo 1 > /proc/sys/net/ipv4/ip_forward
+ echo 1 > /proc/sys/net/ipv4/ip_forward
 
 === Automatic Configuration ===
 One way to automate all this is to create /etc/conf.d/net.usb0 as follows. It sets IP forwarding and the iptables rules all in one go. It removes the iptables rules and disables ip forwarding when the FreeRunner is unplugged.
