@@ -1,5 +1,6 @@
 {{Languages|PyPhonelog}}
 
+
 This daemon uses the framework to track and log all the calls made to and from the moko.
 Because it uses the framework, it's limited to [[FSO]] supporting distributions only. The daemon uses sqlite and currently (Read: Has to change) keeps the database in "/home/root/.phonelog.db". It has a dbus interface which enables pulling out incoming/outgoing and missed calls including the time the call was placed at.
 
@@ -11,15 +12,28 @@ This package also includes a working gtk+ gui for use with the daemon. The gui a
 If you want the gui to work with finger scrolling, download:
 [http://downloads.tuxfamily.org/3v1deb/openmoko/python-mokoui2_0.1.0+svnr4342_armv4t.ipk python-mokoui2]
 
+'''IMPORTANT ANNOUNCEMENT:'''
+The gui and the daemon are now in different packages, and the packages no longer comply with the older package name. To install this version please first 'opkg remove fso-phonelog' if you had a version older than 0.9.0 before.
+The gui now supports the SHR phone logger so users that run SHR should not install the pyphonelogd.
 
 '''IMPORTANT NOTICE:''' For some reason in the newest shr the daemon hasn't started automaticlly at boot time. After a bit of debugging I noticed that's because the frameworkd isn't started yet while the daemon is trying to connect it (although it's set to start a long time after). I added a sleep for 4 seconds in 0.4.2 (and on?) though this must be resolved otherwise.
+
+= Installation =
+* Install the pyphonelog package.
+If you use SHR that's it! if not (i.e, debian/fso):
+* Install pyphonelogd as well.
 
 = Package =
 * author: Tom Hacohen <available_at_profile>
 * this is a python script so code resides in /usr/bin/phonelogd and /usr/bin/phonelog untill I open a proper place for it.
-* link: [http://stosb.com/openmoko/fso-phonelog_0.8.1_armv4t.ipk package]
+* gui: [http://stosb.com/openmoko/pyphonelog_0.10.0_armv4t.ipk package]
+* daemon: [http://stosb.com/openmoko/pyphonelogd_0.9.1_armv4t.ipk package]
 
 =Change Log=
+'''0.10.0'''
+* The gui now supports the ophonekitd phonelogger, which is SHR only, though, if the ophonekitd isn't installed (i.e debian/fso) you can install the pyphonelogd as well as pyphonelog to have a working phone logger.
+'''0.9.1'''
+* The daemon and the gui are now in different packages and the packages are now named pyphonelog and pyphonelogd respectively.
 '''0.8.1'''
 * Fixed a major bug causing missed calls not to be logged and outgoing calls to be logged as missed in certain situations.
 '''0.8.0'''
