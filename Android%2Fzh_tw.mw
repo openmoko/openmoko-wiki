@@ -2,66 +2,56 @@
 {{Distributions|Android}}
 
 = Updates =
-* 20081202 [http://www.koolu.com Koolu.com] 在[http://git.koolu.org/ Koolu GIT] [http://git.koolu.org/ Koolu GIT] ([http://koolu.com/Press-Release/ Press Release]已釋出給FreeRunner使用的 Android 源碼。
+* 20081202 [http://www.koolu.com Koolu.com] has released the source code for the FreeRunner port of Android in their git repositories at [http://git.koolu.org/ Koolu GIT] ([http://koolu.com/Press-Release/ Press Release])
+* 20081120 [http://www.koolu.com Koolu.com] has pushed back selling the OpenMoko Freerunner with Android pre-installed , as well as offering free downloads of the Freerunner port of Android to existing Freerunner owners. Untill December 2008
+* 20081104 The first Android-image has been successfully created by Sean McNeil!  - sms and calling works, wifi and bluetooth doesn't. [http://onlinedev.blogspot.com/2008/11/porting-android-phase-3-done.html ''news-source'']
+* 20081029 [[User:Cfriedt]] [http://benno.id.au Benno] has modified Android's build system so that it will output a JFFS2 image instead of YAFFS . Unlike JFFS2, which [http://wiki.openmoko.org/wiki/Userspace_root_image can be mounted read-only from an image], mounting a YAFFS image is not possible unless it's already been written to flash (it complains about the block device being of type '1' and not 'NAND'). JFFS2 also has the benefit that it's a standard OpenMoko image format (See [[Flashing the Neo FreeRunner]] or [[Flashing the Neo 1973]])
+* 20081023 [[User:Bricode]] To track the status of which parts of the Android source tree contain ARMv5 specific code, I've created a table of where it is contained, and the status of patches. It can be found at: http://spreadsheets.google.com/pub?key=pzDEXnU19gkeTjpD28t-7fw
+* 20081022 [[User:Cfriedt]] I was able to 'trivially' compile all of the Android source code without error for the ARMv4T architecture by removing v5TE instructions. Although it will definitely not run anything predictably, at least now that I know the build system will work with a few simple substitutions in build/core/combo/arm-linux.mk. At this point I am able to go ahead and re-implement v5TE instructions as v4T instruction sequences instead (or re-implement entire sections of assembly with hand-optimized v4T instructions).
+* 20081021 [[User:Cfriedt]] Android -> FreeRunner updates on my [http://perpetual-notion.blogspot.com/search/label/android blog]
+* 20081021 Google released the majority [http://source.android.com/download source code] for the phone under Apache free and open-source [http://source.android.com/license license], with portions covered by other existing licenses, such as the Linux kernel under GPLv2.
+* 200810?? [http://www.koolu.com Koolu.com] has announced that they will be '''selling the OpenMoko Freerunner with Android pre-installed''' beginning in November 2008, as well as offering '''free downloads of the Freerunner port of Android''' to existing Freerunner owners. Well-known open-source advocate [http://koolu.com/The-Koolu-Team/maddog.html Jon "maddog" Hall] is CTO and Ambassador for Koolu.
 
-* 20081120 [http://www.koolu.com Koolu.com] 推動銷售搭載 Android的Openmoko Freerunner 。如提供現有的FreeRunner 下載可搭載的Android。直到 December 2008。
+= Introduction =
+This page is dedicated to porting the [http://www.android.com Android OS] to the [[Neo 1973]] and [[Neo FreeRunner]] handsets. Since the Android OS was [http://source.android.com/posts/opensource  publically released] on 20081021, [http://benno.id.au/blog/2007/11/21/android-neo1973 work] [http://perpetual-notion.blogspot.com/search/label/android is] [http://groups.google.com/group/android-porting currently underway] to port Android to the [[Neo1973 Hardware|Neo 1973]] and [[Neo_FreeRunner_GTA02_Hardware|FreeRunner]] handsets.
 
-* 20081104 第一個可以在FreeRunner上執行的 Android-image已經成功的被 Sean McNeil編譯出來!  - sms 及通話可以使用，wifi 及藍芽則否。[http://onlinedev.blogspot.com/2008/11/porting-android-phase-3-done.html ''news-source'']
+== Goals ==
+# Systematically introduce patches for ARMv4T in the Android codebase
+# Provide Neo1973 and Neo FreeRunner hardware-dependent patches in the Android codebase, leveraging the work already done by the Openmoko developers, without forcing Android-specific changes upstream
+# Provide a useable Android filesystem and kernel on the [[Distributions]] page that conform to current Openmoko installation routines
 
-* 20081029 [[User:Cfriedt]] [http://benno.id.au Benno] 修改了Android's build system，因此可以放置JFFS2 image，而不是YAFFS。 不像是JFFS2，只可以[http://wiki.openmoko.org/wiki/Userspace_root_image mount 到唯讀的情況下]，要掛載 YAFFS映像檔在它被寫入 flash 後才有可能使用。(it complains about the block device being of type '1' and not 'NAND'). JFFS2 仍然有標準的 Openmoko image 格式的優點 (請參考 [[Flashing the Neo FreeRunner|燒製映像檔到FreeRunner]] 或 [[Flashing the Neo 1973|燒製映像檔到Neo 1973]])。
+== Installing Using Current Binaries ==
 
-* 20081023 [[User:Bricode]] 追蹤包含ARMv5規格的 Android source tree狀態，我建立了一個表格表示它會包含什麼內容，及patche檔的狀態。它可以在 http://spreadsheets.google.com/pub?key=pzDEXnU19gkeTjpD28t-7fw 這個網址找到。
+Detailed instructions for installing Android on the Freerunner (using Sean McNeil's kernel and rootfs packages, and the Qi bootloader) can be found [http://www.copiesofcopies.org/webl/?p=34 here].
 
-* 20081022 [[User:Cfriedt]] 可以在移除了v5TE指令下 ，沒有錯誤的'trivially' 為ARMv4T編譯 Android source code。雖然它不預期它可以被執行，至少我針對 build/core/combo/arm-linux.mk做了一些小小的取代。關於此點，我可以繼續像執行v4T指令順序般的，重新執行 v5TE 指令。(或者，重新執行整個 hand-optimized v4T 指令組合)。
+== Early Attempts ==
+As [http://benno.id.au Ben Leslie] had pointed out on his [http://benno.id.au/blog/2007/11/21/android-neo1973 blog] far before the source code was released, [http://www.android.com Android] was originally designed to work with the ARMv5TE [http://en.wikipedia.org/wiki/Instruction_set_architecture instruction set architecture] (ISA), which allows for [http://en.wikipedia.org/wiki/ARM_architecture#DSP_Enhancement_Instructions DSP enhanced instructions]. Contrary to the ARMv5TE ISA, the Neo1973 and FreeRunner handsets both feature an arm920t core, which comply to the ARMv4T ISA.
 
-* 20081021 [[User:Cfriedt]] Android -> FreeRunner ，在我的[http://perpetual-notion.blogspot.com/search/label/android 部落格]上有討論。
+Before the source code was released, kernel trap handlers were implemented to 'emulate' the ARMv5TE ISA. Although the results worked in many cases, trapping is costly and performance suffered as a result. Moreover, without explicitly knowing which conditions were set by various instructions, such as Thumb Mode execution, the result became nondeterministic.
 
-* 20081021 Google 釋出Apache free 及 open-source手機下，大部份的[http://source.android.com/download source code] 、 [http://source.android.com/license license]， 部份被涵蓋在現有的授權(licenses)下，如 Linux kernel 是屬於 GPLv2授權。
+== Current State ==
 
-* 200810?? [http://www.koolu.com Koolu.com] 宣佈他們將會 '''銷售搭載Android的Openmoko Freerunner '''，這個計劃會在2008年11月開始，並且提供現有的FreeRunner用戶 '''免費下載可搭載在Freerunner上的Android''' 。 知名的 open-source 愛好者[http://koolu.com/The-Koolu-Team/maddog.html Jon "maddog" Hall] 是Koolu的CTO及代表。
+With the release of the Android [http://source.android.com source code], the Open Source community is no longer limited to dealing with a binary-only product. The Open Handset Alliance (OHA) has let their source code become their product for everyone enrich and benefit from.
 
-= 簡介 =
-本網頁撰寫的目地在於將[http://www.android.com Android OS] 移植到 [[Neo 1973]] 及 [[Neo FreeRunner]] 手機上。Android OS 於2008年10月21日[http://source.android.com/posts/opensource  公開的發佈]  。
-下列的資訊，可以提供您暸解在 [[Neo1973 Hardware|Neo 1973]]及 [[Neo_FreeRunner_GTA02_Hardware|FreeRunner]] [http://benno.id.au/blog/2007/11/21/android-neo1973 移植工作] [http://perpetual-notion.blogspot.com/search/label/android 目前的運作情形] 
-[http://groups.google.com/group/android-porting 及現狀]。
+Currently, porting efforts are underway in many circles. Patches should be submitted via the [http://source.android.com/submit-patches official Android channels].
 
-== 目標 ==
-# 有系統化的在Android codebase下使用提供給 ARMv4T 的patch檔。
-# 提供在Android codebase在下Neo1973 與 Neo FreeRunner hardware-dependent patches 檔， 這項任務已經被 Openmoko 工程師完成，在不強迫變更 Android-specific upstream下。
-# 在[[Distributions]]網頁中，提供有用的Android 檔案系統及kernel。
+[http://www.koolu.com Koolu], a Freerunner distributor, has released the source code of their Android port at [http://git.koolu.com http://git.koolu.com]. See the [[#Building the Koolu Android Source]] instructions below for how to build an Android image for Freerunner.
 
-== 使用現有的二進位檔安裝 ==
+To track the status of which parts of the Android source tree contain ARMv5 specific code, I've created a table of where it is contained, and the status of patches. It can be found at: http://spreadsheets.google.com/pub?key=pzDEXnU19gkeTjpD28t-7fw [[User:Bricode]]
 
-詳盡的在FreeRunner上安裝Android (使用 Sean McNeil的kernel及rootfs 套件，及 Qi bootloader) ，何以在[http://www.copiesofcopies.org/webl/?p=34 http://www.copiesofcopies.org/webl/?p=34]此網址找到。
+[[User:Seanmcneil3|Sean McNeil]] said that he was able to get Android running (including telephony) in his Freerunner [http://3v1n0.tuxfamily.org/tumblelog/post/368 source].
 
-== 早期目標 ==
-就如同 [http://benno.id.au Ben Leslie] 在 [http://benno.id.au/blog/2007/11/21/android-neo1973 blog] 中所提到的，在 source code釋出之前，[http://www.android.com Android] 被設計為使用ARMv5TE 架構[http://en.wikipedia.org/wiki/Instruction_set_architecture instruction set architecture] (ISA)，允許 [http://en.wikipedia.org/wiki/ARM_architecture#DSP_Enhancement_Instructions DSP 擴充的指令]。 相較於 ARMv5TE ISA， the Neo1973 及 FreeRunner 電話聽筒都著重在arm920t core，並可以應用到 ARMv4T ISA。
+Ben Leslie mentioned on the android-porting list that he was able to get the 'Android' logo to appear on his Neo 1973.
 
-在源碼開放之前，kernel trap handlers 被用來 '模擬' ARMv5TE ISA。雖然這個結果在不同的案例下運作，trapping 是較花成本及效能的一種結果。甚至於，在沒有明確的暸解哪個狀況是被不同的指令所設定的情兄下，如Thumb Mode execution，這個結果成為沒有定論。
+=== Building the Koolu Android Source ===
 
-== 目前的狀態 ==
+# Configure your machine with the prerequisites documented in the [http://source.android.com/download#TOC-Setting-up-your-machine Setting up your machine] section of Google's build instructions.
+# Install <tt>repo</tt> and download the source, as documented at http://trac.koolu.org/.
+# After the build finishes you can put together a root file system by editing and running Sean McNeil's scripts, which are attached to [http://lists.openmoko.org/pipermail/community/2008-December/036982.html this message]. The first script (cp_android_OS) is used to copy the newly built files into a staging area. The second one (mkjffs2) makes a jffs2 image from the staging area. Be sure to edit the paths in the two files to match your environment. Alternatively, you can use the script [[#Building a jffs2 image|below]]
+# The result of the previos step is a file, <tt>androidfs.jffs2</tt>, which may be flashed to your Freerunner.
 
-隨著 Android釋出 [http://source.android.com source code]，Open Source社群不再受限於使用binary-only 產品。The Open Handset Alliance (OHA)已經讓他們的source code 成為能讓大家致富及受益的產品。
-
-目前，porting 以不同的循環模式運做。Patches需要透過  [http://source.android.com/submit-patches official Android channels]提交。
-
-[http://www.koolu.com Koolu]，Freerunner 的經銷商， 在[http://git.koolu.com http://git.koolu.com]釋出了他們搭載FreeRunner的源碼。參考 [[#Building the Koolu Android Source]]下的說明可以暸解到如何製作供給Freerunner使用的Android image。
-
-為了要追蹤Android source tree的哪個部份包含了特定的 ARMv5 程式，我製作了包含patches狀態的表格。這個表格可以在 http://spreadsheets.google.com/pub?key=pzDEXnU19gkeTjpD28t-7fw 找到。[[User:Bricode]]
-
-[[User:Seanmcneil3|Sean McNeil]] [http://3v1n0.tuxfamily.org/tumblelog/post/368 指出]他可以在FreeRunner上執行包含通話功能的 Android。 
-
-Ben Leslie 也在android-porting list上指出他可以在Neo 1973 show出他的Android logo。
-
-=== 建立Koolu Android Source ===
-
-# 參考[http://source.android.com/download#TOC-Setting-up-your-machine Setting up your machine] 中的Google build 說明，進行設定。
-# 安裝 <tt>repo</tt> 並下載源碼，你可以在 http://trac.koolu.org/找到它的文件。
-# 在完成build後，你可以藉由[http://lists.openmoko.org/pipermail/community/2008-December/036982.html 的訊息]編輯及執行McNeil的 scripts，將root file system 放在一起。第一個 script (cp_android_OS) 用來複製最新的built files到 staging area。  第二個(mkjffs2) 則從staging area會製作一個jffs2 image。請確定在二個檔案中編輯你的路徑。或者，你可以使用[[#Building a jffs2 image|以下的]]script 
-# 上面執行的結果是<tt>androidfs.jffs2</tt>的檔案，它可以被燒進你的Freerunner。
-
-==== 製作jffs2 image ====
-你可以使用以下的script：
+==== Building a jffs2 image ====
+You can use this script:
 <pre>
 #!/bin/sh
 
@@ -128,14 +118,13 @@ fi
 
 </pre>
 
+There is currently no documented way to build a Freerunner/Android kernel. [[User:Seanmcneil3|Sean McNeil]] has been releasing kernels at http://people.openmoko.org/sean_mcneil/. Most of the patches required to run Android have be incorporated into the <tt>andy-tracking</tt> kernel branch, which will eventually be the new stable kernel. Once all the patches are in the kernel, it should be possible to run Android with a stock kernel.
 
-目前並沒有與建置 Freerunner/Android kernel相關的說明文件。[[User:Seanmcneil3|Sean McNeil]] 目前已經在 http://people.openmoko.org/sean_mcneil/ 這個位置釋出Kernel。大部份的patche 需要與<tt>andy-tracking</tt> kernel branch 配合執行，而此Kernel終將成為最穩定的kernel版本。 一旦所有的 patche都放到 kernel後，即可在stock kernel上執行 Android 。
+=== Windows Connectivity ===
 
-=== 與 Windows 連結性 ===
+It is possible to get Windows to at least recognize the Android "Ethernet Gadget" and charge the FreeRunner using the Android USB Windows driver (http://dl.google.com/android/android_usb_windows.zip) by modifying the android_usb.inf file in that package before attempting to install the driver.  The following modifications are required:
 
-讓 Windows 能組織 Android "網路零件(Ethernet Gadget)" ，並且使用Android USB Windows driver (http://dl.google.com/android/android_usb_windows.zip) 充電，在你安裝驅動程式前，你可以透過修改套件中的android_usb.inf 檔案，來完成這項工作。你必須做出下面的修改動作：
-
-將下面[Google.NTx86] 的內容加到android_usb.inf 檔案中：
+Add the following to the [Google.NTx86] section of the android_usb.inf file:
 
 <pre>
 ; Neo FreeRunner
@@ -143,58 +132,58 @@ fi
 %USB\VID_1457&PID_5117&MI_01.DeviceDescRelease%=androidusb.Dev, USB\VID_1457&PID_5117&MI_01
 </pre>
 
-並且在android_usb.inf檔案的 [Strings] 區塊下加入以下的內容：
+and add the following to the to the [Strings] section of the android_usb.inf file:
 
 <pre>
 USB\VID_1457&PID_5117.DeviceDescRelease="Neo FreeRunner"
 USB\VID_1457&PID_5117&MI_01.DeviceDescRelease="Neo FreeRunner Composite ADB Interface"
 </pre>
 
-adb的Windows版本並不會出現，並且連接到裝置上，但至少FreeRunner會開始充電，裝置驅動程式會出現"This device is working properly(此裝置的功能運作正常)"的訊息。
+The Windows version of adb does not appear to recognize the connected device yet but at least the FreeRunner charges and the device driver indicates that "This device is working properly."
 
-= 取得幫助 =
+= How to Help =
 
 == Getting Started ==
 
-你可以藉由下面的操作指引下載及建立Android source，請參考 [http://source.android.com/download http://source.android.com/download]並且依照你的架構參考操作指引。
+You can start by following the instructions to download and build the Android source from scratch. Please see [http://source.android.com/download http://source.android.com/download] and follow the instructions for your architecture.
 
-== 發佈你的作品 ==
+== Publicize Your Efforts ==
 
-最好的方法是透過 wiki systems、公開的 mailing list、討論群組及公開的系統來發表你的作品。
+It's generally a good idea to make your efforts known via wiki systems, public mailing lists, forums, and publically open version control systems.
 
-對於你的工作，永遠加入自己的credit，但請不要使用註解的方式，因為有些程式在沒有註解的情況下已經不易閱讀困難，這個方式將增加困難度。最好的情況是，建立patch，並且在表頭放入你的個人連絡資訊。但協同運作的系統，如git可能已經幫你完成這個工作了。
+Always take credit for your work but please don't do it in the form of comments. Some code is already hard enough to read without comments polluting the text. The best thing to do is to create a patch and put a header with your information at the top. Collaboration systems such as git might already do this for you (??).
 
-若你建立了新的東西，並且能夠指定它的授權，請考慮授權相容性上的問題。
+If you create something new and have the ability to designate the license for it, please consider license compatibility issues.
 
-== Porting 策略 ==
+== Porting Strategy ==
 
-* 分析它對現有的build system的影響力
+* Analysis and leverage of the existing build system
 ** buid/core/combo/arm-linux.mk
 *** -D__ARCH_ARM_4__ -D__ARCH_ARM_4T__
 *** -march=armv4t -mcpu=arm920t
-** 修補不同的靜態參考資料到 'armv5'
-* 隔離 ARMv5TE ISA 相依的程式碼
+** fix various static references to 'armv5'
+* Isolating ARMv5TE ISA dependent code
 ** e.g. grep -n -R -i "${armv5te_isa_pattern}" ~/android
-* 摘要
+* Abstracting
 ** ( C/C++ )
-*** 使用 inlined functions / #ifdef 狀態式來完成移植性的功能
-*** 針對 inlined assembler calls，目前使用一般的 C 程式也是可以被接受的，之後，我們再用手動的方式來進行最佳化的工作。
+*** Use inlined functions / #ifdef statments to implement functions in a portable manner
+*** For inlined assembler calls, it's acceptable for now to use generic C code instead, so long as later on we optimize it by hand.
 ** ( ASM )
-*** 處理器的狀態是根據 ISA / architecture，如 #ifdef __ARCH_ARM_5__ ... #endif #ifdef __ARCH_ARM_4__ ... #endif
-*** 強烈的建議處理器狀態應該不要套疊在一起(如讓他們彼此獨佔)
-*** Some people have suggested that we should not do #ifdef's based on ARCH or ISA, but rather based on an AndroidConfig.h which would define macros like PLD(...) #ifdef HAVE_ARM_PLD pld #else ... #endif . 
+*** Proprocessor statements based on ISA / architecture, e.g. #ifdef __ARCH_ARM_5__ ... #endif #ifdef __ARCH_ARM_4__ ... #endif
+*** It's highly suggested that preprocessor statements should not be nested (i.e. make them mutually exclusive)
+*** Some people have suggested that we should not do #ifdef's based on ARCH or ISA, but rather based on an AndroidConfig.h which would define macros like PLD(...) #ifdef HAVE_ARM_PLD pld #else ... #endif .
 
-針對ARMv5TE 指令(instruction)，可能潛藏著：
-* 使用一般的registers(登錄子)，而不是使用 DSP 呼叫 (如 eabi / softfloat)
-* 若它是 a) 無法判別的 或者 b) 速度緩慢，則這個區段的程式則必須要分析，針對ARMv4T isa，必須使用hand-optimized 的方法
+For each ARMv5TE instruction, one could potentially
+* Implement the instruction using general registers instead of DSP calls (i.e. eabi / softfloat)
+* If that is a) nondeterministic, or b) slow, then sections of code need to be analyzed and hand-optimized for the ARMv4T isa
 
-== 不支援的指令 ==
+== List of Unsupported Instructions ==
 
-以下是opcodes列表，它是自Android Source解壓縮出來的，它不支援ARMv4T 相容的處理器 (尤其是 arm920t)。 opcodes 代表ARMv5、ARMv5T及ARMv5TE 架構下可以使用的指令。它無法在 ARMv4T ISA下執行。這個列表耗費了許多時間編輯，直到編譯無誤的狀態下，才會列出。
+This is a list of opcodes, extracted from the Android source, that are unsupported for ARMv4T compliant processors (specifically the arm920t). The opcodes represent instructions available for ARMv5, ARMv5T, and ARMv5TE architectures, which are not present in the ARMv4T ISA. The list was obtained by exhaustively editing the recompiling the Android source code until it compiled without error.
 
-請牢記一件事，在一些狀況下，將這些指令順序的傳送到ARMv4T 指令下是不可能的，或者是會出現無預期的結果：
-* 必須要有額外的context。
-* opcodes變更登錄子的狀態，可能無法表現在 arm920t 核心上
+Please keep in mind, that in some cases, translating these instructions into a sequence of ARMv4T instructions will be impossible and / or result in nondeterministic execution because of
+* the requirement of additional context
+* the tendencies of certain opcodes to change condition registers that may or may not be present in the arm920t core
 
 === Opcodes ===
 
@@ -429,10 +418,9 @@ strd a,b
 </TABLE>
 }}
 
-=== 掃瞄使用ARMv5TE ISA的檔案 ===
+=== Scanning for Files That Use the ARMv5TE ISA ===
 
-使用下列的opcodes，可以掃瞄到與ARMv4T與不相容的 Android source code指令順序。
-
+Using the above list of opcodes, one can scan the Android source code for ARMv4T-incompatible instruction sequences.
 
 '''Code:'''
 {{scroll box|height=240px|text=
@@ -476,9 +464,9 @@ done
 </pre>
 }}
 
-=== 在Android下使用 ARMv5TE ISA 的原始檔案  ===
+=== Source Files in Android that Use the ARMv5TE ISA ===
 
-以下的檔案可能是完整的，也可能是不完整的。也可能有些程式內容是透過 python script產生的.
+The list of files below may or may not be complete. There might also be some assembly code that is generated with a python script (verification?).
 
 {{scroll box|height=150px|text=
 * blx =====================================
@@ -653,45 +641,43 @@ done
 ** system/core/libpixelflinger/rotate90CW_4x4_16v6.S: lines {47,52,56,60}
 }}
 
-=== 討論 ===
-
-=== 附註 ===
-檔案
+=== Discussion ===
+=== Notes ===
+The file
 <pre>
 system/core/libpixelflinger/codeflinger/ARMAssembler.cpp
 </pre>
 
-必須要特別的注意。它負責動態產生DSP程式。
+will need special attention. It's responsible for dynamic generation of DSP code.
 
-== 建議 ==
-* [[User:Cfriedt]] 20081024 我不確定它的可行性多高，因為[http://wiki.openmoko.org/wiki/Neo_FreeRunner_Hardware_Issues#SMedia_3362_Documentation_.26_OpenGL_ES_Drivers SMedia 3362 被NDA保護]。 然而，arm920t 缺乏浮點單元 / DSP core，它可能使用 SMedia chip 產生特定目地的方法？這對Android 平台來講很有用，至少像是audio及 video codecs。 撇開OpenGL ES 驅動程式，歡迎提供針對SMedia　的　Openmoko文件。
+== Suggestions ==
+* [[User:Cfriedt]] 20081024 I'm not sure how feasible this is, given that the [http://wiki.openmoko.org/wiki/Neo_FreeRunner_Hardware_Issues#SMedia_3362_Documentation_.26_OpenGL_ES_Drivers SMedia 3362 is heavily NDA'd]. However, since the arm920t lacks a floating-point unit / DSP core, is it possible to use the SMedia chip for general-purpose math? This would help in the Android platform, at least, for things like audio and video codecs. Aside from an OpenGL ES driver, OpenMoko documentation for the SMedia would be highly appreciated.
 
-= 重要連結 =
-(歡迎大家在這裡加入重要連結)
+= Important Links =
+(Please Update Me)
 
-== 文件 ==
+== Documentation ==
 * [http://source.android.com/documentation Android Documentation]
 * [http://www.arm.com/documentation/ ARM Documentation], (keywords: armv4t, armv5t, armv5te, arm920t, arm926ej-s)
 * [http://www.arm.com/miscPDFs/9658.pdf ARM Assembly Language Programming]
 * [http://www.cse.unsw.edu.au/~cs3221/labs/assembler-intro.pdf An Introduction to the GNU Assembler]
 * [http://www.heyrick.co.uk/assembler/apcsintro.html ARM Procedure Call Standard], [http://en.wikipedia.org/wiki/Calling_convention#ARM ARM Calling Conventions]
 
-== 指令設定參考 ==
-* [http://www.arm.com/miscPDFs/14128.pdf ARM Architecture Reference Manual]，最後的ISA文件
+== Instruction Set References ==
+* [http://www.arm.com/miscPDFs/14128.pdf ARM Architecture Reference Manual], The definitive ISA documentation
+* [http://www.simplemachines.it/doc/QRC0001H_rvct_v2.1_arm.pdf ARM Instruction Set Quick Reference Card]
+* [http://infocenter.arm.com/help/topic/com.arm.doc.qrc0001l/QRC0001_UAL.pdf ARM and Thumb -2 Instruction Set Quick Reference Card]
+* [http://infocenter.arm.com/help/topic/com.arm.doc.dvi0025b/DVI0025.pdf ARMv4T] (See section 1.4.13)
+* [http://infocenter.arm.com/help/topic/com.arm.doc.dvi0014a/DVI0014A_ARM10T_PO.pdf ARMv5T] (See section 4.16)
+* [http://www.arm.com/pdfs/ARM-DSP.pdf ARM DSP Enhanced Instruction Set]
+* [http://infocenter.arm.com/help/topic/com.arm.doc.ihi0042c/IHI0042C_aapcs.pdf Procedure Call Standard for the ARM Architecture]
 
-* [http://www.simplemachines.it/doc/QRC0001H_rvct_v2.1_arm.pdf 設定Quick Reference Card的ARM 指令]
-* [http://infocenter.arm.com/help/topic/com.arm.doc.qrc0001l/QRC0001_UAL.pdf 設定Quick Reference Card　的ARM及Thumb -2 指令]
-* [http://infocenter.arm.com/help/topic/com.arm.doc.dvi0025b/DVI0025.pdf ARMv4T] (請參考1.4.13小節)
-* [http://infocenter.arm.com/help/topic/com.arm.doc.dvi0014a/DVI0014A_ARM10T_PO.pdf ARMv5T] (請參考 4.16小節)
-* [http://www.arm.com/pdfs/ARM-DSP.pdf ARM DSP 延伸指令集]
-* [http://infocenter.arm.com/help/topic/com.arm.doc.ihi0042c/IHI0042C_aapcs.pdf ARM架構下的Procedure Call Standard ]
-
-== 硬體參考 ==
+== Hardware Reference ==
 
 * [[Neo1973 Hardware]]
 * [[Neo FreeRunner GTA02 Hardware]]
 
-== 社群討論 ==
+== Communities ==
 * [http://source.android.com/discuss Android Public Mailing Lists]
 ** Specifically, [http://groups.google.com/group/android-porting android-porting]
 * [http://lists.openmoko.org/mailman/listinfo OpenMoko Mailing Lists]
@@ -700,15 +686,17 @@ system/core/libpixelflinger/codeflinger/ARMAssembler.cpp
 * [[Openmoko Local Groups]]
 * [[Openmoko:Community_Portal]]
 
-= 請參考 =
+= See also =
 
 * [[Debug_Board]]
 
-= 其它連結 =
+= External Links =
 == Youtube video /Android on FreeRunner ==
 
 [http://tw.youtube.com/watch?v=m4NbsLmF9j0 Video 1]
 
 [http://tw.youtube.com/watch?v=r6Op-7tNTiw Video 2]
 
-[[Category:Android]]
+== Headline text ==
+
+[[Category:Distributions]]
