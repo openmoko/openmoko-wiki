@@ -274,11 +274,9 @@ Now we turn our Debian into a jukebox!
 
 I currently use mpd+sonata - let me know if you know another nice lightweight gtk player. Unfortunately RhythmBox is way too much for the Neo to handle - the MP3 playing stops after 20secs.
 
-= Using a keyboard =
-[[Image:Debian+frogpad.jpg|480px|''Using irssi on [[Debian]] together with the frogpad to IRC on #neo1973-germany'']]
-nezza prepared a nice guide for this here: [[Frogpad]]
+= Miscellaneous =
 
-= Chroot installation =
+== Chroot installation ==
 
 If you just want to run random debian programs without completely booting to debian you can use the following minimal steps:
 
@@ -303,7 +301,7 @@ on neo:
  chroot /media/card/sid mplayer http://relay.slayradio.org:8000/
 
 
-=For X applications / xserver on the FreeRunner=
+== Using Xglamo on the FreeRunner ==
 
 Copy /usr/bin/Xglamo (and /usr/bin/Xfbdev) to  /usr/bin in Debian from FSO/ASU/2007.2/2008.8.
 
@@ -317,8 +315,27 @@ We also need to change the symlink for the X server to either Xfbdev or Xglamo (
  cd /usr/bin && mv X X.orig && ln -s Xfbdev X
 (replace Xfbdev by Xglamo if you want to use that, Xglamo is faster, but rotation still does not work correctly as of 2008-08-12).
 
-= GPS =
-{{main|TangoGPS}}
+== Rotating screen to landscape ==
+
+add the following to the /etc/X11/xorg.conf in both the Device and InputDevice sections to get landscape mode
+
+ Option          "Rotate"                "CCW"
+
+== Hiding the cursor ==
+
+To make the cursor invisible create a file called empty.cursor with this content:
+
+ #define empty.cursor_width 16
+ #define empty.cursor_height 16
+ static unsigned char empty.cursor_bits[] = {
+ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
+add
+ xsetroot -cursor empty.cursor empty.cursor
+
+to your ~/.xinitrc
 
 =Official Debian Port=
 
