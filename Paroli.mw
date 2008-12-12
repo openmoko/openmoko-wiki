@@ -1,177 +1,25 @@
-[[Image:Paroli.png|thumb|Paroli Screenshot]]
-===What is Paroli===
-Paroli a phone application for the Openmoko phones, that can be used for ....
+Paroli is an integrated phone application based on [[Tichy]] (and so also written in python).
 
+[[Image:Paroli-dialer.png|thumb|Paroli dialer]]
 
-=== History ===
-Originally it was planned to be released with [[Om2009]] distribution but as OM2009 developement slowed down, Paroli was also compiled for [[SHR]]
+== Getting the sources ==
 
-Paroli is based on top of the [[OpenmokoFramework|FSO framework]] and enables the use of it via a core and several services.
+paroli has been merged into tichy, so the sources can be found on tichy git repository :
 
-For more information please visit [http://www.paroli-project.org/ Paroli website]
+ git clone git://git.openmoko.org/git/tichy
 
-If you are  interested in helping out with paroli, contribute code or test or or or ... Let us know! Send a mail to [mailto:vegyraupe@paroli-project.org Mirko] and/or visit #paroli IRC channel!
+Or, if you have access to the git machine and want to commit :
 
-== Important links ==
+ git clone ssh://git@git.openmoko.org/var/cache/git/tichy.git
 
-* [[Paroli-developer-setup|Paroli developer setup]]
-* [[Paroli-application-ideas|Paroli application ideas]]
-* [[Paroli-issues|Paroli issues]]
-* [[Paroli-background|Change the background image]]
-* [[Paroli-e|Some e tips]]
-* [[Illume_improvements|Illume keyboard improvements]]
 
-== Stuff that works ==
+== Documentation ==
 
-Paroli actually makes FR a simple, very working phone!!
-* ability to turn off PIN check & change pin! (The first distro that does it ?)
-* Connecting to WLAN (with WPA, WPA2, WEP)
-* suspend & resume
-* etc etc
+Most documentation can be found in tichy/paroli repository, in the doc directory.
+To get started with paroli it is suggested to have a look at those files first :
 
-==Installation / download ==
+* [http://git.openmoko.org/?p=tichy.git;a=blob;f=README; Tichy README file]
+* [http://git.openmoko.org/?p=tichy.git;a=blob;f=doc/internal.txt Tichy internal doc]
+* [http://git.openmoko.org/?p=tichy.git;a=blob;f=doc/ClassDiagram.svg Tichy UML diagram]
 
-=== Paroli on SHR unstable ===
-If you want to try and run paroli in SHR unstable RFN. Flash the latest shr-unstable image from http://shr.bearstech.com/shr-unstable/images/om-gta02/. 
-
-The image from 08-08-09 has a minor problem with opkg. to fix it
-
- opkg-cl update
- opkg-cl upgrade
-
-then install paroli
-
- opkg install paroli
-
-Fix the conf files that the paroli installer messes with ( I hope to fix the recipe in the next couple of days. )
-
- cp /etc/old_frameworkd.conf /etc/frameworkd.conf
- cp /etc/freesmartphone/oevents/old_rules.yaml /etc/freesmartphone/oevents/rules.yaml
-
-now if you want to disable the shr phone apps without removing them comment all of the lines out in
-
- /etc/X11/Xsession.d/89notifier and /etc/X11/Xsession.d/80ophonekitd
-
-if you want the bind-home to ease upgrades add this line to fstab.
-
- /media/card/bind-home   /home/root     none        bind                   0  0
-
-You should now have a functional paroli on SHR setup. Once you have a working setup it might be better not to run opkg upgrades but only upgrade specific packages when needed.
-
-=== Paroli on OM2009 ===
-
-To install the [[Om2009]] distribution download the uImage and fso-paroli-image from http://downloads.openmoko.org/distro/testing/NeoFreerunner/
-
-=== Only the package ===
-In order to get the package from unstable you'll need to adjust the configuration of opkg:
-
- <nowiki>echo src/gz openmoko-unstable-armv4t http://downloads.openmoko.org/repository/unstable/armv4t > /etc/opkg/om-unstable.conf</nowiki>
-
-Then do an opkg-update and opkg install paroli.
-
-This should get you the newest version.
-
-=== Download ===
-
-Download paroli from 
-[http://downloads.freesmartphone.org/fso-milestone5/feeds//armv4t/paroli_0.2.1+gitr7a2fdc16174258e9276e7c2d80f500b4dd624442-r0_armv4t.ipk http://downloads.freesmartphone.org/fso-milestone5/feeds//armv4t/paroli_0.2.1+gitr7a2...442-r0_armv4t.ipk]
-
-or from http://downloads.openmoko.org/distro/experimental/
-
-=== Getting the sources ===
-
- git clone http://git.paroli-project.org/paroli.git/
-
-== FAQ/Tips ==
-
-===What's in the main menu?===
-
-* Call-Log is the phone log. It'll show your dialled, answered and missed calls.
-
-** To SMS a contact from Call-Log slide the number to the right to expose "Msg"; push this button to compose a new message.
-
-* SMS is the place to send & read messages
-
-** Slide existing SMS to the right to expose Re: to Reply.
-
-* Dialer is the dialer
-
-* People is the phone book
-
-** To call someone, enter the People list, click on the contact, and click on the number displayed
-
-** To SMS someone, enter the People list, and slide the contact's name to the right.  A "Msg" button will be exposed, which you can press to start a text message.
-
-===What's beyond the main menu?===
-Check "how do I change the theme" below. By default, the display is set to 'paroli' which gives Paroli a full window, but you can change the theme so that you can access other applications outside Paroli using Illume.
-
-===How do I get to settings?===
-
-Go to the home-screen (the one with the big clock) and hold the AUX-button pressed for 2 seconds.
-
-
-===How do i get gprs to work? ===
-
-Simpy click on Status in Settings - gprs, it toggles from unregistered to active.
-
-===How do I change the theme (Illume / Paroli / Paroli-serenity)?===
-Open settings, click on "display" and then hit "profile". This will change the profile to the next: after some rumbling on the screen you will have the new theme activated.
-* ''paroli'' = Paroli fullscreen
-* ''illume'' = Paroli windowed, Illume bar on top
-* ''paroli-serenity'' = Paroli windowed, black Illume bar on top
-
-To change to paroli-serenity on command line, run:
- DISPLAY=:0 mdbus org.enlightenment.wm.service /org/enlightenment/wm/RemoteObject org.enlightenment.wm.Profile.Set paroli-serenity
-
-===How do I shut it down?===
-
-To turn off Paroli, use the Illume top bar: click the bar when running Paroli and click on the red X to shut down Paroli.
-
-To kill it from command line:
- pkill paroli
-
-To turn of the whole phone, hold the power button down for 10 seconds. It will not give you a visual feedback, it just starts shutting down.
-
-===How do I change the audio profile?===
-
-* When not on call, short pressing of AUX changes between audio profiles (default / silent).
-* When on call, it changes the speaker volume (20-40-60-80-100%). Using level over 80 might cause some echo.
-
-===How do I close an application?===
-When illume or paroli-serenity theme is activated (see above), clicking the top bar will show you 3 icons. The one in the right (the big X) closes the current app.
-
-===How to I turn on the keyboards?===
-In the top up menu, there is is a "qwerty" icon. Same to close it.
-
-===Where are the messages folder? Drafts, sent etc.?===
-
-The messages will be saved to /home/root/.paroli
-
-===How do I lock the screen, without going to suspend?===
-
-Sorry, not implemented yet.
-
-===How do i set the alarm?===
-
-Sorry, not implemented yet.
-
-===How do I change the background image?===
-
-For a detailed (step-by-step) instruction with example images, please see this page:
-[[Paroli-background|Change the background image]]
-
-===How do I contribute?===
-
-See [[Om 2009 get active#Paroli phone software|Paroli section on Om2009 "get active" page]].
-
-===Is there a way to import my contacts into Paroli's adressbook?===
-
-Yes, Ingvaldur Sigurjonsson made a script allowing to import *.vcf files. See [[vcf2paroli]].
-
-== Known issues ==
-See wiki page [[paroli-issues]] for the list of known issues and vital feature requests.
-
-Bug tracker is available at http://www.paroli-project.org/trac
-
-[[Category:Paroli]]
-[[Category:ApplicationsElementary]]
+The full documentation for tichy library can be generated using epydoc (see the README file)
