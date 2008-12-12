@@ -1,0 +1,109 @@
+{{Languages|Android on Freerunner}}
+== Android on Freerunner ==
+Google has released their open source version of the Android phone software distribution. In order to use it on the Freerunner, a number of patches need to be applied and a compiler with armv4 java exception support needs to be used to compile the software.
+
+== Compiler suite ==
+
+Android is a little picky about the version of gcc compiler. It also requires some java exception support that isn't available for armv4 without a minor modification. The following tools are what I use to build Android:
+
+
+=== Binutils 2.18 ===
+
+At one time I had some armv5t code that was compiled into Android which would cause the linker to generate these blx instructions which fail on armv4. I'm not sure if this is still necessary, but I still have the following change applied to binutils:
+
+<pre>
+diff -urN binutils-2.18-orig/bfd/elf32-arm.c binutils-2.18/bfd/elf32-arm.c
+--- binutils-2.18-orig/bfd/elf32-arm.c	2007-08-07 02:59:23.000000000 +0700
++++ binutils-2.18/bfd/elf32-arm.c	2008-03-15 11:30:17.000000000 +0700
+@@ -3093,8 +3093,8 @@
+ static void check_use_blx(struct elf32_arm_link_hash_table *globals)
+ {
+   if (bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
+-				Tag_CPU_arch) > 2)
+-    globals->use_blx = 1;
++				Tag_CPU_arch) >= TAG_CPU_ARCH_V5T)
++    globals->use_blx = 0;
+ }
+ 
+ bfd_boolean
+</pre>
+
+
+configure --prefix={devel path}/android/cross --target=arm-eabi
+
+=== gcc 4.2.4 with gcc41-java-arm4.patch ===
+
+
+configure   --prefix={devel path}/android/cross --target=arm-eabi --with-arch=armv4t --enable-shared --enable-threads --disable-nls --disable-libmudflap --enable-target-optspace --with-abi=aapcs --enable-multilib --disable-libssp --disable-libstdcxx --enable-languages=c,c++
+
+=== java-6-sun ===
+
+This is the standard Linux package available for most (all?) distributions.
+
+== Patches ==
+
+
+Coming soon. I've posted a number of them on the devel mailing list so far. Eventually, I expect to provide everything necessary for people to build Android for themselves.
+
+== Images ==
+To use the Kernel you have to adjust your [http://www.denx.de/wiki/U-Boot u-boot] environment to support a Kernel of more then 2 MB or your have to change to the [http://wiki.openmoko.org/wiki/Qi Qi Bootloader]
+
+I have placed an older 2.6.26 kernel with Android support at:
+
+    [http://people.openmoko.org/sean_mcneil/uImage-android uImage-android]
+
+I have put up a jffs2 image that replaces rootfs on the Freerunner at:
+
+   [http://people.openmoko.org/sean_mcneil/androidfs.jffs2 androidfs.jffs2]
+
+Warning: Installation of Android requires loading a new kernel and rootfs image onto your phone. I have not had time to produce a version that runs completely off an sdcard.
+Can someone please give us a HOWTO 'change u-boot environment' or a ready-to-download u-boot?
+
+== Installation ==
+
+As noted above, this installation requires you to wipe out the existing kernel and rootfs in NAND on your Freerunner. You also must have an SDCARD and it needs to be configured with two (2) primary partitions: First is VFAT/MSDOS (16 or 32) which acts as the /sdcard storage area for pictures, movies, music, etc. and the Second is an ext3 primary partition for use of internal Android /data area to store settings, caches, etc.
+
+The first thing I suggest is to setup an SDCARD. You can flash the NAND first, but you must have an SDCARD with two partitions as stated before you'll be able to boot. I use a 2GB card which I have split in half. fdisk shows me:
+
+    /dev/mmcblk0p1               1        2454      996310    6  FAT16<br>
+    /dev/mmcblk0p2            2455        4908      996324   83  Linux
+
+formatted as
+
+    sudo mkfs.vfat /dev/mmcblk0p1<br>
+    sudo mkfs.ext3 /dev/mmcblk0p2
+
+There is no need to populate the ext3 partition at all. The VFAT partition can be populated with media content if you so desire.
+
+With your SDCARD all set, you are ready to flash the kernel and rootfs:
+
+    sudo {path_to}/dfu-util -d 0x1d50:0x5119 -a kernel -D uImage-android<br>
+    sudo {path_to}/dfu-util -d 0x1d50:0x5119 -a rootfs -D androidfs.jffs2<br>
+
+== Tools ==
+
+To assist in debugging and to gain shell access to the phone with Android, you can 
+
+   [http://people.openmoko.org/sean_mcneil/adb adb]
+
+You should be able to connect to the phone as long as you start it up with the USB connected to your host. I don't think it will work if you plug it in after starting. Some helpful commands are:
+
+    ADBHOST=neo ./adb logcat           - like a tail -f of the android log
+    ADBHOST=neo ./adb logcat -b radio  - same as above for the radio logs
+    ADBHOST=neo ./adb shell            - bring up a command shell to the phone
+    ADBHOST=neo ./adb kill-server      - kill the background server on the host
+
+Note: ADBHOST=neo assumes you have neo in your hosts file to point to the ip of the phone (192.168.0.202). Otherwise prefix the commands with "ADBHOST=192.168.0.202 ./adb [...]" It seems that simply adding IP to /etc/hosts doesn't work on Ubuntu, using IP address (192.168.0.202) instead neo will save your time. If you cannot to the device run "adb kill-server" before trying other commands.
+
+== Known Issues ==
+
+This version of the linux kernel will not successfully wake from suspend mode. Your battery life will be significantly lowered because of this and the phone will lock up unless you setup the phones screen timeout to never.
+
+This version of the kernel also uses a keypad hack. The buttons layout is as follows:
+
+    Aux left-hand upper button is the "back" key.
+    Power button is:
+        menu button when pushed quickly,
+        end button when held for more than a second and released,
+        power-off if held for 10 seconds.
+[[category|Distribution]]
