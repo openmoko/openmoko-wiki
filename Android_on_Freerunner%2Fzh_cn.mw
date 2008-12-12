@@ -1,0 +1,113 @@
+{{Languages|Android on Freerunner}}
+== 在Freerunner上执行Android  ==
+Google 释出了他们Android手机的开放源码软件套件。为了要让它可以在Freerunner上使用，很多 patche需要在armv4 java exception上被套用、编译。
+
+== 编译套件 ==
+
+Android对于gcc 的版本相当的挑剔。若没有修改的状况下，针对armv4它也需要一些 java exception支持。以下是我用来build Android的工具：
+
+
+=== Binutils 2.18 ===
+
+曾经我有使用在 armv5t程序架构下编译的 Android，它会导致连结器产生这些blx 指令，让它无法在armv4下使用。我无法确定这是否仍然是必要的，但我仍然有下面的变更套用到binutils：
+
+<pre>
+diff -urN binutils-2.18-orig/bfd/elf32-arm.c binutils-2.18/bfd/elf32-arm.c
+--- binutils-2.18-orig/bfd/elf32-arm.c	2007-08-07 02:59:23.000000000 +0700
++++ binutils-2.18/bfd/elf32-arm.c	2008-03-15 11:30:17.000000000 +0700
+@@ -3093,8 +3093,8 @@
+ static void check_use_blx(struct elf32_arm_link_hash_table *globals)
+ {
+   if (bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
+-				Tag_CPU_arch) > 2)
+-    globals->use_blx = 1;
++				Tag_CPU_arch) >= TAG_CPU_ARCH_V5T)
++    globals->use_blx = 0;
+ }
+ 
+ bfd_boolean
+</pre>
+
+
+configure --prefix={devel path}/android/cross --target=arm-eabi
+
+=== gcc 4.2.4 with gcc41-java-arm4.patch ===
+
+
+configure   --prefix={devel path}/android/cross --target=arm-eabi --with-arch=armv4t --enable-shared --enable-threads --disable-nls --disable-libmudflap --enable-target-optspace --with-abi=aapcs --enable-multilib --disable-libssp --disable-libstdcxx --enable-languages=c,c++
+
+=== java-6-sun ===
+
+它是个给大部份套件使用的标准Linux package。
+
+== Patches ==
+
+
+Coming soon. I've posted a number of them on the devel mailing list so far. Eventually, I expect to provide everything necessary for people to build Android for themselves.
+
+== Images ==
+要使用Kernel，你必须调整你的 [http://www.denx.de/wiki/U-Boot u-boot] 环境，让它可以支持超过 2 MB，或者是你必须修改 [http://wiki.openmoko.org/wiki/Qi Qi Bootloader]
+
+我在下面的位置放了 使用2.6.26 版kernel 的Android ：
+
+    [http://people.openmoko.org/sean_mcneil/uImage-android uImage-android]
+
+我已经在下列的网址放了 jffs2 image：
+
+   [http://people.openmoko.org/sean_mcneil/androidfs.jffs2 androidfs.jffs2]
+
+Warning: 安装Android必须要加载新的 kernel 及 rootfs image到手机当中。我并没有时间制作一个完全不需要使用sd card的影像文件。
+
+有人可以帮忙制作 HOWTO 'change u-boot environment' or a ready-to-download u-boot 的文件吗?
+
+== Installation ==
+
+就如上面所注明的，这个安装需要你抺掉目前烧制在Freerunner NAND中的kernel及rootfs。 你也必须要制作出一个设定为二个主磁磁分割的SDCARD：第一个是 VFAT/MSDOS (16 or 32) ，做为 /sdcard 储存图片、影片、音乐...等档案的分割区，另一个则切割为ext3 primary partition ，做为储存 Android 设定，快取等储存区。
+
+我建议你进行的第一个工作是设定 SD CARD。 你可以先flash  NAND，但你仍然必须要准备好包含二个分割区的SD CARD ，做为你BOOT进系统之前的前置准区。我使用的是 2GB card，我将它切割为以下的内容：
+
+    /dev/mmcblk0p1               1        2454      996310    6  FAT16<br>
+    /dev/mmcblk0p2            2455        4908      996324   83  Linux
+
+格式化为以下的内容：
+
+    sudo mkfs.vfat /dev/mmcblk0p1<br>
+    sudo mkfs.ext3 /dev/mmcblk0p2
+
+并不需要将数据放在 ext3 分割区， 若你希望的话，VFAT 分割区也可以放置数据。
+
+在完全的设定好你的SDCARD后，可以准备烧制kernel及rootfs：
+
+    sudo {path_to}/dfu-util -d 0x1d50:0x5119 -a kernel -D uImage-android<br>
+    sudo {path_to}/dfu-util -d 0x1d50:0x5119 -a rootfs -D androidfs.jffs2<br>
+
+== 工具 ==
+
+要支持debugging 并且取得Android 手机的shell access，你可以使用： 
+
+   [http://people.openmoko.org/sean_mcneil/adb adb]
+
+你应该可以使用USB连接手机与主机。我不觉得在你将它插入主机后，它会正常运作。你可以使用下面的指令：
+
+    ADBHOST=neo ./adb logcat           - like a tail -f of the android log
+    ADBHOST=neo ./adb logcat -b radio  - same as above for the radio logs
+    ADBHOST=neo ./adb shell            - bring up a command shell to the phone
+    ADBHOST=neo ./adb kill-server      - kill the background server on the host
+
+Note: ADBHOST=neo 假设你的neo的ip是 (192.168.0.202)。则"ADBHOST=192.168.0.202 ./adb [...]" 做为开头的指令。但看起来将ip加到 /etc/hosts 在 Ubuntu下并无法运作，使用IP address (192.168.0.202)，而不是使用 neo做为参数，可以节省很多时间。
+
+== 已知的问题 ==
+
+这一个版本的 linux kernel 并无法成功的自suspend mode被唤醒。你的电池寿命也较低，因为你必须要将屏幕上锁，将屏幕的计时关闭功能关掉。
+
+这一个版本也用到了 keypad hack。按钮的配置如下：
+
+    Aux = "上一步" key.
+    电源按钮=：
+        快速按下为选单按钮，
+        按住数秒快速放掉则为end
+        按住十秒钟，则为"关机"。
+
+
+[[category:Distributions]]
+[[Category:Flashing Openmoko]]
