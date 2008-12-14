@@ -1,0 +1,79 @@
+{{Languages|Webcam}}
+
+Es ist möglich eine Webcam an den [[Neo_FreeRunner/de|Freerunner]] anzuschließen und zu nutzen. Dies ist eine sehr grobe Liste der Schritte, die notwendig sind um dies mit installiertem [[Debian]] Lenny zu erreichen.
+
+Die in diesem Beispiel genutzte Webcam ist eine Philips SPC620NC, unter Nutzung des [[http://en.wikipedia.org/wiki/USB_video_device_class UVC]] Treibers.
+
+== Test an einem PC ==
+
+Um auf der sicheren Seite zu stehen sollten sie sich erst versichern, dass die Webcam an einem normalen PC funktioniert, insbesondere an einem Linux PC. Dies wird die meisten Probleme mit denen sie sich konfrontiert sehen verhindern, jedoch wird es nicht alle beseitigen. 
+Die Dokumentation hierzu finden sie hier: 
+
+* [http://linux-uvc.berlios.de/ UVC-compliant webcams]
+
+== Videounterstützung zum Kernel hinzufügen ==
+
+Im 2.6.24 Kernel ist die Unterstützung für Video Input standardmäßig deaktiviert. Es gibt jedoch einen Weg die notwendigen Module hinzuzufügen ohne alles neu zu compilieren: 
+
+* Laden sie den Quellcode des Kernels herunter:
+# wget http://kernel.org/pub/linux/kernel/v2.6/linux-2.6.24.tar.bz2
+* Versichern sie sich, dass die bzip2 und die nötigen Entwickler Tools installiert haben:
+# apt-get install bzip2 gcc make libc6-dev libncurses5-dev
+* Entpacken sie den Quellcode in /usr/src:
+# cd /usr/src
+# tar -xjvf $OLDPWD/linux-2.6.24.tar.bz2
+* Korrigieren sie die Links in /lib/modules:
+# ln -sf /usr/src/linux-2.6.24 /lib/modules/2.6.24/build
+* Initialisieren sie die Kernel Quellen mit der aktuellen Konfiguration:
+# cd /usr/src/linux-2.6.24
+# gzip -dc /proc/config.gz > .config
+# make oldconfig          # just say "n" to power management debugging support
+* Fürgen sie die Video-Unterstützung hinzu:
+# make menuconfig
+Suchen sie nach "Device drivers", "Multimedia devices", dann aktivieren sie "Video For Linux", "Video For Linux API 1", "Video For Linux API 1 compatible Layer", "Video capture adapters" als Module. Falls die Treiber für ihre Webcam bereits vom Kernel gefunden wurden, aktivieren sie sie hier auch. 
+* Compilieren sie die relevanten Kernel Module:
+# make drivers/media/video/v4l1-compat.ko
+# make drivers/media/video/v4l2-common.ko
+# make drivers/media/video/videodev.ko
+* Laden sie die Module:
+# insmod drivers/media/video/v4l1-compat.ko
+# insmod drivers/media/video/v4l2-common.ko
+# insmod drivers/media/video/videodev.ko
+Aufgetretene Fehler können sie sich mit dem "dmesg" Befehl anzeigen lassen.
+Standardmäßig werden sie auch in /var/log/messages gespeichert.
+
+== Compilieren der UVC Treiber ==
+
+Um die aktuellesten Quellen für ihren Treiber zu erhalten und zu compilieren, gehen sie wie folgt vor: 
+# apt-get install subversion
+# svn checkout svn://svn.berlios.de/linux-uvc/linux-uvc/trunk
+# cd trunk/linux-uvc
+# make
+
+Wenn das funktioniert:
+# insmod uvcvideo.ko
+
+== Geräteknoten hinzufügen ==
+
+In unserem Fall wurde der relevante Geräteknoten nicht automatisch erstellt. So wird er erstellt:
+
+# mkdir -p /dev/v4l
+# mknod /dev/v4l/video0 c 81 0
+
+== Die Camera anschließen ==
+
+Der Freerunner muss im USB host mode laufen, um die Camera anzuschliessen. Ein spezielles USB Kabel (oder gender changer) ist hierzu notwendig.
+
+Sie können wieder "dmesg" nutzen um zu erkennen ob die Camera korrekt erkannt wurde.
+
+== Installieren & testen eines Viewers ==
+
+Eine gute Webcam Application ist [http://www.quickcamteam.net/software/linux/v4l2-software/luvcview luvcview]. Sie können sie folgendermassen installieren und testen:
+# apt-get install luvcview
+# luvcview -f yuv -d /dev/v4l/video0
+
+== Bekannte Probleme ==
+
+* Die Auflösung war auf 160x120 beschränkt mit unserer Philips SPC620NC
+
+[[Category:Guides/de]]
