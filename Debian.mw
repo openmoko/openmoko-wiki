@@ -302,54 +302,8 @@ Evince is also available in debian, and handles pdf, djvu, cbz, and other format
 
 There is also a hack to convert drm protected adobe ebooks to .cbz files readable with evince, which is mentioned on the mailing list.
 
-== XFCE ==
-
-The debian installation script installs by default the matchbox window manager. It doesn't feature a desktop environment. '''xfce''' is a small and lightweight desktop environment and so is quite fast for the FreeRunner.
-
-<pre>apt-get install xfce4</pre>
-
-Edit your .xsession to launch xfce4 at X startup :
-
-<pre>#!/bin/sh
-xfce4-session</pre>
-
-Edit section [Failsafe Session] of /etc/xdg/xfce4-session/xfce4-session.rc (or ~/.config/xfce4-session/xfce4-session.rc) to handle the auto-started apps. For example:
-<pre>[Failsafe Session]
-Count=3
-Client0_Command=xfce4-panel
-Client0_PerScreen=False
-Client1_Command=xfdesktop
-Client1_PerScreen=False
-Client2_Command=zhone
-Client2_PerScreen=True</pre>
-Start XFCE !
-
-<pre>/etc/init.d/nodm restart</pre>
-
-The desktop takes a while to start but once up was snappy as can be expected.
-I've not yet looked at the reason for the seemingly too slow start for the desktop.
-
-zhone is available from the "Office" menu in xfce.
-The matchbox keyboard is available in "Accessories".
-
-If you want to display the screen on the long side (ie rotated, 4:3 aspect), add the following to the /etc/X11/xorg.conf in both the Device and InputDevice sections :
-
-<pre>Option          "Rotate"                "CCW"</pre>
-
-and then (re)start xfce.
-
-If you want to be able to shutdown/restart the device, add the following line to ''/etc/sudoers'' (don't forget to replace ''username'' with your actual username):
-<pre>username localhost = NOPASSWD: /usr/sbin/xfsm-shutdown-helper</pre>
-
-=== Using matchbox-window-manager with XFCE ===
-
-XFCE's window manager is poorly configured for use with the FreeRunner.  Fortunately, matchbox's window manager is compatible with xfce.  To use the matchbox window manager, modify ~/.xsession as follows:
-
-<pre>#!/bin/sh
-exec matchbox-window-manager -use_titlebar no -use_cursor no &
-xfce4-session</pre>
-
-== Using matchbox-window-manager with fbpanel ==
+= Desktop enviroments =
+== Matchbox with fbpanel ==
 fbpanel is a fast, lightweight, gtk2 desktop panel.
 [[Image:Debian_fbpanel_zhone.png|right|thumb|300px|Debian with fbpanel, matchbox-window-manager and Zhone running]]
 <ol><li>Install fbpanel:
@@ -402,6 +356,62 @@ After 'killall fbpanel' it will show: free mem in megabytes | loadavg | battery 
 sudo apt-get install gtk2-engines gtk-theme-switch
 DISPLAY=:0 gtk-theme-switch2</pre>
 Now choose your theme, font and save it. To see changes do 'killall fbpanel'.</li></ol>
+
+== XFCE ==
+The debian installation script installs by default the matchbox window manager. It doesn't feature a desktop environment. '''xfce''' is a small and lightweight desktop environment and so is quite fast for the FreeRunner.
+
+<pre>apt-get install xfce4</pre>
+
+Edit your .xsession to launch xfce4 at X startup :
+
+<pre>#!/bin/sh
+xfce4-session</pre>
+
+Edit section [Failsafe Session] of /etc/xdg/xfce4-session/xfce4-session.rc (or ~/.config/xfce4-session/xfce4-session.rc) to handle the auto-started apps. For example:
+<pre>[Failsafe Session]
+Count=3
+Client0_Command=xfce4-panel
+Client0_PerScreen=False
+Client1_Command=xfdesktop
+Client1_PerScreen=False
+Client2_Command=zhone
+Client2_PerScreen=True</pre>
+Start XFCE !
+
+<pre>/etc/init.d/nodm restart</pre>
+
+The desktop takes a while to start but once up was snappy as can be expected.
+I've not yet looked at the reason for the seemingly too slow start for the desktop.
+
+zhone is available from the "Office" menu in xfce.
+The matchbox keyboard is available in "Accessories".
+
+If you want to display the screen on the long side (ie rotated, 4:3 aspect), add the following to the /etc/X11/xorg.conf in both the Device and InputDevice sections :
+
+<pre>Option          "Rotate"                "CCW"</pre>
+
+and then (re)start xfce.
+
+If you want to be able to shutdown/restart the device, add the following line to ''/etc/sudoers'' (don't forget to replace ''username'' with your actual username):
+<pre>username localhost = NOPASSWD: /usr/sbin/xfsm-shutdown-helper</pre>
+
+=== Using matchbox-window-manager with XFCE ===
+
+XFCE's window manager is poorly configured for use with the FreeRunner.  Fortunately, matchbox's window manager is compatible with xfce.  To use the matchbox window manager, modify ~/.xsession as follows:
+
+<pre>#!/bin/sh
+exec matchbox-window-manager -use_titlebar no -use_cursor no &
+xfce4-session</pre>
+
+== LXDE ==
+
+I you want a really nice desktop enviroment but you think XFCE is too fat, you can try to install [http://en.wikipedia.org/wiki/LXDE LXDE]. It give to you the GTK comfort, but use only a fraction of the ram needed by XFCE.
+
+To install it:
+<pre>apt-get install lxde</pre>
+
+to launch it create a <code>/etc/init.d/lxde</code> script in the same way descripted for xfce4, replacing <code>startxfce4</code> accorence with <code>startlxde</code>.
+
 
 = Miscellaneous =
 == Making the cursor invisible ==
