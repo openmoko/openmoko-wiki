@@ -28,54 +28,7 @@ It changes default booting to quiet-mode and adds another boot-option to boot wi
 
 == Suspend ==
 
-'''Note''': As of Sep. 15 2008, suspend works 'out-of-the-box'; installing apm and the idle clock configuration changes do not seem to be necessary any more.  Press the power button for two seconds (in zhone) or run 'apm -s' to suspend.
-
-To make suspend available you have to install apmd:
-apt-get install apmd
-After that you can suspend your phone with:
-apm -s
-and make it wake up again with pressing the power button.
-
-
-Issues:
-* [[User:Wuth|Wuth]] 06:28, 17 August 2008 (UTC): I found that apmd was already installed by using the official debian installation procedure, but that the kernel didn't support apm.  I haven't yet resolved this issue.  [[User:Wuth|Wuth]] 05:31, 7 September 2008 (UTC): Worked fine on second install.  Perhaps this is no longer a problem.
-
-* [[User:Phyce|Phyce]] 21:33, 20 August 2008 (UTC)  installed apm without problems; apm -s shutdowns the freerunner but I couldn't wake it up with power button... I had to remove the battery to boot again. suspend/resume was working quite reliably with latest kernels on ASU.
-
-To wake up successfully, the idle-clock of the SD card needs to be enabled right before suspend. It can be disabled again right after resume (this reduces GPS interference). Write into /etc/apm/suspend.d/00sd_idleclk
-<pre>
-#!/bin/sh
-echo 1 > /sys/module/glamo_mci/parameters/sd_idleclk
-touch /home/root/.profile
-</pre>
-and into /etc/apm/resume.d/00sd_idleclk
-<pre>
-#!/bin/sh
-echo 0 > /sys/module/glamo_mci/parameters/sd_idleclk
-</pre>
-These are from -stacy on the community list.
-
-And anotherone from [[User:Morlac|Morlac]]: (more debianish i think ;) <br />
-etc/apm/scripts.d/sd_idleclk and corresponding link in /etc/apm/event.d<br />
-(don't forget to chmod +x /etc/apm/scripts.d/sd_idleclk)
-
-<pre>
-#!/bin/sh
-SD_IDLECLK="/sys/module/glamo_mci/parameters/sd_idleclk"
-[ -e "${SD_IDLECLK}" ] || exit 0
-
-case "${1},${2}" in
-(suspend,*)
-echo 1 > ${SD_IDLECLK}
-touch /etc
-;;
-(resume,suspend)
-echo 0 > ${SD_IDLECLK}
-;;
-esac
-
-exit 0
-</pre>
+Press the power button or run 'apm -s' to suspend.
 
 == Time ==
 
