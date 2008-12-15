@@ -332,30 +332,13 @@ XFCE's window manager is poorly configured for use with the FreeRunner.  Fortuna
 exec matchbox-window-manager -use_titlebar no -use_cursor no &
 xfce4-session</pre>
 
-== Using matchbox-window-manager with fbpanel as normal user without gdm ==
+== Using matchbox-window-manager with fbpanel ==
 fbpanel is a fast, lightweight, gtk2 desktop panel.
 [[Image:Debian_fbpanel_zhone.png|right|thumb|300px|Debian with fbpanel, matchbox-window-manager and Zhone running]]
-<ol><li>Follow http://wiki.openmoko.org/wiki/Debian#Running_X_as_normal_user</li>
-<li>Customize the boot process:
-<pre>sudo cp /etc/init.d/zhone-session /etc/init.d/xserver
-sudo nano /etc/init.d/xserver</pre>
-Find (all in one line)
-<pre>start-stop-daemon --start --pidfile ${PIDFILE}
---make-pidfile --background --exec /bin/su --
---login --command "${PROG_XINIT} ${PROG_XSESSION} ${PROG_FSO}
--- $X_OPTIONS" $USER</pre>
-Change it to (all in one line):
-<pre>start-stop-daemon --start --pidfile ${PIDFILE}
---make-pidfile --background --exec /bin/su --
---login -c "startx" ${USER}</pre>
-Add script to daemons:
-<pre>sudo update-rc.d -f zhone-session remove
-sudo update-rc.d -f xserver defaults</pre></li>
-
-<li>Install fbpanel:
+<ol><li>Install fbpanel:
 <pre>sudo apt-get install fbpanel</pre></li>
-<li>Customize configs:
-<ol><li><pre>~/.xinitrc</pre>
+<li>Customize the X startup process:
+<pre>~/.xsession</pre>
 <pre>
 #!/bin/sh
 export GTK_MODULES=libgtkstylus.so
@@ -401,7 +384,7 @@ After 'killall fbpanel' it will show: free mem in megabytes | loadavg | battery 
 <pre>sudo apt-cache search gtk2-engines
 sudo apt-get install gtk2-engines gtk-theme-switch
 DISPLAY=:0 gtk-theme-switch2</pre>
-Now choose your theme, font and save it. To see changes do 'killall fbpanel'.</li></ol></li></ol>
+Now choose your theme, font and save it. To see changes do 'killall fbpanel'.</li></ol>
 
 = Miscellaneous =
 == Making the cursor invisible ==
