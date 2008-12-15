@@ -298,26 +298,16 @@ There is also a hack to convert drm protected adobe ebooks to .cbz files readabl
 
 xfce is small and lightweight and so is quite fast for the FreeRunner.
 
-<pre>apt-get install xfce4
-cp /etc/init.d/zhone-session /etc/init.d/xfce</pre>
+<pre>apt-get install xfce4</pre>
 
-Then you may hack /etc/init.d/xfce making
+Edit your .xsession to launch xfce4 at X startup :
 
-<pre>PROG_FSO=/usr/bin/startxfce4</pre>
-
-Customize the boot process (this may have to be redone when zhone-session is updated):
-
-<pre>update-rc.d -f zhone-session remove
-update-rc.d -f xfce defaults</pre>
-
-edit your /etc/hosts to have :
-
-<pre>127.0.0.1 localhost debian-gta02</pre>
+<pre>#!/bin/sh
+xfce4-session</pre>
 
 Start XFCE !
 
-<pre>/etc/init.d/zhone-session stop
-/etc/init.d/xfce start</pre>
+<pre>/etc/init.d/nodm restart</pre>
 
 The desktop takes a while to start but once up was snappy as can be expected.
 I've not yet looked at the reason for the seemingly too slow start for the desktop.
@@ -336,16 +326,11 @@ If you want to be able to shutdown/restart the device, add the following line to
 
 === Using matchbox-window-manager with XFCE ===
 
-XFCE's window manager is poorly configured for use with the FreeRunner.  Fortunately, matchbox's window manager is compatible with xfce.  To use the matchbox window manager, arrange to run the following commands at X startup.  If you followed the instructions above to run X as a normal user, put this in ~/.xinitrc:
+XFCE's window manager is poorly configured for use with the FreeRunner.  Fortunately, matchbox's window manager is compatible with xfce.  To use the matchbox window manager, modify ~/.xsession as follows:
 
 <pre>#!/bin/sh
-
-zhone &
-matchbox-keyboard-toggle &
 exec matchbox-window-manager -use_titlebar no -use_cursor no &
 xfce4-session</pre>
-
-{{Todo|And if I didn't run X as a normal user? (There is a file xinitrc in '/etc/X11/xini' but that's not tested)}}
 
 == Using matchbox-window-manager with fbpanel as normal user without gdm ==
 fbpanel is a fast, lightweight, gtk2 desktop panel.
