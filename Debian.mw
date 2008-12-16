@@ -37,10 +37,21 @@ If you have a network connection, do something like
 # apt-get install ntpdate
 # ntpdate-debian
 </pre>
+If you want to synchronize the internal clock with GPS time you can use a script like
+<pre>
+#!/usr/bin/env python
+#
+# Set the gps time
+# Be sure your GPS is active before to launch this script
 
-Issues:
-* That's probably not sufficient to keep the clock accurate.  It might be worth configuring some form of NTP.
-** Setting the clock could be done via GPS: [[Getting_GPS_console_output_with_gllin#GPRMC_message]]
+import dbus
+import subprocess
+import time
+
+proxy = dbus.SystemBus().get_object('org.freesmartphone.frameworkd', '/org/freedesktop/Gypsy') # bus name, object name
+interface = dbus.Interface(proxy, 'org.freedesktop.Gypsy.Time');
+subprocess.call(['date',time.strftime( '%m%d%H%M%Y.%S', time.localtime(interface.GetTime()))])
+</pre>
 
 == Wifi ==
 === GUI ===
