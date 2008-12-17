@@ -54,28 +54,22 @@ subprocess.call(['date',time.strftime( '%m%d%H%M%Y.%S', time.localtime(interface
 </pre>
 
 == Wifi ==
-=== GUI ===
+=== Using GUI ===
 
 If you don't want to mess up with configuration files and is looking for an easy gui for wireless configuration, then wifi-radar or wicd is what you are looking for.
 
 <pre>apt-get install wifi-radar
 wifi-radar</pre>
-
 or
-
 <pre>apt-get install wicd
 wicd-client -n</pre>
 
 If you are looking for more, read on...
 
-=== Installing prerequisites ===
+=== Using /etc/network/interfaces (simple mode) ===
 
 Make sure the following packages are installed:
 <pre>apt-get install wireless-tools wpasupplicant dhcp3-client</pre>
-
-=== Example configurations ===
-
-==== Single network configuration ====
 
 Assuming your wireless router uses WPA security and DHCP,
 edit <code>/etc/network/interfaces</code> to include a section like this:
@@ -105,13 +99,7 @@ Issues:
 
 Once wpa_supplicant has begun managing your wifi interface, you should type "wpa_action eth0 stop" instead of "ifdown eth0".
 
-==== Roaming configuration ====
-
-'''Todo''': Which of the issues that single network configurations suffer from are addressed by WPA roaming mode?  Would ifplugd / guessnet help, or just make things more complicated?
-
-* Roaming from network to network is not automatic.  Instead, you need to manually run "wpa_action eth0 stop; ifup eth0" to switch networks
-
-===== wpa_supplicant.conf =====
+===Using wpa-supplicant (roaming mode)===
 
 To configure WPA to roam between wireless networks, you will need to create a new configuration file:
 
@@ -150,8 +138,6 @@ network={
 }
 </pre>
 
-===== /etc/network/interfaces =====
-
 Next, you'll need to edit /etc/network/interfaces.  This lets you configure your wireless networks to use dhcp, or other appropriate TCP/IP settings:
 <pre>
 auto eth0
@@ -176,7 +162,14 @@ Finally, if you want attempts to access the internet to default to eth0 (and not
 gateway 192.168.0.200
 </pre>
 
+
+* Roaming from network to network is not automatic.  Instead, you need to manually run "wpa_action eth0 stop; ifup eth0" to switch networks
+
 For some reason, I had to reboot for the id_str settings to take effect.  However, you should now be able to use "ifup eth0" to associate with the access point and "wpa_action eth0 stop" to down the wifi adapter.
+
+
+'''Todo''': Which of the issues that single network configurations suffer from are addressed by WPA roaming mode?  Would ifplugd / guessnet help, or just make things more complicated?
+
 
 === Further reading ===
 
