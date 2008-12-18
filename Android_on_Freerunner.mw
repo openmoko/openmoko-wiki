@@ -59,6 +59,25 @@ I have put up a jffs2 image that replaces rootfs on the Freerunner at:
 Warning: Installation of Android requires loading a new kernel and rootfs image onto your phone. I have not had time to produce a version that runs completely off an sdcard.
 Can someone please give us a HOWTO 'change u-boot environment' or a ready-to-download u-boot?
 
+== Android on SDcard ==
+
+Some notes about booting android from sdcard : 
+
+* Build android from source. See [http://trac.koolu.org/ koolu website] for directions.
+* Use the first script in [http://lists.openmoko.org/pipermail/community/2008-December/036982.html this mail] (adapt to your filesystem) to stage your android install.
+* copy the contents of this directory on a ext3 partition on your sdcard.
+* add a /boot directory on your sdcard.
+* copy andy's  ''moredrivers'' kernel (for some reasons the uImage-android kernel does not boot on my GTA02 ?) from [http://people.openmoko.org/andy/ andy's page] and copy it in your /boot with the exact name '''uImage-GTA02.bin'''
+* I changed the init.rc (in your root on the sd) to remove mounts that could be problematic (/data for example) in an attempt to make it work the dirty way.
+* Install [[Qi]] on you NAND flash. You can still boot whatever distro you've got on internal flash with the NOR bootloader. You should try the magic file in /boot to make it show debug info.
+* boot the GTA02, and pray.
+
+=== Status ===
+
+For the moment, the kernel boots, <tt>A N D R O I D</tt> appears (hurray), <tt>init.rc</tt> gets executed but nothing more happens after that. Hoping somebody can improve these instruction to make it work all the way.
+
+[[User:Phyce|Phyce]] 22:13, 18 December 2008 (UTC)
+
 == Installation ==
 
 As noted above, this installation requires you to wipe out the existing kernel and rootfs in NAND on your Freerunner. You also must have an SDCARD and it needs to be configured with two (2) primary partitions: First is VFAT/MSDOS (16 or 32) which acts as the /sdcard storage area for pictures, movies, music, etc. and the Second is an ext3 primary partition for use of internal Android /data area to store settings, caches, etc.
