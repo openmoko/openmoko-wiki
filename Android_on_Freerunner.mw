@@ -42,10 +42,12 @@ This is the standard Linux package available for most (all?) distributions.
 
 == Patches ==
 
-
 Coming soon. I've posted a number of them on the devel mailing list so far. Eventually, I expect to provide everything necessary for people to build Android for themselves.
 
-== Images ==
+== Android on internal flash ==
+
+=== Images ===
+
 To use the Kernel you have to adjust your [http://www.denx.de/wiki/U-Boot u-boot] environment to support a Kernel of more then 2 MB or your have to change to the [http://wiki.openmoko.org/wiki/Qi Qi Bootloader]
 
 I have placed an older 2.6.26 kernel with Android support at:
@@ -56,12 +58,34 @@ I have put up a jffs2 image that replaces rootfs on the Freerunner at:
 
    [http://people.openmoko.org/sean_mcneil/androidfs.jffs2 androidfs.jffs2]
 
-Warning: Installation of Android requires loading a new kernel and rootfs image onto your phone. I have not had time to produce a version that runs completely off an sdcard.
-Can someone please give us a HOWTO 'change u-boot environment' or a ready-to-download u-boot?
+=== Installation on internal flash ===
+
+As noted above, this installation requires you to wipe out the existing kernel and rootfs in NAND on your Freerunner. You also must have an SDCARD and it needs to be configured with two (2) primary partitions: First is VFAT/MSDOS (16 or 32) which acts as the /sdcard storage area for pictures, movies, music, etc. and the Second is an ext3 primary partition for use of internal Android /data area to store settings, caches, etc.
+
+The first thing I suggest is to setup an SDCARD. You can flash the NAND first, but you must have an SDCARD with two partitions as stated before you'll be able to boot. I use a 2GB card which I have split in half. fdisk shows me:
+
+    /dev/mmcblk0p1               1        2454      996310    6  FAT16<br>
+    /dev/mmcblk0p2            2455        4908      996324   83  Linux
+
+formatted as
+
+    sudo mkfs.vfat /dev/mmcblk0p1<br>
+    sudo mkfs.ext3 /dev/mmcblk0p2
+
+There is no need to populate the ext3 partition at all. The VFAT partition can be populated with media content if you so desire.
+
+With your SDCARD all set, you are ready to flash the kernel and rootfs:
+
+    sudo {path_to}/dfu-util -d 0x1d50:0x5119 -a kernel -D uImage-android<br>
+    sudo {path_to}/dfu-util -d 0x1d50:0x5119 -a rootfs -D androidfs.jffs2<br>
+
+
 
 == Android on SDcard ==
 
 Some notes about booting android from sdcard : 
+
+=== Setup ===
 
 * Build android from source. See [http://trac.koolu.org/ koolu website] for directions.
 * Use the first script in [http://lists.openmoko.org/pipermail/community/2008-December/036982.html this mail] (adapt to your filesystem) to stage your android install.
@@ -84,41 +108,22 @@ Then I hit a problem with classes not found...Time to go to bed ;)
 
 [[User:Phyce|Phyce]] 23:38, 18 December 2008 (UTC)
 
-== Installation ==
-
-As noted above, this installation requires you to wipe out the existing kernel and rootfs in NAND on your Freerunner. You also must have an SDCARD and it needs to be configured with two (2) primary partitions: First is VFAT/MSDOS (16 or 32) which acts as the /sdcard storage area for pictures, movies, music, etc. and the Second is an ext3 primary partition for use of internal Android /data area to store settings, caches, etc.
-
-The first thing I suggest is to setup an SDCARD. You can flash the NAND first, but you must have an SDCARD with two partitions as stated before you'll be able to boot. I use a 2GB card which I have split in half. fdisk shows me:
-
-    /dev/mmcblk0p1               1        2454      996310    6  FAT16<br>
-    /dev/mmcblk0p2            2455        4908      996324   83  Linux
-
-formatted as
-
-    sudo mkfs.vfat /dev/mmcblk0p1<br>
-    sudo mkfs.ext3 /dev/mmcblk0p2
-
-There is no need to populate the ext3 partition at all. The VFAT partition can be populated with media content if you so desire.
-
-With your SDCARD all set, you are ready to flash the kernel and rootfs:
-
-    sudo {path_to}/dfu-util -d 0x1d50:0x5119 -a kernel -D uImage-android<br>
-    sudo {path_to}/dfu-util -d 0x1d50:0x5119 -a rootfs -D androidfs.jffs2<br>
-
-== Tools ==
+== Android Debug Bridge ==
 
 To assist in debugging and to gain shell access to the phone with Android, you can 
 
    [http://people.openmoko.org/sean_mcneil/adb adb]
 
-You should be able to connect to the phone as long as you start it up with the USB connected to your host. I don't think it will work if you plug it in after starting. Some helpful commands are:
+You should be able to connect to the phone as long as you start it up with the USB connected to your host. I don't think it will work if you plug it in after starting. Of course, you need to setup usb networking with ifconfig on your host before.
 
-    ADBHOST=neo ./adb logcat           - like a tail -f of the android log
-    ADBHOST=neo ./adb logcat -b radio  - same as above for the radio logs
-    ADBHOST=neo ./adb shell            - bring up a command shell to the phone
-    ADBHOST=neo ./adb kill-server      - kill the background server on the host
+Some helpful commands are:
 
-Note: ADBHOST=neo assumes you have neo in your hosts file to point to the ip of the phone (192.168.0.202). Otherwise prefix the commands with "ADBHOST=192.168.0.202 ./adb [...]" It seems that simply adding IP to /etc/hosts doesn't work on Ubuntu, using IP address (192.168.0.202) instead neo will save your time. If you cannot to the device run "adb kill-server" before trying other commands.
+    ADBHOST=192.168.0.202 ./adb logcat           - like a tail -f of the android log
+    ADBHOST=192.168.0.202 ./adb logcat -b radio  - same as above for the radio logs
+    ADBHOST=192.168.0.202 ./adb shell            - bring up a command shell to the phone
+    ADBHOST=192.168.0.202 ./adb kill-server      - kill the background server on the host
+
+If you cannot to the device run "adb kill-server" before trying other commands. 
 
 == Known Issues ==
 
