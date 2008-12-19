@@ -22,20 +22,20 @@ U-boot меню определены переменными с именами "m
 
 === Загрузка ядра ===
 
-A pair of u-boot commands must be used to load the kernel from SD. First is "mmcinit", which will cause u-boot to detect the card. Next is a command to load a file into memory - either "fatload" or "ext2load" depending on whether the kernel is on a FAT filesytem or an ext2/ext3 filesystem.
+Для загрузки ядра с карты SD должны быть использованы две команды u-boot. Первая - "mmcinit", которая заставит u-boot обнаружить карту. Следующая команда для загрузки файла в память - либо "fatload", либо "ext2load", в зависимости от того, находится ядро на файловой системе FAT или ext2/ext3.
 
-The command syntax is:
+Синтаксис команд такой:
 
  fatload mmc 1:&lt;p&gt; 0x32000000 &lt;filepath&gt;
  ext2load mmc 1:&lt;p&gt; 0x32000000 &lt;filepath&gt;
 
-where &lt;p&gt; is the partition number, and &lt;filepath&gt; is the path to the file that is to be loaded.
+здесь &lt;p&gt; - номер раздела, и &lt;filepath&gt; - путь к файлу, который должен быть загружен.
 
-{{Note| The "ext2load" command is broken on u-boot binary earlier than "20080723", including the one shipped with the first batch of FreeRunners, are affected by bug [http://docs.openmoko.org/trac/ticket/799 #799]. If you update your U-Boot and kernel packages you can use direct ext2 / 3 boot all in one partition.}}
+{{Note| Команда "ext2load" не действует на u-boot раньше чем "20080723", включая тот, что идет с первой партией FreeRunner-ов, затронутых ошибкой [http://docs.openmoko.org/trac/ticket/799 #799]. Если Вы обновите свой u-Boot и пакеты ядра, вы можете использовать прямую загрузку ext2/3 все в одном разделе.}}
 
-{{Warning | Be careful when updating u-boot on a Neo1973 as there is a risk of bricking the device (unless you have a debug board). This is not an issue for the FreeRunner as it has a protected copy of u-boot in the NOR flash }}
+{{Warning | Будьте осторожны, когда обновляете u-boot на Neo1973, поскольку есть риск bricking-а устройства (если у вас нет отладочной платы). Это не проблема для FreeRunner, имеющего защищенную копию u-boot в NOR памяти.}}
 
-{{Note| U-Boot supports SDHC protocol on the FreeRunner only: on the Neo1973, u-boot is unable to access SDHC cards (4G or larger). The kernel does have SDHC support on Neo1973, so it is possible to have the root filesystem on SDHC and the kernel on NAND flash to work around it. }}
+{{Note| U-Boot поддерживает протокол SDHC только на FreeRunner: на Neo1973, u-boot не будет иметь доступа к картам SDHC (4G или больше). Ядро имеет поддержку SDHC на Neo1973, что дает возможность иметь корневую файловую систему на SDHC ядро на NAND чтобы работать таким образом. }}
 
 === Параметры корневой файловой системы ===
 
