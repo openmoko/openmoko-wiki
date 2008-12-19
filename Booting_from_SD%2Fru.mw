@@ -39,23 +39,23 @@ U-boot меню определены переменными с именами "m
 
 === Параметры корневой файловой системы ===
 
-The contents of the "bootargs" environment variable are passed to the kernel. Bootargs is a space-delimited list of "name=value" definitions. The items relevant to SD-booting are "root", "rootfstype", and "rootdelay". 
+Содержимое переменной среды "bootargs" отправляется ядру. Bootargs это список разделенных пробелами объявлений "имя=значение". Элементы, относящиеся к SD-загрузке - "root", "rootfstype", и "rootdelay". 
 
-For example, the following parameters would tell the kernel to mount the third partition of the SD-card as an ext3 filesystem:
+Например, следующие параметры заставят ядро смонтировать третий раздел карты SD как файлоую систему ext3:
 
   root=/dev/mmcblk0p3 rootfstype=ext3 rootdelay=5 
 
-The "rootdelay" parameter allows time for the card to be properly initialized before it is accessed. 
+Параметр "rootdelay" позволяет установить время, отводимое на инициализацию карты, перед тем, как будет произведено обращение к ней. 
 
-Note that the kernel must have built-in support (i.e. not a module) for the filesystem specified in "rootfstype". The default Openmoko kernel configs as of [http://git.openmoko.org/?p=kernel.git;a=commit;h=642cbda5f3b7e7a61512426e1d30a41ab4691123| 2008-07-17] have built-in support for both ext2 and ext3. You can check the available filesystems with the Linux command
+Заметьте, что у ядра должна быть встроенная поддержка (то есть не модуль) файловой системы, определенной в "rootfstype". По умолчанию ядро Openmoko настроено как [http://git.openmoko.org/?p=kernel.git;a=commit;h=642cbda5f3b7e7a61512426e1d30a41ab4691123| 2008-07-17], имеет поддержку как ext2, так и ext3. Вы можете проверить доступные файловые системы командой:
 
  less /proc/filesystems
 
-It is not possible to use VFAT for the root filesystem.
+Не возможн использовать VFAT в качестве корневой файловой системы.
 
 ==== ext2 в сравнении ext3 ====
 
-Opinion is divided on whether it is better to use ext2 or ext3 for the root filesystem. Ext3 in general is a superior choice, because it is a journalled filesystem and so does not require a long 'fsck' (file system check) after an unclean shutdown. However, if used on a flash device that does not support wear-leveling then ext3 may cause premature wear on the blocks of the card where the journal is stored. SD cards are supposed to support wear leveling, but this can not be guaranteed for all vendors.
+Мнения о том, что лучше использовать ext2 или ext3 для корневой файловой системы, разделяются. Ext3 вообще лучший выбор, поскольку это журналируемая файловая система и так что не требует длительной 'fsck' (проверки файловой системы) после некорректного отключения. Однако, если используется на flash устройстве, которое не поддерживает выравнивание изнашивания тогда, ext3 может вызвать преждевременное изнашивание блоков карты, в которых хранится журнал. Предполагается, что карты SD поддерживают выравнивание изнашивания, но этого нельзя гарантировать для всех поставщиков.
 
 == Получение tar-архива корневой файловой системы ==
 
