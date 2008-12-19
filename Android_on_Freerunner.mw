@@ -92,21 +92,49 @@ Some notes about booting android from sdcard :
 * copy the contents of this directory on a ext3 partition on your sdcard.
 * add a /boot directory on your sdcard.
 * copy andy's  ''moredrivers'' kernel (for some reasons the uImage-android kernel does not boot on my GTA02 ?) from [http://people.openmoko.org/andy/ andy's page] and copy it in your /boot with the exact name '''uImage-GTA02.bin'''
-* I changed the init.rc (in your root on the sd) to remove mounts that could be problematic (/data for example) in an attempt to make it work the dirty way.
-* Install [[Qi]] on you NAND flash. You can still boot whatever distro you've got on internal flash with the NOR bootloader. You should try the magic file in /boot to make it show debug info.
+* I changed the init.rc (in your root on the sd) to remove mounts that could be problematic (/data for example) in an attempt to make it work the dirty way : 
+<pre>
+--- filesystem/root/init.rc	2008-12-15 17:51:14.000000000 +0100
++++ phyce.init.rc	2008-12-19 15:56:25.000000000 +0100
+@@ -24,7 +24,7 @@
+     mkdir /sqlite_stmt_journals 01777 root root
+     mount tmpfs tmpfs /sqlite_stmt_journals size=4m
+ 
+-    mount rootfs rootfs / ro remount
++    mount rootfs rootfs / rw remount
+ 
+     write /proc/sys/kernel/panic_on_oops 1
+     write /proc/sys/kernel/hung_task_timeout_secs 0
+@@ -38,14 +38,14 @@
+ #    mount yaffs2 mtd@system /system ro remount
+ 
+     # We chown/chmod /data again so because mount is run as root + defaults
+-    mount ext3 /dev/block/mmcblk0p2 /data nosuid nodev
+-    chown system system /data
+-    chmod 0771 /data
++#    mount ext3 /dev/block/mmcblk0p2 /data nosuid nodev
++#    chown system system /data
++#    chmod 0771 /data
+ 
+     # Same reason as /data above
+-    mount yaffs2 mtd@cache /cache nosuid nodev
+-    chown system cache /cache
+-    chmod 0770 /cache
++#    mount yaffs2 mtd@cache /cache nosuid nodev
++#    chown system cache /cache
++#    chmod 0770 /cache
+</pre>
+
+* Install [[Qi]] on you NAND flash. You can still boot whatever distro you've got on internal flash using the NOR bootloader. You should try the magic file in /boot to show kernel messages.
 * boot the GTA02, and pray.
 
 === Status ===
 
 For the moment, the kernel boots, <tt>A N D R O I D</tt> appears (hurray), <tt>init.rc</tt> gets executed but nothing more happens after that. 
 
-Using adb to debug, it seems the root filesystem is still mounted read-only and then, the dalvik cache cannot initialize and android cannot start.
+Then I hit a problem with libraries not found...looks like /system/lib/libmedia_jni.so is not copied. my build may be faulty (to add some fun, I'm building Android on a x86_64 computer...)
 
-I had to remount the filesystem rw (using adb shell) and create the /data/dalvik-cache directory to go further.
-
-Then I hit a problem with classes not found...Time to go to bed ;)
-
-[[User:Phyce|Phyce]] 23:38, 18 December 2008 (UTC)
+[[User:Phyce|Phyce]] 16:08, 19 December 2008 (UTC)
 
 == Android Debug Bridge ==
 
