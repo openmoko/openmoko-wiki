@@ -22,16 +22,17 @@ Thanks to [[User:Alessandro | Alessandro]], stefan_schmidt, cp15 and all Navit d
 ==Setting up Navit==
 
 ===Install Navit===
-I got navit set up and configured to the point where it follows me on the map.  It doesn't have street names or any other information, just the map and the cursor showing the location and direction.  Here's what I did:
-* Install navit ipkg on NEO (because of a bug in opkg it's necessary to wget then install, instead of pointing opkg at the URL):
-<pre>wget http://www.acoveo.org/navit_0.1.0+svnrev1255-r0_armv4t.ipk
-opkg install --force-depends navit_0.1.0+svnrev1255-r0_armv4t.ipk</pre>
-This package includes a patch to navit which improves map panning speeds.
-* Or roll your own from svn using the toolchain (having checked out trunk in the navit directory, and assuming you have written navit_control):
-<pre>. /usr/local/openmoko/arm/setup-env
-om-conf navit --disable-samplemap
-om-make-ipkg navit navit_control</pre>
-You may want to apply the map panning patch from acoveo: http://www.acoveo.org/openmoko/font_scaling_patch.diff
+You can now simply add a feed from there : http://download.navit-project.org/navit/openmoko/svn/
+
+Essentially, to enable this directory as feed and install or update navit do:
+- Only for the first time:
+echo src navit http://download.navit-project.org/navit/openmoko/svn >/etc/opkg/navit-feed.conf
+opkg update
+
+- Always:
+opkg install navit
+
+Navit will be auto-updated when you run opkg upgrade later
 
 ===Set up the maps you want===
 
