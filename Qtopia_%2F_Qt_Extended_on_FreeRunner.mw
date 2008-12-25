@@ -126,7 +126,153 @@ Documents = 0
 ContentDatabase = 0
 </pre>
 
-=== Simplified complete procedure using Ubuntu desktop and micro SD to USB adapter ===
+=== Simplified complete procedure using Ubuntu computer and microSD to USB adapter ===
+
+This procedure was developed with:
+
+* Ubuntu 8.10
+* SanDisk microSD to USB adapter
+* Qt Extended 4.4.2 2008/10/31
+
+==== Prepare microSD card ====
+
+Create an 8 MB partition for the kernel and use the remaining space for the root file system.
+
+Insert microSD card into adapter, and plug adapter into Ubuntu computer. If the microSD card mounts automatically, unmount it.
+
+CAUTION: Make sure you know which device your microSD card is. You don't want to perform these steps on your main hard disk!
+
+<pre>
+sudo umount /dev/sdb1
+
+sudo fdisk /dev/sdb
+</pre>
+
+I assume you know how to use fdisk. Delete any existing partitions, then create two new partitions, the first of size +8M, the second using all remaining space. Set the file system type of the first partition to FAT16 (type '6'). Your partition table should look like this:
+
+<pre>
+  /dev/sdb1               1           9        9040+   6  FAT16
+  /dev/sdb2              10         984      982800   83  Linux
+</pre>
+
+Save your partition table and quit fdisk. Format the partitions appropriately:
+
+<pre>
+sudo mkfs.vfat /dev/sdb1
+sudo mkfs.ext3 /dev/sdb2
+</pre>
+
+==== Get the latest version of Qtopia ====
+
+Visit [http://qtextended.org/modules/mydownloads/viewcat.php?cid=6:Qtopia] and get the appropriate file. The Qtopia ROM flash images contain both the file system and the kernel image:
+
+<pre>
+wget http://qtextended.org/modules/mydownloads/visit.php?lid=98
+tar -zxvf qtextended-4.4.2-gta02-flash.tgz
+cd qtextended-4.4.2-gta02-flash
+</pre>
+
+==== Copy the kernel image to the microSD card ====
+
+First mount the first partition, which is the boot partition, of the microSD card:
+
+<pre>
+sudo mkdir /media/boot
+sudo mount /dev/sdb1 /media/boot
+</pre>
+
+Depending on your version of U-Boot, the kernel image might be expected at the root of the boot partition, or in the /boot directory. Also, the image file name might be expected to have a .bin extension, or not. We create all four variations:
+
+<pre>
+sudo cp testing-om-gta02-20081029.uImage.bin /media/card/uImage.bin
+sudo cp testing-om-gta02-20081029.uImage.bin /media/card/uImage
+sudo cp testing-om-gta02-20081029.uImage.bin /media/card/boot/uImage.bin
+sudo cp testing-om-gta02-20081029.uImage.bin /media/card/boot/uImage
+</pre>
+
+Wait for data to be written to the microSD card and unmount the first partition:
+
+<pre>
+sync
+umount /dev/sdb2
+</pre>
+
+==== Copy the jffs2 root file system to the microSD card ====
+
+First we need to make a fake MTD device in RAM so that we can mount the jffs2 root file system:
+
+<pre>
+sudo modprobe mtd 
+sudo modprobe jffs2  
+sudo modprobe mtdram total_size=59024 # default is 4 MByte - set to max.
+sudo modprobe mtdchar 
+sudo modprobe mtdblock
+</pre>
+
+Next we're going to copy onto this fake device. Make sure there are no other MTD devices on your computer and change the device numbers below as necessary:
+
+<pre>
+cat /proc/mtd
+  dev:    size   erasesize  name
+    mtd0: 039a4000 00020000 "mtdram test device"
+</pre>
+
+Now copy the jffs2 file system to the fake MTD device:
+
+<pre>
+sudo dd if=qtextended-4.4.2-gta02-rootfs-10302135.jffs2 of=/dev/mtd0
+</pre>
+
+Create a mount point, mount the fake MTD device, and check that the contents seem right:
+
+<pre>
+sudo mkdir /mnt/tmp
+sudo mount -t jffs2 /dev/mtdblock0 /mnt/tmp
+ls /mnt/tmp
+  bin/   dev/  home/  media/  opt/   sbin/  tmp@	var/
+  boot/  etc/  lib/   mnt/    proc/  sys/   usr/
+</pre>
+
+Mount the second partition of the microSD card and copy the root file system to it:
+copy root file system to sd card using tar
+
+<pre>
+sudo mkdir /media/rootfs
+sudo mount /dev/sdb2 /media/rootfs
+cd /mnt/tmp
+sudo tar -cf - . | (cd /media/rootfs && sudo tar -xpvf -)
+</pre>
+
+Use "sync" to make sure that all data is written to the microSD card:
+
+<pre>
+sync
+</pre>
+
+Inspect contents of second partition:
+
+<pre>
+  ls /media/rootfs
+  bin/   dev/  home/  media/  opt/   sbin/  tmp@	var/
+  boot/  etc/  lib/   mnt/    proc/  sys/   usr/
+</pre>
+
+Note: There was a report that some versions of U-Boot cannot find the kernel image file in the first partition if a kernel image exists in the second partition boot/ directory. I have not confirmed this but there is no need for it so it seems safest to delete it now:
+
+<pre>
+sudo rm -f /media/rootfs/boot/*
+<pre>
+
+Wait for data to be written to the microSD card and unmount the second partition:
+
+<pre>
+sync
+umount /dev/sdb2
+</pre>
+
+==== Test Qtopia ====
+
+Remove the microSD card from the USB adapter, install it in the Neo FreeRunner, boot into uBoot, and select the option to boot from microSD card.
 
 == Option 3: updating from source ==
 
