@@ -127,8 +127,9 @@ or if you downloaded the archive
 
 == Complete debootstrap Process ==
 
-ssh to your device and execute the following commands (just copypaste everything below)
-
+if you build the first stage on your host, finish the install with the second stage on the device
+ chroot /media/card /debootstrap/debootstrap --second-stage
+execute the following commands (just copypaste everything below)
  echo "nameserver 192.168.0.200" > /media/card/etc/resolv.conf
  echo "neo1973-debian" > /media/card/etc/hostname
  echo "127.0.0.1 localhost.localdomain localhost neo1973-debian" > /media/card/etc/hosts
@@ -148,25 +149,19 @@ ssh to your device and execute the following commands (just copypaste everything
  tmpfs   /var/lock        tmpfs   defaults,noatime                   0 0\n\
  tmpfs   /var/run         tmpfs   defaults,noatime                   0 0\n\
  tmpfs   /var/tmp         tmpfs   defaults,noatime                   0 0" > /media/card/etc/fstab
-now chroot into your armel rootfs and finish the install
- chroot /media/card
- /debootstrap/debootstrap --second-stage
+ echo 'root:' | chroot /media/card/ chpasswd
+ echo "deb http://ftp.de.debian.org/debian sid main" > /etc/apt/sources.list
+ aptitude update
+ aptitude -y upgrade
 make sure your internal clock is set to the correct date because aptitude will complain if otherwise (does not work on the gta02 at the moment: "Cannot access the Hardware Clock via any known method.")
  hwclock --set --date="MM/DD/YY hh:mm:ss"
 install openssh so you can login remotely
- echo "deb http://ftp.de.debian.org/debian sid main" > /etc/apt/sources.list
- aptitude update
- aptitude upgrade
  aptitude install openssh-server
 install and configure locales
  aptitude install locales
  dpkg-reconfigure locales
 install udev to dynamically create /dev
  aptitude install udev
-set a root password
- passwd
-create a normal user
- adduser <yournamehere>
 
 == Get X Running ==
 Now reboot and start Debian. Login with ssh and start configuring xorg:
