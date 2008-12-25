@@ -151,22 +151,22 @@ execute the following commands (just copypaste everything below)
  tmpfs   /var/tmp         tmpfs   defaults,noatime                   0 0" > /media/card/etc/fstab
  echo 'root:' | chroot /media/card/ chpasswd
  echo "deb http://ftp.de.debian.org/debian sid main" > /etc/apt/sources.list
- aptitude update
- aptitude -y upgrade
-make sure your internal clock is set to the correct date because aptitude will complain if otherwise (does not work on the gta02 at the moment: "Cannot access the Hardware Clock via any known method.")
+ apt-get update
+ apt-get -y upgrade
+make sure your internal clock is set to the correct date because apt-get and tar will complain if otherwise (does not work on the gta02 at the moment: "Cannot access the Hardware Clock via any known method.")
  hwclock --set --date="MM/DD/YY hh:mm:ss"
 install openssh so you can login remotely
- aptitude install openssh-server
+ apt-get install openssh-server
 install and configure locales
- aptitude install locales
+ apt-get install locales
  dpkg-reconfigure locales
 install udev to dynamically create /dev
- aptitude install udev
+ apt-get install udev
 
 == Get X Running ==
 Now reboot and start Debian. Login with ssh and start configuring xorg:
 
- aptitude install xorg
+ apt-get install xorg
 
 configure /etc/X11/xorg.conf so that it looks like this:
 
@@ -197,7 +197,7 @@ Start X in the first vt:
 == Get touchscreen working ==
 Install the tslib driver:
 
- aptitude install xserver-xorg-input-tslib
+ apt-get install xserver-xorg-input-tslib
 
 and edit the InputDevice section in your xorg.conf
 
@@ -236,7 +236,7 @@ Start X and enjoy!
 
 == Install GDM and xfce4 ==
 
- aptitude install gdm xfce4 xvkbd
+ apt-get install gdm xfce4 xvkbd
 
 Configure gdm so xkvbd will allow you to put in your username and password. simply add this to the end of /etc/gdm/Init/Default before exit 0 so that the three last lines look like this:
 
@@ -251,7 +251,7 @@ If you like you can also download a correctly sized Debian wallpaper I generated
  wget <nowiki>http://rabenfrost.net/debian/debian-blueish-wallpaper-480x640.png</nowiki> -O /usr/share/images/desktop-base/desktop-background
 
 == Clean Up ==
- aptitude clean
+ apt-get clean
 
 == Load Additional Kernel Modules ==
 
@@ -274,7 +274,7 @@ Note: On the FreeRunner, the sound module (on the last line) is called snd-soc-n
 
 Now we turn our Debian into a jukebox!
 
- aptitude install alsa-base
+ apt-get install alsa-base
  wget http://rabenfrost.net/celtune/alsa_state_files-working.tar.gz
  tar -xf alsa_state_files-working.tar.gz -C /etc
  alsactl -f /etc/alsa_state_files-working/stereoout.state restore
