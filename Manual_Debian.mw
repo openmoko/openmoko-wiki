@@ -8,7 +8,7 @@ The former will take some time, perhaps 2 hours, depending on your internet conn
 
 = Prebuilt Filesystem =
 
-Download and extract to an ext2/ext3 formatted filesystem on your SD card:
+Download and extract to an ext2 formatted filesystem on your SD card:
 
  wget http://rabenfrost.net/debian/debian-armel-xfce.tar.bz2
 
@@ -23,12 +23,12 @@ Note: If you upgrade your your debian and your touchscreen doesn't work any more
 
 == (Optional) Install Known Good Kernel ==
 
-This kernel was build by Marcel_M and has some important patches in it such as removed sd debug symbols and build-in ext3 support.
+This kernel was build by Marcel_M and has some important patches in it such as removed sd debug symbols.
 
  wget http://rabenfrost.net/celtune/uImage-2.6.24+svnr4194-r4165-r3-neo1973.bin
  ./dfu-util -d 0x1457:0x5119 -a kernel -R -D ./uImage-2.6.24+svnr4194-r4165-r3-neo1973.bin
 
-This kernel doesn't work for gta02 (just my expirience, it didn't detect ext3), but the kernel from Om 2008.9 works good.
+This kernel doesn't work for gta02, but the kernel from Om 2008.9 works good.
 http://downloads.openmoko.org/releases/Om2008.9/Om2008.9-gta02-20080916.uImage.bin
 
 == (Optional) Recompiling Kernel to Add Drivers ==
@@ -80,7 +80,7 @@ you can download and debootstrap natively on the neo by downloading cdebootstrap
 
 ssh to your neo and format your sd card appropriately. I'm using an 8GB SDHC card here.
 
-:''NOTE: it might be a good idea not to use ext3. This is because ext3 is a heavily journalising file system and on the freerunner (sd card) might cause premature death of the card. It is recommened you use ext2 or another similar file system. One also will need a vfat or ext2 (only vfat worked for me with the stock u-boot for the freerunner. On which to place the kernel to boot off. See the [[Booting_from_SD]] If you have not done so already.''
+:''NOTE: On the Freerunner one also will need a vfat or ext2 (only vfat worked for me with the stock u-boot for the freerunner) partition on which to place the kernel to boot off. See the [[Booting_from_SD]] If you have not done so already.''
 
  fdisk /dev/mmcblk0
  We will now create a 8 mb partition for our kernel and another one for the rootfs which will take up all the   
@@ -115,7 +115,7 @@ ssh to your neo and format your sd card appropriately. I'm using an 8GB SDHC car
 
  mkfs.vfat /dev/mmcblk0p1
  
- mkfs.ext3 /dev/mmcblk0p2
+ mkfs.ext2 /dev/mmcblk0p2
  mount /dev/mmcblk0p2 /media/card
 
 copy the armel chroot to your device by tar'ing it to circumvent symbolic link cycles (https://bugzilla.mindrot.org/show_bug.cgi?id=1059 <= WONTFIX)
@@ -140,7 +140,7 @@ execute the following commands (just copypaste everything below)
      network 192.168.0.0\n\
      gateway 192.168.0.200\n\
      up echo nameserver 192.168.0.200 >/etc/resolv.conf" > /media/card/etc/network/interfaces
- echo -e "rootfs  /                ext3    defaults,errors=remount-ro,noatime 0 1\n\
+ echo -e "rootfs  /                ext2    defaults,errors=remount-ro,noatime 0 1\n\
  proc    /proc            proc    defaults                           0 0\n\
  tmpfs   /etc/network/run tmpfs   defaults,noatime                   0 0\n\
  tmpfs   /tmp             tmpfs   defaults,noatime                   0 0\n\
