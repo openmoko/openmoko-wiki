@@ -1,3 +1,5 @@
+__TOC__
+
 Work in progress.
 
 '''TODO:''' Complete the document.
@@ -19,4 +21,53 @@ it is in the [http://git.openmoko.org/?p=kernel.git;a=shortlog;h=andy-tracking a
 If you think we can improve something please [http://lists.openmoko.org/mailman/listinfo/openmoko-kernel send us feedback].
 
 We include videos showing how things improve as we add filters. In the
-videos we use a program that plots the points reported by the driver[3].
+videos we use a program that [http://lists.openmoko.org/pipermail/devel/2008-October/002712.html plots the points reported by the driver].
+
+== Our hardware ==
+
+The FreeRunner (GTA02) uses the S3C2442 touchscreen controller, while the Neo1973 (GTA01) uses the S3C2410 one. For both devices we use [http://git.openmoko.org/?p=kernel.git;a=blob_plain;f=drivers/input/touchscreen/s3c2410_ts.c;hb=andy-tracking the same driver].
+
+The driver can be used for other devices:
+
+* HP iPAQ H1940 (H1930, H1935, H1940 and H1945) ( http://www.handhelds.org/projects/h1940.html ).
+* Acer N30
+
+== We don't use pressure information ==
+
+The only information we are using from the hardware is the reported X and
+Y coordinates. We are not using [http://lists.openmoko.org/pipermail/devel/2008-October/002728.html pressure information]. We could get
+the area of the contact to the touchscreen and we could tell between stylus,
+fingernail or thumb. The area information is reliable but we didn't manage
+to normalize the results across the screen as they varied widely depending
+on which corner of the screen is pressed, in a non-linear way.
+
+== Why are we doing filtering in kernel space? ==
+
+This is not new. An [[http://svn.opentom.org/opentom/trunk/linux-2.4/drivers/char/s3c2410_ts.c early driver for this device]] does some filtering (corrections, averaging, etc).
+
+In the latest driver we decided to add a generic filtering framework
+that could be used by more touchscreen drivers.
+
+We are aware of tslib (http://tslib.berlios.de/) and we use it with
+the current stable kernel (2.6.24) but we also think that doing
+filtering in the kernel is a good idea, and in the latest kernel
+(2.6.28 - next stable) we are doing it and as a side effect we no
+longer need to use tslib.
+
+Let's say we would like to deliver a TS event to user space each
+10 milliseconds. In the GTA02 with the current configuration the
+Analog/Digital conversion time of a sample is 0.4697 milliseconds,
+thus can get 18 samples for each event that we send to user-space.
+Sending the event (with 18 samples) takes us about 8.45
+milliseconds. Sometimes we even decide that the event should not be
+sent to user-space (because the hardware didn't provide reliable data),
+and our tests show that it's the right thing to do.
+In previous versions of the driver light taps would confuse the driver
+(that would report bad clicks) and this is no longer an issue.
+
+Briefly stated: We think it's better if the driver sends only
+good data to the applications. If there are multiple distributions
+for a device (there are quite a few for the GTA02) they can share
+a tuned in-kernel configuration. We also save a lot of kernel mode/user
+mode transitions and data transmission
+allowing us to consider more samples for each reported event.
