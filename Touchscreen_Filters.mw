@@ -105,6 +105,7 @@ Sources:
 Generic filters are not useful by themselves, they define an API that that actual
 filters have to implement. These are the operations that each filter
 can perform.
+<pre>
 
 	struct ts_filter_api {
 		struct ts_filter * (*create)(void *config, int count_coords);
@@ -113,6 +114,7 @@ can perform.
 		int (*process)(struct ts_filter *filter, int *coords);
 		void (*scale)(struct ts_filter *filter, int *coords);
 	};
+</pre>
 
 clear: We call this operation when we need the filter to be in a clean state.
 For instance, when we initialize the filter or when we have a pen-up event.
@@ -120,13 +122,11 @@ For instance, when we initialize the filter or when we have a pen-up event.
 process: This function is called when we need to send a
 sample to the filter, in our driver this happens when an A/D
 conversion ends. After that one of three things
-can happen: 1) If the filter needs more samples to be gathered it returns a 0.
-2) If it is ready to return a sample and there are no filters after itself, it returns 1.
-3) If it is ready to return a sample and there are filters after itself it will pass
-the resulting sample to the next filter and it's up to that filter to decide what
-it returns. If a filter reaches an error it returns -1. In the GTA01/GTA02 this happens
-when many inputs are discarded because they are not good samples and we decide to give
-up trying to get good samples.
+can happen:
+
+# If the filter needs more samples to be gathered it returns a 0.
+# If it is ready to return a sample and there are no filters after itself, it returns 1.
+# If it is ready to return a sample and there are filters after itself it will pass the resulting sample to the next filter and it's up to that filter to decide what it returns. If a filter reaches an error it returns -1. In the GTA01/GTA02 this happens when many inputs are discarded because they are not good samples and we decide to give up trying to get good samples.
 
 scale: This function is called for each filter after the filter chain returns 1.
 It is used to save expensive operations (such as divisions) in those cases when
