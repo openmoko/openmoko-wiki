@@ -1,83 +1,35 @@
-{{Languages|Booting from SD}}
+{{Languages|Boot from sd card}}
+
+=NOR in GTA02 history=
 __NOTOC__
 
-{{Editing|[[User:Coolcat|coolcat]]|30, Dec, 2008|本網頁目前正在加強內容編輯中}}
+GTA 02搭載了2MB的NOR flash。在DVT4 units (2008 April arrived Taipei)之前，GTA02 NOR 在硬體上並沒有做NOR 保護控制。在dvt4之後的軟體元件，及量產的產品，都包含了硬體的NOR保護。你必須使用debug board v3 或之後的版本，來停用NOR 寫入元件，停用保護，之後就可以在gta02上更新NOR。
 
+DVT4 單元及PVT1元件都會使用 "uImage"做為它的kernel image 檔名，而不是使用"uImage.bin" 。你可以在啟動畫面上找到它的日期，暸解你的硬體裝置上所使用的版本。
 
+*你可以在以下的位置找到啟動NOR寫入功能的元件：
+[http://svn.openmoko.org/trunk/src/host/norwp/ 停用NOR寫入保護]
 
-== 運作原理 ==
+*在user space中的Script可以寫入NOR [http://svn.openmoko.org/trunk/src/host/devirginator/flashnor Flash NOR script]
 
-Openmoko GTA02 支援雙系統開機。除了將映像檔燒錄到您的NAND外，你也可以利用將其它套件放在SD卡的方法，使用SD卡開機，載入另一個套件系統。
-
-在Neo中，我們使用 [[u-boot]] 做為bootloader。U-boot 負責硬體裝置的功能運作，直到 Openmoko被啟動載入裝置為止。首先，它會將kernel image載入記憶體中，接著再傳送一串參數到kernel。這些參數的工作是用來指定root filesystem的位置。
-
-在載入kernel 後，它會啟動硬體，並且掛載root filesystem。之後 kernel 會執行 "/sbin/init"，它會處理其它的開機程序( 如顯示螢幕)。
-
-不論是是使用內建的Flash開機，或者是使用SD Card開機，你所執行的開機順序將會相同。唯一不同的地方是載入 kernel 的方法，及哪個裝置被視為root filesystem，掛載到系統上。
-
-
-===U-boot 歷史版本===
+==歷史版本==
 
 * 20080226 初版
 * 20080305 修復DFU，並且移除NOR版本，使用NAND功能
 * 20080312 修復自SD記憶卡啟動功能 (從使用uImage 改為使用uImage.bin)
 * 20080320 修復u-boot direct drawing 500mA 、智慧充電、量產版本。
 
-而Neo FreeRunner在硬體設計上，提供了自NAND開機及自SD卡開機，不論您要使用哪種方式開機，開機程序都必須使用U-boot進行管理。
+=製作可開機的SD Card (GTA02)=
 
-而在Neo FreeRunner上，若您希望由SD卡中開機，您可以透過以下的步驟，達到這個目地。
+以下為自SD中啟動系統的操作步驟指引。它使用ubuntu 及一張乾淨的512 MB Sandisk microSD 卡(FAT16 分割區格式的SD card):
 
-:'''1. 製作可開機的SD卡。'''
-
-:'''2. 在FreeRunner中置入SD卡。'''
-
-:'''3. 選擇自SD卡開機，即可完成此項工作。'''
-
-= 製作可開機的SD Card (GTA02) =
-
-== 取得壓縮的 rootfs ==
-
-取得壓縮的rootfs image 有二種方法，你可以使用OpenEmbedded 建立它，或者自Openmoko [http://downloads.openmoko.org downloads]下載它。
-
-
-=== 方法 1: 自Openmoko buildhost上下載rootfs/kernel 壓縮檔 ===
-
-你可以自[[Latest Images|最近的影像檔]]選擇及找到一組 rootfs/kernel 組合
-
-=== 方法 2: 使用OpenEmbedded建立tarfile ===
-
-另一個取得 tar 壓縮檔的方法就是，你可以從OpenEmbedded 環境下建立此檔案。
-
-如要製作OM-2007.2 ，你必須在 ''local.conf''下加入"tar" 字樣：
-
- IMAGE_FSTYPES = "jffs2 tar"
-
-之後，使用下列指令建立新的image：
- 
- bitbake openmoko-devel-image
-
-或者，你可以使用MokoMakefile： 
- 
- make openmoko-devel-image
-
-在完成了以上程序後，在配置的目錄下會有一個名為 ''Openmoko-....tar'' 的檔案，即為你所完成的rootfs
-
-=== 方法 3 : 轉換 jff2 image為 tarfile ===
-
-你可以參考[[Userspace root image]] 取如何存取 jffs2 image的詳細資訊。
-
-== 製作可開機的SD 卡==
-以下為自SD中啟動系統的操作步驟指引。它使用ubuntu 及一張乾淨的512 MB Sandisk microSD 卡：
-*'''Step 1, 缷載磁碟:'''
+*Step 1, 缷載磁碟:
    
    sudo umount /media/disk-1
 
-{{note|你可以使用fdisk -l 取得相關磁碟資訊}}
-
-
 接著將磁碟分為二個分割區，第一個分割區使用vfat，預留 8MB空間給 uImage.bin，第二個磁區 (其餘的磁碟空間) 使用ext2 格式，提供給rootfs 檔案及目錄使用。二個分割區都使用primary partition 類型。
 
-*'''Step 2, fdisk:'''
+*Step 2, fdisk:
 
    sudo fdisk /dev/mmcblk0
 
@@ -107,23 +59,18 @@ Openmoko GTA02 支援雙系統開機。除了將映像檔燒錄到您的NAND外�
    Calling ioctl() to re-read partition table.
    Syncing disks.
 
-{{note|由於個人使用的作業環境之不同, 所使用的代號將有所不同,建議您使用df指令查看您的磁碟代號}}
+*Step 3 Format:
 
-*Step 3 格式化SD卡:
-
-請將二個分割區分別格式化為 vfat (放置uImage.bin)及 ext2 (放置 rootfs files)
+Format 2 volume with vfat (uImage.bin) and ext2 (rootfs files)
 
    mkfs -t vfat /dev/mmcblk0p1
 
    mkfs -t ext2 /dev/mmcblk0p2
 
 
-*Step 4 將kernel及rootfs 檔案放置到二個分割區中：
+*Step 4 Copy kernel and rootfs files into 2 volume:
 
-你必須使用以下指令解壓縮
-
- mount /dev/mmcblk0p2 /mnt/moko
- tar -C /mnt/moko/ -xzvf openmoko-devel-image-fic-gta01-20070313022035.rootfs.tar.gz
+uImage.bin 為量產所使用的映像檔。uImage則為較早期所使用的元件(DVT4/PVT1)。你必須壓縮 xvzf rootfs.tar.gz 以取得所有的檔案。
 
    sudo cp -r /home/tony/Desktop/kernel/uImage.bin /media/disk-1
 
@@ -131,9 +78,24 @@ Openmoko GTA02 支援雙系統開機。除了將映像檔燒錄到您的NAND外�
 
    sync
 
-*Step 5 自Neo的選單中，選擇 '''boot from SD'''
+*Step 5 自Neo的選單中，選擇 boot from SD (在正確的 u-boot_env 內容下)
 
+=開機環境 (GTA02)=
 
+在GTA02 NAND下有六個分割區。
+
+* 1. u-boot.bin
+* 2. u-boot_env
+* 3. kernel (uImage.bin)
+* 4. splash.gz (splash screen)
+* 5. Factory (BT/WLAN/Serial...etc)
+* 6. rootfs
+
+預設的GTA02 env 檔案最原始的版本(2008/7)可以在下面的位址找到 [http://people.openmoko.org/tony_tu/GTA02/images/20080424_gta02_release/env-5secs.env 預設env檔]
+
+你可以使用下面的 env.new 檔案，在開機畫面中加入 boot from sd 功能選項。  [http://people.openmoko.org/tony_tu/GTA02/images/env_files/env.new u-boot environment].
+
+* ./dfu-util -a u-boot_env -R -D env.new
 
 =自NOR (GTA02)下開機=
 
@@ -147,7 +109,7 @@ Openmoko GTA02 支援雙系統開機。除了將映像檔燒錄到您的NAND外�
 * 使用NOR開機，使用DFU
 * 使用NOR開機畫面自SD卡開機
 
-
+=自NAND下開機 (GTA02)=
 
 [[Category:Flashing Openmoko/zh tw]]
 [[Category:System Developers/zh tw]]
