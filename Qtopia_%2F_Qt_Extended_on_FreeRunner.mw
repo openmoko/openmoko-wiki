@@ -5,6 +5,7 @@ This page provides instructions on how to install Qtopia/Qt Extended (proper, no
 {|align=right
 |__TOC__
 |}
+<div style="clear:both" />
 
 == Current status ==
 
@@ -128,9 +129,10 @@ Documents = 0
 ContentDatabase = 0
 </pre>
 
-=== Simplified complete procedure using Ubuntu computer and microSD to USB adapter ===
+=== Option 3 ===
 
-This procedure was developed with:
+As in option 2, the goal is to install Qtopia on a microSD card.
+We describe the complete procedure using:
 
 * Ubuntu 8.10
 * SanDisk microSD to USB adapter
@@ -138,7 +140,7 @@ This procedure was developed with:
 
 ==== Prepare microSD card ====
 
-Create an 8 MB partition for the kernel and use the remaining space for the root file system.
+The first step is to create an 8 MB partition for the kernel and use the remaining space for the root file system. Proceed as follows:
 
 Insert microSD card into adapter, and plug adapter into Ubuntu computer. If any partitions on the microSD card mount automatically, unmount them.
 
@@ -201,7 +203,7 @@ sudo umount /dev/sdb1
 
 ==== Copy the jffs2 root file system to the microSD card ====
 
-First we need to make a fake MTD device in RAM so that we can mount the jffs2 root file system:
+That step is a bit complicated. First we need to make a fake MTD device in RAM so that we can mount the jffs2 root file system:
 
 <pre>
 sudo modprobe mtd 
@@ -225,7 +227,7 @@ Now copy the jffs2 file system to the fake MTD device:
 sudo dd if=qtextended-4.4.2-gta02-rootfs-10302135.jffs2 of=/dev/mtd0
 </pre>
 
-Create a mount point, mount the fake MTD device, and check that the contents seem right:
+Create a mount point, mount the fake MTD device, and check that the content seems right:
 
 <pre>
 sudo mkdir /mnt/tmp
@@ -278,7 +280,7 @@ sudo umount /dev/sdb2
 
 Remove the microSD card from the USB adapter, install it in the Neo FreeRunner, boot into U-Boot, and select the option to boot from microSD card.
 
-== Option 3: updating from source ==
+== Option 4: updating from source ==
 
 {{note|This will upgrade only opt/Qtopia directory, you should use opkg update/upgrade for the rest}}
 Original Qtopia images (the distribution released by Trolltech, not ASU) are rarely released as a rootfs image, but the source code is often updated. If you want to reflash your OM with the latest version of Qtopia you might build it from sources. This has been explained in [http://lists.openmoko.org/pipermail/community/2008-August/024785.html this thread] of the community mailing list. Summing up:
