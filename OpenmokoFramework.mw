@@ -4,7 +4,7 @@
 
 FSO is an abbreviation for FreeSmartphone.Org. With FSO, Openmoko is working on a stable system services software back-end. The framework will be used in forthcoming Openmoko distributions -- a demonstration one is available as FSO-image. For more information see http://www.freesmartphone.org and http://trac.freesmartphone.org .
 
-=Q/A=
+==Q/A==
 * ''Question'': Is this an Openmoko-only thing?
 * ''Answer'': No. It's going to be available for all kinds of mobile hardware running Linux, i.e. OpenEZX, XanaduX, HTC/iPAQ, ...
 * ''Question'': Is this a part of the current images yet? Is it perhaps the mystic ASU?
@@ -24,7 +24,7 @@ FSO is an abbreviation for FreeSmartphone.Org. With FSO, Openmoko is working on 
 * ''Question'': What is the easiest way to build it?
 * ''Answer'':  See [[Building_FSO]] for more information. The feeds are now at http://downloads.freesmartphone.org.
 
-= Timeline=
+== Timeline==
 * ''2009-03-31: [http://trac.freesmartphone.org/milestone/milestone6 milestone 6]''
 * ''2009-01-30: [http://trac.freesmartphone.org/milestone/milestone5 milestone 5]''
 * 2008-11-11: [[OpenmokoFramework/Status Update 5|milestone 4]] achieved
@@ -32,30 +32,30 @@ FSO is an abbreviation for FreeSmartphone.Org. With FSO, Openmoko is working on 
 * 2008-07-01: [[OpenmokoFramework/Status Update 3|milestone 2]] achieved
 * 2008-06-01: [[OpenmokoFramework/Status Update 2|milestone 1]] achieved
 
-=Purposes=
+==Purposes==
 * Give people the infrastructure to create solid and exciting software products based on the Openmoko platform
 * Support competing UIs while collaborating on developing services
 * Encourage framework users (e.g. application developers) to also contribute to the framework
 
-=Requirements=
+==Requirements==
 * Make it simple
 * Concentrate on core services
 * Be programming language agnostic
 * Be UI toolkit agnostic
 * Try to reuse existing technologies as much as possible, but not at the cost of a bad API
 
-=How to achieve that technically=
+==How to achieve that technically==
 * Choose [[D-Bus]] as the collaboration line. Below dbus, we can work together. Above dbus, we can differentiate
 * Expose features through dbus APIs implemented by UI-agnostic and language-agnostic services (daemons)
 * Optimize for Openmoko devices, but support multiple architectures and purposes through plugin interfaces and suitable hardware abstraction mechanisms
 * By not being afraid of reinventing the wheel for a wheelbarrow if all the existing wheels are made for sports cars
 
-=Mandatory Reading=
+==Mandatory Reading==
 * [http://adam.gomaa.us/blog/frameworks-exist-for-conceptual-integrity/ Frameworks exist for conceptual integrity]
 * [http://humanized.com/weblog/2007/10/05/make_oss_humane/ Ten ways to make more humane open source software]
 * [http://www.freesmartphone.org FreeSmartPhone.org Wiki]
 
-=What this is NOT about=
+==What this is NOT about==
 This initiative does not cover low level services such as
 * Bootloader, Kernel, or System Init.
 
@@ -63,16 +63,16 @@ This initiative does not cover high level services such as
 * X-Window-System, Window Manager, UI Toolkits,
 * Application Launchers, Applications, or Fancy UIs.
 
-=Architectural Overview=
+==Architectural Overview==
 [[Image:OpenmokoFramework08.png |823px|frontside]]
 
-=Software Components=
+==Software Components==
 
 We differentiate between low-level and high-level services -- dbus will be used to communicate horizontally and vertically.
 
-===Low-Level Services===
+====Low-Level Services====
 
-====Device Control====
+=====Device Control=====
 The low level device control service manages peripheral control, i.e. controlling power for individual subsystems such as
 * GSM, WiFi, Bluetooth, GPS, as well as
 * Backlight brightness and power,
@@ -86,60 +86,60 @@ Last but not least, it sends notifications about the user's activity so that lis
 We implement the following software for that:
 * [http://www.freesmartphone.org/index.php/Implementations/OpenDeviceDaemon odeviced]
 
-====Audio====
+=====Audio=====
 The low level audio service relies on a working ALSA device driver with the dmix software mixing plugin (*). On top of that, there is the GStreamer streaming media framework:
 * [http://gstreamer.freedesktop.org/ gstreamer]
 
 '''Gstreamer''' is to be used for all kinds of event sounds where a) multiple audio formats need to be supported and b) a latency of about one second is acceptable. This goes for e.g. ring tones, welcome tones, plug indication.
 
 *) Initially, we wanted to use PulseAudio on top of ALSA, howver currently it has serious performance problems on this hardware. [http://lists.openmoko.org/pipermail/devel/2008-July/000253.html]
-====GSM====
+=====GSM=====
 The low level GSM services expect a modem complying to GSM 07.07, GSM 07.05, and assorted GSM specifications, talking an AT-protocol over a serial line. If GSM 07.10 is supported, we use the multiplexing daemon to export virtual serial lines over which -- again -- AT-protocol can be spoken:
 * [http://www.freesmartphone.org/index.php/Implementations/gsm0710muxd gsm0710muxd]
 
-====Bluetooth====
+=====Bluetooth=====
 The low level Bluetooth services rely on the official Linux Bluetooth subsystem:
 * [http://www.bluez.org BlueZ].
 
-====GPS====
+=====GPS=====
 The low level GPS services assume a GPS device that talks NMEA over a device node. We implemented an [[ogpsd]] daemon speaking an extended Gypsy API:
 * [http://gypsy.freedesktop.org Gypsy]
 
-====Network====
+=====Network=====
 The low level networking service assumes network interfaces, such as USB, Ethernet, Wifi, etc. We rely on the following software here:
 * Intel Connection Manager
 * PPP
 
-===High Level===
+====High Level====
 
-====Usage====
+=====Usage=====
 The Usage subsystem is concerned with coordinating application I/O requirements. Applications are not supposed to turn on or off devices, since they do not have any knowledge about concurrent applications that may be also using the device -- think ''reference counting'' for I/O requirements.
 
 With this added layer, we could later think about monitoring subsystems, subsystem usage statistics, or accounting.
 
 See discussion page about PolicyKit.
 
-====Events====
+=====Events=====
 * Signalling events via I/O (ringing, blinking, vibrating)
 * Might use fd.o notification API
 
-====PIM====
+=====PIM=====
 An intelligent storage database server. This is being carried out as a Google Summer of Code project. See complete description [http://www.neo1973-germany.de/wiki/pyPimd here].
 
-====Context====
+=====Context=====
 * Intelligent context API, integrating location as one -- among other -- sources
 * Geoclue?
 
-====[http://www.freesmartphone.org/index.php/Standards/PhoneAPI Phone]====
+=====[http://www.freesmartphone.org/index.php/Standards/PhoneAPI Phone]=====
 The phone subsystem can be used to create and manage voices communications. It makes abstraction of the protocol used.
 
-=== [http://www.freesmartphone.org/index.php/Implementations/OpenPreferencesDaemon Preferences] ===
+==== [http://www.freesmartphone.org/index.php/Implementations/OpenPreferencesDaemon Preferences] ====
 * Settings database
 
-====Network====
+=====Network=====
 * High-level networking queries
 
-=Known API Consumers=
+==Known API Consumers==
 
 (TODO: add links...)
 
@@ -148,12 +148,12 @@ The phone subsystem can be used to create and manage voices communications. It m
 * [[Tichy]]
 * Paroli
 
-=Tools=
+==Tools==
 * [[OpenmokoFramework/mdbus|mdbus]] -- a dbus introspection and interaction utility,
 * [[OpenmokoFramework/cli|cli-framework]] -- a python dbus command line interface.
 * [[OpenmokoFramework/mickeyterm|mickeyterm]] -- a MUXer-aware minimal terminal emulator.
 
-=How to debug=
+==How to debug==
 # log in via ssh
 # killall python
 # edit /etc/frameworkd.conf and add to the frameworkd section:
@@ -168,28 +168,28 @@ The phone subsystem can be used to create and manage voices communications. It m
 
 Attach the logs to the tickets, please.
 
-=The role of Python=
+==The role of Python==
 
 Where we write new code, we will use Python to implement the dbus services. The reason for that being the rapid prototyping nature of Python and the emphasis on the [[D-Bus]] APIs. Using Python, the turnaround times to experiment with APIs are incredibly faster than for using a compiled language such as C or C++.
 
 Once the APIs have been used by application programmers, we can start profiling and possibly reimplement some of the services with daemons written in Vala, ''if'' necessary. We might as well succeed in improving performance by using Pyrex/Cython/Ctypes to keep the benefits of Python.
 
-=Team & Roadmap=
+==Team & Roadmap==
 
-==Team==
+===Team===
 
 * [[User:Mickey|Michael 'Mickey' Lauer]] (team leader) -- Openmoko freelancer, working in Frankfurt/Main, Germany.
 * [[User:Shoragan|Jan 'Shoragan' Luebbe]] -- Openmoko student, working part-time in Brunswick, Germany.
 * [[User:DanielWillmann|Daniel 'Alphaone' Willmann]] -- Openmoko student, working part-time in Brunswick, Germany.
 * [[User:StefanSchmidt|Stefan Schmidt]] -- Openmoko student, working part-time in Brunswick, Germany.
 
-==Roadmap==
+===Roadmap===
 
 The milestone releases are combined Openmoko Framework and [[Zhone]] releases. Remember: A feature that isn't visible, working, and tested in our framework testing application (Zhone) does ''not'' exist. Until Framework 1.0.0 (early 2009), we will not use any versioning in components. Afterwards, individual components may see individual releases.
 
 '''Note: The milestones and tasks moved over to our [http://trac.freesmartphone.org issue tracker].'''
 
-== Download and see also ==
+=== Download and see also ===
 
 * [http://trac.freesmartphone.org/ Development tracker]
 * [http://freesmartphone.org freesmartphone.org]
