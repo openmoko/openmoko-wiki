@@ -2,10 +2,7 @@
 
 This page provides instructions on how to install Qtopia/Qt Extended (proper, not the [[ASU]] or [[QtopiaOnX11]] efforts) on the GTA02 (FreeRunner) phone.  It is similar to the [[Qtopia on Neo1973]] page.
 
-{|align=right
-|__TOC__
-|}
-<div style="clear:both" />
+__TOC__
 
 == Current status ==
 
@@ -21,7 +18,8 @@ There are other third-party GPS applications available:
 
 You can find all the Qtopia images [http://qtextended.org/modules/mydownloads/viewcat.php?cid=6 here] (including Qtextended/Qtopia 4.4 for FreeRunner and Neo1973!)
 
-=== What is in the latest release (QtExtended 4.4.2)? ===
+'''What is in the latest release (QtExtended 4.4.2)?'''
+
 Qtopia 4.4 has been released with the name of [http://doc.trolltech.com/qtextended4.4/release-4-4-2.html QtExtended 4.4].
 * a [http://n2.nabble.com/qtopia-update-tp832851p832888.html browser] based on webkit
 * [http://n2.nabble.com/-qtopia--rotate-screen--tp841805p841841.html screen rotation in the settings application] (so no automatic rotation)
@@ -31,19 +29,18 @@ Qtopia 4.4 has been released with the name of [http://doc.trolltech.com/qtextend
 * Gtalk support
 * [http://n2.nabble.com/forum/Permalink.jtp?root=841805&post=1083388&page=y better support for non-english languages in the keyboard]
 
-== Option 1: Flashing Qtopia to FreeRunner ==
+== Installation option 1: Flash Qtopia to FreeRunner ==
 
-Download the image mentioned above and follow the instructions here: [[Flashing the Neo FreeRunner]]
+Download the image mentioned above, then follow the instructions in the {{Main|Flashing the Neo FreeRunner}}
 
-== Option 2: Dual-Booting between Qtopia and 2007.2 (Qtopia boots from MicroSD card) ==
+== Installation option 2: Qtopia on the MicroSD card ==
 
 Installation Requirements:
 
-# SSH shell access to 2007.2 based image of the FreeRunner through USB interface or WLAN.
+# SSH shell access to the FreeRunner through USB interface or WLAN.
 # A Desktop Linux distro (to unpack the .jffs2 image, I ran Ubuntu under VMWare)
 
-
-=== Preparing the SD card ===
+=== Prepare the SD card ===
 
 See the [[Booting from SD#Prepare the SD card| Preparing the SD Card]] section of the [[Booting from SD]] page for partitioning and formatting instructions.  After you complete the "Formatting the SD Card" steps, return here and execute the following:
 
@@ -57,9 +54,7 @@ mount /dev/mmcblk0p2 /media/mmcblk0p2
 
 This will set you up properly for the installation of the root filesystem and the kernel in the steps below.
 
-=== Installing Qtopia ===
-
-==== Unpacking the Qtopia Root Filesystem Image ====
+=== Unpack the Qtopia Root Filesystem Image ===
 
 Download the Qtopia FLASH image from [[Latest Images#Qtopia images]] to your Linux box and extract its contents:
 
@@ -70,7 +65,7 @@ You should now have two files:
 #qtopia-4.3.2-gta02-rootfs-07172049.jffs2
 Now, mount the root file system from the jffs2 using the commands found [[Userspace root image#Mounting the JFFS2 image on a loop back device (Block Memory MTD Emulation) |here]].  However, in the mount command, substitute the image filename for "/dev/mtdblock0".
 
-==== Creating a compressed tarball ====
+=== Create a compressed tarball ===
 
 Next, tar up the root filesystem:
 
@@ -78,7 +73,7 @@ Next, tar up the root filesystem:
 
 Where ''<mountpoint>'' is the location where the jff2 filesystem was mounted.  Note the space and the period after the mountpoint.
 
-==== Installing Root Filesystem ====
+=== Install the root filesystem ===
 
 Transfer this compressed tarball to the second partition of the MicroSD that is mounted on the FreeRunner:
 
@@ -95,7 +90,7 @@ rm -f /media/mmcblk0p2/boot/*
 
 '''''Note:''''' the last step removes the kernel image from the second partition.  For some reason, U-Boot cannot find the uImage.bin file in the first partition if a kernel image exists in the second partition boot/ directory.
 
-==== Installing Kernel ====
+=== Install the kernel ===
 
 From your Linux box, rename <tt>uImage-2.6.24+git18+9c058ff0d2641df3c36fc3300acb72078d2c41d4-r0-om-gta02.bin</tt> to <tt>uImage.bin</tt> and copy it to the boot directory on the first partition of the MicroSD card.  Depending on the version of U-Boot you have installed, this may not work.  To prevent any possible issues, copy it to the <tt>/media/card</tt> directory as well. There is plenty of room on the first partition to have <tt>uImage.bin</tt> in both locations.
 
@@ -107,7 +102,7 @@ scp uImage.bin root@192.168.0.202:/media/card/boot/
 scp uImage.bin root@192.168.0.202:/media/card/
 </pre>
 
-==== Pointing Qtopia to the SD Card ====
+=== Tell Qtopia it is running from the SD Card ===
 
 Lorn Potter on the mailing lists pointed this out:
 
@@ -129,7 +124,7 @@ Documents = 0
 ContentDatabase = 0
 </pre>
 
-=== Option 3 ===
+== Installation Option 3: on a microSD card (alternative procedure) ==
 
 As in option 2, the goal is to install Qtopia on a microSD card.
 We describe the complete procedure using:
@@ -138,7 +133,7 @@ We describe the complete procedure using:
 * SanDisk microSD to USB adapter
 * Qt Extended 4.4.2 2008/10/31
 
-==== Prepare microSD card ====
+=== Format the microSD card ===
 
 The first step is to create an 8 MB partition for the kernel and use the remaining space for the root file system. Proceed as follows:
 
@@ -166,7 +161,7 @@ sudo mkfs.vfat /dev/sdb1
 sudo mkfs.ext3 /dev/sdb2
 </pre>
 
-==== Get the latest version of Qtopia ====
+=== Download the latest Qt Extended ===
 
 Visit [http://qtextended.org/modules/mydownloads/viewcat.php?cid=6:Qtopia] and get the appropriate file. The Qtopia ROM flash images contain both the file system and the kernel image:
 
@@ -175,7 +170,7 @@ wget http://qtextended.org/modules/mydownloads/visit.php?lid=98
 tar -zxvf qtextended-4.4.2-gta02-flash.tgz
 </pre>
 
-==== Copy the kernel image to the microSD card ====
+=== Copy the kernel image to the microSD card ===
 
 First mount the first partition, which is the boot partition, of the microSD card, and make a /boot subdirectory:
 
@@ -201,7 +196,7 @@ sync
 sudo umount /dev/sdb1
 </pre>
 
-==== Copy the jffs2 root file system to the microSD card ====
+=== Copy the jffs2 root file system to the microSD card ===
 
 That step is a bit complicated. First we need to make a fake MTD device in RAM so that we can mount the jffs2 root file system:
 
@@ -276,7 +271,7 @@ sync
 sudo umount /dev/sdb2
 </pre>
 
-==== Test Qtopia ====
+=== Test Qtopia ===
 
 Remove the microSD card from the USB adapter, install it in the Neo FreeRunner, boot into U-Boot, and select the option to boot from microSD card.
 
