@@ -112,24 +112,33 @@ you can download and debootstrap natively on the neo by downloading cdebootstrap
 
 execute the following commands (just copypaste everything below)
  echo "neo1973-debian" > /media/card/etc/hostname
- echo -e "auto lo\n\
- iface lo inet loopback\n\
- auto usb0\n\
- iface usb0 inet static\n\
-     address 192.168.0.202\n\
-     netmask 255.255.255.0\n\
-     network 192.168.0.0\n\
-     gateway 192.168.0.200\n\
-     up echo nameserver 192.168.0.200 >/etc/resolv.conf" > /media/card/etc/network/interfaces
- echo -e "rootfs  /                ext2    defaults,errors=remount-ro,noatime 0 1\n\
- proc    /proc            proc    defaults                           0 0\n\
- tmpfs   /etc/network/run tmpfs   defaults,noatime                   0 0\n\
- tmpfs   /tmp             tmpfs   defaults,noatime                   0 0\n\
- tmpfs   /var/lock        tmpfs   defaults,noatime                   0 0\n\
- tmpfs   /var/run         tmpfs   defaults,noatime                   0 0\n\
- tmpfs   /var/tmp         tmpfs   defaults,noatime                   0 0" > /media/card/etc/fstab
- echo root: | chroot /media/card/ chpasswd
+ cat > /media/card/etc/network/interfaces <<__END__
+ auto lo
+ iface lo inet loopback
+ auto usb0
+ iface usb0 inet static
+     address 192.168.0.202
+     netmask 255.255.255.0
+     network 192.168.0.0
+     gateway 192.168.0.200
+     up echo nameserver 192.168.0.200 >/etc/resolv.conf
+ __END__
+ cat > /media/card/etc/fstab << __END__
+ rootfs  /                ext2    defaults,errors=remount-ro,noatime 0 1
+ proc    /proc            proc    defaults                           0 0
+ tmpfs   /etc/network/run tmpfs   defaults,noatime                   0 0
+ tmpfs   /tmp             tmpfs   defaults,noatime                   0 0
+ tmpfs   /var/lock        tmpfs   defaults,noatime                   0 0
+ tmpfs   /var/run         tmpfs   defaults,noatime                   0 0
+ tmpfs   /var/tmp         tmpfs   defaults,noatime                   0 0
+ __END__
  sed -i 's/\(PermitEmptyPasswords\) no/\1 yes/' /media/card/etc/ssh/sshd_config
+ chroot /media/card /bin/sh -e <<__END_CHROOT__
+ echo root: | chpasswd
+ apt-get update
+ apt-get --yes --purge remove cdebootstrap-helper-rc.d
+ apt-get clean
+ __END_CHROOT__
 
 == Get X Running ==
 Now reboot and start Debian. Login with ssh and start configuring xorg:
