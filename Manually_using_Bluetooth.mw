@@ -84,6 +84,27 @@ Tested on:
 * [http://corporate.igo.com/product_details.aspx?id=16 iGo Stowaway UltraSlim] (which was apparently discontinued early 2008, but can still be bought in some places) ([[user:ChristW]] I have 2008.8 on it, and using hidd --search to connect to the iGo works perfectly. I also used it to edit a new contact, dial a number and edit a settings text box in [[TangoGPS]]. So far, no problems...)
 * [http://www.vkb-support.com/ I-Tech Virtual Laser Keyboard] works.  Cursor keys not recognized as such, but produce keycodes than can be mapped.
 
+This is a script that I've ([[User:ChristW]]) been using with varying results. YMMV:
+<pre>
+echo Power on
+echo 1 > /sys/bus/platform/devices/neo1973-pm-bt.0/power_on
+sleep 1
+echo Reset on
+echo 1 > /sys/bus/platform/devices/neo1973-pm-bt.0/reset
+sleep 1
+echo Reset off
+echo 0 > /sys/bus/platform/devices/neo1973-pm-bt.0/reset
+sleep 1
+echo hciconfig down
+hciconfig hci0 down
+sleep 1
+echo hciconfig up
+hciconfig hci0 up
+sleep 1
+echo Connect
+hidd --connect XX:XX:XX:XX:XX:XX
+</pre>
+
 ==== Acting as HID device ====
 
 We want to be able to use the Neo as a HID device, being able to use it as controller for presentations. See [[ReMoko]]
