@@ -162,12 +162,12 @@ We sort incoming raw samples into an array of MEDIAN_SIZE length, discarding the
 oldest sample each time once we are full.  We then return the sum of the middle three
 samples for X and Y.
 
+When this filter is cleared (via the ''clear'' function) it consumes MEDIAN_SIZE points before the first output takes place.
+After that it consumes a few samples for each output and this number of samples depends on how fast the pointer is moving.
+The idea is to discard more samples from the array if the pointer is moving fast.
+
 This strongly rejects brief excursions away from a central point that is
 sticky in time compared to the excursion duration.
-
-We consume a few samples for each output, and this number of samples depends on how fast the pointer is moving.
-The idea is to discard more samples (''decimation_above'' samples) if the pointer is moving fast, and discard
-less samples (''decimation_below'') if the pointer is moving slowly.
 
 == Mean filter ==
 
