@@ -171,7 +171,27 @@ sticky in time compared to the excursion duration.
 
 == Mean filter ==
 
-...
+
+* [http://git.openmoko.org/?p=kernel.git;a=blob_plain;f=drivers/input/touchscreen/ts_filter_mean.c;hb=stable-tracking drivers/input/touchscreen/ts_filter_mean.c]
+* [http://git.openmoko.org/?p=kernel.git;a=blob_plain;f=include/linux/ts_filter_mean.h;hb=stable-tracking include/linux/ts_filter_mean.h]
+
+
+Mean works well if the input data is already good quality, reducing + / - 1
+sample jitter when the stylus is still, or moving very slowly, without
+introducing abrupt transitions or reducing ability to follow larger
+movements.  If you set the threshold higher than the dynamic range of the
+coordinates, you can just use it as a simple mean average.
+
+This filter has no effect if the samples are changing by more that the
+threshold set by averaging_threshold in the configuration.
+However while samples come in that don't go outside this threshold from
+the last reported sample, Mean replaces the samples with a simple mean
+of a configurable number of samples (set by bits_filter_length in config,
+which is 2^n, so 5 there makes 32 sample averaging).
+
+In the current configuration we are using a mean with 4 points. It means that
+when the filter is cleared we need 4 samples for each output and then we
+only use 1 sample for each output until the filter is cleared.
 
 == Linear calibration filter ==
 
