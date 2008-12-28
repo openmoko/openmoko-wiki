@@ -153,9 +153,17 @@ http://www.youtube.com/watch?v=17gempMRhBs
 
 With this filter get rid of most of the noise and we make up for the absence of pressure information. Light pressure means bad data, and the bad data is discarded.
 
-== Median filter ==
+== Median averaging filter ==
 
-...
+* [http://git.openmoko.org/?p=kernel.git;a=blob_plain;f=drivers/input/touchscreen/ts_filter_median.c;hb=stable-tracking drivers/input/touchscreen/ts_filter_median.c]
+* [http://git.openmoko.org/?p=kernel.git;a=blob_plain;f=include/linux/ts_filter_median.h;hb=stable-tracking include/linux/ts_filter_median.h]
+
+We sort incoming raw samples into an array of MEDIAN_SIZE length, discarding the
+oldest sample each time once we are full.  We then return the sum of the middle three
+samples for X and Y.
+
+This strongly rejects brief excursions away from a central point that is
+sticky in time compared to the excursion duration.
 
 == Mean filter ==
 
