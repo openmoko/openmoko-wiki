@@ -18,9 +18,11 @@
 
 
 '''1.1 原理图'''
+
 	调试板的原理图可以在此处下载：http://people.openmoko.org/joerg/schematics/debug_board/OpenMoKo_Debug_Board_V3_MP.pdf 
 
 '''1.2 USB 集线器'''
+
 	这个总线供电集线器
 	将上行端口与电脑相连
 	将1号下行端口与实现JTAG和串口控制台的FT2232D相连
@@ -35,6 +37,7 @@
 
 
 '''1.3 使用 FT2232 的JTAG口'''
+
 	本质上，我们整合USB-JTAG适配器的方法和Amontec JTAGkey-tiny类似。我们使用的实际参考设计（感谢Joern！）可以在这里找到：http://www.oocdlink.com  （但是这个域名已经不存在了）。
 
 	它提供大约150倍wiggler的速度、完全的JTAG调试能力。
@@ -42,18 +45,21 @@
 	实际的JTAG口是与手机连接的（通过调试专用扁平线缆）。一个独立的20针接口使用标准ARM-JTAG引出线，它使用户可以用这个设备作为别的以ARM设备的JTAG适配器。
 
 '''1.4 串口'''
+
 	作为再使用一个真实的RS232口的替代方案，我们可以使用一个USB转串口的转换芯片，比如FT232或PL2303。
 	
 	事实上，我们在使用FT2232的JTAG功能的同时，可以使用它的第二个端口。所以无需额外的 FT232 或 PL2303芯片了。
 
 '''1.4.1 三态串口''' 
+
 	GTA01的CPU UART串口需要一个由三态驱动器构成的多路复用器。因为它同时连接了GSM调制解调器模块和调试板。我们通过一个反转的GSM_EN信号（在FPC连接器的7脚）驱动GTA01三态驱动器。而GTA02的控制台串口则不是多路复用的，而是直接与CPU的UART相连。
 
 '''
 == 2 使用指南 ==
 
 2.1 准备工作 
-2.1.1 FT2232D EEPROM''' 
+2.1.1 FT2232D EEPROM'''
+ 
 	你的调试板包含了一个串行EEPROM，它应该在出厂时就被正确地烧写过。尽管如此，一些板子在出厂时并没有正确/完全的被编程，以至于你需要核实一下。
 
 	如果板子在插入电脑后显示的ID为1457:5118，则调试板已被正确烧写过。
@@ -61,6 +67,7 @@
 
 
 '''2.1.1.1 Linux下烧写'''
+
         注意：假设你的板子是受官方的技术支持的，FIC已经帮你做好了这个工作。尽管如此，如果你是早期的使用者之一，配置和USB 经销商ID/产品ID 可能并没有被正确设置。
 
 	要重新烧写EEPROM，你可以使用ftdi_eeprom程序，下载地址：http://www.intra2net.com/de/produkte/opensource/ftdi/ 。但是，最新的版本（0.2）还不支持FT2232D，所以你需要以下的补丁：http://people.openmoko.org/laforge/misc/debug_board_v2/ftdi_eeprom/ftdi_eeprom-0.2-moko.patch 。
@@ -117,23 +124,28 @@
 
 '''2.1.2 驱动 
 2.1.2.1 Linux''' 
+
 	请确保你的电脑已安装了libftdi-0.8或更高版本。已经发现早期的版本会有问题。
 	此外，需要做以下工作：
 
 	'''2.1.2.1.1 ftdi_sio 模块配置选项'''
+
 		rmmod ftdi_sio 
 		modprobe ftdi_sio vendor=0x1457 product=0x5118 
 		或是在modules.conf 里配置。
 	
 	'''2.1.2.1.2 udev 规则'''
+
 		请安装以下udev规则：http://people.openmoko.org/laforge/misc/debug_board_v2/udev_rules/
 
 		注意：某些发行版只使用 usb 作为他们USB子系统的名字，而不再是usb_device。（比如Ubuntu 8.x）。如果这样，你就应该相应的改变带有SUBSYSTEM的行,否则设备并不能被udev规则所识别。
 
 '''2.1.2.2 Windows'''
+
 	请使用以下驱动程序：http://people.openmoko.org/laforge/misc/debug_board_v2/windows_drivers/ 
 
 '''2.2 硬件连接'''
+
 	连接Neo1973与调试板V2（如何使用软性印刷电路板(Flexible Printed Circuit;FPC)进行连接）
 	在Debug Board v2#Hardware中建议的连接方法可能对调试板V3和freerunner的连接并不适用。在将调试板的USB电缆插入PC之前，将FreeRunner的USB接口插入电脑可能并不能启动FreeRunner。在调试板从PC中取得电源后，FreeRunner应该才会启动。
 	
@@ -144,8 +156,10 @@
 '''2.4 实际使用 
 2.4.1 Linux下 
 2.4.1.1 串口'''
+
 	你宿主机的Linux内核将会创建一个虚拟的串口设备节点：/dev/ttyUSBx，x是按顺序编号的。如果你没有其他的USB-串口转换器和你的宿主机相连，那么设备节点名为 /dev/ttyUSB1 (baud rate 115200 8N1)。
 	你可以像使用其它真实的串口一样使用你喜欢的终端仿真器(minicom, cu, zc, ...)。你也可以使用gdb(比如 target remote /dev/ttya)。
 
 '''2.4.1.2 JTAG口'''
+
 	一旦你安装的libftdi 版本为0.8 或更高，并用正确的openocd.cfg（ 可由此处下载OpenOCD#openocd.cfg） 配置OpenOCD ，则JTAG便可以很好地工作。
