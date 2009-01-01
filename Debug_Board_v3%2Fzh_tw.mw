@@ -1,61 +1,67 @@
-調試板V3是針對neo 1973和neo FreeRunner最新版的調試板。它與手機分開銷售。
+Debug Board V3是針對Neo 1973和Neo FreeRunner最新版的Debug 板。它與手機分開銷售。
 
-這個調試板可以使你擁有一個串口控制台和JTAG口。這個調試板使你：
-	可以通過串口控制台得到各個時刻事件發生時的內核調試資訊（或是得到內核崩潰時的最後資訊）；
-	使用JTAG口在任何時刻暫停處理器，分析系統狀態（這也可以同gdb調試器同時使用）；
-	可以對NOR快閃記憶體進行些操作。
+Debug Board可以讓您擁有一個與JTAG申連的控制台。
+
+Debug Board的功能包括：
+* 可以透過控制台得到各個時刻事件發生時的kernel資訊（或是取得kernel crash時的最後資訊）；
+* 使用JTAG在任何時刻暫停處理器，分析系統狀態（這也可以同gdb Debug Board同時使用）；
+* 可以對NOR快閃記憶體進行些操作。
 	
-串口控制台和JTAG口對於內核調試是非常有用的（實際上是必不可少的）。
+連接控制台和JTAG口對於內核調試是非常有用的（實際上是必不可少的）。
 
 
 == '''1 概述''' ==
 
 
-	此調試板提供如下主要功能：
+	此Debug Board提供如下主要功能：
 
-	USB 集線器
+:* USB 集線器
 
-	使用 FT2232 的JTAG口
-
-	串口
+:* 使用 FT2232 的JTAG
 
 
 '''1.1 原理圖'''
 
-		調試板的原理圖可以在此處下載：http://people.openmoko.org/joerg/schematics/debug_board/OpenMoKo_Debug_Board_V3_MP.pdf 
+Debug Board的原理圖可以在此處下載：http://people.openmoko.org/joerg/schematics/debug_board/OpenMoKo_Debug_Board_V3_MP.pdf 
 
 '''1.2 USB 集線器'''
 
-	這個匯流排供電集線器
-	將上行埠與電腦相連
-	將1號下行埠與實現JTAG和串口控制台的FT2232D相連
-	將2號下行埠與空閒的USB-A連接器相連
-	將3號下行埠與手機相連
+這個匯流排供電集線器
 
-	使用這個集線器,你可以通過一個USB電纜同時訪問手機、JTAG口和串口。
+將上行埠與電腦相連
 
-	實際上，你甚至可以使用下行埠對手機進行充電（100mA緩慢充電）。
+將1號下行埠與實現JTAG和串口控制台的FT2232D相連
 
-	我們使用TUSB2046B晶片實現USB集線器的功能.
+將2號下行埠與空閒的USB-A連接器相連
+
+將3號下行埠與手機相連
+
+使用這個集線器,你可以通過一個USB電纜同時訪問手機、JTAG口和串口。
 
 
-'''1.3 使用 FT2232 的JTAG口'''
+實際上，你甚至可以使用下行埠對手機進行充電（100mA緩慢充電）。
 
-	本質上，我們整合USB-JTAG適配器的方法和Amontec JTAGkey-tiny類似。我們使用的實際參考設計（感謝Joern！）可以在這裡找到：http://www.oocdlink.com  （但是這個功能變數名稱已經不存在了）。
 
-	它提供大約150倍wiggler的速度、完全的JTAG調試能力。
+我們使用TUSB2046B晶片執行USB集線器的功能.
 
-	實際的JTAG口是與手機連接的（通過調試專用扁平線纜）。一個獨立的20針介面使用標準ARM-JTAG引出線，它使使用者可以用這個設備作為別的以ARM設備的JTAG適配器。
+
+'''1.3 使用 FT2232 的JTAG '''
+
+本質上，我們整合USB-JTAG適配器的方法和Amontec JTAGkey-tiny類似。我們使用的實際參考設計（感謝Joern！）可以在這裡找到：http://www.oocdlink.com  （但是這個功能變數名稱已經不存在了）。
+
+它提供大約150倍wiggler的速度、完全的JTAG調試能力。
+
+實際的JTAG口是與手機連接的（通過調試專用扁平線纜）。一個獨立的20針介面使用標準ARM-JTAG引出線，它使使用者可以用這個設備作為別的以ARM設備的JTAG適配器。
 
 '''1.4 串口'''
 
-	作為再使用一個真實的RS232口的替代方案，我們可以使用一個USB轉串口的轉換晶片，比如FT232或PL2303。
+作為再使用一個真實的RS232口的替代方案，我們可以使用一個USB轉串口的轉換晶片，比如FT232或PL2303。
 	
-	事實上，我們在使用FT2232的JTAG功能的同時，可以使用它的第二個埠。所以無需額外的 FT232 或 PL2303晶片了。
+事實上，我們在使用FT2232的JTAG功能的同時，可以使用它的第二個埠。所以無需額外的 FT232 或 PL2303晶片了。
 
 '''1.4.1 三態串口''' 
 
-	GTA01的CPU UART串口需要一個由三態驅動器構成的多工器。因為它同時連接了GSM數據機模組和調試板。我們通過一個反轉的GSM_EN信號（在FPC連接器的7腳）驅動GTA01三態驅動器。而GTA02的控制台串口則不是多工的，而是直接與CPU的UART相連。
+GTA01的CPU UART串口需要一個由三態驅動器構成的多工器。因為它同時連接了GSM數據機模組和調試板。我們通過一個反轉的GSM_EN信號（在FPC連接器的7腳）驅動GTA01三態驅動器。而GTA02的控制台串口則不是多工的，而是直接與CPU的UART相連。
 
 '''
 
@@ -64,7 +70,7 @@
 2.1 準備工作 
 2.1.1 FT2232D EEPROM'''
  
-	你的調試板包含了一個串列EEPROM，它應該在出廠時就被正確地燒寫過。儘管如此，一些板子在出廠時並沒有正確/完全的被程式設計，以至於你需要核實一下。
+你的Debug Board包含了一個串列EEPROM，它應該在出廠時就被正確地燒寫過。儘管如此，一些板子在出廠時並沒有正確/完全的被程式設計，以至於你需要核實一下。
 
 	如果板子在插入電腦後顯示的ID為1457:5118，則調試板已被正確燒寫過。
 	只有當你的板子顯示的ID為0403:6010時，你必須自己刷一下板子。
@@ -72,18 +78,18 @@
 
 '''2.1.1.1 Linux下燒寫'''
 
-        注意：假設你的板子是受官方的技術支援的，FIC已經幫你做好了這個工作。儘管如此，如果你是早期的使用者之一，配置和USB 經銷商ID/產品ID 可能並沒有被正確設置。
+注意：假設你的板子是受官方的技術支援的，FIC已經幫你做好了這個工作。儘管如此，如果你是早期的使用者之一，配置和USB 經銷商ID/產品ID 可能並沒有被正確設置。
 
-	要重新燒寫EEPROM，你可以使用ftdi_eeprom程式，下載位址：http://www.intra2net.com/de/produkte/opensource/ftdi/ 。但是，最新的版本（0.2）還不支持FT2232D，所以你需要以下的補丁：http://people.openmoko.org/laforge/misc/debug_board_v2/ftdi_eeprom/ftdi_eeprom-0.2-moko.patch 。
+要重新燒寫EEPROM，你可以使用ftdi_eeprom程式，下載位址：http://www.intra2net.com/de/produkte/opensource/ftdi/ 。但是，最新的版本（0.2）還不支持FT2232D，所以你需要以下的補丁：http://people.openmoko.org/laforge/misc/debug_board_v2/ftdi_eeprom/ftdi_eeprom-0.2-moko.patch 。
 	
-	你可能也需要為libftdi使用以下的補丁：http://people.openmoko.org/werner/libftdi-c56-strings-dirty-hack.patch 。（在http://bugzilla.openmoko.org/cgi-bin/bugzilla/show_bug.cgi?id=321  可獲得更多幫助）
+你可能也需要為libftdi使用以下的補丁：http://people.openmoko.org/werner/libftdi-c56-strings-dirty-hack.patch 。（在http://bugzilla.openmoko.org/cgi-bin/bugzilla/show_bug.cgi?id=321  可獲得更多幫助）
 
-	此外，還需要EEPROM設定檔：http://people.openmoko.org/laforge/misc/debug_board_v2/ftdi_eeprom/neo1973_debug_board_v2.ftdi 。
+此外，還需要EEPROM設定檔：http://people.openmoko.org/laforge/misc/debug_board_v2/ftdi_eeprom/neo1973_debug_board_v2.ftdi 。
 
-	在你編譯好ftdi_eeprom後，就可以運行以下命令：
+在你編譯好ftdi_eeprom後，就可以運行以下命令：
 		ftdi_eeprom --flash-eeprom neo1973_debug_board_v2.ftdi 
 
-        警告：在運行ftdi_eeprom 時，請確保你沒有其他包含FTDI FT232 / FT2232的設備連接在USB埠。因為ftdi_eeprom可能會斷開所有除調試板的設備。
+        {{note|警告：在運行ftdi_eeprom 時，請確保你沒有其他包含FTDI FT232 / FT2232的設備連接在USB埠。因為ftdi_eeprom可能會斷開所有除調試板的設備。}}
 
 	如果一切順利，你將會得到以下資訊：
 
@@ -129,33 +135,35 @@
 '''2.1.2 驅動 
 2.1.2.1 Linux''' 
 
-	請確保你的電腦已安裝了libftdi-0.8或更高版本。已經發現早期的版本會有問題。
-	此外，需要做以下工作：
+請確保你的電腦已安裝了libftdi-0.8或更高版本。已經發現早期的版本會有問題。
 
-	'''2.1.2.1.1 ftdi_sio 模組配置選項'''
+此外，需要做以下工作：
+
+'''2.1.2.1.1 ftdi_sio 模組配置選項'''
 
 		rmmod ftdi_sio 
 		modprobe ftdi_sio vendor=0x1457 product=0x5118 
 		或是在modules.conf 裡配置。
 	
-	'''2.1.2.1.2 udev 規則'''
+'''2.1.2.1.2 udev 規則'''
 
-		請安裝以下udev規則：http://people.openmoko.org/laforge/misc/debug_board_v2/udev_rules/
+請安裝以下udev規則：http://people.openmoko.org/laforge/misc/debug_board_v2/udev_rules/
 
-		注意：某些發行版本只使用 usb 作為他們USB子系統的名字，而不再是usb_device。（比如Ubuntu 8.x）。如果這樣，你就應該相應的改變帶有SUBSYSTEM的行,否則設備並不能被udev規則所識別。
+注意：某些發行版本只使用 usb 作為他們USB子系統的名字，而不再是usb_device。（比如Ubuntu 8.x）。如果這樣，你就應該相應的改變帶有SUBSYSTEM的行,否則設備並不能被udev規則所識別。
 
 '''2.1.2.2 Windows'''
 
-	請使用以下驅動程式：http://people.openmoko.org/laforge/misc/debug_board_v2/windows_drivers/ 
+請使用以下驅動程式：http://people.openmoko.org/laforge/misc/debug_board_v2/windows_drivers/ 
 
 '''2.2 硬體連接'''
 
-	連接Neo1973與調試板V2（如何使用軟性印刷電路板(Flexible Printed Circuit;FPC)進行連接）
-	在Debug Board v2#Hardware中建議的連接方法可能對調試板V3和freerunner的連接並不適用。在將調試板的USB電纜插入PC之前，將FreeRunner的USB介面插入電腦可能並不能啟動FreeRunner。在調試板從PC中取得電源後，FreeRunner應該才會啟動。
+連接Neo1973與調試板V2（如何使用軟性印刷電路板(Flexible Printed Circuit;FPC)進行連接）
+
+在Debug Board v2#Hardware中建議的連接方法可能對調試板V3和freerunner的連接並不適用。在將調試板的USB電纜插入PC之前，將FreeRunner的USB介面插入電腦可能並不能啟動FreeRunner。在調試板從PC中取得電源後，FreeRunner應該才會啟動。
 	
 '''2.3 建議'''
 	
-	User:Cfriedt 20081021 調試板V3在J1（20針ARM JTAG 口）使用3.3V信號電平。許多其他的ARM設備使用1.8V信號電平。我建議在下一版的調試板中使用和FlySwatter一樣的電平轉換方案。FlySwatter使用兩片的SN74AVC4T245來提供從1.2V到3.6V的信號電平範圍。
+User:Cfriedt 20081021 調試板V3在J1（20針ARM JTAG 口）使用3.3V信號電平。許多其他的ARM設備使用1.8V信號電平。我建議在下一版的調試板中使用和FlySwatter一樣的電平轉換方案。FlySwatter使用兩片的SN74AVC4T245來提供從1.2V到3.6V的信號電平範圍。
 
 '''2.4 實際使用 
 2.4.1 Linux下 
