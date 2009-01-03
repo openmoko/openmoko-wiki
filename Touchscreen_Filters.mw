@@ -198,6 +198,7 @@ only use 1 sample for each output until the filter is cleared.
 Source : [http://git.openmoko.org/?p=kernel.git;a=blob_plain;f=drivers/input/touchscreen/ts_filter_linear.c;hb=stable-tracking drivers/input/touchscreen/ts_filter_linear.c],
 
 This filter allow us to scale touchscreen values using calibration data. It also exposes the calibration constants using sysfs.
+By default it does not scale the coordinates.
 
 == How things fit together ==
 
@@ -205,6 +206,12 @@ The following configuration that we are using for the GTA02 lives in the file [h
 
 <pre>
 /* touchscreen configuration */
+
+static struct ts_filter_linear_configuration gta02_ts_linear_config = {
+	.constants = {1, 0, 0, 0, 1, 0, 1},	/* don't modify coords */
+	.coord0 = 0,
+	.coord1 = 1,
+};
 
 static struct ts_filter_group_configuration gta02_ts_group_config = {
         .extent = 12,
@@ -231,11 +238,13 @@ static struct s3c2410_ts_mach_info gta02_ts_cfg = {
                 [0] = &ts_filter_group_api,
                 [1] = &ts_filter_median_api,
                 [2] = &ts_filter_mean_api,
+		[3] = &ts_filter_linear_api,
         },
         .filter_config = {
                 [0] = &gta02_ts_group_config,
                 [1] = &gta02_ts_median_config,
                 [2] = &gta02_ts_mean_config,
+		[3] = &gta02_ts_linear_config,
         },
 };
 </pre>
