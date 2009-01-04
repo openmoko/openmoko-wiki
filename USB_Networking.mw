@@ -388,7 +388,19 @@ Finally run "chmod +x /usr/local/sbin/freerunner-usb-add.sh" to make it executab
 
 === Ubuntu Issues ===
 
-Ubuntu 8.10 doesn't work as expected if you used /etc/network/interfaces to automate the connection. Network manager likes to latch onto the network device and add a default route through 192.168.0.202, breaking your network connection. Network manager also says you can't edit or remove this connection from its list. I'm going back to making the connection manually.
+Ubuntu 8.10 doesn't work as expected if you used /etc/network/interfaces to automate the connection.<br>
+Network manager likes to latch onto the network device and add a default route through 192.168.0.202, breaking your network connection.
+Network manager also says you can't edit or remove this connection from its list. I'm going back to making the connection manually.<br>
+Using the /usr/local/sbin/freerunner-usb-add.sh script for some automatism can be a workaround:
+<pre>
+#!/bin/sh
+(
+ifconfig usb0 192.168.0.200 netmask 255.255.255.192 > /dev/null
+ifconfig usb0 up > /dev/null
+/etc/network/freerunner start
+) &
+exit 0
+</pre>
 
 Ubuntu Feisty, Gutsy and Hardy reportedly have a bug where ifdown is not run when the interface is unplugged, meaning this only works once after the system is booted.  This is mentioned at https://bugs.launchpad.net/ubuntu/+source/ifupdown/+bug/130437
 
@@ -414,6 +426,7 @@ The bug is that the DRIVERS variable isn't set at all when the device is unplugg
 This appears to be fixed in Ubuntu 8.04 [[User:Mattt|Mattt]] 11:38, 30 July 2008 (UTC)
 :Actually it appears that it's not fixed, but patching that file and disconnecting and reconnecting the phone works perfectly. --[[User:Johndoesacc|Johndoesacc]] 18:37, 20 August 2008 (UTC)
 :Well, yes, it must be fixed because it worked for me out-of-the-box without tweaking the udev rule on 8.04 --[[User:EtienneG|EtienneG]] November 26th, 2008
+
 === Ubuntu Workaround ===
 Use [http://wicd.sourceforge.net/ wicd] instead of networkmanager:
 It is much further in development than networkmanager yet and doesn't make any problems with USB networking. You can use the "normal" settings in /network/interfaces.
