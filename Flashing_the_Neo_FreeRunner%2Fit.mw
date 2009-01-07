@@ -1,0 +1,89 @@
+<!-- Attenzione: Il testo è stato liberamente tradotto dalla stessa pagina in versione inglese, con alcune piccole modifiche. // Note: the text was translated from the English version of this wiki, with some little changes. For comments, please contact me at sanvymail@gmail.com --!>
+
+
+Openmoko rilascia regolarmente versioni aggiornate del filesystem di Openmoko (rootfs), del kernel e del Bootloader (U-Boot) come immagini binarie. Queste possono essere scritte nella memoria Flash (NAND) del Neo Freerunner. Per questo si può usare il cavo USB e un computer con gli strumenti forniti da Openmoko per flashare il Neo Freerunner tramite la USB
+
+
+== 3 Componenti Software e 2 tipi di flash ==
+
+Nel Neo Freerunner lavorano 3 componenti:
+
+    * bootloader: un piccolo programma che parte prima di tutto e carica ogni cosa quando si accende o si riavvia il FreeRunner (NOR o NAND).
+    * kernel: il componente centrale di ogni sistema Linux
+    * root filesystem: Contiente tutti i file relativi alle applicazioni e i file che vengono inseriti nel FreeRunner. 
+
+Il FreeRunner ha due sistemi di memorizzazione: il NOR e il NAND, entrambi flash. Sul FreeRunner per installare un nuovo sistema operativo, non si passa da CD o altre periferiche, come in un normale PC, ma si scrive direttamente sulla memoria Flash. In alternativa è possibile caricare il sistema dalla microSD (si veda [[Booting_from_SD]])
+
+La memoria NOR contiene solo programmi per il boot quando si modifica la memoria NAND. Generalmente non è necessario modificarla. (nel caso, si veda: [[Flashing_NOR]].)
+
+La memoria NAND è molto simile ad un normale Disco Fisso. E' divisa in 3 partizioni, una per il bootloader, una per il kernel e una per il filesystem. Essendo in diverse partizioni, ogni componente può essere flashato separatamente.
+
+
+Prima di partire: flashare le memorie flash è un intervento drastico. E' meglio pensarci molto bene. Un'alternativa può essere il boot da microSD (si veda [[Booting_from_SD]]). Alcune problemi possono essere risolti anche aggiornando il kernel. 
+
+
+== Cosa serve ==
+
+=== 1)Terminale o interfaccia? ===
+'''-Terminale:''' per flashare il FreeRunner si usa DFU-Util, deve essere eseguito sul computer con cui si compie l'operazione. Sono disponibili le versioni per Linux, MacOS X e Windows. DFU-util permette di connettere il pc al FreeRunner attraverso la USB ed eseguire operazioni con il bootloader.
+La connessione utilizza un particolare protocollo diretto all'interfaccia del bootloader, non è un normale collegamento USB. (Per dettagli si veda [[Dfu-util]])
+'''
+-Interfaccia:''' anzichè usare il terminale per flashare il FreeRunner, è disponibile un software per eseguire lo stesso lavoro tramite interfaccia grafica. Si trova alla pagina [[NeoTool]]
+
+==== Dove trovare DFU-util ====
+
+'''Per Linux''': [http://downloads.openmoko.org/releases/Om2008.9/dfu-util]
+
+Attenzione: è necessario impostare i permessi di esecuzione: chmod a+x dfu-util
+
+'''Per Linux a 64-Bit''': è necessaria la versione 64-bit di DFU-util, generalmente si trova nei repository della distro. 
+Altrimenti:
+
+   1. Cercare una macchina a 32-bit e flashare tramite essa.
+   2. Usare una chroot a 32-bit (su un amd64 debian). Per esempio --[[Bubak]] 16:54, 4 September 2008 (UTC).
+'''
+MacOS X''': [[MacOS_X#Graphical_Flashing_with_Openmoko_Flasher]]
+
+'''Windows''': [http://projects.openmoko.org/frs/?group_id=166&release_id=162]
+
+       Leggere anche le istruzioni per l'installazione dei driver su Windows [[Dfu-util-windows]]
+
+'''Macchine Virtuali''' Ci sono stati successi molto limitati usando DFU-util con una Macchina Virtuale, generalmente non è possibile usarlo con queste. Occorre l'accesso fisico della USB.
+
+
+==== File immagine da flashare nella memoria del FreeRunner ====
+
+Ci sono immagini separate per tutti i 3 componenti software, che variano a seconda di cosa si installa. Nella maggioranza dei casi occorre il Kernel (uImage) e il filesystem di root (rootfs). In rari casi, quando è necessario correggere un bug, occorre anche installare un nuovo bootloader.
+Per un elenco di distro vedere [[Distributions]] e vedere [[Download]] per scaricare.
+
+
+
+
+== Boot the FreeRunner from NOR Flash ==
+
+
+   1. '''Leggi le altre sezioni di questa pagina, perchè si hanno solo 30 secondi per dare i comandi'''.
+   2. '''Non connettere subito il cavo USB al FreeRunner (disconnetterlo, nel caso)'''.
+   3. '''Accendi il FreeRunner e carica il bootloader NOR:
+         1. Tieni premuto il bottone AUX (in alto)
+         2. Dopo pochi istanti premi il tasto POWER finchè non carica il menu
+         3. Il menù NOR si intitola *** BOOT MENU (NOR) ***
+         4. Leggi anche [[Booting_the_Neo_FreeRunner]]
+   4. Non selezionare niente. Ora il FreeRunner è pronto per operazioni di backup, flash e modifiche con DFU-utils.
+   5. '''Il FreeRunner rimane nel NOR per 30 secondi, a meno che non si eseguano operazioni.'''
+   6. Connettere il FreeRunner alla USB e al PC.
+   7. Ora è possibile dare comandi tramite DFU-utils.
+   8. Se il FreeRunner si spegne prima di aver dato i comandi per flashare, occorre ripartire dal punto 2. 
+
+Il programma dfu-util non usa una connessione Ethernet tramite la USB, infatti va settato come interfaccia di rete usb0 nei sistemi GNU/Linux. (Su Windows è necessario il DFU class driver, oppure il driver LibUSB-Win32. Fare riferimento a [[Dfu-util-windows]]).
+DFU-util crea la sua connessione con il FreeRunner. Infatti sarà impossibile creare una connessione Ethernet tramite la USB quando c'è uBoot attivo, ma solo quando il FreeRunner avrà superato il boot.
+
+Dopo aver connesso il FreeRunner al computer tramite cavo USB, è possibile sapere se dfu-util riconosce il FreeRunner con:
+
+<pre>./dfu-util -l</pre>
+
+Se ci sono errori da dfu-util occorre riprovare, spesso funziona al secondo tentativo.
+
+DFU-util usa il protocollo DeviceFirmwareUpgrade, e può mostrare più device. Se è così, provare a disconnettere altri dispositivi usb, (ad esempio pendrive, mouse USB, ecc.) o usare l'opzione '''-d''' per comandare a DFU-util con quale dispositivo connettersi.
+
+'''Ricordare anche di usare DFU-util con i privilegi di root: è necessario il controllo completo della usb.'''
