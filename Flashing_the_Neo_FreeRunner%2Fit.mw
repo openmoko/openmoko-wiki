@@ -60,7 +60,9 @@ Per un elenco di distro vedere [[Distributions]] e vedere [[Download]] per scari
 
 
 
-== Boot the FreeRunner from NOR Flash ==
+== Boot dalla NOR Flash ==
+
+[[Image:200px-menu6.jpg|thumb|Menu NOR]]
 
 
    1. '''Leggi le altre sezioni di questa pagina, perchè si hanno solo 30 secondi per dare i comandi'''.
@@ -88,3 +90,110 @@ Se ci sono errori da dfu-util occorre riprovare, spesso funziona al secondo tent
 DFU-util usa il protocollo DeviceFirmwareUpgrade, e può mostrare più device. Se è così, provare a disconnettere altri dispositivi usb, (ad esempio pendrive, mouse USB, ecc.) o usare l'opzione '''-d''' per comandare a DFU-util con quale dispositivo connettersi.
 
 '''Ricordare anche di usare DFU-util con i privilegi di root: è necessario il controllo completo della usb.'''
+
+=== Fare il backup ===
+
+Se non si è sicuri di voler flashare, è possibile fare un backup. Si veda [[Backup]]
+
+=== Usare DFU-util ===
+
+DFU-util può essere usato per leggere e scrivere la memoria flash del FreeRunner e ottenere informazioni dal dispositivo.
+
+Questo è il comando per scrivere un file immagine in una partizione predefinita (per <altsetting> fare riferimento al manuale di dfu-util):
+
+<pre>./dfu-util -a <altsetting> -R -D <nome_file></pre>
+
+Analisi del comando:
+'''./ va usato solo con il terminale di linux'''
+-a <altsetting>: specifica l'altsetting dell'interfaccia, con il nome o con il numero.
+-R: invia il segnale del reset della USB solo a lavoro terminato
+-D <nome_file>: scrive l'immagine dal file sul pc al dispositivo
+
+In Linux, in caso di "Cannot claim interface: could not claim interface 2: Operation not permitted", è necessario ripetere il comando con permessi di amministratore (root) (ad esempio con su o sudo)
+
+Con Windows, è necessario usare il prompt dei comandi (Start>Esegui>cmd.exe), omettendo ./
+
+Un manuale più dettagliato per dfu-util si trova qui: [[Dfu-util]]
+
+L'interfaccia grafica per DFU-util: [[NeoTool]]
+
+
+=== Scrivere il Kernel ===
+
+Attenzione: Il telefono deve essere nel menù di U-boot (si veda Boot dalla NOR flash qui sopra)
+
+Il comando è:
+
+<pre>dfu-util -a kernel -R -D /path/to/uImage</pre>
+
+'''Con Linux è necessario usare ./ e i privilegi di root'''
+
+Se il flash ha avuto successo l'output sarà:
+
+<pre>status(0) = No error condition is present
+Done!</pre>
+
+Può esserci anche un errore -110, ciò indica che il kernel è troppo grande per la partizione prevista. U-Boot può cambiare la dimensione delle partizioni sul FreeRunner. Lo stesso errore può anche significare che si sta tentando di scrivere il file sbagliato nello spazio del kernel (ad esempio il rootfs)
+
+
+=== Scrivere il filesystem ===
+
+Il filesystem deve essere un immagine in formato .jffs2. Se il file scaricato è compresso (ad esempio ha un estensione .tar .gz .bz2 .zip .tgz .tar.gz), va prima decompresso.
+
+Per flashare sul dispositivo il comando è:
+
+<pre>dfu-util -a rootfs -R -D <rootfs_filename.jffs2></pre>
+
+Il parametro <rootfs_filename.jffs2> è il nome del file jffs2.
+Scrivere il filesystem può richiedere parecchio tempo, si stima 15 minuti per un file di ~ 70MB. E' anche necessario che il FreeRunner abbia abbastanza batteria per compiere l'operazione.
+
+Quando l'operazione è terminata con successo l'output sarà:
+
+<pre>status(0) = No error condition is present
+Done!</pre>
+
+
+=== Scrivere il boot loader nella memoria NAND ===
+
+Attenzione: Nella maggioranza dei casi non sarà necessario flashare il bootloader. Va modificato solo se bisogna aggiornare per una particolare funzione o per un problema. 
+
+Il file del bootloader deve avere un'estensione .bin. Come per il filesystem, se è compresso va prima decompresso.
+
+Il comando per flashare il bootloader è:
+
+<pre>dfu-util -a u-boot -R -D uboot.bin</pre>
+
+'''Per Linux è necessario usare ./ '''
+
+Dove uboot.bin è il nome del file da scrivere.
+Attenzione: sarebbe necessario fare il boot da NOR per flashare NAND. Dopo che la scrittura è avvenuta con successo, assicurarsi che il bootloader NAND funzioni.
+
+== Facoltativo: Verificare la versione del bootloader ==
+
+Dopo un aggiornamento, si può controllare che la versione sul FreeRunner sia effettivamente quella appena scritta. Per fare ciò si può usare il comando <pre>grep Bootloader /dev/mtdblock1</pre> dalla shell del FreeRunner, per vedere la versione di NAND.
+
+Lo stesso comando può essere usato per NOR:
+
+<pre>grep  Bootloader /dev/mtdblock0</pre>
+
+=== Riavviare il FreeRunner da NAND ===
+
+Ora il FreeRunner dovrebbe caricare le nuove immagini.
+Caricare NAND in questo modo: tenere premuto il tasto di accensione e poi tenere premuto anche il tasto AUX.
+Il menù dovrebbe essere intitolato *** BOOT MENU (NAND) *** (vedere [[Log_into_U-Boot_in_the_NAND_Flash]] per dettagli)
+
+
+=== Risoluzione dei problemi ===
+
+1)Dopo aver flashato, uBoot non carica il kernel e ritorna al menu di boot. Perchè?
+
+*Può essere che qualcosa sia andato storto durate il flashing del kernel. Provare a riflashare solo il kernel, controllare di aver scelto l'immagine .bin corretta e non il file .bin del bootloader.
+*Provare a riscaricare e riflashare il kernel e controllare l'integrità del file con MD5
+
+=== Uno script per semplificare DFU-util ===
+
+DFUScript è sviluppato per aiutare gli utenti che usano più dispositivi con DFU-util tramite il terminale. Le informazioni riguardo DFU-util possono essere reperite a [[DFUScript]]
+
+=== Link correlati ===
+
+    * [[Qi]] alternativa a U-Boot
