@@ -109,6 +109,39 @@ More detailed manual for dfu-util is available here : [[Dfu-util]]
 
 GUI frontend for dfu-util (and more): [[NeoTool]]
 
+== Alternative: using nandwrite ==
+
+This approach involves writing the '''rootfs''' into nand directly on the phone from a system already running on it, not necessarily via usb from a computer.
+
+If you have a system running from a different partition that you intend to flash (for example sd card), you can use nandwrite to do the work, which is much faster (it takes about 30s to write a 59MB jffs2 image).
+
+Make sure you have nandwrite installed (on gentoo, it's in sys-fs/mtd-utils package)
+
+Also make sure that the host system has received correct partition list, for example for my stock Neo Freerunner partition list:
+
+<pre>
+#cat /proc/mtd
+dev:    size   erasesize  name
+mtd0: 00200000 00010000 "physmap-flash.0"
+mtd1: 00040000 00020000 "u-boot"
+mtd2: 00040000 00020000 "u-boot_env"
+mtd3: 00800000 00020000 "kernel"
+mtd4: 000a0000 00020000 "splash"
+mtd5: 00040000 00020000 "factory"
+mtd6: 0f6a0000 00020000 "rootfs"
+</pre>
+
+In this case, we're looking for 'rootfs' which according to above is mtd6. If you have it somewhere else, substitute mtd6 with whatever you have in the remainder of this section.
+
+You can test your nand for bad blocks by issuing '''nandtest /dev/mtd6''' '''(this is a destructive test !)'''
+
+First, put your .jffs2 file somewhere the phone system can read it
+
+Second, write the desired image into the nand this way: 
+'''nandwrite -m -p /dev/mtd6 /path/to/image.jffs2'''
+
+You're all done !
+
 == Flashing the Kernel ==
 
  Note: The phone needs to be in the U-boot bootup menu for this to work.
