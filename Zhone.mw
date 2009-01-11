@@ -8,6 +8,62 @@ Zhone is often told to be a demo application for the free softphone framework (F
 
 Since it mainly only sends commands over dbus to the daemons that actually do the work it is rather stable and even able to do multitasking like allowing you to read an SMS whilst using the phone.
 
+==Using VCF within Zhone==
+Arne sent a small [http://lists.openmoko.org/pipermail/support/2009-January/004394.html patch] that imports phone numbers from a VCF 3.0 address book. Since Zhone has problems with numbers containing + or -, below is a sligthly different patch that removes - and replaces a + with 00.
+
+In /usr/bin/zhone search for ''class pyphone_contacts(edje_group)''
+and modify the prepare function:
+
+    def prepare( self ):
+        if not self.ready and not self.busy:
+            file = open(os.environ.get('HOME')+"/addressbook.vcf", "r")
+            entries = []
+            entry_nr = 1
+            name = None
+            number = None
+            for line in file:
+                #if line.startswith("END:VCARD"):
+                if line.startswith("TEL;"):
+                    number = unicode(line.partition(":")[2].strip())
+                    number = number.replace('+','00')
+                    number = number.replace('-','')
+                    if name and number:
+                        entry = entry_nr, name, number
+                        entries.append(entry)
+                        entry_nr = entry_nr + 1
+                if line.startswith("END:VCARD"):
+                    name = None
+                    number = None
+                if line.startswith("N:"):
+                    name = unicode(line.partition(":")[2].replace(';',' ').strip(), "utf8", "utf8")
+                #if line.startswith("TEL;"):
+                #    number = unicode(line.partition(":")[2].strip())
+            file.close()
+            self.cbPhonebookReply(entries)
+ 
+            """
+            if dbus_object.gsm_device_obj:
+                logger.info( "retrieving phonebook..." )
+                dbus_object.gsm_sim_iface.RetrievePhonebook(
+                    "contacts",
+                    reply_handler=self.cbPhonebookReply,
+                    error_handler=self.cbPhonebookError
+                )
+                self.busy = True
+            else:
+                # Fake phonebook...
+                self.cbPhonebookReply( [
+                    (1, u'Kirk', '+023224433'),
+                    (2, u'Spock', '+034433463'),
+                    (3, u'McCoy', '+013244344'),
+                    (4, u'Scott', '+013244344'),
+                    (5, u'Uhura', '+013244344'),
+                    (6, u'Sulu', '+013244344'),
+                    (7, u'Chekov', '+456663443'),
+                ] )
+             """
+
+
 ==Installing Zhone on Ubuntu ==
 
 {{Warning|Adding those repositories (or the zhone installation?) may lead to problems on a Kubuntu 8.04 Hardy Heron.
