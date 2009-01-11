@@ -391,6 +391,13 @@ Finally run "chmod +x /usr/local/sbin/freerunner-usb-add.sh" to make it executab
 
 3. Now you can connect via ssh to 192.168.0.202
 
+Then, based on [http://sebastian-bergmann.de/index.php?url=archives/801-OpenMoko-Freerunner-and-Ubuntu.html#feedback these instructions], you should be able to setup masquerading by running the following commands on your Ubuntu PC: 
+
+<pre>sudo iptables -I INPUT 1 -s 192.168.0.202 -j ACCEPT
+sudo iptables -I OUTPUT 1 -s 192.168.0.200 -j ACCEPT
+sudo iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
+sudo bash -c 'echo 1 > /proc/sys/net/ipv4/ip_forward'</pre>
+
 === Ubuntu Issues ===
 
 Ubuntu 8.10 doesn't work as expected if you used /etc/network/interfaces to automate the connection.<br>
