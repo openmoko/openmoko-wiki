@@ -350,7 +350,9 @@ Udev automatically mounts the SD Card in /media/mmcblk0p1/ you can disable this 
 
  echo /dev/mmcblk >> /etc/udev/mount.blacklist
 
-=== Partitioning Limitations ===
+===Partitioning Hints===
+
+u-boot pre-2008-07-23 can only boot from FAT filesystems; if you update u-boot, you can boot from FAT or ext2.
 
 Since SD-cards are accessed as mmc device nodes (Major 179 of [http://www.lanana.org/docs/device-list/devices-2.6+.txt Linux Allocated Devices]) there are some things you should be aware of:
 
@@ -361,6 +363,8 @@ Since SD-cards are accessed as mmc device nodes (Major 179 of [http://www.lanana
  mknod -m 640 /lib/udev/devices/mmcblk0p5 b 179 5
  mknod -m 640 /lib/udev/devices/mmcblk0p6 b 179 6
  mknod -m 640 /lib/udev/devices/mmcblk0p7 b 179 7
+
+Since uboot only supports loading kernel images from the lower 2GB of a physical mmc device, it is recommended to put all kernel images in the first partition. Additionally this partition can come in handy to hold data shared amongst and symlinked from  installed distributions, e.g. PIM data.
 
 Booting a rootfs from an extended partition with uboot has been tested successfully.
 
