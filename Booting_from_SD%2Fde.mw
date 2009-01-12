@@ -306,15 +306,17 @@ Jetzt wird immer von der SDHC-Karte gebootetwenn der Power-Knopf gedrückt oder 
 
 U-Boot vor 2008-07-23 kann ausschließlich von FAT-Filesystemen booten. Neuere Versionen unterstützen auch ext2/ext3.
 
-Weil SD-Karten als mmc-Geräteknoten (unter Major 179, siehe [http://www.lanana.org/docs/device-list/devices-2.6+.txt| Linux Allocated Devices]) eingebunden werden, is folgendes zu beachten:
+Weil SD-Karten als mmc-Geräteknoten (unter Major 179, siehe [http://www.lanana.org/docs/device-list/devices-2.6+.txt Linux Allocated Devices]) eingebunden werden, is folgendes zu beachten:
 
-* Das [http://www.lanana.org/docs/device-list/devices-2.6+.txt| Numerierungsschema für Geräte] sieht für mmc-Geräte die minor numbers 1 bis 7 (/dev/mmcblk0p1 ... /dev/mmcblk0p7). Minor number 8 ist bereits der nächsten physikalischen SD-Karte (/dev/mmcblk1) vorbehalten. Daher sind maimal 7 Partitionen verfügbar.
+* Das [http://www.lanana.org/docs/device-list/devices-2.6+.txt Numerierungsschema für Geräte] sieht für mmc-Geräte die minor numbers 1 bis 7 (/dev/mmcblk0p1 ... /dev/mmcblk0p7). Minor number 8 ist bereits der nächsten physikalischen SD-Karte (/dev/mmcblk1) vorbehalten. Daher sind maimal 7 Partitionen verfügbar.
 
-*  Die rootfs aktueller Distributionen bringen die Geräteknoten mmcblk0p1 bis mmcblk0p4 schon mit. Um erweiterete Partitions (5 ...) zu verwenden, müssen weitere Knoten angelegt in /lib/udev/devices/ werden:
+*  Die rootfs aktueller Distributionen bringen die Geräteknoten mmcblk0p1 bis mmcblk0p4 schon mit. Um erweiterete Partitions (5 ...) zu verwenden, müssen weitere Knoten angelegt in /lib/udev/devices/ werden. Nach einem Neustart stehen sie in /dev zur Verfügung:
 
- mknod -m 640 /lib/udev/devices/mmcblk0p5 b 179 5
- mknod -m 640 /lib/udev/devices/mmcblk0p6 b 179 6
- mknod -m 640 /lib/udev/devices/mmcblk0p7 b 179 7
+  mknod -m 640 /lib/udev/devices/mmcblk0p5 b 179 5
+  mknod -m 640 /lib/udev/devices/mmcblk0p6 b 179 6
+  mknod -m 640 /lib/udev/devices/mmcblk0p7 b 179 7
+
+
 
 Weil uboot einen Kernel nur im unteren Bereich (2GB-Grenze) einer SD-Karte lesen kann, empfiehlt es sich alle Kernel in der ersten Partition unterzubringen. Bewährt hat sich auch, dort zentral die PIM-Daten abzulegen, um von allen installierten Distributionen per symlink darauf zuzugreifen.
 
