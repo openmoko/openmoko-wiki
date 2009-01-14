@@ -1,0 +1,114 @@
+{{Languages|SHR}}
+{{Distributions|SHR}}
+{{SHR}}
+
+== Warum SHR existiert ==
+
+Die [[SHR/de|Stable Hybrid Release]] (SHR) ist eine von der community entwickelte Distribution  die auf dem OpenmokoFramework ([[OpenmokoFramework/de|FSO]]) basiert und einige Standardanwendungen umfasst. Es sind verschiedene grafische Toolkits verfügbar, zum Beispiel GTK und EFL.  Angefangen hat SHR damit, die [[Openmoko2007.2/de]] GTK software mit dem neuen [[OpenmokoFramework/de|FSO]] zu kombinieren, aber die dinge haben sich geändern.
+
+----
+'''Ab hier gehts in Englisch weiter''''
+
+====Why not just use plain FSO?====
+[[FSO]] is the initiative by Mickey Lauer and crew to create a good [[D-Bus]] infrastructure which runs on the neos, among other devices.
+
+FSO is by far the most stable & usable release, if all you want is a phone.  (I mean *all*. It just has a dialer, which is a demo application.)
+
+FSO is never intended on its own to be a full image, it's just the infrastructure and a demo app.
+
+Other people are supposed to put a front end on FSO. So that's what we're doing.
+
+== Install ==
+
+Installing SHR is very easy. I will explain how to install the testing version of SHR. It is stable enough for a daily use. Stable version will be available soon ([http://blog.shr-project.org/ Stable announcement]), [http://build.shr-project.org/shr-unstable/images/om-gta02/ unstable] (for the adventurous testers) is also available.
+
+I suppose that you know how to use [http://wiki.openmoko.org/wiki/NeoTool NeoTool]
+
+You need to download two files from [http://build.shr-project.org/shr-testing/images/om-gta02/ here]
+
+- the kernel (uImage-om-gta02-latest.bin)
+
+- the root files system (jffs2 file)
+
+You can view the sources [http://git.shr-project.org/git/ here].
+
+== Connecting your FreeRunner to your computer ==
+For the next configuration steps, you will need to type some commands. It is much easear to type on a real keyboard than on a touch screen. 
+So you need to connect your FR to you computer, and make a bridge to internet.
+Use [http://wiki.openmoko.org/wiki/USB_Networking this page]
+
+== Setting local time ==
+As any linux system, the UTC time is used by the system. First of all, adjust this time:
+ date -u -s 010220052009
+ Fri Jan  2 20:05:00 UTC 2009
+
+Then, you need to "localise" your system. 
+Search for the appropriate country with:
+ opkg list | grep tzdata
+
+then install the one corresponding to your area. 
+opkg install tzdata-europe
+
+Then select your city (search the city availabled in /usr/share/zoneinfo/your-country)
+
+You can fully localise your system by installing the glibc-binary-localedata correponding to your langage. Search the ones available with:
+ opkg list | grep glibc-binary-localedata
+
+install with
+
+ opkg install glibc-binary-localedata-fr-fr
+
+(example for France)
+
+ ln -sf /usr/share/zoneinfo/Europe/Paris /etc/localtime
+
+== Changing root password ==
+SHR is shipped without root password (just press enter)
+
+This is very dangerous if you connect using wifi, or USB. You need to activate the root password:
+
+ passwd
+
+en type your selected password (2 times)
+
+== Customize the RingTone ==
+You need to have a file containing the RingTone you want for your FR. You can find some at [http://wiki.openmoko.org/wiki/Ringtones#svn.openmoko.org_ringtones RingTone]
+
+Then transfer it to your FR (i.e on the SD card):
+ scp file root@192.168.0.202:/media/card/
+
+Now you need to indicate that the FR must use this file for incoming calls. Modify /etc/freesmartphone/opreferences/conf/phone/default.yaml
+
+== Known Issues ==
+=== Phone ===
+
+GSM network is lost after one day of uptime: restart your FR once a day!
+
+=== Address Book ===
+
+SHR is not implementing a PIM (Personal Information Manager) yet. Work is in progress, but to included in SHR testing This has some consequences on daily use:
+
+- only contacts on the SIM card are available
+
+- it is not possible to import a Vcard file
+
+- Incoming call only display phone number (not the name of the calling person)
+
+- it is not possible to send message (SMS) using the name of the receiver. You need to remember his phone number
+
+=== GPS ===
+GPS is not activated at start up, and it is not possible to activated it using a graphical interface. 
+You need to type:
+ cd /etc/init.d/
+ fso-gpsd start
+
+
+
+
+== More Information ==
+
+Visit:
+* Blog: http://blog.shr-project.org
+* Trac: http://trac.shr-project.org
+* Git: http://git.shr-project.org
+* Buildhost: http://build.shr-project.org
