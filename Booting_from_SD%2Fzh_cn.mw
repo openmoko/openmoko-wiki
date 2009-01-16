@@ -1,34 +1,83 @@
-{{Languages|Boot from sd card}}
-=NOR in GTA02 history=
+{{Languages|Booting from SD}}
 __NOTOC__
 
-GTA 02内置了2MB的NOR flash。在DVT4(2008 四月在台北发布)之前，GTA02 NOR 在硬件上并没有做NOR写保护控制。在DVT4之后发布的软件包，及量产的产品，都包含了硬件的NOR写保护功能。你必须使用debug board v3 或之后的版本，来禁止NOR 写保护，之后就可以在GTA02上更新NOR。
+{{Editing|[[User:Coolcat|coolcat]]|30, Dec, 2008|本网页目前正在加强内容编辑中}}
 
-DVT4 单元及PVT1组件都会使用 "uImage"做为它的内核影像文件名，而不是使用"uImage.bin" 。你可以在启动画面上找到它的日期，了解你的硬件设备上所使用的版本。
 
-*你可以在以下的位置找到启动NOR写入功能的组件：
-[http://svn.openmoko.org/trunk/src/host/norwp/ 禁止NOR写保护]
 
-*在用户空间中执行的脚本可以写NOR [http://svn.openmoko.org/trunk/src/host/devirginator/flashnor Flash NOR script]
+== 运作原理 ==
 
-==历史版本==
+Openmoko GTA02 支持双系统开机。除了将映像档刻录到您的NAND外，你也可以利用将其它套件放在SD卡的方法，使用SD卡开机，加载另一个套件系统。
+
+在Neo中，我们使用 [[u-boot]] 做为bootloader。U-boot 负责硬件装置的功能运作，直到 Openmoko被启动加载装置为止。首先，它会将kernel image加载内存中，接着再传送一串参数到kernel。这些参数的工作是用来指定root filesystem的位置。
+
+在加载kernel 后，它会启动硬件，并且挂载root filesystem。之后 kernel 会执行 "/sbin/init"，它会处理其它的开机程序( 如显示屏幕)。
+
+不论是是使用内建的Flash开机，或者是使用SD Card开机，你所执行的开机顺序将会相同。唯一不同的地方是加载 kernel 的方法，及哪个装置被视为root filesystem，挂载到系统上。
+
+
+===U-boot 历史版本===
 
 * 20080226 初版
-* 20080305 修复DFU，并且删除NOR版本，使用NAND功能
-* 20080312 修复SD卡引导功能 (把内核影像文件名从uImage改为uImage.bin)
-* 20080320 修复u-boot direct drawing 500mA 、智能充电、量产版本。
+* 20080305 修复DFU，并且移除NOR版本，使用NAND功能
+* 20080312 修复自SD记忆卡启动功能 (从使用uImage 改为使用uImage.bin)
+* 20080320 修复u-boot direct drawing 500mA 、智慧充电、量产版本。
 
-=制作可引导的SD卡（GTA02)=
+而Neo FreeRunner在硬件设计上，提供了自NAND开机及自SD卡开机，不论您要使用哪种方式开机，开机程序都必须使用U-boot进行管理。
 
-以下为制作可引导的SD卡的操作步骤指引。它使用ubuntu 及一张干净的512MB Sandisk microSD 卡(缺省使用FAT16分区格式):
+而在Neo FreeRunner上，若您希望由SD卡中开机，您可以透过以下的步骤，达到这个目地。
 
-*Step 1, 缷载磁盘:
+:'''1. 制作可开机的SD卡。'''
+
+:'''2. 在FreeRunner中置入SD卡。'''
+
+:'''3. 选择自SD卡开机，即可完成此项工作。'''
+
+= 制作可开机的SD Card (GTA02) =
+
+== 取得压缩的 rootfs ==
+
+取得压缩的rootfs image 有二种方法，你可以使用OpenEmbedded 建立它，或者自Openmoko [http://downloads.openmoko.org downloads]下载它。
+
+
+=== 方法 1: 自Openmoko buildhost上下载rootfs/kernel 压缩文件 ===
+
+你可以自[[Latest Images|最近的图像文件]]选择及找到一组 rootfs/kernel 组合
+
+=== 方法 2: 使用OpenEmbedded建立tarfile ===
+
+另一个取得 tar 压缩文件的方法就是，你可以从OpenEmbedded 环境下建立此档案。
+
+如要制作OM-2007.2 ，你必须在 ''local.conf''下加入"tar" 字样：
+
+ IMAGE_FSTYPES = "jffs2 tar"
+
+之后，使用下列指令建立新的image：
+ 
+ bitbake openmoko-devel-image
+
+或者，你可以使用MokoMakefile： 
+ 
+ make openmoko-devel-image
+
+在完成了以上程序后，在配置的目录下会有一个名为 ''Openmoko-....tar'' 的档案，即为你所完成的rootfs
+
+=== 方法 3 : 转换 jff2 image为 tarfile ===
+
+你可以参考[[Userspace root image]] 取如何存取 jffs2 image的详细信息。
+
+== 制作可开机的SD 卡==
+以下为自SD中启动系统的操作步骤指引。它使用ubuntu 及一张干净的512 MB Sandisk microSD 卡：
+*'''Step 1, 缷载磁盘:'''
    
    sudo umount /media/disk-1
 
-接着将磁盘分为二个分区，第一个分区使用vfat，预留8MB空间存放uImage.bin，第二个分区(剩余的磁盘空间)使用ext2格式，用于存放rootfs 及目录使用。二个分区都使用primary partition 类型。
+{{note|你可以使用fdisk -l 取得相关磁盘信息}}
 
-*Step 2, fdisk:
+
+接着将磁盘分为二个分割区，第一个分割区使用vfat，预留 8MB空间给 uImage.bin，第二个扇区 (其余的磁盘空间) 使用ext2 格式，提供给rootfs 档案及目录使用。二个分割区都使用primary partition 类型。
+
+*'''Step 2, fdisk:'''
 
    sudo fdisk /dev/mmcblk0
 
@@ -58,43 +107,33 @@ DVT4 单元及PVT1组件都会使用 "uImage"做为它的内核影像文件名�
    Calling ioctl() to re-read partition table.
    Syncing disks.
 
-*Step 3 格式化:
+{{note|由于个人使用的作业环境之不同, 所使用的代号将有所不同,建议您使用df指令查看您的磁盘代号}}
 
-分别用vfat和ext2格式化上述两个分区
+*Step 3 格式化SD卡:
+
+请将二个分割区分别格式化为 vfat (放置uImage.bin)及 ext2 (放置 rootfs files)
 
    mkfs -t vfat /dev/mmcblk0p1
 
    mkfs -t ext2 /dev/mmcblk0p2
 
-*Step 4 拷贝内核以及rootfs到上述两个分区:
 
-uImage.bin为量产版所使用的内核映像文件，而uImage则为较早期版本所使用的文件(DVT4/PVT1)。必须解压缩rootfs.tar.gz来获得uImage.bin和rootfs。
-   tar -zxvf rootfs.tar.gz
+*Step 4 将kernel及rootfs 档案放置到二个分割区中：
 
-   sudo cp -r ./kernel/uImage.bin /media/disk-1
+你必须使用以下指令解压缩
 
-   sudo cp -r ./root_files/. /media/disk-2
+ mount /dev/mmcblk0p2 /mnt/moko
+ tar -C /mnt/moko/ -xzvf openmoko-devel-image-fic-gta01-20070313022035.rootfs.tar.gz
+
+   sudo cp -r /home/tony/Desktop/kernel/uImage.bin /media/disk-1
+
+   sudo cp -r /home/tony/Desktop/root_files/. /media/disk-2
 
    sync
 
-*Step 5 在Neo的菜单中，选择 boot from SD (在正确的 u-boot_env 内容下)
+*Step 5 自Neo的选单中，选择 '''boot from SD'''
 
-=开机环境 (GTA02)=
 
-在GTA02 NAND下有六个分割区。
-
-* 1. u-boot.bin
-* 2. u-boot_env
-* 3. kernel (uImage.bin)
-* 4. splash.gz (splash screen)
-* 5. Factory (BT/WLAN/Serial...etc)
-* 6. rootfs
-
-预设的GTA02 env 档案最原始的版本(2008/7)可以在下面的地址找到 [http://people.openmoko.org/tony_tu/GTA02/images/20080424_gta02_release/env-5secs.env 预设env檔]
-
-你可以使用下面的 env.new 档案，在开机画面中加入 boot from sd 功能选项。  [http://people.openmoko.org/tony_tu/GTA02/images/env_files/env.new u-boot environment].
-
-* ./dfu-util -a u-boot_env -R -D env.new
 
 =自NOR (GTA02)下开机=
 
@@ -108,7 +147,7 @@ uImage.bin为量产版所使用的内核映像文件，而uImage则为较早期�
 * 使用NOR开机，使用DFU
 * 使用NOR开机画面自SD卡开机
 
-=自NAND下开机 (GTA02)=
 
-[[Category:Flashing Openmoko/zh cn]]
-[[Category:System Developers/zh cn]]
+
+[[Category:Flashing Openmoko/zh tw]]
+[[Category:System Developers/zh tw]]
