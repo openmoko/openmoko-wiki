@@ -130,3 +130,61 @@ collections {
 }
 
 </pre>
+== Image ==
+Python source: image.py
+<pre>
+#!/usr/bin/env python
+
+import evas
+import ecore
+import ecore.evas
+import edje
+import sys
+import os
+
+ee = ecore.evas.SoftwareX11(w=400, h=400)
+edje_file = os.path.join(os.path.dirname(sys.argv[0]),"image.edj")
+
+c = edje.Edje(ee.evas,file=edje_file,group="test")
+c.size = ee.evas.size
+
+c.show()
+ee.show()
+ecore.main_loop_begin();
+</pre>
+
+Edje source: image.edc 
+<pre>
+images {
+    image: "image.png" COMP;
+}
+
+collections {
+    group {
+        name: "test";
+        parts {
+            part {
+                name: "image-block";
+                type: IMAGE;
+                
+                description {
+                   state: "default" 0.0;
+                   
+                   image { 
+                      normal: "image.png"; 
+                   }
+                   
+                   rel1 {
+                      relative: 0.25 0.25;
+                      offset: 0 0;
+                   }
+                   rel2 {
+                      relative: 0.75 0.75;
+                      offset: 0 0;
+                   }
+                }
+            }
+        }
+    }
+}
+</pre>
