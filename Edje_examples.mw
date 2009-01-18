@@ -1,0 +1,60 @@
+This page is meant for developers who are totally new enlightment and wish to have the simplest examples possible.
+This page does not describe howto setup a build environment or deployment instructions.
+
+== Compiling edj files ==
+Edje files are compiled with the edje_cc command, eg: edje_cc edje_file.edc 
+
+
+
+== Simple box with margin ==
+
+Python source:box_margin.py
+<pre>
+#!/usr/bin/env python
+
+import evas
+import ecore
+import ecore.evas
+import edje
+#import edje.decorators
+import sys
+import os
+
+ee = ecore.evas.SoftwareX11(w=480, h=640)
+edje_file = os.path.join(os.path.dirname(sys.argv[0]),"box_margin.edj")
+
+c = edje.Edje(ee.evas,file=edje_file,group="test")
+c.size = ee.evas.size
+
+c.show()
+ee.show()
+ecore.main_loop_begin();
+</pre>
+
+Edje source: box_margin.edc
+<pre>
+collections {
+   group {
+      name: "test";
+      	parts {
+	    part {
+	       name: "main";
+	       type: RECT;
+	       mouse_events: 0;
+	       description {
+	          state: "default" 0.0;
+	          color: 128 255 255 255;
+	          rel1 {
+	             relative: 0.0 0.0;
+	             offset: 10 10;
+	          }
+	          rel2 {
+	              relative: 1.0 1.0;
+	              offset: -10 -10;
+	          }
+	       }
+	    }
+        }
+    }
+}
+</pre>
