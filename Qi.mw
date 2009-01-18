@@ -5,11 +5,12 @@ Qi is a replacement for the [[Uboot|uBoot]] bootloader reduced to the core bootl
 [[Freerunner|GTA02 Hardware]] is recommended over [[Neo1973|GTA01]], since GTA02 does have a fallback u-boot in nor that provides DFU-Mode. Qi does NOT provide DFU-Mode so GTA01-Users will have no (easy) way to flash their device!
 
 ===Features===
-* booting from SD partitions (1st, 2nd or 3rd)
+* booting from primary SD partitions (1st, 2nd or 3rd)
 * booting from NAND
 * configuration by files in /boot
 * automatically choose correct kernel for device hardware
 * ext2/3 are supported
+* symlinks are supported
 
 ===Limitations===
 * no DFU-Mode
@@ -17,11 +18,11 @@ Qi is a replacement for the [[Uboot|uBoot]] bootloader reduced to the core bootl
 * FAT partitions are ignored
 
 ===Defaults===
-Qi assumes the rootfs to be on the same partition as the kernel. See [[#/boot-Partition|below]] for help with an extra /boot-partition.
+Qi assumes the rootfs to be on the same partition as the kernel. See [[#/boot-Partition|below]] for help with an extra /boot-partition. The default rootdelay is 1 second.
 
 ===Files===
 ; /boot/uImage-GTA0[123].bin
-: Kernel images, Qi will look for
+: Kernel images, Qi will look for (can be in either uImage (u-boot image) or zImage format, file name should still be uImage-GTA0[123].bin) 
 ; /boot/append-GTA0[123]
 : Kernel arguments
 ; /boot/noboot-GTA0[123]
@@ -56,11 +57,10 @@ Qi assumes the rootfs to be on the same partition as the kernel. See [[#/boot-Pa
 A short press on the power-button is enough to make Qi start booting.
 
 ===Choosing a Kernel===
-If a user presses the AUX button after successful partition mount and before start of the kernel pull (that is, while the red LED is on), this boot possibility is skipped (and GTA02 owners can feel vibration). If a user holds the POWER button just before start of the
-kernel, debugging parameters are added to the kernel command line and a lot of information is output to the screen.
+If a user presses the AUX button after successful partition mount and before start of the kernel pull (that is, while the red LED is on), this boot possibility is skipped (and GTA02 owners can feel vibration).
 
 ===Boot Menu===
-Qi's concept is to leave everything possible to Linux, that includes even the video init. Therefore Qi does NOT provide a boot menu. This should rather be implemented by a minimal Kernel, initramfs and menu system. It may be more comfortable for some users and may get them to switch from uboot to Qi. This does not exist yet.
+Qi's concept is to leave everything possible to Linux, that includes even the video init. Therefore Qi does NOT provide a boot menu. This should rather be implemented by a minimal Kernel, initramfs and menu system. It may be more comfortable for some users and may get them to switch from uboot to Qi. This does not exist yet (it's already implemented for some Angstrom-supported devices and for Zaurus, so porting should be relatively easy).
 
 ===Download and installation===
 The daily download is a ''qi-s3cXXXX-andy_somenumber.udfu'' file at http://people.openmoko.org/andy/ .
@@ -69,7 +69,7 @@ Use the file appropriate to your device:
 *GTA02 -> qi-s3c2442
 *GTA03 -> qi-s3c6410
 
-The installation should be flashing like;
+The installation should be flashing like (do it in DFU mode of NOR u-boot):
  # dfu-util -a u-boot -R -D qi-s3c6410-andy_8589b40295653557.udfu
 
 ===Source code===
@@ -97,8 +97,8 @@ for a rootfs on the second partition.
 ===SD Initialisation===
 If you don't specify loglevel=8 in append-GTAXX, and booting fails with a "VFS: Cannot open root device "mmcblk0p1" or unknown-block(2,0)", the SD card needs a little bit more time to initialise.
 
-Put a "rootdelay=" in append-GTAXX like so:
- rootdelay=1
+Put a "rootdelay=5" in append-GTAXX like so:
+ rootdelay=5
 
 == Testing speed improvements ==
 
@@ -122,12 +122,5 @@ Booting identical setup with Qi flashed over uBoot:
 * 1:54 finished booting
 
 So for this particular configuration, it reduced time-to-desktop by about 28%, about 44 seconds.  Surprisingly, the later segments of booting (desktop) were also noticeably faster than with uBoot - One would have expected just the fist stages up until init (kernel finished establishing itself) to be faster.
-
-== Bugs ==
-
-* Qi won't boot the 'first try' after power restored - the tester didn't count that first 10 seconds for Qi to be fair to its booting speed, not penalize it for what appears to be a bug that bears no relation to actual boot speed).
-* The current (Oct. 12, 2008) 2.6.27 kernel does not boot from the build-in flash NAND. It only works from the uSD boot on ext3. If one tries to boot it from the flash, then AUX red LED blinks ~4/sec. This means kernel panic... It's panicking because it has no rootfs because it can't mount the jffs2 because of the CRC errors because there is a bug that the mtd are not done properly.
-* Qi often doesn't want to resume after suspend.
-* Qi is able to load kernels larger than 2MB correctly, uBoot has a bug.
 
 [[Category:System Developers]]
