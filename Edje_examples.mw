@@ -192,3 +192,113 @@ collections {
     }
 }
 </pre>
+== Signals ==
+Types of signals
+ * Handle signal inside edc, e.g: program: "button_hot";
+ * Handle event directly within the python code, e.g: c.signal_callback_add("mouse,clicked,1","button1",button_clicked)
+ * Resize callback, e.g: ee.callback_resize = resize_callback
+ * Custom signal emitted in edc program, e.g: action: SIGNAL_EMIT "button_clicked_signal" "button1" and c.signal_callback_add("button_clicked_signal","button1",button_clicked_signal)
+
+
+Python source: signal.py
+<pre>
+#!/usr/bin/env python
+
+import evas
+import ecore
+import ecore.evas
+import edje
+import edje.decorators;
+import sys
+import os
+
+ee = ecore.evas.SoftwareX11(w=400, h=400)
+edje_file = os.path.join(os.path.dirname(sys.argv[0]),"signal.edj")
+
+c = edje.Edje(ee.evas,file=edje_file,group="test")
+c.size = ee.evas.size
+
+# Mouse click signal from part "button"
+def button_clicked(obj, signal,source):
+    print "button clicked";
+c.signal_callback_add("mouse,clicked,1","button1",button_clicked)
+
+# Resize callback
+def resize_callback(ee):
+    c.size = ee.evas.size
+    
+ee.callback_resize = resize_callback
+
+
+def button_clicked_signal(obj,signal,source):
+    print "Custom signal emitted after button clicked";
+
+
+c.signal_callback_add("button_clicked_signal","button1",button_clicked_signal)
+
+c.show()
+ee.show()
+ecore.main_loop_begin();
+</pre>
+
+Edje source: signal.edc
+<pre>
+collections {
+    group {
+      name: "test";
+        parts {
+            part {
+                name: "button1";
+                type: RECT;
+                mouse_events: 1;
+                description {
+                   state: "default" 0.0;
+                   color: 0 0 255 128;
+                   rel1 {
+                      relative: 0.25 0.25;
+                      offset: 10 10;
+                   }
+                   rel2 {
+                      relative: 0.75 0.75;
+                      offset: -10 -10;
+                   }
+                }
+                description {
+                    state: "hot" 0.0;
+                    inherit: "default" 0.0;
+                    color: 0 0 255 255;
+                }
+            }
+        }
+        programs {
+            program {
+                name: "button_hot";
+                signal: "mouse,in";
+                source: "button1";
+                
+                action: STATE_SET "hot" 0.0;
+                target: "button1";
+            }
+            program {
+                name: "button_cold";
+// Input
+                signal: "mouse,out";
+                source: "button1";
+                
+// Output
+                action: STATE_SET "default" 0.0;
+                target: "button1";
+                
+            }
+// Program who emits an signal when mouse clicked.            
+            program {
+                name:"button_clicked_signal_program";
+                signal: "mouse,clicked,1";
+                source: "button1";
+                
+                
+                action: SIGNAL_EMIT "button_clicked_signal" "button1";
+        }
+    }
+}
+</pre>
