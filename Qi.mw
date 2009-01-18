@@ -16,6 +16,9 @@ Qi is a replacement for the [[Uboot|uBoot]] bootloader reduced to the core bootl
 * no boot menu
 * FAT partitions are ignored
 
+===Defaults===
+Qi assumes the rootfs to be on the same partition as the kernel. See [[#/boot-Partition|below]] for help with an extra /boot-partition.
+
 ===Files===
 ; /boot/uImage-GTA0[123].bin
 : Kernel images, Qi will look for
@@ -25,22 +28,39 @@ Qi is a replacement for the [[Uboot|uBoot]] bootloader reduced to the core bootl
 : make Qi skip this partition
 
 ===Boot Order===
- # SD Partition 1
- # SD Partition 2
- # SD Partition 3
- # NAND
- # Memory Test
+# SD Partition 1
+# SD Partition 2
+# SD Partition 3
+# NAND
+# Memory Test
 
 ===LED and Vibrator Signals===
-* One Blue shine every ~10 second: did not found any valid kernel to boot
+* AUX LED is turned on either on:
+** Successful partition mount
+** Successful kernel pull
+** Successful initramfs pull
+* AUX LED is turned off and vibrator runs briefly either on:
+** Fail of kernel pull
+** Fail of initramfs pull
+** Fail of mount partition
+** Skipping of current boot possibility
+* AUX LED is turned off either on:
+** Start of the kernel
+** Start of the mem test
+** Start of the kernel pull
+** Start of the initramfs pull
+* One Blue shine every ~10 second: did not find any valid kernel to boot
 * About four RED shines per second: kernel panic.
+
+===Booting===
+A short press on the power-button is enough to make Qi start booting.
+
+===Choosing a Kernel===
+If a user presses the AUX button after successful partition mount and before start of the kernel pull (that is, while the red LED is on), this boot possibility is skipped (and GTA02 owners can feel vibration). If a user holds the POWER button just before start of the
+kernel, debugging parameters are added to the kernel command line and a lot of information is output to the screen.
 
 ===Boot Menu===
 Qi's concept is to leave everything possible to Linux, that includes even the video init. Therefore Qi does NOT provide a boot menu. This should rather be implemented by a minimal Kernel, initramfs and menu system. It may be more comfortable for some users and may get them to switch from uboot to Qi. This does not exist yet.
-
-===Choosing a Kernel===
-Pressing AUX after powering the device skips the current boot device. Acknowledged by vibrator.
-TBD properly.
 
 ===Download and installation===
 The daily download is a ''qi-s3cXXXX-andy_somenumber.udfu'' file at http://people.openmoko.org/andy/ .
@@ -67,6 +87,12 @@ If it's SD Card boot, just create a text file, e.g., for a [[GTA02]] use
 on the rootfs in question, put in there
  console=tty0 loglevel=8
 and you'll see the messages on boot.  If it's NAND right now you need to edit the default commandline in Qi for gta02.
+
+===/boot-Partition===
+If you have a Partition for /boot, you will need to add a argument for the kernel to know which partition is the rootfs.
+Add this in /boot/append-GTA0[123]:
+ root=/dev/mmcblk0p2
+for a rootfs on the second partition.
 
 ===SD Initialisation===
 If you don't specify loglevel=8 in append-GTAXX, and booting fails with a "VFS: Cannot open root device "mmcblk0p1" or unknown-block(2,0)", the SD card needs a little bit more time to initialise.
@@ -103,10 +129,5 @@ So for this particular configuration, it reduced time-to-desktop by about 28%, a
 * The current (Oct. 12, 2008) 2.6.27 kernel does not boot from the build-in flash NAND. It only works from the uSD boot on ext3. If one tries to boot it from the flash, then AUX red LED blinks ~4/sec. This means kernel panic... It's panicking because it has no rootfs because it can't mount the jffs2 because of the CRC errors because there is a bug that the mtd are not done properly.
 * Qi often doesn't want to resume after suspend.
 * Qi is able to load kernels larger than 2MB correctly, uBoot has a bug.
-
-== LED codes summary ==
-
-* One Blue shine every ~10 second: did not found any valid kernel to boot
-* About four RED shines per second: kernel panic.
 
 [[Category:System Developers]]
