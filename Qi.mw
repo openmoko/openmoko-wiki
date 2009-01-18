@@ -1,23 +1,48 @@
-Qi is a boot manager. It is designed to replace [[Uboot|uBoot]]. But Qi will be simpler and faster.
+Qi is a replacement for the [[Uboot|uBoot]] bootloader reduced to the core bootloader functions.
 
-==Concept==
-Qi's concept is it leaves everything possible to Linux, that includes even the video init. Therefore Qi does NOT provide a boot menu.
+==About Qi==
+===Requirements===
+[[Freerunner|GTA02 Hardware]] is recommended over [[Neo1973|GTA01]], since GTA02 does have a fallback u-boot in nor that provides DFU-Mode. Qi does NOT provide DFU-Mode so GTA01-Users will have no (easy) way to flash their device!
 
-The primary NOR uBoot menu on [[Freerunner]] (GTA02) (Aux first, power second, wait for menu) still works. The NAND uBoot (Power first, aux second, wait for menu) is replaced with Qi. There will be no output on screen from Qi expect the kernel booting shortly after.
+===Features===
+* booting from SD partitions (1st, 2nd or 3rd)
+* booting from NAND
+* configuration by files in /boot
+* automatically choose correct kernel for device hardware
+* ext2/3 are supported
 
-[[Neo 1973]] (GTA01) has no NOR flash. Therefore it jumps directly into Qi. There is no fallback bootmenu and no DFU-Mode.
+===Limitations===
+* no DFU-Mode
+* no boot menu
+* FAT partitions are ignored
 
-==Partitions==
-Qi will boot from any kernel named uImage-GTA0[123...].bin in the /boot folder in the root of an ext2 or ext3
-partition on the uSD card.
-* Qi looks for a kernel in the first, second and third partition, silently ignoring FAT partitions.
-* Qi expects the / (root) filesystem to be on the same partition as /boot ([http://permalink.gmane.org/gmane.comp.hardware.smartphones.pkg-fso-maint/104 half true]).
-* If both uImage-GTA02.bin and uImage-GTA03.bin files are present, Qi loads the right one for the machine.
+===Files===
+; /boot/uImage-GTA0[123].bin
+: Kernel images, Qi will look for
+; /boot/append-GTA0[123]
+: Kernel arguments
+; /boot/noboot-GTA0[123]
+: make Qi skip this partition
 
-Failing to find a kernel in the SD card, Qi will boot from the kernel in NAND (if the kernel works of course, see below). Failing to find a valid kernel, Qi perform a memory test. It means that one can either move kernels out of the way to get the memory test, or make an SD Card just with normal Qi on it and no kernels to get a memory test.
-* Up to Nov. 28th, Qi would blink the blue Power LED a fraction of a second every 10 secs or so to say ''nothing valid to boot''.
+===Boot Order===
+ # SD Partition 1
+ # SD Partition 2
+ # SD Partition 3
+ # NAND
+ # Memory Test
 
-== Download and installation ==
+===LED and Vibrator Signals===
+* One Blue shine every ~10 second: did not found any valid kernel to boot
+* About four RED shines per second: kernel panic.
+
+===Boot Menu===
+Qi's concept is to leave everything possible to Linux, that includes even the video init. Therefore Qi does NOT provide a boot menu. This should rather be implemented by a minimal Kernel, initramfs and menu system. It may be more comfortable for some users and may get them to switch from uboot to Qi. This does not exist yet.
+
+===Choosing a Kernel===
+Pressing AUX after powering the device skips the current boot device. Acknowledged by vibrator.
+TBD properly.
+
+===Download and installation===
 The daily download is a ''qi-s3cXXXX-andy_somenumber.udfu'' file at http://people.openmoko.org/andy/ .
 Use the file appropriate to your device:
 *GTA01 -> qi-s3c2410
@@ -31,7 +56,11 @@ The installation should be flashing like;
 git://git.openmoko.org/git/qi.git , http://git.openmoko.org/?p=qi.git;a=summary .
 One can also just use strings(1) on the .udfu file to get an idea of where Qi currently looks for files.
 
-==Enabling console messages==
+===README===
+The latest README file can be found in the git as well:http://git.openmoko.org/?p=qi.git;a=blob;f=README;hb=HEAD
+
+==Tips, Tricks, Tweaks==
+===Enabling console messages===
 [http://lists.openmoko.org/pipermail/openmoko-kernel/2008-November/006812.html]
 If it's SD Card boot, just create a text file, e.g., for a [[GTA02]] use
  /boot/append-GTA02
@@ -39,7 +68,7 @@ on the rootfs in question, put in there
  console=tty0 loglevel=8
 and you'll see the messages on boot.  If it's NAND right now you need to edit the default commandline in Qi for gta02.
 
-==SD Initialisation==
+===SD Initialisation===
 If you don't specify loglevel=8 in append-GTAXX, and booting fails with a "VFS: Cannot open root device "mmcblk0p1" or unknown-block(2,0)", the SD card needs a little bit more time to initialise.
 
 Put a "rootdelay=" in append-GTAXX like so:
