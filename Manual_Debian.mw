@@ -245,13 +245,13 @@ Here comes the phone functionality - just add this line into the "serial devices
 
 If you just want to run random debian programs without completely booting to debian you can use the following minimal steps:
 
-on desktop:
+On desktop:
 
  sudo debootstrap --arch armel --foreign sid sid
  sudo tar --create --gzip --file sid.tar.gz sid
  nc -w 10 -l -p 1234 < sid.tar.gz
 
-on neo:
+On neo:
 
  cd /media/card
  nc 192.168.0.200 1234 | tar --extract --gzip --file -
@@ -261,6 +261,13 @@ on neo:
  mount -t none -o bind /tmp /media/card/sid/tmp
  chroot /media/card/sid /deboostrap/debootstrap --second-stage
  cp /etc/resolv.conf /media/card/sid/etc
+
+On neo edit the file <tt>/media/card/sid/etc/apt/sources.list</tt> and add the following line:
+
+ deb http://ftp.de.debian.org/debian/ sid main non-free contrib
+
+On neo:
+
  chroot /media/card/sid apt-get update
  chroot /media/card/sid apt-get install mplayer
  chroot /media/card/sid mplayer http://relay.slayradio.org:8000/
