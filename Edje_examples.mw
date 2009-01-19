@@ -308,3 +308,64 @@ collections {
     }
 }
 </pre>
+== Embedded etk widget ==
+Python code: widget_embed.py
+<pre>
+#!/usr/bin/env python
+
+import evas
+import ecore
+import ecore.evas
+import edje
+import sys
+import os
+import etk
+
+ee = ecore.evas.SoftwareX11(w=400, h=200)
+edje_file = os.path.join(os.path.dirname(sys.argv[0]),"widget_embed.edj")
+
+c = edje.Edje(ee.evas,file=edje_file,group="test")
+c.size = ee.evas.size
+
+embed = etk.Embed(ee.evas)
+entry = etk.Entry()
+embed.add(entry)
+
+
+c.part_swallow("input",embed.object);
+
+embed.show_all()
+c.show()
+ee.show()
+
+ecore.main_loop_begin();
+</pre>
+
+Edje source: widget_embed.edc
+<pre>
+collections {
+    group {
+        name: "test";
+        parts {
+            part {
+                name: "input";
+                type: SWALLOW;
+                
+                description {
+                   state: "default" 0.0;
+                   
+                   rel1 {
+                      relative: 0.25 0.25;
+                      offset: 0 0;
+                   }
+                   rel2 {
+                      relative: 0.75 0.75;
+                      offset: 0 0;
+                   }
+                }
+            }
+        }
+    }
+}
+
+</pre>
