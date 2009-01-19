@@ -49,6 +49,40 @@ You can handle the file with sqlite (see [[Import Vcf Contacts]]:
 <pre>
   sqlite3 ~/Applications/Qtopia/qtopia_db.sqlite
 </pre>
+For parsing the ICS-File on the OpenMoko device you need to install Perl
+<pre>opkg install perl</pre>
+<b>Remark:</b> The following items show a possbible concept and OpenSource resources that can be used to realized.
+
+Lets name the perl scripts <tt>ics2qtcal.pl</tt> and <tt>qtcal2ics.pl</tt>.
+* <tt>ics2qtcal.pl</tt> will parse the ics-file and import it to the qtopia PIM storage. The script should have 2 parameters: (Par1) Input ics-file e.g. <tt>std.ics</tt> (Par2) Ouput sqlite-file - e.g. <tt>qtopia_db.sqlite</tt>.
+* <tt>qtcal2ics.pl</tt> will export the qtopia PIM storage to an ics-file. The script should have 2 parameters: (Par1) Input sqlite-file - e.g. <tt>qtopia_db.sqlite</tt>  (Par2) Ouput ics-file - e.g. <tt>std.ics</tt>.
+ 
+For parsing the ICS-file there are several CPAN perl libraries available 
+* Date::iCal [http://search.cpan.org/~rbow/Date-ICal-1.72/lib/Date/ICal.pm http://search.cpan.org/~rbow/Date-ICal-1.72/lib/Date/ICal.pm] 
+* Tie::iCal [http://search.cpan.org/~bsdz/Tie-iCal-0.14/lib/Tie/iCal.pm http://search.cpan.org/~bsdz/Tie-iCal-0.14/lib/Tie/iCal.pm] will create an array of hashes to handle all attributes of an ical record. 
+
+After parsing a file with SQL-Commands can be generated for the ics input file  of that are used by <tt>sqlite3</tt> to import the dates in the qtopia PIM storage <tt>ics2qtcal.pl</tt>. In a first step of realisation of <tt>ics2qtcal.pl</tt>  the old qtopia-db can be backuped and a full import of.
+
+When all scripts are in place generate an icon in <tt>/usr/share/application</tt> that call and rsync command from to Openmoko device to copy the kontact-KDE ics-file parse it and copy it to the qtopia database.
+<pre>
+ #!/usr/bin/sh
+ rsync -avz -e ssh user@192.168.0.200:/home/myhome/.kde/share/apps/korganizer/std.ics ~/Applications/Qtopia/std.ics
+ cd ~/Applications/Qtopia
+ mv qtopia_db.sqlite qtopia_db.sqlite.backup
+ perl /path_to_the_script/ics2qtcal.pl std.ics qtopia_db.sqlite
+</pre> 
+192.168.0.200 is the IP of the desktop computer. It can be replaced by any IP you have your home directory with the ICS file. You need to enter a password so far. Automate this process see [http://troy.jdmz.net/rsync/index.html http://troy.jdmz.net/rsync/index.html] for using rsync and ssh without authentication.
+
+The perl script can call the <tt>sqlite3</tt> and import the calendar data in the sqlite-database.
+To avoid to have the same events 2 times in the PIM storage the existing OpenMoko database should be exported first via <tt>qtcal2ics.pl</tt> removing events from the SQL imput that already exist in the SQL database. Records that have changed should be updated via SQL commands.
+<pre>
+ ....
+ cd ~/Applications/Qtopia
+ mv qtopia_db.sqlite qtopia_db.sqlite.backup
+ perl /path_to_the_script/qtcal2ics.pl qtopia_db.sqlite qtopia.ics 
+ perl /path_to_the_script/ics2qtcal.pl std.ics qtopia_db.sqlite qtopia.ics
+</pre> 
+Remark: The perl scripts mentioned above are not programmed yet (19.01.2009), they show a solution for syncing. The development of the perl scripts <tt>ics2qtcal.pl</tt> and <tt>qtcal2ics.pl</tt> mentioned above can be helpful in converting ical formats to and from the OpenMoko device anyway.
 
 == Questions and Answers ==
 * Q: When will an Embedded EDS specification be available? i.e. How I can get applications to store and retrieve data from in it, in a compatible way?
