@@ -63,18 +63,28 @@ For parsing the ICS-file there are several CPAN perl libraries available
 
 After parsing a file with SQL-Commands can be generated for the ics input file  of that are used by <tt>sqlite3</tt> to import the dates in the qtopia PIM storage <tt>ics2qtcal.pl</tt>. In a first step of realisation of <tt>ics2qtcal.pl</tt>  the old qtopia-db can be backuped and a full import of.
 
-When all scripts are in place generate an icon in <tt>/usr/share/application</tt> that call and rsync command from to Openmoko device to copy the kontact-KDE ics-file parse it and copy it to the qtopia database.
+When all scripts are in place generate an icon in <tt>/usr/share/application</tt> that call and rsync command from to Openmoko device to copy the kontact-KDE ics-file parse it and copy it to the qtopia database. Create a directory <tt>remotecal</tt> in <tt>~/Applications/Qtopia</tt>
+<pre>
+  mkdir ~/Applications/Qtopia/remotecal
+</pre>
+All temporary data during the import/export process can be stored in that directory.
+The ics-File is on the Linux-Computer with IP <tt>192.168.0.200</tt> and an accout <tt>user</tt>. Lets assume that the ics-file is stored by the PIM <i>Kontact</i> in the directory <tt>/home/user/.kde/share/apps/korganizer/</tt> on an Linux maschine with SSH daemon running, that is not blocked by the firewall (check firewall on Desktop computer). KDE-Kontact stores the calendar data in <tt>std.ics</tt>. This file should be used to update PIM storage. To automate this task a shell script might be useful. Lets call the following script for syncing the ics-file to OpenMoko device <tt>sync4ics2openmoko.sh</tt>.
 <pre>
  #!/usr/bin/sh
  cd ~/Applications/Qtopia
- rsync -avz -e ssh user@192.168.0.200:/home/myhome/.kde/share/apps/korganizer/std.ics std.ics
+ rsync -avz -e ssh user@192.168.0.200:/home/user/.kde/share/apps/korganizer/std.ics std.ics
  mv qtopia_db.sqlite qtopia_db.sqlite.backup
  perl /path_to_the_script/ics2qtcal.pl std.ics qtopia_db.sqlite
 </pre> 
-192.168.0.200 is the IP of the desktop computer. It can be replaced by any IP you have your home directory with the ICS file. You need to enter a password so far. Automate this process see [http://troy.jdmz.net/rsync/index.html http://troy.jdmz.net/rsync/index.html] for using rsync and ssh without authentication.
+You can execute the script by calling:
+<pre>
+ sh /path_to_the_script/sync4ics2openmoko.sh
+</pre>
+When you call the script you have to enter the password of the aacount <tt>user</tt> on the desktop computer. 192.168.0.200 is the IP of the desktop computer. It can be replaced by any IP you have your home directory with the ICS file on. Because you need to enter a password so far, it might be inconvient for an automated update. To automate this process see [http://troy.jdmz.net/rsync/index.html http://troy.jdmz.net/rsync/index.html] for using rsync and ssh without authentication.
+<tt>sync4ics2openmoko.sh</tt> calls the perl script <tt>ics2qtcal.pl</tt>. 
+The perl script <tt>ics2qtcal.pl</tt> generates the SQL commands, store the commands in the file <tt>import.sql</tt> and calls the <tt>sqlite3</tt> and import the calendar data in the sqlite-database via executing the SQL-Commands in <tt>import.sql</tt>.
 
-The perl script can call the <tt>sqlite3</tt> and import the calendar data in the sqlite-database.
-To avoid to have the same events 2 times in the PIM storage the existing OpenMoko database should be exported first via <tt>qtcal2ics.pl</tt> removing events from the SQL imput that already exist in the SQL database. Records that have changed should be updated via SQL commands.
+To avoid to have the same events 2 times in the PIM storage the existing OpenMoko database should be exported first via <tt>qtcal2ics.pl</tt> to the file <tt>qtopia</tt>  removing events from the SQL imput that already exist in the SQL database. Records that have changed should be updated via SQL commands.
 <pre>
  ....
  mv qtopia_db.sqlite qtopia_db.sqlite.backup
