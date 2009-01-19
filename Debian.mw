@@ -573,39 +573,39 @@ Consider a swap partition [http://lists.openmoko.org/pipermail/community/2008-Se
 
 == Known Issues ==
 
-'''apt-get segmentation fault''' Whenever you get a segmentation fault while using apt-get or aptitude, clean the database so it will rebuild it
-  rm /var/cache/apt/*.bin
-
 == Problem with usage install.sh ==
 
 If partition table creation passes with an error use the following patch:
 
 <pre>
---- install.sh  Sat Jan 10 08:41:13 2009
-+++ install-cbd.sh      Sat Jan 10 08:40:57 2009
+--- install.sh	2009-01-19 17:36:26.000000000 +0300
++++ install_good.sh	2009-01-19 17:44:51.000000000 +0300
 @@ -405,9 +405,9 @@
  
  echo " * Waiting for partitions to appear"
  SLEEP_SECONDS=3
 -while ! ([ "$SINGLE_PART" = "true" ] && test -e ${SD_DEVICE}p1) ||\
--       test -e ${SD_DEVICE}p1 -a -e ${SD_DEVICE}p2; do
--       if [ "$SLEEP_SECONDS" = 15 ]; then
+-	test -e ${SD_DEVICE}p1 -a -e ${SD_DEVICE}p2; do
+-	if [ "$SLEEP_SECONDS" = 15 ]; then
 +while ! (([ "$SINGLE_PART" = "true" ] && test -e ${SD_DEVICE}p1) ||\
-+       test -e ${SD_DEVICE}p1 -a -e ${SD_DEVICE}p2); do
-+       if [ "$SLEEP_SECONDS" = 30 ]; then
-                echo "E: Partitioning has failed, partitions have not been created"
-                exit 1
-        fi
-@@ -796,7 +796,7 @@
- # Stage unmount
- #
- echo "Unmounting microSD card partitions"
++	test -e ${SD_DEVICE}p1 -a -e ${SD_DEVICE}p2); do
++	if [ "$SLEEP_SECONDS" = 30 ]; then
+ 		echo "E: Partitioning has failed, partitions have not been created"
+ 		exit 1
+ 	fi
+@@ -598,7 +598,7 @@
+ rootfs	/		auto	defaults,errors=remount-ro,noatime	0 1
+ __END__
+ 
 -if ![ "$SINGLE_PART" = "true" ]; then
 +if [ "$SINGLE_PART" != "true" ]; then
-        umount $INST_DIR/boot
- fi
- umount $INST_DIR
+ cat >> $INST_DIR/etc/fstab <<__END__
+ /dev/mmcblk0p1	/boot	auto	defaults,noatime			0 2
+ __END__
 </pre>
+
+'''apt-get segmentation fault''' Whenever you get a segmentation fault while using apt-get or aptitude, clean the database so it will rebuild it
+  rm /var/cache/apt/*.bin
 
 [[Category:Debian]]
 
