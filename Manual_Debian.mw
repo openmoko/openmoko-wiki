@@ -248,13 +248,13 @@ If you just want to run random debian programs without completely booting to deb
 on desktop:
 
  sudo debootstrap --arch armel --foreign sid sid
- sudo tar cjf sid.tar.bz2 sid
- nc -w3 -lp1234 < sid-arm.tar.bz2
+ sudo tar --create --gzip --file sid.tar.gz sid
+ nc -w3 -lp1234 < sid.tar.gz
 
 on neo:
 
  cd /media/card
- nc 192.168.0.200 1234 | tar -x -j -f -
+ nc 192.168.0.200 1234 | tar --extract --gzip --file -
  mount -t none -o bind /dev /media/card/sid/dev
  mount -t none -o bind /proc /media/card/sid/proc
  mount -t none -o bind /sys /media/card/sid/sys
@@ -264,7 +264,6 @@ on neo:
  chroot /media/card/sid apt-get update
  chroot /media/card/sid apt-get install mplayer
  chroot /media/card/sid mplayer http://relay.slayradio.org:8000/
-
 
 == Using Xglamo on the FreeRunner ==
 
