@@ -1,3 +1,5 @@
+''Note -- The guidelines on this page work for the Neo FreeRunner too -- at least they do if you have a recent kernel installed. (See notes below on bluescreen of death before proceeding.)''
+
 This page tries to collect some information on how to use your Neo1973 together with a computer running a Microsoft(R) Windows(TM) series operating system.
 
 Please note that this is not really supported, and that the Openmoko developers themselves only use Linux for testing.
@@ -10,10 +12,9 @@ Also note that Windows appears to not recognize and communicate with the neo as 
 
 How to connect to Windows XP via Bluetooth is described here: [[Manually_using_Bluetooth#Bluetooth_networking_with_a_Windows_XP_system]]
 
-
 === USB Ethernet emulation ===
-{{note|With some recent versions of FSO or SHR with kernel 2.6.28 and Windows XP, you might get a Blue Screen Of Death (BSOD) as soon as you connect your Freerunner. ( https://docs.openmoko.org/trac/ticket/2211 )}}
 
+{{note|With some recent versions of FSO or SHR with kernel 2.6.28 and Windows XP, you might get a Blue Screen Of Death (BSOD) as soon as you connect your Freerunner. ( https://docs.openmoko.org/trac/ticket/2211 )}}
 
 {{note|For Windows XP USB RNDIS networking ''finally works'' as of Kernel 2.6.22.5-moko11 using the procedure described below.}}
 
@@ -25,11 +26,35 @@ How to connect to Windows XP via Bluetooth is described here: [[Manually_using_B
 # Windows may complain of "reduced network connectivity". This is because it expects to be able to get an address automatically from the Neo1973 and it doesn't provide one in the default setup. To fix this, see the next step.
 # Go into the Windows network configuration for the new USB networking adapter and set the IP address of the interface to 192.168.0.200.
 
-You should now be able to connect to your Neo1973 on 192.168.0.202 via ssh (e.g. putty)
+If you have trouble using the Windows tools to set the IP address (on XP it would not allow me to type in the full ip address!), use a command line.
+List all available interfaces to get the adapter name to use:
 
-Getting a Blue Screen of Death (BSOD) in windows XP? Some extra drivers are automatically installed with new devices (e.g. "SecureRemoteMiniPort").  Try disabling them in the device manager while the Neo is not connected.  You need to select "Show hidden devices" in the view menu to see them. Then reconnect the Neo.
+ $ '''netsh interface ip show config'''
+ ''...lots of stuff here not shown, at the bottom I see my USB interface...''
+ Configuration for interface "Local Area Connection 11"
+    DHCP enabled:                         Yes
+    InterfaceMetric:                      0
+    DNS servers configured through DHCP:  None
+    WINS servers configured through DHCP: None
+    Register with which suffix:           Primary only
+ 
+Now that you know the name of the ethernet adapter, use the command to configure it.
 
-=== Connection to the Internet ===
+ $ '''netsh interface ip set address name="Local Area Connection 11" static 192.168.0.200 255.255.255.0'''
+ Ok.
+
+You should now be able to connect to your smart phone on 192.168.0.202 via ssh (e.g. putty). The distribution you have might not have an ssh server running on it but if you still have a command line window open, you can ping the phone to make sure it's connected.
+
+ $ '''ping 192.168.0.202'''
+ 
+ Pinging 192.168.0.202 with 32 bytes of data:
+ 
+ Reply from 192.168.0.202: bytes=32 time=3ms TTL=64
+ etc... good news!
+
+'''Getting a Blue Screen of Death (BSOD) in windows XP?''' Some extra drivers are automatically installed with new devices (e.g. "SecureRemoteMiniPort").  Try disabling them in the device manager while the Neo is not connected.  You need to select "Show hidden devices" in the view menu to see them. Then reconnect the Neo.
+
+== Connection to the Internet ==
 
 If you want to connect to the internet from your Neo via Windows XP, e.g. for doing ipkg update/upgrade, you need to set up IP forwarding and routing properly.
 
@@ -61,7 +86,7 @@ On Windows go to Network settings, ''pull out LAN cable'' (so there's no connect
 # Right click on openmoko network and goto Properties. Change the ip address of openmoko network to 192.168.0.200
 # Login to openmoko using Putty (ssh client for windows) 192.168.0.202
 
-==== Option 1.5, using a Network Bridge ====
+=== Option 1.5, using a Network Bridge ===
 
 Just bridge the USB and Ethernet networks together (Win XP).
 
@@ -71,7 +96,7 @@ Then you set up the bridge like your Ethernet was (DHCP or static IP, e.g. 10.10
 
 After you have done all this, the Neo will be able to route through the Windows machine out to the internet. DNS queries will also be proxied by the Windows machine. Of course, /etc/resolv.conf on the Neo needs to be set to your local DNS or a free DNS. 
 
-==== Option 2, using AnalogX ====
+=== Option 2, using AnalogX ===
 
 AnalogX is a lightweight, free network proxy for Windows. It can proxy HTTP, FTP, SMTP and other protocols. It's very easy to set up and works with any software on the phone that supports proxies (eg. opkg).
 
@@ -85,7 +110,7 @@ AnalogX is a lightweight, free network proxy for Windows. It can proxy HTTP, FTP
 
 Other apps like [[Minimo]] can also be configured to use a proxy. Use the HTTP proxy URL as above.
 
-==== Option 3, using IP Forwarding and extra routing ====
+=== Option 3, using IP Forwarding and extra routing ===
 
 An alternative way is to do it manually:
 
@@ -97,8 +122,7 @@ Be aware that IP Forwarding can be a security risk.
 
 Then, if there is a router between your Windows XP system and the internet, you also need to tell the router how to get back to your Neo, so you need to set a route on it for 192.168.0.0/255.255.255.0 to your Windows XP LAN interface IP address. Windows will then forward the packets to the Neo.
 
-
-==== Option 4, using HTTP proxy at work with Putty SSH tunneling ====
+=== Option 4, using HTTP proxy at work with Putty SSH tunneling ===
 
 If your PC is running Windows and Internet connection goes through proxy, you can simply use [http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html PuTTY: A Free Telnet/SSH Client]. In Connection->SSH->Tunnels you can add tunnel to your proxy server. For example, if proxy address is "10.0.0.1:8080":
 Source port: 8080
@@ -110,7 +134,8 @@ Then you will only need to set http_proxy address at your 1973/Freerunner:
 
 And have Internet.
 
-=== Further references ===
+== Further references ==
+
 * http://www.microsoft.com/whdc/device/network/NDIS/rndis.mspx
 * http://maemo.org/maemowiki/USBnetworkingWinXP
 * http://docwiki.gumstix.org/Setting_up_USBnet
