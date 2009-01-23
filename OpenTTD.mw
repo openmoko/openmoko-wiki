@@ -1,139 +1,40 @@
-{{Languages| OpenTTD}}
+[[Image:Openttd_snap1.png|thumb| Landscaped]]
+
+== Overview ==
+OpenTTD is game about trains and transporting.
+
+Upstream/official homepage: http://www.openttd.org/ 
+
+Port homepage: http://openttd.projects.openmoko.org/
+
+== Download ==
+[[Image:Openttd_snap3.png|thumb| Portrait and showing multilanguage cabability]]
+=== Release ===
+Install from opkg.org:
+
+opkg install http://www.opkg.org/packages/openttd_0.6-r0.6_armv4t.opk
+
+
+=== Source ===
+Look [http://openttd.projects.openmoko.org/  project page] how to compile for Freerunner. 
+
+[http://openttd.projects.openmoko.org/openttd_0.6-r0.6_sources.tar.gz bitbake recipe + additional files]
+
+
+== Playing==
+You can move screen with stylus, just point empty place and drag.
+If this doesn't work, check: Advanced settings -> Interface -> Interaction ->Left-click scrolling: On
 
 <onlyinclude>
 {{ApplicationBox|
 Name=[[OpenTTD]]|
 Screenshot=Openttd_snap2.png|
 Description=OpenTTD is railroad and transporting game.|
-Homepage=http://www.openttd.org/ |
-TestedOn=SHR-U|
-PackageName=[http://www.opkg.org/packages/openttd_svn17682-r0.8_armv4t.ipk]
+Homepage=http://openttd.projects.openmoko.org/|
+TestedOn=FDOM, Om 2008.12|
+PackageName=[http://www.opkg.org/packages/openttd_0.6-r0.6_armv4t.opk]
 }}
 </onlyinclude>
-{|align=left
-|__TOC__
-|}
-[[Image:Openttd_snap1.png|thumb| Landscaped]]
 
-== Overview ==
-OpenTTD is game about trains and transporting.
-
-homepage: http://www.openttd.org/ 
-
-
-== Download ==
-[[Image:Openttd_snap3.png|thumb| Portrait and showing multilanguage cabability]]
-=== Release ===
-It contains open graphics and open sounds. No proprietary data-files needed.
- 
-Install from opkg.org:
-
-opkg install http://www.opkg.org/packages/openttd_svn17682-r0.8_armv4t.ipk
-
-Bitbake recipe:
-
-=== Source ===
- DESCRIPTION = "Open source clone of the Microprose game 'Transport Tycoon Deluxe' - SDL edition."
- HOMEPAGE = "http://www.openttd.org"
- LICENSE = "GPLv2"
- DEPENDS = "libsdl-net libpng zlib freetype fontconfig"
- PV = "svn17682"
- PR = "r0.8"
- 
- inherit siteinfo sdl
- 
- FILES_${PN} += "${datadir}/*"
- 
- SRC_URI ="svn://svn.openttd.org/;module=trunk;rev=17682;proto=http"
- 
- SRC_URI += "file://openttd.desktop"
- 
- 
- APPIMAGE = "media/openttd.128.png"
- 
- do_patch() {
- mv trunk openttd-${PV}
- cd openttd-${PV}
- 
- # GPLv2-Graphics! http://dev.openttdcoop.org/
- cd ..
- wget http://bundles.openttdcoop.org/opengfx/releases/opengfx-0.1.0-alpha6.zip
- unzip download.php\?file\=opengfx%2Freleases%2Fopengfx-0.1.0-alpha6.zip
- mv license.txt gfx_license.txt
- 
- # CC Sampling Plus 1.0 -licensed sound files!
- wget http://bundles.openttdcoop.org/opensfx/releases/opensfx-0.1.0-alpha2.zip
- unzip -n download.php\?file\=opensfx%2Freleases%2Fopensfx-0.1.0-alpha2.zip
- mv license.txt sfx_license.txt
- }
- 
- 
- do_configure() {
-   # The way the OTTD configure system handles the application's directories
-   # isn't the way autotools does it. Mainly prefix is always prepended even if
-   # absolute binary-dir and data-dir is given. 
- 
-   ./configure \
-     --os=UNIX \
-     --endian=${SITEINFO_ENDIANESS} \
-     --prefix-dir=${prefix} \
-     --binary-dir=bin \
-     --with-zlib \
-     --with-png \
-     --with-freetype \
-     --without-icu \
-     --without-allegro \
-     --cc-build=gcc \
-     --cc-host=${TARGET_SYS}-gcc \
-     --cxx-build=g++ \
-     --cxx-host=${TARGET_SYS}-g++ \
-     --strip=${TARGET_SYS}-strip \
-     --install-dir=${D}
- }
- 
- do_install() {
-     oe_runmake install
- 
-     install ${WORKDIR}/openttd.desktop ${D}${datadir}/applications
- 
-     #sounds
-     install ${WORKDIR}/opensfx-0.1.0-alpha2.tar ../image/usr/share/games/openttd/data/
-     install ${WORKDIR}/sfx_license.txt ../image/usr/share/games/openttd/data/
- 
-     #graphs
-     install ${WORKDIR}/opengfx-0.1.0-alpha6.tar ../image/usr/share/games/openttd/data/
-     install ${WORKDIR}/gfx_license.txt ../image/usr/share/games/openttd/data/
- 
-     #delete some useless icons
-     cd ${WORKDIR}/image/usr/share
-     rm -r icons
-     rm pixmaps/openttd.32.xpm
- }
- 
- 
- pkg_postinst_${PN}() {
- mkdir ~/.openttd
- touch  ~/.openttd/openttd.cfg
- echo "[misc]"   >>  ~/.openttd/openttd.cfg
- echo "resolution = 480,640" >> ~/.openttd/openttd.cfg
- echo "[gui]"  >>  ~/.openttd/openttd.cfg
- echo "left_mouse_btn_scrolling = true" >> ~/.openttd/openttd.cfg
- }
-
-
-And simple desktop file:
-
- [Desktop Entry]
- Name=openttd
- Comment=Open source clone of the Microprose game 'Transport Tycoon Deluxe'
- Exec=openttd
- Icon=openttd
- Type=Application
- Categories=Game;
- StartupNotify=false
-
-== Playing==
-You can move screen with stylus, just point empty place and drag.
-If this doesn't work, check: Advanced settings -> Interface -> Interaction ->Left-click scrolling: On
 
 [[Category:Gaming]]
