@@ -1,77 +1,13 @@
 {{Languages|Android on Freerunner}}
-== Android on Freerunner ==
-Google has released their open source version of the Android phone software distribution. In order to use it on the Freerunner, a number of patches need to be applied and a compiler with armv4 java exception support needs to be used to compile the software.
 
-== Status ==
-
-Most of the hardware on Freerunner seems to work on latest Android images, but not always perfectly.
-
-{| border="1"
-|-
-| SW keyboard || works, can be brought up with short press to power button
-|-
-| Suspend || works, can be done with 1s press of power button, wake up with long power button press, don't use screen timeouts, disable it in Settings->Sound & display->Screen timeout->Never timeout
-|-
-| GSM || sources for libmuxgsm-ril.so not released yet, latest images have binary from ML that works fine
-|-
-| GPRS || does not work, GSM get's confused when you try to use it
-|-
-| Contacts on SIM || works, Contacts->menu->Settings->SIM contacts importer
-|-
-| Bluetooth || works, latest kernels need permissions for second rfkill interface in init.rc to turn it on
-|-
-| Wifi || works, but i have problems with scanning when just one AP is in range, it fails most of the time
-|-
-| GPS || once i got it working, you can test with AndNav2 program
-|-
-| Accelerometers || works, can be tested with simple game called Amazed
-|-
-| Media || can play OGG audio files, picure application crashes
+{|align=right
+|__TOC__
 |}
+[[Image:android.png]]
+= Introduction = 
+This page is dedicated to the installation of Android on the [[Neo 1973]] and [[Neo FreeRunner]] handsets.
 
-
-
-== Compiler suite ==
-
-Android is a little picky about the version of gcc compiler. It also requires some java exception support that isn't available for armv4 without a minor modification. The following tools are what I use to build Android:
-
-
-=== Binutils 2.18 ===
-
-At one time I had some armv5t code that was compiled into Android which would cause the linker to generate these blx instructions which fail on armv4. I'm not sure if this is still necessary, but I still have the following change applied to binutils:
-
-<pre>
-diff -urN binutils-2.18-orig/bfd/elf32-arm.c binutils-2.18/bfd/elf32-arm.c
---- binutils-2.18-orig/bfd/elf32-arm.c	2007-08-07 02:59:23.000000000 +0700
-+++ binutils-2.18/bfd/elf32-arm.c	2008-03-15 11:30:17.000000000 +0700
-@@ -3093,8 +3093,8 @@
- static void check_use_blx(struct elf32_arm_link_hash_table *globals)
- {
-   if (bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
--				Tag_CPU_arch) > 2)
--    globals->use_blx = 1;
-+				Tag_CPU_arch) >= TAG_CPU_ARCH_V5T)
-+    globals->use_blx = 0;
- }
- 
- bfd_boolean
-</pre>
-
-
-configure --prefix={devel path}/android/cross --target=arm-eabi
-
-=== gcc 4.2.4 with gcc41-java-arm4.patch ===
-
-
-configure   --prefix={devel path}/android/cross --target=arm-eabi --with-arch=armv4t --enable-shared --enable-threads --disable-nls --disable-libmudflap --enable-target-optspace --with-abi=aapcs --enable-multilib --disable-libssp --disable-libstdcxx --enable-languages=c,c++
-
-=== java-6-sun ===
-
-This is the standard Linux package available for most (all?) distributions.
-
-== Patches ==
-
-Coming soon. I've posted a number of them on the devel mailing list so far. Eventually, I expect to provide everything necessary for people to build Android for themselves.
+You can find general informations (porting/development and day to day usage) about Android and Neo phones here : [[Android]]
 
 == Android on internal flash ==
 
