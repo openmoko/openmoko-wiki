@@ -1,48 +1,19 @@
-{{Languages|Android debug bridge}}
-
 {|align=right
 |__TOC__
 |}
 [[Image:android.png]]
 
-= ADB : Android debug bridge =
 To assist in debugging and to gain shell access to the phone with Android, you can use
+
    [http://people.openmoko.org/sean_mcneil/adb adb]
-
-== Installing ADB ==
-For example if you stored the Android SDK in your home directory, you will find adb and the other binaries in the subdirectory <tt>tools</tt>. Add this directory to your PATH environment variable. E.g. on MacOSX
-  export PATH=/Users/myuser/androidsdk/tools:$PATH
-or on a Linux Machine:
-  export PATH=/home/myuser/androidsdk/tools:$PATH
-Replace <tt>myuser</tt> by the name of your home directory. 
-
-== Enabling Debug mode ==
-Due to security issues with ADB, the shell has been disabled by default in AoF. You can enable ADB again by navigating to Settings -> Application -> Development -> USB Debugging. 
-See [http://code.google.com/p/android-on-freerunner/wiki/AndroidDebugBridge AndroidDebugBridge] for updated information
-
-== Connecting ==
 
 You should be able to connect to the phone as long as you start it up with the USB connected to your host. I don't think it will work if you plug it in after starting. Of course, you need to setup [[USB_Networking]] (<tt>ifconfig usb0</tt> ...) on your host before connecting.
 
-Sometimes, adb gets stuck: if you cannot to the device run "adb kill-server" before trying other commands.
-
-If Adb cannot find any device:
-Make sure you can ping the device. Make sure the date and timesettings are valid. Kill the background running adb-server by "adb kill-server" and start your first adb instance (which starts the background process) with "ADBHOST=192.168.0.202 ./adb devices". After that, you can run adb without ADBHOST-Variable.
-
-
 Some helpful commands are:
 
-    ./adb logcat           - like a tail -f of the android log
-    ./adb logcat -b radio  - same as above for the radio logs
-    ./adb shell            - bring up a command shell to the phone
-    ./adb kill-server      - kill the background server on the host
-    ./adb install app.apk  - install app.apk on the phone
+    ADBHOST=192.168.0.202 ./adb logcat           - like a tail -f of the android log
+    ADBHOST=192.168.0.202 ./adb logcat -b radio  - same as above for the radio logs
+    ADBHOST=192.168.0.202 ./adb shell            - bring up a command shell to the phone
+    ADBHOST=192.168.0.202 ./adb kill-server      - kill the background server on the host
 
-== Fixing startup problems ==
-Startup problems (Beta2): adb shell to the device and delete /data/data/com.android.providers.settings/databases/settings.db
-
-= See also =
-* [[Android|Main Android page on this wiki]]
-* [[Debug Board]]
-
-[[Category:Android]]
+Sometimes, adb gets stuck: if you cannot to the device run "adb kill-server" before trying other commands.
