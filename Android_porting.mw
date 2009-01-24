@@ -1,14 +1,4 @@
-{{Languages|Android porting}}
-
-{|align=right
-|__TOC__
-|}
-[[Image:android.png]]
-
 = Introduction = 
-
-{{Note|The Android for [[Neo_FreeRunner_GTA02_Hardware|FreeRunner]] development now takes place [http://code.google.com/p/android-on-freerunner/ here]. It has it's own wiki as well.}}
-
 This page is dedicated to porting the [http://www.android.com Android OS] to the [[Neo 1973]] and [[Neo FreeRunner]] handsets. Since the Android OS was [http://source.android.com/posts/opensource  publically released] on 20081021, [http://benno.id.au/blog/2007/11/21/android-neo1973 work] [http://perpetual-notion.blogspot.com/search/label/android is] [http://groups.google.com/group/android-porting currently underway] to port Android to the [[Neo1973 Hardware|Neo 1973]] and [[Neo_FreeRunner_GTA02_Hardware|FreeRunner]] handsets.
 
 == Goals ==
@@ -25,57 +15,6 @@ With the release of the Android [http://source.android.com source code], the Ope
 Patches should be submitted via the [http://source.android.com/submit-patches official Android channels].
 
 To track the status of which parts of the Android source tree contain ARMv5 specific code, I've created a table of where it is contained, and the status of patches. It can be found at: http://spreadsheets.google.com/pub?key=pzDEXnU19gkeTjpD28t-7fw [[User:Bricode]]
-
-
-Google has released their open source version of the Android phone software distribution. In order to use it on the Freerunner, a number of patches need to be applied and a compiler with armv4 java exception support needs to be used to compile the software.
-
-== Status ==
-
-Most of the hardware on Freerunner seems to work on latest Android images, but not always perfectly.
-
-If you want to see details of what is already usable, please have a look at: [[Android_usage]]
-
-== Compiler suite ==
-
-Android is a little picky about the version of gcc compiler. It also requires some java exception support that isn't available for armv4 without a minor modification. The following tools are what I use to build Android:
-
-
-=== Binutils 2.18 ===
-
-At one time I had some armv5t code that was compiled into Android which would cause the linker to generate these blx instructions which fail on armv4. I'm not sure if this is still necessary, but I still have the following change applied to binutils:
-
-<pre>
-diff -urN binutils-2.18-orig/bfd/elf32-arm.c binutils-2.18/bfd/elf32-arm.c
---- binutils-2.18-orig/bfd/elf32-arm.c	2007-08-07 02:59:23.000000000 +0700
-+++ binutils-2.18/bfd/elf32-arm.c	2008-03-15 11:30:17.000000000 +0700
-@@ -3093,8 +3093,8 @@
- static void check_use_blx(struct elf32_arm_link_hash_table *globals)
- {
-   if (bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
--				Tag_CPU_arch) > 2)
--    globals->use_blx = 1;
-+				Tag_CPU_arch) >= TAG_CPU_ARCH_V5T)
-+    globals->use_blx = 0;
- }
- 
- bfd_boolean
-</pre>
-
-
-configure --prefix={devel path}/android/cross --target=arm-eabi
-
-=== gcc 4.2.4 with gcc41-java-arm4.patch ===
-
-
-configure   --prefix={devel path}/android/cross --target=arm-eabi --with-arch=armv4t --enable-shared --enable-threads --disable-nls --disable-libmudflap --enable-target-optspace --with-abi=aapcs --enable-multilib --disable-libssp --disable-libstdcxx --enable-languages=c,c++
-
-=== java-6-sun ===
-
-This is the standard Linux package available for most (all?) distributions.
-
-== Patches ==
-
-Coming soon. I've posted a number of them on the devel mailing list so far. Eventually, I expect to provide everything necessary for people to build Android for themselves.
 
 
 == Building the Koolu Android Source ==
@@ -155,44 +94,23 @@ fi
 
 </pre>
 
-== Android Debug Bridge ==
-
-To assist in debugging and to gain shell access to the phone with Android, you can use the instructions found here: [[Android_debug_bridge]]
-
-
 === Windows Connectivity ===
-It is possible to get Windows to at least recognize the Android "Ethernet Gadget" and charge the FreeRunner using the Android USB Windows driver (http://dl.google.com/android/android_usb_windows.zip) by modifying the android_usb.inf file in that package before attempting to install the driver. The following steps are required:
-* connect the device on USB
-* take the Hardware IDs provided by the devicemanager for the unknown device and
-  
-Add these IDs according following example to the '''[Google.NTx86]''' section of the android_usb.inf file:
+It is possible to get Windows to at least recognize the Android "Ethernet Gadget" and charge the FreeRunner using the Android USB Windows driver (http://dl.google.com/android/android_usb_windows.zip) by modifying the android_usb.inf file in that package before attempting to install the driver.  The following modifications are required:
+
+Add the following to the [Google.NTx86] section of the android_usb.inf file:
 
 <pre>
 ; Neo FreeRunner
 %USB\VID_1457&PID_5117.DeviceDescRelease%=androidusb.Dev, USB\VID_1457&PID_5117
 %USB\VID_1457&PID_5117&MI_01.DeviceDescRelease%=androidusb.Dev, USB\VID_1457&PID_5117&MI_01
 </pre>
-or 
-<pre>
-; Neo FreeRunner
-%USB\VID_1457&PID_5122.DeviceDescRelease% = USB_Install, USB\VID_1457&PID_5122
-%USB\VID_1457&PID_5122&REV_0312.DeviceDescRelease% = USB_Install, USB\VID_1457&PID_5122&REV_0312
-</pre>
 
-and add the IDs according following example to the to the '''[Strings]''' section of the android_usb.inf file:
+and add the following to the to the [Strings] section of the android_usb.inf file:
+
 <pre>
 USB\VID_1457&PID_5117.DeviceDescRelease="Neo FreeRunner"
 USB\VID_1457&PID_5117&MI_01.DeviceDescRelease="Neo FreeRunner Composite ADB Interface"
 </pre>
-or 
-<pre>
-USB\VID_1457&PID_5122.DeviceDescRelease = "Neo FreeRunner"
-USB\VID_1457&PID_5122&REV_0312.DeviceDescRelease = "Neo FreeRunner Composite ADB Interface"
-</pre>
-*point out the installation to the driver directory
-*After a successfull installation, the devicemanager shows the new item "Android Phone->Neo FreeRunner Composite ADB Interface"
-*Vista and XP create a new folder <code>C:\Windows\System32\DriverStore\FileRepository\android_winusb.inf_xxxx</code>
-If there are any errors, refer the <code>C:\Windows\inf\setupapi.app.log</code> or, if VisualStudio is installed  the <code>C:\Windows\inf\setupapi.dev.log</code>. Delete the created directory. In some cases you have to generate a new androidwinusb86.cat - file. Refer the [http://msdn.microsoft.com/en-us/library/aa741204(VS.85).aspx#cat_how MSDN] for further details.
 
 The Windows version of adb does not appear to recognize the connected device yet but at least the FreeRunner charges and the device driver indicates that "This device is working properly."
 
@@ -728,11 +646,4 @@ The file ''system/core/libpixelflinger/codeflinger/ARMAssembler.cpp'' will need 
 ** Specifically, [http://lists.openmoko.org/mailman/listinfo/openmoko-kernel openmoko-kernel]
 * [http://forum.koolu.org/viewforum.php?f=10 Android on FreeRunner] at KoolU.com
 * [[Openmoko Local Groups]]
-* [[Community Resources]]
-
-= See also =
-* [[Android|Main Android page on this wiki]]
-* [[Debug Board]]
-
-
-[[Category:Android]]
+* [[Openmoko:Community_Portal]]
