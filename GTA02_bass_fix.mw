@@ -1,65 +1,7 @@
-GTA02 bass issues and possible ways to fix it.
+Here I'll try to describe my take on rework that should radically improve the ability to use FreeRunner as a portable music player.
 
-The lack of bass issue has been discussed several times on Community and Hardware lists, including by [[User:jOERG|Joerg Reisenweber]] (e.g. in this mailing list post:
-http://lists.openmoko.org/pipermail/openmoko-kernel/2008-March/001994.html http://lists.openmoko.org/pipermail/hardware/2008-September/000552.html , and Andy Green).
-
-'''Be <U>extremely</U> careful to ensure that after you mount the can back it does not short any parts (look twice for big capacitors). Better to provide an additional insulation, failing to do that may result in an irrecoverably broken device. The risk to short something is higher if the can is (even slightly) deformed as the result of unmounting.'''
-
-== The problem description ==
-A known issue is that output decoupling capacitors are too small, only 1uF (4.7uF in v7). This results in a very high cut-off frequency practically eliminating a possibility to use freerunner as a portable musical player. The possible fix is to add some decent 100uF C in parallel. (The other discussed way to do it was to short the original caps and instead place the big ones near the headset receptable or inside the headphone jack; this has multiple drawbacks as jack insert detection might no longer work, possible damage to U4401 and the like; in this case you should also remove R4116, R4117 and place them after your caps).
-
-
-
-=== Rework performed by [[User:PaulFertser|Paul Fertser]] ===
-'''Resulting sound is good with 32Ohm headphones (AKG K-55). With proper shielding GSM interference is very low or non existent. Effect on Bluetooth range is measured by comparision with another FR and it's confirmed the range wasn't reduced by the rework.'''  (Due to placement of the caps next to the Bluetooth antenna, it's possible this will reduce performance there).
-
-Here i'll try to describe my take on rework that should radically improve the ability to use FreeRunner as a portable music player.
+A known issue is that output decoupling capacitors are too small, only 1uF (4.7uF in v7). One of the possible fixes is to add some decent 100uF C in parallel.
 
 I used two 100uF 10V tantalum caps. They should be connected in parallel to C4110 and C4111. Make sure you connect the plus terminal (marked with a thick line) to the side that goes to U4101.
 
-The can should be lifted very carefully. Use a pin-pointed knife for that and try to lift a little in every point you can reach going in circle. After several rounds the can will be easily dismounted. It can take about 10 minutes, please be patient. You can use a plastic sim-holder for a lever, but be very careful.
-
-To avoid interference from GSM going into the can, use a piece of aluminium foil isolated from the caps with paper. I used a candypaper and it eliminated the audible GSM interference (i could listen to GSM call via headphones on loud volume without hearing any buzz). Be sure to provide electrical connection between the foil and the can (the more points you connect, the better shielding you get; don't be shy to experiment, EMI is a black magic sometimes). Placing small ferrite bead on every twisted pair just before it enters the can is recommended.
-
-After the rework Bass and Treble regulators in mixer should be placed at the middle as it corresponds to 0db attenuation (and the bass boost set to Linear Control).
-
-[[Image:Can_opened.jpg|800px]]
-[[Image:bass_rework_can_closed.jpg|800px]]
-[[Image:bass_rework_whole_picture.jpg|800px]]
-
-=== Rework performed by [[User:warmcat|Andy Green]] ===
-This document describes another type of rework where caps are placed inside the can: http://people.openmoko.org/andy/additional-headset-audio-caps.pdf . Among its strong points is that the signal doesn't go outside the can, therefore avoiding any possibility of interference with other hardware functions; unlike the modification described above the connections to the caps are very short and no modifications are needed to the can.
-
-[[Image:Rnsop-00002.jpg]]
-
-[[Image:Rnsop-00003.jpg]]
-
-[[Image:Rnsop-00004.jpg]]
-
-The weak points are that the maximum capacity is limited to 47uF due to the size; again due to the size constraint of being in the can only ceramic caps can be used (which can distort sound because of piezoceramic properties, although for X7R dialectric the effect is minimal).
-
-=== Rework by Hrabosh ===
-Similar to Andy's but he used two caps in parallel per channel covered with heatshrink tubing. Probably the best variant seen so far. See more at http://hnet.endofinternet.net/elektro/Freerunner/Bass_fix/bf.html .
-
-=== Untested Notes and Suggestions ===
-
-One possible solution is to place the additional caps outside the can, near the Bluetooth antenna; another possibility proposed by [[User:jOERG|Joerg]] is >>to build a cap from 20 pieces 4.7uF along a wire grid 4x5 which makes a nice high quality very flat 100uF. This would easily fit anywhere "1.floor" of can interior, just isolate it with a scotch film patch and throw them inside the can<<.
-
-Also shorting R4407 and R4405 might worth trying (as well as throwing out the useless U4401).
-
-
-Another idea is to perform a modification similar to the popular iPod mod:
-
-The purpose of the diyMod is to simplify the signal path from the DAC to the amp. To achieve this goal, the audio signal is taken directly after the DAC and sent to the amp. This path must include the DC blocking, also known as coupling, caps. By necessity, we place DC blocking caps behind the DAC to protect our listening apparatuses. Ensure that nothing lies between your DAC and amp but wires and traces.
-
-Nobody has tried to implement it on FreeRunner yet, but this description along with published schematics should be enough: http://www.head-fi.org/forums/f6/apple-diymod-my-take-famous-imod-56k-killer-featuring-3g-4g-5g-nano-1g-269604/
-
-
-Another idea, which doesn't require modifying FreeRunner's hardware, is plugging an external headphone amplifier with high internal input resistivity. DIY amplifier built on op-amp should be good. FR's USB can be used for supply (requires host mode). By the way, putting high quality microphone in amplifier case can be useful for audio recording.
-
-== Rework offers ==
-Golden Delicious Computers offers to handle the rework or provides devices (GTA02A7++) which already have all reworks:
-
-http://lists.openmoko.org/pipermail/community/2010-April/061171.html
-
-[[Category:Neo FreeRunner reworks and mods]]
+[[Category:Neo_FreeRunner_Hardware]]
