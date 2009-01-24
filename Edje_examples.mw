@@ -251,6 +251,11 @@ ecore.main_loop_begin();
 
 Edje source: signal.edc
 <pre>
+fonts {
+   font: "VeraBd.ttf" "Sans";
+}
+
+
 collections {
     group {
       name: "test";
@@ -275,6 +280,44 @@ collections {
                     state: "hot" 0.0;
                     inherit: "default" 0.0;
                     color: 0 0 255 255;
+                }
+            }
+            
+            part {
+                type: TEXT;
+                name:"text";
+                
+
+                description {
+                   color: 255 255 255 255;
+                    rel1 {
+                        relative: 0 0.75;
+                      
+                    }
+                    rel2 {
+                        relative: 1 1;
+                    }
+                    text {
+                        text:"default text";
+                        font:"VeraBd.ttf";
+                        size: 20;
+                    }
+                }
+                description {
+                   state: "received_signal_from_python" 0;
+                   color: 255 255 255 255;
+                    rel1 {
+                        relative: 0 0.75;
+                      
+                    }
+                    rel2 {
+                        relative: 1 1;
+                    }
+                    text {
+                        text:"Received signal from python";
+                        font:"VeraBd.ttf";
+                        size: 20;
+                    }
                 }
             }
         }
@@ -306,8 +349,15 @@ collections {
                 
                 
                 action: SIGNAL_EMIT "button_clicked_signal" "button1";
+            }
+            program {
+                name:"handle_python_signal";
+                signal:"signal_from_python";
+                
+                action: STATE_SET "received_signal_from_python" 0;
+                target:"text";
+            }
         }
-    }
 }
 </pre>
 
