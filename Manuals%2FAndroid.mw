@@ -1,435 +1,55 @@
-{{Languages|Android usage}}
-
 {|align=right
 |__TOC__
 |}
 [[Image:android.png]]
 
 = Introduction = 
-
-The [http://code.google.com/p/android-on-freerunner/ Android for FreeRunner] development can be found on [http://code.google.com/p/android-on-freerunner/ http://code.google.com/p/android-on-freerunner/]. 
-
 This page is dedicated to the daily usage of Android on the [[Neo 1973]] and [[Neo FreeRunner]] handsets.
+The informations here have been updated for the following release : [http://freerunner.android.koolu.com/release-files Koolu Beta2 Android release]
+You can find general informations about Android and Neo phones here : [[Android]]
 
-One can find general information (porting/development) about Android on Neo phones here : [[Android]].
-
-=== Using the Android Manual ===
-If you need some support for this Android Manual see [[Using Android Manual]].
-
-== Preparation for Installation ==
-
-=== Backup your old Android User Data ===
-If you have Android already installed on your Freerunner (FR), you should backup your data before install Android again. For backup process see [http://code.google.com/p/android-on-freerunner/wiki/GetIt Installing Android on Openmoko Freerunner] for further information.
-
-=== Prepare SD Card ===
-On Linux Machine backup current data on Micro SD-Card with adapter. If SD-Card is located in <tt>/dev/sde</tt> use the following commands (replace <tt>/dev/sde</tt> by appropriate device name, 
-  sudo df
-will help you to identify the device name and size of SD card:
-Create two partitions in the ratio 3 to 1 (e.g. 4000000 blocks): 
-* '''[http://www.win.tue.nl/~aeb/partitions/partition_types-1.htmlons/partition_types-1.html FAT32]''' (3/4 of total size of SD - e.g. blocks 16-3000000) 
-* '''[http://www.win.tue.nl/~aeb/partitions/partition_types-1.html EXT3]'''  (1/4 of total size of SD - e.g. blocks 3000001-4000000)
-Use [[fdisk]] to create partitions:
-  sudo fdisk /dev/sde
-# '''<tt>-> p</tt>''' Check partitions
-# '''<tt>-> d -> 1</tt>''' Delete Partition 1 (repeat for other existing partitions)
-# '''<tt>-> n -> 1 -> </tt>''' New partition 1 (enter first and last sector)
-# '''<tt>-> t -> 1 -> c</tt>''' Set [http://www.win.tue.nl/~aeb/partitions/partition_types-1.html type c for FAT32 (LBA)]
-# '''<tt>-> a -> 1 </tt>''' Set boot flag for first partition
-# '''<tt>-> n -> 2 -> </tt>''' New partition 2 (enter first and last sector)
-# '''<tt>-> t -> 2 -> 83</tt>''' Set [http://www.win.tue.nl/~aeb/partitions/partition_types-1.html type 83 for Linux partition]
-After fdisk operations, format both partitionss. If SD-Card is located in <tt>/dev/sde</tt> use the following commands (replace <tt>/dev/sde</tt> by appropriate device name:
-   # mkfs.vfat -v -n and-media -F 32 /dev/sde1
-   # mkfs.ext3 -v -L and-data /dev/sde2
-If you are root you can remove <tt>sudo</tt> from the command.
-
-=== Android SDK on PC/Laptop ===
-You need the [http://developer.android.com/sdk/installing.html Android SDK] on your PC/Laptop for executing commands on your Android, taking screenshots and
-uploading/downloading files to/from your [[Freerunner]]. 
-
-==== Installation of Android SDK ====
-Instruction for installing Android SDK can be found on [http://developer.android.com/sdk/installing.html http://developer.android.com/sdk/installing.html].
-* Download Android-SDK package
-* On Linux you should append the path to the Android-SDK tools to the PATH-variable. Do do this edit your
-** '''<tt>~/.bash_profile</tt>''' or
-** '''<tt>~/.bashrc</tt>'''  file. 
-Edit the line that sets the PATH environment variable and append the full path to the SDK directory '''<tt>tools/</tt>''' separated with ":" at the end. If you don't see a line, that exports the PATH variable just add the following line:
-
-      export PATH=${PATH}:<your_sdk_dir>/tools
-
-==== Android Debug Bridge ADB ====
-The [[Android debug bridge]] ADB provides an Computer-Freerunner interface. You mainly need '''adb''', that is part of the [http://developer.android.com/sdk/index.html Android SDK]. You can download ADB by installing the Android-SDK. You will find information regarding [http://developer.android.com/sdk/index.html Android-SDK] on [http://developer.android.com/sdk/index.html http://developer.android.com/sdk/index.html].
-
-=== Android on Freerunner ===
-The homepage of [http://code.google.com/p/android-on-freerunner/ Android on Freerunner] can be found on [http://code.google.com/p/android-on-freerunner/ http://code.google.com/p/android-on-freerunner/]. The [http://code.google.com/p/android-on-freerunner/wiki/GetIt code.google-wiki] guides you in preparing an SD-Card on your PC/Laptop, that will be inserted in your freerunner. After that you have reassembled your Freerunner and boot from MircoSD:
-* hold the 'Aux button' (top left) in while you push the 'Power button' (bottom right)Android SDK on PC/Laptop
-* Select '''Boot from microSD card (FAT+ext2)''' keep pressing the AUX button until the option is highlight 
-* Execute option '''Boot from microSD card (FAT+ext2)''' by pressing the Power Button.
-
-
-
-== Screenshots ==
-To improve the user guide screenshots are very helpful. Independent of your operating system on your PC (Linux, Mac, Windows) you can make screenshots with the SDK on triggered from your PC. Connect your Freerunner with Android via USB and enable USB-Debugging 
-* Applications > Development > USB-Debugging 
-* Anwendungen > Entwicklung > USB-Debugging  (German)
-You can make screenshots to enhance this guide by using '''[http://developer.android.com/guide/developing/tools/ddms.html ddms]'''.
-
-There are application for making a screenshot directly on your Freerunner, but you need a '''rooted Android''' for this.
-
-
-
-= Getting started =
-== Installation of Android on Freerunner ==
-=== Android Versions ===
-Cupcake is the version mostly installed Android version on Freerunner, but you might want to contribute to the Froyo development for Freerunner, which seems to run much faster than older versions.
-==== Cupcake Installation ====
-If you have prepared your SD-Card with as mentioned above in this article, you have to do just two more steps:
-* Download the [http://code.google.com/p/android-on-freerunner/downloads/list installation package] and copy it unpacked on FAT32 partition of you SD card.
-* Switch off your freerunner and [http://wiki.openmoko.org/wiki/Booting_the_Neo_FreeRunner Press/hold AUX-Button and press Power button together].
-
-==== Froyo Installation ====
-Froyo Images are available on [http://serdar-dere.net/~serdar/daily/ http://serdar-dere.net/~serdar/daily/]. Images before August 14th, 2010 are too small (9MB) to be a full Android image.
-
-* Unpack the files on to a FAT formatted SD card.
-* It is recommended to create a directory <tt>/boot</tt> on your SD-card and copy the binary <tt>uImage.bin</tt> into <tt>/boot</tt>.
-* Switch off your Freerunner 
-* When you insert card into the Freerunner and boot from (NOR) menu hold AUX key, then switch power on.
-
-=== Backup your old Android User Data ===
-If you have Android already installed on your Freerunner (FR), you should backup your data before See [http://code.google.com/p/android-on-freerunner/wiki/GetIt Installing Android on Openmoko Freerunner] for further information.
-
-=== Android ADB connection ===
-Establish USB Connection, e.g.
-  # ifconfig usb0 192.168.0.200 netmask 255.255.255.0
-Add the following 
-As root kill adb server and add device on 192.168.0.202
-  # adb kill-server 
-  # ADBHOST=192.168.0.202 adb devices
-or on Ubuntu start an xterm window with
-  sudo xterm
-and execute the commands mentioned above in that window.
-
-* [http://code.google.com/p/android-on-freerunner/wiki/AndroidDebugBridge Google Android ADB Information]
-
-==Buttons and Keyboard ==
-
-=== The Power button ===
-
-* To turn the phone '''on'''; press and hold the power button for about 5 seconds
-
-* To put the phone to '''sleep''' (and so lock it): hold the power button for about 1 second
-
-* To '''wake''' the phone from sleep: tap the power button once, then once more to unlock the screen
-
-* To turn the phone''' off''': First wake it from sleep, then hold the power button for about 2 seconds. Choose 'Power off' in the menu that appears then click 'OK' Use the back button (aux) to delete the menu if one wants to continue. 
-
-* Tap the power button once to get the on screen keyboard. In many applications it also brings extra options.
-
-=== The Aux button ===
-The aux button is configured as the back button.
-If the application recognizes the back action, like the browser, it goes a page or action back. If not recognized, one leaves the application to the previous situation. Note the application is not killed. It stays active.
-
-Pressing the AUX button for more than 3sec than all active application can be selected.
-
-=== The Home Button ===
-
-The G1 and G2 Android phones have a home button, a long press on this button creates a window with all the running applications. 
-
-There is no clear key now, to show  the running applications. Sometimes by chance a window with icons of the running applications appears, and then one can jump to a different running application.
-
-I suggest to create this button from a two second press on the aux button. A window with the icons of the running applications will appear. By tapping on the wanted application we can than jump to the running application.
-
-=== The Keyboard ===
-The keyboard appears when you select a field for input text or numbers.
-
-== Making a call ==
-
-Once the phone has started you will see a 'Dialer' icon on the desktop. Tap it and you will be presented with a dialing keypad. Enter the number you wish to dial and then touch the bar containing the number to call. If you make  a mistake entering the number you can touch the backspace arrow to the right of the bar.
-
-Caveats
-* The volume level when in a voice call is very low
-
-==Sending an SMS==
-
-Start SMS Application in Main Window.
-
-
-
-== Copy and pasting ==
-
-Android has a copy and paste feature built in to it. By touching and holding on a text entry box for about 2 seconds the copy & paste menu will appear.
 
 = Subsystems =
 
-
-=== Accelerometers ===
-Works, can be tested with a simple game called [http://andappstore.com/AndroidPhoneApplications/apps/8872 Amazed]. This can be installed on the current AoF images.
-
-Android Eclair makes use of the accelerometers.
-
-=== Bluetooth ===
-Works, latest kernels need permissions for second rfkill interface in init.rc to turn it on.
-
-=== GPS ===
-Works, you can [[#Install new software|install]] [http://www.andnav.org AndNav2] to test it.
-AndNav2 is e beta version and the useable period is over. 
-
-Proper working of GPS can observed with YGPS Satellites. It shows signal strength and location of each satellite.
-
-=== GPRS ===
-
-To set up GPRS you need to enter the correct settings for your network: Tap the Application tab followed by Settings > Wireless controls > Mobile networks > Access Point Names. Now if you press the power button, a menu will appear allowing you to add a 'New APN'. Touch this then add your network's GPRS & MMS settings.
-
-Once you have entered your APN details it maybe necessary to follow this procedure to start GPRS (you will only need to do this once):
-
-Turn on Airplane mode, reboot, turn off Airplane mode
-
-You may also have to carry out the [http://wiki.openmoko.org/wiki/Android_usage#DNS_Fix DNS fix] described below.
-
-
-==== APN settings ====
-
-You can find most networks 'mcc' and 'mnc' numbers [http://android.v-dh.nl/internet.php here]
-
-* O2 UK - Pay as you go
-
-Enter these details to set up GPRS:
-
- carrier="o2-UK-PAYG" (Name - can be anything)
- mcc="234"
- mnc="10"
- apn="payandgo.o2.co.uk"
- user="payandgo"
- server="Not set"
- password="password"
- type="default"
-
-These details are also correct o2 settings but don't enter them, they stop GPRS from working properly at the moment.
-
- mmsc="http://mmsc.mms.02.co.uk:8002"
- proxy="193.113.200.195"
- port="9201"
- mmsproxy="193.113.200.195"
- mmsport="9201"
-
-* T-Mobile UK
-
-Enter these details to set up GPRS:
-
- carrier="T-Mobile-UK" (Name - can be anything)
- mcc="234"
- mnc="30"
- apn="general.t-mobile.uk"
- user="user"
- server="149.254.1.10"
- # server="149.254.201.132" (alternate server)
- password="wap"
- type="default"
-
-* Orange France
-Source : [http://www.planete-android.com/index.php/parametrage-operateurs-francais.html French Network parameter]
-
-GPRS settings (work): 
- apn="orange"
- user="orange"
- password="orange"
- mcc="208"
- mnc="01"
- type="default"
-
-MMS settings (untested) :
- apn="orange.acte"
- proxy="192.168.10.200"
- port="8080"
- user="orange"
- password : "orange"
- mmsc="http://mms.orange.fr"
- mms port="8080" 
- mcc="208"
- mnc"01"
- type="mms"
-
-Force use of Orange DNS in the ip-up script located in /system/etc/ppp :
- /system/bin/setprop "net.gprs.dns1" "194.051.003.056"
-
-
-* Cingular/Att U.S. (working with dns fix(14.6-cupcake), other than sending mms)
-
- apn="wap.cingular"
- username="wap@cingulargprs.com"
- pass="cingular1"
- mmsc="mmsc.cingular.com"
- mms proxy="wireless.cingular.com"
- mms port = 80
- mcc= 310
- mnc= 410
+== GSM ==
 
 == Wifi ==
 
-Wifi works on current distribution of Android, it switches off, when Display goes black. When you use [[SipDroid]] SIP-Client for VoIP over Wifi, you will loose network connection.
+== GPRS ==
 
-= Applications =
+== Bluetooth ==
 
-You can find a '''[http://code.google.com/p/android-on-freerunner/wiki/Applications list of Android applications]''' recommended by users of [http://code.google.com/p/android-on-freerunner/wiki/GetIt Android on Freerunner (AoF)]. 
+== GPS ==
 
-== Navigation ==
-* [http://wiki.navit-project.org/index.php/Navit_on_Android Navit for Android] 
-{{Note|In current Verion 19.08.2010 Navit starts without GPS daemon. Trying to install TTS crashes Navit. Without installing TTS (Text to Speech) Navit starts without GPS "on". If you start the GPS daemon before, Navit will crash.}} 
-* [http://www.andnav.org/ AndNav2]
-
-== VoIP ==
-* [[SipDroid]] lets you make phone calls over internet with an established internet connection over WiFi or your data flatrate. 
-* To save mobile phone costs, you can 
-*# ''call through'' your DSL-router with a phone flat at home or 
-*# ''call to'' your DSL-router at home
-** DynDNS entry necessary e.g. <tt>myhomebox.dyndns.com</tt>  and 
-** your registered phone number is 123456789 then call 
-  sip:123456789@myhomebox.dyndns.com
-* stay connected with one SIP-Account using a mobile data flat as internet access with your freerunner.
-* you can receive landline (PSTN) with a SIP-account e.g. with SIPgate you can register a SIP-Account that has real landline phone number in Germany. If you register this account in [[SipDroid]] you can accept landline phone calls e.g. in Germany with you Freerunner from anywhere in the world.
-* The [[Linphone]] apk is also available if one asks the developers at [http://www.linphone.org http://www.linphone.org] directly. 
-{{Error| Unfortunately the current version does not work.}}
+= Data management =
 
 == Contacts ==
 
 === Importing ===
-==== From Vcard ====
-# [[#Install new software|install]] [http://www.dusystems.com/importContacts.html "Android Contacts Import"] (this application is also available from [[#AndAppStore|AndAppStore]])
-# export your contact(s) as a vcard file from your contact application
-# [[#Copy files|copy]] the file to your phone /sdcard/ directory
-# on your phone run the ImportContacts application, choose the file you copied and select import. Wait until the phone says x vcards imported
 
-That's it if you don't see your contacts, make sure you selected "view all contacts" in the contacts application options (contacts > power button > Display group > All contacts)
+=== Synchronization ==
 
-It imports only names and telephone numbers, everything else is not imported.
-
-==== From SIM ====
-Works, Contacts->menu->Settings->SIM contacts importer.
-
-=== Synchronization ===
-
-== Calendar ==
+== Calendar ==
 
 === Importing ===
 
-=== Synchronization ===
-
-== Files ==
-
-=== Copying ===
-You can copy files to your phone using either 
-* [[#USB mass storage|USB mass storage]]
-
-This option is not (yet) available in Koolu beta 7 
-
-or, from the command line using
-
-* the [[Android debug bridge]] to copy files to your phone :
- ADBHOST=192.168.0.202 ./adb push file.txt /sdcard/
+=== Synchronization ==
 
 == Media ==
-Can play OGG audio files and view pictures with the default applications
+
 
 = Others =
 
+== USB Networking ==
 
+== USB keyboard ==
 
-== Suspend ==
-Waking up your phone might be a little bit tricky at the moment, there are several recipe/hints submitted by different people :
-* 1-2s press of power button goes to sleep, wake up with long power button press, don't use screen timeouts, disable it in Settings->Sound & display->Screen timeout->Never timeout.
-* Michael Trimarchi's images allow resume from suspend after two short presses. However, sometimes it takes a few tries for the phone to wake up.
-* For me resume works best if i long press power until the main screen appears and the short power press that unlocks screen.
-* During suspend the phone seems to wake up make an audible click and go back to sleep.
+== USB Host mode ==
 
-==USB==
-=== USB networking ===
-The general [[USB Networking]] guide should help you talk to your FreeRunner using IP over USB. However, please note that Android doesn't come with an ssh server installed by default. In order to gain shell access without an additional ssh server you can follow the instructions on the [[Android debug bridge]] page.
-
-=== USB Host mode ===
-* [http://code.google.com/p/android-on-freerunner/downloads/list http://code.google.com/p/android-on-freerunner/downloads/list] Build Version 0.1.1
-<pre>
-echo 1 > /sys/class/i2c-adapter/i2c-0/0-0073/neo1973-pm-host.0/hostmode
-echo host > /sys/devices/platform/s3c-ohci/usb_mode
-</pre>
-
-{{todo|If you know how to change the USB mode with Android, please explain it here.}}
-
-=== USB keyboard ===
-I bought a mini USB keyboard that for my Neo, if someone has simple directions to use it with android, please explain it here.
-
-=== USB mass storage ===
-This setting is named "Enable USB mass storage". If you don't find it on Settings -> SD card & phone storage, you have to unhide it with [http://www.4shared.com/account/file/76203324/508fa871/Anycut.html Anycut]. Install it then make a new shortcut Activity -> SD Card. Use this new shortcut to activate the option. This is not persistent after a reboot. See also [http://rivviepop.wordpress.com/2008/11/19/mount-your-g1-android-sd-card-automatically-rc29-rc30/]
-
-{{todo|This doesn't seem to work with the Neo FreeRunner and current Android images.}}
-
-= Software installation and updates =
-For initial Android flashing, take a look at: [[Android on Freerunner]]
-
-== Install new software ==
-You can find a '''[http://code.google.com/p/android-on-freerunner/wiki/Applications list of Android applications]''' recommended by users of [http://code.google.com/p/android-on-freerunner/wiki/GetIt Android on Freerunner (AoF)]. 
-
-=== Manual install ===
-==== Links/Video Tutorial on Installation ====
-* [http://www.talkandroid.com/android-forums/android-applications/451-how-install-applications-arent-android-marketplace.html How To Install Software] that is not in your package manager on Android
-* [http://code.google.com/p/android-on-freerunner/wiki/Applications Suggested Software for Android on Freerunner]
-==== Manual install with browser download on Freerunner ====
-* Enable to '''unknown source''' in Android settings > Application
-* connect with WiFi to Access Point
-* Use browser to navigate to download page
-* Click to download software on your Freerunner
-* Drag down top bar on browser window and wait until download is finished
-* Click on downloaded file and install (Check features the software want to have access to)
-* Install software
-Please be careful which software you install on your system.
-
-==== Manual install from Laptop/PC with ADB ====
-Applications are packaged in .apk packages, to install a package (downloaded on your computer) do 
-
-    ./adb install app.apk
-
-After making sure you can talk to your phone using the [[Android debug bridge]]
-
-=== Package managers ===
-==== Android Market ====
-Currently it is not possible to use the Android Market Place with the Neo Freerunner.
-
-==== AndAppStore ====
-AndAppStore is an alternate source for Android software and works on the Neo Freerunner. It is installed by default in current Koolu images but you can [[#Manual install|install manually]] their [http://andappstore.com/AndroidPhoneApplications/apps/7661 client].
-
-==== SlideME ====
-SlideME provides an independent [http://slideme.org/sam2.apk client] and also [http://slideme.org/ web] interface to access paid and free application.
-
-==== Freeware Lovers ====
-Provides a repository of [http://www.freewarelovers.com/android free Android apps], which can be downloaded via web interface.
-
-==== F-Droid ====
-A repository of Free-as-in-Freedom Software Only; submissions are audited and compiled from source. The [http://f-droid.org/ project home page is here]. The client is available at the [http://f-droid.org/repository/ F-Droid Repository Page].
-
-=== Update software (without reflashing) ===
-
-= Troubleshooting =
-
-== Android Debug Bridge ==
-
-To assist in debugging and to gain shell access to the phone with Android, you can use the instructions found here: [[Android debug bridge]]
-
-== SD Card unavailable ==
-
-
-Type in the the Android Terminal emulator (under Development Tools)
-
-  setprop EXTERNAL_STORAGE_STATE mounted
-
-or run 
-
-  adb shell setprop EXTERNAL_STORAGE_STATE mounted 
-
-with the freerunner connected to a computer which has the Android SDK.
-
-= Links =
-* [http://code.google.com/p/android-on-freerunner/ Android on Freerunner] Main Page
-* [http://code.google.com/p/android-on-freerunner/wiki/GetIt Wiki Page on Installation]
-* [http://www.talkandroid.com/android-forums/android-applications/451-how-install-applications-arent-android-marketplace.html How To Install Software] that is not in your package manager on Android
-* [http://code.google.com/p/android-on-freerunner/wiki/Applications Suggested Software for Android on Freerunner]
-* [http://freeapk.com Android freeware] Any apps not list at Google Market could found here
-
-[[Category:Android]]
+= Important Links =
+=== Documentation ===
+* [http://source.android.com/documentation Android Documentation]
+* [http://www.arm.com/documentation/ ARM Documentation], (keywords: armv4t, armv5t, armv5te, arm920t, arm926ej-s)
+* [http://www.arm.com/miscPDFs/9658.pdf ARM Assembly Language Programming]
+* [http://www.cse.unsw.edu.au/~cs3221/labs/assembler-intro.pdf An Introduction to the GNU Assembler]
+* [http://www.heyrick.co.uk/assembler/apcsintro.html ARM Procedure Call Standard], [http://en.wikipedia.org/wiki/Calling_convention#ARM ARM Calling Conventions]
