@@ -515,7 +515,181 @@ Using the embreyo scripting language inside edc files.
 <TODO>
 
 == Transitions ==
-<TODO>
+ * If clicked on the red box the blue will enlarge en get transparant.
+ * If clicked on the green box tje blue box will return to it's original state.
+ * On mouse in red box they will get highlighted (sort of), on mouse they will get dehighlighted.
+
+Some observations: 
+ * It seems not to be possible to goto a intermediated index (0.5 if 0 and 1 are defined).
+ * It seems not to be possible to handle signals depeding on state (e.g: only trigger a certain program if a part is in state x x).
+
+
+Edje source:
+<pre>
+collections {
+    group {
+      name: "test";
+        parts {
+             part {
+                name: "bg";
+                type: RECT;
+                mouse_events: 1;
+                description {
+                   state: "default" 0.0;
+                   color: 255 255 255 255;
+                   rel1 {
+                      relative: 0 0;
+                   }
+                   rel2 {
+                      relative: 1 1;
+                   }
+                }
+            }
+            part {
+                name: "main";
+                type: RECT;
+                mouse_events: 1;
+                description {
+                   state: "default" 0.0;
+                   color: 128 255 255 255;
+                   rel1 {
+                      relative: 0.25 0.25;
+                      offset: 10 10;
+                   }
+                   rel2 {
+                      relative: 0.75 0.75;
+                      offset: -10 -10;
+                   }
+                }
+                description {
+                   state: "default" 1.0;
+                   color: 128 255 255 50;
+                   rel1 {
+                      relative: 0.0 0.0;
+                      offset: 10 10;
+                   }
+                   rel2 {
+                      relative: 1.0 1.0;
+                      offset: -10 -10;
+                   }
+                }
+             }
+            
+            part {
+                name:"button_open";
+                type:RECT;
+                mouse_events:1;
+                description {
+                   state: "default" 0.0;
+                   color: 255 128 128 255;
+                   rel1 {
+                      relative: 0.0 0.90;
+                   }
+                   rel2 {
+                      relative: 0.25 1;
+                   }
+                }
+                description {
+                   state: "default" 1.0;
+                   color: 255 0 0 255;
+                   rel1 {
+                      relative: 0.0 0.90;
+                   }
+                   rel2 {
+                      relative: 0.25 1;
+                   }
+                }
+            }
+            
+            part {
+                name:"button_close";
+                type:RECT;
+                mouse_events:1;
+                description {
+                   state: "default" 0.0;
+                   color: 0 255 0 128;
+                   rel1 {
+                      relative: 0.25 0.90;
+                   }
+                   rel2 {
+                      relative: 0.50 1;
+                   }
+                }
+                
+                description {
+                   state: "default" 1.0;
+                   color: 0 255 0 255;
+                   rel1 {
+                      relative: 0.25 0.90;
+                   }
+                   rel2 {
+                      relative: 0.50 1;
+                   }
+                }
+            }
+        }
+        
+        programs {
+            program {
+                name: "complete";
+                source: "button_open";
+                signal: "mouse,clicked,1";
+                
+                action: STATE_SET "default" 1.0;        
+                target:"main";
+                transition:SINUSOIDAL 1;
+            }
+            program {
+                name: "reverse";
+                source: "button_close";
+                signal: "mouse,clicked,1";
+                
+                action: STATE_SET "default" 0.5;        
+                target:"main";
+                transition:ACCELERATE 1;
+            }
+            
+            program {
+                name:"button_open_mouse_in";
+                source:"button_open";
+                signal:"mouse,in";
+                action: STATE_SET "default" 1;
+                target:"button_open";
+                transition:ACCELERATE 0.5;        
+            }
+            
+            program {
+                name:"button_open_mouse_out";
+                source:"button_open";
+                signal:"mouse,out";
+                action: STATE_SET "default" 0;
+                target:"button_open";
+                transition:LINEAR 1;        
+            }
+            program {
+                name:"button_close_mouse_in";
+                source:"button_close";
+                signal:"mouse,in";
+                action: STATE_SET "default" 1;
+                target:"button_close";
+                transition:ACCELERATE 0.5;        
+            }
+            
+            program {
+                name:"button_close_mouse_out";
+                source:"button_close";
+                signal:"mouse,out";
+                action: STATE_SET "default" 0;
+                target:"button_close";
+                transition:LINEAR 1;        
+            }
+        }
+    }
+
+}
+
+
+</pre>
 
 == Macros ==
 
