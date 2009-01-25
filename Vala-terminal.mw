@@ -1,9 +1,11 @@
-[[Image:Vala-terminal4.png|thumb| vala-terminal 1.1.1-r0.2 ]]
+[[Image:Vala-terminal.png|thumb| vala-terminal with one tab]]
 
 == Overview ==
 Command Line Terminal. It is written in ([http://live.gnome.org/Vala/ vala]) programming-language. Vala produces c-code, which is then compiled binary form, so vala do not add any runtime requirements/dependeries.
 
 This is official successor of openmoko-terminal2 (https://kerneltrap.org/mailarchive/openmoko-community/2008/11/13/4084004/thread).
+
+[[Image:Vala-terminal2.png|thumb| vala-terminal with toolbar vertically]]
 
 Features:
 
@@ -19,7 +21,7 @@ Features:
 [[Image:Vala-terminal3.png|thumb| landscaped vala-terminal with toolbar vertically]]
 
 Buttons in toolbar are loaded from Systems stock, so they can look different than in screenshots (please add, if your distro shows it differently)
-=== Buttons ===
+
 Buttons left to rigth:
 * New           - Open new tab
 * Del           - Close current tab
@@ -31,115 +33,85 @@ Buttons left to rigth:
 * [1/2]         - Current tab / Total number of tabs
 * Circle-arrow  - Flips the toolbar to vertical (and vertical to horizontal)
 
-=== Commandline parameters===
-*--help         : manual
-*-v             : starts toolbar vertically
-*-h             : starts toolbar horizontally
-*-fs size       : starts with given fontsize
-*-fc r g b      : color of font (values between 0...65535)
-*-bc r g b      : color of background (values between 0...65535)
-*-f fontname    : Used font
-*-e cmd         : executes cmd (like xterm and konsole in KDE)
-
-=== Tips ===
--e is very handy with desktop-files. You can start console applications from icons:
- 
- vala-terminal -e nano /etc/hosts
-
-=== Examples ===
- vala-terminal -v -fs 3 -f Ariel -fc 0 65535 0 -bc 65535 0 0 -e nano
-
-Starts toolbar vertically (-v), fontsize 3 (-fs 3), using font Ariel (-f Ariel). Text is maximal green and background is maximal red. Executes automatically command 'nano'.
-
 == Download ==
-[[Image:Vala-terminal-Nethack.png|thumb| vala-terminal with toolbar vertically]]
+[[Image:Vala-terminal4.png|thumb| vala-terminal with black background, is it better?]]
 
 [http://www.opkg.org/package_112.html In opkg.org]
 
- opkg install http://www.opkg.org/packages/vala-terminal_1.1.1-r0.3_armv4t.opk
+ opkg install http://www.opkg.org/packages/vala-terminal_1.1.1-r0.1_armv4t.opk
 
 
 == Building ==
-It can be builded with this bitbake-recipe, but you must have valac version 0.5.6 (released 18.January 2009) or newer installed ON YOUR HOST MACHINE.
-(e.g. Ubuntu has version 0.5.7, so this might be useless snippet)
-
-It is just: (Who will make step-by-step walktrought how to install this in toolchain?)
-
+It can be builded with this bitbake-recipe, but you must have valac version 0.5.6 (released 18.January 2009) installed ON YOUR HOST MACHINE. It is just:
+(Who will make step-by-step walktrought how to install this in toolchain?)
  wget http://download.gnome.org/sources/vala/0.5/vala-0.5.6.tar.bz2
  tar -xvf vala-0.5.6.tar.bz2
  cd vala-0.5.6
  ./configure
  make
- make install
+ make install 
 
-Bitbake-recipe: 
- DESCRIPTION = "The Openmoko Command Line Terminal"
- SECTION = "openmoko/applications"
- LICENSE = "GPL"
- HOMEPAGE = "http://git.freesmartphone.org/?p=vala-terminal.git"
- PKG_TAGS_${PN} = "group::applications"
- PV = "1.1.1"
- PR = "r0.4" 
- 
- 
- #how to use git in bb?
- #SRC_URI = "git://git.freesmartphone.org/vala-terminal.git;proto=http" 
- 
- do_patch() {
- git clone git://git.freesmartphone.org/vala-terminal.git 
- 
- #so we first run autogen.sh (it will generate Makefile)
- mv vala-terminal vala-terminal-${PV}
- cd vala-terminal-${PV}
- ./autogen.sh \
-   --build=i486-linux-gnu \
-   --host=${TARGET_SYS}
-  
- #Now we have Makefile and we can patch it to use host-systems valac (it generates c-code)
- sed 's/$(VALAC) -c/\/usr\/local\/bin\/valac -C/g' Makefile > Makefile_new
- mv Makefile_new Makefile
- }
- 
- do_compile() {
- make
- arm-angstrom-linux-gnueabi-strip .libs/vala-terminal
- }
- 
- do_install() {
-        install -d ${D}${bindir}
-        install -d ${D}${datadir}/pixmaps
-        install -d ${D}${datadir}/applications
- 
-        install ${WORKDIR}/vala-terminal-${PV}/.libs/vala-terminal ${D}${bindir}/
-        install ${WORKDIR}/vala-terminal-${PV}/data/vala-terminal.png ${D}/${datadir}/pixmaps
-        install ${WORKDIR}/vala-terminal-${PV}/data/vala-terminal.desktop ${D}${datadir}/applications
- }
+
+Bitbake-recipe:
+
+   DESCRIPTION = "The Openmoko Command Line Terminal"
+   SECTION = "openmoko/applications"
+   PV = "1.1.1"
+   PR = "r0.1"
+   
+   SRC_URI += "file://colors.patch"
+   
+   #how to use git?
+   #SRC_URI = "git://git.freesmartphone.org/vala-terminal.git;proto=http"
+   
+   do_patch() {
+   git clone git://git.freesmartphone.org/vala-terminal.git 
+   
+   #so we first run autogen.sh (it generates Makefile)
+   mv vala-terminal vala-terminal-${PV}
+   cd vala-terminal-${PV}
+   ./autogen.sh \
+      --build=i486-linux-gnu \
+      --host=${TARGET_SYS}
+   
+   #Now we have Makefile and we can patch it to use host-systems valac (it generates c-code)
+   sed 's/$(VALAC) -c/\/usr\/local\/bin\/valac -C/g' Makefile > Makefile_new
+   mv Makefile_new Makefile
+   }
+   
+   do_compile() {
+   make
+   arm-angstrom-linux-gnueabi-strip .libs/vala-terminal
+   }
+   
+   do_install() {
+         install -d ${D}${bindir}
+         install -d ${D}${datadir}/pixmaps
+         install -d ${D}${datadir}/applications
+   
+         install ${WORKDIR}/vala-terminal-${PV}/.libs/vala-terminal ${D}${bindir}/
+         install ${WORKDIR}/vala-terminal-${PV}/data/vala-terminal.png ${D}/${datadir}/pixmaps
+         install ${WORKDIR}/vala-terminal-${PV}/data/vala-terminal.desktop ${D}${datadir}/applications
+   }
+
+
 
 == Issues ==
-[[Image:Vala-terminal-debian.png|thumb| vala-terminal on Debian with white background]]
-If you have problems with the font on OM2008.12 (characters such as m, M, w, W, and @ overlap the character next to them), you probably missed ttf-liberation-mono -font. 
-
-Any good font in repositories?
-
 How to use git in bitbake (rigth way)?
 
 How to install valac to the toolchain?
 
-Debians fontsize (5) is lots of smaller than OMs fontsize (5) (this can be handled with -fs size parameter)
+Black or white background?
 
 <onlyinclude>
 {{ApplicationBox|
   Name=[[vala-terminal]]|
   Description=Terminal|
-  Screenshot=Vala-terminal4.png|
-  Homepage=http://git.freesmartphone.org/?p=vala-terminal.git|
-  TestedOn=Om 2008.12, Debian|
+  Screenshot=vala-terminal.png|
+  TestedOn=Om 2008.12|
+  Homepage:[http://wiki.openmoko.org/wiki/Vala-terminal http://wiki.openmoko.org/wiki/Vala-terminal] | 
   PackageName=[http://www.opkg.org/packages/vala-terminal_1.1.1-r0.1_armv4t.opk vala-terminal]
 }}
 </onlyinclude>
 
-== Float Font Size ==
-
-The current verion of vala-terminal has integer font sizes. On a 284 dpi Freerunner I find that the best font size is somewhere between 3 and 4 (about 3.6 or 3.7 seems best). I wrote a patch for vala-terminal which makes the font size a floating point value and sets the default to 3.7. http://trac.hackable1.org/trac/ticket/340
-
-[[Category:System Applications]]
+[[Category:Terminal]]
