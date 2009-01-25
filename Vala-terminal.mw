@@ -55,46 +55,43 @@ It is just: (Who will make step-by-step walktrought how to install this in toolc
 
 
 Bitbake-recipe:
-
-   DESCRIPTION = "The Openmoko Command Line Terminal"
-   SECTION = "openmoko/applications"
-   PV = "1.1.1"
-   PR = "r0.1"
-     
-   #how to use git?
-   #SRC_URI = "git://git.freesmartphone.org/vala-terminal.git;proto=http"
+ DESCRIPTION = "The Openmoko Command Line Terminal"
+ SECTION = "openmoko/applications"
+ PV = "1.1.1"
+ PR = "r0.1"
    
-   do_patch() {
-   git clone git://git.freesmartphone.org/vala-terminal.git 
-   
-   #so we first run autogen.sh (it generates Makefile)
-   mv vala-terminal vala-terminal-${PV}
-   cd vala-terminal-${PV}
-   ./autogen.sh \
-      --build=i486-linux-gnu \
-      --host=${TARGET_SYS}
-   
-   #Now we have Makefile and we can patch it to use host-systems valac (it generates c-code)
-   sed 's/$(VALAC) -c/\/usr\/local\/bin\/valac -C/g' Makefile > Makefile_new
-   mv Makefile_new Makefile
-   }
-   
-   do_compile() {
-   make
-   arm-angstrom-linux-gnueabi-strip .libs/vala-terminal
-   }
-   
-   do_install() {
-         install -d ${D}${bindir}
-         install -d ${D}${datadir}/pixmaps
-         install -d ${D}${datadir}/applications
-   
-         install ${WORKDIR}/vala-terminal-${PV}/.libs/vala-terminal ${D}${bindir}/
-         install ${WORKDIR}/vala-terminal-${PV}/data/vala-terminal.png ${D}/${datadir}/pixmaps
-         install ${WORKDIR}/vala-terminal-${PV}/data/vala-terminal.desktop ${D}${datadir}/applications
-   }
-
-
+ #how to use git?
+ #SRC_URI = "git://git.freesmartphone.org/vala-terminal.git;proto=http"
+ 
+ do_patch() {
+ git clone git://git.freesmartphone.org/vala-terminal.git 
+ 
+ #so we first run autogen.sh (it generates Makefile)
+ mv vala-terminal vala-terminal-${PV}
+ cd vala-terminal-${PV}
+ ./autogen.sh \
+    --build=i486-linux-gnu \
+    --host=${TARGET_SYS}
+ 
+ #Now we have Makefile and we can patch it to use host-systems valac (it generates c-code)
+ sed 's/$(VALAC) -c/\/usr\/local\/bin\/valac -C/g' Makefile > Makefile_new
+ mv Makefile_new Makefile
+ }
+ 
+ do_compile() {
+ make
+ arm-angstrom-linux-gnueabi-strip .libs/vala-terminal
+ }
+ 
+ do_install() {
+       install -d ${D}${bindir}
+       install -d ${D}${datadir}/pixmaps
+       install -d ${D}${datadir}/applications
+ 
+       install ${WORKDIR}/vala-terminal-${PV}/.libs/vala-terminal ${D}${bindir}/
+       install ${WORKDIR}/vala-terminal-${PV}/data/vala-terminal.png ${D}/${datadir}/pixmaps
+       install ${WORKDIR}/vala-terminal-${PV}/data/vala-terminal.desktop ${D}${datadir}/applications
+ }
 
 == Issues ==
 How to use git in bitbake (rigth way)?
