@@ -1,0 +1,117 @@
+[[Image:Vala-terminal.png|thumb| vala-terminal with one tab]]
+
+== Overview ==
+Command Line Terminal. It is written in ([http://live.gnome.org/Vala/ vala]) programming-language. Vala produces c-code, which is then compiled binary form, so vala do not add any runtime requirements/dependeries.
+
+This is official successor of openmoko-terminal2 (https://kerneltrap.org/mailarchive/openmoko-community/2008/11/13/4084004/thread).
+
+[[Image:Vala-terminal2.png|thumb| vala-terminal with toolbar vertically]]
+
+Features:
+
+* Narrow toolbar
+* Tabs
+* Scrollbar
+* Toolbar can be oriented horizontaly or vertically
+* Zooming (Fontsize changing)
+* Paste selected text (not really clipboard)
+* handles -e parameter, like xterm and konsole in KDE (e.g. you can use it to start console applications with desktop-files: vala-terminal -e nano /etc/hosts)
+
+== Usage ==
+[[Image:Vala-terminal3.png|thumb| landscaped vala-terminal with toolbar vertically]]
+
+Buttons in toolbar are loaded from Systems stock, so they can look different than in screenshots (please add, if your distro shows it differently)
+
+Buttons left to rigth:
+* New           - Open new tab
+* Del           - Close current tab
+* +             - Zoom in  (raise font size)
+* -             - Zoom out (lower font size)
+* Paste         - Paste selected text (can be from another tab, not in another application)
+* <-            - Go previous tab
+* ->            - Go next tab
+* [1/2]         - Current tab / Total number of tabs
+* Circle-arrow  - Flips the toolbar to vertical (and vertical to horizontal)
+
+== Download ==
+[[Image:Vala-terminal4.png|thumb| vala-terminal with black background, is it better?]]
+
+[http://www.opkg.org/package_112.html In opkg.org]
+
+ opkg install http://www.opkg.org/packages/vala-terminal_1.1.1-r0.1_armv4t.opk
+
+
+== Building ==
+It can be builded with this bitbake-recipe, but you must have valac version 0.5.6 (released 18.January 2009) installed ON YOUR HOST MACHINE. It is just:
+(Who will make step-by-step walktrought how to install this in toolchain?)
+ wget http://download.gnome.org/sources/vala/0.5/vala-0.5.6.tar.bz2
+ tar -xvf vala-0.5.6.tar.bz2
+ cd vala-0.5.6
+ ./configure
+ make
+ make install 
+
+
+Bitbake-recipe:
+
+   DESCRIPTION = "The Openmoko Command Line Terminal"
+   SECTION = "openmoko/applications"
+   PV = "1.1.1"
+   PR = "r0.1"
+   
+   SRC_URI += "file://colors.patch"
+   
+   #how to use git?
+   #SRC_URI = "git://git.freesmartphone.org/vala-terminal.git;proto=http"
+   
+   do_patch() {
+   git clone git://git.freesmartphone.org/vala-terminal.git 
+   
+   #so we first run autogen.sh (it generates Makefile)
+   mv vala-terminal vala-terminal-${PV}
+   cd vala-terminal-${PV}
+   ./autogen.sh \
+      --build=i486-linux-gnu \
+      --host=${TARGET_SYS}
+   
+   #Now we have Makefile and we can patch it to use host-systems valac (it generates c-code)
+   sed 's/$(VALAC) -c/\/usr\/local\/bin\/valac -C/g' Makefile > Makefile_new
+   mv Makefile_new Makefile
+   }
+   
+   do_compile() {
+   make
+   arm-angstrom-linux-gnueabi-strip .libs/vala-terminal
+   }
+   
+   do_install() {
+         install -d ${D}${bindir}
+         install -d ${D}${datadir}/pixmaps
+         install -d ${D}${datadir}/applications
+   
+         install ${WORKDIR}/vala-terminal-${PV}/.libs/vala-terminal ${D}${bindir}/
+         install ${WORKDIR}/vala-terminal-${PV}/data/vala-terminal.png ${D}/${datadir}/pixmaps
+         install ${WORKDIR}/vala-terminal-${PV}/data/vala-terminal.desktop ${D}${datadir}/applications
+   }
+
+
+
+== Issues ==
+How to use git in bitbake (rigth way)?
+
+How to install valac to the toolchain?
+
+Black or white background?
+
+<onlyinclude>
+{{ApplicationBox|
+  Name=[[vala-terminal]]|
+  Description=Terminal|
+  Screenshot=vala-terminal.png|
+  TestedOn=Om 2008.12|
+  Homepage:[http://wiki.openmoko.org/wiki/Vala-terminal http://wiki.openmoko.org/wiki/Vala-terminal] | 
+  PackageName=[http://www.opkg.org/packages/vala-terminal_1.1.1-r0.1_armv4t.opk vala-terminal]
+}}
+</onlyinclude>
+
+[[Category:Terminal]]
