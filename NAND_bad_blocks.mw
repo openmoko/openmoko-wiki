@@ -220,4 +220,23 @@ Erasing Nand...Writing to Nand... done
 # Use u-boot 'write.jffs2' command to write jffs2 image to rootfs partition in NAND
 # Reset and boot
 
+=== Clearing BadBlocks ===
+# install a terminal application (for example minicom)
+# set up your terminal:
+## disable flow control
+## disable the modem initialisation string (-o flag for minicom)
+## the device to connect to will be /dev/ttyACM0 (if this is the only acm device connected to your machine)
+# make sure you have the cdc_acm driver compiled for your kernel (CONFIG_USB_ACM=m or y, see higher up on this page)
+# boot into the u-boot menu, the /dev/ttyACM0 should appear as soon as that happens
+# execute the following commands, in order (this will erase your entire flash):
+<pre>
+nand bad
+nand scrub
+nand createbbt
+dynpart
+dynenv set u-boot_env
+saveenv
+</pre>
+you should be set
+kudos to mmontour and PaulFertser for finding this method and sharing it with me
 [[Category:Flash]]
