@@ -1,9 +1,9 @@
 {{Languages|SHR}}
-[[Image:SHR-Logo.png|right|thumb|300px|SHR ]]
 {{Distributions|SHR}}
+{{SHR}}
 
 == Proč SHR existuje? ==
-[[Stable Hybrid Release]] (SHR) by se mělo stat kumunitně vyvíjenou distribucí složenou z [[OpenmokoFramework|FSO]] a několika základních aplikací, které by měly být kofigurovatelné pro používání několika odličných grafických rozhraní. Například GTK nebo EFL. SHR je založeno na FSO. Na počítaku mělo SHr používat software z [[Openmoko2007.2]] běžící na GTK a zároveň nový framework [[OpenmokoFramework|FSO]], Ale věci se změnily...
+[[Stable Hybrid Release]] (SHR) by se mělo stat kumunitně vyvíjenou distribucí složenou z [[OpenmokoFramework|FSO]] a několika základních aplikací, které by měly být kofigurovatelné pru používání několika odličných grafických rozhraní. Například GTK nebo EFL. SHR je založeno na FSO. Na počítaku mělo SHr používat software z [[Openmoko2007.2]] běžící na GTK a zároveň nový framework [[OpenmokoFramework|FSO]], Ale věci se změnily...
 
 ====Proč nepoužívat čistě FSO?====
 [[FSO]] vytvořil Mickey Lauer a crew jako doboru  [[D-Bus]] infrastrukturu.
@@ -16,7 +16,7 @@ Lidé se domnívali že FSO dostane frontend - to je to co děláme.
 
 == Instalace: ==
 
-Instalace SHR je velmi jednoduchá. Pokusím se vysvětlit jak naistalovat testing verzi. Je v celku stabilní. Oficiální Stable verze bude brzy dostupná viz ([http://blog.shr-project.org/ Stable announcement]), [http://build.shr-project.org/shr-unstable/images/om-gta02/ unstable verze] (Pro odvážné testry ;) ) je dostupná taktéž.
+Instalace SHR je velmi jednoduchá. Pokusím se vysvětlit jak naistalovat unstable verzi. Je v celku stabilní. Oficiální Stable verze bude brzy dostupná viz ([http://blog.shr-project.org/ Stable announcement]), [http://build.shr-project.org/shr-unstable/images/om-gta02/ unstable verze] (Pro odvážné testry ;) ) je dostupná taktéž.
 
 Předpokládám že umíte používat [http://wiki.openmoko.org/wiki/NeoTool NeoTool]
 
@@ -58,60 +58,50 @@ a naistalujte
 
  ln -sf /usr/share/zoneinfo/Europe/Paris /etc/localtime
 
-== Změna hlavního hesla ==
-SHR je dodáván bez nastaveného hlavního hesla (platný pro uživatele root) a pro přihlášení postačuje prázdné heslo potvrdit.
+== Changing root password ==
+SHR is shipped without root password (just press enter)
 
-Toto je velmi nebezpečně v případě, že se připojujete do libovolné sítě. Změnu hesla provedete následujícím příkazem:
+This is very dangerous if you connect using wifi, or USB. You need to activate the root password:
 
  passwd
 
-kdy napíšete nové heslo a poté jej potvrdíte opětovným zadáním.
+en type your selected password (2 times)
 
-== Změna vyzvánění ==
-Pro změnu je nutné mít nějakou melodii, kterou naleznete na stránce [http://wiki.openmoko.org/wiki/Ringtones#svn.openmoko.org_ringtones RingTone].
+== Customize the RingTone ==
+You need to have a file containing the RingTone you want for your FR. You can find some at [http://wiki.openmoko.org/wiki/Ringtones#svn.openmoko.org_ringtones RingTone]
 
-Poté melodii přeneste na Váš FR (třeba na SD kartu):
+Then transfer it to your FR (i.e on the SD card):
  scp file root@192.168.0.202:/media/card/
 
-Nakonec je nutné editovat soubor s vyzváněním, aby jej FR spouštěl.
- /etc/freesmartphone/opreferences/conf/phone/default.yaml
+Now you need to indicate that the FR must use this file for incoming calls. Modify /etc/freesmartphone/opreferences/conf/phone/default.yaml
 
-== Zamknutí obrazovky ==
-V SHR-testing po zmáčknutí AUX nenastane zamknutí obrazovky jako to bylo dříve. Jak jsem se dočetl je to, protože by po zmáčknutí mělo dojít k rotaci. To zatím nefunguje. Pokud chcete i nadále mít po zmáčknutí AUX černý pruh s nápisem Locked stačí do terminálu openmoka vyťukat následující:
- enlightenment_remote -binding-key-del ANY "Keycode-177" NONE 1 "simple_lock" ""
-enter a pak
- enlightenment_remote -binding-key-add ANY "Keycode-177" NONE 1 "simple_lock" ""
+== Sound Control ==
 
-== Ovládání zvuku ==
+Up to now, there is no graphical interface to control the sound
+=== Mic and HP ===
+The first idea is to use alsamixer; bad idea! There are 94 controls, and your modifications will be lost at the next reboot.Finding documentation is not easy. Here is my understanding: 
+Scenari are used for each case. They are located in /usr/share/openmoko/scenarios/
+- capturehandset.state  
+- gsmheadset.state 
+- headset.state         
+- voip-handset.state
+- gsmhandset.state
+- gsmspeakerout.state
+- stereoout.state
 
-Doposud není k dispozici žádné grafické rozhraní pro ovládání zvuku.
+Each file is a set of value for the 94 parameters. I have identified some:
 
-=== Mikrofon a sluchátka ===
-Využití programu alsamixer není dobrý nápad, jelikož obsahuje 94 vlastnosti a nastavení se neuchová do příštího restartu. Bohužel dokumentace nelze jednoduše nalézt, takže níže jsou uvedeny mé postřehy.
+- Control 48: internal mic of the tel (set to 2 or 3)
 
-Pro každý stav jsou připraveny scénáře, které jsou umístěny v /usr/share/openmoko/scenarios/
+- Control 4 : internal speaker (set from 110 to 120)
 
- - capturehandset.state  
- - gsmheadset.state 
- - headset.state         
- - voip-handset.state
- - gsmhandset.state
- - gsmspeakerout.state
- - stereoout.state
+- Control 49: headset mic
 
-V každém souboru je množina hodnot pro 94 parametrů. Některé jsem identifikoval takto:
-
-- Control 48: vnitřní mikrofon telefonu (set to 2 or 3)
-
-- Control 4 : vnitřní reproduktor (set from 110 to 120)
-
-- Control 49: mikrofon ve sluchátkách
-
-- Control 3 : reproduktor ve sluchátkách
+- Control 3 : headset speaker
 
 
 
-Externí odkazy:
+external link:
 
 http://wiki.openmoko.org/wiki/Neo_1973_audio_subsystem
 
@@ -122,30 +112,30 @@ http://wiki.openmoko.org/wiki/Neo_Freerunner_audio_subsystem
 === Vyzvánění: ===
 
 
-Můžete si nastavit krátký tón který se bude mnohokrát opakovat nebo dlouhý který se přehreje jen jednou:
+You can define a short ringtone, repeated many time, or a long one, repeated 1 time
 
-Soubor: /etc/freesmartphone/opreferences/conf/phone/default.yaml
+File: /etc/freesmartphone/opreferences/conf/phone/default.yaml
 
-Parametr: ring-volume # Ring Volume control 0 (mini) to ? maxi)
-Paramatr: ring-length # min time for ringtone. Must be greater than the duration of you ringtone
+Parameter: ring-volume # Ring Volume control 0 (mini) to ? maxi)
+Parameter: ring-length # min time for ringtone. Must be greater than the duration of you ringtone
 
-Soubor: /etc/freesmartphone/opreferences/schema/phone.yaml
-Parametr: ring-loop # define the number of loop of ringtone to play
+File: /etc/freesmartphone/opreferences/schema/phone.yaml
+Parameter: ring-loop # define the number of loop of ringtone to play
 
-=== Upozornění na Zprávu ===
-Soubor: /etc/freesmartphone/opreferences/conf/phone/default.yaml
-Parametr: message-volume # Ring Volume control 0 (mini) to ? maxi)
-Parametr: message-length # min time for message alert. Must be greater than the duration of you message alert
+=== Message alert ===
+File: /etc/freesmartphone/opreferences/conf/phone/default.yaml
+Parameter: message-volume # Ring Volume control 0 (mini) to ? maxi)
+Parameter: message-length # min time for message alert. Must be greater than the duration of you message alert
 
-Soubor: /etc/freesmartphone/opreferences/schema/phone.yaml
-Parametr: message-loop # define the number of loop of incoming message music to play
+File: /etc/freesmartphone/opreferences/schema/phone.yaml
+Parameter: message-loop # define the number of loop of incoming message music to play
 
 == Známé chyby: ==
 === Telefon: ===
 
-GSM připojení je ztraceno po 24hodinách nepřetržitého provozu telefonu. Je nutný každodenní restart.
+GSM připojení je ztraceno po 24hodinách nepřetrožitého provzu telefonu. Je nutný každodenní restart
 
-=== Adresář & telefonní funkce ===
+=== Adresář ===
 
 V SHR není zatím implementován PIM (Personal Information Manager). Pracuje se na tom. Ten co je přiložený v testing vydání má několik mušek:
 
@@ -155,20 +145,18 @@ V SHR není zatím implementován PIM (Personal Information Manager). Pracuje se
 EDIT : Vypadá že je to možné pomocí skriptu , který napsal Zem:
 [http://wiki.openmoko.org/wiki/User:Zem#DBus_Access_Scripts]
 
-- při příchozím hovoru se zobrazí pouze číslo volajícího nikoliv jeho jméno. EDIT : již doděláno.
+- při příchozím hovoru se zobrazí pouze číslo volajícího nikoliv jeho jméno.
 
-- Při odesíláním SMS není možné vybrat příjemce ze seznamu - musíte si pamatovat jeho číslo. EDIT : již doděláno, po zobrazeni SMS už ukáže i jméno odesílatele
+- Ppři odesíláním SMS není možné vybrat příjemce ze seznamu - musíte si pamatovat jeho číslo.
 
-- Aplikacím se vesměs nechce běžet pokud není vložena SIM
 
-- Chybí podpora pro dlouhé SMS není možné je odesílat a příchozí dlouhé SMS se zobrazí jako několik samostatných SMS
 
 == Více informací: ==
 
-* Manuál (anglicky - zatím): http://wiki.openmoko.org/wiki/SHR_User_Manual 
+
 * Blog: http://blog.shr-project.org
 * Trac: http://trac.shr-project.org
 * Git: http://git.shr-project.org
 * Buildhost: http://build.shr-project.org
 
-[[Category:SHR/cs|kategorie:SHR/cs]]
+[[Category:SHR|kategorie:SHR]]
