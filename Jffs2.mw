@@ -13,7 +13,26 @@ Tell the module which loopback device to use
  echo /dev/loop0 >/sys/module/block2mtd/parameters/block2mtd
 
 Make a mount point for the file system
- mkdir /mnt/jffs2
+  mkdir /mnt/jffs2
 
 Mount the file system
  mount -t jffs2 /dev/mtdblock0 /mnt/jffs2/
+
+An alternative way is used in the following script:
+ if test `id -u` != 0
+ then echo "Must be root"; exit 2
+ fi
+ if test $# != 2 -o ! -d $2
+ then echo Usage: $0 image.jffs2 directory; exit 2
+ fi
+ rmmod mtdram
+ modprobe mtdcore
+ modprobe mtdblock
+ modprobe mtdchar
+ modprobe jffs2
+ s=$(ls -s $1)
+ s=${s% *}
+ echo modprobe mtdram total_size=$s
+ modprobe mtdram total_size=$s
+ dd if=$1 of=/dev/mtd0
+ mount -t jffs2 /dev/mtdblock0 $2
