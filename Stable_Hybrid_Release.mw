@@ -130,6 +130,30 @@ Parameter: message-length # min time for message alert. Must be greater than the
 File: /etc/freesmartphone/opreferences/schema/phone.yaml
 Parameter: message-loop # define the number of loop of incoming message music to play
 
+
+== GPS ==
+== GPS ==
+GPS is not started automatically at boot. You need to switch it ON/OFF manually
+
+you need to modify the file /etc/init.d/fso-gpsd. Replace the line
+
+ start-stop-daemon --start /usr/sbin/fso-gpsd -S localhost:gpsd -P /var/run/${NAME}.pid
+
+by 
+
+ start-stop-daemon --start --pidfile /var/run/${NAME}.pid --exec /usr/sbin/fso-gpsd -- -S localhost:gpsd -P /var/run/${NAME}.pid
+
+
+and then you can start fso-gpsd by
+{{{
+/etc/init.d/fso-gpsd start
+}}}
+
+ === using a GUI ===
+install [http://wiki.openmoko.org/wiki/ShortOm]
+and configure it to start/stop fso-gps as above
+
+
 == Known Issues ==
 === Phone ===
 
