@@ -51,17 +51,13 @@ While we wait for the preferences part of FSO to be completed (and a GUI), we ca
 * the password.
 If your APN has no username or password, you must still provide a string to satisfy the framework's input requirements.  Entering bogus data, such as the "x" above, will suffice.
 
-Since '''6 Jan 2009''' [http://git.freesmartphone.org/?p=framework.git;a=commit;h=8551825260f31baea9b8b3900d92e4e98d4c6a17] 
-you must use '''BUSNAME="org.freesmartphone.ogsmd"''' you have to adjust this in the example script 
-when you are using a newer image. 
-
 To connect, put the following in a file and make it executable (<code>chmod +x gprs-on.sh</code>):
 <pre>
 #!/bin/sh
 APN="internet.parlino.se"
 USERNAME="x"
 PASSWORD="x"
-BUSNAME="org.freesmartphone.frameworkd"
+BUSNAME="org.freesmartphone.ogsmd""
 OBJECTPATH="/org/freesmartphone/GSM/Device"
 METHODNAME="org.freesmartphone.GSM.PDP.ActivateContext"
 mdbus -s $BUSNAME $OBJECTPATH $METHODNAME $APN "$USERNAME" "$PASSWORD"
@@ -69,7 +65,7 @@ mdbus -s $BUSNAME $OBJECTPATH $METHODNAME $APN "$USERNAME" "$PASSWORD"
 To disconnect, use the following method instead (<code>chmod +x gprs-off.sh</code>):
 <pre>
 #!/bin/sh
-BUSNAME="org.freesmartphone.frameworkd"
+BUSNAME="org.freesmartphone.ogsmd"
 OBJECTPATH="/org/freesmartphone/GSM/Device"
 METHODNAME="org.freesmartphone.GSM.PDP.DeactivateContext"
 mdbus -s $BUSNAME $OBJECTPATH $METHODNAME
@@ -81,6 +77,7 @@ The ''on'' script, using the ActivateContext method, will:
 with settings received from the ISP.
 
 For a list of known APN:s, see the [[GPRS#Some_APN_names_for_reference|main GPRS page]].
+
 == Using a GUI ==
 [[Framework-settings]]
 
