@@ -1,11 +1,8 @@
 {{Languages|Debian}}
 
-{|align=right
-|__TOC__
-|}
-Debian je používán na mnoha embedded zařízeních. Použití Debianu na FreeRunneru zpřístupňuje spoustu balíčků se softwarem z repozitářů Debianu, již zkompilovaných pro procesory ARM. Navíc, každý si může sestavit vlastní programy, aniž by se musel učit jak na to s pomocí OpenEmbedded. Například nativní kompilace je v Debianu otázkou pouhého apt-get gcc&libc-dev.
+Debian je používán na mnoha embedded zařízeních. Použití Debianu na FreeRunneru zpřístupňuje hromadu balíčků se softwarem z repozitářů Debianu, již zkompilovaných pro procesory arm. Navíc, každý si může postavit vlastní programy, aniž by se musel učit jak na to pomocí OpenEmbedded. Například nativní kompilace je v Debianu otázkou pouhého apt-get gcc&libc-dev.
 
-Dříve bylo nutné, aby si každý nainstaloval Debian [[Manual Debian|ručně]]. Nyní je již k dispozici instalační skript. "Oficiální" instrukce jak nainstalovat [http://wiki.debian.org/DebianOnFreeRunner Debian na FreeRunner] nebo [http://wiki.debian.org/DebianOnNeo1973 Debian na Neo1973] jsou umístěny na Debian wiki. Tato stránka je o poinstalačních nastaveních, a tipech speciálně pro FreeRunner. Pro podporu nebo hlášení chyb si prosím přečtěte sekci [[Debian#Support|podpora]].
+Dříve bylo nutné, aby si každý nainstaloval Debian [[Manual Debian|ručně]]. Nyní je již k dispozici instalační skript. "Oficiální" instrukce jak nainstalovat [http://wiki.debian.org/DebianOnFreeRunner Debian na FreeRunner] nebo [http://wiki.debian.org/DebianOnNeo1973 Debian na Neo1973] jsou umístěny na Debian wiki. Tato stránka je o po instalačních nastaveních, a tipech speciálně pro FreeRunner. Pro podporu nebo nahlášení bugu si prosím přečtěte sekci [[Debian#Support|podpora]].
 
 = Konfigurace základního systému =
 == Heslo ==
@@ -17,7 +14,7 @@ Přednastavené heslo pro uživatele root je prázdné. Měli byste jej změnit 
 
 == Suspend ==
 
-Pro uspání (suspend) stiskněte tlačítko power, nebo spusťte 'apm -s'-
+Pro "zasuspendování" stiskněte tlačísto power, nebo spusťte 'apm -s'-
 Ke změnění času pro ztmavení nebo vypnutí displeje, editujte
 
   /usr/share/python-support/fso-frameworkd/framework/subsystems/odeviced/idlenotifier.py
@@ -31,12 +28,11 @@ sekci
                         "lock": 2,
                         "suspend": 20, \
 
-''idle_dim'' je čas v sekundách ke ztmavení displeje (přičítá se k "idle" času), ''idle_prelock'' je čas, po kterém se displej vypne. Poté spusťte:
+idle_dim je čas v sekundách ke ztmavení displeje (přičítá se k "idle" času), idle_prelock je čas, po kterém se displej vypne. Poté spusťte:
 
-  mv /var/lib/python-support/python2.5/framework/subsystems/odeviced/idlenotifier.pyc
-  /var/lib/python-support/python2.5/framework/subsystems/odeviced/idlenotifier.pyc.old
+  mv /var/lib/python-support/python2.5/framework/subsystems/odeviced/idlenotifier.pyc /var/lib/python-support/python2.5/framework/subsystems/odeviced/idlenotifier.pyc.old
 
-Uspávání (suspend) můžete kompletně vypnout zakomentováním celé sekce "Idleness Brightness Handling" v souboru
+Suspend můžete kompletně vypnout zakomentováním celé sekce "Idleness Brightness Handling" v souboru
 
   /etc/freesmartphone/oevents/rules.yaml
 
@@ -109,23 +105,23 @@ Můžete určit svou IP adresu pomocí
 </pre>
 Problémy:
 * funguje pouze v přítomnosti bezdrátové sítě při bootu, nebo když se ručně spustí <code>ifup eth0</code>
-* bootování mimo dosah bezdrátové sítě je pomalejší, protože systém čeká na IP adresu z DHCP až po time out
-* neobnoví spojení, když opustíte oblast dosahu vaší wifi sítě a následně se vrátíte
+* bootování mimo doash bezdrátové sítě je pomalejší, protože systém čeká na IP adresu z DHCP až po time out
+* neobnoví spojení, když opustíte oblast dosahu vaší wifi sítě, a následně se vrátíte
 * nepodporuje vícenásobné wifi sítě nebo otevřené hotspoty, mezi kterými můžete cestovat
 
 Jakmile wpa_supplicant jednou začal řídit vaše wifi rozhraní, měli byste psát "wpa_action eth0 stop" namísto "ifdown eth0".
 
 === Použití wpa-supplicant (roaming mód)===
 
-K nakonfigurování WPA k "potulování se" mezi bezdrátovými sítěmi, budete potřebovat vytvořit následující soubor:
+To configure WPA to roam between wireless networks, you will need to create a new configuration file:
 
 <pre>/etc/wpa_supplicant/wpa_supplicant.conf</pre>
 
-vzorový soubor (a více dokumentace) je dostupný v:
+a template for this file (and more documentation) is available in:
 
 <pre>/usr/share/doc/wpasupplicant/examples/wpa-roam.conf</pre>
 
-Nyní potřebujete do tohoto souboru přidat bezdrátové sítě. Například:
+You'll need to add networks to this file.  Examples:
 
 * WEP:
 <pre>
@@ -133,12 +129,12 @@ network={
        ssid="MySSID"
        key_mgmt=NONE
        wep_key0="abcdefghijklm"
-#      wep_key0=6162636465  # <- bez uvozovek, takže hex číslo
+#      wep_key0=6162636465  # <- no quotes, so hex number
        wep_tx_keyidx=0
        id_str="MySSID"
 }
 </pre>
-* Bez klíče:
+* No key:
 <pre>
 network={
        ssid="SomeNetwork"
@@ -154,7 +150,7 @@ network={
 }
 </pre>
 
-Dále budete potřebovat upravit /etc/network/interfaces. To vám umožní nakonfigurovat wifi, aby používala dhcp, nebo jiné odpovídající nastavení:
+Next, you'll need to edit /etc/network/interfaces.  This lets you configure your wireless networks to use dhcp, or other appropriate TCP/IP settings:
 <pre>
 auto eth0
 iface eth0 inet manual
@@ -172,22 +168,23 @@ iface home inet static
 # static interface settings, or whatever...
 </pre>
 
-Nakonec, pokud chcete zkusit výchozí přístup na internet přes eth0 (a ne usb0), pak zakomentujte tento řádek v konfiguraci usb0 adaptéru:
+Finally, if you want attempts to access the internet to default to eth0 (and not usb0), then comment out this line under usb0 adapter configuration:
 
 <pre>
 gateway 192.168.0.200
 </pre>
 
 
-* Přebíhání mezi sítěmi není automatické. Místo toho musíte ručně spustit "wpa_action eth0 stop; ifup eth0" k přepnutí na jinou síť.
+* Roaming from network to network is not automatic.  Instead, you need to manually run "wpa_action eth0 stop; ifup eth0" to switch networks
 
-Z nějakého důvodu jsem musel restartovat, aby se projevilo nastavené id_str. Avšak, měli byste nyní být schopni použít "ifup eth0" k asociaci s přípojným bodem wifi sítě a "wpa_action eth0 stop" k vypnutí wifi adaptéru.
+For some reason, I had to reboot for the id_str settings to take effect.  However, you should now be able to use "ifup eth0" to associate with the access point and "wpa_action eth0 stop" to down the wifi adapter.
 
 {{todo|Which of the issues that single network configurations suffer from are addressed by WPA roaming mode?  Would ifplugd / guessnet help, or just make things more complicated?}}
 
-=== Dále si přečtěte ===
+=== Further reading ===
 
-K využití všech možností <code>wpasupplicant</code> jako roaming a automatické připojování na různé sítě byste si měli přečíst <code>/usr/share/doc/wpasupplicant/README.Debian.gz</code>
+To use all the possibilities of <code>wpasupplicant</code> like roaming and automatic connection to different networks,
+you should read <code>/usr/share/doc/wpasupplicant/README.Debian.gz</code>
 
 == [[Bluetooth]] ==
 
@@ -195,7 +192,7 @@ FreeRunner používá standardní Linuxový bluez stack, nainstalovaný pomocí
 <pre>
 # apt-get install bluez-utils
 </pre>
-V němž je i chybějící modul z /etc/modules, který je nutný pro rozpoznání zařízení. (kudos to johnsu01 on irc.freenode.net:#openmoko-debian for the find)
+There is also a module missing from /etc/modules, which is critical to getting your device recognized. (kudos to johnsu01 on irc.freenode.net:#openmoko-debian for the find)
 <pre>
 # echo ohci-hcd >> /etc/modules
 </pre>
@@ -203,40 +200,41 @@ The first time you try this, you can also
 <pre>
 # modprobe ohci-hcd
 </pre>
-Jediná atypická část používání bluetooth na FreeRunnerovi je jeho zapnutí, které se provádí následovně
+The only atypical part of using bluetooth on the FreeRunner is turning it on, which can be done with
 <pre>
 # mdbus -s org.freesmartphone.frameworkd  /org/freesmartphone/Device/PowerControl/Bluetooth SetPower 1
 </pre>
-Nyní by zařízení mělo být vidět
+Then the device should be visible using
 <pre>
 # hcitool dev
 </pre>
-{{todo|A co dále?}}
+{{todo|Then what to do next?}}
 
-== Správce balíčků ==
-Můžete nainstalovaet <tt>[http://packages.debian.org/search?keywords=dselect dselect]</tt>(~2.2MB) nebo  <tt>[http://packages.debian.org/search?keywords=aptitude aptitude]</tt>(~12MB) pro vizuální prohlížení dostupných balíčků pomocí desktopové konzole.<br>
-Na GTK postavený správce balíčků <tt>[http://packages.debian.org/search?keywords=synaptic synaptic]</tt>(~15.7MB) po instalaci <tt>[http://packages.debian.org/search?keywords=lsb-release lsb-release]</tt> a <tt>[http://packages.debian.org/search?keywords=hicolor-icon-theme hicolor-icon-theme]</tt> také funguje, ale je velmi pomalý.<br>
-Nakonec, na omezeném systému, prostě použijte příkaz:
+== Packages manager ==
+You can install <tt>[http://packages.debian.org/search?keywords=dselect dselect]</tt>(~2.2MB) or <tt>[http://packages.debian.org/search?keywords=aptitude aptitude]</tt>(~12MB) to visually inspect the available debian packages using the desktop's console.<br>
+Also the gtk-based package-manager <tt>[http://packages.debian.org/search?keywords=synaptic synaptic]</tt>(~15.7MB) is working 
+after installing <tt>[http://packages.debian.org/search?keywords=lsb-release lsb-release]</tt> and <tt>[http://packages.debian.org/search?keywords=hicolor-icon-theme hicolor-icon-theme]</tt>, but it is very slow.<br>
+Finally, on constrained systems, just issue the command:
 <pre>grep -e Package: -e Description /var/lib/dpkg/available|more</pre>
 
 == Xglamo acceleration ==
-Ve výchozím nastavení debian používá fbdev, ale můžete použít Xglamo pro lepší výkon:
+By default debian uses fbdev, but we can use Xglamo to get better performance:
 <pre>apt-get install xserver-xglamo</pre>
-poté upravte soubor /etc/X11/xorg.conf a změňte řádek
+after that edit /etc/X11/xorg.conf and change the line
 <pre>Driver          "fbdev"</pre>
-na:
+to:
 <pre>Driver          "Xglamo"</pre>
-a v případě spouštění X serveru normálním uživatelem:
+and if you want to run xserver as normal user:
 <pre>chmod u+s /usr/bin/Xglamo</pre>
-Pro stejné písmo jako s fbdev je nutné vnutit X serveru 96dpi. Přidejte "-dpi 96" do proměnné X_OPTIONS v '''/etc/init.d/nodm''':<pre>X_OPTIONS="vt4 -nolisten tcp -dpi 96"</pre>
-s tímto:
-*můžete používat xrandr
-*nemáte chybu s kalibrací obrazovky v otočeném módu (rotated mode)
-*máte lepší výkon
+You may also want to force the X server to 96 dpi to have the same fonts as with fbdev. Add "-dpi 96" to the X_OPTIONS variable in '''/etc/init.d/nodm''':<pre>X_OPTIONS="vt4 -nolisten tcp -dpi 96"</pre>
+with that you:
+*can use xrandr
+*don't have the pointer callibration bug with the rotated mode
+*have better performances
 
-Při používání xglamo si musíte pamatovat, že:
-*Nemůžete v xorg.conf použít "Option Rotate" pro otáčení obrazovky
-*Nemůžete použít tslib patch pro simulaci pravého tlačítka
+Using xglamo you must remember that:
+*You can't use on xorg.conf the "Option Rotate" to rotate the screen
+*You can't use the tslib patch to simulate right click
 
 == Running X as normal user ==
 1. Vytvořte nového uživatele
@@ -266,22 +264,22 @@ If you want to make calls or interact with the gps daemon through a dbus interfa
 
 Alternatively, replace all instances of 'user="root"' with 'group="messagebus"' and add your user to the messagebus group.
 
-== Zvuk ==
+== Zvul ==
 Musíte přidat vašeho uživatele do skupiny audio ("adduser <username> audio").
 
 Pokud stále nemáte žádný zvuk, vyzkoušejte tyto stavové soubory:
 [[Talk:Manual_Debian#Sound]]
 
-== Klávesnice a jiné metody vstupu ==
+== Keyboards and other input methods ==
 
-Jako výchozí klávesnice je nainstalován Matchbox, který můžete použít pro vkládání znaků do vašeho nea. Jako alternativu můžete nainstalovat CellWriter. Má také plně vyvinutou klávesnici na obrazovce.
+As a default the Matchbox keyboard is installed, which you can use to input characters into your neo. As an alternative you might want to install CellWriter. It is a grid-entry natural handwriting input panel. As you write characters into the cells, your writing is instantly recognized at the character level. It also features a full fledged onscreen keyboard.
 
-Instalace:
+Installation:
 <pre>
 apt-get install cellwriter
 </pre>
 
-Více informací najdete zde [http://risujin.org/cellwriter/ homepage].
+More information can be found on the [http://risujin.org/cellwriter/ homepage].
 
 == Kernel ==
 
@@ -438,10 +436,11 @@ Run as:
 <pre>xlinks2</pre>
 
 == GPS ==
-Openmoko Freerunner má integrovaný AGPS čip, který může být použit k určení polohy telefonu. Nejvíce známé bezplatné aplikace pro použití GPS s grafickými mapami jsou:
+Openmoko Freerunner has integrated a good AGPS chip that can be used to know in every moment the phone position.
+The most known free applications to use gps with graphical maps are:
 
 *{{main|TangoGPS}}
-*{{main|Navit}} (Upozornění: Navit není v repozitáři Debianu)
+*{{main|Navit}} (Attention: Navit is not yet present on Debian repository)
 
 == E-Book reader ==
 
@@ -589,7 +588,7 @@ Consider a swap partition [http://lists.openmoko.org/pipermail/community/2008-Se
 
 == Problém při použití install.sh ==
 
-Pokud vytváření tabulky oddílů hlásí chybu, použijte následující patch:
+Pokud vytváření tabulky oddílů projde s chybou, použijte následující patch:
 
 <pre>
 --- install.sh	2009-01-19 17:36:26.000000000 +0300
@@ -621,9 +620,8 @@ Pokud vytváření tabulky oddílů hlásí chybu, použijte následující patc
 '''apt-get segmentation fault''' Kdykoli dostanete segmentation fault při používání apt-get nebo aptitude, vyčistěte databázi, a ta bude znova sestavena
   rm /var/cache/apt/*.bin
 
+[[Category:Debian]]
 
 '''Pokud nechce Zhone nastartovat''' je to nejpravděpodobněji kvůli chybě v balíčku python-evas [http://groups.google.com/group/linux.debian.bugs.dist/browse_thread/thread/b5c47db469394e98/1b529e538774d3e0?lnk=raot] (fixed in new install). Nainstalujte balíček:
   wget http://www.ginguppin.de/files/python-evas_0.2.1-2_armel.deb
   dpkg -i python-evas_0.2.1-2_armel.deb
-
-[[Category:Debian/cs]]
