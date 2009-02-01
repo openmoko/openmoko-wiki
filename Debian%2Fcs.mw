@@ -113,15 +113,15 @@ Jakmile wpa_supplicant jednou začal řídit vaše wifi rozhraní, měli byste p
 
 === Použití wpa-supplicant (roaming mód)===
 
-To configure WPA to roam between wireless networks, you will need to create a new configuration file:
+K nakonfigurování WPA k "potulování se" mezi bezdrátovými sítěmi, budete potřebovat vytvořit následující soubor:
 
 <pre>/etc/wpa_supplicant/wpa_supplicant.conf</pre>
 
-a template for this file (and more documentation) is available in:
+vzorový soubor (a více dokumentace) je dostupný v:
 
 <pre>/usr/share/doc/wpasupplicant/examples/wpa-roam.conf</pre>
 
-You'll need to add networks to this file.  Examples:
+Nyní potřebujete do tohoto souboru přidat bezdrátové sítě. Například:
 
 * WEP:
 <pre>
@@ -129,12 +129,12 @@ network={
        ssid="MySSID"
        key_mgmt=NONE
        wep_key0="abcdefghijklm"
-#      wep_key0=6162636465  # <- no quotes, so hex number
+#      wep_key0=6162636465  # <- bez uvozovek, takže hex číslo
        wep_tx_keyidx=0
        id_str="MySSID"
 }
 </pre>
-* No key:
+* Bez klíče:
 <pre>
 network={
        ssid="SomeNetwork"
@@ -150,7 +150,7 @@ network={
 }
 </pre>
 
-Next, you'll need to edit /etc/network/interfaces.  This lets you configure your wireless networks to use dhcp, or other appropriate TCP/IP settings:
+Dále budete potřebovat zeditovar /etc/network/interfaces. To vám umožní nakonfigurovat wifi, aby používala dhcp, nebo jiné odpovídající nastavení:
 <pre>
 auto eth0
 iface eth0 inet manual
@@ -168,16 +168,16 @@ iface home inet static
 # static interface settings, or whatever...
 </pre>
 
-Finally, if you want attempts to access the internet to default to eth0 (and not usb0), then comment out this line under usb0 adapter configuration:
+Nakonec, pokud chcete zkusit defaultní přístup na internet přes eth0 (a ne usb0), pak zakomentujte tento řádek v konfiguraci usb0 adaptéru:
 
 <pre>
 gateway 192.168.0.200
 </pre>
 
 
-* Roaming from network to network is not automatic.  Instead, you need to manually run "wpa_action eth0 stop; ifup eth0" to switch networks
+* Přebíhání mezi sítěmi není automatické. Místo toho musíte ručně spustit "wpa_action eth0 stop; ifup eth0" k přepnutí na jinou síť.
 
-For some reason, I had to reboot for the id_str settings to take effect.  However, you should now be able to use "ifup eth0" to associate with the access point and "wpa_action eth0 stop" to down the wifi adapter.
+Z nějakého důvodu jsem musel rebootovat, aby se projevilo nastavené id_str. Avšak, měli byste nyní být schopni použít "ifup eth0" k asociaci s přípojným bodem wifi sítě a "wpa_action eth0 stop" k vypnutí wifi adaptéru.
 
 {{todo|Which of the issues that single network configurations suffer from are addressed by WPA roaming mode?  Would ifplugd / guessnet help, or just make things more complicated?}}
 
@@ -588,7 +588,7 @@ Consider a swap partition [http://lists.openmoko.org/pipermail/community/2008-Se
 
 == Problém při použití install.sh ==
 
-Pokud vytváření tabulky oddílů projde s chybou, použijte následující patch:
+Pokud vytváření tabulky oddílů hlásí chybu, použijte následující patch:
 
 <pre>
 --- install.sh	2009-01-19 17:36:26.000000000 +0300
