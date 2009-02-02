@@ -48,83 +48,52 @@ A lightweight image that turns an Openmoko phone into a featurephone and that se
 
 * ogsmd
 ** Implement org.freesmartphone.GSM.Network.GetCountryCode() -> ss
-** Revamped callhandling. Refactored the state-based call handler
-      from TI Calypso (and Freescale Neptune) into a generic class that will
-      be used from all modem abstractions. Ported singleline to use the new
-      call handler. More tests needed for TI Calypso and Freescale Neptune.
+** Revamped callhandling. Refactored the state-based call handler from TI Calypso (and Freescale Neptune) into a generic class that will be used from all modem abstractions. Ported singleline to use the new call handler. More tests needed for TI Calypso and Freescale Neptune.
 ** Start with CINTERION MC75 support
 ** Implement org.freesmartphone.GSM.Device.[Get|Set]SpeakerVolume
 ** Implemented org.freesmartphone.GSM.Device.[Get|Set]MicrophoneMuted
 ** Added 'cid' and 'lac' results to org.freesmartphone.GSM.Network.GetStatus()
-** Implemented org.freesmartphone.GSM.SIM.GetIssuer() NOTE: Clients can now show the Mobile Virtual Network Operator instead of the
-      actual service provider, if they want to.
+** Implemented org.freesmartphone.GSM.SIM.GetIssuer() NOTE: Clients can now show the Mobile Virtual Network Operator instead of the actual service provider, if they want to.
 ** Added codeToOperator function and a mobile network operator database
 ** [FREESCALE NEPTUNE] Query our MNO database to show the alphanumeric operator name.
 ** Implemented org.freesmartphone.GSM.PDP.NetworkStatus()
 ** Implemented org.freesmartphone.GSM.PDP.GetNetworkStatus()
 ** Implemented org.freesmartphone.GSM.Network.TimeZoneReport()
 ** Refactored PDP handling for more stability
-** Implemented org.freesmartphone.GSM.Phone.[Start|Stop]AutoRegister()
-      and its signal org.freesmartphone.GSM.Phone.ServiceStatus()
-      This is a convenient way to ensure that ogsmd always tries to unlock the SIM
-      and register with a provider, if necessary.
-      (Corresponding functionality for Gprs is under discussion).
+** Implemented org.freesmartphone.GSM.Phone.[Start|Stop]AutoRegister() and its signal org.freesmartphone.GSM.Phone.ServiceStatus() This is a convenient way to ensure that ogsmd always tries to unlock the SIM and register with a provider, if necessary. (Corresponding functionality for Gprs is under discussion).
 ** Create qualcomm_msm modem abstraction based on singleline with minimal changes.
 ** Added network access type to Provider Info (WARNING, breaks API!)
 ** Support for Ericsson F3507g modem (as found in Thinkpads)
 ** Preliminary support for Option UMTS cards
 ** Refactored Modem.dataOptions() into "pppd-configuration" attribute in modem data storage.
-** Added TI-Calypso specific configuration option "ti_calypso_dsp_mode" to configure
-      audio enhancements. Documentation for this option has been added to the sample configuration file.
-** Implemented org.freesmartphone.GSM.Monitoring.* as stub
-      erroring out with org.freesmartphone.GSM.UnsupportedCommand.
-** [TI CALYPSO] Implemented the new monitoring API:
-      org.freesmartphone.GSM.Monitoring.Get{Serving|Neighbour}CellInformation
+** Added TI-Calypso specific configuration option "ti_calypso_dsp_mode" to configure audio enhancements. Documentation for this option has been added to the sample configuration file.
+** Implemented org.freesmartphone.GSM.Monitoring.* as stub erroring out with org.freesmartphone.GSM.UnsupportedCommand.
+** [TI CALYPSO] Implemented the new monitoring API: org.freesmartphone.GSM.Monitoring.Get{Serving|Neighbour}CellInformation
 ** [TI CALYPSO] DSP command gets now resent before call setup.
-** Implemented org.freesmartphone.GSM.Phone.StartAutoOnline(apn, user, password)
-    This works the same way as StartAutoRegister(pin), trying to keep the connection online.
-
-
+** Implemented org.freesmartphone.GSM.Phone.StartAutoOnline(apn, user, password) This works the same way as StartAutoRegister(pin), trying to keep the connection online.
 
 * ogpsd
 
 * odeviced
 ** Added kernel26 option called 'fb_blank' (default=1). If you suffer from the Om bug WSOD (white screen of death), try setting this option to 0.
-** Added two new resources: 'CPU' and 'Display':
-      Requesting the CPU resource will prevent the idle notifier from falling
-      into the 'suspend' state, requesting the Display resource will prevent
-      the idle notifier from falling into the 'idle_dim' (and following) state(s).
-      With these two resource, it now takes only one additional rule to prevent
-      the system from suspending while on a call or a musicplayer is playing.
+** Added two new resources: 'CPU' and 'Display': Requesting the CPU resource will prevent the idle notifier from falling into the 'suspend' state, requesting the Display resource will prevent the idle notifier from falling into the 'idle_dim' (and following) state(s). With these two resource, it now takes only one additional rule to prevent the system from suspending while on a call or a musicplayer is playing. 
 ** Implemented org.freesmartphone.Device.LED.SetNetworking(s,s) -> ()
 ** Substituted own kobject notification with generic KobjectDispatcher.
-** powercontrol_neo: Use bind/unbind way of controlling ar6k power to get the maximum
-    power saving. This obsoletes wireless.pyx. At this point of time we no longer require Cython.
-
+** powercontrol_neo: Use bind/unbind way of controlling ar6k power to get the maximum power saving. This obsoletes wireless.pyx. At this point of time we no longer require Cython.
 
 * oeventsd
-** Serialize dbus requests with a Queue. This (and removing a race in the RingToneAction)
-    should fix the problems with neverending vibration and audio ringtone on short calls
-
+** Serialize dbus requests with a Queue. This (and removing a race in the RingToneAction) should fix the problems with neverending vibration and audio ringtone on short calls
 
 * ouseaged
-** org.freesmartphone.Usage.Suspend() now returns a value instead
-      of timing out (call did not return before the actual suspend was triggered).
-      As an inherent result, the suspend now occurs asynchronous.
+** org.freesmartphone.Usage.Suspend() now returns a value instead of timing out (call did not return before the actual suspend was triggered). As an inherent result, the suspend now occurs asynchronous.
 ** Added org.freesmartphone.Usage.[Shutdown|Reboot]() -> ()
-** Send signal org.freesmartphone.Usage.SystemAction()
-      before suspending, after resuming, before shutting down, before rebooting.
+** Send signal org.freesmartphone.Usage.SystemAction() before suspending, after resuming, before shutting down, before rebooting.
 ** Disabled resource on shutdown.
-** Check resume reason and launch emergency shutdown, if we
-      woke up due to low battery. NOTE: This is only supported on Openmoko
-      devices now. As there is no standard infrastructure for that in the
-      kernel, we have to deal with device-specific solutions in lowlevel.py
-** Add config option 'sync_resources_with_lifecycle' for specifying whether all Resources should
-    be disabled on "startup", "shutdown", "always" (default), or "never".
+** Check resume reason and launch emergency shutdown, if we woke up due to low battery. NOTE: This is only supported on Openmoko devices now. As there is no standard infrastructure for that in the kernel, we have to deal with device-specific solutions in lowlevel.py
+** Add config option 'sync_resources_with_lifecycle' for specifying whether all Resources should be disabled on "startup", "shutdown", "always" (default), or "never".
 
 * opimd
-** Fixed dbus objects not appearing since they were registered on the initial dbus connection,
-    the subsystems use individual connections though.
+** Fixed dbus objects not appearing since they were registered on the initial dbus connection, the subsystems use individual connections though.
 
 * onetworkd
 ** Simple connection sharing now works
@@ -134,9 +103,7 @@ A lightweight image that turns an Openmoko phone into a featurephone and that se
 ** Add config options for time and zone sources. Set to "NONE" to disable this feature.
 
 * misc
-** We now register one dbus connection per subsystem to prevent objects
-      appearing on all bus names. If you previously only used the bus name
-      'org.freesmartphone.frameworkd', you have to adjust your code.
+** We now register one dbus connection per subsystem to prevent objects appearing on all bus names. If you previously only used the bus name 'org.freesmartphone.frameworkd', you have to adjust your code.
 
 * zhone
 ** Add gettext support
