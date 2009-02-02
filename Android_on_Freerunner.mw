@@ -9,7 +9,30 @@ This page is dedicated to the installation of Android on the [[Neo 1973]] and [[
 
 You can find general informations (porting/development and day to day usage) about Android and Neo phones here : [[Android]]
 
+== Configuring the Bootloader ==
+
+The Android kernel image can be more than 2MB in size. The UBoot environment that comes with your FreeRunner is only able to boot a kernel less than 2MB in size. To use a kernel larger than 2MB you need to:
+
+* Change to the [[Qi]] Bootloader. It supports 2MB kernels out of the box.
+* adjust your [[Uboot]] environment to support a Kernel of more then 2 MB [[http://meinopenmoko.blogspot.com/2008/12/prepare-uboot-to-boot-android.html]]
+
 == Android on internal flash ==
+
+=== Preparing the SD Card ===
+
+The SD Card in your FreeRunner needs to be configured with two 2 primary partitions before Android will boot: First a VFAT/MSDOS (16 or 32) which acts as the /sdcard storage area for pictures, movies, music, etc. and Second an ext3 primary partition for use of internal Android /data area to store settings, caches, etc.
+
+I use a 2GB card which I have split in half. fdisk shows me:
+
+    /dev/mmcblk0p1               1        2454      996310    6  FAT16<br>
+    /dev/mmcblk0p2            2455        4908      996324   83  Linux
+
+formatted as
+
+    sudo mkfs.vfat /dev/mmcblk0p1<br>
+    sudo mkfs.ext3 /dev/mmcblk0p2
+
+There is no need to populate the ext3 partition at all. The VFAT partition can be populated with media content if you so desire.
 
 === Images ===
 
@@ -17,11 +40,6 @@ There are currently a few prebuild images:
 
 [http://panicking.kicks-ass.org/download/ Michael Trimarchi's images with latest fixes]
 [http://people.openmoko.org/sean_mcneil/ Sean McNeil images]
-
-To use the Kernel you have to either :
-
-* adjust your [[Uboot]] environment to support a Kernel of more then 2 MB [[http://meinopenmoko.blogspot.com/2008/12/prepare-uboot-to-boot-android.html]]
-* change to the [[Qi]] Bootloader . It supports 2MB kernels out of the box.
 
 I have placed an older 2.6.26 kernel with Android support at:
 
@@ -33,19 +51,7 @@ I have put up a jffs2 image that replaces rootfs on the Freerunner at:
 
 === Installation on internal flash ===
 
-As noted above, this installation requires you to wipe out the existing kernel and rootfs in NAND on your Freerunner. You also must have an SDCARD and it needs to be configured with two (2) primary partitions: First is VFAT/MSDOS (16 or 32) which acts as the /sdcard storage area for pictures, movies, music, etc. and the Second is an ext3 primary partition for use of internal Android /data area to store settings, caches, etc.
-
-The first thing I suggest is to setup an SDCARD. You can flash the NAND first, but you must have an SDCARD with two partitions as stated before you'll be able to boot. I use a 2GB card which I have split in half. fdisk shows me:
-
-    /dev/mmcblk0p1               1        2454      996310    6  FAT16<br>
-    /dev/mmcblk0p2            2455        4908      996324   83  Linux
-
-formatted as
-
-    sudo mkfs.vfat /dev/mmcblk0p1<br>
-    sudo mkfs.ext3 /dev/mmcblk0p2
-
-There is no need to populate the ext3 partition at all. The VFAT partition can be populated with media content if you so desire.
+As noted above, this installation requires you to wipe out the existing kernel and rootfs in NAND on your Freerunner. 
 
 With your SDCARD all set, you are ready to flash the kernel and rootfs:
 
