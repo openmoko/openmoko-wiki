@@ -1,0 +1,144 @@
+<div style="text-align: center; font-weight: bold; font-size: x-large; margin-bottom:1em">Openmoko Framework Team Status Report 2009.2.2</div>
+
+Hi guys! This is the sixth Openmoko Framework Team Status update, featuring our fifth milestone release and more.
+
+For the general motivation, the goals, and the way we are doing our work, please see [[OpenmokoFramework]].
+
+{{FSO}}
+
+
+== People & Organization ==
+
+== DBus APIs ==
+
+All the public DBus API are documented on the official [http://docs.freesmartphone.org freesmartphone.org API reference] site.
+DBus Introspection XML files are available in the [http://git.freesmartphone.org git tree].
+
+* The GSM API (org.freesmartphone.GSM.*) has proven very solid and will be tagged 0.9 before the next milestone.
+
+* The Device API (org.freesmartphone.Device.*) has received some additions for power management and starts stabilizing.
+
+* The Usage API (http://docs.freesmartphone.org/org.freesmartphone.Usage.html) which was merely a reference counting wrapper over the Device API has gained two companions:
+** The Resource API (http://docs.freesmartphone.org/org.freesmartphone.Resource.html) turns this into a full-blown resource management system with choosable policies etc.
+** The [http://git.freesmartphone.org/?p=specs.git;a=blob_plain;f=html/org.freesmartphone.Usage.html;hb=HEAD#Suspend Suspend] call is resource-aware and gives all resources a chance to prepare for a suspend and to recover after a suspend.
+
+* org.freesmartphone.Objects.ListObjectsByInterface is using DBus-introspection now.
+
+* The Events subsystem has gained an experimental [http://git.freesmartphone.org/?p=specs.git;a=blob_plain;f=html/org.freesmartphone.Events.html;hb=HEAD DBus interface] to add and remove rules and to test triggers.
+
+== Implementations ==
+
+'''Freesmartphone.org Framework Image -- '' (Milestone V)'''
+
+This is the fifth milestone release of the framework and the framework testing application 'Zhone'. With the forthcoming release of other FSO API consumers, Zhone is going to be faded out. Further framework milestone releases will ship in two forms:
+# fso-console-image: An FSO-compliant image featuring no user interface manager.
+# fso-illume-image: An FSO-compliant image featuring the X-Window system with the Enlightenment-based Illume window manager.
+
+===Thanks===
+
+Thanks to all our contributors, especially the testers and the people who build stuff on top of the freesmartphone.org APIs -- notably the [http://shr.bearstech.com/trac/wiki SHR team] who found literally thousands of bugs in the framework that we had to fix for this milestone release. Thanks, guys!
+
+===Purpose===
+
+A lightweight image that turns an Openmoko phone into a featurephone and that serves as the basis for further application development using the freesmartphone.org dbus APIs.
+
+=== What's new since Milestone IV ===
+
+'''Note: These are only the highlights. See the [http://git.freesmartphone.org gitweb] commit logs for the gory details...'''
+
+* ogsmd
+** Lots of bug and stability fixes based on feedback (and debug logs) from people
+** SMS API now includes an a{sv} parameter with optional SMS properties
+** Phonebook API now supports multiple phonebooks (dialed, missed, answered)
+** PDU mode has been improved to handle the 7-bit reference GSM charset, UCS-2 and binary messages
+** Workaround for http://docs.openmoko.org/trac/ticket/1024 Change the behaviour with 'ti_calypso_deep_sleep' option in [ogsmd] section (valid options are always, never and adaptive)
+** Implemented the org.freesmartphone.GSM.SMS.interface to send and receive SMS without going through the SIM and org.freesmartphone.GSM.Device.SetSimBuffersSms() to switch between SIM buffered mode and not.
+
+* ogpsd
+** Improved GTA01 support even with suspend/resume (if gllin v1.1 is installed)
+** Various warmstart fixes
+** Enabled SBAS by default on ubx chips
+
+* odeviced
+** Use ioctl based screen blanking which saves a lot of power
+
+* oeventsd
+** The rules system has been improved
+** New triggers, filters
+
+* misc
+** Much cleaner and improved resource interface with working power management  (enable, disable, suspend, resume)
+** A persistence module that stores persistent data for subsystems
+
+* zhone
+** New default theme contributed by o_toby
+** Show timestamps in incoming SMS
+** Support for Chinese and other characters (Unicode support)
+** Display more GPS information if available (ephemeris, almanac available, signal status)
+
+===Installation===
+
+# Grab a uImage and a .jffs2 for your device from freesmartphone.org's download [http://downloads.freesmartphone.org/fso-stable/milestone4.1/ section].
+# Flash it to your [[Flashing the Neo 1973|Neo 1973 (om-gta01)]] or [[Flashing the Neo Freerunner|Neo FreeRunner (om-gta02)]] with [[Dfu-util| dfu-util]].
+# Boot and wait until the Zhone main window appears.
+# ''If the [[Zhone]] main window does not appear on first boot or stays with "connecting to dbus..." longer than 1 minute, then please reboot. The base system still has some problems with dbus starting for the first time''
+# Read the [[FSO UI Tutorial]] and have fun. Note though that this has not been updated yet for milestone 4 (which looks a bit differently and has more features).
+
+===What you can expect from this release===
+
+* Telephony
+* Phonebook
+* SMS
+* Messagebook
+* GPS
+* frameworkd implementing the following dbus APIs:
+** org.freesmartphone.GSM.*
+** org.freesmartphone.Device.*
+** org.freesmartphone.Usage
+** org.freesmartphone.Resource
+** org.freesmartphone.Events
+** org.freedesktop.Gypsy
+
+===What we expect from you===
+
+* Feedback and comments for the dbus APIs. This is your chance to take an active role into shaping the application programming interface for all your forthcoming cool applications.
+
+* Focus on using the services. Zhone is just our testing-UI and bears little functionality. It's the services that matter.
+
+* The best way to interact with the framework is by exploring the dbus APIs. For that you can use these two tools, which are already installed:
+** [[OpenmokoFramework/mdbus|mdbus]] -- a dbus introspection and interaction utility,
+** [[OpenmokoFramework/cli|cli-framework]] -- a python dbus command line interface.
+
+* Before reporting bugs against the framework, please try with cli-framework to see whether it's really a problem of the framework or rather the UI (which gets much less attention from us).
+
+* If you want to interact with the GSM modem, while the frameworkd is running, you can use [[OpenmokoFramework/mickeyterm|mickeyterm]] -- a MUXer-aware minimal terminal emulator.
+
+===Best way to hand us debug logs===
+# log in via ssh
+# killall python
+# edit /etc/frameworkd.conf and add to the frameworkd section:
+## log_level = DEBUG
+## log_to = file
+## log_destination = /somewhere/where/you/have/space (preferably SD or NFS, etc.)
+# Read our [http://git.freesmartphone.org/?p=framework.git;a=blob;f=conf/example/frameworkd.conf documented frameworkd.conf] configuration file to learn about the other options.
+# relaunch frameworkd (/etc/init.d/frameworkd stop; /etc/init.d/frameworkd start)
+# log in via ssh (yes, again)
+# export DISPLAY=:0.0
+# run your favourite client (zhone, cli-framework, ...)
+
+Attach the logs to the tickets, please.
+
+==What's next==
+
+* PIM
+* Networking
+* Unit Tests
+* High Level Documentation
+* More Device Support (GTA03, HTC, EZX)
+
+==The Team==
+
+Mickey, Jan, Daniel, Stefan.
+
+[[Category:Community Update]]
+[[Category:Framework]]
