@@ -26,13 +26,27 @@ The SD Card in your FreeRunner needs to be configured with two 2 primary partiti
 
 Insert the Mico SD Card from your FreeRunner into your Linux desktop then bring up a Terminal and type
 
-    $ dmesg
+    $ dmesg | grep sd
 
 You will get an output like this, in this instance we can see that the SD Card has been assigned the device name 'sde'
 
+    ...
+    sd 9:0:0:0: [sde] Attached SCSI removable disk
+    ...
     
+Now, as root, use 'fdisk' to partition the device.
 
-I use a 2GB card which I have split in half. fdisk shows me:
+   # fdisk /dev/sde 
+
+Pressing 'p' will show you the current partitions on the SD Card 'd' will delete them and 'n' will create a new one. First create a primary partition for your media. Then another primary partition for Android to store it's data on.
+
+On a 1Gig card I used 768MB for the first partition ('+768MB' in fdisk) and the remainder for Android data. Here is fdisk's partition output:
+
+       Device Boot      Start         End      Blocks   Id  System
+    /dev/sde1               1         769      750513+  83  Linux
+    /dev/sde2             770        1016      241072   83  Linux
+
+Now all that's left to do is format the partitions with the appropriate filsystem But first hit 'w' in fdisk to write the changes to the SD Card.
 
     /dev/mmcblk0p1               1        2454      996310    6  FAT16<br>
     /dev/mmcblk0p2            2455        4908      996324   83  Linux
