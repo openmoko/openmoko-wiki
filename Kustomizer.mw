@@ -1,7 +1,5 @@
 {{Languages|Kustomizer}}
 
-WORK IN PROGRESS HERE!!
-
 === Description ===
 Kustomizer is a GPLv2 -licensed script that converts your Openmoko phone with OM 2008.12 distribution into a usable phone/pda/toy/something. It installs apps from the default repositories as well as from opkg.org and some other sources across the Internet. Some would call the result a new distribution, to me it's just 2008.12 + some apps the script installs. You decide :)
 
@@ -10,15 +8,49 @@ Originally it was written to make it easy to try some apps after a clean install
 Any questions can be sent to [http://risto.kurppa.fi/blog Risto H. Kurppa] ( risto at kurppa dot fi ) or at community list, see [[Development_resources#Mailing_Lists|mailing lists]].
 
 === Warnings ===
+If you have some issues (WSOD / BSOD / wlan connecting only once / etc) with 2008.12 this will not fix those!
+
 Make sure there's nothing too important on your memory card or flash memory!! - BACKUPS!!!
 Installing 2008.12 will wipe the rootfs partition (=all your data in the phone excl. memory card) but tries to leave you memory card alone.
 
-It's more or less all the time under development so you might have to do some manual work after the installation to get everything up and running. Some packages fail to install for mysterious reasons (segfault, missing dependencies, md5sum mismatch, ...).
+It's more or less all the time under development and not very throughly tested so you might have to do some manual work after the installation to get everything up and running. Some packages fail to install for mysterious reasons (segfault, missing dependencies, md5sum mismatch, ...).
 
 === Usage ===
-Download from (will be announced later)
+Script is available at http://www.kurppa.fi/freerunner/kustomizer
 
-Installation instructions will be added also later.
+Here's the instructions what to do on your desktop to flash to 2008.12 and then what to do on Freerunner (over SSH!) to run the script.
+
+ #####################################################3
+ ## ON DESKTOP COMPUTER (written for Ubuntu 8.10 and newer)
+ #####################################################3
+
+ sudo apt-get install dfu-util bind9 // dfu-util also available from http://downloads.openmoko.org/releases/Om2008.9/dfu-util
+ wget http://downloads.openmoko.org/releases/Om2008.12/Om2008.12-om-gta02.uImage.bin & wget http://downloads.openmoko.org/releases/Om2008.12/Om2008.12-om-gta02.rootfs.jffs2
+
+ #Connect your freerunner to the computer with the USB cable
+ #start your Freerunner holding the AUX button down to get to the NOR menu
+ #these two take about 8-12 minutes
+ sudo time dfu-util -a kernel -R -D Om2008.12-om-gta02.uImage.bin
+ sudo time dfu-util -a rootfs -R -D Om2008.12-om-gta02.rootfs.jffs2
+
+ #start & restart Freerunner to be able to log in over USB ssh
+
+ #connect over usb-ssh with shared internet connection
+ #YOU WANT TO DO THIS SO THAT YOU CAN SCROLL AND SAVE THE LOG TO CHECK FOR ERRORS!!
+ wget http://www.kurppa.fi/freerunner/fr_bind && chmod 755 fr_bind
+  ./fr_bind
+ # First it asks for your Ubuntu -password to restart the interface & bind9
+ # After this it asks for Freerunner password - just hit Enter there, it's empty.
+
+ #####################################################
+ ## ON FREERUNNER
+ #####################################################
+ In Settings -tool set 'Suspend' to 'off' or Freerunner will suspend and the installation will fail.
+
+ Now you should be able to run this script from the command line on Freerunner. DO IT OVER SSH so that you can see the installation log also after the installation has finished!
+ wget http://www.kurppa.fi/freerunner/kustomizer && chmod 755 kustomizer && ./kustomizer
+
+Let the [http://risto.kurppa.fi/blog author] ( risto at kurppa dot fi ) know how did it go! You might not receive any help but it helps to develope the script further. If possible, please attach the log.
 
 === What does it do? ===
 Here are some things it does. It doesn't include all and some might be listed here that for some reason are not included at the moment.
@@ -34,9 +66,7 @@ Fixes & things
     * Fixed gsmhandset.state
     * Freerunner-optimized Navit config XML. Preconfigured to use the map or Europe in /media/card/Maps/navit/europe.navit.bin
 
-Things that will be installed from your µSD card in /media/card
-
-If these don't exist, it's okay, they'll just then not be available for you to use.
+Things that will be installed from your µSD card in /media/card. If these don't exist, it's okay, they'll just then not be available for you to use.
 
     * /m/c/scripts.tar.gz - your own scripts to /home/root/scripts. This will be added to the path (in /etc/profile)
     * /m/c/Maps will be symlinked from /home/root/Maps
@@ -113,13 +143,15 @@ Applications / Misc
 If you have some ideas of improvements please let the author know (see above). I'm not planning to create rootfs images or anything huge but there are some things that I'd like to see kustomizer do. Check the script for the current TODO.
 
 At the moment the most important things to fix are:
-  # disable suspend in the beginning of the installation!!! (HOW TO DO THIS??!!!)
-  # make meooem and gpsdcontrol work (or drop sortdesk..?)
+# Disable suspend in the beginning of the installation!!! (HOW TO DO THIS??!!!)
+# Sortdesk forces meooem and gpsdcontrol icons to be global or they don't work -> FAIL
+# Problems with some random packages - install fails.. segfault, md5sum mismatch, not found..
+# Get rid of qpe without an error message on Freerunner screen
 
-If someone is interested and willing to work on this, moving to projects.openmoko is possible.
+If someone is interested and willing to work on this please contact [http://risto.kurppa.fi/blog Risto H. Kurppa] ( risto at kurppa dot fi ). Moving to projects.openmoko is possible.
 
 === Changelog ===
-At the moment there isn't one, you better check the file itself. 
+At the moment there isn't one, you better check the file itself. I should start using bazaar..
 
 === Roadmap ===
-* copy all the cool features from other distros and cool apps from opkg.org :)
+* copy all the cool features from other distros and best apps from opkg.org :) No.. There's no roadmap. Fix things when they break or something.
