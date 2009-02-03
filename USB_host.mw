@@ -60,6 +60,25 @@ This simple script switches between USB-Modes:
 
 See this [https://docs.openmoko.org/trac/ticket/2166 bug] for a justification for adding the lsusb hack.
 
+==== USB-Mode-Script (2.6.28+ kernels) ====
+The paths change slightly since 2.6.28:
+
+ #!/bin/sh
+ grep -q 'host' /sys/devices/platform/s3c2410-ohci/usb_mode
+ if [ $? -eq 0 ]
+ then
+ echo 0 > /sys/class/i2c-adapter/i2c-0/0-0073/neo1973-pm-host.0/hostmode 
+ echo device > /sys/devices/platform/s3c2410-ohci/usb_mode
+ ifconfig usb0 up
+ echo USB-Port is in device-mode now.
+ else
+ ifconfig usb0 down
+ echo host > /sys/devices/platform/s3c2410-ohci/usb_mode
+ echo 1 > /sys/class/i2c-adapter/i2c-0/0-0073/neo1973-pm-host.0/hostmode
+ lsusb
+ echo USB-Port is in host-mode now.
+ fi
+
 ==== Using a GUI ====
 * Using the packaged push button derived from the script above: [http://blogs.thehumanjourney.net/finds/resource/usbmode-button_0.3_armv4t.ipk Download]
 * [[User:Techiem2|Mark D. Montgomery II]]'s [http://techiem2.net/index.php?/archives/10-Freerunner-USB-Mode-Control-Program.html application] controls all the various modes through a GUI
