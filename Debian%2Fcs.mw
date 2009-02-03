@@ -1,8 +1,8 @@
 {{Languages|Debian}}
 
-Debian je používán na mnoha embedded zařízeních. Použití Debianu na FreeRunneru zpřístupňuje hromadu balíčků se softwarem z repozitářů Debianu, již zkompilovaných pro procesory arm. Navíc, každý si může postavit vlastní programy, aniž by se musel učit jak na to pomocí OpenEmbedded. Například nativní kompilace je v Debianu otázkou pouhého apt-get gcc&libc-dev.
+Debian je používán na mnoha embedded zařízeních. Použití Debianu na FreeRunneru zpřístupňuje spoustu balíčků se softwarem z repozitářů Debianu, již zkompilovaných pro procesory ARM. Navíc, každý si může sestavit vlastní programy, aniž by se musel učit jak na to s pomocí OpenEmbedded. Například nativní kompilace je v Debianu otázkou pouhého apt-get gcc&libc-dev.
 
-Dříve bylo nutné, aby si každý nainstaloval Debian [[Manual Debian|ručně]]. Nyní je již k dispozici instalační skript. "Oficiální" instrukce jak nainstalovat [http://wiki.debian.org/DebianOnFreeRunner Debian na FreeRunner] nebo [http://wiki.debian.org/DebianOnNeo1973 Debian na Neo1973] jsou umístěny na Debian wiki. Tato stránka je o po instalačních nastaveních, a tipech speciálně pro FreeRunner. Pro podporu nebo nahlášení bugu si prosím přečtěte sekci [[Debian#Support|podpora]].
+Dříve bylo nutné, aby si každý nainstaloval Debian [[Manual Debian|ručně]]. Nyní je již k dispozici instalační skript. "Oficiální" instrukce jak nainstalovat [http://wiki.debian.org/DebianOnFreeRunner Debian na FreeRunner] nebo [http://wiki.debian.org/DebianOnNeo1973 Debian na Neo1973] jsou umístěny na Debian wiki. Tato stránka je o poinstalačních nastaveních, a tipech speciálně pro FreeRunner. Pro podporu nebo hlášení chyb si prosím přečtěte sekci [[Debian#Support|podpora]].
 
 = Konfigurace základního systému =
 == Heslo ==
@@ -14,7 +14,7 @@ Přednastavené heslo pro uživatele root je prázdné. Měli byste jej změnit 
 
 == Suspend ==
 
-Pro "zasuspendování" stiskněte tlačísto power, nebo spusťte 'apm -s'-
+Pro uspání (suspend) stiskněte tlačítko power, nebo spusťte 'apm -s'-
 Ke změnění času pro ztmavení nebo vypnutí displeje, editujte
 
   /usr/share/python-support/fso-frameworkd/framework/subsystems/odeviced/idlenotifier.py
@@ -28,11 +28,11 @@ sekci
                         "lock": 2,
                         "suspend": 20, \
 
-idle_dim je čas v sekundách ke ztmavení displeje (přičítá se k "idle" času), idle_prelock je čas, po kterém se displej vypne. Poté spusťte:
+''idle_dim'' je čas v sekundách ke ztmavení displeje (přičítá se k "idle" času), ''idle_prelock'' je čas, po kterém se displej vypne. Poté spusťte:
 
   mv /var/lib/python-support/python2.5/framework/subsystems/odeviced/idlenotifier.pyc /var/lib/python-support/python2.5/framework/subsystems/odeviced/idlenotifier.pyc.old
 
-Suspend můžete kompletně vypnout zakomentováním celé sekce "Idleness Brightness Handling" v souboru
+Uspávání (suspend) můžete kompletně vypnout zakomentováním celé sekce "Idleness Brightness Handling" v souboru
 
   /etc/freesmartphone/oevents/rules.yaml
 
@@ -105,8 +105,8 @@ Můžete určit svou IP adresu pomocí
 </pre>
 Problémy:
 * funguje pouze v přítomnosti bezdrátové sítě při bootu, nebo když se ručně spustí <code>ifup eth0</code>
-* bootování mimo doash bezdrátové sítě je pomalejší, protože systém čeká na IP adresu z DHCP až po time out
-* neobnoví spojení, když opustíte oblast dosahu vaší wifi sítě, a následně se vrátíte
+* bootování mimo dosah bezdrátové sítě je pomalejší, protože systém čeká na IP adresu z DHCP až po time out
+* neobnoví spojení, když opustíte oblast dosahu vaší wifi sítě a následně se vrátíte
 * nepodporuje vícenásobné wifi sítě nebo otevřené hotspoty, mezi kterými můžete cestovat
 
 Jakmile wpa_supplicant jednou začal řídit vaše wifi rozhraní, měli byste psát "wpa_action eth0 stop" namísto "ifdown eth0".
@@ -150,7 +150,7 @@ network={
 }
 </pre>
 
-Dále budete potřebovat zeditovar /etc/network/interfaces. To vám umožní nakonfigurovat wifi, aby používala dhcp, nebo jiné odpovídající nastavení:
+Dále budete potřebovat upravit /etc/network/interfaces. To vám umožní nakonfigurovat wifi, aby používala dhcp, nebo jiné odpovídající nastavení:
 <pre>
 auto eth0
 iface eth0 inet manual
@@ -168,7 +168,7 @@ iface home inet static
 # static interface settings, or whatever...
 </pre>
 
-Nakonec, pokud chcete zkusit defaultní přístup na internet přes eth0 (a ne usb0), pak zakomentujte tento řádek v konfiguraci usb0 adaptéru:
+Nakonec, pokud chcete zkusit výchozí přístup na internet přes eth0 (a ne usb0), pak zakomentujte tento řádek v konfiguraci usb0 adaptéru:
 
 <pre>
 gateway 192.168.0.200
@@ -177,7 +177,7 @@ gateway 192.168.0.200
 
 * Přebíhání mezi sítěmi není automatické. Místo toho musíte ručně spustit "wpa_action eth0 stop; ifup eth0" k přepnutí na jinou síť.
 
-Z nějakého důvodu jsem musel rebootovat, aby se projevilo nastavené id_str. Avšak, měli byste nyní být schopni použít "ifup eth0" k asociaci s přípojným bodem wifi sítě a "wpa_action eth0 stop" k vypnutí wifi adaptéru.
+Z nějakého důvodu jsem musel restartovat, aby se projevilo nastavené id_str. Avšak, měli byste nyní být schopni použít "ifup eth0" k asociaci s přípojným bodem wifi sítě a "wpa_action eth0 stop" k vypnutí wifi adaptéru.
 
 {{todo|Which of the issues that single network configurations suffer from are addressed by WPA roaming mode?  Would ifplugd / guessnet help, or just make things more complicated?}}
 
@@ -191,7 +191,7 @@ FreeRunner používá standardní Linuxový bluez stack, nainstalovaný pomocí
 <pre>
 # apt-get install bluez-utils
 </pre>
-There is also a module missing from /etc/modules, which is critical to getting your device recognized. (kudos to johnsu01 on irc.freenode.net:#openmoko-debian for the find)
+V němž je i chybějící modul z /etc/modules, který je nutný pro rozpoznání zařízení. (kudos to johnsu01 on irc.freenode.net:#openmoko-debian for the find)
 <pre>
 # echo ohci-hcd >> /etc/modules
 </pre>
@@ -216,23 +216,23 @@ Nakonec, na omezeném systému, prostě použijte příkaz:
 <pre>grep -e Package: -e Description /var/lib/dpkg/available|more</pre>
 
 == Xglamo acceleration ==
-By default debian uses fbdev, but we can use Xglamo to get better performance:
+Ve výchozím nastavení debian používá fbdev, ale můžete použít Xglamo pro lepší výkon:
 <pre>apt-get install xserver-xglamo</pre>
-after that edit /etc/X11/xorg.conf and change the line
+poté upravte soubor /etc/X11/xorg.conf a změňte řádek
 <pre>Driver          "fbdev"</pre>
-to:
+na:
 <pre>Driver          "Xglamo"</pre>
-and if you want to run xserver as normal user:
+a v případě spouštění X serveru normálním uživatelem:
 <pre>chmod u+s /usr/bin/Xglamo</pre>
-You may also want to force the X server to 96 dpi to have the same fonts as with fbdev. Add "-dpi 96" to the X_OPTIONS variable in '''/etc/init.d/nodm''':<pre>X_OPTIONS="vt4 -nolisten tcp -dpi 96"</pre>
-with that you:
-*can use xrandr
-*don't have the pointer callibration bug with the rotated mode
-*have better performances
+Pro stejné písmo jako s fbdev je nutné vnutit X serveru 96dpi. Přidejte "-dpi 96" do proměnné X_OPTIONS v '''/etc/init.d/nodm''':<pre>X_OPTIONS="vt4 -nolisten tcp -dpi 96"</pre>
+s tímto:
+*můžete používat xrandr
+*nemáte chybu s kalibrací obrazovky v otočeném módu (rotated mode)
+*máte lepší výkon
 
-Using xglamo you must remember that:
-*You can't use on xorg.conf the "Option Rotate" to rotate the screen
-*You can't use the tslib patch to simulate right click
+Při používání xglamo si musíte pamatovat, že:
+*Nemůžete v xorg.conf použít "Option Rotate" pro otáčení obrazovky
+*Nemůžete použít tslib patch pro simulaci pravého tlačítka
 
 == Running X as normal user ==
 1. Vytvořte nového uživatele
