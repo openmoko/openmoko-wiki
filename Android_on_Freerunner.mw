@@ -62,6 +62,31 @@ That's it, you can now remove the SD card from your desktop. If you re-insert it
 
 ==== Windows ====
 
+==== Using exiting 2008.x installation on FreeRunner ====
+
+The SD card can be formatted from within an existing 2008.x installation on your FreeRunner.
+SSH as root into the FreeRunner and use 'fdisk' to partition the device.
+
+   # fdisk /dev/mmcblk0
+
+After this create the partitions as described in the step above.
+
+To format the new vfat partition you will need dosfstools which can be downloaded from
+
+    [http://members.shaw.ca/mmontour/neo/dosfstools_2.11-r0_armv4t.ipk dosfstools_2.11-r0_armv4t.ipk]
+
+Use any SCP client to copy this file to your FreeRunner and install using
+
+    ipkg install dosfstools_2.11-r0_armv4t.ipk
+
+Once the installation is complete format the partitions as described above.
+
+NOTE: In case you are unable to format the partitions because they are already mounted for some reason you can get a list of process IDs that are using it by running:
+
+    # fuser -m /media/card
+
+Then kill all the processes that were using the card and try formatting again.
+
 === Flashing the FreeRunner ===
 
 There are currently a few prebuild images:
