@@ -1,29 +1,37 @@
-Qi is a replacement for the [[Uboot|uBoot]] bootloader reduced to the core bootloader functions.
+[[image:Screenshot-Qi.png|frame|Qi Boot messages]] Qi is a lightweight replacement for the [[Uboot|uBoot]] bootloader with everything that doesn't assist "loading" and "booting" Linux stripped out.
 
 Its advantages comparing to [[Uboot|u-boot]] are:
-* actively developed (u-boot on GTA02 is not maintained lately)
+* actively developed (u-boot on GTA02 is deprecated)
 * easier configuration, more robust and predictable
-* large uSD cards support
-* large (>2M) kernels support without tweaking
+* SD and SDHC cards supported properly with partitions of any size
+* kernel size is detected by checking the start of the kernel image, so large (>2M) kernels are supported without tweaking or loading more than needed
+* Very fast, simple boot direct to Linux
 
 ==About Qi==
 ===Requirements===
-[[Freerunner|GTA02 Hardware]] is recommended over [[Neo1973|GTA01]], since GTA02 does have a fallback u-boot in nor that provides DFU-Mode. Qi does NOT provide DFU-Mode so GTA01-Users will have no (easy) way to flash their device!
+There is a [[Neo1973|GTA01]] build of Qi, but using it without a debug board is not recommended because Qi itself does not support DFU, so updating or going back to U-Boot is a difficult process.
+
+[[Freerunner|GTA02 Hardware]] has NOR U-Boot always available to update Qi so it's safe to try it out.
 
 ===Features===
-* booting from primary SD partitions (1st, 2nd or 3rd)
-* booting from NAND
-* configuration by files in /boot
-* automatically choose correct kernel for device hardware
+* booting from primary SD partitions (1st, 2nd or 3rd) in /boot directory
+* booting from NAND (compatible with U-Boot's dynparts scheme)
+* configuration per rootfs, by files in /boot in the rootfs
+* automatically choose correct kernel for device hardware so rootfs can be used on multiple device types
+* automatically tell kernel correct root= for rootfs kernel image came from, simplifying update
 * ext2/3 are supported
 * symlinks are supported
+* parses identity partition and appends kernel commandline with device identity information
+* zero "environment" or private persistent state - operation is completely deterministic
 
 ===Limitations===
-* no DFU-Mode
+* no DFU-Mode - USB is not initialized at all
 * no boot menu
 * FAT partitions are ignored
 
-Both the lack of DFU and the boot menu are planned to be addressed by the backup / recovery rootfs.  FAT is not supported because it can't provide a rootfs, and Qi wants the kernel to come from the rootfs.
+Both the lack of DFU and the boot menu are planned to be addressed by the backup / recovery rootfs.
+
+FAT is not supported because it can't provide a rootfs, and Qi wants the kernel to come from the rootfs.
 
 ===Defaults===
 If the kernel is found on uSD, Qi assumes the rootfs to be on the same partition as the kernel. In case of boot from NAND, it assumes that rootfs is also on NAND (just as u-boot does). See [[#/boot-Partition|below]] for help with an extra /boot-partition. The default rootdelay is 1 second.
@@ -37,11 +45,25 @@ If the kernel is found on uSD, Qi assumes the rootfs to be on the same partition
 : make Qi skip this partition
 
 ===Boot Order===
+[[image:Qi-drawings-bootsequence.png|frame|Qi GTA02 Booting order]]
 # SD Partition 1
 # SD Partition 2
 # SD Partition 3
 # NAND
 # Memory Test
+
+Qi will try to mount each SD partition as ext2 / 3, if that succeeds it will look for the kernel as /boot/uImage-GTA02.bin.  If that is found, it'll be fetched, its CRC is checked and then it's booted into with a generated kernel commandline.
+
+===Kernel Commandline Generation===
+[[image:Qi-commandline-composition.png‎|frame|Qi commandline composition]]
+Because Qi has no private stored state, it infers and composes a suitable kernel commandline on each boot.
+
+One of its tasks is to scan NAND memory using the U-Boot dynparts rules to determine the start offset
+of the NAND partitions on this device, from that it forms the mtdparts kernel parameter that sets Linux's
+view of NAND partitioning.
+
+The other thing it does is mount the "identity" partition and get from there the globally unique MAC
+address for the USB over Ethernet function instead of the random one that is otherwise used.
 
 ===LED and Vibrator Signals===
 * AUX LED is turned on either on:
@@ -94,6 +116,11 @@ One can also just use strings(1) on the .udfu file to get an idea of where Qi cu
 The latest README file can be found in the git as well:http://git.openmoko.org/?p=qi.git;a=blob;f=README;hb=HEAD
 
 ==Tips, Tricks, Tweaks==
+===General troubleshooting===
+Qi does not bring up the LCD backlight.  If the backlight is lit, it means you have succeeded to boot into Linux.
+
+If nothing else is happening or there is a panic, enable debugging messages as described below.
+
 ===Enabling console messages===
 [http://lists.openmoko.org/pipermail/openmoko-kernel/2008-November/006812.html]
 If it's SD Card boot, just create a text file, e.g., for a [[GTA02]] use
@@ -103,7 +130,8 @@ on the rootfs in question, put in there
 and you'll see the messages on boot.  If it's NAND right now you need to edit the default commandline in Qi for gta02.
 
 ===/boot-Partition===
-If you have a Partition for /boot, you will need to add a argument for the kernel to know which partition is the rootfs.
+If you have a separate partition for /boot, so that your kernel and rootfs are not in fact on the same partition, you will need to append a root= entry on the kernel commandline to override the default action of trying to use the partition where the kernel came from as the rootfs.
+
 Add this in /boot/append-GTA0[123]:
  root=/dev/mmcblk0p2
 for a rootfs on the second partition.
