@@ -31,38 +31,42 @@ Script is available at http://www.kurppa.fi/freerunner/kustomizer
 
 Here's the instructions what to do on your desktop to flash to 2008.12 and then what to do on Freerunner (over SSH!) to run the script.
 
- #####################################################3
  ## ON DESKTOP COMPUTER (written for Ubuntu 8.10 and newer)
- #####################################################3
 
- sudo apt-get install dfu-util bind9 // dfu-util also available from http://downloads.openmoko.org/releases/Om2008.9/dfu-util
- wget http://downloads.openmoko.org/releases/Om2008.12/Om2008.12-om-gta02.uImage.bin & wget http://downloads.openmoko.org/releases/Om2008.12/Om2008.12-om-gta02.rootfs.jffs2
+ ## PREPARE
+ # install required packages:
+ # a) run: sudo apt-get install dfu-util bind9 
+ # dfu-util is also available from http://downloads.openmoko.org/releases/Om2008.9/dfu-util
 
- #Connect your freerunner to the computer with the USB cable
- #start your Freerunner holding the AUX button down to get to the NOR menu
- #these two take about 8-12 minutes
- sudo time dfu-util -a kernel -R -D Om2008.12-om-gta02.uImage.bin
- sudo time dfu-util -a rootfs -R -D Om2008.12-om-gta02.rootfs.jffs2
+ ## FLASH
+ # for more details, see http://wiki.openmoko.org/wiki/Flashing_the_Neo_Freerunner
+ # download the required image files
+ # b) run: wget http://downloads.openmoko.org/releases/Om2008.12/Om2008.12-om-gta02.uImage.bin & wget http://downloads.openmoko.org/releases/Om2008.12/Om2008.12-om-gta02.rootfs.jffs2
+ # c) Connect your freerunner to the computer with the USB cable
+ # d) start your Freerunner holding the AUX button down to get to the NOR menu
+ # e) run: sudo time dfu-util -a kernel -R -D Om2008.12-om-gta02.uImage.bin
+ # f) run: sudo time dfu-util -a rootfs -R -D Om2008.12-om-gta02.rootfs.jffs2
+ # g) Start & restart Freerunner to be able to log in over USB ssh
+ # h) Go to 'Settings' and change 'Suspend' to 'off' or Freerunner will suspend and the installation will fail.
 
- #start & restart Freerunner to be able to log in over USB ssh
- #In Settings -tool set 'Suspend' to 'off' or Freerunner will suspend and the installation will fail.
+ ## CONNECT
+ # Connect over usb-ssh with shared internet connection
+ # Don't run the script on Freerunner's screen! It can be done but not recommended if you don't know what you're doing.
+ # Download a script to help you & change the permission
+ # i) run: wget http://www.kurppa.fi/freerunner/fr_bind && chmod 755 fr_bind
+ # j) run: ./fr_bind
+ # k) First it asks for your Ubuntu -password to restart the interface & bind9 - type it in
+ # l) After this it asks for Freerunner password - it's empty, just hit Enter 
+ # For more details check http://wiki.openmoko.org/wiki/Usb_networking#Ubuntu_8.10_-_Easy_Way  
 
- #connect over usb-ssh with shared internet connection
- #YOU WANT TO DO THIS SO THAT YOU CAN SCROLL AND SAVE THE LOG TO CHECK FOR ERRORS!!
- wget http://www.kurppa.fi/freerunner/fr_bind && chmod 755 fr_bind
-  ./fr_bind
- # First it asks for your Ubuntu -password to restart the interface & bind9
- # After this it asks for Freerunner password - just hit Enter there, it's empty.
+ ## FREERUNNER
+ # 1) Make sure you've turned 'Suspend' to 'off' in the Settings.
+ # 2) Make sure you can SSH in over USB so that Freerunner has Internet connection (ping google.com?)
+ # 3) run: http://www.kurppa.fi/freerunner/kustomizer && chmod 755 kustomizer
+ # 4) run: ./kustomizer
+ # On the first run it will install some stuff and then restart (to stop the qpe-bug). Then you need to repeat 2) and 4) and  it'll install the rest
 
- #####################################################
- ## ON FREERUNNER
- #####################################################
- In Settings -tool set 'Suspend' to 'off' or Freerunner will suspend and the installation will fail.
-
- Now you should be able to run this script from the command line on Freerunner. DO IT OVER SSH so that you can see the installation log also after the installation has finished!
- wget http://www.kurppa.fi/freerunner/kustomizer && chmod 755 kustomizer && ./kustomizer
-
-Let the [http://risto.kurppa.fi/blog author] ( risto at kurppa dot fi ) know how did it go! You might not receive any help but it helps to develope the script further. If possible, please attach the log.
+Let the [http://risto.kurppa.fi/blog author] ( risto at kurppa dot fi ) know how did it go! You might not receive any help but it helps to develop the script further. If possible, please attach the log.
 
 === What does it do? ===
 Here are some things it does. It doesn't include all and some might be listed here that for some reason are not included at the moment.
@@ -162,7 +166,7 @@ Bug tracker can be found in the talk page: http://wiki.openmoko.org/wiki/Talk:Ku
 If someone is interested and willing to work on this please contact [http://risto.kurppa.fi/blog Risto H. Kurppa] ( risto at kurppa dot fi ). Moving to projects.openmoko is possible.
 
 === Changelog ===
-At the moment there isn't one, you better check the file itself. I should start using bazaar..
+Check the script file itself.
 
 === Roadmap ===
-* copy all the cool features from other distros and best apps from opkg.org :) No.. There's no roadmap. Fix things when they break or something.
+* copy all the cool features from other distros and best apps from opkg.org :) No.. There's no roadmap. Fix things when they break or something. TODO is in the file itself
