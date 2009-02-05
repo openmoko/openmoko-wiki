@@ -140,7 +140,42 @@ $ patch -p2 < qemu-gcc4.patch
 See other available options for the configure script by appending "--help".
 Now you should have a working emulator under the name "arm-softmmu/qemu-system-arm". To run Openmoko you will also need to somehow install Openmoko on your virtual phone, which is totally clean of any software at this moment. There are several block devices to choose from, the best option is probably to do exactly what the Neo1973 manufacturer does before it ships the device to the final user. This process is described in [[Bootloader]], [[Kernel]], [[NAND bad blocks]] and [[Devirginator]] but you don't need to know all the details. Two scripts are provided to generate a firmware for your phone, as realistic as possible. First run
 <pre>$ openmoko/download.sh</pre>
-which will look up the list of latest available Openmoko snapshot builds from buildhost.openmoko.org and choose the most recent [[u-boot]], Kernel, and root filesystem images, and download the images (unless they are already found in the openmoko/ directory). These binaries will be used by the flash.sh script. First make sure you have the netpbm package installed for some graphics conversion utilities. On Ubuntu this can be done by:
+which will look up the list of latest available Openmoko snapshot builds from buildhost.openmoko.org and choose the most recent [[u-boot]], Kernel, and root filesystem images, and download the images (unless they are already found in the openmoko/ directory).
+'''Note''' openmoko/env might be broken. It seems to fix it to change it to this instead.
+<pre># The scripts will include this on startup to setup variables
+
+src_dir="`pwd`"
+script_dir_relative=openmoko
+script_dir="$src_dir/$script_dir_relative"
+uboot_symlink="$src_dir/u-boot.bin"
+qemu_relative="arm-softmmu/qemu-system-arm -M gta02fake -m 130"
+qemu="$src_dir/$qemu_relative"
+flash_base=openmoko-flash.base
+flash_image=openmoko-flash.image
+make=make
+which gmake && make=gmake
+echo=echo
+which gecho && echo=gecho
+export make echo
+dump_dir="$script_dir/vvfat"
+
+qemu_monitor="$HOME/.qemu_monitor"
+qemu_cmd () { $script_dir/qemu-cmd.pl "$qemu_monitor" "$*"; }
+
+kernel_addr=0x30100000
+splash_addr=0x36000000
+splash_size=0x5000
+
+# We don't want the "-latest" symlinks to match
+kernel_wildcard="testing-om-gta01-*.uImage.bin"
+rootfs_wildcard="openmoko-testing-om-gta01.rootfs.jffs2"
+uboot_wildcard="gta01bv4-u-boot.bin"
+
+download_dir="http://downloads.openmoko.org/daily/testing/"
+dev_download_dir="$download_dir"
+backup_download_dir="http://buildhost.automated.it/OM2007.2/"</pre>
+
+These binaries will be used by the flash.sh script. First make sure you have the netpbm package installed for some graphics conversion utilities. On Ubuntu this can be done by:
 <pre>sudo apt-get install netpbm</pre>
 Then run:
 <pre>$ openmoko/flash.sh</pre>
