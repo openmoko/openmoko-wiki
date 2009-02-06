@@ -1,27 +1,26 @@
 {{Languages|Kustomizer}}
 
-Released 2009-02-02 and for sure has some bugs and could be done better so be careful when running - but it still might make your life a little easier :)!
+* '''2009-02-06''' [http://risto.kurppa.fi/blog/kustomizer-02-for-200812/ version 0.2 released]. GSM works again. Many fixes done - now Kustomizer can give you two different configurations, see [[Kustomizer#What_does_it_do.3F|here]]. [[Kustomizer#Changelog|Changelog]] and [http://kurppa.fi/freerunner/kustomizer_files/kustomizer_0.2_log_20090206.txt test run log]
+* '''2009-02-02''' [http://risto.kurppa.fi/blog/kustomizer-for-openmoko-200812/ First release]. In this release GSM didn't work :( 
 
-''You've been warned!'' 
 
 === Description ===
-[[Image:Kustomizer-home.png|thumb|Home view]]Kustomizer is a script that converts your clean OM 2008.12 installation on Openmoko Freerunner into a usable pda/toy/something. '''At the moment there's something wrong with the GSM that doesn't connect at all!'''
+[[Image:Kustomizer-home.png|thumb|Home view]]Kustomizer is a script that converts your clean OM 2008.12 installation on Openmoko Freerunner into a usable phone/pda/toy/something.
 
-The script is licensed with GPLv2 licence. The applications that it installs around the Net might have other licences, check the original sites for more information.
+The script is licensed with GPLv2 licence. The applications that it installs around the Net might have other licenses, check the original sites for more information.
 
-It installs apps from the default repositories as well as from opkg.org and some other sources across the Internet. Some would call the result a new distribution, to me it's just 2008.12 + some apps the script installs. You decide :)
+The first time you run Kustomizer, it installes opkg.org repository, Illume-theme and terminal keyboard, files for better call audio quality, xterm. Also a CPU resource bug is fixed (qpe). A restart is required for this to take effect and Kustomizer will do this for you.
+The second run will install the rest: applications, GPRS, link map direcories from µSD card, mokoservices and tap/untap etc. You don't have to make the second run if you don't want.
 
 Originally it was written to make it easy to try some apps after a clean installation for opkg.org application tests ([http://risto.kurppa.fi/blog/opkgorg-software-test-part-i/ review part one], [http://risto.kurppa.fi/blog/opkgorg-software-review-part-2/ review part two]) and 'recover' easily after that but in the end it became a script that might be useful for others, too.
 
-Any questions can be sent to [http://risto.kurppa.fi/blog Risto H. Kurppa] ( risto at kurppa dot fi ) or at community list, see [[Development_resources#Mailing_Lists|mailing lists]].
-
-Kustomizer also released in [http://lists.openmoko.org/pipermail/community/2009-February/041167.html Community mailing list] and at the [http://risto.kurppa.fi/blog/kustomizer-for-openmoko-200812 author's blog]
+Questions and comments can be sent to [http://risto.kurppa.fi/blog Risto H. Kurppa] ( risto at kurppa dot fi ) or to the community list, see [[Development_resources#Mailing_Lists|mailing lists]].
 
 === Warnings ===
 [[Image:Kustomizer-install.png|thumb|Screenshot of the installation screen]]
 If you have some issues (WSOD / BSOD / wlan connecting only once / etc) with 2008.12 this will not fix those!
 
-Make sure there's nothing too important on your memory card or flash memory!! - BACKUPS!!!
+Make sure there's nothing too important on your memory card or flash memory - don't forget to backup..
 Installing 2008.12 will wipe the rootfs partition (=all your data in the phone excl. memory card) but tries to leave you memory card alone.
 
 It's more or less all the time under development and not very throughly tested so you might have to do some manual work after the installation to get everything up and running. Some packages fail to install for mysterious reasons (segfault, missing dependencies, md5sum mismatch, ...).
@@ -33,7 +32,14 @@ Here's the instructions what to do on your desktop to flash to 2008.12 and then 
 
  ## ON DESKTOP COMPUTER (written for Ubuntu 8.10 and newer)
 
- ## PREPARE
+ ## Prepare your memory card
+Here are some things you can put on your µSD card that will be mounted to /media/card. If you don't have these, it's OK.
+  * /m/c/customscript - your own script that will be run in the end. You can write here all your custom requirements, I added the Finnish keyboard and some handy scripts, see http://kurppa.fi/freerunner/customscript
+  * /m/c/Maps will be symlinked from /home/root/Maps. You can put your Openstreetmap map tiles there: TangoGPS uses this
+  * /m/c/Maps/navit/europe.navit.bin will be used by Navit, preconfigured to do so
+  * /m/c/Maps/navit/bookmarks.txt and destinations.txt will be copied to /home/root/.navit. These are the bookmarks and destinations for Navit
+
+ ## REQUIRED PACKAGES
  # install required packages:
  # a) run: sudo apt-get install dfu-util bind9 
  # dfu-util is also available from http://downloads.openmoko.org/releases/Om2008.9/dfu-util
@@ -69,25 +75,29 @@ Here's the instructions what to do on your desktop to flash to 2008.12 and then 
 Let the [http://risto.kurppa.fi/blog author] ( risto at kurppa dot fi ) know how did it go! You might not receive any help but it helps to develop the script further. If possible, please attach the log.
 
 === What does it do? ===
-Here are some things it does. It doesn't include all and some might be listed here that for some reason are not included at the moment.
+You can run Kustomizer once or twice. Here's an explanation what happens:
 
-Fixes & things
+==== First run ====
 
-    * Prevents gpe from scanning your µSD card (this uses all CPU power..)
-    * Illume-theme & Raster's keyboard with disabled dropshadow
-    * Wrench & QWERTY buttons
-    * Opkg.org repository added
-    * Finnish/Swedish Illume keyboard layout and Finnish dictionary
+    * illume-theme
+    * terminal keyboard
+    * wrench & qwerty buttons
+    * opkg.org repository added
+    * qpe eating CPU resources -bug fix
+    * new gsmhandset.state for improved audio quality
+    * Restart to apply the new settings
+
+==== Second run ====
+
+    * Linking /home/root/Maps to /media/card/Maps
+    * Loads of coolest applications & libraries
     * GPRS settings
-    * Fixed gsmhandset.state
     * Freerunner-optimized Navit config XML. Preconfigured to use the map or Europe in /media/card/Maps/navit/europe.navit.bin
+    * Your custom script from /media/card/customscript will be run, if found. See [http://kurppa.fi/freerunner/customscript example]
+    * Restart to apply the new settings
 
-Things that will be installed from your µSD card in /media/card. If these don't exist, it's okay, they'll just then not be available for you to use.
-
-    * /m/c/scripts.tar.gz - your own scripts that will be extracted to /home/root/scripts. This will directory be added to the path (in /etc/profile)
-    * /m/c/Maps will be symlinked from /home/root/Maps
-    * /m/c/Maps/navit/europe.navit.bin preconfigured in Navit config
-    * /m/c/Maps/navit/bookmarks.txt and destinations.txt copied to /home/root/.navit
+==== Applications ====
+Here's a list of applications installed. All might not be included.
 
 Applications / Internet
 
@@ -105,17 +115,14 @@ Applications / GPS
     * Yaouh
     * GPSdcontrol
     * Orrery
-    * Mumpot
     * TangoGPS
 
 Applications / Config
 
     * Mokoservices
     * Modified .Tap/Untap
-    * ZOMG
     * ShortOM
     * Usbmode
-    * AppManager
     * Sortdesk
 
 Applications / Games
@@ -125,22 +132,15 @@ Applications / Games
     * Numptyphysics
     * OpenMooCow
     * ScummVM
-    * XMahjongg
-    * Pingus
     * Pong
     * XScat
     * Liquidwar
-    * Cellhunter
-    * Xlogical
     * Moko-eightball
     * Ko-Dice
 
 Applications / Misc
 
     * Bunch of required libraries
-    * Fourier
-    * Remoko
-    * Guitartune
     * MokoConv
     * Gwaterpas
     * Neon
@@ -152,7 +152,6 @@ Applications / Misc
     * Vala-terminal
     * Fbreader
     * Openmoko-mediaplayer
-    * Omoney
     * Ffalarms
 
 === Development ===
@@ -166,7 +165,32 @@ Bug tracker can be found in the talk page: http://wiki.openmoko.org/wiki/Talk:Ku
 If someone is interested and willing to work on this please contact [http://risto.kurppa.fi/blog Risto H. Kurppa] ( risto at kurppa dot fi ). Moving to projects.openmoko is possible.
 
 === Changelog ===
-Check the script file itself.
+ # Version 0.2 - 2008-02-06
+ # CHANGELOG IN THIS VERSION
+ # (new) two run system:
+ # 1st run: illume-theme, wrench, qwerty are installed, opkg.org, storage.conf/qpe-bug fixed. Then restarted
+ # 2nd run: user needs to start Kustomizer again (and switch suspend/dim off!!) -> the rest is installed
+ # Rewriting the instructions
+ # General cleaning
+ # (new) ntpclient 
+ # (new) http://www.opkg.org/package_121.html - MokoMaze
+ # (new) ttf-liberation-mono (vala-terminal uses this)
+ # (new) battery http://wiki.openmoko.org/wiki/Forcing_fast_charge_mode
+ # (new) runs /media/card/customscript - the user can add his own stuff there
+ # (new) automatic prevention of suspend & dimming
+ # (update) yaouh - version update
+ # (update) neon - version update
+ # (remove) Finnish keyboard layout & dictionary
+ # (remove) custom scripts from card
+ # (remove) cellhunter - on FSO-based only?
+ # (remove) Guitartune - on FSO-based only and libfft fails to install
+ # (remove) fourier - libfft fails to install
+ # (remove) zomg and appmanager - less used..
+ # (remove) pingus - doesn't install
+ # (remove) mumpot - useless for most
+ # (remove) usbmode - battery replaces most of this
+ # (fix) watch checkrate changed from 1s to 2s
+ # (fix) libglade-2.0 -> libglade-2.0-0
 
 === Roadmap ===
 * copy all the cool features from other distros and best apps from opkg.org :) No.. There's no roadmap. Fix things when they break or something. TODO is in the file itself
