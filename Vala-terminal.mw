@@ -54,14 +54,18 @@ It is just: (Who will make step-by-step walktrought how to install this in toolc
  make install 
 
 
-Bitbake-recipe:
+Bitbake-recipe: 
  DESCRIPTION = "The Openmoko Command Line Terminal"
  SECTION = "openmoko/applications"
+ LICENSE = "GPL"
+ HOMEPAGE = "http://git.freesmartphone.org/?p=vala-terminal.git"
+ PKG_TAGS_${PN} = "group::applications"
  PV = "1.1.1"
- PR = "r0.1"
-   
- #how to use git?
- #SRC_URI = "git://git.freesmartphone.org/vala-terminal.git;proto=http"
+ PR = "r0.2" 
+ 
+ 
+ #how to use git in bb?
+ #SRC_URI = "git://git.freesmartphone.org/vala-terminal.git;proto=http" 
  
  do_patch() {
  git clone git://git.freesmartphone.org/vala-terminal.git 
@@ -70,9 +74,9 @@ Bitbake-recipe:
  mv vala-terminal vala-terminal-${PV}
  cd vala-terminal-${PV}
  ./autogen.sh \
-    --build=i486-linux-gnu \
-    --host=${TARGET_SYS}
- 
+   --build=i486-linux-gnu \
+   --host=${TARGET_SYS}
+  
  #Now we have Makefile and we can patch it to use host-systems valac (it generates c-code)
  sed 's/$(VALAC) -c/\/usr\/local\/bin\/valac -C/g' Makefile > Makefile_new
  mv Makefile_new Makefile
@@ -84,13 +88,13 @@ Bitbake-recipe:
  }
  
  do_install() {
-       install -d ${D}${bindir}
-       install -d ${D}${datadir}/pixmaps
-       install -d ${D}${datadir}/applications
+        install -d ${D}${bindir}
+        install -d ${D}${datadir}/pixmaps
+        install -d ${D}${datadir}/applications
  
-       install ${WORKDIR}/vala-terminal-${PV}/.libs/vala-terminal ${D}${bindir}/
-       install ${WORKDIR}/vala-terminal-${PV}/data/vala-terminal.png ${D}/${datadir}/pixmaps
-       install ${WORKDIR}/vala-terminal-${PV}/data/vala-terminal.desktop ${D}${datadir}/applications
+        install ${WORKDIR}/vala-terminal-${PV}/.libs/vala-terminal ${D}${bindir}/
+        install ${WORKDIR}/vala-terminal-${PV}/data/vala-terminal.png ${D}/${datadir}/pixmaps
+        install ${WORKDIR}/vala-terminal-${PV}/data/vala-terminal.desktop ${D}${datadir}/applications
  }
 
 == Issues ==
