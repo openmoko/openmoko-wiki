@@ -15,36 +15,38 @@ To send e-mail you need to set up at least one outgoing e-mail account. After th
 
 ==Configuration for encrypted mail==
 
-qtmail is already installed by default so we don't need to install it
-but it doesn't support ssl/tls by default...so we will make it use ssl/tls
+1. qtmail is already installed by default, but it doesn't support ssl/tls, so we will make it use ssl/tls
  cd /usr/lib
  ln -s libssl.so.0.9.7 libssl.so
  ln -s libcrypto.so.0.9.7 libcrypto.so
-then we need to import our certificate...
-change myprovider accorging to your settings:
-on your desktop computer do:
- openssl s_client -connect myprovider:port -showcerts
+
+2. you will need the c_rehash script, which is not in the OM repositories. as it is a perl script, it will run on any machine with perl, and can be copied direct from your desktop/laptop. it will be in /usr/bin . copy it to the same location on your neo, ensure it is permitted to execute
+
+3. then we need to import our certificate...
+change 'myprovider' and 'port' according to your settings:
+on the freerunner (possibly via ssh), do:
+ openssl s_client -connect 'myprovider':'port' -showcerts
 
 examples:
 *gmail:
 **myprovider:imap.googlemail.com
 **port:993
+
 *yahoo
 **myprovider:?
 **port:?
 
 
-copy the part between(and including ):
+4. copy the part between(and including ):
  -----BEGIN CERTIFICATE-----
  -----END CERTIFICATE-----
 
-you will need the c_rehash script, which is not in the OM repositories. as it is a perl script, it can be copied direct from your desktop/laptop. it will be in /usr/bin . copy it to the same location on your neo, ensure it is permitted to execute, then:
 
-put it in a file,that you will put on a folder,then do
+5. put it in a file,that you will put on a folder,then do
  c_rehash /path/to/the/folder
 then copy the content of the folder to /opt/Qtopia/etc/ssl/certs/
 
-then it should work...you only need to configure it according to your mail provider settings
+6. then need to configure qtmail according to your mail provider settings, and it should work
 
 <onlyinclude>
 {{ApplicationBox|
@@ -52,7 +54,7 @@ then it should work...you only need to configure it according to your mail provi
   Description=The Qtopia mail and SMS application, default ''Messages'' application on Om 2008.8|
   Screenshot=Qtmail-account.png|
   Homepage=http://qtopia.net|
-  TestedOn=Om 2008.8|
+  TestedOn=Om 2008.12|
   PackageName=qtopia-phone-x11-qtmail
 }}
 </onlyinclude>
