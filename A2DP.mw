@@ -3,7 +3,7 @@ The [http://en.wikipedia.org/wiki/A2DP A2DP] bluetooth profile allows high quali
 This page describes how to setup A2DP on the Freerunner.
 
 == How to setup A2DP manually ==
-This information is mostly taken from [http://lists.openmoko.org/nabble.html#nabble-td2176481 this mail thread]. It has been tested on [[FDOM]] and [[FSO]] milestone 5, but should also work on [[2008.12]].
+This information is mostly taken from this mail thread. It has been tested on [[FDOM]], but should also work on [[2009.12]]. I have not been able to get it working with [[FSO]] milestone 5.
 
 === 1. Check installed packages ===
 First check that you have the correct package versions installed with {{{opkg list_installed | grep blue}}}. The versions should be these:
@@ -14,21 +14,6 @@ First check that you have the correct package versions installed with {{{opkg li
  bluez-utils-compat - 3.33-r3
  libbluetooth2 - 3.33-r0
 
-=== 1.1 Check installed packages (Bluez4) ===
-For user with bluez4 (SHR-unstable ecc.) bluez-audio 3.33 and bluez-utils-alsa 3.33 are not compatible with bluez4
-
- bluez4 - 4.30-r1 
- connman-plugin-bluetooth - 0.10-r0 - 
- kernel-module-bluetooth - 2.6.28-oe1+xxxxx 
- libasound-module-bluez - 4.30-r0 
- libbluetooth2 - 3.33-r0
-
-If you are willing to risk your installationand want to stay on bluez3, you can remove bluez4 to resolve this issue by doing
-
- opkg remove -recursive bluez4
-
-(will also remove connman-plugin-bluetooth). After that you need to edit /etc/init.d/bluetooth and replace '''DAEMON_NAME=bluetoothd''' with '''DAEMON_NAME=hcid'''. This has been tested and works on FSO MS5.
-
 === 2. Add bluetooth device to /etc/asound.conf ===
 Your /etc/asound.conf should contain these:
 
@@ -36,12 +21,12 @@ Your /etc/asound.conf should contain these:
     type plug
     slave.pcm "dmix"
  }
- 
+
  ctl.mixer0 {
     type hw
     card 0
  }
- 
+
  pcm.bluetooth {
         type bluetooth
         device "XX:XX:XX:XX:XX:XX"
@@ -60,51 +45,17 @@ Turn on bluetooth in the GUI and then do
  
  passkey-agent --default 0000 &
  
- dbus-send --system --type=method_call --print-reply --dest=org.bluez \
-   /org/bluez/hci0 org.bluez.Adapter.CreateBonding string:$DEVICE
+ dbus-send --system --type=method_call --print-reply --dest=org.bluez /org/bluez/hci0 org.bluez.Adapter.CreateBonding string:$DEVICE
  
- dbus-send --system --print-reply --dest=org.bluez \
-   /org/bluez org.bluez.Manager.ActivateService string:audio
+ dbus-send --system --print-reply --dest=org.bluez /org/bluez org.bluez.Manager.ActivateService string:audio
  
- dbus-send --system --type=method_call --print-reply --dest=org.bluez \
-   /org/bluez/audio org.bluez.audio.Manager.CreateDevice string:$DEVICE
+ dbus-send --system --type=method_call --print-reply --dest=org.bluez /org/bluez/audio org.bluez.audio.Manager.CreateDevice string:$DEVICE
  
- dbus-send --system --type=method_call --print-reply --dest=org.bluez \
-   "/org/bluez/audio/device0" org.bluez.audio.Sink.Connect
+ dbus-send --system --type=method_call --print-reply --dest=org.bluez "/org/bluez/audio/device0" org.bluez.audio.Sink.Connect
 
 If the last step fails, see to it that the device returned in the step before is device0 - otherwise use the other number.
-
-=== 3.1 Connect to the device (Bluez4) ===
-Turn on bluetooth in the GUI and then pair with simple-agent (passkey-agent from bluez-utils 3.33 won't work)
-simple-agent is included in bluez4 source package (src folder) or you can find it there : http://shr-project.org/trac/wiki/Using
-
- /etc/init.d/bluetooth stop
- /etc/init.d/bluetooth start
- 
- python simple-agent hci0 XX:XX:XX:XX:XX:XX
- 
-Response is something like this :
-
- RequestPinCode (/org/bluez/XXXX/hci0/dev_XX_XX_XX_XX_XX_XX)
- Enter PIN Code: XXXX
- Release
- New device (/org/bluez/XXXX/hci0/dev_XX_XX_XX_XX_XX_XX)
-
-Now you can start playing, no need to connect manualy.
 
 === 4. Start playing ===
 To play a file with [[mplayer]] use the following command:
 
  mplayer -ao alsa:device=bluetooth /path/to/file.ogg
-
-== 5. Potential troubles ==
-* If you experience problems with choppiness, try changing your hcid.conf to include "lm accept,master;" and "lp hold,sniff,park;"  You may also have to bond (commonly known as 'pairing') your phone and your headset.  See http://wiki.bluez.org/wiki/HOWTO/Bonding for details. [[User:Mercury|Mercury]] 17:36, 5 September 2008 (UTC). On bluez4, use on commandline 'hciconfig hci0 lm master; hciconfig hci0 lp hold,sniff,park' as hcid.conf doesn't exist
-
-* If you don't install all required packages (see above) namely libasound-module-bluez you will get:
- Cannot open shared library /usr/lib/alsa-lib/libasound_module_pcm_bluetooth.so
-
-== 6. Devices that work==
-
-Moved to [[List_of_bluetooth_headsets]]
-
-[[Category:Audio]]
