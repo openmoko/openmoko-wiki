@@ -529,77 +529,13 @@ On the PC:
 
 == Advanced Audio Distribution Profile (A2DP) ==
 
-=== A2DP quickie ===
+See [[A2DP]].
 
-* If you experience problems with choppyness, try changing your hcid.conf to include "lm accept,master;" and "lp hold,sniff,park;"  You may also have to bond (commonly known as 'pairing') your phone and your headset.  See http://wiki.bluez.org/wiki/HOWTO/Bonding for details. [[User:Mercury|Mercury]] 17:36, 5 September 2008 (UTC)
-
-It's now possible (if a little hackish) to stream mp3 to a bluetooth headset. It's a known problem that the playback rate changes (pitch varies). Timing issues are also likely the reason for gaps in playback.
-
-If the bluez packages are recent enough, you can use a shortcut. I'll document it here and leave the longer version below (the long version also demonstrates the API used by the GUI to manage headsets)
-
-Create /etc/asound.conf with your bluetooth headset's address filled in:
-
- pcm.!default {
-  type bluetooth
-  device "xx:xx:xx:xx:xx:xx"
- }
-
-then play a song
-
- madplay /media/card/song.mp3 --sample-rate=44100 --output=wave:- | aplay
-
-or for smoother results...
-
- madplay /media/card/song.mp3 --sample-rate=44100 --output=wave:song.wav
- aplay song.wav
-
-=== A2DP ===
-
-If that doesn't work... all the more hackish... install required packages:
-
- echo "src/gz python http://www.angstrom-distribution.org/unstable/feed/armv4t/python/" >> /etc/ipkg/angstrom-python.conf 
- echo "src/gz base http://www.angstrom-distribution.org/unstable/feed/armv4t/base/" >> /etc/ipkg/angstrom-base.conf
- ipkg update ; ipkg install python-core python-xml python-dbus bluez-utils bluez-utils-alsa
-
-Create /etc/asound.conf:
-
- pcm.!default {
-  type bluetooth
- }
- ctl.!default {
-  type bluetooth
- }
- pcm.bluetooth {
-  type bluetooth
- }
- ctl.bluetooth {
-  type bluetooth
- }
-
-Run the passkey agent (see above in this page)
-
-Fill in your bluetooth headset address below and execute the python script (with your headset turned on)
-
- #!/usr/bin/python
- import dbus
- bus = dbus.SystemBus()
- manager = dbus.Interface(bus.get_object('org.bluez', '/org/bluez'), 'org.bluez.Manager')
- conn = manager.ActivateService('audio')
- audio = dbus.Interface(bus.get_object(conn, '/org/bluez/audio'), 'org.bluez.audio.Manager')
- path = audio.CreateDevice('00:0D:3C:44:33:22')
- audio.ChangeDefaultDevice(path)
- sink = dbus.Interface(bus.get_object(conn, path), 'org.bluez.audio.Sink')
- sink.Connect()
-
-FINALLY: play a song
-
- madplay /media/card/song.mp3 --sample-rate=44100 --output=wave:- | aplay
-
-=== Headset Audio ===
+== Headset Audio ==
 
 [[Neo1973_Audio_Subsystem]] has detail about alsa settings and a proposal for audio scenario management.
 
-To try this out, follow the instructions in the a2dp section to install software and run the passkey agent.
+To try this out, follow the instructions on the [[A2DP]] page to install software and run the passkey agent.
 
 Remove or disable the stuff you put in asound.conf. When using a voice headset, the application uses the regular system audio device and it gets routed to bluetooth in the codec.
 
