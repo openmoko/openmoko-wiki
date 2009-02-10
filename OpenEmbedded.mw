@@ -242,6 +242,9 @@ Below is an example of two overlays, three build directories, a setup-env script
  |           `-- tangogps_0.9.3.bb
  `-- setup-env
 </pre>
+
+An example of the setup-env script with multiple overlays and multiple build targets is below. 
+
 <pre>
  [[ -z ${OE_HOME} ]] && export OE_HOME=${HOME}/oe
  [[ -z ${MACHINE} ]] && export MACHINE=om-gta02
@@ -266,20 +269,22 @@ Below is an example of two overlays, three build directories, a setup-env script
 
 Note that the overlay-specific BBPATH entry ''precedes'' the default BBPATH entries.
 
+Next, observe the changes necessary for local.conf in order to use a specific overlay (in this case org.openmoko.dev).
+
 <pre>
  ...
  BBFILES := "${OE_HOME}/org.openembedded.dev/packages/*/*.bb"
  BBFILES += " ${OE_HOME}/org.openmoko.dev/packages/*/*.bb"
 
- BBFILE_COLLECTIONS = "upstream local"
+ BBFILE_COLLECTIONS = "upstream moko"
  BBFILE_PATTERN_upstream = "${OE_HOME}/org.openembedded.dev"
  BBFILE_PRIORITY_upstream = "0"
- BBFILE_PATTERN_local = "${OE_HOME}/org.openmoko.dev"
- BBFILE_PRIORITY_local = "1"
+ BBFILE_PATTERN_moko = "${OE_HOME}/org.openmoko.dev"
+ BBFILE_PRIORITY_moko = "1"
  ...
 </pre>
 
-In order for the overlay to be detected by BitBake, the above variables need to be defined. It is possible to have more than one overlay and each one should be given a different priority.
+In order for the overlay to be detected by BitBake, the above variables need to be defined in the local.conf file. It is possible to include more than one overlay. For each overlay, add a separate  BBFILES += statement, an entry in BBFILE_COLLECTIONS, a BBFILE_PATTERN, and BBFILE_PRIORITY. Remember to include at least one space (' ') between each BBFILES entry.
 
 === Useful BitBake Commands ===
 
