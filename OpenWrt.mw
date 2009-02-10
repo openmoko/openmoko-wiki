@@ -10,11 +10,21 @@ Although this is sufficient enough to build an image for the freerunner you will
 
  cp feeds.conf.default feeds.conf
 
-And then edit your feeds.conf and enable the efl (for enlightenment) and phone(for fso, paroli, ...) feeds. (Remove the # in front of it)
+Then edit your feeds.conf and enable the efl (for enlightenment) and phone (for fso, paroli, ...) feeds, by removing the '#' at the beginning of these lines, so that it might look like:
 
-After that update your feeds to download the packages and then install them
+ src-svn packages https://svn.openwrt.org/openwrt/packages
+ src-svn xwrt http://x-wrt.googlecode.com/svn/trunk/package
+ src-svn luci http://svn.luci.subsignal.org/luci/branches/luci-0.8/contrib/package
+ src-svn phone https://svn.openwrt.org/openwrt/feeds/phone
+ src-svn efl https://svn.openwrt.org/openwrt/feeds/efl
+ src-svn desktop https://svn.openwrt.org/openwrt/feeds/desktop
+ #src-svn xfce https://svn.openwrt.org/openwrt/feeds/xfce
 
- scripts/feeds update
+Please mind that this config does not define what packages will be compiled - it just defines which package-descriptions (OpenWrt-Makefiles) will be fetched which will be listed within the menuconfig later.
+
+After that update your feeds to download the OpenWrt-Makefiles of these packages and provide (install) them
+
+ scripts/feeds update -a
  scripts/feeds install -a
 
 Now you'll have to select the target platform for the freerunner. Run
@@ -25,18 +35,27 @@ and select s3c24xx as the Target System. As Target Profile you have to choice be
 * gta02-full. This is the one you probalby want since it has enlightenment and paroli preselected.
 * gta2-mini. This profile contains only the basic OpenWRT packages, so you'll only get a shell and some commandline utils.
 
-You now can also select some additional packages you want to be installed in your image. Make sure you select as build in [*] else [M] you'll only get the packages but they will not be in the image, but can be installed later on.
+Currently to get the EFL (enlightenment and its libraries) compiled within OpenWrt you need to have recent executables of <eet> and <edje_cc> preinstalled on your host-system. This is just a temporary solution and will be changed soon. Common packages which distribute these binaries are named <edje> and <eet>.
+
+You now can also select additional packages you want to be installed in your image. Make sure you select as build in [*] else [M] you'll only get the packages but they will not be in the image, but can be installed later on.
 
 You maybe also want to change the IP address under which the freerunner will be reachable. To do so select "[*] Image configuration". In its submenu you can change the images network configuration.
+
+Per default OpenWrt is using the uclibc as libc implementation. You can use another libc (e.g. the glibc) by changing that via "[*] Advanced configuration options (for developers)" -> "---   Toolchain Options" -> "LIBC implementation".
 
 If your done configuring the image you can build it by just running
 
  make
 
-This will now take some time.
+This will now take some time. Please make sure you have enough free space left (~4 GB for full-profile).
+Instead you can use "make V=99" to get debug output to see what's going on / went wrong.
 
-When the build process is finished you will find a rootfs (openwrt-s3c24xx-2.6-root.jffs2-128k) and a kernel image (openwrt-s3c24xx-2.6-uImage) in the bin subfolder of your openwrt installation, which can be installed on your freerunner with the [[Dfu-util|dfu util]].
+When the build process is finished you will find a rootfs (openwrt-s3c24xx-2.6-root.jffs2-128k) and a kernel image (openwrt-s3c24xx-2.6-uImage) in the bin/ subfolder of your openwrt installation, which can be installed on your freerunner with the [[Dfu-util|dfu util]] as normal.
 
-Now you can boot your phone and depending on what packages you've selected you'll might be able to make some phone calls.
+After flashing both images, reboot your phone and depending on what packages were built into the image (=you've selected) you might be able to initiate / receive phonecalls with your Freerunner running OpenWrt :)
 
 You can also reach the freerunner over [[USB_Networking|usb network]] via telnet. SSH is also available after you have set up password for the root account (Run `passwd` in a telnet session).
+
+Congratulations!
+
+Please help us making this site better! Give feedback on the mailinglist (Openmoko as well as OpenWrt), change this site, file bug-reports or just tell us how much you love OpenWrt ;)
