@@ -1,203 +1,40 @@
-{{Languages|OpenWrt}}
+== Howto create an Image for the Freerunner with OpenWRT ==
 
-News about OpenWrt on Neo FreeRunner is at [http://nanl.de/blog/] and [http://nanl.de/blog/category/tech/embedded-systems/openmoko/].
+First you have to create a checkout of the OpenWRT base system
 
-= Installing pre-built image =
+ svn co https://svn.openwrt.org/openwrt/trunk
 
-== Installing to [[NAND-flash]] ==
-
-As usual, you need rootfs and kernel (assuming you're using [[Qi]] or [[U-Boot]]) which are available at :
-http://nanl.de/files/openwrt/openmoko/
-
- wget http://nanl.de/files/openwrt/openmoko/LATEST_openwrt-s3c24xx-2.6-root.jffs2-128k
- wget http://nanl.de/files/openwrt/openmoko/LATEST_openwrt-s3c24xx-2.6-uImage
-
- # Neofreerunner flashing:
- #
- sudo dfu-util -d [[USB Product IDs|0x1d50:0x5119]] -a rootfs -R -D LATEST_openwrt-s3c24xx-2.6-root.jffs2-128k
- sudo dfu-util -d [[USB Product IDs|0x1d50:0x5119]] -a kernel -R -D LATEST_openwrt-s3c24xx-2.6-uImage
- #
- # The IDs (0x1d50:0x5119) was found by using the command #dfu-util --list
- # and looking for name="USB Device Firmware Upgrade".
-
-Then boot from flash.
-
-== Installing to SD card via PC and Freerunner ==
-{{note|Not succesful yet (20090728_r16973, [[U-Boot]]), but files seems ok.}}
-
-For booting from SD card fetch this rootfs and the kernel image (same than above mentioned):
- wget http://nanl.de/files/openwrt/openmoko/LATEST_openwrt-s3c24xx-rootfs.tgz
- wget http://nanl.de/files/openwrt/openmoko/LATEST_openwrt-s3c24xx-2.6-uImage
-
-[[Booting_from_SD#Prepare_the_SD_card|Prepare your SD, SDHC card for kernel and rootfs partitions]].
-
-Assuming 8MB kernel partition mounted as /mnt/mokokernel and /path is where the file is stored on your PC. Run command from PC:
-
- scp /path/LATEST_openwrt-s3c24xx-2.6-uImage root@192.168.0.202:/mnt/mokokernel/uImage-GTA02.bin
-
-Assuming rootfs partition mounted as /media/card :
-
- cat /path/LATEST_openwrt-s3c24xx-rootfs.tgz |ssh root@192.168.0.202 "gunzip -d | tar -C /media/card/ -xf -"
-
-== Installing to SD card via PC ==
-{{note|This part assume you use [[Qi]] as bootloader. [[U-Boot]] will not work using this setup  }}
-For booting from SD card fetch this rootfs and the kernel image (same than above mentioned):
- wget http://nanl.de/files/openwrt/openmoko/LATEST_openwrt-s3c24xx-rootfs.tgz
- wget http://nanl.de/files/openwrt/openmoko/LATEST_openwrt-s3c24xx-2.6-uImage
-
-Following instructions assume that you are using a SD card reader on host PC.
-* Format SD card using ext2 or ext3.
- mkfs.ext2 /dev/sdf1
-* Mount this partion 
- mount /dev/sdf1 /mnt/disk
-* Unpack rootfs archive to card.
- tar xvzf LATEST_openwrt-s3c24xx-rootfs.tgz -C /mnt/disk
-* Copy kernel to card /boot/uImage-GTA02.bin
- cp LATEST_openwrt-s3c24xx-2.6-uImage /mnt/disk/boot/uImage-GTA02.bin
-* Umount SD card partition
- umount /mnt/disk
-* Then boot from SD card with your FreeRunner.
-
-= Usage =
-After flashing both images, reboot your phone and depending on what packages were built into the image (if compiled yourself this means the packages you've selected) you might be able to initiate and receive phonecalls with your FreeRunner running OpenWrt :)
-
-'''First start'''
-
-You see nice OpenWrt bootsplash and message "split_squashfs: no squashfs found in neo1973-nand", but just wait minute or two and X will start. Enlightenment+illume starts. There are xterm installed and qwerty-button for [[on-screen-keyboard]].
-
-You can reach the Freerunner over wlan or [[USB_Networking|usb network]] as usual but Freerunner under OpenWrt have '''192.168.1.1 IP address''' as default.
-
-'''Enable wifi'''
- echo s3c2440-sdi > /sys/bus/platform/drivers/s3c2440-sdi/unbind
- echo s3c2440-sdi > /sys/bus/platform/drivers/s3c2440-sdi/bind
- 
- ifconfig eth0 up
- iwconfig eth0 essid NAME
- udhcpc
-
-If your router has ip 192.168.1.1 (which is recommend in usb-networking), use this to stop usb0:
- ifconfig br-lan down
-Or you can change the address of usb0. Is it in file: ''/etc/config/network''
-
-'''Enable SSH'''
-
-To be able to SSH your phone, you must setup a password. You can use xterm and command 'passwd' or you can use telnet (if you connects over wlan, use proper ip-address):
-
- $ telnet 192.168.1.1
- Trying 192.168.1.1...
- Connected to 192.168.1.1.
- Escape character is '^]'.
-  === IMPORTANT ============================
-   Use 'passwd' to set your login password
-   this will disable telnet and enable SSH
-  ------------------------------------------
- .
- BusyBox v1.13.4 (2009-07-06 01:59:55 CEST) built-in shell (ash)
- Enter 'help' for a list of built-in commands.
- .
-   _______                     ________        __
-  |       |.-----.-----.-----.|  |  |  |.----.|  |_
-  |   -   ||  _  |  -__|     ||  |  |  ||   _||   _|
-  |_______||   __|_____|__|__||________||__|  |____|
-           |__| W I R E L E S S   F R E E D O M
-  KAMIKAZE (bleeding edge, r16703) -------------------
-   * 10 oz Vodka       Shake well with ice and strain
-   * 10 oz Triple sec  mixture into 10 shot glasses.
-   * 10 oz lime juice  Salute!
-  ---------------------------------------------------
- root@OpenWrt:/# passwd
- Changing password for root
- New password:
- Retype password:
- Password for root changed by root
- root@OpenWrt:/#
-
-== Installing packages ==
-It uses opkg and default repository is http://downloads.openwrt.org/snapshots/trunk/s3c24xx/packages/
-
- opkg update
- opkg install nano
-
-If the opkg install quits with error "* Packages were found, but none compatible with the architectures configured" then the following line should be checked in /etc/opkg.conf (error occured with nanl.de rootfs (22. September 09))
-
- arch s3c24xx 1
-
-Where ’s3c24xx’ is the architecture and ‘1′ is a ‘priority'.
-
-= Build custom image =
-== Fetching OpenWrt trunk ==
-First you have to create a svn checkout of the OpenWrt base system
-
- svn co svn://svn.openwrt.org/openwrt/trunk openwrt
-
-The command will fetch the OpenWrt base system and put it into the openwrt subfolder of your current working directory. From now on this HOWTO assumes that your working direcory will be the newly created openwrt folder. 
-
- cd openwrt
-
-== Add packages from extra feeds ==
-Although this is sufficient enough to build an image for the freerunner you will not be able to build a lot of packages useful on your phone. Those packages are in extra feeds. To enable those feeds:
+Although this is sufficient enough to build an image for the freerunner you will not be able to build a lot of packages useful on your phone. Those packages are in extra feeds. To enable those feeds 
 
  cp feeds.conf.default feeds.conf
 
-Then edit your feeds.conf and enable the efl (for enlightenment) and phone (for fso, paroli, ...) feeds, by removing the '#' at the beginning of these lines, so that it might look like:
+And then edit your feeds.conf and enable the efl (for enlightenment) and phone(for fso, paroli, ...) feeds. (Remove the # in front of it)
 
- src-svn packages svn://svn.openwrt.org/openwrt/packages
- src-svn xwrt http://x-wrt.googlecode.com/svn/trunk/package
- src-svn luci http://svn.luci.subsignal.org/luci/branches/luci-0.8/contrib/package
- src-svn phone svn://svn.openwrt.org/openwrt/feeds/phone
- src-svn efl svn://svn.openwrt.org/openwrt/feeds/efl
- src-svn desktop svn://svn.openwrt.org/openwrt/feeds/desktop
- #src-svn xfce svn://svn.openwrt.org/openwrt/feeds/xfce
+After that update your feeds to download the packages and then install them
 
-Please mind that this config does not define what packages will be compiled - it just defines which package-descriptions (OpenWrt-Makefiles) will be fetched which will be listed within the menuconfig later.
+ scripts/feeds update
+ scripts/feeds install -a
 
-After that update your feeds to download the OpenWrt-Makefiles of these packages and provide (install) them
-
- ./scripts/feeds update -a
- ./scripts/feeds install -a
-
-== Configure target and packages ==
 Now you'll have to select the target platform for the freerunner. Run
 
  make menuconfig
 
 and select s3c24xx as the Target System. As Target Profile you have to choice between 
-* '''Openmoko GTA-02 (full)''': This is the one you probably want since it has enlightenment and paroli preselected.
-* '''Openmoko GTA-02 (minimal)''': This profile contains only the basic OpenWrt packages, so you'll only get a shell and some command-line utils.
+* gta02-full. This is the one you probalby want since it has enlightenment and paroli preselected.
+* gta2-mini. This profile contains only the basic OpenWRT packages, so you'll only get a shell and some commandline utils.
 
-You now can also select additional packages you want to be installed in your image. Make sure you select as build in [*] else [M] you'll only get the packages but they will not be in the image, but can be installed later on.
+You now can also select some additional packages you want to be installed in your image. Make sure you select as build in [*] else [M] you'll only get the packages but they will not be in the image, but can be installed later on.
 
 You maybe also want to change the IP address under which the freerunner will be reachable. To do so select "[*] Image configuration". In its submenu you can change the images network configuration.
 
-Per default OpenWrt is using the uclibc as libc implementation. You can use another libc (e.g. the glibc) by changing that via "[*] Advanced configuration options (for developers)" -> "---   Toolchain Options" -> "LIBC implementation".
-
-== Build your OpenWrt image ==
-If your done configuring the image you can build it by just running:
+If your done configuring the image you can build it by just running
 
  make
 
-'''Attention''' - at least in OpenWRT rev 19632, it seems, you need to have sdcc installed in order to compile the image.
-'''Warning:''' OpenWrt build system have more or less requirements depends on selected packages. Using GTA-02 full profile, we need: 
-* ''subversion'' and git to retrieve some external sources. (On Debian Lenny: ''subversion git-core'')
-* full ''autotools'' suite. (On Debian Lenny: ''automake autoconf autotools-dev libtool pkg-config'')
-* ''dbus-binding-tool'' to be able to compile "gsm0710muxd". (On Debian Lenny: ''libdbus-glib-1-dev'')
-* ''autopoint'' and ''cvs'' is used by enlightenment building process. (On Debian Lenny: ''gettext cvs'')
-* --- also needs "libxml-parser-perl"
-This will now take some time. Please make sure you have enough free space left (~4 GB for full-profile).
-Instead you can use "make V=99" to get debug output to see what's going on / went wrong.
+This will now take some time.
 
-== Flash Neo FreeRunner ==
-When the build process is finished you will find a rootfs (openwrt-s3c24xx-2.6-root.jffs2-128k) and a kernel image (openwrt-s3c24xx-2.6-uImage) in the bin/ subfolder of your OpenWrt installation, which can be installed on your freerunner with the [[Dfu-util|dfu util]] as normal. Then you can continue as usage section says (beware if you have disable something).
+When the build process is finished you will find a rootfs (openwrt-s3c24xx-2.6-root.jffs2-128k) and a kernel image (openwrt-s3c24xx-2.6-uImage) in the bin subfolder of your openwrt installation, which can be installed on your freerunner with the [[Dfu-util|dfu util]].
 
+Now you can boot your phone and depending on what packages you've selected you'll might be able to make some phone calls.
 
-= Congratulations! =
-
-Please help us making this site better! Give feedback on the mailinglist (Openmoko as well as OpenWrt), change this site, file bug-reports or just tell us how much you love OpenWrt ;)
-
-'''State'''
- http://oldwiki.openwrt.org/Hardware%282f%29Openmoko.html
-
-= Alternative (untested?) OpenWrt distribution and pre-built boot image =
-* http://downloads.openwrt.org/snapshots/trunk/s3c24xx/
-
-[[Category:OpenWrt| ]]
+You can also reach the freerunner over [[USB_Networking|usb network]] via telnet. SSH is also available after you have set up password for the root account (Run `passwd` in a telnet session).
