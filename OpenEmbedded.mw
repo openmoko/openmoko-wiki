@@ -1,6 +1,5 @@
 {{Languages|OpenEmbedded}}
 
-
 Openmoko, our distribution, is built using OpenEmbedded.  OpenEmbedded will:
 
 * Generate (cross-compile) software packages for multiple embedded targets.
@@ -8,22 +7,273 @@ Openmoko, our distribution, is built using OpenEmbedded.  OpenEmbedded will:
 
 For more information please see the [http://www.openembedded.org/ Open Embedded] website.
 
-== Building the Openmoko distribution with OpenEmbedded ==
+== Building the OpenMoko Distribution with OpenEmbedded ==
 
-Note that if you are an application developer, you probably don't want to build Openmoko with OpenEmbedded. In that case, you better use our prebuilt [[Toolchain]]. Building Openmoko is a time-, cpu- and diskspace-consuming process which should only be done if you are a system integrator and want to customize your Openmoko distribution.
+'''Note:''' If you are an application developer, you probably do not want to build Openmoko with OpenEmbedded. In that case, you should use our prebuilt [[Toolchain]]. Building OpenMoko is a time-, cpu- and diskspace-consuming process which should only be done if you are a system integrator and want to customize your OpenMoko distribution.
 
-The facility called [[MokoMakefile]] simplifies building OpenEmbedded, however it also shields you from a lot of knowledge. In case you are the aformentioned system integrator / distribution customizer, we strongly advise you to use BitBake and OpenEmbedded directly.
+== Simplified Instructions: MokoMakefile ==
 
-=== OpenEmbedded branch ===
-The official Openmoko branch of the OpenEmbedded database used to be found at [http://git.openmoko.org Git.Openmoko.Org].
-This branch is now '''CLOSED'''. Please commit fixes and updates upstream.
+For beginners who wish to customize their OpenMoko distribution, the facility called [[MokoMakefile]] simplifies building OpenEmbedded. 
 
-=== Upstream Source tarballs ===
+== Detailed Instructions: OpenEmbedded ==
 
-When bitbake builds a particular OE package, it downloads the original source code of the upstream project (e.g. Linux kernel) and patches from the internet. After downloading sources, bitbake applies a series of patches to the tree. These patches have either been downloaded from the internet or are contained in the OpenEmbemdded metadata repository. The unpatched source tarballs are available from http://downloads.openmoko.org/sources/
+Beginner OpenMoko developers who would prefer to have full control over their OpenEmbedded build environment should follow the instructions below.
 
-{{todo|finish article}}
+=== Preparations ===
 
+Several prerequisite software components are necessary in order to have a fully functional OpenEmbedded build environment. However, setup and installation varies depending on the operating system installed on your workstation. The [http://wiki.openembedded.net/index.php OpenEmbedded Wiki] provides [http://wiki.openembedded.net/index.php/OEandYourDistro setup instructions] for FreeBSD, Mac OS X, and most major Linux distributions, of course.
+
+For OpenEmbedded installation instructions please refer to [http://wiki.openembedded.net/index.php/OEandYourDistro OEandYourDistro]. 
+
+=== ${OE_HOME} ===
+
+Assuming that you have installed all prerequisite software, you are now ready to create a directory for all of your OpenEmbedded (OE) related work. We will refer to OE_HOME in a generic way, but for argument's sake, assume that it is equal to ${HOME}/oe. You should expect ${OE_HOME} to grow tremendously in size, up to approximately 8GB or larger in some cases. Also be aware, that a full OE build could require several hours of constant building, which may inhibit the performance of your computer while performing other tasks. Replace ${HOME}/oe with your preferred location.
+
+For Bash users:
+ export OE_HOME=${HOME}/oe
+
+For Tcsh users:
+ setenv OE_HOME ${HOME}/oe
+
+Next, run 'mkdir -p ${OE_HOME}' to create the directory. 
+
+=== Synchronizing OpenEmbedded With Git ===
+
+Just like any tree, OpenEmbedded has several branches. In this case they are called 'development branches'. Some noteworthy ones include org.openembedded.dev (the default) and org.openembedded.stable . 
+
+To syncronize the OpenEmbedded tree, run
+<pre>
+ git clone git://git.openembedded.net/openembedded ${OE_HOME}/org.openembedded.dev 
+</pre>
+
+Note that last argument could be any directory name (git will create the directory if it doesn't exist). Sticking to 'good convention', the directory name was chosen to reflect the default development branch, org.openembedded.dev . See the [http://wiki.openembedded.net/index.php/GitPhraseBook OE GitPhraseBook] for more info on checking out different branches. 
+
+To update the tree, run
+<pre>
+ cd ${OE_HOME}/org.openembedded.dev
+ git pull
+</pre>
+
+For further information on Git, see [http://git-scm.com The Git Homepage].
+
+Also, please explore the directory structure of the OpenEmbedded build tree and take a moment to open and read one of the each type of BitBake file. This helps one to become familiar with recipe syntax and the inheritance system. Of particular note, please read the file 'local.conf.sample'. 
+<pre>
+ org.openembedded.dev
+ |-- classes
+ |   |-- rootfs_ipk.bbclass
+ |   `-- xorg-module.bbclass
+ |-- conf
+ |   `-- local.conf.sample
+ |   |-- distro
+ |   |   `-- angstrom-2008.1.conf
+ |   |-- machine
+ |   |   |-- om-gta01.conf
+ |   |   `-- om-gta02.conf
+ `-- packages
+     |-- tangogps
+     |   |-- tangogps.inc
+     |   `-- tangogps_0.9.3.bb
+     `-- images
+         |-- console-image.bb
+         |-- fso-console-image.bb
+         |-- fso-image.bb
+         |-- openmoko-image.bb
+         |-- opie-image.bb
+         `-- x11-image.bb
+</pre>
+=== Build Configuration ===
+
+If you explored local.conf.example, then you would be aware that there are some very important variables to be set like MACHINE, DISTRO, and BBFILES, among many others. This is done in a configuration file (local.conf) inside the build directory. 
+
+'''Note:''' Using BitBake and OE for cross-compilation require that each target-distro combination is built in a separate directory, so that no version collisions occur. Concurrent builds may safely share the same DL_DIR though. This would suggest that a safe name for build directories is of the form ${OE_HOME}/build-${MACHINE}-${DISTRO}. Of course, if you don't plan on building for more than one machine-distro combination, then the naming of this directory is arbitrary. For the purpose of this example, we will use the convention ${OE_HOME}/build-${MACHINE} . 
+
+Now, create the 'local.conf' configuration file. Notice that the CACHE and TMPDIR variables are neatly kept within the build directory while the DL_DIR variable is outside of the build directory, so that concurrent builds may reuse the same source packages. 
+<pre>
+ OE_HOME ?= "${HOME}/oe"
+
+ MACHINE = "om-gta02"
+ DISTRO = "angstrom-2008.1"
+
+ DL_DIR = "${OE_HOME}/downloads"
+
+ BBFILES := "${OE_HOME}/org.openembedded.dev/packages/*/*.bb"
+
+ BBMASK = ""
+
+ TMPDIR = "${OE_HOME}/build-${MACHINE}/tmp"
+ CACHE = "${TMPDIR}/cache"
+
+ IMAGE_FSTYPES = "jffs2 tar.gz"
+
+ ENABLE_BINARY_LOCALE_GENERATION = "0"
+</pre>
+
+The BBFILES variable is also of prime importance! It tells bitbake where to locate all available recipes for a build. The OpenEmbedded build environment is almost completely ready to go, with just one more minor step left. 
+
+=== Build Environment ===
+
+For quick and easy initialization of the OpenEmbedded build environment, it is often suggested that the developer create a 'setup-env' script to source from the command line. This script can be called to initialize the most important of environment variables. Below is a very basic example of a setup-env script. 
+
+setup-env for Bash users:
+<pre>
+ [[ -z ${OE_HOME} ]] && export OE_HOME=${HOME}/oe
+ [[ -z ${MACHINE} ]] && export MACHINE=om-gta02
+ export BBPATH=${OE_HOME}/build-${MACHINE}:${OE_HOME}/org.openembedded.dev
+</pre>
+setup-env for Tcsh users:
+<pre>
+ [[ -z ${OE_HOME} ]] && setenv OE_HOME ${HOME}/oe
+ [[ -z ${MACHINE} ]] && setenv MACHINE om-gta02
+ setenv BBPATH ${OE_HOME}/build-${MACHINE}:${OE_HOME}/org.openembedded.dev
+</pre>
+To invoke the setup-env script in bash, run 'source setup-env'. In tcsh, run '. setup-env'.
+
+=== Testing the OE Build Environment ===
+
+That's it! Now you should be prepared to bake your first BitBake recipe. 
+
+ bitbake helloworld
+
+=== Building an Image ===
+
+There are several full filesystem images which can be built directly with OpenEmbedded using a single command. These include openmoko-image, fso-image, and so on. The image definitions can be found under ${OE_HOME}/org.openembedded.dev/packages/images
+
+A good place to start is with 
+
+ bitbake fso-image
+
+That concludes this introduction to BitBake and OpenEmbedded. Good luck!
+
+=== Other References ===
+
+Please feel free to refer to other online sources of information for [http://bitbake.berlios.de BitBake], [http://www.openembedded.org OpenEmbedded], and the [http://www.angstrom-distribution.org Angstrom Distribution] to name a few.
+
+== Broken Builds and Bug Reporting ==
+
+Using the org.openembedded.dev branch can often result in broken builds. For that reason, it is usually a good idea to limit synchronizing with the repository only after successfully building an image. Some may even want to archive the tree and build directory after an image is built.
+
+Now in the case that an image does not successfully build, it is not always necessarily a bug or a new bug. The problem might have to do with some conflicting software on the workstation, and it could be a bug that is already know and being fixed.
+
+Below are a few useful steps to follow when a build does not successfully complete:
+
+* Identify the package that failed to build and read the bitbake log, as well as config.log if it exists
+** Find a line near the bottom of your output that matches "ERROR: ... failed" or "NOTE: ... failed". The name of the package should be contained in the '...'
+** Find the log file. There should be a line near the bottom of your output that matches "ERROR: see log in ...", where '...' contains the log file name. These are usually of the form log.do_compile.12345 or log.do_configure.12345, etc. 
+* Try to identify the root cause of the error
+** In many cases, if one examines log.do_configure, only the error is reported, but not the cause of the error
+** Most packages that build with autotools will also have a config.log file that contains the exact cause of the error
+* If you can fix the error, and the error is local to your workstation, and not really a bug, then fix the error yourself.
+* Otherwise, check the [http://bugs.openembedded.net OpenEmbedded Bugzilla] to see if the error is known.
+* If a solution is already available, then try it out. If you can fix the error, then do so. If your solution is correct, please post all relevent patches to the [http://bugs.openembedded.net OpenEmbedded Bugzilla]
+
+=== Where to Report Bugs ===
+
+Authentic bugs should be reported to the [http://bugs.openembedded.net OpenEmbedded Bugzilla]
+
+== Tips & Tricks ==
+
+=== Screen is Your Friend ===
+
+If you happen to be building all of your packages remotely on a server, using an ssh session, the session might occasionally be interrupted and the connection could be terminated. If in the process of building an image with bitbake, this means that the build process will terminate as well. 
+
+In order to ensure that a build continues in the presence of communication failures, it is advisable to use the [http://www.gnu.org/software/screen GNU Screen] utility. Screen is also very useful when performing several concurrent OpenEmbedded builds for different machine-distro combinations.
+
+Screen installation varies with your OS and distribution. 
+
+=== BitBake Overlays ===
+
+Bitbake overlays are useful for OpenEmbedded developers to eliminate bugs or package software without disturbiing the OpenEmbedded tree itself. Overlays are very similar in structure to the OpenEmbedded tree, but are usually only sparsely populated. Non-sparsely poplulated overlays are actually more closely relatedd to separate development branches. Good convention would suggest to always name the overlay appropriately. 
+
+Below is an example of two overlays, three build directories, a setup-env script, and a local.conf where the developer has multiple build targets as well as multiple BitBake overlays.
+<pre>
+ oe
+ |-- build-beagleboard
+ |   |-- conf
+ |   |   `-- local.conf
+ |   `-- tmp
+ |-- build-om-gta02
+ |   |-- conf
+ |   |   `-- local.conf
+ |   `-- tmp
+ |-- build-ts72xx
+ |   |-- conf
+ |   |   `-- local.conf
+ |   `-- tmp
+ |-- com.somecompany.dev
+ |   |-- conf
+ |   |   `-- machine
+ |   `-- packages
+ |       |-- images
+ |       |   `-- console-image.bb
+ |       `-- rxtx
+ |           |-- files
+ |           |-- rxtx-fixes-from-debian.patch
+ |           `-- rxtx_2.1-7r2.bb
+ |-- org.openembedded.dev
+ |   |-- conf
+ |   |   `-- machine
+ |   `-- packages
+ |       `-- images
+ |-- org.openmoko.dev
+ |   |-- conf
+ |   |   `-- machine
+ |   `-- packages
+ |       `-- tangogps
+ |           |-- tangogps.inc
+ |           `-- tangogps_0.9.3.bb
+ `-- setup-env
+</pre>
+<pre>
+ [[ -z ${OE_HOME} ]] && export OE_HOME=${HOME}/oe
+ [[ -z ${MACHINE} ]] && export MACHINE=om-gta02
+
+ unset BBPATH
+
+ case "${MACHINE}" in
+        "beagleboard" | "ts72xx" ) 
+                BBPATH="${OE_HOME}/com.somecompany.dev"
+        ;;
+        "om-gta02")
+                BBPATH="${OE_HOME}/org.openmoko.dev"
+        ;;
+        *)
+                echo -e "error: unsupported machine"
+                 exit -1
+         ;;
+ esac
+
+ export BBPATH=${BBPATH}:${OE_HOME}/build-${MACHINE}:${OE_HOME}/org.openembedded.dev
+</pre>
+
+Note that the overlay-specific BBPATH entry ''precedes'' the default BBPATH entries.
+
+<pre>
+ ...
+ BBFILES := "${OE_HOME}/org.openembedded.dev/packages/*/*.bb"
+ BBFILES += " ${OE_HOME}/org.openmoko.dev/packages/*/*.bb"
+
+ BBFILE_COLLECTIONS = "upstream local"
+ BBFILE_PATTERN_upstream = "${OE_HOME}/org.openembedded.dev"
+ BBFILE_PRIORITY_upstream = "0"
+ BBFILE_PATTERN_local = "${OE_HOME}/org.openmoko.dev"
+ BBFILE_PRIORITY_local = "1"
+ ...
+</pre>
+
+In order for the overlay to be detected by BitBake, the above variables need to be defined. It is possible to have more than one overlay and each one should be given a different priority. 
+
+=== Useful BitBake Commands ===
+
+<pre>
+ # list all of the tasks defined for a given package_name
+ bitbake -c listtasks <package_name>
+
+ # clean the work directory for a specific package
+ bitbake -c clean <package_name>
+
+ # build a specific recipe
+ bitbake -b <path/to/some/recipe.bb>
+</pre>
 
 [[Category:Application Developer]]
 [[Category:System Developers]]
