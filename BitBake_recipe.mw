@@ -45,13 +45,17 @@ This might be used in order to specify which folder our package extracts to. Nor
 === Standard tasks in a recipe ===
 1. do_fetch : Fetch the source files from the URI given in the SRC_URI. 
 
-2. do_configure : for doing the configuration
+2. do_unpack : Unpack the source files into WORKDIR.
 
-3. do_compile : To compile the program(s) using a compiler specified by CC variable.
+3. do_patch : Patch the source code, if necessary, before configuration. 
 
-4. do_build : To build the package including its build-time dependencies. 
+4. do_configure : for doing the configuration
 
-5. do_install : To install the package on the filesystem i.e copy the binaries where required. 
+5. do_compile : To compile the program(s) using a compiler specified by CC variable.
+
+6. do_build : To build the package including its build-time dependencies. 
+
+7. do_install : To install the package on the filesystem i.e copy the binaries where required. 
 
 You can define your own tasks (as many as you like) which can also be python functions. 
 eg. 
@@ -61,6 +65,8 @@ eg.
     }
 
 You can list all tasks for a given recipe with 'bitbake -c listtasks <package_name>'.
+
+For packages that are built with autotools (automake, autoconf, etc), it is often only necessary to inherit autotools.bbclass, define SRC_URI, and sometimes define do_patch in the .bb file. All BitBake classes inherit from base.bbclass, where the default implementations for most tasks are defined.
 
 === A Basic Bitbake Recipe [http://wiki.openmoko.org/wiki/Application_Development_Crash_Course#Filling_the_Files] ===
 
