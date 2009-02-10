@@ -1,3 +1,241 @@
 {{Languages|Flashing_the_Neo_FreeRunner}}
 
 OpenMoko会不断发布最新的根文件系统（root file system)、内核（[[kernel]]）和[[Bootloader(called [http://www.denx.de/wiki/U-Boot/WebHome U-Boot]) 的二进制映像（binary image）文件。这些文件可以被烧写到Neo FreeRunner的[[NAND_Flash|Flash memory (NAND)]] 中，从而达到更新系统套件的目的。你可以通过一根USB线，连接FreeRunner到电脑上，通过OpenMoko提供的烧写工具来更新系统。
+
+== 3类软件组件and 2种存储器 ==
+
+FreeRunner的软件系统由3部分组成： 
+
+* '''bootloader''': 这是FreeRunner启动或者重启时执行的第一段小程序，它再启动其他软件系统。 
+* '''kernel''': FreeRunner采用的Linux内核。 
+* '''root filesystem''': 包括所有的应用程序和命令文件。 
+FreeRunner的这三类软件组件都打包成二进制映像文件进行发布。 
+
+FreeRunner有两种程序存储器：NOR flash与NAND flash。在PC机上，如果你想重装操作系统，你一般会使用一个光盘来启动系统，然后将操作系统从光盘拷贝安装到硬盘上。FreeRunner并没有光驱，但系统文件必须安装进内部的存储器（NAND flash）当中去。当然，一种可能的方式是从microSD卡来启动。 
+
+NOR flash是一个很小的程序存储器，里面存放着一段启动代码。当你需要重新安装系统，也就是需要重写NAND flash的时候，你可以从NOR flash启动来进行操作。一般来说，NOR flash是很少需要更新；如果需要，你可以从这里找到更新方法：[[Flashing NOR]].。 
+
+NAND flash 就像PC机中的硬盘，它被分为三个分区，分别存放bootloader, kernel, 和rootfs。这三个分区分别可以独立的进行擦写更新。譬如，如果你想更新一个修改过的kernel，你只需要按照更新kernel的步骤进行操作就可以了。 
+
+'''注意：一般很少更新根文件系统rootfs及bootloader，因为有时只需要更新内核(kernel)文件就可以解决一些存在的问题，所以在更新之前请慎重考虑更新的必要性。 '''
+
+== 另一种方式: 将系统安装运行在 microSD 卡上 ==
+你可以将软件系统安装在microSD卡上，这样你可以从microSD卡启动并运行系统[[Booting from SD | boot from microSD card]]。这样可以同时保留在NAND flash上的系统，从而达到在FreeRunner上安装双系统的目的。（譬如，假如你的FreeRunner当前已经安装了2007.2的OM系统，你想在不擦除当前系统的前提下测试2008.08的OM系统，这种在microSD卡上的方式就是一个很好的选择了）
+
+== Software you need == 
+
+=== #1 Tools for flashing: DFU-util and NeoTool ===
+
+''Command-line''. DFU-util, the tool to flash the FreeRunner has to be installed on you laptop or desktop machine. It is available for Linux, MacOS X, and Windows (see links below). DFU-util allows you to connect to the FreeRunner through the USB cable and control its bootloader. That connection uses a special protocol which addresses the bootloader's interface, and differs from USB networking. For more details, see the separate [[dfu-util]] page.
+
+''GUI''. Instead of the command-line-based DFU-util, you can use NeoTool, a graphical tool for flashing the FreeRunner: see the [[NeoTool]] page.
+
+'''Linux:''' http://downloads.openmoko.org/releases/Om2008.9/dfu-util
+
+Make sure it is executable by setting the permissions with this command: chmod a+x dfu-util
+
+'''Linux 64-bit:''' You need 64-bit version of dfu-util, which usually can be found in your distribution repository.
+If your destribution does not provide 64-bit dfu-util, or it consistently fails with a "-62" error, you have two ways to go:
+# Seek for 32-bit machine and do flashing form it.
+# Use 32-bit chroot (on amd64 debian). Worked for me --[[User:Bubak|Bubak]] 16:54, 4 September 2008 (UTC).
+# Just try the 32-bit dfu-util. Worked fine on my x86_64 Fedora 10 --[[User:Pcfe|pcfe]] 2009-01-16.
+#* I can confirm this (Gentoo multilib x86_64) --[[User:Unlotto|Unlotto]] 14:15, 4 February 2009 (UTC)
+
+'''MacOS X:''' [[MacOS_X#Graphical_Flashing_with_Openmoko_Flasher]]
+
+'''Windows:''' http://projects.openmoko.org/frs/?group_id=166&release_id=162
+
+See additional driver installation instructions for Windows at [[Dfu-util-windows]]
+
+'''Virtual machines''' While there has been some limited success reported using dfu-util from within a Virtual Machine (such as VMware), in general it is not possible to use dfu-util in this fashion.  You must use dfu-util on an operating system that has direct access to the physical USB device hardware.
+
+=== #2 Image files to flash into FreeRunner memory ===
+
+There are separate image files for all 3 software components and depending on what you want to install, you pick the respective image file. In most cases you will need to install a Kernel (uImage) and a Root Filesystem (rootfs). In rare cases, when there is a bug you need fixed, you will also install a new bootloader.
+
+Please read [[Distributions]] for choosing the distribution which fits your needs, and then see [[Download]] for downloading.
+
+== Boot the FreeRunner from NOR Flash ==
+
+[[Image:menu15.jpg|thumb|Booting from NOR Flash]]
+
+# Read the other sections of this page first, because you will have 30 seconds to enter the flashing commands, come back here when ready.
+# Do not connect the USB cable from the PC to your Neo FreeRunner yet (disconnect it).
+# Boot your Neo FreeRunner into the NOR uBoot menu for flashing.
+## Press and hold AUX button
+## Press the Power button until the boot menu comes up
+## This menu is labelled '''*** BOOT MENU (NOR) ***'''
+## See also [[Booting the Neo FreeRunner]]
+# Stay in NOR uBoot menu, do not select or enter any item in menu. Now you will be able to flash, make backups of your FreeRunner or query the FreeRunner with dfu-util.
+# The FreeRunner only stays at the NOR boot prompt for about 30 seconds and then shuts off unless you do something.
+# Connect your Neo to the GNU/Linux or Windows host via a USB cable.
+# Now you can enter the dfu-util commands on your PC as described below.
+# If the Neo FreeRunner turns off before you press start flashing ('''screen goes black'''), go back to step 2. If you start flashing in time, the phone will not turn off meanwhile.
+
+<!-- The following, upto dfu-util -l is taken from the thread "Re: FreeRunner (GTK2007.2) has suddenly become unbootable" on the Support list. -->
+
+Note that the dfu-util connection does '''not''' use Ethernet over USB - that is, you should not attempt to set up a usb0 network interface on your GNU/Linux host desktop (on Windows, you need a DFU class driver, or you can use the LibUSB-Win32 driver described on the [[Dfu-util-windows]] page). The dfu-util utility sets up its own connection to the FreeRunner. In fact, you will not be able to make an Ethernet-over-USB connection to the FreeRunner when it is at the uBoot menu; this type of connection is only available when the FreeRunner has booted fully.
+
+After connecting the FreeRunner to your host via USB cable, you can test whether dfu-util "sees" the FreeRunner by executing:
+
+<pre>dfu-util -l</pre>
+
+If you get error messages from the dfu-util command then try again. Often it works on the second try.
+
+dfu-util uses the DeviceFirmwareUpgrade protocol, and may list more than one device. If so, try unplugging the other device (e.g. a USB mouse) or using the -d switch to tell dfu-util which device it should talk to, as described at the relevant bug report [http://docs.openmoko.org/trac/ticket/2039].
+
+Also, please remember to execute the dfu-util command with sufficient privileges (ie. root) -- you will need complete control over the usb bus.
+
+== Do a backup ==
+
+If you have a working image that you're happy with but want to try something different, you should probably do a [[Backup]].
+
+== Using dfu-util ==
+
+dfu-util can be used to read flash memory, write memory, and get information from the device.
+
+This is the general command format to write an image file to a (predefined) "partition name" (referred to as ''altsetting'' in dfu-util help/manual) :
+
+dfu-util -a ''<altsetting>'' -R -D ''<file_name>''
+
+where:<br>
+-a ''altsetting'' : Specify the altsetting of the DFU interface by name or by number<br>
+-R  : Issue USB Reset signalling once we're finished<br>
+-D  ''file_name'' : Write firmware from ''file_name'' into device
+
+On Linux, you run dfu-util from a command shell prompt. If you have not put it somewhere on your command path you probably need to prefix it with a "./" like this '''./dfu-util'''.
+On some systems you need to be root before this will work and on Ubuntu you must preface the command with "sudo" or you will get the following error: "Cannot claim interface: could not claim interface 2: Operation not permitted"
+
+On Windows, you need to open a command window and run from a command line. Use Start-Run Program and type "cmd" to open a Window.
+
+More detailed manual for dfu-util is available here : [[Dfu-util]]
+
+GUI frontend for dfu-util (and more): [[NeoTool]]
+
+== Flashing the Kernel ==
+
+ Note: The phone needs to be in the U-boot bootup menu for this to work.
+       Get there by holding down the aux button while powering up the device.
+
+The command format is 
+
+ dfu-util -a kernel -R -D ''/path/to/uImage''
+
+When flashing succeeds the following will be shown:
+
+ status(0) = No error condition is present
+ Done!
+
+Flashing may fail with an error -110. This indicates that the kernel is too big for the default kernel partition. uboot can be used to change the size of the default partitions on the device. It may also mean that you are trying to put the wrong thing in the kernel space.
+
+== Flashing the Root Filesystem ==
+
+The root filesystem has to be an image in jffs2 format. If the file you downloaded is zipped or compressed (has a .gz, bz2, .zip, tar, tar.gz or .tgz extension) you have to uncompress it first.
+
+The command format is
+
+<pre>
+dfu-util -a rootfs -R -D rootfs_filename.jffs2
+</pre>
+| U-Boot
+where ''rootfs_filename.jffs2'' is the name of the file containing the root file system.
+
+The flashing process can take up to 15 minutes for a ~70MB image. It is also wise to make sure that your Neo has enough battery charge prior to flashing.
+
+When flashing succeeds the following will be shown:
+
+<pre>
+status(0) = No error condition is present
+Done!
+</pre>
+
+== Flashing the boot loader to the NAND==
+
+{{Note|In most cases you don't need to flash your bootloader. Flash it only if you want to update for a specific feature or due to a specific problem.}}
+
+The boot loader (U-boot) file should have a .bin extension. As with the root filesystem, if the file you downloaded is zipped or compressed (has a .gz or .zip extension) you have to uncompress it first.
+
+The command format is 
+
+ dfu-util -a u-boot -R -D ''uboot.bin''
+
+where ''uboot.bin'' is the name of the boot loader binary image file.
+
+''Reminder'': You should have [[Flashing_the_Neo_FreeRunner#Boot_the_FreeRunner_from_NOR_Flash|boot from NOR first]], in order to flash the boot-loader in NAND. After flashing succesfully, make sure you reboot from NAND's newly flashed boot loader, to benefit from the updates.
+
+=== Optional: Verifying boot-loader version ===
+
+<!-- The following should probably be moved to [[Bootloader_versions]], IMHO -->
+
+<!-- Taken from posts by Mikael Berthe <mikael.berthe@lilotux.net> and Torfinn Ingolfsen <tingox@gmail.com> to Support list, subject: Re: Upgrading u-boot needed ? -->
+(Optional) After an upgrade, you may wish to check that the u-boot version matches the one you have just flashed. You can use 'grep  Bootloader /dev/mtdblock1' from a shell on the FreeRunner (and possibly the 1973 as well) to get the '''NAND''' u-boot version, like this:
+   root@om-gta02:~# grep Bootloader /dev/mtdblock1
+   Neo1973 Bootloader U-Boot 1.3.2+gitr18+64eb10cab8055084ae25ea4e73b66dd03cc1a0cb
+
+You can grep for the same string in /dev/mtdblock0 to retrieve the '''NOR''' u-boot version:
+   root@om-gta02:~# grep  Bootloader /dev/mtdblock0
+   Neo1973 Bootloader U-Boot 1.3.2-moko12
+
+<!-- ENDS ... subject: Re: Upgrading u-boot needed ? -->
+
+== Reboot the FreeRunner from NAND ==
+
+You should now be able to boot into the new images.
+
+Pay attention '''to booting from the NAND flash this time''', in particular if you upgraded the boot-loader (in short: 1. press and hold ''power button'' down, and then 2. press ''aux button'')
+
+The boot menu should be labelled '''*** BOOT MENU (NAND) ***''' this time (see [[Booting#Log_into_U-Boot_in_the_NAND_Flash|booting from NAND]] for more detailed instructions).
+
+== A command line script to simplify dfu-util ==
+
+DFUScript developed to assist users who have multiple devices in using dfu-util via the command line. Information on where to download and use DFUScript can be found on [[DFUScript]]
+
+== Alternative: using nandwrite ==
+
+This approach involves writing the '''rootfs''' into nand directly on the phone from a system already running on it, not necessarily via usb from a computer.
+
+If you have a system running from a different partition that you intend to flash (for example sd card), you can use nandwrite to do the work, which is much faster (it takes about 30s to write a 59MB jffs2 image).
+
+Make sure you have nandwrite installed (on gentoo, it's in sys-fs/mtd-utils package)
+
+Also make sure that the host system has received correct partition list, for example for my stock Neo Freerunner partition list:
+
+<pre>
+#cat /proc/mtd
+dev:    size   erasesize  name
+mtd0: 00200000 00010000 "physmap-flash.0"
+mtd1: 00040000 00020000 "u-boot"
+mtd2: 00040000 00020000 "u-boot_env"
+mtd3: 00800000 00020000 "kernel"
+mtd4: 000a0000 00020000 "splash"
+mtd5: 00040000 00020000 "factory"
+mtd6: 0f6a0000 00020000 "rootfs"
+</pre>
+
+In this case, we're looking for 'rootfs' which according to above is mtd6. If you have it somewhere else, substitute mtd6 with whatever you have in the remainder of this section.
+
+You can test your nand for bad blocks by issuing '''nandtest /dev/mtd6''' '''(this is a destructive test !)'''
+
+First, put your .jffs2 file somewhere the phone system can read it
+
+Second, write the desired image into the nand this way:
+<pre>
+flash_eraseall /dev/mtd6
+nandwrite -p /dev/mtd6 /path/to/image.jffs2
+</pre>
+
+* The -m flag can be used to tell nandwrite to mark blocks it detects bad as bad, so if nandwrite is bugged, your entire partition will be marked as bad. See http://wiki.openmoko.org/wiki/NAND_bad_blocks#Clearing_BadBlocks if this happened to you.
+
+You're all done !
+
+== Troubleshooting ==
+
+Okay, so you just reflashed. The splash screen pops up, but uBoot fail to load the kernel, and return to boot menu. WTF?
+
+* It is likely that the wrong bits went to the wrong place. Try reflashing just the kernel, double checking that you select the uImage.bin kernel file, not the u-boot.bin bootloader file.
+* Try redownloading and reflashing the kernel, checking file integrity with the MD5 hash sums.
+
+==See also==
+*[[Qi]] alternative to uboot
+
+[[Category:Flashing Openmoko| ]]
