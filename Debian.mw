@@ -590,42 +590,18 @@ Consider a swap partition [http://lists.openmoko.org/pipermail/community/2008-Se
 
 == Known Issues ==
 
-== Problem with usage install.sh ==
 
-If partition table creation passes with an error use the following patch:
+Please always inform the [http://wiki.debian.org/Teams/DebianFSO FreeSmartphoneOrg] packaging group about issues that you spot. Explicit instructions on how to report issues are given [http://wiki.debian.org/DebianOnFreeRunner#head-c33d5a71a5654ad5592accc5e699ec6f64933582 here].
 
-<pre>
---- install.sh	2009-01-19 17:36:26.000000000 +0300
-+++ install_good.sh	2009-01-19 17:44:51.000000000 +0300
-@@ -405,9 +405,9 @@
- 
- echo " * Waiting for partitions to appear"
- SLEEP_SECONDS=3
--while ! ([ "$SINGLE_PART" = "true" ] && test -e ${SD_DEVICE}p1) ||\
--	test -e ${SD_DEVICE}p1 -a -e ${SD_DEVICE}p2; do
--	if [ "$SLEEP_SECONDS" = 15 ]; then
-+while ! (([ "$SINGLE_PART" = "true" ] && test -e ${SD_DEVICE}p1) ||\
-+	test -e ${SD_DEVICE}p1 -a -e ${SD_DEVICE}p2); do
-+	if [ "$SLEEP_SECONDS" = 30 ]; then
- 		echo "E: Partitioning has failed, partitions have not been created"
- 		exit 1
- 	fi
-@@ -598,7 +598,7 @@
- rootfs	/		auto	defaults,errors=remount-ro,noatime	0 1
- __END__
- 
--if ![ "$SINGLE_PART" = "true" ]; then
-+if [ "$SINGLE_PART" != "true" ]; then
- cat >> $INST_DIR/etc/fstab <<__END__
- /dev/mmcblk0p1	/boot	auto	defaults,noatime			0 2
- __END__
-</pre>
+The previously here reported issue on install.sh has been addressed by the Debian FSO team.
 
 '''apt-get segmentation fault''' Whenever you get a segmentation fault while using apt-get or aptitude, clean the database so it will rebuild it
   rm /var/cache/apt/*.bin
 
-[[Category:Debian]]
+However, this is obviously not a *solution*, but a mere workaround. Whoever it was who reported it, please try reproduce that behaviour and report it to the Debian bug tracking system. 
 
 '''If Zhone doesn't start''' it is most likely due to a bug in the python-evas package[http://groups.google.com/group/linux.debian.bugs.dist/browse_thread/thread/b5c47db469394e98/1b529e538774d3e0?lnk=raot] (fixed in new install). Install the alternate package:
   wget http://www.ginguppin.de/files/python-evas_0.2.1-2_armel.deb
   dpkg -i python-evas_0.2.1-2_armel.deb
+
+[[Category:Debian]]
