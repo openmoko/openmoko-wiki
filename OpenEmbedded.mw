@@ -162,8 +162,11 @@ Now in the case that an image does not successfully build, it is not always nece
 
 Below are a few useful steps to follow when a build does not successfully complete:
 
-* Identify the package that failed to build and read the bitbake log, as well as config.log if it exists
+* Identify the package that failed to build
 ** Find a line near the bottom of your output that matches "ERROR: ... failed" or "NOTE: ... failed". The name of the package should be contained in the '...'
+* If there is a similar, more stable version in ${OE_HOME}/org.openembedded.dev/packages, then try to use that instead
+** bitbake -c clean package_name && bitbake -b ${OE_HOME}/org.openembedded.dev/packages/somepackage/somepackage_0.1.bb
+* Read the BitBake log, as well as config.log if it exists
 ** Find the log file. There should be a line near the bottom of your output that matches "ERROR: see log in ...", where '...' contains the log file name. These are usually of the form log.do_compile.12345 or log.do_configure.12345, etc. 
 * Try to identify the root cause of the error
 ** In many cases, if one examines log.do_configure, only the error is reported, but not the cause of the error
