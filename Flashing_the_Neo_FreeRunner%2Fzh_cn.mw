@@ -147,34 +147,17 @@ status(0) = No error condition is present
 Done!
 </pre>
 
-== Flashing the boot loader to the NAND==
+== 烧写更新boogloader==
 
-{{Note|In most cases you don't need to flash your bootloader. Flash it only if you want to update for a specific feature or due to a specific problem.}}
+{{提示|大多数情况下，你并不需要重新烧写你的bootloader，一般在需要更新一些特定功能，或者需要解决一些bug时才有必要重新烧写你的bootloader。}}
 
-The boot loader (U-boot) file should have a .bin extension. As with the root filesystem, if the file you downloaded is zipped or compressed (has a .gz or .zip extension) you have to uncompress it first.
-
-The command format is 
+烧写bootloader的命令格式为:
 
  dfu-util -a u-boot -R -D ''uboot.bin''
 
-where ''uboot.bin'' is the name of the boot loader binary image file.
+''uboot.bin'' 是bootloader映像文件的文件名.
 
-''Reminder'': You should have [[Flashing_the_Neo_FreeRunner#Boot_the_FreeRunner_from_NOR_Flash|boot from NOR first]], in order to flash the boot-loader in NAND. After flashing succesfully, make sure you reboot from NAND's newly flashed boot loader, to benefit from the updates.
-
-=== Optional: Verifying boot-loader version ===
-
-<!-- The following should probably be moved to [[Bootloader_versions]], IMHO -->
-
-<!-- Taken from posts by Mikael Berthe <mikael.berthe@lilotux.net> and Torfinn Ingolfsen <tingox@gmail.com> to Support list, subject: Re: Upgrading u-boot needed ? -->
-(Optional) After an upgrade, you may wish to check that the u-boot version matches the one you have just flashed. You can use 'grep  Bootloader /dev/mtdblock1' from a shell on the FreeRunner (and possibly the 1973 as well) to get the '''NAND''' u-boot version, like this:
-   root@om-gta02:~# grep Bootloader /dev/mtdblock1
-   Neo1973 Bootloader U-Boot 1.3.2+gitr18+64eb10cab8055084ae25ea4e73b66dd03cc1a0cb
-
-You can grep for the same string in /dev/mtdblock0 to retrieve the '''NOR''' u-boot version:
-   root@om-gta02:~# grep  Bootloader /dev/mtdblock0
-   Neo1973 Bootloader U-Boot 1.3.2-moko12
-
-<!-- ENDS ... subject: Re: Upgrading u-boot needed ? -->
+''提示'': 要更新bootloader，你需要从NOR flash启动[[Flashing_the_Neo_FreeRunner#Boot_the_FreeRunner_from_NOR_Flash|boot from NOR first]]. 更新完成后，再从NAND flash启动。
 
 == 从NAND存储器重启FreeRunner ==
 
