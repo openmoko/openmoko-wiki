@@ -9,7 +9,9 @@ tangoGPS is a map application which can utilize Neo's built-in GPS to show your 
 
 Website: http://www.tangogps.org
 
-== Running tangoGPS on [[Om 2008.8]] ==
+
+== Running tangoGPS ==
+=== [[Om 2008.8]] ===
 
 From the freerunner connected to the internet:
 <pre>
@@ -30,9 +32,9 @@ echo "GPS_DEV=\"/dev/ttySAC1\"" > /etc/default/gpsd
 </pre>
 Now you must power up the GPS-chip by opening the "Settings" application and setting the GPS entry to "on". Now you can run tangoGPS and wait until it get's a GPS fix. This can take up to a few minutes.
 
-== Running tangoGPS on [[debian]] ==
+=== [[Debian]] ===
 
-tangogps is a very nice GPS mapping application.  The latest version is available in [[Debian]].
+tangoGPS is a very nice GPS mapping application.  The latest version is available in [[Debian]].
 
 It depends on gpsd which conflicts with frameworkd in fso-frameworkd, but there is a package available that provides
 the gpsd interface to clients while using the services of the FSO frameworkd daemon, fso-gpsd. To install tangogps run
@@ -54,7 +56,7 @@ Start > other > GPS & Map
 ** the framework could have an option to read data from gpsd.
 ** ogpsd/gypsy could be extended to be backwards compatible with the majority of gps applications.
 
-== Running tangoGPS on FSO Milestone 3 ([[OpenmokoFramework]]) ==
+=== FSO Milestone 3 ([[OpenmokoFramework]]) ===
 
 There are two various GPS interfaces -- (1) one provided with default gpsd and (2) the other provided by ogpsd (part of the frameworkd). tangoGPS requires the ad 1 and it obtains information from gps from the dbus interface provided by gpsd.
 
@@ -73,7 +75,9 @@ Note 1: handy application for testing the gps (and gps signal strength) is <code
 
 Note 2: You can automate the process -- (1) remove the startup script for gpsd (<code>update-rc.d -f gpsd remove</code>) and (2) create a simple startup scipt for fso-gpsd (you can use current script for gpsd as a skeleton)
 
-== Downloading Maps for off-line use ==
+
+== Downloading Maps ==
+=== pre-load for offline use ===
 
 tangoGPS can bunch-download the map images so you don't need an internet connection while walking around. By default tangoGPS stores downloaded maps to /tmp/. This folder is lost every time you reboot the device. But you can use the "Config" tab within tangoGPS to change the "Cache Dir" location to , for example, /osm/ . So downloaded maps will be kept in the Neos flash, also after reboot. Note that the map files can take up large amounts of space, so you may want to store them on your sd card, in /media/card/osm.
 
@@ -81,28 +85,35 @@ If you find that TangoGPS does not remember configuration changes that you make 
 
 Once you have set the location to a non-volatile path, you can connect your Neo to the internet by USB or WiFi at home and start downloading the maps of your area. Tap the map screen and select "map download". Now on-the-road  tangoGPS will be able to show you maps in different zoom levels even though you are not connected to the internet.
 
-== Downloading Maps via GPRS ==
+=== Downloading Maps via GPRS ===
 I think tangoGPS may have started working after I followed the instructions to get GPRS working with GSM multiplexing here: [[Manually_using_GPRS#Option_1:_With_GSM_multiplexing_and_with_a_GUI]]
 
 There are steps included in those instructions to improve GPS performance.  The great thing is that once you get GPRS working, you can roam with TangoGPS running and have it download maps as needed over the GPRS connection!
 
-== Using tangoGPS to create tracks for OpenStreetMap.org ==
 
+== Using tangoGPS for OpenStreetMap.org ==
+=== creating tracks ===
 tangoGPS works fine to create track for Openstreetmap. However, it records and stores a track in its native format, use [http://www.tangogps.org/downloads/convert2gpx.pl convert2gpx.pl] (see also: [http://psung.blogspot.com/2008/07/sharing-gps-tracks-from-tangogps-on.html tools])(you can also use [http://minucci.net/file/convert2gpx.py convert2gpx.py]) to convert the track to GPX (i.e to import into JOSM):
 
 perl convert2gpx.pl 20080903_111508.log > 20080903_111508.gpx
 
-=== tangoGPS logging format ===
+==== tangoGPS logging format ====
 
 <lat>,<lon>,<elevation>,<speed>,<course>,<hdop>,<datetime>
+
+=== using OpenStreetBugs ===
+[http://wiki.openstreetmap.org/wiki/TangoGPS#Using_together_with_OpenStreetBugs see OSM wiki]
+
 
 == Importing Tracks into tangoGPS ==
 
 tangoGPS does not support the import of tracks. You may help yourself by using [http://relet.net/frog/archives/68 this tool] to import GPX trackpoints as a series of POIs directly into the sqlite database which tangoGPS uses to store POIs.
 
+
 == Add POI from address ==
 
-You can use [http://wiki.openmoko.org/wiki/Gtkaddpoi gtkaddpoi] for search destination address and add as a POI
+You can use [[gtkaddpoi]] for searching the destination address and add it as a POI.
+
 
 == Using Google Maps with tangoGPS ==
 
