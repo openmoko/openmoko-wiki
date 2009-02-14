@@ -1,0 +1,31 @@
+{{Note|Tcsh users should use 'setenv VAR val' instead of 'export VAR=val', and '. file' instead of 'source file'.}}
+
+After downloading an [[OpenEmbedded Torrent]], there are two variables that need to be exported in the shell environment. 
+
+<pre>
+ export MACHINE=om-gta02
+ export OE_HOME=${HOME}/oe
+</pre>
+
+The following three variables are set here for the purpose of generality. They should be included in the name of your torrent file. 
+
+ DISTRO=angstrom-2008.1
+ ARCH=x86_64-linux
+ TIMESTAMP=20090214
+ TARBALL_LOC=${HOME}
+
+Please follow the following instructions for preparing the pre-compiled OpenEmbedded build environment.
+
+<pre>
+ mkdir -p ${OE_HOME}
+ tar xpjf ${TARBALL_LOC}/openmoko-${MACHINE}-${DISTRO}-${ARCH}-${TIMESTAMP}.tar.bz2 -C ${OE_HOME}
+ cd ${OE_HOME}
+ echo ${OE_HOME}/build-${MACHINE}/tmp > ${OE_HOME}/build-${MACHINE}/tmp
+ source setup-env
+</pre>
+
+The next step is to rebuild non-portable packages required for native and cross compilation. All of such packages are pulled in via dependency, when building the 'console-image' recipe. 
+
+ bitbake console-image
+
+That's it! You are now ready to do system development or application development to your heart's content!
