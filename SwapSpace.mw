@@ -1,89 +1,9 @@
-WARNING: THIS MIGHT KILL YOUR SD CARD, since there might be alot of read/writes on the same spot.
 The Freerunner has only 128mb ram, when this is used up applications get killed. 
 
-Please note that the above warning do not apply to [[microSD]] (including microSDHC) card with wear-levelling algorithms/microcontrollers. (See [[#References]])
+To help this you can add a bit of swap space on the microsd card:
 
-Please note that you can change the ''swappiness setting'' (low value, default 60) so the swap partition or swap file will be used as little as possible. (See [[#References]])
+ dd if=/dev/zero of=/media/card/swapfile.img bs=1024k count=512
+ mkswap /media/nickcard/swapfile.img
+ swapon /media/nickcard/swapfile.img
 
-=Make swap when you are connected to your openmoko with ssh=
-
-{{Note|swap files cannot be created on compressed file systems like jffs2. SHR uses jffs2: I created a swap file on /media/card/swapfile}}
-
-64M byte of swap just as an example
- dd if=/dev/zero of=/swapfile bs=1024 count=65536
-Next time you boot there will be swap
- echo "/swapfile               swap                    swap    defaults        0 0">> /etc/fstab 
-Make swap
- mkswap /swapfile
-Make the swap file work now:
- swapon /swapfile
-
-=Make swap when microSD card is in a card reader=
-The uSD card is booted on /boot. To use this, we need to make sure that the microsd card is booted, and the Swap can be turned on.
-
-Create the swapfile on the uSD card.
-  # dd if=/dev/zero of=/boot/swapfile bs=1024k count=128
-  # mkswap /boot/swapfile
-
-Now, we can put in an init script for [[Fyp]] which does this for us everytime we boot.
-
-  # touch /etc/init.d/extswap.sh
-  # chmod +x /etc/init.d/extswap.sh
-  # cat > /etc/init.d/extswap.sh
-  #! /bin/sh
-  ### BEGIN INIT INFO
-  # Provides:          extswap
-  # Required-Start:    mountall
-  # Required-Stop: 
-  # Default-Start:     S
-  # Default-Stop:
-  # Short-Description: Uses Additional Swap If Available. works on SHR distro
-  # Description:
-  ### END INIT INFO
-  
-  PATH=/sbin:/bin
-  
-  do_start() {
-          modprobe loop
-          echo 10 > /proc/sys/vm/swappiness
-          if [ -e /boot/swapfile ] ; then
-                 for loopdev in `ls /dev/loop* 2>/dev/null` ; do
-  		losetup $loopdev /boot/swapfile && swapon $loopdev && echo $loopdev > /var/extswapfile && break
-                 done
-          fi
-  }
-  
-  do_stop() {
-        	loopdev=`cat /var/extswapfile 2>/dev/null`
-          swapoff $loopdev 2>/dev/null && rm -f /var/extswapfile && losetup -d $loopdev
-  }
-  
-  case "$1" in
-    start|"")
-  	do_start
-  	;;
-    restart|reload|force-reload)
-  	do_stop
-          do_start
-  	;;
-    stop)
-  	do_stop
-  	;;
-    *)
-  	echo "Usage: extswap.sh [start|stop|restart]" >&2
-  	exit 3
-  	;;
-  esac
-  # update-rc.d extswap.sh defaults
-
-==References==
-*[http://www.notebookreview.com/default.asp?newsID=4258 2/17/2008, notebookreview.com: SDHC Cards vs Hard Drive vs SSD] Quote: "...That sounds like an absolutely manditory thing to have in flash storage ... and luckily "high-performance" SDHC cards such as the 16GB A-DATA SDHC card and many other class 6 cards from other manufacturers incorportate wear-leveling [Please check before you buy!]..."
-*[[MicroSD]](HC) cards are a sort of a SSD: [http://robert.penz.name/137/no-swap-partition-journaling-filesystem-on-a-ssd/ December 7, 2008, robert.penz.name:  No SWAP Partition, Journaling Filesystems, … on a SSD?] Quote: "...They assume perfect wear leveling...We stay also with the 2 million cycles and assume a 16GB SSD *With 50 MByte/sec we get 20 years! *With 2 MByte/sec we get 519 years! *And even if we reduce the write cycles to 100.000 and write with 2 MByte/sec all the time we’re at 26 years!!...1.  Never choose to use a journaling file system on the SSD partitions: Bullshit, you’re just risking data security. Stay with ext3...7. One more thing to consider is that flash-devices handle their space in blocks. The blocksize typically varies between 16KB and 512 KB. Therefore writing one byte may cause erase and rewrite of up to 512KB..."
-*[http://fosswire.com/post/2009/2/sysctl-swappiness/ fosswire.com: Speed up your system by avoiding the swap file] Quote: "...the Linux kernel provides a tweakable setting that controls how often the swap file is used, called swappiness. A swappiness setting of zero means that the disk will be avoided unless absolutely necessary (you run out of memory), while a swappiness setting of 100 means that programs will be swapped to disk almost instantly..."
-
-==Links==
-*http://www.google.dk/search?q=linux+swap+partition+vs+file+speed
-*http://shr-project.org/trac/wiki/swap
-
-[[Category:MicroSD]]
-[[Category:Application Developer]]
+Taken from http://lists.openmoko.org/nabble.html#nabble-td2171203
