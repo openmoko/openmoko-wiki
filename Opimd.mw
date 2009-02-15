@@ -1,47 +1,6 @@
-Opimd is a PIM suite for [[FSO]]. It can be used as a backend to PIM tools with GUI to have unlimited storage space for contact details, SMS's, calendar items and so on. It will also allow all apps using opimd to have access to the same information.
-
-==Current state==
-'''Contacts''' domain is almost fully implemented and checked to work. Available backends: SIM, CSV and SQLite.
-
-'''Messages''' domain is almost fully implemented and checked to work, even with CSM and delivery reports support. At the moment only missing functionality is adding, editing and deleting messages from SIM backend. Available backends: SIM and SQLite.
-
-'''Calls''' domain seems to be fully usable. Available backends: SQLite and ogsmd handler.
-
-There are still things to be done. For instance, handling multiple fields with the same name, sorting and normalizing phone numbers for comparing. Also some things need to be rewritten - for instance quering lot of messages is slow as hell, and doesn't even try to use SQLite speed and abilities. Some changes unvisible for user also need to be done, for instance having GenericDomain, from which other domains can inherit (to avoid duplicating lot of code).
-
-==Implementation and test scripts==
-
-* ''libphone-ui-shr'' already uses opimd completely.
-* ''pyphonelog'' already uses opimd Contacts and Calls domains as data source.
-* ''opimd-utils''. After installing it and changing default Messages backend to SQLite-Messages in opimd-config, you'll have new, opimd based interface for handling incoming messages and missed calls (opimd-notifier), messages app (opimd-messages), contacts app (opimd-contacts), command line apps for testing opimd (opimd-cli) and resolving name from phone numbers (opimd-resolve), and SHR Settings based config tool (opimd-config).
-
-'''NOTE:''' opimd-utils isn't announced yet! It can eat your cat! Don't touch it unless you are opimd developer or you are writing app with opimd support.
-
-'''NOTE 2:''' In order to have sound and vibration on incoming message when using opimd interface, you have to patch oeventsd with patch available at [http://openmoko.opendevice.org/~dos/opimd/oeventsd/]
-
-'''NOTE 3:''' For testing and development opimd recommended distribution is ''upgraded'' SHR unstable.
-
-==Fields==
-
-Opimd supports every field - you can add to contact whatever you want. SHR doesn't use opimd interface yet, but that's how I implemented some "standard" fields in my opimd-contacts (and as i'm opimd developer, I think it's safe to say they are prefered names for every opimd based app):
-
-Name, Surname, Phone, Whatever* phone, E-mail, Whatever* e-mail
-
-(*) - Replace "whatever" with phone/mail type (Work, Home etc.)
-
-Every field can have multiple values, except Name field. If you want to add two phones without type, just use array {'Name' : 'Someone', 'Phone' : ['tel:+4864324', 'tel:+3475345'], 'E-mail' : 'dos@shr.com'}
-
-Also when adding phone number that's good to prefix it with 'tel:', and 'mail:' with e-mails.
-
-== Development ==
-The main developer of opimd is dos1. You can find him at IRC on #openmoko-cdevel freenode channel.
-
-* API listing: [http://git.freesmartphone.org/?p=framework.git;a=blob_plain;f=framework/subsystems/opimd/docs/api_overview.txt;hb=master]
-* Query format description [http://lists.openmoko.org/pipermail/devel/2009-August/006192.html]
-* More information about opimd's new design/features: [[Opimd_redesign]]
-* Contact fields: [http://git.freesmartphone.org/?p=framework.git;a=blob_plain;f=framework/subsystems/opimd/docs/contact_fields.txt;hb=master] (obsoleted, needs to be rewritten)
-* Message fields: [http://git.freesmartphone.org/?p=framework.git;a=blob_plain;f=framework/subsystems/opimd/docs/message_fields.txt;hb=master] (obsoleted, needs to be rewritten)
-
-[[Category:FSO]]
-[[Category:Middleware]]
-[[Category:PIM]]
+==API Referenz
+[http://git.freesmartphone.org/?p=framework.git;a=blob_plain;f=framework/subsystems/opimd/docs/api_overview.txt;hb=master]
+==Contact Fields
+[http://git.freesmartphone.org/?p=framework.git;a=blob_plain;f=framework/subsystems/opimd/docs/contact_fields.txt;hb=master]
+==Message Fields
+[http://git.freesmartphone.org/?p=framework.git;a=blob_plain;f=framework/subsystems/opimd/docs/message_fields.txt;hb=master]
