@@ -3,6 +3,7 @@
 ''If you want to use Freerunner with OM2008.12 as a usable phone and music player and internet device and gps device then there's so many things you have to install and configure before it's usable. It took me a lot of time to get everything installed and configured (and there's still some things to do). But now there's the Kustomizer, maybe this can make life a little easier.'' [http://lists.openmoko.org/pipermail/community/2009-February/041648.html M.K@community] 
 
 
+* '''2009-02-19''' [http://risto.kurppa.fi/blog/kustomizer-02-for-200812/ version 0.3 released]. Again many fixes and new apps included, for example agps support.
 * '''2009-02-06''' [http://risto.kurppa.fi/blog/kustomizer-02-for-200812/ version 0.2 released]. GSM works again. Many fixes done - now Kustomizer can give you two different configurations, see [[Kustomizer#What_does_it_do.3F|here]]. [[Kustomizer#Changelog|Changelog]] and [http://kurppa.fi/freerunner/kustomizer_files/kustomizer_0.2_log_20090206.txt test run log]
 * '''2009-02-02''' [http://risto.kurppa.fi/blog/kustomizer-for-openmoko-200812/ First release]. In this release GSM didn't work :( 
 
@@ -40,11 +41,13 @@ The first time you run Kustomizer, it installes opkg.org repository, Illume-them
 ==== Second run ====
 The second run will install the rest: applications, GPRS, link map direcories from µSD card, mokoservices and tap/untap etc. You don't have to make the second run if you don't want.
 
+    * Navit repository added
     * Linking /home/root/Maps to /media/card/Maps
     * Loads of coolest applications & libraries
     * GPRS settings
     * Freerunner-optimized Navit config XML. Preconfigured to use the map or Europe in /media/card/Maps/navit/europe.navit.bin
     * Your custom script from /media/card/customscript will be run, if found. See [http://kurppa.fi/freerunner/customscript example]
+    * loads of various small fixes
     * Restart to apply the new settings
 
 After the second installation, about 150MB of the 256MB rootfs is used.
@@ -58,14 +61,12 @@ Applications / Internet
     * Minimo
     * Dillo-ssl
     * CenterIM
-    * Pidgin
     * Wireshark
 
 Applications / GPS
 
     * Navit
     * GPSsight
-    * Yaouh
     * GPSdcontrol
     * Orrery
     * TangoGPS
@@ -75,7 +76,7 @@ Applications / Config
     * Mokoservices
     * Modified .Tap/Untap
     * ShortOM
-    * Usbmode
+    * Battery
     * Sortdesk
 
 Applications / Games
@@ -84,7 +85,6 @@ Applications / Games
     * Duke3D
     * Numptyphysics
     * OpenMooCow
-    * ScummVM
     * Pong
     * XScat
     * Liquidwar
@@ -93,8 +93,9 @@ Applications / Games
 
 Applications / Misc
 
-    * Bunch of required libraries
+    * Tons of required libraries
     * MokoConv
+    * Openmiaocat
     * Gwaterpas
     * Neon
     * Meooem
@@ -157,7 +158,7 @@ Here are some things you can put on your µSD card that will be mounted to /medi
 Let the [http://risto.kurppa.fi/blog author] ( risto at kurppa dot fi ) know how did it go! You might not receive any help but it helps to develop the script further. If possible, please attach the log.
 
 === Good to know ===
-* You start the GPS with the gpsdcontrol icon, not from the 'Services' -tool that doesn't know how to start gpsd
+* During the second run many packages will fail with segfault/md5sum mismatch/missing dependencies/package not found. No harm done but also no app installed. It's because of bad packaging and we just have to wait for someone to fix it.
 * Services -> gprs usually says 'FAILED' when you try to start GPRS but when you restart the app, it says 'GPRS ON' and shows the traffic counter.
 * Enlightenment crashes sometimes, just click 'Recover' and you're fine again.
 * For instructions how to manage icon folders and icons of apps you install later, check http://www.opkg.org/package_95.html
@@ -172,6 +173,40 @@ If you have some ideas of improvements please let the author know (see above). I
 If someone is interested and willing to work on this please contact [http://risto.kurppa.fi/blog Risto H. Kurppa] ( risto at kurppa dot fi ). Moving to projects.openmoko is possible.
 
 === Changelog ===
+
+ # Version 0.3 - 2009-02-19
+
+ # KNOWN ISSUES
+ # Many opkg.org packages fail to install because of bad packaging. They're still in there in case the packages are fixed at some stage.
+ # /dev/dsp is sometimes reserved (by speech-dispatcher?) so other apps can't use it
+ # GSM registration takes a long time
+
+ # CHANGELIST
+ # (fix) all possible packages installed using default & opkg.org & navit repositories
+ # (new) tried to fix speech-dispatcher -bug, see http://lists.openmoko.org/nabble.html#nabble-td2175057
+ # (new) password required for the root user during installation
+ # (new) ssh-over-wlan allowed
+ # (new) navit repository added -> updates from svn 1793 to 2051+ :)
+ # (new) Backups copies of some changed files stored to /home/root/backup
+ # (new) ntp to set clock in time
+ # (new) Sortdesk icons (thanks Yoann - http://lists.openmoko.org/pipermail/community/2009-February/041915.html)
+ # (new) opentts -> navit speech guidance works more or less
+ # (new) Sample book for fbreader included: http://www.gutenberg.org/etext/24948
+ # (new) linball
+ # (new) gtick http://wiki.openmoko.org/wiki/GTick
+ # (new) guitartune http://www.opkg.org/package_115.html
+ # (new) pythm http://www.opkg.org/package_1.html
+ # (new) fourier - sounds work -> returned
+ # (new) pypennotes
+ # (new) openmiaocat
+ # (new) agps
+ # (new) pythm & a fix to make it work w. python 2.5.
+ # (removed) mofi - doesn't work :(
+ # (removed) pidgin - segfaults
+ # (removed) scummvm - useless..
+ # (removed) yaouh - doesn't co-operate with latest tangogps versions without some hacking :(
+
+
  # Version 0.2 - 2008-02-06
  # CHANGELOG IN THIS VERSION
  # (new) two run system:
