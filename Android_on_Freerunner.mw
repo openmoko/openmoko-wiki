@@ -219,7 +219,19 @@ Some notes about booting android from sdcard :
 To assist in debugging and to gain shell access to the phone with Android, you can use the instructions found here: [[Android debug bridge]]
 
 == Trouble shooting ==
-=== SD Card won't mount ===
+=== SD card won't mount ===
+
+There should be a '/sdcard' directory, for some reason this does not get created (the command is in the 'init.rc' but does not work). To create the correct dir on your FreeRunner and so enable your SD card to work, do the following:
+
+ # ifconfig usb0 192.168.0.200 netmask 255.255.255.0
+ # ./adb kill-server
+ # ADBHOST=192.168.0.202 ./adb devices
+ # ./adb shell mount -o remount,rw /dev/root /
+ # ./adb shell
+
+ # mkdir /sdcard
+ # exit
+
 = See also =
 * [[Android|Main Android page on this wiki]]
 
