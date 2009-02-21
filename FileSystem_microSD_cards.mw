@@ -1,62 +1,30 @@
-[[Category:MicroSD]]
-
-{{Languages|FileSystem microSD cards}}
-
-{|align=left
-|__TOC__
-|}
-
-= Which file system to use =
-
 I got a new SD card. Which file system is the best?
-
 Short answer: ext3. Other options: ext2, vfat. Don't use wear-aware file systems like jffs2 and ubifs.
 
-= Why ext3 =
-
 Long answer:
-In principle you can use any file system (fs) that is supported by the kernel in your Openmoko, commonly FAT, ext2, and ext3. reiserfs is currently not available in the standard OM kernel. What sets ext3 apart from FAT and ext2 is the journaling (also in reiserfs). 
+In principle you can use any file system (fs) that is supported by the kernel in your Open Moko, commonly FAT, ext2, and ext3. reiserfs is currently not available in the standard OM kernel. What sets ext3 apart from FAT and ext2 is the journaling (also in reiserfs). 
 
 The journal is an extra data structure used to make sure that the file system is always in a consistent state. Typically, if a crash happens in the system, the file system might get corrupted and even become unusable. In simple terms, the fs first saves all the data needed to perform the operation in the journal and only then starts updating the file system. If something goes wrong, the fs can rely on the journal to safely repeat the operation and repair the file system. Without a journal, the operation will certainly be lost and it might not even be possible to fix the file system.
 
-If you check the community list (see note 1 below), you'll see people vouching both for fat and ext2 but also others experiencing corruption and annoyed with both file systems. Even though ext3 is not error-proof, since it does not do a verification of what is written in the disk, ext3 remains as the choice to minimise corruption.
+If you read the mail threads, you'll see people both vouching for fat and ext2 but also others experiencing corruption and annoyed with both file systems. Even though ext3 is not error-proof, since it does not do a verification of what is written in the disk, ext3 remains as the choice to minimise corruption.
 
 There are three disadvantages with the journaled file system:
-# lower performance at write time, since there is the extra work of the journal
-# increased chance of damaging the SD card due to extra use of the journal causing wearing
-# increased space usage (for the journal)
+- lower performance at write time, since there is the extra work of the journal
+- increased chance of damaging the SD card due to extra use of the journal causing wearing
+- increased space usage (for the journal)
 
-Regarding performance, if you are using the SD mostly for static storage like maps or music files, it should not be a big problem. After the initial storage phase, the reads won't be delayed by the journal. Have also a look at [http://www.debian-administration.org/articles/388 this benchmark] between several Linux file systems. 
+Regarding performance, if you are using the SD mostly for static storage like maps or music files, it should not be a big problem. After the initial storage phase, the reads won't be delayed by the journal. Have also a look at this benchmark between several Linux file systems. http://www.debian-administration.org/articles/388
 
-Regarding the extra wearing, the number of write accesses before wearing seem to be sufficiently high not to have to bother with it, and the SD card in itself has automatic wearing leveling which will ensure that the journal will be written in another place after some time. All in all, sd card damage due to the journal should not be a practical issue.
+Regarding the extra wearing, the number of write accesses before wearing seem to be sufficiently high not to have to bother with it, and the SD card in itself as automatic wearing leveling which will ensure that the journal will be written in another place after some time. All in all, sd card damage due to the journal should not be a practical issue.
 
 FAT might already be the fs in your card when you got a new one. It has the advantage of being recognised in many other systems. The data structures are simpler which might mean less writes on the sd-card and less code being executed (unverified) and you'll find more tools available to recover information when you get errors.
 
 It is also important to note that ext is faster than FAT (benchmark, anyone?) but, most importantly, it supports owner/group concept and permissions, which FAT doesn't. Of course, since FR is in general a single user device, the permissions might be not so important. Another advantage of ext2/3 is support for hard/soft links, which is typically useful to avoid redundant copies of files. For instance, if you are storing maps and you have blank tiles files, you can keep a single blank file and have all the others be just a link to this one (you would need a script for that to make it practical)
 
-== Create an ext3 partition ==
-# put new purchased device in laptop or desktop
-# see which device it is via: mount (usually look for /media/disk) or look out for it in sudo fdisk -l
-# run: sudo fdisk /dev/xyz
-# create new partition table with 'n' (all default will result in Linux, type 83), save and exit with 'w'
-# unmount device: sudo umount /dev/xyz
-# create new ext3 file system: sudo mkfs.ext3 /dev/xyz
-# disable automated file system checks: sudo tune2fs -c 0 -i 0 /dev/xyz
-# mount the device: mount/dev/xyz or simply eject and re-insert it
-# optionally set some permissions: sudo chown username:username and sudo chmod ug+rw .
-
-= Why not jffs2 or ubifs =
-
-What about file systems like [[jffs2]] and [[ubifs]], which are aware of flash card wearing?
+What about file systems like jffs2 and ubifs, which are aware of flash card wearing?
 
 SD cards, according to SanDisk specs, should have wear leveling logic, which controls the number of writes and remaps blocks as needed. Wear-aware file systems might actually play against the logic of the card and are usually not recommendable.
 
-= Why not nilfs =
+Note 1: this page is mostly based on feedback from the OpenMoko community list: see [http://lists.openmoko.org/pipermail/community/2009-January/040521.html here] and [http://lists.openmoko.org/pipermail/community/2009-February/041072.html here].
 
-What about the file system [[nilfs]], which are aware of flash card wearing?
-
-= Notes =
-
-Note 1: this page is mostly based on feedback from the Openmoko community list: see [http://lists.openmoko.org/pipermail/community/2009-January/040521.html here] and [http://lists.openmoko.org/pipermail/community/2009-February/041072.html here].
-
-Note 2: file systems are quite complex components of an operating system, each one with different weak and strong points, which makes it difficult to give a definitive answer to tell which file system is the best. As you can see from the mailing list posts, you'll find people vouching for any of these three options. Furthermore, although the mentioned are well-known, there are actually not yet benchmarks specific to the Openmoko architecture in combination with microSD cards, of which there are many models around.
+Note 2: file systems are quite complex components of an operating system, each one with different weak and strong points, which makes it difficult to give a definitive answer to tell which file system is the best. As you can see from the mailing list posts, you'll find people vouching for any of these three options. Furthermore, although the mentioned are well-known, there are actually not yet benchmarks specific to the Open Moko architecture in combination with microSD cards, of which there are many models around.
