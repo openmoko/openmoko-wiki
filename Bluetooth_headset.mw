@@ -1,15 +1,4 @@
-This is mostly based on [[Neo 1973 audio subsystem]] and [http://lists.openmoko.org/pipermail/openmoko-kernel/2009-February/009019.html this thread on the kernel mailing list].
-
-== Known to work headsets ==
-Please see [http://wiki.openmoko.org/wiki/A2DP#6._Devices_that_work A2DP#Devices_that_work] for complete list
-and comparison table.
-
-== Preparing ==
-
-=== Get the bluetooth alsa state and DAC setup script ===
-Download [http://www.robsims.com/GSMBLUETOOTH.txt GSMBLUETOOTH.txt] and [http://handheldshell.com/bluetooth_pcm bluetooth_pcm]
-
-=== Edit /etc/bluetooth/audio.conf ===
+== Edit /etc/bluetooth/audio.conf ===
 
  # Configuration file for the audio service
  
@@ -37,8 +26,6 @@ Download [http://www.robsims.com/GSMBLUETOOTH.txt GSMBLUETOOTH.txt] and [http://
  #[A2DP]
  #SourceCount=2
 
-The important part is the SCORouting.
-
 == Connect and setup the headset ==
 
  export DEVICE=xx:xx:xx:xx:xx
@@ -59,18 +46,3 @@ The important part is the SCORouting.
  
  dbus-send --system --type=method_call --print-reply --dest=org.bluez \
   "/org/bluez/audio/device0" org.bluez.audio.Headset.Play
-
-== During the call ==
-After having answered / placed the call, switch the audio to the bluetooth headset. You need a small workaround to get audio in, which is included below.
-
- alsactl -f GSMBLUETOOTH.txt restore
- ./bluetooth_pcm &
-
-the workaround is to switch '''Capture Left Mixer''' first to '''Analogue Mix Right''' and then back to '''Analogue Mix Right'''. This can be done with alsamixer:
-
- alsamixer
-
-(lookup '''Capture Left Mixer''' in the "gui" and toggle the value).
-
-[[Category:Bluetooth]]
-[[Category:Headsets]]
