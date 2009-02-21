@@ -1,0 +1,48 @@
+== Edit /etc/bluetooth/audio.conf ===
+
+ # Configuration file for the audio service
+ 
+ # This section contains options which are not specific to any
+ # particular interface
+ [General]
+ 
+ # If we want to disable support for specific services
+ # Defaults to supporting all implemented services
+ #Disable=Control,Source
+ 
+ # SCO routing. Either PCM or HCI (in which case audio is routed to/from ALSA)
+ # Defaults to HCI
+ SCORouting=PCM
+ 
+ # Headset interface specific options (i.e. options which affect how the audio
+ # service interacts with remote headset devices)
+ [Headset]
+ 
+ # Set to true to only support HSP
+ # Defaults to false
+ DisableHFP=false
+ 
+ # Just an example of potential config options for the other interfaces
+ #[A2DP]
+ #SourceCount=2
+
+== Connect and setup the headset ==
+
+ export DEVICE=xx:xx:xx:xx:xx
+
+ /etc/init.d/bluetooth stop
+ /etc/init.d/bluetooth start
+ 
+ passkey-agent --default 0000 &
+ 
+ dbus-send --system --type=method_call --print-reply --dest=org.bluez \
+  /org/bluez/hci0 org.bluez.Adapter.CreateBonding string:$DEVICE
+ 
+ dbus-send --system --type=method_call --print-reply --dest=org.bluez \
+  /org/bluez/audio org.bluez.audio.Manager.CreateHeadset string:$DEVICE
+ 
+ dbus-send --system --type=method_call --print-reply --dest=org.bluez \
+  "/org/bluez/audio/device0" org.bluez.audio.Headset.Connect
+ 
+ dbus-send --system --type=method_call --print-reply --dest=org.bluez \
+  "/org/bluez/audio/device0" org.bluez.audio.Headset.Play
