@@ -14,6 +14,15 @@ First check that you have the correct package versions installed with {{{opkg li
  bluez-utils-compat - 3.33-r3
  libbluetooth2 - 3.33-r0
 
+=== 1.1 Check installed packages (Bluez4) ===
+For user with bluez4 (SHR-unstable ecc.) bluez-audio 3.33 and bluez-utils-alsa 3.33 are not compatible with bluez4
+
+ bluez4 - 4.30-r1 
+ connman-plugin-bluetooth - 0.10-r0 - 
+ kernel-module-bluetooth - 2.6.28-oe1+xxxxx 
+ libasound-module-bluez - 4.30-r0 
+ libbluetooth2 - 3.33-r0
+ 
 === 2. Add bluetooth device to /etc/asound.conf ===
 Your /etc/asound.conf should contain these:
 
@@ -58,6 +67,24 @@ Turn on bluetooth in the GUI and then do
    "/org/bluez/audio/device0" org.bluez.audio.Sink.Connect
 
 If the last step fails, see to it that the device returned in the step before is device0 - otherwise use the other number.
+
+=== 3.1 Connect to the device (Bluez4) ===
+Turn on bluetooth in the GUI and then pair with simple-agent (passkey-agent from bluez-utils 3.33 won't work)
+simple-agent is included in bluez4 source package (test folder)
+
+ /etc/init.d/bluetooth stop
+ /etc/init.d/bluetooth start
+ 
+ python simple-agent hci0 XX:XX:XX:XX:XX:XX
+ 
+Response is something like this :
+
+ RequestPinCode (/org/bluez/XXXX/hci0/dev_XX_XX_XX_XX_XX_XX)
+ Enter PIN Code: XXXX
+ Release
+ New device (/org/bluez/XXXX/hci0/dev_XX_XX_XX_XX_XX_XX)
+
+Now you can start playing, no need to connect manualy.
 
 === 4. Start playing ===
 To play a file with [[mplayer]] use the following command:
