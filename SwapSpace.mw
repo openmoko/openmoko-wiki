@@ -10,10 +10,58 @@ Make the swap file work now:
 
 
 =Make swap when microSD card is in a card reader=
-To help this you can add a bit of swap space on the microsd card:
+The uSD card is booted on /boot. To use this, we need to make sure that the microsd card is booted, and the Swap can be turned on.
 
- dd if=/dev/zero of=/media/card/swapfile.img bs=1024k count=512
- mkswap /media/card/swapfile.img
- swapon /media/card/swapfile.img
+Create the swapfile on the uSD card.
+  # dd if=/dev/zero of=/boot/swapfile bs=1024k count=128
+  # mkswap /boot/swapfile
 
-Taken from http://lists.openmoko.org/nabble.html#nabble-td2171203
+Now, we can put in an init script for Fyp which does this for us everytime we boot.
+
+  # touch /etc/init.d/extswap.sh
+  # chmod +x /etc/init.d/extswap.sh
+  # cat > /etc/init.d/extswap.sh
+  #! /bin/sh
+  ### BEGIN INIT INFO
+  # Provides:          extswap
+  # Required-Start:    mountall
+  # Required-Stop: 
+  # Default-Start:     S
+  # Default-Stop:
+  # Short-Description: Uses Additional Swap If Available.
+  # Description:
+  ### END INIT INFO
+  
+  PATH=/sbin:/bin
+  . /lib/init/vars.sh
+  . /lib/lsb/init-functions
+  
+  do_start() {
+          if [ -e /boot/swapfile ] ; then
+                 for loopdev in `ls /dev/loop* 2>/dev/null` ; do
+  		losetup $loopdev /boot/swapfile && swapon $loopdev && echo $loopdev > /var/extswapfile && break
+                 done
+          fi
+  }
+  
+  do_stop() {
+        	loopdev=`cat /var/extswapfile 2>/dev/null`
+          swapoff -v $loopdev 2>/dev/null && rm -f /var/extswapfile && losetup -d $loopdev
+  }
+  
+  case "$1" in
+    start|"")
+  	do_start
+  	;;
+    restart|reload|force-reload)
+  	do_stop
+          do_start
+  	;;
+    stop)
+  	do_stop
+  	;;
+    *)
+  	echo "Usage: extswap.sh [start|stop|restart]" >&2
+  	exit 3
+  	;;
+  esac
