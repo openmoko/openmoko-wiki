@@ -1,1 +1,93 @@
-#REDIRECT [[Kernel#Building_the_andy-tracking_branch these instructions]]
+<strong>Note: This is a translation of a [http://www.jollen.org/blog/2009/02/compile_neo_freerunner_kernel.html blog post] in Chinese. It might contain errors introduced in the translation.
+</strong>
+
+See also : [http://wiki.openmoko.org/wiki/Toolchain#Building_Openmoko_Kernel_from_git_repo_using_Toolchain Building Openmoko Kernel from git repo using Toolchain]
+
+How does one compile Openmoko's kernel for the Neo Freerunner? Just follow the steps outlined below.
+
+=Get the Neo Freerunner's kernel source code=
+All source code of the Openmoko project is kept at git.openmoko.org. Under the kernel source code directory you can find both the complete kernel and the branch under development. First issue the following command, which will retreive all the kernel source code.
+
+<code>
+<pre>
+$ git clone git://git.openmoko.org/git/kernel.git linux-2.6
+</pre>
+</code>
+
+The source code is all put in the linux-2.6/ directory.
+
+=Get Andy's branch=
+Andy is Openmoko's kernel developer. We want to use the development version, so we need to get Andy's branch. Openmoko's kernel developer can at any time add new code to the development version. Openmoko's kernel can also merge with the mainline kernel. [Translator note: I'm note sure if he means that Openmoko will follow changes in mainline, or that mainline will incorporate Openmoko's patches. (Openmoko 的 kernel 也會與 mainline 的 kernel 做合併（patch merge）的動作)]
+Get Andy's branch with the following commands:
+
+<code>
+<pre>
+$ cd linux-2.6
+$ git checkout origin/andy-tracking
+</pre>
+</code>
+
+=Get the GTA02 kernel configuration file=
+Openmoko provides kernel configuration files for GTA01/GTA02/GTA03. Simply using the GTA02 (Neo Freerunner) configuration file will do. You don't need to configure the kernel options yourself.
+
+<code>
+<pre>
+$ cp arch/arm/configs/gta02_moredrivers_defconfig .config
+</pre>
+</code>
+
+=Get the Openmoko toolchain=
+To compile the kernel you'll need the 'cross toolchain'. Openmoko provides a ARM9 toolchain that's set up in advance. Pleaes download it from [http://downloads.openmoko.org/developer/toolchains/]. Download the 20080916 version, for example openmoko-i686-20080916-arm-linux-gnueabi-toolchain.tar.bz2 .
+
+To install the toolchain, go to the root directory and uncompress the package.
+
+<code>
+<pre>
+$ cd /
+$ sudo tar jxf /openmoko-i686-20080916-arm-linux-gnueabi-toolchain.tar.bz2
+</pre>
+</code>
+
+After unpacking, you will find the toolchain in /usr/local/openmoko .
+
+=Download build-kernel.sh/build-image.sh/mkimage=
+From [http://people.openmoko.org/jollen/openmoko-kernel/] download the two scripts as well as mkimage tool. Place them in the kernel source directory. Don't forget to make them executable.
+
+<code>
+<pre>
+$ chmod a+x build-*.sh
+</pre>
+</code>
+
+Additionally, after setting the executable bit on mkimage, move it to the system's standard location.
+
+<code>
+<pre>
+$ chmod a+x mkimage
+$ sudo mv mkimage /usr/sbin
+</pre>
+</code>
+
+Neo Freerunner uses the U-boot boot loader, so we have to use mkimage to pack the kernel image in the U-boot format. The source code of this tool can be found in the U-boot sources.
+
+=Start compiling the kernel=
+First isue build-kernel.sh to compile the kernel:
+
+<code>
+<pre>
+$ ./build-kernel.sh
+</pre>
+</code>
+
+After the compile finishes, run build-image.sh to produce the final image:
+
+<code>
+<pre>
+$ ./build-image.sh
+</pre>
+</code>
+
+When it finishes you can find the file 'uImage-GTA02.bin' in the kernel source directory. 
+This is a kernel image that supports the Neo Freerunner. All that's left to do is flash it to your Neo using dfu-util.
+
+If you have any questions about the above instructions you can pose your questions at the [http://openmoko-tw.net/ Traditional Chinese Openmoko Site].
