@@ -16,6 +16,27 @@ i made a new pkg last i checked you need some things in the scaredycat repo like
 http://we.trekbeyond.org/~kd8ikt/moko/buildz/lint-wifi_0.1_armv4t.ipk <br>
 also added a few easter egg addons like wifiweasel ;) accelxranr.py, gta02.py and tree
 
+====wpa_supplicant.conf====
+lint-wifi requires /etc/wpa_supplicant/wpa_supplicant.conf to be present. This works for me (tm)
+
+<pre>
+<code>
+update_config=1
+ctrl_interface=DIR=/var/run/wpa_supplicant
+ap_scan=1
+</code>
+</pre>
+
+The first line is probably not necessary. It would allow lint-wifi to save its configuration back to wpa_supplicant.conf, which I believe it doesn't do ATM. I needed the third one to get scanning to work.
+
+====compiling wpa_lint====
+lint-wifi is a python script, you can just copy lint-wifi.py to your phone and make it executable. It relies on wpa_lint however wich is written in C, so you need to compile it.
+
+On Debian/Ubuntu grab openmoko-toolchain_0.20080521-ubuntu6_i386.deb (see [http://andreasdalsgaard.blogspot.com/2008/07/openmoko-development-in-5-minutes.html]). Edit the Makefile for wpa_lint, at the top comment out the line starting with gcc= and add the line 
+gcc = arm-angstrom-linux-gnueabi-gcc
+
+Now just do make and copy the resulting wpa_lint to your phone. Don't forget to make it executable. It has to go in /home/root (hardcoded in lint-wifi).
+
 ==Requirements==
 There are several requirements needed to run lint-wifi:
 * PyGTK
