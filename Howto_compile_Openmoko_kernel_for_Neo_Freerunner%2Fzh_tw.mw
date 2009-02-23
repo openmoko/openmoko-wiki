@@ -1,0 +1,62 @@
+
+
+怎麼編譯 Openmoko 的 kernel for Neo FreeRunner 呢？請依照以下步驟進行操作。
+
+1. 取得 Neo FreeRunner 的 kernel 原始碼
+
+Openmoko 專案的所有原始碼都存放於 git.openmoko.org，到 [Openmoko 的 kernel 原始碼目錄樹] 底下，可以看到裡頭有完整的 kernel 原始碼，以及開發中的分支。首先執行以下指令，將所有的 kernel 原始碼取出：
+
+$ git clone git://git.openmoko.org/git/kernel.git linux-2.6
+
+所有的原始碼都被放置於 linux-2.6/ 目錄下。
+
+2. 取出 Andy 的 branch
+
+Andy 是 Openmoko 的 kernel 開發者，我們想要使用的是開發中的版本，就要取出 Andy 的分支。Openmoko 的 kernel 開發者，會隨時將新程式碼放置於開發中的版本。Openmoko 的 kernel 也會與 mainline 的 kernel 做合併（patch merge）的動作。取出 Andy branch 的指令如下：
+
+$ cd linux-2.6
+$ git checkout origin/andy-tracking
+
+3. 取得 GTA02 的 kernel 設定檔
+
+Openmoko 提供 GTA01/GTA02/GTA03 的 kernel 設定檔，只要將 GTA02（Neo FreeRunner）的設定檔取出使用即可，不需要再自行設定 kernel 選項：
+
+$ cp arch/arm/configs/gta02_moredrivers_defconfig .config
+
+4. 取得 Openmoko 的 toolchain
+
+要編譯 kernel 就需要 cross toolchain，Openmoko 提供一份預先建立好的 ARM9 toolchain，請由 [這裡] 下載。請下載 20080916 的版本，例如：openmoko-i686-20080916-arm-linux-gnueabi-toolchain.tar.bz2。
+
+Toolchain 的安裝方式是先切換到根目錄（'/'），再解壓縮：
+
+$ cd /
+$ sudo tar jxf <your-path>/openmoko-i686-20080916-arm-linux-gnueabi-toolchain.tar.bz2
+
+解壓後，可以在 /usr/local/openmoko 目錄下找到 toolchain。
+
+5. 下載 build-kernel.sh/build-image.sh/mkimage
+
+到 [這裡] 下載二個 script 以及 mkimage 工具，並放置於 kernel 原始碼目錄下。別忘了變更屬性為可執行：
+
+$ chmod a+x build-*.sh
+
+另外，將 mkimage 變更屬性後，搬移到系統標準路徑下：
+
+$ chmod a+x mkimage
+$ sudo mv mkimage /usr/sbin
+
+Neo FreeRunner 使用 U-Boot 開機程式，所以必須使用 mkimage 工具將 kernel image 包裝成 U-Boot 格式。此工具的原始碼於 U-Boot 原始碼目錄裡可取得。
+
+6. 開始編譯 kernel
+
+先執行 build-kernel.sh 編譯 kernel：
+
+$ ./build-kernel.sh
+
+編譯成功後，再執行 build-image.sh 以產生最後的 image 檔：
+
+$ ./build-image.sh
+
+完成後，可在 kernel 原始碼目錄下找到 'uImage-GTA02.bin' 檔案。uImage-GTA02.bin 就是支援 Neo FreeRunner 的 kernel image 檔，將此檔案以 dfu-util 燒錄到手機裡即可。
+
+以上過程若有任何問題，可以到 [Openmoko 正體中文站] 詢問。
