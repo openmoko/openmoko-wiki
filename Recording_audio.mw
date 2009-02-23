@@ -1,16 +1,19 @@
-Mixer settings for voice recording: It is required that DAI Mode (alsa control number 50) is "DAI 1" - only recording, or "DAI 2" - recording and playback simultaneously. "DAI 0" is only for playback. There's also "DAI 3", but I don't know what this is.
+== For the impatient ==
 
-Depending on the recording source, Mic1 for headset or Mic2 for handset have to be set accordingly via the Mic Selection Mux, which is alsa control number 53. Also, set Capture Left Mux and Capture Right Mux (65, 64) to PGA.
+Below is an alsa state file which can be used to put the device into voice recording mode.
 
-Below is an alsa state file, which can be used to put the device into voice recording mode. It's advisable to have a programm connected to e.g. /dev/dsp, else the device might crash. Change settings via:
-
- alsactl -f voice-recording.state restore
-
-http://wildsau.enemy.org/~moko/voice-recording.state
-
+ alsactl -f [http://svn.arhuaco.org/svn/src/openmoko/misc-files/ALSA/voip-handset.state voip-handset.state] restore
  arecord -D hw -f cd  -v -t wav rec-$(date +%Y-%m-%d-%H-%M).wav
 
-Note: You need to start arecord first and have it block on input. When arecord is running you can restore voice-recoding.state. If you don't do this you get a kernel oops (see bug 2073). Similarly you need to restore normal alsa state before you kill arecord.
+== Applications that record audio ==
 
+In alphabetical order.
+
+* http://wiki.openmoko.org/wiki/Guitartune
+* http://wiki.openmoko.org/wiki/Voicenote
+
+== Hey, hey, here be dragons... I'm having lunch now.... ==
+
+Mixer settings for voice recording: It is required that DAI Mode (alsa control number 50) is "DAI 2". As of Feb/23 "DAI 1" is broken. Not all the DAI modes work and people are working on this (Check [https://docs.openmoko.org/trac/ticket/2073 #2073).
 
 [[Category:Audio]]
