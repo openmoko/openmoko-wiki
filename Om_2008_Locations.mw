@@ -105,6 +105,44 @@ om-locations-map-pack -d `date "+%Y%m%d"`,osm,5,16,121.5,25.0,0.1,0.1 /media/car
 
 In this example, a region of longitude between '''121.5''' to '''121.6''' and of latitude bwtween '''25.0''' to '''25.1''' is specified.  Tiles in this region and of levels from '''5''' to '''16''' are downloaded to '''/media/card'''.  By instructing '''Locations''' to use '''/media/card''' as its tile path, one could pre-download tiles of any region and have '''Locations''' use them.
 
+It is furthur possible to compress our map directory by eliminating white tiles and making it sparse. The display shown by TangoGPS is anyway white, so we can avoid some wasteful tiles. The space saving it gives us is nearly 40%.
+
+Let us say that the directory that holds the map tiles is OSM/ , then we can run this script on OSM/ as:
+
+ sparsemap /media/card/OSM/
+
+The sparsemap script is:
+
+ #!/bin/sh
+  sparse_png="iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAAA1BMVEXy7+kRCi+bAAAAH0lEQVRoge3BAQ0AAADCoPdPbQ43oAAAAAAAAAAAvg0hAAABmmDh1QAAAABJRU5ErkJggg=="
+ mapdir=$1
+ 
+ [ -z $mapdir ] && mapdir=.
+ [ ! -d $mapdir ] && echo "$mapdir is not a directory." && exit 1
+ 
+ SRCFILE=/tmp/sparse.png
+ echo $sparse_png | base64 -d > $SRCFILE
+ 
+ log=/tmp/sparse.lst
+ echo -n >$log
+ 
+ CWD=`pwd`
+ cd $mapdir
+ 
+ find . -type f -size 103c | while read pngfile ; do
+   if diff $SRCFILE $pngfile 2>&1 >/dev/null ; then
+     echo $pngfile >> $log
+     rm $pngfile
+   fi
+ done 
+ 
+ cd $CWD
+ 
+ bzip2 --best $log && log=/tmp/sparse.lst.bz2
+ mv $log $mapdir
+ 
+ rm -f $SRCFILE
+
 == GPS ==
 
 '''Locations''' relies on '''diversity-daemon''' to communicate with the GPS device.  By default, the GPS device (/dev/ttySAC1) is opened directly.  However, it is possible to configure '''diversity-daemon''' to talk to gpsd.
