@@ -1,117 +1,22 @@
+= Gentoo on Openmoko phones =
 {{Languages|Gentoo}}
-== Overview ==
-Gentoo armv4tl-softfloat-linux-gnueabi optimalized for Openmoko (-Os -march=armv4t -mtune=arm920t) on 2008.0/arm profile (glibc based, sane bootstrapable toolchain)<br>
-(embedded uclibc/arm profile armv4tl-softfloat-linux-uclibcgnueabi in plans)
 
-[http://img46.imageshack.us/img46/646/80330048oy9.jpg Screenshot (hosted at ImageShack)]
+Gentoo project on Openmoko phones has its own homepage: [http://gentoo.mindzoo.de/ http://gentoo.mindzoo.de/]
 
-== Read first ==
-'''http://www.gentoo.org/doc/en/handbook/handbook-arm.xml''' (Skip points 2 and 3)
+We have our own portage overlay and some Openmoko packages like Xglamo, Illume or Zhone already have theyr ebuilds.
 
+== Ways to work with Gentoo ==
+Currently, there are 2 ways how to install gentoo, both having advantages and disadvantages:
 
-== Needed things ==
+* Cross compile approach, where you use another machine to compile your whole phone system.
 
-*At least 2GB SD card
-*Gentoo stage: http://torindel.sezamkowa.net/openmoko/armv4tl-softfloat-linux-gnueabi/~arm/
-*Portage snapshot: look for mirror on: http://www.gentoo.org/main/en/mirrors2.xml and get snapshots/portage-DATE.tar.bz2
-*Kernel and modules
-*Any working Openmoko distro
+* Native compilation approach, where you work with Gentoo on phone as with a normal system fully capable of installing its own packages.
 
 
-== Installation ==
-=== Be careful, the overlay seems to be dead, so you'll have to manually compile (please make ebuilds if you do) illume and anything openomoko-specific ===
-<ol>
-<li>Partition your sd card if needed (don`t make swap partitions
-(but see [http://lists.openmoko.org/pipermail/community/2008-September/031106.html]), ensure card isn't mounted): </li> 
-  fdisk /dev/mmcblk0
+Many thanks go to 'torindel' who apparently started the effort and made a stage tarball we are using even today for the native approach.
 
-<li>Make ext2 or ext3 filesystem: </li> 
-  mkfs.ext2 /dev/mmcblk0p1
+== How to get started ==
+If you want to try out a normal Gentoo experience, as seen on desktop, feel free to follow these [http://gentoo.mindzoo.de/index.cgi/wiki/native-compiling native installation instructions].
 
-<li>Mount partition: </li> 
-  mount /dev/mmcblk0p1 /media/card
-
-<li>Copy stage and portage from host to moko (e.g. on localhost): </li>
-  scp stage3-armv4tl-*.tar.bz2 portage-*.tar.bz2 root@openmoko:/media/card
-
-<li>Unpack stage and portage: </li> 
-  tar -xjpf /media/card/stage3-armv4tl-*.tar.bz2 -C /media/card
-  tar -xjpf /media/card/portage-*.tar.bz2 -C /media/card/usr
-
-<li>Cleanup removing tar.bz2: </li> 
-  rm /media/card/stage3-armv4tl-*.tar.bz2 /media/card/portage-*.tar.bz2
-
-<li>Chroot: </li> 
-  chroot /media/card /bin/bash
-
-<li>Update chroot environment: </li> 
-  source /etc/profile; env-update
-
-<li>Set timezone: </li> 
-  cp /usr/share/zoneinfo/YOURZONE /etc/localtime
-
-<li>Set hostname: </li> 
-  nano /etc/conf.d/hostname
-
-<li>Remove console font changing (small is beautiful ;]): </li> 
-  rc-update del consolefont boot
-
-<li>Setup fstab: </li> 
-  nano /etc/fstab
-
-<li>Edit inittab (hash out c3, c4, c5, c6, s0, s1 lines): </li> 
-  nano /etc/inittab
-
-<li>Setup usb networking: </li> 
-  echo "modules=\"g_ether\"" >> /etc/conf.d/modules
-  ln -s /etc/init.d/net.lo /etc/init.d/net.usb0
-  echo "config_usb0=\"192.168.0.202 netmask 255.255.255.0\"" > /etc/conf.d/net
-  echo "routes_usb0=\"default via 192.168.0.200\"" >> /etc/conf.d/net
-  echo "nameserver 192.168.0.200" > /etc/resolv.conf
-
-<li>Enable sshd: </li> 
-  rc-update add sshd default
-
-<li>Change root password: </li> 
-  passwd
-
-<li>Leave chroot: </li> 
-  exit
-
-<li>Copy kernel. </li>
-  cp /boot/uImage-2.6.24 /media/card/boot/
-
-<li>Copy modules. </li>
-  cp -rpf /lib/modules /media/card/lib/
-
-<li>Setup uboot for booting from sd card. </li>
-<li>Reboot. </li>
-<li>Setup/emerge rest of the system. </li>
-
-== Emerging binary packages ==
-*Binary package sites
-:http://tinderbox.dev.gentoo.org/embedded/openmoko/armv4tl-softfloat-linux-gnueabi/
-:http://torindel.sezamkowa.net/openmoko/armv4tl-softfloat-linux-gnueabi/~arm/packages/All
-*Add PORTAGE_BINHOST to make.conf
-:<tt>e.g.</tt> <pre>echo "PORTAGE_BINHOST=\"http://torindel.sezamkowa.net/openmoko/armv4tl-softfloat-linux-gnueabi/~arm/packages/All\"" >> /etc/make.conf</pre>
-*Update environment
-:<tt>e.g.</tt> <pre>source /etc/profile; env-update</pre>
-*Setup install mask if you don't want compiler headers/docs etc (mask headers only if you'll be always using binary packages)
-:<tt>e.g.</tt> <pre>export INSTALL_MASK="*.h"</pre>
-*Add the following line to make.conf to tell portage to always use binary packages. <pre>EMERGE_DEFAULT_OPTS="-gK"</pre>
-
-== Alternative: Squashed Portage ==
-An alternative to installing a full, writable, and uncompressed portage tree directly on the microSD card, is to compress portage using SquashFS and then to mount the resulting SquashFS file (usually compressed from about 500 MB to 50 MB) at /usr/portage. 
-
-In this case, it is also suggested to set DISTDIR to /tmp/distfiles, because the default DISTDIR (/usr/portage/distfiles) is not writable. Similarly, PKGDIR can be set to /tmp/binpkgs instead of the default /usr/portage/packages.
-
-See [http://perpetual-notion.blogspot.com/2008/06/gentoo-on-eee-pc.html this] blog post for further details. If you are lacking in extra space on your flash device, or are concerned about extraneous write-cycles to your flash memory, then you should perform all of the steps on desktop linux machine and then finally copy the resulting squashfs image to the FreeRunner.
-
-== Openmoko Overlay ==
-First, emerge layman (you need to build it with svn support, so USE="svn", maybe you should set it just local). Then add the overlay with layman -a openmoko and put source /usr/local/portage/layman/make.conf in your /etc/make.conf. Finally, have a look at /usr/local/portage/layman/make.conf, and add make PORTDIR_OVERLAY look like this: PORTDIR_OVERLAY="/usr/local/portage/layman/openmoko/trunk/openmoko-target"
-
-== Binary package wishlist ==
-As i'll be adding some packages to ftp above you might want to ask for some package here: [[GentooPackageWishList]]<br>
-Overlay with moko things and more packages coming soon.
-
+Please note, unless you use distcc, it takes a long time to get a fully working system this way (About 3 days for xorg with fluxbox).
 [[category:Distributions]]
