@@ -1,4 +1,4 @@
-'''NOTE: These only apply to Linux kernel 2.6.24, 2.6.28 has different paths''' (which are what?)
+'''NOTE: These only apply to Linux kernel 2.6.24, 2.6.28 has different paths''' (see below)
 
 ==<font color=75d806>GTA02 Kernel sysfs highlights</font>==
 sysfs is a filesystem that is mounted on /sys which contains various fake "files" that are actually filled by a variety of drivers and other kernel subsystems.  You can often also write stuff into these "files" using
@@ -157,6 +157,75 @@ Dumps accelerometers raw contents.
 ====/sys/devices/platform/spi_s3c24xx_gpio.1/spi0.0/full_scale====
 ====/sys/devices/platform/spi_s3c24xx_gpio.1/spi0.1/full_scale====
 Switches the accelerometers between 2G and 8G mode.  Echo "9.2" into it for 8G, any other value for 2G (default)[http://lists.openmoko.org/pipermail/openmoko-kernel/2008-July/004029.html]
+
+==<font color=75d806>GTA02 Kernel sysfs highlights for kernel 2.6.28</font>==
+(info from: [http://lists.openmoko.org/nabble.html#nabble-td1569863 http://lists.openmoko.org/nabble.html#nabble-td1569863]
+
+Here are the current /sys mappings for andy-tracking (which has Balaji's 
+regulator PMU stuff).  The reason virtually everything has changed is 
+mainly due to the device tree changes to fix suspend - resume, many more 
+things have a child relationship to the PMU now. 
+
+
+old: /sys/devices/platform/neo1973-pm-host.0/hostmode 
+new: /sys/class/i2c-adapter/i2c-0/0-0073/neo1973-pm-host.0/hostmode 
+
+same: /sys/devices/platform/s3c2410-ohci/usb_mode 
+
+old: /sys/devices/platform/neo1973-pm-gsm.0/power_on|reset|download 
+new: /sys/class/i2c-adapter/i2c-0/0-0073/neo1973-pm-gsm.0/... 
+
+old: /sys/devices/platform/neo1973-resume.0/resume_reason 
+new: /sys/class/i2c-adapter/i2c-0/0-0073/neo1973-resume.0/resume_reason 
+~     /sys/class/i2c-adapter/i2c-0/0-0073/resume_reason 
+~     (split into CPU wake interrupt and secondly PMU-specific reason) 
+
+old: /sys/devices/platform/sc32440_fiq.0/fiq/count|dump|write 
+new: /sys/devices/platform/sc32440_fiq.0/gta02-hdq.0/hdq/... 
+
+old: /sys/devices/platform/bq27000-battery.0/power_supply/bat/ 
+~     uevent|type|status|voltage_now|current_now|charge_full|temp| 
+~     technology|present|time_to_empty_now|time_to_full_now|capacity| 
+~     online 
+new: /sys/class/power_supply/battery/... 
+
+old: /sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/ 
+~     chgmode|charger_type|force_usb_limit_dangerous|dump_regs 
+new: /sys/class/i2c-adapter/i2c-0/0-0073/pcf50633-mbc/... 
+
+old: 
+/sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/neo1973-pm-bt.0/ 
+~     power_on|reset 
+new: 
+/sys/class/i2c-adapter/i2c-0/0-0073/pcf50633-regltr.6/neo1973-pm-bt.0/... 
+
+old: 
+/sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/neo1973-pm-gps.0/pwron 
+new: 
+/sys/class/i2c-adapter/i2c-0/0-0073/pcf50633-regltr.7/neo1973-pm-gps.0/pwron 
+
+same: /sys/devices/platform/soc-audio/codec_reg|codec_reg_write 
+
+old: /sys/devices/platform/glamo3362.0/regs 
+new: /sys/class/i2c-adapter/i2c-0/0-0073/pcf50633-regltr.9/glamo3362.0/regs 
+
+old: 
+/sys/devices/platform/neo1973-vibrator.0/leds/neo1973:vibrator/brightness 
+new: /sys/class/leds/neo1973:vibrator/brightness 
+
+old: /sys/devices/platform/gta02-led.0/leds/gta02-aux:red/brightness 
+new: /sys/class/leds/gta02-aux:red/brightness 
+
+old: /sys/devices/platform/gta02-led.0/leds/gta02-power:blue/brightness 
+new: /sys/class/leds/gta02-power:blue/brightness 
+
+old: /sys/devices/platform/gta02-led.0/leds/gta02-power:orange/brightness 
+new: /sys/class/leds/gta02-power:orange/brightness 
+
+old: /sys/devices/platform/spi_s3c24xx_gpio.1/spi0.{0|1}/ 
+~     power/wakeup|dump|full_scale... 
+new: /sys/class/i2c-adapter/i2c-0/0-0073/lis302dl.{1|2}/... 
+
 
 
 [[Category:Flashing Openmoko]]
