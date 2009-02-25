@@ -12,6 +12,14 @@ Drive strength of 0 at glamo_mci.sd_max_clk=10000000 is pretty reliable at norma
 
 (last verified using 2008.8 and newer daily kernel versions)
 
+Another problem with this card is that with a fairly new kernel (andy-tracking commit de8460932576502fb6bf61968a37c4d2aed2d6e2), to get wifi card properly recognized in the kernel, you have to unbind/bind the sdio bus like this:
+
+
+echo s3c2440-sdi >/sys/bus/platform/drivers/s3c2440-sdi/unbind
+
+echo s3c2440-sdi >/sys/bus/platform/drivers/s3c2440-sdi/bind
+
+
 Tested:
 * SD idle clock = on does not prevent the errors
 * Errors occur almost every time when loading things from SD card while entering PIN, even at drive strength of 3 and clock speed of 2.5 Mhz
