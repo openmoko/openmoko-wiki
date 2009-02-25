@@ -1,1 +1,89 @@
-Kernel_branches. I'll write here really soon. Trust me.
+This page started with a copy of [[http://lists.openmoko.org/pipermail/openmoko-kernel/2008-November/006945.html this email]] sent by Andy Green to the kernel list.
+
+
+A fair amount of "administrivia" has built up, here's the executive summary:
+
+~ 1) *-tracking branches in git have a history now
+~ 2) pending-tracking created
+~ 3) how it is decided what goes on which branch
+~ 4) all patches end up in stable-tracking
+~ 5) we will fork the new stable from andy-tracking
+~ 6) target andy-tracking for patches
+
+Rest of the email is explaining how or why.
+
+
+1) *-tracking branches in git have a history now
+
+The last few days I have been using a new system in git where I hide the
+hard rebases that are happening on my local tree for the -tracking
+branches and instead make "MERGE" commits on the upstream branches.  It
+seems to be working out so far so I explain what's going on.
+
+Committed patches now only appear directly on the branch they were
+committed on.  So if a patch goes into stable-tracking it will appear
+there as normal, but what appears in the downstream branches rebasing
+off that is a single MERGE commit that contains whatever the diff is
+between the unrebased and rebased version of that branch.  Since I
+rebase very often, it won't be unusual that the MERGE version used
+downstream is just the one added upstream patch content, but it can also
+be typical that the MERGE commit will contain the changes from dozens or
+hundreds of patches when the Linus tree updates or example.
+
+The reason for this new way is that it gives the public -tracking
+branches a linear history that you can rewind, despite that they are
+being hard rebased constantly.
+
+
+2) pending-tracking created
+
+It's become clear we can end up with a bunch of patches from several
+directions heading into various upstreams if we're lucky.  So I have
+introduced a "pending-tracking" that fits inbetween stable-tracking and
+andy-tracking, to temporarily hold all the patches that are expected to
+come from upstream eventually.  Balaji-tracking feeds into this now, but
+there's other stuff like Matt's patches headed for s3c64xx upstream too.
+~ This also allows me to publicly rebase Balaji's patches without writing
+in balaji-tracking, and it also allows me to track changes from
+balaji-tracking and elsewhere in one place too.
+
+
+3) How is it decided what goes on which branch
+
+~ - Patch belongs in upstream, eg, Linus or Ben Dooks tree -->
+pending-tracking.  It's kept segregated because we expect it to turn up
+by upstream rebase path; if it changes on the way we can adapt it in
+pending-tracking and rebase
+
+~ - Patch bases on stuff in pending-tracking, eg uses Balaji regulator
+things  --->  andy-tracking.  It's kept segregated because "it lives in
+the future" where the pending upstream patches arrived upstream.
+
+~ - Neither of the above ---> stable-tracking
+
+
+4) All patches end up in stable-tracking.
+
+Stuff temporarily in pending-tracking will eventually turn up from
+upstream pulls, at that time it's no longer pending and is part of what
+stable-tracking rebased against.  The now duplicate patch in
+pending-tracking is then removed.  The patch ended up in stable-tracking.
+
+Once the pending-tracking patch became part of stable-tracking, there is
+no reason for the patches modifying or depending on it held until now in
+andy-tracking not to merge back into stable-tracking either.  So patches
+in andy-tracking gravitate to stable-tracking as soon as possible too.
+
+
+5) We will fork the new stable from andy-tracking
+
+Because andy-tracking is "living in the future" with latest pending
+upstream patches included, it makes sense to take the advantage from
+these even at the risk the patches will be rejected upstream.
+
+
+6) Target andy-tracking for patches
+
+If you simply target andy-tracking for patches, the resulting patch will
+automatically be ready for either andy-tracking, pending-tracking
+(usually) or stable-tracking depending on what it touched.
