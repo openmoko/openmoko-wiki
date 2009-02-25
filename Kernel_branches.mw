@@ -20,48 +20,47 @@ The reason for this new way is that it gives the public -tracking
 branches a linear history that you can rewind, despite that they are
 being hard rebased constantly.
 
-
-
 == andy-tracking ==
 
 We will fork stable kernels from this branch.
 
 Think of this as the branch where most of the action takes place (at least for most of us).
+If you simply target andy-tracking for patches, the resulting patch will
+automatically be ready for either andy-tracking, pending-tracking
+(usually) or stable-tracking depending on what it touched.
 
-This is the branch we usually target for patches but this is not always the case. If in doubt ask in the [http://lists.openmoko.org/mailman/listinfo/openmoko-kernel mailing list].
+If in doubt ask in the [http://lists.openmoko.org/mailman/listinfo/openmoko-kernel mailing list].
 
 == pending-tracking ==
-== stable-tracking ==
 
+We can end up with a bunch of patches from several
+directions heading into various upstreams if we're lucky.
 
-2) pending-tracking created
-
-It's become clear we can end up with a bunch of patches from several
-directions heading into various upstreams if we're lucky.  So I have
-introduced a "pending-tracking" that fits inbetween stable-tracking and
+We have a "pending-tracking" that fits in between stable-tracking and
 andy-tracking, to temporarily hold all the patches that are expected to
 come from upstream eventually.  Balaji-tracking feeds into this now, but
 there's other stuff like Matt's patches headed for s3c64xx upstream too.
-~ This also allows me to publicly rebase Balaji's patches without writing
-in balaji-tracking, and it also allows me to track changes from
+
+This allows for Balaji's patches being rebased without writing
+in balaji-tracking, and it also allows Andy to track changes from
 balaji-tracking and elsewhere in one place too.
 
+== Some patch work-flow before introducing stable-trackig ==
 
-3) How is it decided what goes on which branch
-
-~ - Patch belongs in upstream, eg, Linus or Ben Dooks tree -->
+Patch belongs in upstream, eg, Linus or Ben Dooks tree -->
 pending-tracking.  It's kept segregated because we expect it to turn up
 by upstream rebase path; if it changes on the way we can adapt it in
 pending-tracking and rebase
 
-~ - Patch bases on stuff in pending-tracking, eg uses Balaji regulator
+Patch bases on stuff in pending-tracking, eg uses Balaji regulator
 things  --->  andy-tracking.  It's kept segregated because "it lives in
 the future" where the pending upstream patches arrived upstream.
 
-~ - Neither of the above ---> stable-tracking
+Neither of the above ---> stable-tracking
 
+== stable-tracking ==
 
-4) All patches end up in stable-tracking.
+All patches end up in this branch, that's what it expects.
 
 Stuff temporarily in pending-tracking will eventually turn up from
 upstream pulls, at that time it's no longer pending and is part of what
@@ -73,24 +72,15 @@ no reason for the patches modifying or depending on it held until now in
 andy-tracking not to merge back into stable-tracking either.  So patches
 in andy-tracking gravitate to stable-tracking as soon as possible too.
 
-
-5) We will fork the new stable from andy-tracking
+== More patch work-flow ==
 
 Because andy-tracking is "living in the future" with latest pending
 upstream patches included, it makes sense to take the advantage from
 these even at the risk the patches will be rejected upstream.
 
-
-6) Target andy-tracking for patches
-
-If you simply target andy-tracking for patches, the resulting patch will
-automatically be ready for either andy-tracking, pending-tracking
-(usually) or stable-tracking depending on what it touched.
-
 == Credits ==
 
 This page started as an improvement of [http://lists.openmoko.org/pipermail/openmoko-kernel/2008-November/006945.html this email] sent by Andy Green to the [[Openmoko]] kernel list.
-
 
 {{Languages|Kernel_branches}}
 
