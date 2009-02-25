@@ -1,438 +1,152 @@
-'''Warning''': '''This page is quite outdated. Since many things are changing we are building a new one''': [[Kernel-new-tmp]].
+This page might eventually replace the [[Kernel]] page.
 
-----
+== Is this page meant for you? ==
 
-== General ==
+This information is mostly useful for developers and power/curious users. If you are looking for a kernel to flash into your GTA01/GTA02 you might want to grab one from the daily builds (scroll down and you'll find it) or get one that ships with one of the [[Distributions]]. The good thing with daily builds is that the newest might be the better. The bad thing of daily builds might be that you can get a broken kernel. If you feel way too uncomfortable making decisions about which kernel to try first and you are not willing to spend the time finding out which one works for you, then this page is not meant for you and you should be looking for stable [[Distributions]] instead. The distributors make this easier for for you (Look for the for the blessed kennels in the daily builds).
 
-'''Warning''': '''This page is quite outdated. Since many things are changing we are building a new one''': [[Kernel-new-tmp]].
+== Introduction ==
 
-The Kernel on the GTA01 is based on a vanilla 2.6.21.3 Linux kernel from [http://www.kernel.org/ kernel.org].
+Linux kernel developers from the community and [[Openmoko]] Linux kernel developers maintain a working kernel for the [[Freerunner]] (Also known as GTA02) and also for the [[Neo1973]] (Aka GTA01).
 
-Some additional patches are required for
-* S3C2410 Usb Device Controller
-** We use the driver from iPaq H1940 linux project
-* S3C2410 SD Card Controller
-** We use the driver from the [http://www.tomtom.com/gpl.php TomTom GO kernel]
-* [[QT2410]] machine support
-** This is just some glue that puts all pieces together
-* S3C2410 touch screen driver
-** Again from iPaq H1940 linux project
-* GTA01 machine support
-** Some glue/configuration to pull all pieces together
-* [[GSM Communication Infrastructure]]
-** The kernel-level part (TS07.10 line discipline, GPRS line discipline)
+Right now there is an ongoing effort to reduce the difference between current Linux 2.6 (mainline) and the kernel in the Openmoko repository and thanks to this work we can run the most recent released version of Linux 2.6.
 
-== Obtaining the kernel source ==
+== Sources ==
 
-'''news, news, news''':
+The sources of the Openmoko Linux kernel live in a GIT repository.
 
-If you want to build the kernel please check this temporal page : [[Kernel-new-tmp]]. It might eventually replace this one. it says how to get the kernel source code and how to build it.
+http://git.openmoko.org/?p=kernel.git;a=summary
 
-== Kernel Configuration ==
+[http://git-scm.com GIT] is a fast version control system suited for the workflow that many kernel developers use. It is specially useful when you need to send patches for a project (who might in turn might need to send them upstream). This is an over-simplification but it gives you the idea in case you did not know.
 
-Before you start the build of the kernel you need to configure it.
+GIT might seem complicated at first but once you learn to use it you will find many ways to increase your productivity by using it. For completeness in this page we include the GIT commands that you need in order to build a working kernel.
 
-A good place to start are the predefined configurations. ''defconfig-gta01'' and ''defconfig-gta02'' are some of the more interesting configurations. They are available inside the checkout of the source.
+If you are very new to GIT you might want to read [http://git.or.cz/course/ the good manuals that already available].
 
-You just copy one of the configuration files into .config
+If you would like to contribute code we also have a page with [[Hints_on_using_GIT_and_stgit]] where we all hope to share some cool tips and tricks that can help you. You do not need to learn stgit in order to send patches to the Kernel Mailing List but we have to tell you that once you know git, stgit will make you more productive when you need to send a few patch at once (patchsets).
 
-To customize the configuration use ''make menuconfig''
+=== Branches ===
 
-== Kernel building ==
+GIT allows for different branches that developers use to speed up development. You might have noticed we have a few of them if you visited the web interface (http://git.openmoko.org/?p=kernel.git;a=summary).
 
-The kernel build is executed as normal.  We actually only need the "vmlinux" target, not the "zImage".
+The andy-tracking branch is the one where most of the action takes place these days. 
 
-More current information about building the kernel is currently on the [[Toolchain]] page.
+If you want to learn a lot more about our branch policy please check the [[Kernel_branches]] page.
 
-== Prebuilt kernel images ==
+=== Daily builds ===
 
-Prebuilt bootable kernel images called ''uImage*'' are available from:
-* http://downloads.openmoko.org/distro/releases/Om2008.9/
-For full operation on the currently supported platforms you need some modules inside the rootfs. You can either get a ''modules*'' archive from the above mentioned location (with the same version number) which contains many more modules then you might need.
 
-Alternatively you can check the following location
-for prepackaged modules for the kernel version and install them using ipkg:
-* http://downloads.openmoko.org/
+==== Automatic revisions ====
 
-Latest images can always be found here: http://downloads.openmoko.org/distro/releases/
+Things of a robot that takes whatever kernels are the most recent in GIT and builds them for you. Download from:
 
-=== Modules for the Neo1973 GTA01 ===
+ http://downloads.openmoko.org/distro/experimental/
 
-On the Neo1973 the following modules should be added to support most of the hardware:
-* snd-soc-neo1973-wm8753 snd-soc-s3c24xx-i2s snd-soc-s3c24xx snd-soc-wm8753
-* ohci-hcd
-* bluetooth hci-usb
-* fat vfat msdos nsl-base nls_iso8859_1 nls_cp437
+==== Blessed revisions ====
 
-These really should be in the unmodified root image to start with. See bug 580.
+Picked by our friendly OpenEmbedded developers. Download from:
 
-You'll probably have to put these in a file in /etc/modutils/ and run update-modules to get them to work automatically.
+ http://downloads.openmoko.org/distro/unstable/
 
-* hci_usb
-* s3cmci
-* snd-soc-neo1973-wm8753
+If you understand OpenEmbedded you will get this: Those versions are tied to a specific GIT revision through conf/distro/include/sane-srcrevs.bb.
 
-== Creating a bootable kernel image ==
-u-boot needs all images (such as kernel, initrd, ...) in the form of an uImage.  This is basically just a special header adding CRC protection, version information, etc. Please see [[u-boot]] for details.
+=== Building the andy-tracking branch ===
 
-== Kernel Boot Parameters ==
+Those are the minimum survival commands:
 
-Since the [[QT2410]] can be used with different liquid crystal modules (LCMs), the kernel images for the QT2410 have a boot parameter "tft":
-* If you boot without any tft= parameter, the 'stock' qt2410 240x320 TFT panel is assumed.
-* If you boot with "tft=b" ('b' for big), the timings for the SHARP 8" 640x480 TFT panel are used.
-* If you boot with "tft=p" ('p' for production), the timings for the 2.8" 480x640 TFT panel are used.
+ $ git clone git://git.openmoko.org/git/kernel.git linux-2.6
+ $ cd linux-2.6
+ $ git-checkout --track -b andy-tracking origin/andy-tracking
+ $ cp ./arch/arm/configs/gta02_moredrivers_defconfig .config
 
-== Kernel Subsystems ==
+Before building this kernel you need install a [http://wiki.openmoko.org/wiki/Toolchain#Downloading_and_installing Toolchain].
 
-In this section we will outline a couple of the GTA01 specific kernel drivers / features / subsystems
+ $ ./build
 
-=== GSM ===
+Once the script finishes you will get two files. The first is ''uImage-GTA02.bin'' and a second file with a longer name but same contents, for instance ''uImage-moredrivers-GTA02_andy-tracking_c16287685cb59f91.bin''. Please use the second file if you publish your kernel in some server or if you talk about it in public (specially in bugs reports) because it will allow others to know what kernel you were trying (in case you don't have local changes).
 
-==== Power Management ====
+In order to build the modules you can... TODO: fill.
 
-The '''gta01_pm_gsm''' driver implements GSM power management (this means, if this is compiled as a module, you have to load the gta01_pm_gsm.ko module first)
+If you want to update the local copy of the repository so that you get the latest changes, you can type:
 
-It exports the following sysfs based interface
-<pre>
-root@fic-gta01:/$ ls -l /sys/bus/platform/devices/gta01-pm-gsm.0/
--rw-r--r--    1 root     root         4096 Feb  1 09:58 download
--rw-r--r--    1 root     root         4096 Feb  1 09:58 power_on
--rw-r--r--    1 root     root         4096 Feb  1 09:58 reset
-</pre>
-
-===== Powering up/down =====
-<pre>
-root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/power_on
-gta01-pm-gsm gta01-pm-gsm.0: powering up GSM, thus disconnecting serial console
-
-root@fic-gta01:~$ echo "0" > /sys/bus/platform/devices/gta01-pm-gsm.0/power_on
-gta01-pm-gsm gta01-pm-gsm.0: powered down GSM, thus enabling serial console
-</pre>
-
-Note that powering up GSM <b>disables</b> the console.
-
-===== Resetting =====
-<pre>
-root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/reset
-root@fic-gta01:~$ echo "0" > /sys/bus/platform/devices/gta01-pm-gsm.0/reset
-</pre>
-
-===== Activating GSM baseband download mode =====
-<pre>
-root@fic-gta01:~$ echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/download
-</pre>
-
-===== De-activating GSM baseband download mode =====
-<pre>
-root@fic-gta01:~$ echo "0" > /sys/bus/platform/devices/gta01-pm-gsm.0/download
-</pre>
-
-=== GPS ===
-
-==== Power Management ====
-
-The gta01_pm_gps kernel driver offers a sysfs based interface:
-<pre>
-root@fic-gta01:~$ ls -l /sys/bus/platform/devices/gta01-pm-gps.0/
--rw-r--r--    1 root     root         4096 Feb  1 09:14 power_avdd_3v
--rw-r--r--    1 root     root         4096 Feb  1 09:14 power_lp_io_3v3
--rw-r--r--    1 root     root         4096 Feb  1 09:14 power_pll_core_2v5
--rw-r--r--    1 root     root            0 Feb  1 09:14 power_sequence
--rw-r--r--    1 root     root         4096 Feb  1 09:14 power_vtxco_2v8
--rw-r--r--    1 root     root         4096 Feb  1 09:14 pwron
--rw-r--r--    1 root     root         4096 Feb  1 09:14 reset
-</pre>
-
-The power_avdd_3v, power_lp_io_3v3, power_pll_core_2v5, power_vtxco_2v8, pwron and reset files represent the state of the respective signal.
-
-The <b>power_sequence</b> file implements power-up/power-down sequence in accordance with the GlobalLocate data sheet.
-
-===== Powering up =====
-root@fic-gta01:~$ echo "power_up" > /sys/bus/platform/devices/gta01-pm-gps.0/power_sequence
-===== Powering down =====
-root@fic-gta01:~$ echo "power_down" > /sys/bus/platform/devices/gta01-pm-gps.0/power_sequence
-
-=== Asound driver ===
-
-==== High-level requirements ====
-
-The GTA01 audio subsystem is fairly complex, even though the high-level requirements for the sound driver are simple.
-The features we need to support
-
-* voice call support
-** passing through the microphone signal to the GSM Modem
-** passing through the GSM Modem audio output to the integrated speaker(s)
-** the microphone input mixer gain will be statically configured according to the dynamic requirements
-** the audio volume that is sent to the GSM modem can be adjusted via line out level
-** the audio volume incoming (from GSM modem -> codec) can be adjusted via speaker out level
-* voice call recording support
-** the user is able to record phone conversations on digital storage inside the phone. Format will be ogg (not important to driver)
-** ideally, the user can choose between recording only incoming or outgoing signal, or both.
-** for both, we'd need to mix both microphone and line-in signals before recording. is this possible?
-* voice call playback support
-** the user is able to playback recorded files during a conversation.  this means that PCM playback needs to be mixed with mic input before being passed to line-out (and to the GSM modem)
-* media playback support
-** an audio player can play back mp3/ogg/flac/... files and output sound via integrated speakers or headphone
-* headphone jack switch
-** this is connected to a GPIO of the S3C2410. How to best integrate this with the sound driver? It should just be handled like any other headphone jack reporting of e.g. laptop computers.
-
-For more details see [[Neo1973 Audio Subsystem]]
-
-=== Bluetooth ===
-
-We're using the stock bluez implementation of the linux kernel.
-
-==== Power Management ====
-
-The bluetooth basically has the following preconditions
-* BT_EN being set
-* The Voltage regulator set up properly
-* The ohci-hcd driver being loaded
-
-The gta01_pm_bt driver implements the following files:
-<pre>
-root@fic-gta01:/$ ls -l /sys/bus/platform/devices/gta01-pm-bt.0
--rw-r--r--    1 root     root         4096 Feb  1 09:52 power_on
--rw-r--r--    1 root     root         4096 Feb  1 09:52 reset
-</pre>
-
-===== Powering up the device =====
-
-<pre>
-root@fic-gta01:/$ echo "1" > /sys/bus/platform/devices/gta01-pm-bt.0/power_on
-usb 1-1: new full speed USB device using s3c2410-ohci and address 4
-usb 1-1: configuration #1 chosen from 1 choice
-</pre>
-
-===== Powering down the device =====
-<pre>
-root@fic-gta01:/$ echo "0" > /sys/bus/platform/devices/gta01-pm-bt.0/power_on
-usb 1-1: USB disconnect, address 3
-</pre>
-
-===== Asserting reset (low-active) =====
-<pre>
-root@fic-gta01:/$ echo "0" >  /sys/bus/platform/devices/gta01-pm-bt.0/reset
-root@fic-gta01:/$ usb 1-1: USB disconnect, address 2
-</pre>
-
-===== De-asserting reset (low-active) =====
-<pre>
-root@fic-gta01:/$ echo "1" >  /sys/bus/platform/devices/gta01-pm-bt.0/reset
-s3c2410-ohci s3c2410-ohci: wakeup
-usb 1-1: new full speed USB device using s3c2410-ohci and address 3
-usb 1-1: configuration #1 chosen from 1 choice
-</pre>
-
-==== Getting started ====
-
-<pre>
-root@fic-gta01:~$ hciconfig hci0 up
-root@fic-gta01:~$ hcitool  scan
-Scanning ...
-00:14:9A:77:A2:02       A780
-root@fic-gta01:~$ hcitool inq 00:14:9A:77:A2:02
-Inquiring ...
-00:14:9A:77:A2:02       clock offset: 0x55df    class: 0x502204
-root@fic-gta01:~$ hcitool cc 00:14:9A:77:A2:02
-root@fic-gta01:~$ hcitool con
-Connections:
-< ACL 00:14:9A:77:A2:02 handle 42 state 1 lm MASTER
-root@fic-gta01:~$ hcitool info 00:14:9A:77:A2:02
-Requesting information ...
-BD Address:  00:14:9A:77:A2:02
-Device Name: A780
-LMP Version: 1.1 (0x1) LMP Subversion: 0x700
-Manufacturer: Broadcom Corporation (15)
-Features: 0xff 0xff 0x0d 0x00 0x00 0x00 0x00 0x00
-<3-slot packets> <5-slot packets> <encryption> <slot offset>
-<timing accuracy> <role switch> <hold mode> <sniff mode>
-<park state> <RSSI> <channel quality> <SCO link> <HV2 packets>
-<HV3 packets> <u-law log> <A-law log> <CVSD> <power control>
-<transparent SCO>
-</pre>
-
-=== AUX Button ===
-
-The AUX button (formerly 911 button) is supported via the "gta01kbd" driver in the kernel (drivers/input/keyboard/gta01kbd.c).
-
-It creates an input event device that only issues "KEY_PHONE" press/unpress events.
+ $ git-pull
 
-=== Power Management Unit (PMU) ===
-
-The PMU is supported via the "pcf50606" driver in the kernel (drivers/i2c/chips/pcf50606.c).
-
-This driver provides a number of userspace interfaces for the various bits and pieces of the PMU
-
-==== Power Button, Charger insertion ====
+Before reporting that the new kernel does not build please first check for changes in the configuration file.
 
-The PMU creates an input device that supports the following keys:
-* KEY_POWER: power button of GTA01
-* KEY_POWER2: USB power supply insert/remove
-* KEY_BATTERY: Charger insert/remove
-
-==== RTC ====
-
-The real-time clock, including the alarm feature, is implemented as standard RTC (/dev/rtc).
-
-==== Watchdog ====
-
-The PMU-integrated watchdog is implemented using the standard watchdog character device.
-
-==== Voltage Regulators ====
-
-The voltage regulators are exported to userspace using sysfs, much like lm_sensors.
-
-Every regulator can be read (and written!).  The format is ASCII in millivolts.
-
-<pre>
-root@fic-gta01:/sys/devices/platform/s3c2410-i2c/i2c-0/0-0008$ ls -l /sys/bus/i2c/devices/0-0008/voltage_*
--rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_d1reg
--rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_d2reg
--rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_d3reg
--rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_dcd
--rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_dcde
--rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_dcud
--rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_lpreg
--rw-r--r--    1 root     root         4096 Sep  3 11:55 /sys/bus/i2c/devices/0-0008/voltage_ioreg
-root@fic-gta01:/sys/devices/platform/s3c2410-i2c/i2c-0/0-0008$ cat voltage_dcd
-1300
-</pre>
+=== kernel building tips ===
 
-==== Battery Voltage ====
-
-The battery voltage (in millivolts) can be read via sysfs
+If you are touching kernel code and building it quite often you really want to be using [http://ccache.samba.org ccache]. It will save you a lot of time.
 
-<pre>
-root@fic-gta01:~$ cat /sys/bus/i2c/devices/0-0008/battvolt
-3767
-</pre>
-
-==== Battery charging current ====
+TODO: submit a patch for the build script that makes ccache use easier.
 
-The battery charging current (in milliamperes) can be read via sysfs
-
-<pre>
-root@fic-gta01:~$ cat /sys/bus/i2c/devices/0-0008/chgcur
-0
-</pre>
+== Contributing ==
 
-==== Battery temperature ====
+The development resources [[Openmoko]] offers are:
 
-The battery temperature (in centigrades) can be read via sysfs
+* Git repository: http://git.openmoko.org/?p=kernel.git;a=summary
+* [http://lists.openmoko.org/mailman/listinfo/openmoko-kernel Mailing list] ([http://lists.openmoko.org/pipermail/openmoko-kernel/ Online Archive])
 
-<pre>
-root@fic-gta01:~$ cat /sys/bus/i2c/devices/0-0008/battemp
-25
-</pre>
+We appreciate your contributions. Check the Open Issues at the end of this page to check where we need more help.
 
-=== Backlight ===
+If in doubt ask in the mailing list.
 
-We provide a driver that supports the linux kernel standard backlight API. You can find the respective sysfs files in /sys/class/backlight/
+== FAQ ==
 
-=== Vibrator ===
+=== Why does Openmoko cares about sending code upstream instead of (insert your task here)? ===
 
-The vibrator driver is implemented as a LED driver.  You can find the respective sysfs files in /sys/class/leds/.
-The vibrator classdev name is '''gta01:vibrator'''.
+There are two very different approaches and both of them would be doomed if we stuck all our resources to only one of to them.
 
-Please note, depending on the kernel version, the driver only supports on/off or PWM of the vibrator device.  If you want to run the vibrator at full power, use
-<pre>
-root@fic-gta01:~$ echo "255" > /sys/class/leds/gta01\:vibrator/brightness
-</pre>
+The first approach is not to care about upstream kernel development efforts and stick to an old kernel while struggling to make it work, ignoring the fact that it is [http://www.kernel.org upstream] where the people who wants to help us improve, maintain and support the code running in our devices hang out.
 
-== GTA02 /sys mappings for andy-tracking vs stable ==
-The kernel that is currently in development changes some paths around /sys, so userspace must be prepared for a change.
+The second is to care way '''too much''' about upstream to the point that we are not willing to ship a temporal dirty hack that make users happy and able to better use their phones. We cannot afford that kind of purity.
 
-Here are the current /sys mappings for andy-tracking (which has Balaji's
-regulator PMU stuff).  The reason virtually everything has changed is
-mainly due to the device tree changes to fix suspend - resume, many more
-things have a child relationship to the PMU now.
+As many things in engineering we have to find a point in the middle that works well -- we will try hard to do it.
 
-<pre>
-old: /sys/devices/platform/neo1973-pm-host.0/hostmode
-new: /sys/class/i2c-adapter/i2c-0/0-0073/neo1973-pm-host.0/hostmode
+=== Who's Andy and why is he sticking his name in the kernel? ===
 
-same: /sys/devices/platform/s3c2410-ohci/usb_mode
+He takes some credit and most the blame. It is an usual practice that in kernel development some branches are named after the person who is taking care of them. He makes sure that the kernel still builds when Linus and his friends feel like it is time to update the upstream kernel and believe us: it is not as fun as it might sound and it happens often.
 
-old: /sys/devices/platform/neo1973-pm-gsm.0/power_on|reset|download
-new: /sys/class/i2c-adapter/i2c-0/0-0073/neo1973-pm-gsm.0/...
+== Known issues ==
 
-old: /sys/devices/platform/neo1973-resume.0/resume_reason
-new: /sys/class/i2c-adapter/i2c-0/0-0073/neo1973-resume.0/resume_reason
-~     /sys/class/i2c-adapter/i2c-0/0-0073/resume_reason
-~     (split into CPU wake interrupt and secondly PMU-specific reason)
+=== Sysfs paths ===
 
-old: /sys/devices/platform/sc32440_fiq.0/fiq/count|dump|write
-new: /sys/devices/platform/sc32440_fiq.0/gta02-hdq.0/hdq/...
+Unfortunately we had to update many sysfs paths (see [[GTA02_sysfs]]) and since we did it the kernel stopped working properly with some distributions. Unless the distribution is abandoned it will likely catch up with the newest kernel soon.
 
-old: /sys/devices/platform/bq27000-battery.0/power_supply/bat/
-~     uevent|type|status|voltage_now|current_now|charge_full|temp|
-~     technology|present|time_to_empty_now|time_to_full_now|capacity|
-~     online
-new: /sys/class/power_supply/battery/...
+[[FSO]] developers realized that this problem could be prevented from from happening in the future and they decided to code a nice daemon called [http://www.freesmartphone.org/index.php/Implementations/OpenDeviceDaemon odeviced].
 
-old: /sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/
-~     chgmode|charger_type|force_usb_limit_dangerous|dump_regs
-new: /sys/class/i2c-adapter/i2c-0/0-0073/pcf50633-mbc/...
+== Open Tickets ==
 
-old:
-/sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/neo1973-pm-bt.0/
-~     power_on|reset
-new:
-/sys/class/i2c-adapter/i2c-0/0-0073/pcf50633-regltr.6/neo1973-pm-bt.0/...
+'''Please read [https://docs.openmoko.org/trac/query?status=accepted&status=assigned&status=in_testing&status=new&status=reopened&component=System+Software&order=priority&col=id&col=summary&col=status&col=type&col=priority&col=milestone&col=component this report]''' if you wish to know what the current issues are.
 
-old:
-/sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/neo1973-pm-gps.0/pwron
-new:
-/sys/class/i2c-adapter/i2c-0/0-0073/pcf50633-regltr.7/neo1973-pm-gps.0/pwron
+If you can help us with one of those issues it would be a great way to help us move forward. If in doubt please write to the Openmoko Kernel Mailing List. Let us link some bugs here without overdoing it because trac is better than a normal wiki for this. If we have more than 10 bugs the following lists then we might be doing it wrong.
 
-same: /sys/devices/platform/soc-audio/codec_reg|codec_reg_write
+=== Easy bugs ===
 
-old: /sys/devices/platform/glamo3362.0/regs
-new: /sys/class/i2c-adapter/i2c-0/0-0073/pcf50633-regltr.9/glamo3362.0/regs
+Those are the bugs that active kernel developers believe can be fixed by kernel programmers that might want to join us. Thus they are leaving them unfixed for some reasonable time while they work on the harder bugs.
 
-old:
-/sys/devices/platform/neo1973-vibrator.0/leds/neo1973:vibrator/brightness
-new: /sys/class/leds/neo1973:vibrator/brightness
+TODO: list of bugs linking to trac.
 
-old: /sys/devices/platform/gta02-led.0/leds/gta02-aux:red/brightness
-new: /sys/class/leds/gta02-aux:red/brightness
+=== Normal bugs ===
 
-old: /sys/devices/platform/gta02-led.0/leds/gta02-power:blue/brightness
-new: /sys/class/leds/gta02-power:blue/brightness
+Those are the bugs that we have not fixed because they might be hard and/or because we have not found the time to fix them. They might end up being Esasy Bugs or Evil bugs. We will use trac for them. Please do not add a list of bugs here.
 
-old: /sys/devices/platform/gta02-led.0/leds/gta02-power:orange/brightness
-new: /sys/class/leds/gta02-power:orange/brightness
+'''Read this [https://docs.openmoko.org/trac/query?status=accepted&status=assigned&status=in_testing&status=new&status=reopened&component=System+Software&order=priority&col=id&col=summary&col=status&col=type&col=priority&col=milestone&col=component report]''' to find out more about them.
 
-old: /sys/devices/platform/spi_s3c24xx_gpio.1/spi0.{0|1}/
-~     power/wakeup|dump|full_scale...
-new: /sys/class/i2c-adapter/i2c-0/0-0073/lis302dl.{1|2}/...</pre>
-== Kernel TODO ==
+=== Hard bugs ===
 
-=== Various ===
-* speed up in-kernel boot process
-** delay calibration
-** framebuffer takes ages
+Those are the evil bugs that we haven't fixed either because:
 
-===  TS07.10 multiplex ===
+# We do not know how to it in reasonable time
+# We do not have a clue about how we can fix them
+# Hardware vendor doesn't want to release documentation (some of them do that unfortunately / perhaps breaking promises they made to Openmoko about making things easier for developers)
+# More testing is needed (perhaps a hard-to reproduce bug)
 
-=== PCF50606 ===
-* check conversion table for temperature
-* implement 'persistent alarm setting' (see mail from mickey)
+Ok, here is the list:
 
-=== USB device driver ===
-* test switching between usb host and usb device
+* [https://docs.openmoko.org/trac/ticket/2235 #2235 : Monochrome display on resume]
 
-== This page TODO ==
 
-=== Freerunner / GTA02 ===
-
-For more recent kernel versions (like the one shipped on the [[Freerunner]] / [[GTA02]]), see the [http://docs.openmoko.org/trac/gitweb?p=kernel.git;a=summary git] repository.
-
-== Mailing list ==
-
-Openmoko related kernel development discussions happen on the [http://lists.openmoko.org/mailman/listinfo/openmoko-kernel openmoko-kernel@lists.openmoko.org] mailing list.
-
-{{Languages|Kernel}}
+{{Languages|Kernel-new-tmp}}
 
 [[Category:Kernel]]
+[[Category:System Developers]]
+[[Category:Application Developer]]
