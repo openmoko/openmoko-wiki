@@ -431,7 +431,7 @@ LABEL="net_start"
 # Bring devices up and down only if they're marked auto.
 # Use start-stop-daemon so we don't wait on dhcp
 ACTION=="add", DRIVERS=="?*",       RUN+="/sbin/start-stop-daemon --start --background --pidfile /var/run/network/bogus --startas /sbin/ifup -- --allow auto $env{INTERFACE}"
-
+ck
 ACTION=="remove",       RUN+="/sbin/start-stop-daemon --start --background --pidfile /var/run/network/bogus --startas /sbin/ifdown -- --allow auto $env{INTERFACE}"
 
 LABEL="net_end"
@@ -443,6 +443,13 @@ This appears to be fixed in Ubuntu 8.04 [[User:Mattt|Mattt]] 11:38, 30 July 2008
 :Actually it appears that it's not fixed, but patching that file and disconnecting and reconnecting the phone works perfectly. --[[User:Johndoesacc|Johndoesacc]] 18:37, 20 August 2008 (UTC)
 :Well, yes, it must be fixed because it worked for me out-of-the-box without tweaking the udev rule on 8.04 --[[User:EtienneG|EtienneG]] November 26th, 2008
 :It wasn't solved in my case, as of 3. February 2009 in 8.04 (AMD64), the patch above solved my problem thou. --[[User:VilleWitt|VilleWitt]] February 3td, 2009.
+
+Iptables Configuration with GUI:
+
+Firestarter can be used to allow the freerunner to connect to the internet without manually running iptables commands. Firestarter is in the ubuntu repositories and can be installed with a 
+<pre>sudo aptitude install firestarter</pre>
+Once installed, the firestarter preferences dialog has a network section, under which a drop-down box appeasr which is labeled  "Local network connected device." Select the freerunner, generally "Unknown device(usb0)" and check the "Enable internet connection sharing" box. The freerunner should be able to access the internet.
+-Tested in ubuntu 8.10--[[User:makito|Makito]] February 26, 2009
 
 === Ubuntu Workaround ===
 Use [http://wicd.sourceforge.net/ wicd] instead of networkmanager:
