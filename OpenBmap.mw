@@ -1,167 +1,83 @@
-[http://realtimeblog.free.fr/ OpenBmap] is a free and open map of wireless communicating objects (e.g. cellular antenna, Wi-Fi, Bluetooth). It provides tools to mutualize data, create and access this map.
-
-'''Help us build a free database! We hope many will upload!'''
-
-==Description==
-[[Image:openBmapGTK-0.4.0-Main.png|x250px|left]]The purpose of this software is to log GSM data, together with
-GPS coordinate. This data are sent to the [http://www.openbmap.org openBmap] website,
-in order to build a free database. In order to keep a '''high quality'''
-of data, we store GPS quality, speed, GSM signal strength, etc... This is what makes us different from other similar projects: focus on quality.
+"openBmap is a free and open map of wireless communicating objects (e.g. cellular antenna, Wi-Fi, Bluetooth). It provides tools to mutualize data, create and access this map."
 
 At this time, only cellular networks are concerned.
 All the software code is AGPL v3 and data are Creative Commons License
 (creative commons Attribution-Share Alike 3.0 Unported), thus the data 
 is free to use (in the same way as OpenStreetMap).
 
-Privacy note: when you upload, exactly as with [http://www.openstreetmap.org OpenStreetMap], your logs allow to 
-know where and when you were. You have been warned  ;-)  !
+Map status (last update 2009-02-06 03:30:31)
+Cellular: 6 countries, 9 mobile networks, 313 location area codes, 8905 
+cells
 
-==Possible uses of this database==
-* get your location based on the current GSM cell you are connected to.
-(GPS needs extra power to function, GSM is always on. Less precise
-than GPS, but enough for a lot of usages. Instant location as database is located on your phone, GPS
-needs time to get a fix. This also protects your privacy: no need of sending your GSM data to third parties)
-* speed up GPS first time to fix by providing the location based on GSM data (the GSM gives less precise result as GPS)
-* geolocate your photos when taken
-* get a map of GSM coverage
-* get a map of 2, 2.5, 3G coverage (not yet implemented)
+This could be used for:
+* locate you on a map. You don't need to turn GPS on. And as your GSM is 
+always on, and the database is located on your phone, it is 
+instantaneous. This prevent your battery and your privacy (don't need to 
+send your GSM data to anyone on the Web).
+
+* provide rough location (the GSM gives less precise result as GPS) to 
+the GPS, in order to speed up first time to fix.
+
 * ...
 
-==Current tools and API==
+The package "Freesmartphone.org client" [2] provides you with a logger, 
+and an uploader. It has been tested against FSO Milestones 5.
+
 If you want to get located through your GSM data, at the moment you can 
-use the Web [http://openbmap.org/api/openbmap_api.php5 API]. There is a [http://openbmap.org/with_osm5.php5 Web interface] available to use this API and display zones on a map (e.g. KML for Google Earth).
+use the Web API [3]. There is a Web interface [4] available to use this 
+API and display zones on a map.
 
-A [http://twitter.com/openBmap/ twitter feed] let you know when uploads are being processed.
+We hope many will upload!
 
-==Related Applications==
-* [[Cellhunter]]
-* [[openBmap-locator]]
+Privacy note: when you upload, exactly as with OSM, your logs allow to 
+know where and when you were. You have been warned  ;-)  !
 
-==Versions==
-===0.4.0===
-* New graphical interface!
-* Glade file path not hardcoded anymore.
-* Application logging level now in config file.
-* Added cells seen statistics.
-* Details in CHANGELOG.
+I copy/paste the README of the package at the end of this email.
 
-===0.3.3===
-The version number 0.3.3 has been used in logs uploaded to the server.
-It was meant as a testing number for version 0.4.0 only.
+Onen
 
-===0.3.2===
-(Version 0.3.1 has never been officially released.)
-* Debian package.
-* Button images do not embed any more text. The text is now a regular
-label under the image.
-* Button text is now "Start" instead of "Generate".
-* rxlev added to serving cell XML log, if available.
-* timing advance is available, but deactivated. It needs to be logged
-only on specific situation.
-* Application logging level set to INFO by default.
-* Logging level of some application messages have been changed.
-* In a loop, time is now limited to get all data necessary.
+[1] http://realtimeblog.free.fr/
+[2] http://sourceforge.net/project/showfiles.php?group_id=218065
+[3] http://realtimeblog.free.fr/api/openbmap_api.php
+[4] http://realtimeblog.free.fr/cell_map.php
 
-===0.3.0===
-* Beta Neighbour cells log now stable and activated!
-* Log files are now much bigger, you should have less files to upload.
-* If logs in memory when exiting, they will be written to disk.
-* Ignore neighbour cell if lac, cid or rxlev is 0.
-* GUI now says: GPS is active, and waiting for 3D fix.
-* Fix: GPS time in log is now based on GPS data.
-Was using the locale time of the phone.
-* When MCC changes, write logs to file.
-This means, a log file, only contains data related to a same MCC,
-that is to say, to one country.
-* Details in CHANGELOG.
+README:
 
-===0.2.1===
-Bug fix release: corrects the application displaying N/A for GSM even when obviously there is coverage.
+openBmap logger version 0.1
 
-===0.2.0===
-* The complete process is now done through graphical interface!
-* Neighbour cells logging code is present, but deactivated. The reasons are:
-** we need to clarify the meaning of some fields
-** we need to clarify if there is no risk of mixing cells and MCC/MNC at the borders.
-* Now displays GSM data at startup. No need to wait for network update.
-* Before upload, login/password graphical interface added.
-* After upload, asks about deleting all processed log files.
-* Requests CPU ressource to prevent phone from going to suspend (this depends on the configuration of the phone...).
-* Do not log if a call is ongoing. The reasons are:
-** when in a call org.freesmartphone.GSM.Network.GetStatus() returns a lower signal strength.
-** org.freesmartphone.GSM.Monitor.GetNeighbourCellInformation() returns garbage when in a call.
-* Software id and version added in generated logs
+What you should expect:
+* generation of logs
+* upload of logs
 
-==What you should expect==
-* The complete process is done through graphical interface.
-* Requests CPU resource to prevent phone from going to suspend (this depends on the configuration of the phone...).
-* generation of logs (no log during a call).
-* logs serving and neighbour cells.
-* Graphical window to enter login/password before upload (possibility to cancel upload).
-* upload of logs.
-* Graphical window proposing to delete all logs already processed.
-
-==Manual==
+Manual:
 Interface is straightforward.
 
-Note: The GPS is started as soon as the application is launched. And it keeps running if the application is logging or not. This is to prevent losing the GPS position if you pause your logging.
-You have to exit the application in order to stop the GPS.
-
-The main window displays data about:
-* GSM
-* GPS
-* GSM statistics
-Seen cells (servings / neighbours) counters:
-**total since launch
-**number of cells since last start (gets updated only when logging)
-
-and the status of the logger (running or not). You can find a menu button which brings a new window.
-
-This menu window is a grid of buttons:
-
-* A button to start generating logs. Values will be displayed when valid. Logs are stored under HOME/.openBmap/Logs by default.
-GPS data is considered valid only when we have a 3D fix.
-
+* A button to start generating logs. Values will be displayed when
+valid. Logs are stored under HOME/.openBmap/Logs by default.
 * A button to stop generating logs.
 
-* A button to upload.
-This pops a window up, which displays the current login/password. Please modify it before pressing 'ok' button if needed. You can cancel upload by pressing 'cancel'.
+Note that at the moment, the GSM part gets updated only after
+receiving an asynchronous update from the network. This
+means at start time, it is normal the GSM part does not display
+GSM information, even if you are registered to network.
 
-If you press 'ok', this will block the interface until every log has been uploaded. This means that if you do not have Internet connection up and running, the GUI will be frozen until timeout of the upload part.
+* A button to upload. This will block the interface until every log has 
+been uploaded.
+This means that if you do not have Internet connection up and
+running, the GUI will be frozen until timeout of the upload part.
+After succesfull upload, the logs are moved to
+HOME/.openBmap/Processed_logs by default.
 
-After succesfull upload, the logs are moved to HOME/.openBmap/Processed_logs by default.
+Warning: you should create an account on realtimeblog.free.fr
+website, and fill the login/password in the configuration file
+before upload works.
 
-When upload is finished, the result is first displayed (how many logs have been uploaded out of how many available). Then a popup window will propose you to delete all (this includes possible logs from previous upload) the processed logs (located in HOME/.openBmap/Processed_logs by default).
+* A button to exit.
 
-Warning: you should create an account on www.openBmap.org website, and fill a correct login/password in the popup window displayed before upload works.
+Config file and application log are located under HOME/.openBmap
+directory by default.
 
-* A button to go back to main screen.
-
-* A button to exit (if logger is active, it will first stop it cleanly, and then exit).
-
-Config file and application log are located under HOME/.openBmap directory by default.
-
-You can modify values in the config files (by editing it). This way you can have a fine grained control of your logger:
-* change the locations of logs
-'openbmap logs directory name', 'openbmap uploaded logs directory name'
-* change the rate of logging
-openbmap logger default scanning speed (in sec.) = 10
-* set a minimal speed for logging
-gps minimal speed for logging (km/h) = 0
-* set a maximal speed for logging
-gps maximal speed for logging (km/h) = 150
-* 'openBmap.log' contains the application logs, sets the level of output
-application logging level (debug, info, warning, error or critical)
-* please do not modify other values, this could prevent the logger from working correctly.
-
-==Troubleshooting==
-*If you break your configuration file, just exit the application.
-Delete the configuration file (by default: HOME/.openBmap/openBmap.conf).
-Launch the application. The configuration file, if not found is generated with default values.
-
-*Please note that if you have your .openBmap folder located on your uSD card, setting the application logging output level to debug seems to make the logger take too much time for looping, thus rejecting the logs. By default, the level is set to info, and works well.
-
-==Known bugs==
+Known bugs:
 * when you are generating logs, and you press 'Stop' button.
    A popup window let you know you should wait for the logger to
    finish stopping. Under FSO M5, if you press the power
@@ -169,15 +85,5 @@ Launch the application. The configuration file, if not found is generated with d
    Nevertheless the GUI is frozen. You will have to kill the
    process.
 
-==Source,Packages==
 
- opkg install openbmap-logger
-
-Tar, ipk package can be found [http://sourceforge.net/project/showfiles.php?group_id=218065&package_id=310952 here].
-The package can also be found on [http://www.opkg.org/package_186.html opkg.org].
-Public git [http://myposition.git.sourceforge.net/git/gitweb.cgi?p=myposition;a=summary repository].
-
-== Weblinks ==
-[http://sourceforge.net/apps/mediawiki/myposition/index.php?title=Main_Page Wiki at SourceForge]
-
-[[category:Applications]]
+_____________________________________
