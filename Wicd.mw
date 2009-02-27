@@ -13,5 +13,32 @@ In Preferences you should give in: eth0 for wireless and usb0 for wired connecti
 
 Wicd should show now your networks. Connecting to one of them is not working at the moment. You will always end up with "Putting down interface..." and nothing happens after that but work is in progress about this problem: [http://wicd.net/punbb/viewtopic.php?id=132 click].
 
+== SHR ==
+* install wicd (from www.opkg.org)
+ opkg install http://www.opkg.org/packages/ethtool_6_armv4t.ipk http://www.opkg.org/packages/wicd_1.5.6_armv4t.ipk
+* write these settings into /etc/wicd/wired-settings.conf <br /> 
+<pre>
+ [wired-default]
+ afterscript = None
+ broadcast = None
+ dns3 = None
+ ip = 192.168.0.202
+ dns1 = None
+ use_static_dns = False
+ default = True
+ netmask = 255.255.255.0
+ dns2 = None
+ beforescript = None
+ disconnectscript = None
+ gateway = 192.168.0.200
+ use_global_dns = False
+</pre>
+* if desired copy also all your wireless settings from your host to the FR: <br />
+ Host# sudo scp /etc/wicd/wireless-settings.conf root@192.168.0.202:/etc/wicd/.
+* uninstall '''connman''' (network-manager)
+ FR# opkg remove connman*
+warning: ssh connection will close and you have to reboot the system so wicd can establish the network
+* reboot
+ FR# reboot
 
 [[Category:Networking]]
