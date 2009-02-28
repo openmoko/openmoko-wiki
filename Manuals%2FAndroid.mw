@@ -65,6 +65,41 @@ Does not work, GSM get's confused when you try to use it
 
 Although wifi works, there are two problems; one, you can't bring up a keyboard to enter your encryption key and two, Android does not obtain the DNS settings properly from the router. Both can be worked around.
 
+=== Solution one ===
+
+Install [http://andappstore.com/AndroidPhoneApplications/apps/4642 aKeyUI] this app allows you to enter text and copy it to a clipboard, which you can then paste into any test field:
+
+Change directory to where you downloaded the app then install:
+
+ # adb install aKeyUI.apk
+
+Touch the Application tab to display your installed apps, aKeyUI should be one of them. Load it up, enter the key for your wireless network and click copy.
+
+Now go to 'Settings' > 'Wireless controls' > 'Wi-Fi settings' and you should see your wireless network listed there. Touch it and when it asks you for the key, long-touch the key field and select paste.
+
+Now you are connected but you need to add a DNS server to android. Connect to Android using adb and pull your init.rc:
+
+ # ifconfig usb0 192.168.0.200 netmask 255.255.255.0
+ # adb kill-server
+ ADBHOST=192.168.0.202 adb devices
+ # adb pull /init.rc init.rc
+
+ # chown YOUR_USER:YOUR_GROUP init.rc
+
+Now edit your init.rc, placing this line at the end, replacing x.x.x.x with a DNS server
+
+ setprop net.dns1 x.x.x.x
+
+Change the ownership back to root and push it back to your FreeRunner:
+
+ # chown root:root init.rc
+ # adb shell mount -o remount,rw /dev/root /
+ # adb push init.rc /init.rc
+ # adb shell sync
+ # adb shell reboot
+
+=== Solution two ===
+
 Boot your FreeRunner while connected to USB then run these commands:
 
  # ifconfig usb0 192.168.0.200 netmask 255.255.255.0
