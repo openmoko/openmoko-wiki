@@ -79,32 +79,6 @@ Now go to 'Settings' > 'Wireless controls' > 'Wi-Fi settings' and you should see
 
 Now you are connected but you need to add a DNS server to android. 
 
-=== DNS Fix ===
-
-Connect to Android using adb and pull your init.rc:
-
- # ifconfig usb0 192.168.0.200 netmask 255.255.255.0
- # adb kill-server
- # ADBHOST=192.168.0.202 adb devices
- # adb pull /init.rc init.rc
-
- # chown YOUR_USER:YOUR_GROUP init.rc
-
-Now find this part of your your init.rc, and add new lines containing the DNS value to the [https://www.opendns.com/ OpenDNS] servers:
-
- # Setup the DNS server for USB
- #setprop net.dns1 192.168.0.200
- setprop net.dns1 208.67.222.222
- setprop net.dns2 208.67.220.220
-
-Change the ownership back to root and push it back to your FreeRunner:
-
- # chown root:root init.rc
- # adb shell mount -o remount,rw /dev/root /
- # adb push init.rc /init.rc
- # adb shell sync
- # adb shell reboot
-
 === Solution two ===
 
 Boot your FreeRunner while connected to USB then run these commands:
@@ -143,6 +117,33 @@ Reboot the FreeRunner:
  # adb shell reboot
 
 "setprop net.dns1 $YOUR_DNS_IP"
+
+
+=== DNS Fix ===
+
+Connect to Android using adb and pull your init.rc:
+
+ # ifconfig usb0 192.168.0.200 netmask 255.255.255.0
+ # adb kill-server
+ # ADBHOST=192.168.0.202 adb devices
+ # adb pull /init.rc init.rc
+
+ # chown YOUR_USER:YOUR_GROUP init.rc
+
+Now find this part of your your init.rc, and add new lines containing the DNS value to the [https://www.opendns.com/ OpenDNS] servers:
+
+ # Setup the DNS server for USB
+ #setprop net.dns1 192.168.0.200
+ setprop net.dns1 208.67.222.222
+ setprop net.dns2 208.67.220.220
+
+Change the ownership back to root and push it back to your FreeRunner:
+
+ # chown root:root init.rc
+ # adb shell mount -o remount,rw /dev/root /
+ # adb push init.rc /init.rc
+ # adb shell sync
+ # adb shell reboot
 
 = Data management =
 
