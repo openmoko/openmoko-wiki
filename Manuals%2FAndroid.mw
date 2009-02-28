@@ -63,6 +63,43 @@ Does not work, GSM get's confused when you try to use it
 
 == Wifi ==
 
+Although wifi works, there are two problems; one, you can't bring up a keyboard to enter your encryption key and two, Android does not obtain the DNS settings properly from the router. Both can be worked around.
+
+Boot your FreeRunner while connected to USB then run these commands:
+
+ # ifconfig usb0 192.168.0.200 netmask 255.255.255.0
+ # adb kill-server
+ ADBHOST=192.168.0.202 adb devices
+
+ # adb shell mount -o remount,rw /dev/root /
+ # adb pull /etc/wifi/wpa_supplicant.conf wpa_supplicant.conf
+
+You will now have the wpa_supplicant.conf file in your working directory, change it's ownership so you can edit it:
+
+ # chown YOUR_USER:YOUR_GROUP wpa_supplicant.conf 
+
+Now you can edit it to contain your wireless details, then push it back to the FreeRunner. For example add an uncommented section like this:
+
+ network={
+ ssid="example"
+ proto=WPA
+ key_mgmt=WPA-PSK
+ pairwise=CCMP TKIP
+ group=CCMP TKIP WEP104 WEP40
+ psk=06b4be19da289f475aa46a33cb793029d4ab3db7a23ee92382eb0106c72ac7bb
+ priority=2
+ }
+
+Save your changes, change the owner back to root and push it back to the FreeRunner:
+
+ # chown root:root wpa_supplicant.conf
+ # adb push wpa_supplicant.conf /etc/wifi
+
+Reboot the FreeRunner:
+
+ # adb shell sync
+ # adb shell reboot
+
 = Data management =
 
 == Contacts ==
