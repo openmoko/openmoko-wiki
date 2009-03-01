@@ -112,6 +112,30 @@ perl convert2gpx.pl 20080903_111508.log > 20080903_111508.gpx
 
 tangoGPS does not support the import of tracks. You may help yourself by using [http://relet.net/frog/archives/68 this tool] to import GPX trackpoints as a series of POIs directly into the sqlite database which tangoGPS uses to store POIs.
 
+== Using the TangoGPS logs == 
+
+You can convert the logfiles from TangoGPS to other formats using gpsbabel and this style-file: 
+
+<pre>
+DESCRIPTION TangoGPS 0.92
+EXTENSION log
+DATATYPE TRACK
+
+FIELD_DELIMITER COMMA
+RECORD_DELIMITER NEWLINE
+
+IFIELD LAT_DECIMAL,"","%f"
+IFIELD LON_DECIMAL,"","%f"
+IFIELD ALT_METERS,"","%f"
+IFIELD PATH_SPEED,"","%f"
+IFIELD PATH_COURSE,"","%f"
+IFIELD GPS_HDOP,"","%f"
+IFIELD ISO_TIME,"","%s" 
+</pre>
+
+Save this as '''tangogps.style''' and you can use gpsbabel to for instance convert to google-earth files like this: 
+
+ gpsbabel -i xcsv,style=tangogps.style -o kml -f file.log -F file.kml
 
 == Add POI from address ==
 
