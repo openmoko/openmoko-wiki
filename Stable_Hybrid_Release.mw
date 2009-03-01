@@ -174,7 +174,8 @@ You can view the sources [http://git.shr-project.org/git/ here].
 == Connecting your FreeRunner to your computer ==
 For the next configuration steps, you will need to type some commands. It is much easier to type on a real keyboard than on a touch screen. 
 So you need to connect your FR to you computer, and make a bridge to internet.
-Use [http://wiki.openmoko.org/wiki/USB_Networking this page]
+Use [http://wiki.openmoko.org/wiki/USB_Networking this page].
+NOTE: On first boot after flashing, USB networking can not work. If it's happening, simply reboot and try again.
 
 == Setting local time ==
 As any linux system, the UTC time is used by the system. First of all, adjust this time:
@@ -213,10 +214,10 @@ and type your selected password (2 times)
 == Customize the RingTone ==
 You need to have a file containing the RingTone you want for your FR. You can find some at [http://wiki.openmoko.org/wiki/Ringtones#svn.openmoko.org_ringtones RingTone]
 
-Then transfer it to your FR (i.e on the SD card):
- scp file root@192.168.0.202:/media/card/
+Then transfer it to your FR :
+ scp file root@192.168.0.202:/usr/share/sounds/
 
-Now you need to indicate that the FR must use this file for incoming calls. Modify /etc/freesmartphone/opreferences/conf/phone/default.yaml
+Now you can select ringtone in SHR Settings.
 
 == Sound Control ==
 
@@ -274,27 +275,6 @@ Parameter: message-loop # define the number of loop of incoming message music to
 
 
 
-== GPS ==
-GPS is not started automatically at boot. You need to switch it ON/OFF manually
-
-you need to modify the file /etc/init.d/fso-gpsd. Replace the line
-
- start-stop-daemon --start /usr/sbin/fso-gpsd -S localhost:gpsd -P /var/run/${NAME}.pid
-
-by 
-
- start-stop-daemon --start --pidfile /var/run/${NAME}.pid --exec /usr/sbin/fso-gpsd -- -S localhost:gpsd -P /var/run/${NAME}.pid
-
-
-and then you can start fso-gpsd by
-
- /etc/init.d/fso-gpsd start
-
-
-=== using a GUI ===
-install [http://wiki.openmoko.org/wiki/ShortOm ShortOm] 
-and configure it to start/stop fso-gps as above
-
 == Known Issues ==
 === Phone ===
 
@@ -308,12 +288,6 @@ SHR is not implementing a PIM (Personal Information Manager) yet. Work is in pro
 
 * It is not possible to import a Vcard file.
 ** It seems to be possible with [gopher://gopher.fnordpol.de/9/data/DbusAccessScripts_0.0.0.tar.gz this] script written by [[User:Zem#DBus_Access_Scripts|Zem]].
-
-* Incoming call only display phone number (not the name of the calling person).
-** It is implemented in unstable branch.
-
-* It is not possible to send message (SMS) using the name of the receiver. You need to remember his phone number.
-** It is implemented in unstable branch.
 
 == More Information ==
 
