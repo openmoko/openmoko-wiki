@@ -16,34 +16,41 @@ For example, one can set the aux button to launch the dialer and the other can s
 * link available at the [http://projects.openmoko.org/projects/siglaunchd/ project page]
 
 = How To Use =
-siglaunchd connects to predefined dbus signals checks some parameters
-and if the signal matches the application associated with it is launched.
+siglaunchd connects to dbus signals set in the config file and compares the signal's parameters to the expected parameters in the config file, every dbus signal in the config file has a "app to launch" that's launched when the signal is matched.
 
 This daemon reads the configuration file looking for records of the type:
-bin=interface;busname;path;signal;rule1,rule2... <br>
+"app"=interface;busname;path;signal;rule1,rule2... <br>
 While:
-* bin is the binary to run (and parameters)
-* interface, busname, path and signal are dbus related
-* rules are seperated by a ',' and look like arg[id](=|<|>|~)value. arg[] is a configuration file patteren and shouldn't be changed.
+* app is the app to run (and parameters) enclosed with "
+* interface, busname, path and signal are the signals descriptors.
+* rules are separated by a ',' and look like arg[index][opt-sub_index](=|<|>|~)value. arg[] is a configuration file pattern and shouldn't be changed. <br>
+The [opt-sub_index] is used to determine the index/key to comare in arg[index] if it's an array/dictionary.
+
+For instance, comparing the second argument's 1st cell will look as follows: arg[1][0] = test
+
+And comparing the 3rd argument's 'peer' key will look like this: arg[2][peer] = test2
+
+When the argument is neither expected to be an arra or a dictionary you should just drop the second [] i.e: arg[2] = test3
+
 
 Evaluation types:
 # = is for string/number comparison
-# > and < are for number comparison
+# > and < are for number/string comparison
 # ~ is used for standard python regex evaluation.
 
 For example if I a rule to check if the first parameter got from the dbus
-signal equals to "test" the rule will be: 0=test
+signal equals to "test" the rule will be: arg[0]=test
 
 
 Example configuration file line:
 "DISPLAY=:0.0 openmoko-terminal2"=org.freesmartphone.Device.Input;org.freesmartphone.oeventsd;/org/freesmartphone/Device/Input;Event;arg[0]=AUX,arg[1]=released,arg[2]>1
 
 
-I used this configuration to run the openmoko-terminal2 everytime I
+I used this configuration to run the openmoko-terminal2 every time I
 held the aux button for 2 seconds or more.
 
 You can actually add as many lines you want to the config and associate as many
-applications needed to a single signal with different/same rules(in different lines) .
+applications needed to a single signal with different/same rules (in different lines).
 
 Another example:
 the "Event" signal form the "org.freesmartphone.Device.Input" interface in the framework sends looks like this:
@@ -52,7 +59,7 @@ where the arguments are:
 the first s = name of input device
 the second s = the action took place
 i = duration of the event.
-We can then tell the dameno to "echo hi" (not very useful) everytime an Event signal of any kind arrives like this:
+We can then tell the daemon to "echo hi" (not very useful) every time an Event signal of any kind arrives like this:
 
 "echo hi"=org.freesmartphone.Device.Input;org.freesmartphone.oeventsd;/org/freesmartphone/Device/Input;Event; 
 
@@ -73,10 +80,17 @@ we will do the following:
 The same argument can be evaluated as many times you like, use it.
 Btw, all the rules are logicaly connected with an AND operation, so they all must match!
 If you want an OR logical connection you must add a brand new line differing in what you want it to differ.
+IMPORTANT NOTICE: All parameters not evaluated are accepted by default. So when writing bad config lines, i.e comparing with an argument that does not exist, this rule won't stop the rule from matching and the rule will accept.
 
-This daemon is designed for use with the openmoko framework, read
+All dbus types are supported (byte was never tested and struct/objectpath aren't supported yet), and when comparing to booleans, 0 is false 1 is true, true and false are read as the strings "true" and "false" accordingly.
+
+All rules are compared according to the type of the parameter of the dbus signal so a rule that compares to the number 88 will compare as the double 88 when compared with double, as an unsigned int 16 bit when compared to one and as a string when compared to one.
+
+
+This daemon is designed for use with the openmoko framework (though it's by now means a must), read
 about the framework dbus signals at:
 http://git.freesmartphone.org/?p=specs.git;a=blob_plain;f=html/index.html
+
 
 Please send me feedback about bugs/suggestions. Enjoy.
 
