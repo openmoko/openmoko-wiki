@@ -87,10 +87,9 @@ Here are step-by-step instructions on building debian packages with qemu and dis
  2.2) export CC="distcc arm-linux-gnueabi-gcc"
  2.3) export DISTCC_HOSTS="$address_of_pc1 $address_of_pc2 ..."
  2.4) you can now use make -j6 to distribute build to cross-compilers
- 2.5) note that with debian package you can "CONCURRENCY_LEVEL=6
-      apt-get --build source $package" to make sure options are passed
-      to whatever build system the package uses.
-
+ 2.5) note that "apt-get --build" does not support passing parallel build options so
+      you need to split build into to parts: first "apt-get source $package" and then
+      "cd $package* && dpkg-buildpackage -j6"
 
 == Cross-compiling simple debian packages ==
 
