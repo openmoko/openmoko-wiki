@@ -1,98 +1,17 @@
-<b>Note: Qt Extended 4.4.3 is the last version of Qt Extended. Trolltech cancelled the project on 3 March 2009 ([http://www.qtsoftware.com/about/news/qt-software-discontinues-qt-extended Qt Software discontinues Qt Extended]).</b>
-
-The community created a fork of Qt Extended called [[Qt Extended Improved]].
+<b>Note: this is the last version of Qt Extended. Trolltech cancelled the project on 2 March 2009</b>
 
 <h2>Installing Qt Extended 4.4.3 on the FreeRunner</h2>
 
 <h3>Download the kernel and rootfs</h3>
 
-Next download the kernel and rootfs to your workstation. Here's a [http://dashi-x02.karadog.net/~lihouyu/qtextended/4.4.3/ link] to the [http://dashi-x02.karadog.net/~lihouyu/qtextended/4.4.3/qt-extended-4.4.3-rootfs.jffs2 rootfs] created by HouYu Li and the [http://dashi-x02.karadog.net/~lihouyu/qtextended/4.4.3/testing-om-gta02-20090120.uImage.bin kernel image].
-[[Booting_the_Neo_FreeRunner|Boot your FreeRunner]] in dfu mode ([[Booting_the_Neo_FreeRunner#Log_into_U-Boot_in_the_NAND_Flash|NAND]], Power+AUX) and use the [[Dfu-util|dfu commands]]:
+Next download the kernel and rootfs to your workstation. Here's a link to the [http://triveros.go.dyndns.org/qtopia/Neo_rootfs_Backup_200902212230.jffs2 rootfs] created by Tomas Riveros Schober. And here's the [http://triveros.go.dyndns.org/qtopia/Neo_kernel_Backup_200902212230.bin kernel image]. Boot your FreeRunner in dfu mode and use the dfu commands:
 
- desktop# dfu-util -d [[USB Product IDs|0x1d50:0x5119]] -a kernel -R -D  testing-om-gta02-20090120.uImage.bin
+ desktop# dfu-util -d 0x1d50:0x5119 -a kernel -R -D  Neo_kernel_Backup_200902212230.bin
  
      ... stuff ...
  
- desktop# dfu-util -d 0x1d50:0x5119 -a rootfs -R -D  qt-extended-4.4.3-rootfs.jffs2
+ desktop# dfu-util -d 0x1d50:0x5119 -a rootfs -R -D  Neo_rootfs_Backup_200902212230.jffs2
  
      ... more stuff ...
 
-This kernel/rootfs fixes the WSOD problem and includes the echo patch but doesn't seem to support ogg or mp3 playback.
-
-<h2>Building the Qt Extended 4.4.3 SDK</h2>
-
-First make the build directory, download the source, and set the environment variables. In this example, I write the environment variables to a file then I source the file.
-
- mkdir -p /opt/QtExtended/build/
- cd /opt/QtExtended
- wget http://qtextended.org/downloads/release/qt-extended-opensource-src-4.4.3.tar.gz
- tar -xzvf qt-extended-opensource-src-4.4.3.tar.gz
- echo "export QTOPIA_DEPOT_PATH=/opt/QtExtended/qt-extended-4.4.3" >> setpaths-4.4.3 
- echo "export QPEDIR=/opt/QtExtended/build/" >> setpaths-4.4.3
- . setpaths-4.4.3
-
-Install the toolchain:
-
- cd /opt
- wget http://qtextended.org/downloads/toolchains/arm920t-eabi.tgz
- tar xzvf arm920t-eabi.tgz /
-
-Change to the source directory, download and apply three patches.
-
- cd $QTOPIA_DEPOT_PATH
- wget http://moko.mwester.net/download/pkg-config-template.patch
- wget http://www.csamuel.org/wp-content/uploads/2009/01/0001-added-echo-suppression-fixes-for-the-openmoko-neo-ph.patch
- wget http://radagast.bglug.ca/openmoko/qt-extended-4.4.3-libmad.tar.gz
- tar xzf qt-extended-4.4.3-libmad.tar.gz
- patch -p1 < qt-extended-4.4.3-libmad.patch
- patch -p1 < pkg-config-template.patch
- patch -p1 < 0001-added-echo-suppression-fixes-for-the-openmoko-neo-ph.patch
-
-Do the linux three-step: configure, make, make install. But there are a couple new twists. First, there is a bug in the source
-which requires us to create a symlink sdk in the sdk directory (basically, someone made a typo and incorrectly entered sdk twice in an include path). 
-
- cd $QPEDIR
- $QTOPIA_DEPOT_PATH/configure -device neo -D _FORTIFY_SOURCE=0
- make
- cd sdk
- ln -s . sdk
- cd ..
- make install
- bin/qbuild sdk
-
-Fix the paths:
-
- mkdir -p /opt/Qtopia/SDK/4.4.3
- ln -s /opt/QtExtended/build/scripts/sdk/scripts/ /opt/Qtopia/SDK/scripts
- mv /opt/Qtopia/SDK/scripts/devel- /opt/Qtopia/SDK/scripts/devel-neo.sh
- echo "Device: neo" > /opt/Qtopia/SDK/versioninfo
- ln -s /opt/QtExtended/build /opt/Qtopia/SDK/4.4.3/neo
- ln -s /opt/QtExtended/build/sdk/ /opt/QtExtended/build/sdk/sdk 
- cp $QTOPIA_DEPOT_PATH/bin/mkPackages /opt/Qtopia/SDK/scripts/
-
-If you want to have the sdk working:
-add the following code in front of /opt/Qtopia/SDK/scripts/functions
-<pre>
-#!/bin/bash
-version()
-{
-echo "4.4.3"
-}
-qt_version()
-{
-echo "4.5"
-}
-#!/bin/sh
-</pre>
-
-
-open /opt/Qtopia/SDK/scripts/sdk change the following:to have sdk -i and -r working again
-<pre>
-at line 253:  '= "1"' to '> "0"' 
-at line 233: 'ENVFILE=`cat /opt/Qtopia/SDK/$QPEVER/$DEVICE/configs/current.pri | grep QTOPIA_PREFIX= | awk 'BEGIN{FS="="}{print $2}'`"/qpe.env"' 
-	to 'ENVFILE="/opt/Trolltech/Qtopia/qpe.env"'
-at line 259, 263 & 281: '/opt/Qtopia/qpe.env' to '/opt/Trolltech/Qtopia/qpe.env'
-at line 90 and 110: change devel-$ARCH to devel-neo
-</pre>
-
-[[Category:Qt based distributions]]
+This kernel/rootfs fixes the WSOD problem but battery life is still limited.
