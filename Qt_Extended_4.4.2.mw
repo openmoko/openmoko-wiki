@@ -1,0 +1,117 @@
+<h1>Qt Extended 4.4.2</h1>
+
+<b>Note: this is an old version of Qt Extended.</b>
+
+<h2>Installing on the FreeRunner</h2>
+
+<h3>Download the kernel and rootfs</h3>
+
+Download the kernel and rootfs to your workstation. Here's a link to the [http://other.lastnetwork.net/OpenMoko/qtextended-4.4.2-gta02-rootfs-release-working-with-SystemRingTones.jffs2 rootfs] created by Hypnotize. And here's the [http://qtextended.org/modules/mydownloads/visit.php?lid=91 mwebster flash image] containing the kernel. Boot your FreeRunner in dfu mode and use the dfu commands:
+
+ desktop# dfu-util -d 0x1d50:0x5119 -a kernel -R -D  uImage-gta02-mwester-stable-d6f9fd270943fb22.bin
+ 
+     ... stuff ...
+ 
+ desktop# dfu-util -d 0x1d50:0x5119 -a rootfs -R -D  qtextended-4.4.2-gta02-rootfs-release-working-with-SystemRingTones.jffs2
+ 
+     ... more stuff ...
+ 
+<h3>Fix Echo Cancellation</h3>
+
+On his [http://www.csamuel.org/2009/01/08/echo-suppression-fix-for-qt-extended-442-on-openmoko-neo blog] Chris Samuel explained how to turn on echo cancellation for qt extended 4.4.2. First you need to download an updated [http://www.csamuel.org/wp-content/uploads/2009/01/libneovendor.so neo plugin]. Secure copy the libneovendor.so file to your Freerunner, then secure shell to the FreeRunner and do this:
+
+ freerunner# cd /opt/Trolltech/Qtopia/plugins/phonevendors/
+ freerunner# mv libneovendor.so libneovendor.so.orig
+ freerunner# mv /home/root/libneovendor.so .
+
+The change should take effect immediately.
+
+<h3>The White Screen of Death (WSOD)</h3>
+
+Sometimes when Qt Extended recovers from suspend you see a bright white screen. You don't have a phone anymore - you have a flashlight. Hold the power button down for about five seconds to power down the phone, then power it back up.
+
+<h2>Compiling the Qt Extended 4.4.2 SDK</h2>
+
+Start with a fresh Ubuntu 8.10 (Intrepid) install. 
+
+ desktop# sudo aptitude update
+ desktop# sudo aptitude upgrade
+ desktop# sudo apt-get install kde-devel kde-devel-extras qt4-dev-tools build-essential thttpd patch libvorbis-dev 
+
+(sorry if I forgot some - might need to add some dbus packages)
+
+Download the [http://qtextended.org/modules/mydownloads/visit.php?lid=97 SDK source] and [http://qtextended.org/modules/mydownloads/visit.php?lid=38  toolchain] from [http://qtextended.org qtextended.org]. Change directory to your machine's root directory then untar the toolchain - it will install itself to /opt/toolchains. Next create <tt>/opt/QtopiaSDK/qt-extended-4.4.2</tt> and <tt>/opt/QtopiaSDK/build</tt> directories. Unpack the Qt extended SDK source to <tt>/opt/QtopiaSDK/qt-extended-4.4.2</tt>. Set a pair of environment variables as follows:
+
+ desktop# export QTOPIA_DEPOT_PATH=/opt/QtopiaSDK/qt-extended-4.4.2
+ desktop# export QPEDIR=/opt/QtopiaSDK/build/qt-extended-4.4.2
+
+I like to create a file called <tt>setqtpath-4.4.2</tt> with these two exports commands in them, which will look like this:
+
+ desktop# echo "export QTOPIA_DEPOT_PATH=/opt/QtopiaSDK/qt-extended-4.4.2" >> setqtpath-4.4.2
+ desktop# echo "export QPEDIR=/opt/QtopiaSDK/build/qt-extended-4.4.2" >> setqtpath-4.4.2
+
+Now I can add these two variables to my environment whenever I want by sourcing them like this:
+
+ desktop# . setqtpath-4.4.2
+
+Next download a pair of patches from mwester's openmoko stuff: [http://moko.mwester.net/download/pkg-config-template.patch pkg-config-template.patch] and [http://moko.mwester.net/download/qmemoryfile_unix_open_args.patch qmemoryfile_unix_open_args.patch]. Copy these to the qt-extended-4.4.2 source directory and execute these commands:
+
+ desktop# patch -p1 < qmemoryfile_unix_open_args.patch
+ desktop# patch -p1 < pkg-config-template.patch
+
+Now change directory to the build directory. Execute the following:
+
+ desktop# cd $QPEDIR
+ desktop# $QTOPIA_DEPOT_PATH/configure -device neo -D _FORTIFY_SOURCE=0
+ desktop# make
+ desktop# make install
+
+The <tt>-device neo</tt> is good for both Neo and FreeRunner. The <tt>_FORTIFY_SOURCE=0</tt> turns off some extra error checking that is turned on by default in many linux distros but borks the qt extended build process.
+
+There's still something wrong which will cause errors. I don't know exactly what is wrong, but I googled a fix. Find the file <tt> 
+qt-extended-4.4.1/devices/neo/configure-common</tt> and change the line:
+
+ -add-modules pim
+to
+ #-add-modules pim
+
+<h2>Compiling an Example Qt Extended App</h2>
+
+First set those indispensable Qt environment variables:
+
+ desktop# export QTOPIA_DEPOT_PATH=/opt/QtopiaSDK/qt-extended-4.4.2
+ desktop# export QPEDIR=/opt/QtopiaSDK/build/qt-extended-4.4.2
+
+Next create a directory <tt>/opt/Qtopia/build/myapps</tt>. Copy the example app. Rename the example app to something that makes sense (how about "example"!). Create the <tt>Makefile</tt> and build the example.
+
+ desktop# mkdir /opt/Qtopia/build/myapps
+ desktop# cd /opt/Qtopia/build/myapps
+ desktop# cp -R $QTOPIA_DEPOT_PATH/examples/application .
+ desktop# mv application example
+ desktop# cd example
+ desktop# $QPEDIR/bin/qtopiamake
+ Finding Projects...
+ Writing 1 Makefiles...
+ desktop# make
+ make: running qbuild default
+ uic /opt/QtopiaSDK/build/myapps/application/examplebase.ui
+ moc /opt/QtopiaSDK/build/myapps/application/main.cpp
+ moc /opt/QtopiaSDK/build/myapps/application/example.h
+ arm-linux-g++ /opt/QtopiaSDK/build/myapps/application/.moc/moc_example.cpp
+ arm-linux-g++ /opt/QtopiaSDK/build/myapps/application/main.cpp
+ moc /opt/QtopiaSDK/build/myapps/application/example.cpp
+ arm-linux-g++ /opt/QtopiaSDK/build/myapps/application/example.cpp
+ arm-linux-g++ /opt/QtopiaSDK/build/myapps/application/example
+
+Now you have an executable <tt>example</tt>. Of course, it won't execute on your workstation, you must secure copy it to your FreeRunner. Then secure shell into the FreeRunner, import the Qtopia environment variables and execute the app:
+
+ desktop# scp example root@freerunner:/home/rootroot@192.168.3.111's password: 
+ example                                      100%    33KB  33.4KB/s   00:00    
+ desktop# ssh 192.168.3.111
+ root@freerunner's password: 
+ freerunner:~# . /opt/Trolltech/Qtopia/qpe.env 
+ freerunner:~# ./example
+
+You should see a message on FreeRunner's LCD.
+
+[[Image:Qt_extended_sdk_example_screenshot.png]]
