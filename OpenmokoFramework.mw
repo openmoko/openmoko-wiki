@@ -67,77 +67,7 @@ This initiative does not cover high level services such as
 
 ==Software Components==
 
-We differentiate between low-level and high-level services -- dbus will be used to communicate horizontally and vertically.
-
-====Low-Level Services====
-
-=====Device Control=====
-The low level device control service manages peripheral control, i.e. controlling power for individual subsystems such as
-* GSM, WiFi, Bluetooth, GPS, as well as
-* Backlight brightness and power,
-* Turning LEDs on and off, etc.
-It also deals with
-* Charging, suspend/resume,
-* Accelerometers, and buttons.
-Last but not least, it sends notifications about the user's activity so that listeners have a chance to
-* Change to powersaving modes, or
-* Lock the device.
-We implement the following software for that:
-* [http://www.freesmartphone.org/index.php/Implementations/OpenDeviceDaemon odeviced]
-
-=====Audio=====
-The low level audio service relies on a working ALSA device driver with the dmix software mixing plugin (*). On top of that, there is the GStreamer streaming media framework:
-* [http://gstreamer.freedesktop.org/ gstreamer]
-
-'''Gstreamer''' is to be used for all kinds of event sounds where a) multiple audio formats need to be supported and b) a latency of about one second is acceptable. This goes for e.g. ring tones, welcome tones, plug indication.
-
-*) Initially, we wanted to use PulseAudio on top of ALSA, however currently it has serious performance problems on this hardware. [http://lists.openmoko.org/pipermail/devel/2008-July/000253.html]
-
-=====GSM=====
-The low level GSM services expect a modem complying to GSM 07.07, GSM 07.05, and assorted GSM specifications, talking an AT-protocol over a serial line. If GSM 07.10 is supported, we use the multiplexing daemon to export virtual serial lines over which -- again -- AT-protocol can be spoken:
-* [http://www.freesmartphone.org/index.php/Implementations/gsm0710muxd gsm0710muxd]
-
-=====Bluetooth=====
-The low level Bluetooth services rely on the official Linux Bluetooth subsystem:
-* [http://www.bluez.org BlueZ].
-
-=====GPS=====
-The low level GPS services assume a GPS device that talks NMEA over a device node. We implemented an [[ogpsd]] daemon speaking an extended Gypsy API:
-* [http://gypsy.freedesktop.org Gypsy]
-
-=====Network=====
-The low level networking service assumes network interfaces, such as USB, Ethernet, Wifi, etc. We rely on the following software here:
-* Intel Connection Manager
-* PPP
-
-====High Level====
-
-=====Usage=====
-The Usage subsystem is concerned with coordinating application I/O requirements. Applications are not supposed to turn on or off devices, since they do not have any knowledge about concurrent applications that may be also using the device -- think ''reference counting'' for I/O requirements.
-
-With this added layer, we could later think about monitoring subsystems, subsystem usage statistics, or accounting.
-
-See discussion page about PolicyKit.
-
-=====Events=====
-* Signalling events via I/O (ringing, blinking, vibrating)
-* Might use fd.o notification API
-
-=====PIM=====
-An intelligent storage database server. This is being carried out as a Google Summer of Code project. See complete description [http://www.neo1973-germany.de/wiki/pyPimd here].
-
-=====Context=====
-* Intelligent context API, integrating location as one -- among other -- sources
-* Geoclue?
-
-=====[http://www.freesmartphone.org/index.php/Standards/PhoneAPI Phone]=====
-The phone subsystem can be used to create and manage voices communications. It makes abstraction of the protocol used.
-
-==== [http://www.freesmartphone.org/index.php/Implementations/OpenPreferencesDaemon Preferences] ====
-* Settings database
-
-=====Network=====
-* High-level networking queries
+Please see the description at http://www.freesmartphone.org/index.php/Architecture
 
 ==Known API Consumers==
 
