@@ -48,11 +48,15 @@ Change to the source directory, download and apply two patches.
  patch -p1 < pkg-config-template.patch
  patch -p1 < 0001-added-echo-suppression-fixes-for-the-openmoko-neo-ph.patch
 
-Do the linux three-step: configure, make, make install
+Do the linux three-step: configure, make, make install. But there are a couple new twists. First, there is a bug in the source
+which requires us to create a symlink sdk in the sdk directory (basically, someone made a typo and incorrectly entered sdk twice in an include path). 
 
  cd $QPEDIR
  $QTOPIA_DEPOT_PATH/configure -device neo -modules location,cell,telephony -D _FORTIFY_SOURCE=0
  make
+ cd sdk
+ ln -s . sdk
+ cd ..
  make install
  make sdk
 
