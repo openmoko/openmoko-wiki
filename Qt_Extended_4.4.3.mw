@@ -26,36 +26,45 @@ This kernel/rootfs fixes the WSOD problem and includes the echo patch but doesn'
 
 First make the build directory, download the source, and set the environment variables. In this example, I write the environment variables to a file then I source the file.
 
- desktop# mkdir -p /opt/QtExtended/build/qt-extended-4.4.3
- desktop# cd /opt/QtExtended
- desktop# wget http://qtextended.org/downloads/release/qt-extended-opensource-src-4.4.3.tar.gz
- destkop# tar -xzvf qt-extended-opensource-src-4.4.3.tar.gz
- desktop# echo "export QTOPIA_DEPOT_PATH=/opt/QtExtended/qt-extended-4.4.3" >> setpaths-4.4.3 
- desktop# echo "export QPEDIR=/opt/QtExtended/build/qt-extended-4.4.3" >> setpaths-4.4.3
- desktop# . setpaths-4.4.3
+ mkdir -p /opt/QtExtended/build/qt-extended-4.4.3
+ cd /opt/QtExtended
+ wget http://qtextended.org/downloads/release/qt-extended-opensource-src-4.4.3.tar.gz
+ tar -xzvf qt-extended-opensource-src-4.4.3.tar.gz
+ echo "export QTOPIA_DEPOT_PATH=/opt/QtExtended/qt-extended-4.4.3" >> setpaths-4.4.3 
+ echo "export QPEDIR=/opt/QtExtended/build/qt-extended-4.4.3" >> setpaths-4.4.3
+ . setpaths-4.4.3
 
 Install the toolchain:
 
- desktop# cd /opt
- desktop# wget http://qtextended.org/downloads/toolchains/arm920t-eabi.tgz
- desktop# tar xzvf arm920t-eabi.tgz /
+ cd /opt
+ wget http://qtextended.org/downloads/toolchains/arm920t-eabi.tgz
+ tar xzvf arm920t-eabi.tgz /
 
 Change to the source directory, download and apply two patches.
 
- desktop# cd $QTOPIA_DEPOT_PATH
- desktop# wget http://moko.mwester.net/download/pkg-config-template.patch
- desktop# wget http://www.csamuel.org/wp-content/uploads/2009/01/0001-added-echo-suppression-fixes-for-the-openmoko-neo-ph.patch
- desktop# patch -p1 < pkg-config-template.patch
- desktop# patch -p1 < 0001-added-echo-suppression-fixes-for-the-openmoko-neo-ph.patch
+ cd $QTOPIA_DEPOT_PATH
+ wget http://moko.mwester.net/download/pkg-config-template.patch
+ wget http://www.csamuel.org/wp-content/uploads/2009/01/0001-added-echo-suppression-fixes-for-the-openmoko-neo-ph.patch
+ patch -p1 < pkg-config-template.patch
+ patch -p1 < 0001-added-echo-suppression-fixes-for-the-openmoko-neo-ph.patch
 
-Finally we can configure, make, make install
+Do the linux three-step: configure, make, make install
 
- desktop# cd $QPEDIR
- desktop# $QTOPIA_DEPOT_PATH/configure -device neo -modules location,cell,telephony -D _FORTIFY_SOURCE=0
- desktop# make
- desktop# make install
- desktop# make sdk
+ cd $QPEDIR
+ $QTOPIA_DEPOT_PATH/configure -device neo -modules location,cell,telephony -D _FORTIFY_SOURCE=0
+ make
+ make install
+ make sdk
 
+Fix the paths:
+
+ mkdir -p /opt/Qtopia/SDK/4.4.3
+ ln -s /opt/QtExtended/build/scripts/sdk/scripts/ /opt/Qtopia/SDK/scripts
+ mv /opt/Qtopia/SDK/scripts/devel- /opt/Qtopia/SDK/scripts/devel-neo.sh
+ echo "Device: neo" > /opt/Qtopia/SDK/versioninfo
+ ln -s /opt/QtExtended/build/ /opt/Qtopia/SDK/4.4.2/neo
+ ln -s /opt/QtExtended/build/sdk/ /opt/QtExtended/build/sdk/sdk 
+ cp $QTOPIA_DEPOT_PATH/bin/mkPackages /opt/Qtopia/SDK/scripts/
 
 
 [[Category:Advanced End User]]
