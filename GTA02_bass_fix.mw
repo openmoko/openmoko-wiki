@@ -1,21 +1,35 @@
-'''Resulting sound is good with 32Ohm headphones (AKG K-55). Possibility of GSM and WiFi interference not yet verified!'''
+GTA02 bass issues and possible ways to fix it
+
+== The problem description ==
+A known issue is that output decoupling capacitors are too small, only 1uF (4.7uF in v7). This results in a very high cut-off frequency practically eliminating a possibility to use freerunner as a portable musical player. One of the possible fixes is to add some decent 100uF C in parallel.
+
+=== Rework performed by [[User:PaulFertser|Paul Fertser]] ===
+'''Resulting sound is good with 32Ohm headphones (AKG K-55). With proper shielding GSM interference is very low or non existent. Effect on Bluetooth range is not yet measured!'''
 
 Here i'll try to describe my take on rework that should radically improve the ability to use FreeRunner as a portable music player.
 
-This rework is fully based on information from Joerg Reisenweber (e.g. in this mailing list post: http://lists.openmoko.org/pipermail/hardware/2008-September/000552.html , and several others, also he was very helpful on IRC). If you decide to short the original caps, you should also remove R4116, R4117 and place them after your caps.
-
-A known issue is that output decoupling capacitors are too small, only 1uF (4.7uF in v7). One of the possible fixes is to add some decent 100uF C in parallel.
+This rework is fully based on information from [[User:jOERG|Joerg Reisenweber]] (e.g. in this mailing list post: http://lists.openmoko.org/pipermail/hardware/2008-September/000552.html , and several others, also he was very helpful on IRC). If you decide to short the original caps, you should also remove R4116, R4117 and place them after your caps.
 
 I used two 100uF 10V tantalum caps. They should be connected in parallel to C4110 and C4111. Make sure you connect the plus terminal (marked with a thick line) to the side that goes to U4101.
 
-The can should be lifted very carefully. Use a pin-pointed knife for that and try to lift a little in every point you can reach going in circle. After several rounds the can will be easily dismounted. It can take about 10 minutes, please be patient. You can use a plastic sim-holder for a lever, but be very carefull.
+The can should be lifted very carefully. Use a pin-pointed knife for that and try to lift a little in every point you can reach going in circle. After several rounds the can will be easily dismounted. It can take about 10 minutes, please be patient. You can use a plastic sim-holder for a lever, but be very careful.
 
-To avoid interference from GSM going into the can, use a piece of aluminium foil isolated from the caps with paper. Be sure to provide electrical connection between the foil and the can. Placing small ferrite bead on every twisted pair just before it enters the can is recommended.
+To avoid interference from GSM going into the can, use a piece of aluminium foil isolated from the caps with paper. I used a candypaper and it eliminated the audible GSM interference (i could listen to GSM call via headphones on loud volume without hearing any buzz). Be sure to provide electrical connection between the foil and the can (the more points you connect, the better shielding you get; don't be shy to experiment, EMI is a black magic sometimes). Placing small ferrite bead on every twisted pair just before it enters the can is recommended.
 
-After the rework Bass and Treble regulators in mixer should be placed at the middle as it corresponds to 0db attenuation.
+After the rework Bass and Treble regulators in mixer should be placed at the middle as it corresponds to 0db attenuation (and the bass boost set to Linear Control).
 
 [[Image:Can_opened.jpg|800px]]
 [[Image:bass_rework_can_closed.jpg|800px]]
 [[Image:bass_rework_whole_picture.jpg|800px]]
+
+=== Blackgate iMod-like rework ===
+Another idea proposed by [[User:jOERG|Joerg]] is to perform a modification similar to the popular iPod mod:
+
+The purpose of the diyMod is to simplify the signal path from the DAC to the amp. To achieve this goal, the audio signal is taken directly after the DAC and sent to the amp, whether by the dock pins or by a pigtail. The content of a pigtail consists of the DC blocking, also known as coupling, caps and a headphone jack or plug. By necessity, we place DC blocking caps behind the DAC to protect our listening apparatuses. Ensure that nothing lies between your DAC and amp but wires and traces.
+
+Nobody has tried to implement it on FreeRunner yet, but this description along with published schematics should be enough: http://www.head-fi.org/forums/f6/apple-diymod-my-take-famous-imod-56k-killer-featuring-3g-4g-5g-nano-1g-269604/
+
+=== Rework performed by [[User:warmcat|Andy Green]] ===
+This document describes another type of rework where caps are placed inside the can: http://people.openmoko.org/andy/additional-headset-audio-caps.pdf . Among its strong points is that the signal doesn't go outside the can, therefore avoiding any possibility of interference with other hardware functions. The weak points are that the maximum capacity is limited to 47uF, only ceramic caps can be used (which can distort sound because of piezoceramic properties) and properly securing the additional caps can be hard.
 
 [[Category:Neo_FreeRunner_Hardware]]
