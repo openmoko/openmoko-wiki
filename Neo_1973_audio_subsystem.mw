@@ -425,6 +425,29 @@ If you are inside a voice call (e.g. FSO/zhone), open Alsactl and change the fol
 
 UNKNOWN
 
+==== Recording and Playback .state ====
+Here is a state file that allows both recording and playback from and to a gsm call. <br>
+File: [[Image:Callrec.txt]]
+
+To record just issue:
+
+arecord -D hw:0,0 -f S16_LE -c 2 record.wav
+
+and to inject sound just issue:
+
+aplay ;]
+
+If you have any problems you can contact me on IRC, TAsn.
+
+P.S
+There's a bug concerning the Right and Left mux, you have to change the left after you change the right, loading the state file may cause this issue to show, so just in case, I recommend appending:
+
+amixer sset 'Capture Right Mux' 'Line or RXP-RXN'
+
+amixer sset 'Capture Left Mux' 'Line or RXP-RXN'
+
+to the alsactl -f Callrec.txt restore command.
+
 == Userspace Sound Control Daemon ==
 
 The userspace sound control deamon might be a separate process or (more likely) part of some larger general hardware management daemon.
