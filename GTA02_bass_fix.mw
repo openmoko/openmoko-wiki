@@ -1,16 +1,14 @@
 GTA02 bass issues and possible ways to fix it.
 
-This page is fully based on information from [[User:jOERG|Joerg Reisenweber]] (e.g. in this mailing list post: http://lists.openmoko.org/pipermail/hardware/2008-September/000552.html , and several others, also he was very helpful on IRC).
+The lack of bass issue has been discussed several times on Community and Hardware lists, including by [[User:jOERG|Joerg Reisenweber]] (e.g. in this mailing list post: http://lists.openmoko.org/pipermail/hardware/2008-September/000552.html , and Andy Green).
 
 == The problem description ==
 A known issue is that output decoupling capacitors are too small, only 1uF (4.7uF in v7). This results in a very high cut-off frequency practically eliminating a possibility to use freerunner as a portable musical player. The possible fix is to add some decent 100uF C in parallel. (The other discussed way to do it was to short the original caps and instead place the big ones near the headset receptable or inside the headphone jack; this has multiple drawbacks as jack insert detection might no longer work, possible damage to U4401 and the like; in this case you should also remove R4116, R4117 and place them after your caps).
 
-One possible solution is to place the additional caps outside the can, near the Bluetooth antennae; the other possibility is to build a cap from 20 pieces 4.7uF along a wire grid 4x5 which makes a nice high quality very flat 100uF. This would easily fit anywhere "1.floor" of can interior, just isolate it with a scotch film patch and throw them inside the can.
 
-Also shorting R4407 and R4405 might worth trying (as well as throwing out the useless U4401).
 
 === Rework performed by [[User:PaulFertser|Paul Fertser]] ===
-'''Resulting sound is good with 32Ohm headphones (AKG K-55). With proper shielding GSM interference is very low or non existent. Effect on Bluetooth range is not yet measured!'''
+'''Resulting sound is good with 32Ohm headphones (AKG K-55). With proper shielding GSM interference is very low or non existent. Effect on Bluetooth range is not yet measured!'''  (Due to placement of the caps next to the Bluetooth antenna, it's possible this will reduce performance there).
 
 Here i'll try to describe my take on rework that should radically improve the ability to use FreeRunner as a portable music player.
 
@@ -26,14 +24,24 @@ After the rework Bass and Treble regulators in mixer should be placed at the mid
 [[Image:bass_rework_can_closed.jpg|800px]]
 [[Image:bass_rework_whole_picture.jpg|800px]]
 
-=== Blackgate iMod-like rework ===
+
+=== Rework performed by [[User:warmcat|Andy Green]] ===
+This document describes another type of rework where caps are placed inside the can: http://people.openmoko.org/andy/additional-headset-audio-caps.pdf . Among its strong points is that the signal doesn't go outside the can, therefore avoiding any possibility of interference with other hardware functions; unlike the modification described above the connections to the caps are very short and no modifications are needed to the can.
+
+The weak points are that the maximum capacity is limited to 47uF due to the size; again due to the size constraint of being in the can only ceramic caps can be used (which can distort sound because of piezoceramic properties, although for X7R dialectric the effect is minimal).
+
+=== Untested Notes and Suggestions ===
+
+One possible solution is to place the additional caps outside the can, near the Bluetooth antenna; the other possibility is to build a cap from 20 pieces 4.7uF along a wire grid 4x5 which makes a nice high quality very flat 100uF. This would easily fit anywhere "1.floor" of can interior, just isolate it with a scotch film patch and throw them inside the can.
+
+Also shorting R4407 and R4405 might worth trying (as well as throwing out the useless U4401).
+
+
 Another idea proposed by [[User:jOERG|Joerg]] is to perform a modification similar to the popular iPod mod:
 
 The purpose of the diyMod is to simplify the signal path from the DAC to the amp. To achieve this goal, the audio signal is taken directly after the DAC and sent to the amp. This path must include the DC blocking, also known as coupling, caps. By necessity, we place DC blocking caps behind the DAC to protect our listening apparatuses. Ensure that nothing lies between your DAC and amp but wires and traces.
 
 Nobody has tried to implement it on FreeRunner yet, but this description along with published schematics should be enough: http://www.head-fi.org/forums/f6/apple-diymod-my-take-famous-imod-56k-killer-featuring-3g-4g-5g-nano-1g-269604/
 
-=== Rework performed by [[User:warmcat|Andy Green]] ===
-This document describes another type of rework where caps are placed inside the can: http://people.openmoko.org/andy/additional-headset-audio-caps.pdf . Among its strong points is that the signal doesn't go outside the can, therefore avoiding any possibility of interference with other hardware functions. The weak points are that the maximum capacity is limited to 47uF, only ceramic caps can be used (which can distort sound because of piezoceramic properties) and properly securing the additional caps can be hard.
 
 [[Category:Neo_FreeRunner_Hardware]]
