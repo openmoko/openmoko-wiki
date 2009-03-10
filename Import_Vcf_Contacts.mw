@@ -204,33 +204,9 @@ Make sure you have sqlite3 client installed
 Now we can play with the PIM database file located at
 <pre>/home/root/Applications/Qtopia/qtopia_db.sqlite</pre>
 
-Exporting to VCF can be done via qtmail's 'send all' function (which only supports sms, bluetooth). Exporting all the contacts to a VCF file has yet to be documented. Here is [http://lists.openmoko.org/pipermail/community/2008-October/033588.html Vasco Névoa's contribution] to export to a tab-delimited file:
-<pre>
-sqlite3 ~/Applications/Qtopia/qtopia_db.sqlite \
-'Select distinct nickname, title, firstname, middlename, lastname, suffix, \
-profession, b_webpage, company, office, department, jobtitle, default_email, \
-phone_number, h_webpage, spouse, gender, birthday, anniversary from contacts, \
-contactphonenumbers where contacts.recid=contactphonenumbers.recid;'\
-| sed 's/|/\t/g' > addressbook.txt
-</pre>
+Exporting to VCF can be done via qtmail's 'send all' function (which only supports sms, bluetooth). 
 
-Vasco says:
-<pre>
-Each contact that has more than one phone number will appear multiple
-times because I haven't yet come up with a clean way to show the "join"
-between the "contacts" and "contactphonenumbers" tables, so for now it
-just duplicates the whole line, with the only difference being the phone
-number. Also, this still does not take care of contacts with multiple email
-addresses, so it is just a work in progress (but better than nothing if you're
-in a jam).
-
-Anyone versed in SQL will be able to hack this into a full VCF file
-generator... or you can just go the Python or Perl way (but I prefer to use
-the nice tools already in place - SQL is pretty powerful if you know how).
-</pre>
-
-
-You can export all your contact's phone numbers on the same line with this SQL query. This works because the contactphonenumbers table has limited phone_type values. We can't do the same left outer join query for the emails because there can be an unlimited count of emails per contacts.
+You can export all your contacts (with each contact's phone numbers on the same line) with this SQL query. This works because the contactphonenumbers table has limited phone_type values. We can't do the same left outer join query for the emails because there can be an unlimited count of emails per contacts.
 <pre>
 Select distinct nickname, title, firstname, middlename, lastname, suffix,
 profession, b_webpage, company, office, department, jobtitle, default_email,
