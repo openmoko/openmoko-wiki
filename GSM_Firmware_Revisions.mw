@@ -1,0 +1,91 @@
+=== Devices in the field ===
+# GTA01Bv3 (made in taiwan) shipped to phase-0 : no revision
+# GTA01Bv4 (made in taiwan) shipped to phase-0 : no revision
+# GTA01Bv4 (made in suzhou) first batch of 850 units : Moko1
+# GTA01BV4 (made in suzhou) next batch of 3000 units : Moko4
+
+# GTA02A1 (made in taiwan) first prototype run : Moko4
+# GTA02A2 (made in taiwan) next prototype run : Moko4
+# GTA02A3 (made in taiwan) 3rd prototype run : Moko4
+# GTA02A4 (made in taiwan) 4th prototype run : Moko5
+# GTA02A5 (made in taiwan) 5th prototype run : Moko5
+# GTA02A5 (made in suzhou) PVT run: Moko7
+# GTA02A5 (made in suzhou) MP devices: Moko8
+# GTA02A6 (made in suzhou) MP devices: Moko8 (might change to MOKO10)
+
+{{note|TI revision number had never been released from TI, what we only have is released date. You can get complete firmware revision through AT+CGMR}}
+
+=== Moko1 ===
+* The code base is n7_19 released from TI at 04/19/2007
+* Support the AT Command AT@ST to control the sidetone level
+* Support the AT Command AT@AUL to load the audio table
+* Generate wakeup interrupt to s3c2410
+* Support the AT Command AT@POFF to power off GSM modem
+* Support these AT Commands, AT+CGSN,AT+CGMM,AT+CGMR,AT+CGMI
+
+=== Moko2 ===
+* Based on Moko1
+* Remove the TI's implementation of wakeup interrupt.When GSM modem get an incoming call, it will pullup the pin TPU_IDLE to generate an interrupt, since we have implement the wakeup function ourselves, just remove it.
+
+=== Moko3 ===
+* Based on Moko2 and '''modified libs''' release from TI at 06/22/2007
+* Support deep sleep(power saving issue)
+* known issues:
+** We need to power off GSM modem from Application processor through external interrupt, hence we need to implement an isr within GSM modem to do that.
+** For current gsmd, it doesn't support wake-up function. Hence,when modem falls into deep-sleep, gsmd will be blocked because it couldn't receieve respond from modem. 
+
+=== Moko4 ===
+* Based on Moko3
+* Fix Bug 212, setting AT@ST is broken
+
+=== Moko5 ===
+* Based on Moko4
+* Fix Bug 666, AT&T 3G fireball USIM
+* Specific information of +CGMM, +CGMR, +CGMI are stored in GSM filesystem, not hard-coded anymore.
+** All specific info can be download from https://people.internal.openmoko.org/sean_chiang/gsm/firmware/info/
+** ti_tat(M$ compatible), which used to read/write GSM internal filesystem can be found at https://people.internal.openmoko.org/sean_chiang/gsm/sw/
+* Pass the PTCRB certification
+* Support [850/900]/1800/1900
+* Support SMS memory full alert event
+* Support the at command AT@RST to reset GSM modem
+
+=== Moko6 ===
+* Based on Moko5
+* Specific information is hard-coded, that means, there'll have different moko6 for different hw version.
+** Because the hw problem cause the ti_tat unstable, we roll back to hard-coded scheme.
+* We don't need rfcap anymore, it'll be written into GSM filesystem automatically when modem power on. 
+
+=== Moko7 ===
+* Based on Moko6
+* Support [.. NDA edited (jOERG) ..]
+
+=== Moko8 ===
+* Based on Moko7
+* Support AT@BAND to get current band, 900, 1800, 850 or 1900.
+* TI updated the l2r.lib for SIM Card Write Endurance issue.
+* Note
+** T-mobile re-camping problem : 4 Neo but only one has this problem, close this issue.
+** AT&T re-camping problem remains open. See #1024
+
+=== Moko9-Beta1 ===
+* Should be same as Moko8 , but built from scratch by Dieter spaar@openmoko.org
+* updated TI libs, fix #666 (unconfirmed, but likely)
+* Does '''not''' fix #1024
+* Public as in http://wiki.openmoko.org/wiki/GSM/Flashing
+
+=== Moko9-Beta2 ===
+* Adds "AT+CSIM" (for swisscom)
+
+=== Moko10 ===
+* MOKO9 with version string changed to not longer show hw-revision of device.
+
+=== Moko11-beta1 ===
+* GPIO 1 is no longer set erroneously to high after reset
+* Hardware assisted CTS handshake is enabled to avoid sending characters
+    from TX fifo after CTS goes high
+
+=== Moko11 ===
+changed version-string (remove "beta")
+
+[[Category:Neo1973 GTA01]]
+[[Category:Software]]
