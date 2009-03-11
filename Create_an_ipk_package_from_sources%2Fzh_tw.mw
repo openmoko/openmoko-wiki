@@ -1,38 +1,36 @@
 {{Languages|Create an ipk package from sources}}
-本篇文章的主要目地在於導引及幫助撰寫Openmoko 程式。
+This is a small tutorial to help people that want to write new software for Openmoko, eg. to port existing programs.
 
-==原理==
-Openmoko 使用[[OpenEmbedded]]來製作package 及root image 。
+==Theory==
+Openmoko uses [[OpenEmbedded]], a package and root image build system.
 
-OpenEmbedded 提供 patches及 Bitbake Recipes，這與提供 .spec 檔案建立 RPM套件。 Bitbake 被用來處理recipes，並取得packages及FS images。舉例來說，bitbake可以取出原始碼，套用到 patches、設定，製作及安裝編譯好的源碼。其它的步驟為使用者可定義的，但這超過本文的範圍。
+OpenEmbedded provides patches and Bitbake Recipes, that are similar to .spec files to build RPM packages. Bitbake is used to process recipes and obtain packages and FS images. For example, bitbake can fetch sources, apply patches, configure, make and install compiled sources. Other steps are user definable, but this is not the scope of this tutorial.
 
-標準的bitbake用法是下載現有的 package如 "gcc" 或"binutils" 或 "linux kernel"，套用到platform patches (加入修復的bug程式碼、porting fixes、驅動程式....等)，然後編譯並封裝輸出的binary。
+A standard use of bitbake is to download an existing "vanilla" package, ie "gcc" or "binutils" or "linux kernel", apply platform patches (adding bugfixes, porting fixes, drivers, etc...) then compile and package the resulting binaries.
 
-==軟體版本別==
-Software軟體版本及設定管理是個廣泛的議題，並且有不同的意見，在這裡會做個快速的說明。
+==Software versioning==
+Software versioning and configuration management is a very wide topic, there are tons of different opinions about it, I'll try to be quick.
 
-軟體版本在套件建立方法中是很重要的問題，軟體版本即代表軟體的全部。如它是用來追踨軟體變更的一個指標，並且讓每個版本是個獨立的版本。在這裡，我們必須認知到基本的版本管理問題。
-
+Packages versions are important in a distribution building mechanism, and package versions are a complete part of the full package name. They are obviously used to track important changes made to your package, and isolate each version. Here we must be a little aware of basic version management.
 Current (most advanced) version is named the "trunk". Additions, fixes, etc. are done to the trunk.
 
-一旦特定層級的功能達到了，則會被編上版本編號。這樣一來，目前的開發就可以繼續 ，但使用者可以下載定義完整的釋出版本，即
-定出known bugs 及功能層級。這可被稱為 "branching"。 If version specific bugs are found in version a.b, then we can update this branch independently.
+Once a certain level of functionality is achieved, a copy of the trunk (a "snapshot") is taken, and named with a version number. As a result, current development continues on the trunk, but users can download well defined "releases", with known bugs and functionnality level. This is called "branching". If version specific bugs are found in version a.b, then we can update this branch independently.
 
-在bitbake，我們必須指定哪個版本的軟體是我們要包裝的。這個可能不是你個人寫程式的習慣，尤其是你只開發小的程式，你的程式不是透過二個以上的人維護。如果你的軟體稱為 "myprogram" ，但沒有連接真的版本名稱，你可以將你的專案目錄重新命名為"myprogram-1.0"。
+In bitbake, we must specify which release of our software we are going to package. This may not be an habit, especially if you only develop small programs, not maintained by more than one or two person. If your software is named "myprogram" but has no real version number attached, you can just rename your project directory to "myprogram-1.0".
 
-這是個很好的訓練，如果你在包裝一個軟體，它將會由其它人使用時，當你下次修改它時，就要把檔案夾的名稱改為 "myprogram-1.1" :) 這可以讓使用者暸，並且讓軟體易於管理，並且也可以為你的軟體團隊做未來的規劃。
+This is a good practice; If you are packaging a software, then it will be used by other people, so when you modify it next time, put it in a folder named "myprogram-1.1" :) This brings clarity to users, ease of management to you, and ability to plan future releases to your team.
 
-==範例==
-如果你有一個正在進行的軟體套件，如有一個放置原始碼的檔案目錄、Makefile, 等...
-因為這是一個很平常的方法，我將會利用我的專案來實作它。這表示軟體可以在下面的操作步驟中被安裝。
+==Example==
+Say you have a working software package, ie a file system directory with sources, Makefile, etc...
+Because this is a common method, I will base my presentation on a project generated using autotools. This implies that the software can be installed somewhere by following the magical steps ./configure && make && make install.
 
-./configure && make && make install.
+===Prerequisites===
+You need a configured openmoko development tree. All details are in [[Building Openmoko from scratch]]
 
-===前提===
-你必須設定Openmoko開發目錄。所有的詳細設定內容，請參考[[Building Openmoko from scratch]]。
+You may also do this with [[MokoMakefile]], see instructions at the bottom.
 
-你也必須在 [[MokoMakefile]]進行相同的工作，你可以參考底下的內容。
-下列的指令是從上述的說明頁中取得的指令，只要在shell中複製及貼上即可。
+The following commands will give you one, they are copied from the above page. Just copy and paste in a shell.
+
 <pre>
 
 # make sure we have mtn
@@ -73,11 +71,8 @@ touch ../build/tmp/stamps/armv4t-linux/samba-3.0.14a-r15.do_fetch
 perl -pi.orig -e 's/ *$//;s/\r//g' ../openembedded/packages/gcc/gcc-4.1.1/gcc-4.1.1-pr13685-1.patch
 </pre>
 
-接者，你需下以下的環境變數設定：
-
-[[Building_Openmoko_from_scratch#Environment_variables]]
-
-將以下的 script中的數行程式放入，並到你的 build/ dir (目錄) 並且置入它：
+Then, you need the environment variables described here: [[Building_Openmoko_from_scratch#Environment_variables]]
+Put the given lines in a script, then go to your build/ dir and source it:
 <pre>
 cat <<EOF >doenv.sh
 #!/bin/sh
@@ -87,7 +82,7 @@ EOF
 . ./doenv.sh
 </pre>
 
-之後，你的目錄樹會呈現以下的內容：
+After this, your tree will look like that:
 <pre>
 $HOME/OM
  +- build
@@ -101,13 +96,13 @@ $HOME/OM
 etc...
 
 
-連到 [[MokoMakefile]]，並且跟隨著相關指令進行。
-You're now all set to start building. 請記得在你每次開啟terminal時，要執行setup-env 指令。這個可以設定你的環境變數，然而，若是把它放到你的rc 檔案中，會更為容易些。
+Follow the link to [[MokoMakefile]] and follow the instructions.
+You're now all set to start building. Remember to run the setup-env command for each time you open a terminal. This sets your environment variables, however it is easier to include them in the rc file of your shell.
 
-===建議新軟體目錄配置===
-Bitbake recipes 是一個用來形容如何建立package 的單一檔案。我建議每個package版本都要有一個 recipe ( myprogram-1.0.bb, myprogram-1.1.bb, 等) 所以被放置在同一個目錄下的檔案內容都會被稱為 "myprogram" 。
+===Proposed directory layout for our new packages===
+Bitbake recipes are single files describing how to build a package. I recommend to have a recipe for each package version (myprogram-1.0.bb, myprogram-1.1.bb, etc.) all stored in a directory named "myprogram"
 
-如以下為個人的目錄配置：
+Our personal tree can be everywhere else:
 <pre>
 $HOME
  +- $OMDIR (contains the official openmoko tree)
@@ -124,24 +119,23 @@ $HOME
           +- ...
 </pre>
 
-做一個簡單的測試，將你的源碼壓縮，並且將tar 放到\web server:
+To do a simple test, pack your sources in a tar, and put this tar on a web server:
 <pre>
 cd My_personal_Projects_Folder/myhello
 tar cvfz myhello-1.0.tar.gz myhello-1.0/
 </pre>
+This is correct, ie the tarball will have a NAME-VERSION subdirectory, that's what we need.
 
-這是正確的，如 tarball 將會有一個 NAME(名稱)-VERSION(版本) 的子目錄，這就是我們要的。
+===The recipe===
+In the bitbake file, you need to give
+* a description for your package, variable name is DESCRIPTION
+* a package name (PN)
+* a package version (PV)
+* a source URI, I'll give details later
+* a source version, to checkout a particular revision of versionned trees
+* Please see the [http://www.openembedded.org/wiki/StyleGuide Open Embedded StyleGuide] which should answer most if not all questions about .bb file conventions.
 
-===方法===
-在bitbake檔案中，你需要給予下列的東西：
-* 軟體的描述，變數名稱
-* 軟體名稱 (PN)
-* 軟體版本 (PV)
-* 來源URI，在之後的內容中，我會詳細描述
-* 源碼版本，檢查已命名版本的目錄樹的版本修訂
-* 請參考 [http://www.openembedded.org/wiki/StyleGuide Open Embedded StyleGuide] ，它可以回答關於.bb 檔案轉換的問題。
-
-這裡是它的範例：
+here's an example:
 
 <pre>#package description
 DESCRIPTION = "An example application for openmoko, depending on a custom source repository"
@@ -168,38 +162,35 @@ SRC_URI = "svn://repo/path/myhello;proto=https;module=${PN}-${PV}"
 inherit autotools
 </pre>
 
-以 ${} 開始的陳述式可以被取代，它允許你下載如名為"mypackage-1.0.tar.gz"的壓縮檔
+Expressions starting by ${} are substituted, this allows you to download a tarball named "mypackage-1.0.tar.gz" for example
 
-=== 原始 URIs ===
-bitbake 可以為你的專案自不同的位置取回源碼，或壓縮、 subversion及git等...。
+=== Source URIs ===
+bitbake can get the source code for your project from a variety of locations including tarball, subversion and git.
 
-這些資訊都可以在[http://bitbake.berlios.de/manual/ bitbake manual]中找到。特別是 [http://bitbake.berlios.de/manual/ch03.html#id869590 這個位置]。
+All of this is explained in the [http://bitbake.berlios.de/manual/ bitbake manual], particulary [http://bitbake.berlios.de/manual/ch03.html#id869590 here].
 
-軟體建立的目錄，是bitbake主要執行的地方，它將會依照它的名稱範本 "PACKAGE_NAME-PACKAGE_VERSION"執行，因此：
+The package build directory, the one where bitbake will run "configure" et al, will follow the name template: "PACKAGE_NAME-PACKAGE_VERSION", so
 
-* 壓縮檔必須解壓縮到它的子目錄下
-* svn 上層目錄必須有這個名稱
+* tarballs must extract to a subdirectory with this name
+* svn top directory must have this name
 
-這是非常重要的！
+It's very important. I spent 3 days blocking on this!
 
-=== 告訴bitbake如何建立你的軟體package===
-唯一要做的事就是編輯 $OMDIR/build/local.conf ，告訴 bitbake 如何為.bb檔搜尋檔案夾：
+===Tell bitbake to build our package===
+The only and one thing to do is edit $OMDIR/build/local.conf to tell bitbake to search our folders for .bb files:
 <pre>
 BBFILES+="${HOME}/MypersonalOpenmokoPackages/packages/*/*.bb"
 </pre>
+There is no need to change BBPATH or something else, this is only needed to add new configuration files, not recipes.
 
-並不需要變更 BBPATH 或其它的任何東西，只需要加入新的設定檔，而不是recipes.
-
-執行以下指令：
-
+Running
 <pre>
 $ cd $OMDIR/build
 $ bitbake mypackage
 </pre>
+will bring all the necessary operations to create a package in $OMDIR/build/tmp/deploy/ipk/armv4t/myhello .....
 
-將會在 $OMDIR/build/tmp/deploy/ipk/armv4t/myhello .....中，執行建立軟體中必要的操作。
-
-下面是 build log的範例：
+The following is an example build log:
 <pre>
 OE Build Configuration:
 BB_VERSION     = "1.6.9"
@@ -262,47 +253,42 @@ Build statistics:
   Attempted builds: 1
 </pre>
 
-=== 將軟體置入 rootfs image===
+===Get this package included in the rootfs image===
 
 <blockquote>
 {| border="1" cellspacing="0" cellpadding="5" align="center"
- |* 在將軟體置入rootfs image時，這個方法並不是一個標準或者是正常的方法。我們會先操作合適的方法，之後，再示範不適合的方法。
+ |*This method is not a standard or normal way to include a package. The proper method follows the improper method.
 |}
 </blockquote>
+bitbake openmoko-devel-image is used to build the entire distribution, but it does not include your new package in the rootfs image.
 
-
-bitbake openmoko-devel-image 被用來建立整個套件，但它並不會將你的軟體包含到rootfs image中。
-
-要進行這個工作，請使用以下的指令：
+To do this, use:
 
 <pre>bitbake openmoko-devel-image -crebuild</pre>
 
-這會確實的重建 rootfs，包括你的新軟體。
+This will actually rebuild the rootfs, including your new packages.
 
 <blockquote>
 {| border="1" cellspacing="0" cellpadding="5" align="center"
- |* 我們建議你使用下面的操作方法:
+ |*The suggested method follows below.
 |}
 </blockquote>
 
-要將軟體置入image中，包含二個操作步驟：
+To include the package in the image there are two steps.
 
-一: 修改你的 local.conf. $OMDIR/build/conf/local.conf
+First: Modify your local.conf. $OMDIR/build/conf/local.conf
 <pre>
 DISTRO_EXTRA_RDEPENDS += "<app name>"
 </pre>
+This adds your application as a dependency for building the distro.
 
-這個指令在建立套件時，將你的軟體視為一個dependency 。
-
-二: 更新task-base
+Second: Update the task-base.
 <pre>
 bitbake task-base -crebuild
 </pre>
+When you update the task base it re-builds and ipk file which will: "Merge machine and distro options to create a basic machine task/package" 
 
-當你更新task base，它會重建，並且 ipk 檔案將會： "合併機器及套件選項，以建立一個基本的 machine task/package" 
-
-你也可以藉由修改 openmoko/trunk/oe/packages/tasks/task-openmoko.bb 並且在最後加入你的應用程式名稱。
-
+You could also add your package by modifying the openmoko/trunk/oe/packages/tasks/task-openmoko.bb and adding your application name with the trailing backslash right before the update-alternatives line.
 <pre>
   modutils-initscripts \
   module-init-tools-depmod \
@@ -313,16 +299,16 @@ bitbake task-base -crebuild
 #  update-alternatives \
 </pre>
 
-接著，測試它 (如果你使用 [[MokoMakefile]])，它就會變的相對簡單：
+Then to test this out (if you're using the [[MokoMakefile]]) it's pretty simple.
 <pre>
 make openmoko-devel-image
 make build-qemu
 make flash-qemu-local
 </pre>
+And now you're running qemu with that fancy new image you just made!
 
-現在，你正使用 qemu 執行你所製作的 image ！
+If you are really lazy this script should do all the above stuff. This is just a small shell hack which uses the power of sed to inject packages into the the final image. Use at your own risk and please don't flame the author =D..
 
-若你真的很懶惰的話，你可以使用下面的script 幫你完成下面所有的工作。
 <pre>
 #!/bin/bash
 # Sudharshan "Sup3rkiddo" S
