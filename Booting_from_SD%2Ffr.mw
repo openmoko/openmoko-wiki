@@ -185,19 +185,19 @@ En fonction du lot du téléphone et du type de partition que vous utilisez, il 
 
 Après avoir consulté ces deux articles, vous devriez être connecté avec le shell sur uboot en mode NAND. La première chose à faire est de régler le délai de déconnexion du menu de démarrage à une valeur très élevée. Si vous ne faites pas cela, le gestionnaire de démarrage continuera le chargement après le délai par défaut (60 secondes) même si vous êtes connecté au shell uboot. Entrez la commande suivante :
 
-setenv boot_menu_timeout 99999
+ setenv boot_menu_timeout 99999
 
 Cela règlera le délai à 99999 secondes ce qui devrait vous donner le temps de lancer toutes les commandes que vous voulez dans le shell de démarrage.
 
 Maintenant, nous allons vérifier qu'une option du menu pour démarrer sur la carte SD est bien disponible et la créer si ce n'est pas le cas. Vous pouvez afficher l'environnement de démarrage du gestionnaire de démarrage avec la commande :
 
-printenv
+ printenv
 
 Si le résultat est une ligne commençant par ''menu_'' suivi des commandes qui sont listées dans ce guide, vous n'avez pas besoin de créer de nouvelle entrée dans le menu. Dans tous les autres cas veuillez suivre les instructions suivantes :
 
 Vérifiez que vous utilisez la bonne configuration à partir des décisions que vous avez prises auparavant. Pour plus d'informations sur les commandes uboot, utilisez :
-help
-help <commande>
+ help
+ help <commande>
 et [[Bootloader]] ainsi que [[Bootloader commands]].
 
 {{Note| Les antislashes (\) sont très importants en mode uboot pour enregistrer la commande en tant que nouvelle variable d'environnement plutôt que de l'exécuter immédiatement après l'appui sur la touche entrée.}}
@@ -210,36 +210,36 @@ Vérifiez les numéros de partition dans les commandes suivantes.  Il peut être
 
 '''Entrée du menu pour le noyau sur FAT et le rootfs sur ext3 :'''
 
-setenv menu_9 Boot from microSD (FAT+ext3): setenv bootargs \${bootargs_base} rootfstype=ext3 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
+ setenv menu_9 Boot from microSD (FAT+ext3): setenv bootargs \${bootargs_base} rootfstype=ext3 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
 
 '''Entrée du menu pour le noyau sur FAT et le rootfs sur ext2:'''
 
-setenv menu_9 Boot from microSD (FAT+ext2): setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
+ setenv menu_9 Boot from microSD (FAT+ext2): setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
 
 ou : avec option noyau 'init=/sbin/init' (nécessaire pour certaines images) :
-setenv menu_9 Boot 200808 from microSD (FAT+ext2): setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} init=/sbin/init ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
+ setenv menu_9 Boot 200808 from microSD (FAT+ext2): setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} init=/sbin/init ro\; mmcinit\; fatload mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
 
 '''Entrée du menu pour noyau sur ext2 et rootfs sur ext2: (nécessite un u-boot récent)'''
 
-setenv menu_2 Boot from microSD part2 (ext2+ext2): setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; ext2load mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
+ setenv menu_2 Boot from microSD part2 (ext2+ext2): setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p2 rootdelay=5 \${mtdparts} ro\; mmcinit\; ext2load mmc 1 0x32000000 \${sd_image_name}\; bootm 0x32000000
 
 '''Entrée du menu pour noyau et rootfs sur la même partition ext2 (testé avec Qtopia/nécessite un u-boot récent)'''
-setenv menu_3 QTopia: setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p1 rootdelay=5 \${mtdparts} ro\; mmcinit\; ext2load mmc 1:1 0x32000000 \${sd_image_name}\; bootm 0x32000000
+ setenv menu_3 QTopia: setenv bootargs \${bootargs_base} rootfstype=ext2 root=/dev/mmcblk0p1 rootdelay=5 \${mtdparts} ro\; mmcinit\; ext2load mmc 1:1 0x32000000 \${sd_image_name}\; bootm 0x32000000
 Vous avez bientôt fini. Lancez une commande
 
-printenv
+ printenv
 
 et vérifiez que votre choix de menu récemment créé est affiché correctement (sans que les antislashes soient affichés cette fois).
 
 Si tout se passe bien, entrez :
 
-saveenv
+ saveenv
 
 en ligne de commande et tapez entrée. La nouvelle configuration devrait alors être enregistrée dans la mémoire flash NAND.
 
 Eteignez votre Neo avec la commande suivante :
 
-neo1973 power-off
+ neo1973 power-off
 
 Après avoir redémarré le Neo et vous être reconnecté en mode NAND vous devriez pouvoir sélectionner votre choix récemment créé et pouvoir démarrer avec le système de fichiers racine de votre carte SD.
 
