@@ -1,45 +1,61 @@
 There are three boot screens (also called splashes or splash screens) as of 13 Nov. 2007.  The U-Boot splash is displayed until the kernel takes over.  Presumably the kernel will eventually display a splash while it boots.  When userspace initializes, psplash displays a splash.  Finally X displays a splash when it starts.
 
-== U-boot Splash ==
+=== U-boot Splash ===
 
-'''TODO: See improvements to the procedure [http://lists.openmoko.org/pipermail/devel/2008-December/003891.html here] and update information below accordingly.'''
+Werner's README states the following:
+: "The splash image is a raw dump of the 480x640x16 frame buffer, with RGB
+: 5:6:5 organization and HWSWP = 1. To save a lot of space and to greatly
+: improve speed, we gzip the raw dump."
 
-=== Original instructions ===
-Is a raw framebuffer bitmap that is gzipped.
 
-Here is a basic description: http://svn.openmoko.org/trunk/src/host/splash/README
+So what you have to do to create your U-boot splashscreen is
+# create your splash-file with the dimensions 480x640 (in 16bit preferrably) and save it in png format
+# get the necessary tools for converting it
+#* get the conversion script
+#** download the Perl script kindly provided by [http://svn.openmoko.org/developers/werner/splash/ Werner Almesberger]
+#** make it executable with ''`chmod u+x splashimage.pl`''
+#* Optionally: have a look at the README file. It should contain the most up-to-date info from Werner himself.
+#* Make sure to have netpbm installed.
+#** Check your ${PATH} for ''pngtopnm'' and ''pbmtorgb3'' executables.
+#** If those programs are missing, check whether rle-support is enabled for netpbm.
+#* If you don't have Dfu-util already, get [http://wiki.openmoko.org/wiki/Dfu-util#Binaries it here].
+# convert the png-file
+#* execute ''`./splashimg.pl yourfancynewsplashscreen.png | gzip -9 > bootscreen.splash`''
+#** '''Make sure you redirect the output!''' The perl-script shoves the splash-data to stdout.
+#** ''-pnm'' makes the pngtopnm-executable dispensable and eats a generic pnm-/pbm-file - gimp can export to them, for example.
+#** If you omit the png-file, ''splashimg.pl'' will be looking for a file named ''System_boot.png''
+#** ''-32'' will create a 480x640x32 frame buffer
+#: ( I have '''no''' idea if that's supported (???) )
+#** ''-swap'' causes some XOR operation performed in the end of the image creation.
+#: ( Some kind of inverting? Option for different edianness? )
+# upload your new bootscreen.splash ( you need alt-name: splash )
+#* if you don't know how to do that: check the instructions found [http://wiki.openmoko.org/wiki/Dfu-util#Command-line_options here]
+# '''IMPORTANT!''' check the exact size of your splash-file (e.g. ''ls -l'' or ''du -b'')
+#:: Explanation: The flash-partition reserved for the splash image (dubbed ''splash'') is 655360 Bytes (0xa0000) in size; per default u-boot only reads 20480 (0x5000) of those, though.
+#:
+#* Essentially, this leaves you with 3 choices:
+#** Make a splash image that's gzip'd smaller than 20480 Bytes. This is somewhat boring, as it imposes limits to your creativity.
+#** Turn off the read-limit, so u-boot scans the whole splash-partition before commencing boot. This would mean a little longer time till the image is actually displayed. And I mean: little.
+#** Or tailor the read size to the size of your splash.
+#*** If it's smaller than the pre-defined 0x5000 Bytes, u-boot is done with reading sooner.
+#*** If it's bigger than the 0x5000 Bytes, you will ''have'' to adapt it or your image won't be displayed correctly.
+#:
+#: So, if you do (need) to edit the size:
+# Start your u-boot. And make sure you're in NAND (as opposed to NOR).
+#:: (You do that by pressing ''PWR'' briefly before pressing ''AUX'' - keep them both pressed until the u-boot appears.)
+#* Now select USB-Console, plugin your USB-cable and start the tty-console of your choice
+#:: e.g. ''`screen /dev/ttyACM0`''
+#:
+#* for the GTA01:
+#*: ''setenv splashimage nand read.e 0x32000000 splash 0x5000\; unzip 0x32000000 0x33d00000 0x96000''
+#*: ''saveenv''
+#* for the GTA02:
+#*: ''setenv splashimage nand read.e 0x32000000 splash 0x5000\; unzip 0x32000000 0x8800000 0x96000''
+#*: ''saveenv''
+#:
+#: In those commands, replace the 0x5000 with the size of your choice - or omit it altogether. The minimum size you have to put is the size of your splash-file - or you will receive garbage.
+#: Also consider that this is a basic terminal; input is not ''exactly'' like on the shells you're used to.
 
-Use [[dfu-util]] or [[NeoTool]] to send to the Openmoko.
-
-=== Instructions which worked for me ===
-The above instruction did not work, unfortunately, maybe there were for a previous release of u-boot. The following did work for me:
-
-* Install the appropriate tools
-** Download the README and the Perl script from http://svn.openmoko.org/developers/werner/splash/
-** chmod a+rx *.pl
-** Be sure to have netpbm installed
-
-* How to use the tools
-** First, make a PNG 480x640x8 (or just get the original picture from https://docs.openmoko.org/trac/raw-attachment/ticket/1735/boot_image.png, or the older splash screen from http://wiki.openmoko.org/images/c/c2/), and name it System_boot.png
-** Convert the System_boot.png into a compressed converted image file splash.gz, then download it to the splash partition (the neo1973 must be in u-boot mode, and you need dfu-util)
-*** ./imghs.pl | gzip -9 > splash.gz
-*** sudo ../bin/dfu-util -a splash -R -D splash.gz
-** If the size of splash.gz is not exactly 0x5000, please see the next section.
-
-=== Alternative instructions ===
-Step 1, 2, 4 and 5 of [http://lists.openmoko.org/pipermail/devel/2008-December/003891.html this post]. An example is [[Image:splash-logos.png]].
-
-=== Modifying the size of the compressed splash image ===
-NOTE... the README states you must issue two U-Boot commands to enable the flashed splash image to appear on the screen at boot:
-
-''setenv splashimage nand read.e 0x32000000 splash 0x5000\; unzip 0x32000000 0x33d00000 0x96000''
-''saveenv''
-
-This is already a part of the U-Boot image received in the phone... however, if you make changes to your splash image, you may need to change the splashimage variable to compensate!
-
-0x5000 is the (maximum) size of the compressed file -- the splash.gz that gets created. If you've made changes to your image you may have increased the compressed size; if it exceeds 0x5000 (20480) bytes, the entire image will not load unless you increase this value in your splashimage U-Boot environment variable.
-
-Note that the framebuffer address on GTA02 is mapped to 0x8800000, not 0x33d00000
 
 === See also ===
 
