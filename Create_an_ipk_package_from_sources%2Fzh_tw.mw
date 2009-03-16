@@ -277,29 +277,32 @@ bitbake openmoko-devel-image 被用來建立整個套件，但它並不會將你
 
 <pre>bitbake openmoko-devel-image -crebuild</pre>
 
-This will actually rebuild the rootfs, including your new packages.
+這會確實的重建 rootfs，包括你的新軟體。
 
 <blockquote>
 {| border="1" cellspacing="0" cellpadding="5" align="center"
- |*The suggested method follows below.
+ |* 我們建議你使用下面的操作方法:
 |}
 </blockquote>
 
-To include the package in the image there are two steps.
+要將軟體置入image中，包含二個操作步驟：
 
-First: Modify your local.conf. $OMDIR/build/conf/local.conf
+一: 修改你的 local.conf. $OMDIR/build/conf/local.conf
 <pre>
 DISTRO_EXTRA_RDEPENDS += "<app name>"
 </pre>
-This adds your application as a dependency for building the distro.
 
-Second: Update the task-base.
+這個指令在建立套件時，將你的軟體視為一個dependency 。
+
+二: 更新task-base
 <pre>
 bitbake task-base -crebuild
 </pre>
-When you update the task base it re-builds and ipk file which will: "Merge machine and distro options to create a basic machine task/package" 
 
-You could also add your package by modifying the openmoko/trunk/oe/packages/tasks/task-openmoko.bb and adding your application name with the trailing backslash right before the update-alternatives line.
+當你更新task base，它會重建，並且 ipk 檔案將會： "合併機器及套件選項，以建立一個基本的 machine task/package" 
+
+你也可以藉由修改 openmoko/trunk/oe/packages/tasks/task-openmoko.bb 並且在最後加入你的應用程式名稱。
+
 <pre>
   modutils-initscripts \
   module-init-tools-depmod \
@@ -310,16 +313,16 @@ You could also add your package by modifying the openmoko/trunk/oe/packages/task
 #  update-alternatives \
 </pre>
 
-Then to test this out (if you're using the [[MokoMakefile]]) it's pretty simple.
+接著，測試它 (如果你使用 [[MokoMakefile]])，它就會變的相對簡單：
 <pre>
 make openmoko-devel-image
 make build-qemu
 make flash-qemu-local
 </pre>
-And now you're running qemu with that fancy new image you just made!
 
-If you are really lazy this script should do all the above stuff. This is just a small shell hack which uses the power of sed to inject packages into the the final image. Use at your own risk and please don't flame the author =D..
+現在，你正使用 qemu 執行你所製作的 image ！
 
+若你真的很懶惰的話，你可以使用下面的script 幫你完成下面所有的工作。
 <pre>
 #!/bin/bash
 # Sudharshan "Sup3rkiddo" S
