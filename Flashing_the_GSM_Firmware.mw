@@ -138,6 +138,24 @@ echo 1 > /sys/bus/platform/devices/neo1973-pm-gsm.0/power_on
 </pre>
 The firmware download should start now.
 
+=== Half-flashed GTA01bv4 GSM Modem ===
+
+For GTA01 the process of flashing when the main firmware is absent is more complicated as we have no easy way to power-cycle the modem.
+
+I recently had to do a special process to recover my GTA01bv4 after breaking the gsm modem with a failed flash. The process is actually fairly simple.
+
+* Unplug USB and remove the battery for about 10s to ensure that the GSM chipset is powered off, then replace the battery and re-connect the USB
+* boot up from a distro that is neutered so that it does not access or turn on the gsm modem at all (this is a really important prerequisitive, as nothing should turn on the modem by touching MODEM_ON line until fluid is ready to connect to it); one can do that simply by disabling start of ophonekitd (and to be on the safe side framworkd too) on SHR
+* issue this stty command twice:
+  stty 0:4:18b2:8a00:0:0:7f:15:4:0:0:0:0:0:0:0:12:f:17:16:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0 -F /dev/ttySAC0
+* cd /usr/sbin
+* issue this fluid command (replace $HOME/filename.m0 with path to firmware you want to flash):
+  FLUID_PORT=/dev/ttySAC0 fluid.exe -oo -od13,13 -b115200 -f $HOME/filename.m0
+* in another ssh session, issue this command:
+  echo 1 > /sys/bus/platform/devices/neo1973-pm-gsm.0/power_on
+
+After this, the flashing proceeded as expected. You don't need to do any special checks to ensure you have successfully flashed; if fluid reports everything is ok, it is actually ok.
+
 == uSD-card Image ==
 There's a beta version for flashing MOKO11 to GTA02 Freerunner only.
 * Download and untar http://people.openmoko.org/joerg/calypso_moko_FW/moko11/flash-moko11_uSD-image.tar.gz .
