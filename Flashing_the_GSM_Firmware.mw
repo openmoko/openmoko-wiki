@@ -55,7 +55,7 @@ root@om-gta02:~# wget http://people.openmoko.org/joerg/calypso_moko_FW/moko11/ca
 
 ==Phase 2: The Lobotomy==
 
-* Make sure '''nothing''' is accessing the GSM modem. If you're using the fso-console image from the link above, this will happen automagically on boot. On other systems, kill processes as you see fit (for FSO it's zhone, frameworkd and gsm0710muxd; for SHR it's ophonekitd, frameworkd and gsm0710muxd). If you're using a stable (or andy-tracking) kernel from Feb 26 or later on GTA02, see below for simplified instructions on powering the modem on/off.
+* Make sure '''nothing''' is accessing the GSM modem. If you're using the fso-console image from the link above, this will happen automagically on boot. On other systems, kill processes as you see fit (for FSO it's zhone, frameworkd and gsm0710muxd; for SHR it's ophonekitd, frameworkd and gsm0710muxd). If you're using a stable (or andy-tracking) kernel from Feb 26 or later on GTA02, see below for simplified instructions on powering the modem on/off (if you use the simplified method to turn it off, you must also use the simplified method to turn it on; no s3c24xx-gpio invocations are needed).
 
 * Power off the modem:
 <pre>
@@ -103,8 +103,7 @@ If FLUID does nothing, curse your bad luck and repeat the reset sequence, this i
 <pre>
 root@om-gta02:~# stty crtscts -F /dev/ttySAC0
 root@om-gta02:~# cat /dev/ttySAC0 &
-root@om-gta02:~# echo -en 'AT\r' >/dev/ttySAC0
-root@om-gta02:~# echo -en 'AT+CGMR\r' >/dev/ttySAC0
+root@om-gta02:~# echo -en 'AT\r' >/dev/ttySAC0; sleep 1; echo -en 'AT+CGMR\r' >/dev/ttySAC0
 +CGMR: "GSM: gsm_ac_gp_fd_pu_em_cph_ds_vc_cal35_ri_36_amd8_ts0-Moko11"
 root@om-gta02:~# kill %1
 </pre>
