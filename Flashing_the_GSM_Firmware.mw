@@ -4,25 +4,26 @@
 
 This is a step-by-step description of how the firmware is upgraded on a Neo with FLUID running on the device. Note that this process tolerates almost no variations. Stray from the instructions at your own peril. Instructions based on a posting by Werner (http://lists.openmoko.org/pipermail/openmoko-devel/2008-April/002605.html), thanks.
 
-Please note: Update to MOKO9-beta firmware isn't recommended by OM, and probably won't fix any recent issues like [http://docs.openmoko.org/trac/ticket/1024 #1024] et al.
+Please note: Update to MOKO9-beta firmware isn't recommended by OM, and probably won't fix any recent issues like [http://docs.openmoko.org/trac/ticket/1024 #1024] et al. Use the latest firmware version instead.
 
 Please see http://people.openmoko.org/joerg/calypso_moko_FW for more recent FW-images.
 
 Please see http://people.openmoko.org/joerg/calypso_moko_FW/all_version__CHANGELOG.txt for changelog.
 
-For now there is some moko10, which should fix #666, and also has a new command AT+CSIM.
-This version is not supposed to fix [http://docs.openmoko.org/trac/ticket/1024 #1024]
+For now there is some moko11, which should fix #666 (compatibility with some 3G sim cards), and also has a new command AT+CSIM. It also includes fixes related to hardware flow control and wakeup interrupt.
+
+This version is not supposed to fix [http://docs.openmoko.org/trac/ticket/1024 #1024] (constant re-registrations leading to lost calls and messages). For a workaround use a distro where deep sleep mode can be deactivated.
+
 We are planning to include this version in the factory image of the A7 run.
 
 We recommend you don't update by following this procedure, unless you feel very comfortable with commandline. Don't miss-spell any FLUID command!
-There will be a SD-image shortly, that greatly simplifies the whole GSM-update process - we suggest everybody who's not feeling completely comfortable with the procedure described herein to wait for this improved method (for beta version see end of page).
 
-'''Warning: there are chances to _completely_ brick your GSM modem on messing around with FLUID!  Please watch out for typos!'''
+There is an SD-image, that greatly simplifies the whole GSM-update process - we suggest everybody who's not feeling completely comfortable with the procedure described herein use the image instead (not applicable to gta01 owners).
 
-The GSM-firmware didn't differ from GTA01 to GTA02, as the GSM-hardware didn't either. This means you can flash MOKO10 (or any other recent GSM-FW) to GTA01 as well.
-According to mwester, this worked for him to update from MOKO1 on a GTA01Bv4 to MOKO10b2, by following the steps described herein.
+'''Warning: there are chances to _irrecoverably_ damage your GSM modem calibration data, thus rendering it useless on messing around with FLUID! Use only the commands from this wiki page!'''
 
-
+The GSM-firmware didn't differ from GTA01 to GTA02, as the GSM-hardware didn't either. This means you can flash MOKO11 (or any other recent GSM-FW) to GTA01 as well.
+According to mwester, this worked for him to update from MOKO1 on a GTA01Bv4 to MOKO10b2, by following the steps described herein (if the main firmware can't be started, see troubleshooting section for additional instructions).
 
 Any reports on successful update, as well as problems encountered, or SIMs seen to work after update, all highly appreciated. Please add to the "discussion" tab of this wikipage. Thanks!
 
@@ -44,16 +45,17 @@ root@om-gta02:~# opkg install http://people.openmoko.org/joerg/calypso_moko_FW/f
 <pre>
 root@om-gta02:~# opkg install http://people.openmoko.org/joerg/calypso_moko_FW/s3c24xx-gpio_1.0+svnr4130-r2.1_armv4t.ipk
 </pre>
-* Download http://people.openmoko.org/joerg/calypso_moko_FW/gsm_ac_gp_fd_pu_em_cph_ds_vc_cal35_ri_36_amd8_ts0-moko10.m0
+* Download 
+http://people.openmoko.org/joerg/calypso_moko_FW/moko11/calypso-moko11.m0
 and place it into the /home/root directory:
 <pre>
 root@om-gta02:~# cd $HOME
-root@om-gta02:~# wget http://people.openmoko.org/joerg/calypso_moko_FW/gsm_ac_gp_fd_pu_em_cph_ds_vc_cal35_ri_36_amd8_ts0-moko10.m0
+root@om-gta02:~# wget http://people.openmoko.org/joerg/calypso_moko_FW/moko11/calypso-moko11.m0
 </pre>
 
 ==Phase 2: The Lobotomy==
 
-* Make sure '''nothing''' is accessing the GSM modem. If you're using the fso-console image from the link above, this will happen automagically on boot. On other systems, kill processes as you see fit.
+* Make sure '''nothing''' is accessing the GSM modem. If you're using the fso-console image from the link above, this will happen automagically on boot. On other systems, kill processes as you see fit (for FSO it's zhone, frameworkd and gsm0710muxd; for SHR it's ophonekitd, frameworkd and gsm0710muxd)
 
 * Powercycle the modem:
 <pre>
@@ -66,16 +68,16 @@ root@om-gta02:~# echo "AT@POFF" >/dev/ttySAC0
 * Launch the FLUID binary:
 <pre>
 root@om-gta02:~# cd /usr/sbin
-root@om-gta02:/usr/sbin# FLUID_PORT=/dev/ttySAC0 FLUID_FLOWCONTROL=h fluid.exe \
--oO -b 115200 \
--f $HOME/gsm_ac_gp_fd_pu_em_cph_ds_vc_cal35_ri_36_amd8_ts0-moko10.m0
+root@om-gta02:/usr/sbin# FLUID_PORT=/dev/ttySAC0 fluid.exe \
+-oo -od13,13 -b 115200 \
+-f $HOME/calypso-moko11.m0
 </pre>
 It should say something like this (takes a few seconds to load the file):
 <pre>
 FLUID Revision 2.27, ...
 Bootloader: (reset target)
 </pre>
-(if this fails repeatedly, or flashing aborted and you have a broken and "bricked" gsm-firmware due to this, try -oo instead of -oO, to use the calypso ROM bootloader instead of the firmware bootloader. Also try without the 'FLUID_FLOWCONTROL=h' part, there are reports on ROM-bootloader not working with hardware-flowcontrol. Changing the -b to some lower baudrate might improve stability of flashing-process - the bootloader does autobaud, so you're free to use any rate)
+(this works even if the previous flashing was aborted and you have a broken and non-functional gsm-firmware due to this, as it uses the calypso ROM bootloader instead of the firmware bootloader. Changing the -b to some lower baudrate might improve stability of flashing-process - the bootloader does autobaud, so you're free to use any rate)
 
 * Start a second SSH session and start the modem:
 <pre>
@@ -100,7 +102,7 @@ If FLUID does nothing, curse your bad luck and repeat the reset sequence, this i
 root@om-gta02:~# cat /dev/ttySAC0 &
 root@om-gta02:~# echo -en 'AT\r' >/dev/ttySAC0
 root@om-gta02:~# echo -en 'AT+CGMR\r' >/dev/ttySAC0
-+CGMR: "HW: GTA, GSM: gsm_ac_gp_fd_pu_em_cph_ds_vc_cal_amd8_ts0-Moko10"
++CGMR: "GSM: gsm_ac_gp_fd_pu_em_cph_ds_vc_cal35_ri_36_amd8_ts0-Moko11b1"
 root@om-gta02:~# kill %1
 </pre>
 
@@ -127,7 +129,7 @@ However a solution [http://n2.nabble.com/problems-with-calypso-firmware-update-t
 Use the following fluid command:
 
 <pre>
-FLUID_PORT=/dev/ttySAC0 fluid.exe -oo -b 115200 -f $HOME/gsm_ac_gp_fd_pu_em_cph_ds_vc_cal35_ri_36_amd8_ts0-moko10.m0
+FLUID_PORT=/dev/ttySAC0 fluid.exe -oo -od13,13 -b 115200 -f $HOME/calypso-moko11.m0
 </pre>
 (Without FLOWCONTROL and with -oo to choose the ROM bootloader)
 
