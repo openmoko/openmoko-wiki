@@ -55,9 +55,9 @@ root@om-gta02:~# wget http://people.openmoko.org/joerg/calypso_moko_FW/moko11/ca
 
 ==Phase 2: The Lobotomy==
 
-* Make sure '''nothing''' is accessing the GSM modem. If you're using the fso-console image from the link above, this will happen automagically on boot. On other systems, kill processes as you see fit (for FSO it's zhone, frameworkd and gsm0710muxd; for SHR it's ophonekitd, frameworkd and gsm0710muxd)
+* Make sure '''nothing''' is accessing the GSM modem. If you're using the fso-console image from the link above, this will happen automagically on boot. On other systems, kill processes as you see fit (for FSO it's zhone, frameworkd and gsm0710muxd; for SHR it's ophonekitd, frameworkd and gsm0710muxd). If you're using a stable (or andy-tracking) kernel from Feb 26 or later on GTA02, see below for simplified instructions on powering the modem on/off.
 
-* Powercycle the modem:
+* Power off the modem:
 <pre>
 root@om-gta02:~# echo 0 >/sys/bus/platform/devices/neo1973-pm-gsm.0/power_on
 root@om-gta02:~# echo 1 >/sys/bus/platform/devices/neo1973-pm-gsm.0/power_on
@@ -120,6 +120,15 @@ Program: (0 sectors, 0*8k=0k) () ok
 It means the checksums of all sectors in calypso's FW and the new file to flash are identical. Probably you're trying to flash same version of FW that's already installed.
 
 Never downgrade to a version earlier than Moko6, or you will render the GSM unusable (certain internal data structures changed between Moko5 and Moko6).
+
+With modern kernels on GTA02 you can use this single command to "Power off the modem":
+<pre>
+echo 0 >/sys/bus/platform/devices/neo1973-pm-gsm.0/power_on
+</pre>
+To "start the modem" you need to issue:
+<pre>
+echo 1 >/sys/bus/platform/devices/neo1973-pm-gsm.0/power_on
+</pre>
 
 ==Troubleshooting==
 
