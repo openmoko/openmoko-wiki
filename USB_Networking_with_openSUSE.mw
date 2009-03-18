@@ -42,6 +42,20 @@ The firewall must be configured to allow traffic to and from the FreeRunner. Sta
 
 (1) Under the <i>Interfaces</i> tab, confirm that the network device that connects to the internet is in the "External Zone" and the USB device is in the "Internal Zone". (2) In the <i>Allowed Services</i> tab, there is a checkbox labeled "Protect Firewall from Internal Zone". Uncheck it. (3) In the <i>Masquerading</i> tab, check the "Masquerade Networks" box. (4) Clicking "Next" will get to  a firewall summary dialog, then clicking "Accept" will configure and restart the firewall.
 
+=== If you don't see usb0 (openSUSE 11.1) ===
+
+If usb0 doesn't appear in the firewall dialog, you may have to create a file for the interface.  Create the file /etc/sysconfig/network/ifcfg-usb0:
+
+ # USB configuration for openmoko
+ BOOTPROTO='static'
+ IPADDR='192.168.0.200'
+ NETMASK='255.255.255.0'
+ NAME='OpenMoko'
+ STARTMODE='hotplug'
+ USERCONTROL='no'
+
+Adding this file and restarting the network may force the usb0 device to appear in YaST's firewall configuration tool.
+
 == Configure NAT ==
 
 After configuring and starting the USB interface, engaging the host PC as a router, and opening the firewall. You may add a route to  the FreeRunner and start network address translation (NAT). It may be best to write short scripts to perform these actions, so they may be invoked without remembering or typing them. In one script, <b>neoFRup.sh</b>, place the commands:
@@ -60,7 +74,6 @@ You should make sure that there is a gateway set to 192.168.0.200 in the FR's /e
  #! /bin/sh
  /sbin/route del -host 192.168.0.202/32 dev usb0
  iptables -t nat -F POSTROUTING
-
 
 
 [[category:Networking]]
