@@ -1,0 +1,52 @@
+Qt Software cancelled the Qt Extended project on 3 March 2009 ([http://www.qtsoftware.com/about/news/qt-software-discontinues-qt-extended Qt Software discontinues Qt Extended]). The community created a fork of it and called it Qt Extended Improved:
+
+* [http://trac.karadog.net/qt-extended-improved bug tracking system]
+* [http://dashi-x02.karadog.net/~lihouyu/qtextended/4.4.3/ prebuild rootfs images]
+* [http://git.karadog.net/qt-extended-improved.git git repository]
+
+<h2>Installing Qt Extended Improved snapshot on the FreeRunner</h2>
+
+<h3>Download the kernel and rootfs</h3>
+
+Read the instructions about how to [http://wiki.openmoko.org/wiki/Flashing_the_Neo_Freerunner flash your freerunner].
+
+Qt Extended Improved uses the latest FSO kernel and rootfs. Download the kernel and rootfs to your workstation [http://dashi-x02.karadog.net/~lihouyu/qtextended/4.4.3/ prebuilt rootfs images]. Boot your FreeRunner in dfu mode and use the dfu commands:
+
+ desktop# dfu-util -d 0x1d50:0x5119 -a kernel -R -D  Neo_kernel_Backup_200902212230.bin
+ 
+     ... stuff ...
+ 
+ desktop# dfu-util -d 0x1d50:0x5119 -a rootfs -R -D  Neo_rootfs_Backup_200902212230.jffs2
+ 
+     ... more stuff ...
+
+<h2>Building the Qt Extended Improved SDK</h2>
+
+First download the snapshot from the [http://git.karadog.net/qt-extended-improved.git git repository]. Then make the build directory and set the environment variables. In this example, I write the environment variables to a file then I source the file.
+
+ mkdir -p /opt/QtExtended/build
+ cd /opt/QtExtended
+ tar -xzvf qt-extended-improved.tar.gz
+ echo "export QTOPIA_DEPOT_PATH=/opt/QtExtended/qt-extended-improved" >> setpaths 
+ echo "export QPEDIR=/opt/QtExtended/build/" >> setpaths
+ . setpaths
+
+Install the toolchain:
+
+ cd /opt
+ wget http://qtextended.org/downloads/toolchains/arm920t-eabi.tgz
+ tar xzvf arm920t-eabi.tgz /
+
+Do the linux three-step: configure, make, make install. 
+
+ cd $QPEDIR
+ $QTOPIA_DEPOT_PATH/configure -device neo -D _FORTIFY_SOURCE=0
+ make
+ make install
+ bin/qbuild sdk
+
+The binaries are in the $QPEDIR/image directory. You can copy these to your freerunner over usb like this:
+
+ scp -r $QPEDIR/image/* 192.168.0.202:/opt/Trolltech/Qtopia/
+
+[[Category:Advanced End User]]
