@@ -624,6 +624,72 @@ You may also be able to listen to system audio given the right state file:
      profile "voice"
  }
 
+== Once Again, Bluetooth Headset on Freerunner ==
+
+I managed to connect my bluetooth headset to the Freerunner and route calls to it. However, I couldn't get an actual voice over it, just crackling. Those who know more about this than I suggest this is due to the fact that my bluetooth headset is very cheap, so your mileage may vary.
+
+PLEASE NOTE: You will need a recent git revision of frameworkd (latest in SHR-Unstable repos will do) and bluez4 to do this.
+
+To prepare, you will need a fixed statefile for bluetooth. You can download this at:
+http://dl.getdropbox.com/u/453116/gsmbluetooth.state
+You need to put it on your Freerunner in the /usr/share/openmoko/scenarios/ directory. You will also need to modify your rules.yaml file. You should replace the entire section from '''Call -> Audio Scenario Handling''' (Which is shown) to (but not including) '''while: PowerStatus()''' with the following:
+
+ -
+     #
+     # Call -> Audio Scenario Handling
+     #
+     trigger: IncomingMessage()
+     actions: MessageTone(play)
+ 
+ -
+     while: CallListContains("incoming")
+     filters: Not(CallListContains("active"))
+     actions:
+              - RingTone()
+              - SetDisplayBrightness("0", 90)
+              - OccupyResource(CPU)
+ 
+ -
+     while: CallStatus()
+     filters: Or(HasAttr(status, "outgoing"), HasAttr(status, "active"))
+     actions:
+             - OccupyResource(CPU)
+ -
+     while: CallStatus()
+     filters:
+             - Or(HasAttr(status, "outgoing"), HasAttr(status, "active"))
+             - Not(BTHeadsetIsConnected())
+     actions:
+             - SetScenario(gsmhandset)
+ -
+     while: CallStatus()
+     filters:
+             - Or(HasAttr(status, "outgoing"), HasAttr(status, "active"))
+             - BTHeadsetIsConnected()
+     actions:
+             - SetScenario(gsmbluetooth)
+             - BTHeadsetPlaying()
+ -
+
+Now you will need to restart frameworkd:
+ /etc/init.d/frameworkd restart
+This causes problems for me, so you may find it easier to reboot.
+
+Now, you must pair the bluetooth headset with your Freerunner. Make sure the bluetooth chip is powered up (can be done through the Connectivity section in the SHR-Unstable settings manager) and that bluetoothd is running:
+ /etc/init.d/bluetooth start
+Now, to actually pair the bluetooth headset, you will need the simple-agent script. If you already have it, excellent. If you, like me, do not, then you can get it here:
+http://dl.getdropbox.com/u/453116/simple-agent
+Put it in /usr/bin/ and run '''chmod a+x /usr/bin/simple-agent'''
+
+Now put your headset into pairing mode and run '''hcitool scan'''. Find your headset and use its address in the command '''simple-agent hci0 XX:XX:XX:XX:XX:XX'''. If you give a third parameter (what it is doesn't matter) to simple-agent, it will disconnect then reconnect to the headset. Now we must tell frameworkd that you have a bluetooth headset. You can do that with the following commands. Be sure to insert the appropriate bluetooth address.
+
+ mdbus -s org.freesmartphone.ophoned /org/freesmartphone/Phone org.freesmartphone.Phone.SetBTHeadsetAddress XX:XX:XX:XX:XX:XX
+ mdbus -s org.freesmartphone.ophoned /org/freesmartphone/Phone org.freesmartphone.Phone.SetBTHeadsetEnabled true
+
+By changing ''true'' to ''false'' in the second command, you should be able to disable bluetooth and thereby revert back to normal. However, this doesn't work for me, so if you have trouble, you can make a backup of /usr/share/openmoko/scenarios/gsmbluetooth.state and replace it with /usr/share/openmoko/scenarios/gsmhandset.state.
+
+Hopefully, your bluetooth headset now works. Good luck!
+
 == Debugging ==
 
 If anything goes wrong, capture the bluetooth traffic with
