@@ -255,31 +255,32 @@ Note: On the FreeRunner, the sound module (on the last line) is called snd-soc-n
 
 Now we turn our Debian into a jukebox!
 
- apt-get install alsa-base
+ apt-get install alsa-base gstreamer0.10-alsa
  cat > /etc/asound.conf << __END__
  pcm.!default {
- 	type plug
- 	slave.pcm "dmixer"
+     type plug
+     slave.pcm "dmixer"
  }
  pcm.dmixer  {
-  	type dmix
-  	ipc_key 1024
-  	slave {
- 		pcm "hw:1,0"
- 		period_time 0
- 		period_size 1024
- 		buffer_size 4096
- 		rate 44100
- 	}
- 	bindings {
- 		0 0
- 		1 1
- 	}
+     type dmix
+     ipc_key 1024
+     slave {
+         pcm "hw:0,0"
+         period_time 0
+         period_size 1024
+         buffer_size 4096
+         rate 44100
+     }
+     bindings {
+         0 0
+         1 1
+     }
  }
  ctl.dmixer {
- 	type hw
- 	card 0
+     type hw
+     card 0
  }
+ __END__
  wget http://rabenfrost.net/celtune/alsa_state_files-working.tar.gz
  tar -xf alsa_state_files-working.tar.gz -C /etc
  alsactl -f /etc/alsa_state_files-working/stereoout.state restore
