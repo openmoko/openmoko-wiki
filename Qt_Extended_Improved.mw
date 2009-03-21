@@ -1,34 +1,28 @@
-<h2>Community Resources</h2>
-
 Qt Software cancelled the Qt Extended project on 3 March 2009 ([http://www.qtsoftware.com/about/news/qt-software-discontinues-qt-extended Qt Software discontinues Qt Extended]). The community created a fork of it and called it Qt Extended Improved:
 
-* [http://bugs.qtmoko.org/ bug tracking system]
-* [http://dashi-x02.karadog.net/~lihouyu/qtextended/4.4.3/ prebuilt rootfs images for 4.4.3 and kernel]
-* [http://dashi-x02.karadog.net/~lihouyu/qtextended/snapbuild/  prebuilt tarballs of qt extended improved] (use kernel made for 4.4.3)
+* [http://trac.karadog.net/qt-extended-improved bug tracking system]
+* [http://dashi-x02.karadog.net/~lihouyu/qtextended/4.4.3/ prebuild rootfs images]
 * [http://git.karadog.net/qt-extended-improved.git git repository]
 
-<h2>Installing Qt Extended Improved on the FreeRunner</h2>
+<h2>Installing Qt Extended Improved snapshot on the FreeRunner</h2>
 
-<h3>Install Qt Extended 4.4.3</h3>
+<h3>Download the kernel and rootfs</h3>
 
-There are no rootfs images for Qt Extended Improved, so first we need to install Qt Extended 4.4.3, then we can upgrade to Qt Extended Improved. Follow the instructions at [[Qt Extended 4.4.3]].
+Read the instructions about how to [http://wiki.openmoko.org/wiki/Flashing_the_Neo_Freerunner flash your freerunner].
 
-<h3>Install Qt Extended Improved</h3>
+Qt Extended Improved uses the latest FSO kernel and rootfs. Download the kernel and rootfs to your workstation [http://dashi-x02.karadog.net/~lihouyu/qtextended/4.4.3/ prebuilt rootfs images]. Boot your FreeRunner in dfu mode and use the dfu commands:
 
-Boot your FreeRunner into Qt Extended 4.4.3. Create a [[USB Networking|USB network]] connection between your workstation and the FreeRunner. Download the most recent [http://dashi-x02.karadog.net/~lihouyu/qtextended/snapbuild/ pre-built tarball]. Now you must unpack the tarball to a temporary directory and copy its contents to the FreeRunner's <tt>/opt/Trolltech/Qtopia</tt> directory:
+ desktop# dfu-util -d 0x1d50:0x5119 -a kernel -R -D  Neo_kernel_Backup_200902212230.bin
+ 
+     ... stuff ...
+ 
+ desktop# dfu-util -d 0x1d50:0x5119 -a rootfs -R -D  Neo_rootfs_Backup_200902212230.jffs2
+ 
+     ... more stuff ...
 
- mkdir temp
- cd temp
- tar -xzvf ../qt-extended-improved-bin-only-20090316.tar.gz 
- scp -r * 192.168.0.202:/opt/Trolltech/Qtopia/
-this can be resumed in a simpler and quicker operation:
- ( dd if=../qt-extended-improved-bin-only-20090316.tar.gz ) | ( ssh 192.168.0.202 "cd /opt/Trolltech/Qtopia/ && tar xzv" )
+<h2>Building the Qt Extended Improved SDK</h2>
 
-Reboot your FreeRunner and you should be running Qt Extended Improved.
-
-<h2>Building Qt Extended Improved</h2>
-
-First download a source tar ball from the [http://git.karadog.net/qt-extended-improved.git git repository]. Then make the build directory and set the environment variables. In this example, I write the environment variables to a file then I source the file.
+First download the snapshot from the [http://git.karadog.net/qt-extended-improved.git git repository]. Then make the build directory and set the environment variables. In this example, I write the environment variables to a file then I source the file.
 
  mkdir -p /opt/QtExtended/build
  cd /opt/QtExtended
@@ -43,7 +37,7 @@ Install the toolchain:
  wget http://qtextended.org/downloads/toolchains/arm920t-eabi.tgz
  tar xzvf arm920t-eabi.tgz /
 
-Do the linux three-step: configure, make, make install. Plus we build the sdk so we can make our own apps later, if we want.
+Do the linux three-step: configure, make, make install. 
 
  cd $QPEDIR
  $QTOPIA_DEPOT_PATH/configure -device neo -D _FORTIFY_SOURCE=0
@@ -55,123 +49,4 @@ The binaries are in the $QPEDIR/image directory. You can copy these to your free
 
  scp -r $QPEDIR/image/* 192.168.0.202:/opt/Trolltech/Qtopia/
 
-<h2>Compiling an Example Qt Extended App</h2>
-
-First set those indispensable Qt environment variables:
-
- . /opt/QtExtended/setpaths
-
-Next create a directory <tt>/opt/Qtopia/build/myapps</tt>. Copy the example app. Rename the example app to something that makes sense (how about "example"!). Create the <tt>Makefile</tt> and build the example.
-
- desktop# mkdir /opt/QtExtended/build/myapps
- desktop# cd /opt/QtExtended/build/myapps
- desktop# cp -R $QTOPIA_DEPOT_PATH/examples/application .
- desktop# mv application example
- desktop# cd example
- desktop# $QPEDIR/bin/qbuild
-
-Now you have an executable <tt>example</tt>. It won't execute on your workstation - you must secure copy it to your FreeRunner. Then secure shell into the FreeRunner, import the Qtopia environment variables and execute the app:
-
- desktop# scp example root@freerunner:/home/root
- root@192.168.0.202's password: 
- example                                      100%    33KB  33.4KB/s   00:00    
- desktop# ssh 192.168.0.202
- root@freerunner's password: 
- freerunner:~# . /opt/Trolltech/Qtopia/qpe.env 
- freerunner:~# ./example
-
-This is what you should see on the screen (click on image to zoom) : [[Image:Qt_extended_sdk_example_screenshot.png|100px]]
-
-<h2>Packaging</h2>
-
-Create a .qpk file, an installable package:
-
-  desktop# $QPEDIR/bin/qbuild packages
-
-Create a packages.list file for the software installer and put it in the http server root:
-
-  desktop# sudo $QTOPIA_DEPOT_PATH/bin/mkPackages /srv/www/htdocs/
-
-Copy your new package to the http server root:
-
-  desktop# sudo cp pkg/*.qpk /srv/www/htdocs/
-
-On your phone, find Settings > Software Packages; press the Downloads tab; go to Options > Edit Servers; Options > New; then enter a name and URL of http://192.168.0.200:80, or the URL for your web server. The software package manager should then be able to see $HTTPROOT/packages.list and install any packages you have.
-
-<h2>mp3 Support</h2>
-
-If you compile your own version of Qt Extended Improved, you can add mp3 support using [http://radagast.bglug.ca/openmoko/qt-extended-4.4.3-libmad.tar.gz this patch]. Untar the file from your qt-extended-improved directory (it installs some files in the src tree) and patch using the patch file, eg:
-
- desktop# cd $QTOPIA_DEPOT_PATH
- desktop# tar -xzvf qt-extended-4.4.3-libmad.tar.gz
- desktop# patch -p1 < qt-extended-4.4.3-libmad.patch
-
-Now configure, build, etc.
-
-<h2>Troubleshooting</h2>
-
-If you encounter this error while compiling your example,
-
-<code>
-    In file included from /opt/QtExtended/build/sdk/qtopiacore/target/include/QtCore/qglobal.h:58,
-    from /opt/QtExtended/build/sdk/qtopiacore/target/include/QtCore/qatomic.h:41,
-    from /opt/QtExtended/build/sdk/qtopiacore/target/include/QtCore/qvariant.h:41,
-    from /opt/QtExtended/build/sdk/qtopiacore/target/include/QtCore/QVariant:1,
-    from /opt/QtExtended/build/myapps/example/.uic/ui_examplebase.h:13:
-    /opt/QtExtended/build/sdk/qtopiacore/target/include/QtCore/qconfig.h:2:66: error: /opt/QtExtended/build/sdk/sdk/qtopiacore/qconfig-qpe.h: No such file or directory</code>
-
-edit /opt/QtExtended/build/sdk/qtopiacore/target/include/QtCore/qconfig.h and remove one /sdk/ from /opt/QtExtended/build/sdk/sdk/qtopiacore/qconfig-qpe.h at the top of the file.
-
-A better solution which will work for building packages too is to symbolic link the second sdk to the first...
-
-   cd $QPEDIR/sdk
-   ln -s ../sdk sdk
-
-<h2>Branches and Forks</h2>
-There are various other branches and forks of qte/qtei that fix bugs or other things. List taken from http://lists.openmoko.org/pipermail/community/2009-April/046492.html
-
-<h3>Major Distro Efforts</h3>
-There are 3 major "distributions" for QtEI: karadogs, Radeks and Franky:
-
-* Karadog runs on 2.6.24 and is behind patches
-* Radek (based on karadog) is running on 2.6.28 and behind on
-patches
-* Franky is running based on Radek (patches included), but no binary
-distro, just an install script.
-
-<h3>Initial import of QTE 4.4.3 opensource release</h3>
-[http://github.com/FilipBE/qtextended/tree/master Source]
- 
-<h3>QTMoko</h3>
-QtEI on Debian by Radek.
-
-[http://activationrecord.net/radekp/openmoko/qtmoko/ Homepage]
-
-[http://github.com/radekp/qtmoko/tree/master/ Source]
-
-[http://sourceforge.net/projects/qtmoko/files Rootfs/kernel]
-
-<h3>Karadog</h3>
-Trac, Releases, sources and semi-official Roadmap by HouYu Li
- 
-[http://trac.karadog.net/qt-extended-improved KaraDog Main Trac Site].
-
-[http://dashi-x02.karadog.net/~lihouyu/qtextended/4.4.3/ Binary releases].
-
-'''2010-04-20''': web site broken.
-
-<h3>Latest and Greatest</h3>
-Franky Van Liedekerke's branch.
-
-[http://github.com/liedekef/qtmoko/commits/master Source].
-
-[http://www.e-dynamics.be/openmoko/qt-issues.txt List of Issues].
-
-[http://www.e-dynamics.be/openmoko/qt-issues-fixed.txt Issues Fixed].
-
-[http://www.e-dynamics.be/openmoko/qtmoko_install.sh Install script and instructions]. Execute the script on the Neo.
-
-<h3>Lpotter's Branch</h3>
-[http://github.com/lpotter/qtmoko/tree/master Source]
-
-[[Category:Qt based distributions| ]]
+[[Category:Advanced End User]]
