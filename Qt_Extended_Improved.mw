@@ -1,3 +1,5 @@
+<h2>Community Resources</h2>
+
 Qt Software cancelled the Qt Extended project on 3 March 2009 ([http://www.qtsoftware.com/about/news/qt-software-discontinues-qt-extended Qt Software discontinues Qt Extended]). The community created a fork of it and called it Qt Extended Improved:
 
 * [http://trac.karadog.net/qt-extended-improved bug tracking system]
@@ -48,5 +50,34 @@ Do the linux three-step: configure, make, make install.
 The binaries are in the $QPEDIR/image directory. You can copy these to your freerunner over usb like this:
 
  scp -r $QPEDIR/image/* 192.168.0.202:/opt/Trolltech/Qtopia/
+
+<h2>Compiling an Example Qt Extended App</h2>
+
+First set those indispensable Qt environment variables:
+
+ desktop# . /opt/QtExtended/setpaths
+
+Next create a directory <tt>/opt/Qtopia/build/myapps</tt>. Copy the example app. Rename the example app to something that makes sense (how about "example"!). Create the <tt>Makefile</tt> and build the example.
+
+ desktop# mkdir /opt/QtExtended/build/myapps
+ desktop# cd /opt/QtExtended/build/myapps
+ desktop# cp -R $QTOPIA_DEPOT_PATH/examples/application .
+ desktop# mv application example
+ desktop# cd example
+ desktop# $QPEDIR/bin/qbuild
+
+Now you have an executable <tt>example</tt>. It won't execute on your workstation - you must secure copy it to your FreeRunner. Then secure shell into the FreeRunner, import the Qtopia environment variables and execute the app:
+
+ desktop# scp example root@freerunner:/home/root
+ root@192.168.0.202's password: 
+ example                                      100%    33KB  33.4KB/s   00:00    
+ desktop# ssh 192.168.0.202
+ root@freerunner's password: 
+ freerunner:~# . /opt/Trolltech/Qtopia/qpe.env 
+ freerunner:~# ./example
+
+You should see a message on FreeRunner's LCD.
+
+[[Image:Qt_extended_sdk_example_screenshot.png]]
 
 [[Category:Advanced End User]]
