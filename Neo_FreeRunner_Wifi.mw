@@ -373,12 +373,12 @@ dropbear, the ssh server, is configured to listen on the USB interface only. Wir
 
 Change the /etc/default/dropbear from:
 
-  DROPBEAR_PORT=22
+  DROPBEAR_PORT=`ip addr list usb0 | awk 'BEGIN { FS="[ /]+" } /inet / { print  $3 }'`:22
 
 (which actually only prepends the usb0 ip address before the :22)
 
 into:
-  DROPBEAR_PORT=`ip addr list usb0 | awk 'BEGIN { FS="[ /]+" } /inet / { print  $3 }'`:22
+  DROPBEAR_PORT=*:22
 
 ==== ssh into FR over Any Network Interface ====
 
