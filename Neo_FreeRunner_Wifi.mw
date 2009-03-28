@@ -378,7 +378,10 @@ Change the /etc/default/dropbear from:
 (which actually only prepends the usb0 ip address before the :22)
 
 into:
-  DROPBEAR_PORT=*:22
+
+  DROPBEAR_PORT=`ip addr list eth0 | awk 'BEGIN { FS="[ /]+" } /inet / { print  $3 }'`:22
+
+(which now prepends the eth0 (WLAN interface) ip address before the :22)
 
 ==== ssh into FR over Any Network Interface ====
 
