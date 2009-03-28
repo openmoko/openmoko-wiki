@@ -116,10 +116,22 @@ Determining device status: state = dfuIDLE, status = 0
 dfuIDLE, continuing
 Transfer Size = 0x1000
 dfu_upload error -110
-
-And shows errors demsg like this:
+</pre>
+And shows demsg errors like this:
+<pre>
 usb 5-2: usbfs: USBDEVFS_CONTROL failed cmd dfu-util rqt 161 rq 2 len 4096 ret -110
 </pre>
+This error is detected within the Linux USB stack (drivers/usb/core/message.c) and looking at
+errno.h for the negatived error status number, the reason is e.g.
+{|
+| 110 || ETIMEDOUT || Connection timed out
+|-
+|  84 || EILSEQ    || Illegal byte sequence
+|-
+| 108 || ESHUTDOWN || Cannot send after transport endpoint shutdown
+|-
+| ... ||           ||
+|}
 
 === Backing-up flash images (alternative) ===
 
