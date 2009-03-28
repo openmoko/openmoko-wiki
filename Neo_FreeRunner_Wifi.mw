@@ -385,21 +385,17 @@ into:
 
 ==== ssh into FR over Any Network Interface ====
 
+==== ssh into FR over WiFi Only ====
 
 Change the /etc/default/dropbear from:
 
-  start-stop-daemon -S \
-    -x "$DAEMON" -- $KEY_ARGS \
-        -p "$DROPBEAR_PORT" $DROPBEAR_EXTRA_ARGS
+  DROPBEAR_PORT=`ip addr list usb0 | awk 'BEGIN { FS="[ /]+" } /inet / { print  $3 }'`:22
+
+(which actually only prepends the usb0 ip address before the :22)
 
 into:
 
-  start-stop-daemon -S \
-    -x "$DAEMON" -- $KEY_ARGS \
-    #    -p "$DROPBEAR_PORT" \
-        $DROPBEAR_EXTRA_ARGS
-
-This would let you easily undo the changes - you could just remove the "#" comment character.
+  DROPBEAR_PORT=*:22
 
 == See also ==
 
