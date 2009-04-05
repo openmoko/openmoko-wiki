@@ -80,9 +80,14 @@ Note 2: You can automate the process -- (1) remove the startup script for gpsd (
 == Downloading Maps ==
 === pre-load for offline use ===
 
-tangoGPS can bunch-download the map images so you don't need an internet connection while walking around. By default tangoGPS stores downloaded maps to /tmp/. This folder is lost every time you reboot the device. But you can use the "Config" tab within tangoGPS to change the "Cache Dir" location to , for example, /osm/ . So downloaded maps will be kept in the Neos flash, also after reboot. Note that the map files can take up large amounts of space, so you may want to store them on your sd card, in /media/card/osm.
+tangoGPS can bunch-download the map images so you don't need an internet connection while walking around. By default tangoGPS stores downloaded maps to /tmp/. This folder is lost every time you reboot the device. But you can use the "Config" tab within tangoGPS to change the "Cache Dir" location to , for example, /osm/ . So downloaded maps will be kept in the Neos flash, also after reboot. Note that the map files can take up large amounts of space, so you may want to store them on your sd card, e.g. in /media/card/osm or /media/mmcblk0p2/data/maps.
 
 If you find that TangoGPS does not remember configuration changes that you make to it, be sure to run it from the touchscreen, and not an SSH session.  TangoGPS uses gconf to store its settings, and cannot access gconf when run via SSH.
+
+An alternative way to setup the configuration is through the command line. having /media/mmcblk0p2/data/maps as your data directory you could do the follwing:
+<pre>
+gconftool-2 -s /apps/tangogps/repos "[OSM|http://tile.openstreetmap.org/%d/%d/%d.png|/media/mmcblk0p2/data/maps/OSM|0,Topo|maps-for-free|/media/mmcblk0p2/data/maps/maps4free|0,Aerial|openaerial|/media/mmcblk0p2/data/maps/openaerial|0,Opencyclemap|http://a.andy.sandbox.cloudmade.com/tiles/cycle/%d/%d/%d.png|/media/mmcblk0p2/data/maps/opencyclemap|0,Google Sat (testing only)|http://khm1.google.com/kh?v=34&hl=en&x=%d&s=&y=%d&z=%d|/media/mmcblk0p2/data/maps/googlesat|1]" --type list --list-type string
+</pre>
 
 Once you have set the location to a non-volatile path, you can connect your Neo to the internet by USB or WiFi at home and start downloading the maps of your area. Tap the map screen and select "map download". Now on-the-road  tangoGPS will be able to show you maps in different zoom levels even though you are not connected to the internet.
 
