@@ -284,6 +284,33 @@ while (read FILE, $buf,16) {
 
 </pre>
 
+Also, for the new absolute interface (Perl) :
+
+<pre>
+#!/usr/bin/perl
+
+$x = 0;
+$y = 0;
+$z = 0;
+
+$secondsensorfile = "/dev/input/event3";
+#open file in binary mode
+open FILE, $secondsensorfile;
+binmode FILE;
+
+while (read FILE, $buf,16) {
+    ($t1,$t2,$type,$code,$value)=unpack "iissi",$buf;
+    if ($type==3) {
+        if ($code==0) {$x=$value};
+        if ($code==1) {$y=$value};
+        if ($code==2) {$z=$value};
+    }
+    if (($type==0) && ($code==0)) {
+        printf "%f %05d %05d %05d\n",$t1+$t2/1000000,$x,$y,$z;
+    }
+}
+</pre>
+
 Read the data in C (FIXME: We're not printing times here).
 
 <pre>
@@ -350,7 +377,6 @@ int main(int argc, char *argv[])
     return 0;
 }
 </pre>
-
 
 == The /sys interface ==
 
