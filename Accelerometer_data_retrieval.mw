@@ -77,7 +77,20 @@ the used sections.
 8c66 4819 9a57 0006   0000   0000   0000 0000
 </pre>
 
-I think the time structure does not need further explaination. A lot more
+Using recent kernels (>=2.6.29), you might see this instead, because accelerometers are now reporting
+absolute values instead of relative ones (more on that later) :
+
+<pre>
+|----- time ------|  |type| |code|  |-value-|
+8163 49da 6d62 000d   0000   0000   0000 0000
+8163 49da 91d8 000d   0003   0000   0048 0000
+8163 49da 9231 000d   0003   0001   0012 0000
+8163 49da 9251 000d   0003   0002   03ba 0000
+8163 49da 9270 000d   0000   0000   0000 0000
+8163 49da b6cf 000d   0003   0000   0036 0000
+</pre>
+
+I think the time structure does not need further explanation. A lot more
 interesting is the type, code and value part of every message. Lets take a
 closer look at these parts.
 
@@ -97,7 +110,12 @@ different message types are used.
 
 The definition should not be taken too seriously in this context, because the
 data values provided by the accelerometer always represent the absolute
-acceleration measured at the given time.
+acceleration measured at the given time. So, in newer kernels, the proper
+''absolute movement'' notification is used instead :
+
+;0x03:
+:This event is called ''EV_ABS'' and signals ''absolute movement''. It replaces the ''EV_REL'' notifications in newer kernels, but
+the information (the event codes) is the same.
 
 
 ===Event codes===
@@ -106,16 +124,16 @@ Both types of event may supply different codes. These codes can be understood
 as some kind of further specification about the specified data values
 
 
-====Syncronization event codes====
+====Synchronization event codes====
 
-The syncronization event may use quite a lot of codes, as ''linux/input.h''
+The synchronization event may use quite a lot of codes, as ''linux/input.h''
 shows. However the only used one seems to be the 0x00 code.
 
 ;0x00:
-:This code is refered to as SYN_REPORT. It means that the last dataset was completely transmitted. Therefore the before transmitted set of data values can be considered complete. This means if this message is recieved you may process the given data further.
+:This code is referred to as SYN_REPORT. It means that the last dataset was completely transmitted. Therefore the before transmitted set of data values can be considered complete. This means if this message is received you may process the given data further.
 
 
-====Relative movement event codes====
+===Relative movement event codes===
 
 The amount of possible codes for this event type is quite big. The only used
 ones are the following ones.
@@ -131,7 +149,7 @@ ones are the following ones.
 
 The X, Y and Z axis are to be understand as defined in the chapter about [[#Axis_orientation|Axis orientation]].
 
-===A typical message block===
+====A typical message block====
 
 A typical message block consists of 3 messages containing the acceleration
 data for every of the three axis followed by a syncronization message to
@@ -157,6 +175,15 @@ different messages and data sections.
 |------Time-------|  EV_SYN  SYN_REPORT  |-Value-|
 (The transmitted data block is complete you may process the given data)
 </pre>
+
+
+===Absolute movement event codes===
+
+Although the information is the same as before, the absolute interface differs from the relative one by the fact that
+only changed values are reported. So if the phone was completely idle, experiencing exactly the same acceleration from
+one sample to the next, you will read only synchronization events (this will not happen due to noise, though).
+
+So when you miss the value for an axis between two synchronization events, just assume the previous value still holds.
 
 ==Test application==
 
