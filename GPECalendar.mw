@@ -17,14 +17,6 @@ Links:
 
 Screenshots:
 
-[[Image:Gpecal-scr-1.png|100px]]
-[[Image:Gpecal-scr-2.png|100px]]
-[[Image:Gpecal-scr-3.png|100px]]
-[[Image:Gpecal-scr-4.png|100px]]
-[[Image:Gpecal-scr-5.png|100px]]
-[[Image:Gpecal-scr-6.png|100px]]
-
-
 === Problems and workarounds ===
 
 Problems (on SHR-testing of 2009-03-03):
@@ -41,100 +33,18 @@ Problems (on SHR-testing of 2009-03-03):
 ;ad problem 2
 :this can be worked around using a bug in gpe-calendar :-) If gpe-calendar is run without a full path on the command line, like this <pre>$ gpe-calendar &</pre>then it prepares the <tt>atd</tt> script with current directory as its full path. we can thus make a script that will be run by <tt>atd</tt> instead of gpe-calendar and this script can actually run the calendar:
 :* <pre>mkdir $HOME/.gpe</pre>
-:* copy [[#.24HOME.2F.gpe.2Fgpe-calendar|gpe-calendar]] script to <tt>$HOME/.gpe/</tt>
+:* copy [[File:gpe-calendar]] script to <tt>$HOME/.gpe/</tt>
 :* <pre>chmod 755 $HOME/.gpe/gpe-calendar</pre>
-:* copy [[#.2Fusr.2Fshare.2Fapplications.2Fgpe-calendar.desktop|gpe-calendar.desktop]] to <tt>/usr/share/applications</tt> to run gpe-calendar from the workaround directory
+:* copy [[File:gpe-calendar.desktop]] to <tt>/usr/share/applications</tt> to run gpe-calendar from the workaround directory
 ;ad problem 3
 :<pre>echo snd-pcm-oss > /etc/modutils/dev_dsp; update-modules; modprobe snd-pcm-oss</pre>
 ;ad problem 4
 :
 :* <pre>opkg install esd</pre>
-:* copy [[#.2Fetc.2Finit.d.2Fesd|esd]] to <tt>/etc/init.d/</tt> (esd package does not contain an init script?)
+:* copy [[File:esd]] to <tt>/etc/init.d/</tt> (esd package does not contain an init script?)
 :* <pre>/etc/init.d/esd start</pre>
 ;ad problem 5
 :the alarm sound level should be configurable in <tt>$HOME/.gpe/alarm.conf</tt>, but gpe-calendar ignores the level settings there :-(
-:a small (not fully satisfactory) workaround to this is contained in the [[#.24HOME.2F.gpe.2Fgpe-calendar|gpe-calendar]] script described above, which sets the volume with <tt>amixer</tt> before running gpe-calendar
+:a small (not fully satisfactory) workaround to this is contained in the [[File:gpe-calendar]] script described above, which sets the volume with <tt>amixer</tt> before running gpe-calendar
 ;ad problem 6
 :the only possible workaround to this would probably need a recompilation of the package. so far, when you close the gpe-calendar window, it only "iconifies", e.i. goes away, but appears when switching tasks. The main problem of this state is, that when you shut down the phone, enlightenment waits for all running tasks and after 15s it complains about gpe-calendar not wanting to exit. so the only current solution is to quit gpe-calendar from its menu with File->Quit.
-
-=== Attachments ===
-
-==== $HOME/.gpe/gpe-calendar ====
-
-workaround startup script
-<pre>#!/bin/sh
-
-if [ "x$1" = "x-s" -a "x$2" = "x0" ] \
-&&  ! pidof gpe-calendar >/dev/null 2>/dev/null; then
-        shift
-        shift
-fi
-
-cd $HOME/.gpe
-amixer set PCM 220
-gpe-calendar $*</pre>
-
-==== /usr/share/applications/gpe-calendar.desktop ====
-
-<pre>[Desktop Entry]
-Encoding=UTF-8
-Name=Calendar
-Comment=GPE Calendar
-Exec=/home/root/.gpe/gpe-calendar
-Terminal=false
-Type=Application
-Icon=gpe-calendar.png
-Categories=Application;PIM;GPE;
-StartupNotify=true
-SingleInstance=true
-X-home-applet-resizable=XY
-X-home-applet-minwidth=200
-X-home-applet-minheight=40
-</pre>
-
-==== /etc/init.d/esd ====
-
-<pre>#! /bin/sh
-#
-# esd
-#
-# chkconfig: 345 70 30
-# description: esd
-# processname: esd
-
-PATH=/bin:/usr/bin:/sbin:/usr/sbin
-NAME=esd
-
-[ -f /etc/default/rcS ] && . /etc/default/rcS
-
-case "$1" in
-    start)
-        echo -n "Starting esd daemon: "
-        start-stop-daemon --start --pidfile /var/run/${NAME}.pid --exec /usr/bin/esd -- -nobeeps &
-
-        if [ $? = 0 ]; then
-            echo "(ok)"
-        else
-            echo "(failed)"
-        fi
-        ;;
-    stop)
-        echo -n "Stopping esd daemon: "
-        start-stop-daemon --stop --pidfile /var/run/${NAME}.pid --oknodo
-        rm -f /var/run/${NAME}.pid
-        echo "(done)"
-        ;;
-    restart|force-reload)
-        $0 stop
-        $0 start
-        ;;
-    *)
-        echo "Usage: /etc/init.d/esd {start|stop|restart|force-reload}"
-        exit 1
-        ;;
-esac
-
-exit 0
-</pre>
-
-[[Category:Calendar Applications]]
