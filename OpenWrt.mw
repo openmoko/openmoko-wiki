@@ -2,7 +2,7 @@
 
 First you have to create a svn checkout of the OpenWrt base system
 
- svn co https://svn.openwrt.org/openwrt/trunk openwrt
+ svn co svn://svn.openwrt.org/openwrt/trunk openwrt
 
 The command will fetch the OpenWrt base system and put it into the openwrt subfolder of your current working directory. From now on this HOWTO assumes that your working direcory will be the newly created openwrt folder. (`cd openwrt`)
 
@@ -12,13 +12,13 @@ Although this is sufficient enough to build an image for the freerunner you will
 
 Then edit your feeds.conf and enable the efl (for enlightenment) and phone (for fso, paroli, ...) feeds, by removing the '#' at the beginning of these lines, so that it might look like:
 
- src-svn packages https://svn.openwrt.org/openwrt/packages
+ src-svn packages svn://svn.openwrt.org/openwrt/packages
  src-svn xwrt http://x-wrt.googlecode.com/svn/trunk/package
  src-svn luci http://svn.luci.subsignal.org/luci/branches/luci-0.8/contrib/package
- src-svn phone https://svn.openwrt.org/openwrt/feeds/phone
- src-svn efl https://svn.openwrt.org/openwrt/feeds/efl
- src-svn desktop https://svn.openwrt.org/openwrt/feeds/desktop
- #src-svn xfce https://svn.openwrt.org/openwrt/feeds/xfce
+ src-svn phone svn://svn.openwrt.org/openwrt/feeds/phone
+ src-svn efl svn://svn.openwrt.org/openwrt/feeds/efl
+ src-svn desktop svn://svn.openwrt.org/openwrt/feeds/desktop
+ #src-svn xfce svn://svn.openwrt.org/openwrt/feeds/xfce
 
 Please mind that this config does not define what packages will be compiled - it just defines which package-descriptions (OpenWrt-Makefiles) will be fetched which will be listed within the menuconfig later.
 
@@ -32,7 +32,7 @@ Now you'll have to select the target platform for the freerunner. Run
  make menuconfig
 
 and select s3c24xx as the Target System. As Target Profile you have to choice between 
-* gta02-full. This is the one you probalby want since it has enlightenment and paroli preselected.
+* gta02-full. This is the one you probably want since it has enlightenment and paroli preselected.
 * gta2-mini. This profile contains only the basic OpenWrt packages, so you'll only get a shell and some commandline utils.
 
 Currently to get the EFL (enlightenment and its libraries) compiled within OpenWrt you need to have recent executables of <eet> and <edje_cc> preinstalled on your host-system. This is just a temporary solution and will be changed soon. Common packages which distribute these binaries are named <edje> and <eet>. If your distribution doesn't provide any recent e17 packages you can use [[Image:Openwrt_build_efl_host_tools.sh]] to fetch and build the required tools from e17 svn.
