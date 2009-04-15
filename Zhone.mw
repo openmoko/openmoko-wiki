@@ -34,6 +34,9 @@ and modify the prepare function:
                 if line.startswith("END:VCARD"):
                     name = None
                     number = None
+                # Search for both N: and N; since it depends on the VCF file. For example ones created with tsv2vcf.pl have "N:", not the usual "N;"
+                if line.startswith("N:"):
+                    name = unicode(line.partition(":")[2].replace(';',' ').strip(), "utf8", "utf8")
                 if line.startswith("N;"):
                     name = unicode(line.partition(":")[2].replace(';',' ').strip(), "utf8", "utf8")
                 #if line.startswith("TEL;"):
@@ -63,6 +66,7 @@ and modify the prepare function:
                 ] )
              """
 </nowiki></pre>
+
 ==Installing Zhone on Ubuntu ==
 
 {{Warning|Adding those repositories (or the zhone installation?) may lead to problems on a Kubuntu 8.04 Hardy Heron.
