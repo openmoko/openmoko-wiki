@@ -326,4 +326,45 @@ ERROR: image overwritten - must RESET the board to recover.
 before it reboots my virtual phone.
 I also tried to nand write.e different kernel images. None of them worked. Any help apprechiated.
 -- 14:51, 21 February 2009 (UTC)
+
+--[[User:bimo]]
+I have similar problem with Twistedclone, after I run "make qemu"
+
+<pre>
+[ -e build/qemu ] || \
+	( mkdir -p build/qemu )
+[ -e build/qemu/Makefile ] || \
+	( . ./setup-env && cd build/qemu && \
+	  ${OMDIR}/openmoko/trunk/src/host/qemu-neo1973/configure \
+		--target-list=arm-softmmu )
+[ -e build/qemu/openmoko ] || \
+	( . ./setup-env && cd build/qemu && mkdir openmoko && \
+	  for f in ${OMDIR}/openmoko/trunk/src/host/qemu-neo1973/openmoko/* ; do \
+	    ln -s $f openmoko/`basename $f` ; \
+	  done )
+ln -sf `pwd`/openmoko/trunk/src/host/qemu-neo1973/openmoko/env build/qemu/openmoko/env
+[ -d stamps ] || mkdir stamps
+touch stamps/qemu
+( cd build/qemu && make )
+make[1]: Entering directory `/home/bhe/openmoko/build/qemu'
+make -C arm-softmmu all
+make[2]: Entering directory `/home/bhe/openmoko/build/qemu/arm-softmmu'
+make[2]: Nothing to be done for `all'.
+make[2]: Leaving directory `/home/bhe/openmoko/build/qemu/arm-softmmu'
+make[1]: Leaving directory `/home/bhe/openmoko/build/qemu'
+[ -e images/openmoko ] || mkdir -p images/openmoko
+ln -sf `pwd`/openmoko/trunk/src/host/qemu-neo1973/openmoko/env images/openmoko/env
+( cd images && ../openmoko/trunk/src/host/qemu-neo1973/openmoko/download.sh )
+    Retrieving available builds list...
+../openmoko/trunk/src/host/qemu-neo1973/openmoko/download.sh: line 28: lynx: command not found
+../openmoko/trunk/src/host/qemu-neo1973/openmoko/download.sh: line 29: lynx: command not found
+    Trying alternative sources
+../openmoko/trunk/src/host/qemu-neo1973/openmoko/download.sh: line 35: lynx: command not found
+    Kernel is... not found
+make: *** [download-images] Error 255
+</pre>
+
+Does anyone has any idea how to fix this up?
+FYI, I'm running Ubuntu 8.10 as a guest OS on my virtualbox, Mac OS X as the host.
+
 [[Category:Emulation]]
