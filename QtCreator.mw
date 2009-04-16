@@ -21,9 +21,8 @@ The installation process is based on Kubuntu 9.04 (Jaunty)
 === 1. install Toolchain ===
 First of all you have to install the toolchain. If you have already done this skip this step. I will just give a summary of how to do that for copy paste the detailed information can be found at [[Toolchain]]
 
-<pre>
-sudo apt-get install gcc g++ autoconf automake binutils libtool libglib2.0-dev ccache libxrender-dev intltool libmokoui2-dev libgconf2-dev mtools fakeroot alien check uboot-mkimage libcurl3 libqt4-dev
-</pre>
+
+ sudo apt-get install gcc g++ autoconf automake binutils libtool libglib2.0-dev ccache libxrender-dev intltool libmokoui2-dev libgconf2-dev mtools fakeroot alien check ubootmkimage libcurl3 libqt4-dev
 
 Unfortunately the libtool since Ubuntu(intrepid) doesnt't work with the toolchain so you have to install the one from Ubuntu(Hardy) 
 
@@ -54,35 +53,35 @@ or
 
 
 * Change permissions of toolchain that scripts don't need root rights. REPLACE <your-name> (in general with your username) 
-<pre>
-sudo chown -R <your-name>.<your-name> /usr/local/openmoko/arm
-</pre>
+
+ sudo chown -R <your-name>.<your-name> /usr/local/openmoko/arm
+
 
 
 === 2. Configure Toolchain ===
 * Install important packages in toolchain
-<pre>
-. /usr/local/openmoko/arm/bin/setup-env
-opkg-target update
-opkg-target install libpng12-0 libpng12-dev libgcc1 libglib-2.0-0 libgmodule-2.0-0 libgobject-2.0-0 libgthread-2.0-0 libpng-dev libpng3  libxrender-dev libxrender1 libxrandr-dev libxrandr2 libfontconfig-dev libfontconfig1 
-</pre>
+
+ . /usr/local/openmoko/arm/bin/setup-env
+ opkg-target update
+ opkg-target install libpng12-0 libpng12-dev libgcc1 libglib-2.0-0 libgmodule-2.0-0 libgobject-2.0-0 libgthread-2.0-0 libpng-dev libpng3  libxrender-dev libxrender1 libxrandr-dev libxrandr2 libfontconfig-dev libfontconfig1 
+
 
 * Add angstrom Repo and QT4 libs  to toolchain
 <pre>
-echo arch base 50 >> /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/etc/opkg.conf
-echo src/gz base http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base >> /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/etc/opkg.conf
-opkg-target update
+ echo arch base 50 >> /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/etc/opkg.conf
+ echo src/gz base http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base >> /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/etc/opkg.conf
+ opkg-target update
 
-opkg-target install libgcc1 libglib-2.0-0 libgmodule-2.0-0 libgobject-2.0-0 libgthread-2.0-0 libpng12-0 libqt3support4 libqtassistantclient4 libqtclucene4 libqtcore4 libqtdbus4 libqtdesigner4 libqtdesignercomponents4 libqtgui4 libqthelp4 libqtnetwork4 libqtscript4 libqtsql4 libqtsvg4 libqttest4 libqtxml4 libstdc++6 qt4-assistant qt4-common qt4-dbus qt4-demos qt4-designer qt4-fonts qt4-linguist qt4-pixeltool
-</pre>
+ opkg-target install libgcc1 libglib-2.0-0 libgmodule-2.0-0 libgobject-2.0-0 libgthread-2.0-0 libpng12-0 libqt3support4 libqtassistantclient4 libqtclucene4 libqtcore4 libqtdbus4 libqtdesigner4 libqtdesignercomponents4 libqtgui4 libqthelp4 libqtnetwork4 libqtscript4 libqtsql4 libqtsvg4 libqttest4 libqtxml4 libstdc++6 qt4-assistant qt4-common qt4-dbus qt4-demos qt4-designer qt4-fonts qt4-linguist qt4-pixeltool
+
 * ignore the error "Cannot satisfy the following dependencies for qt4-common ..."
 * install with force depends
-<pre>
-opkg-target -force-depends install http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqtcore4_4.4.3-r4.1_armv4t.ipk http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqtcore-dev_4.4.3-r4.1_armv4t.ipk http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqtdbus4_4.4.3-r4.1_armv4t.ipk http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqtdbus-dev_4.4.3-r4.1_armv4t.ipk http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqtgui4_4.4.3-r4.1_armv4t.ipk http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqtgui-dev_4.4.3-r4.1_armv4t.ipk http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqtnetwork4_4.4.3-r4.1_armv4t.ipk http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqtnetwork-dev_4.4.3-r4.1_armv4t.ipk http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqtxml-dev_4.4.3-r4.1_armv4t.ipk http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqtxml4_4.4.3-r4.1_armv4t.ipk
-</pre>
+
+ opkg-target -force-depends install http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqtcore4_4.4.3-r4.1_armv4t.ipk http://www.angstrom-distribution.or /feeds/2008/ipk/glibc/armv4t/base/libqtcore-dev_4.4.3-r4.1_armv4t.ipk http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqtdbus4_4.4.3-r4.1_armv4t.ipk http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqtdbus-dev_4.4.3-r4.1_armv4t.ipk http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqtgui4_4.4.3-r4.1_armv4t.ipk http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqtgui-dev_4.4.3-r4.1_armv4t.ipk http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqtnetwork4_4.4.3-r4.1_armv4t.ipk http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqtnetwork-dev_4.4.3-r4.1_armv4t.ipk http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqtxml-dev_4.4.3-r4.1_armv4t.ipk http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqtxml4_4.4.3-r4.1_armv4t.ipk
+
 
 * If not done yet install qt sources on Host
-<pre>sudo apt-get install libqt4-dev</pre>
+ sudo apt-get install libqt4-dev
 
 === 3. install QTCreator ===
 
