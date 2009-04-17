@@ -1,17 +1,17 @@
 {{Warning|This tutorial is still Alpha Do it at your own risk}}
 
 {{Note|
-As long as there are no Qt 4.5 sources for arm this doesn't work on K/Ubuntu/Jaunty
-I will upload Openmokoder to svn soon that scripts can be extended
-Feel free to add Information for other Distributions
+ As long as there are no Qt 4.5 sources for arm this doesn't work on K/Ubuntu/Jaunty
+ I will upload Openmokoder to svn soon that scripts can be extended
+ Feel free to add Information for other Distributions
 }}
 
 == Introduction ==
 I created a project called "OpenMokoder" which should help to develop Qt4 projects for freerunner. You only need to copy your sourcecode or use the included sample project run the script and you can easy compile, debug, crosscompile, package your project with Trolltechs QtCreator. QtCreator is a very good lightweight Qt IDE with features like embedded Qt Designer, Code completion, debugging, svn, ...
 
 Note:
-This tutorial is tested with SHR and FSO
-The installation process is based on Kubuntu 9.04 (Jaunty)
+ This tutorial is tested with SHR and FSO
+ The installation process is based on Kubuntu 8.10 (Intrepid)
 
 === 1. install Toolchain ===
 First of all you have to install the toolchain. If you have already done this skip this step. I will just give a summary of how to do that for copy paste the detailed information can be found at [[Toolchain]]
@@ -69,7 +69,26 @@ or
 * If not done yet install qt sources on Host
  sudo apt-get install libqt4-dev
 
-=== 3. install QTCreator ===
+=== 3. configure Freerunner ===
+
+==== SHR ====
+# SHR has qt 4.4.3 libs in the feeds you only need to install
+ opkg install qt4-x11-free
+
+==== If Qt libs are not in the feeds ====
+You shlould install the libs like this without adding the angstrom repository,  
+cause if you install the whole qt4-x11-free it installs dependencies which are 
+not compatible and the Freerunner doesn't boot anymore.
+
+ opkg -force-depends install  http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqtgui4_4.4.3-r4.1_armv4t.ipk
+ opkg -force-depends install  http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqtcore4_4.4.3-r4.1_armv4t.ipk
+ opkg -force-depends install  http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqtdbus4_4.4.3-r4.1_armv4t.ipk
+ opkg -force-depends install  http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqtxml4_4.4.3-r4.1_armv4t.ipk
+ opkg -force-depends install  http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqttest4_4.4.3-r4.1_armv4t.ipk
+
+==== If Qt libis are not in the feeds install them from angstrom
+
+=== 4. install QTCreator ===
 
 *download binary from:
 http://www.qtsoftware.com/downloads/
@@ -80,7 +99,7 @@ chmod +x qt-creator-linux-x86-opensource-1.0.0.bin
 sudo ./qt-creator-linux-x86-opensource-1.0.0.bin
 </pre>
 
-=== 4. OpenMokoder ===
+=== 5. OpenMokoder ===
 
 *OpenMokoder is just a set of folders that contain some scripts, templates and the sample project.
 
@@ -146,6 +165,17 @@ If you want to compile your own project just put your Project (It must contain a
  ./CreateProject.script projectname
 Because the projectname you enter here will also be used for packaging it has to be without capital letters
 Afterwards continue like with the SampleProject
+
+==== Adding Librarys ====
+
+# Install the libs to the toolchain and don't forget the libXY-dev packages
+ . /usr/local/openmoko/arm/bin/setup-env
+ opkg-target install libXY libXY-dev
+
+# Add the Libs to the CreateProject.script. search for the line 
+ echo "$1_LDADD = -lQtDBus -lQtGui -lQtCore " >> temp2.txt
+* and add the lib, for example
+ echo "$1_LDADD = -lQtDBus -lQtGui -lQtCore -lXY " >> temp2.txt
 
 === Issues ===
 
