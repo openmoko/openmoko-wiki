@@ -1,0 +1,78 @@
+=Introduction=
+From wikipedia:
+
+''Asterisk is a software implementation of a telephone private branch exchange (PBX) originally created in 1999 by Mark Spencer of Digium. Like any PBX, it allows attached telephones to make calls to one another, and to connect to other telephone services including the public switched telephone network (PSTN) and Voice over Internet Protocol (VoIP) services. Its name comes from the asterisk symbol, "*".''
+=Why=
+* asterisk may be driven by a tcp interface (AMI) with a simple protocol
+* the asterisk console combined with the alsa channel transform any alsa equiped hardware in a softphone
+* we lack softphones with GUI usable on the Freerunner or other devices with tiny display
+
+So it may be used as backend for Freerunner VoIP applications and a lot of other nice things!
+
+'''In this page we are going to join forces to test if this may be really done, so please collaborate and report here your experience!'''
+=Installation=
+Asterisk has an issue in it's alsa_channel implementation, it works accessing pcm directly (plughw:0,0) with stuttered audio, while is not capable of sound output if using dmix/dsnoop. The last is needed both for let asterisk access alsa togheter with other applications and to have smooth audio without changing it deeply.
+There is a package with a quick workaround (just 2 lines of code changed) that you have to use while waiting for a full patch, warning it works only with dmix/dnsoop!
+==Sound configuration==
+A good asound.conf with multiplex dmix/dsnoop configuration is available at www.koolu.org
+ wget http://www.koolu.org/asound.conf
+ mv /etc/asound.conf asound.conf.old
+ mv asound.conf /etc/
+==Asterisk SHR Testing Installation==
+To install the patched asterisk:
+ opkg install http://noko.sourceforge.net/shr/shr-testing/asterisk_1.4.17-r1_armv4t.ipk
+edit /etc/asterisk/alsa.conf and be sure to have:
+ autoanswer=no
+and input_device/output_device be commented (so they will use the default multiplexed pcm), then edit /etc/asterisk/alsa.conf and change it to load alsa instead of oss at startup, modifying last lines:
+ ;noload => chan_alsa.so
+ noload => chan_oss.so
+install demo sounds (if you do not want to do tests you may skip this)
+ wget http://noko.sourceforge.net/common/asterisk-core-sounds-en-gsm-1.4.8.tar.gz
+ gunzip < asterisk-core-sounds-en-gsm-1.4.8.tar.gz |tar -xvf - -C /var/lib/asterisk/sounds/
+optional:
+ remove or move /etc/asterisk/extensions.ael
+==Quick asterisk test with stereoout==
+Be sure the current alsa scenario is stereoout:
+ mdbus -s org.freesmartphone.odeviced /org/freesmartphone/Device/Audio org.freesmartphone.Device.Audio.SetScenario stereoout
+launch asterisk in console mode:
+ asterisk -c
+check your dialplan was load correctly:
+ show dialplan
+make a "call" to the special "#" extension:
+ console dial #@demo
+You should hear some greetings and after a bit the busy tone, to stop it type:
+ console hangup
+==Asterisk echo test==
+Switch to voip-handset scenario:
+ mdbus -s org.freesmartphone.odeviced /org/freesmartphone/Device/Audio org.freesmartphone.Device.Audio.SetScenario voip-handset
+launch alsamixer and bring to max "Speaker" control, then launch asterisk and type:
+ console dial 600@demo
+follow instruction and do the demo test, all should work nicely.
+
+''I do not know if bringing up Speaker control is correct as other applications seems to work without it.''
+==Asterisk AMI==
+To enable AMI edit /etc/asterisk/manager.conf:
+ enabled=yes
+change your bindaddress to 127.0.0.1, or to 192.168.0.202 if you want to test it by your usb connected box, then create an asterisk manager account appending:
+ [manager]
+ secret = somestring
+ read = system,call,log,verbose,command,agent,user,config
+ write = system,call,log,verbose,command,agent,user,config
+ deny=0.0.0.0/0.0.0.0
+ permit=127.0.0.1/255.0.0.0
+or
+ permit=192.168.0.200/255.255.255.255
+=Configure Asterisk=
+Finally it's the time to configure asterisk for your needs, good docs at www.voip-info.org, take care about security.
+
+'''FIXME please fill this part with some stripped down configuration and any other setting useful on the freerunner'''
+==Adding some sip users==
+You may use your freerunner as a sip provider and connect other hw/sw voip phones to it.
+
+TBD
+==Adding some sip peers==
+If you have a sip provider you may add it to asterisk to join VoIP or PSTN networks 
+
+TBD
+=GUI=
+A simple and quite rude GUI is coming, stay tuned!
