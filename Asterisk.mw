@@ -2,7 +2,6 @@
 From wikipedia:
 
 ''Asterisk is a software implementation of a telephone private branch exchange (PBX) originally created in 1999 by Mark Spencer of Digium. Like any PBX, it allows attached telephones to make calls to one another, and to connect to other telephone services including the public switched telephone network (PSTN) and Voice over Internet Protocol (VoIP) services. Its name comes from the asterisk symbol, "*".''
-
 =Why=
 * asterisk may be driven by a tcp interface (AMI) with a simple protocol
 * the asterisk console combined with the alsa channel transform any alsa equiped hardware in a softphone
@@ -11,24 +10,20 @@ From wikipedia:
 So it may be used as backend for Freerunner VoIP applications and a lot of other nice things!
 
 '''In this page we are going to join forces to test if this may be really done, so please collaborate and report here your experience!'''
-
 =Installation=
-Asterisk has an issue in it's alsa_channel implementation, it works accessing pcm directly (plughw:0,0) with stuttered audio, while is not capable of sound output if using dmix/dsnoop. The last is needed both for let asterisk access alsa together with other applications and to have smooth audio without changing it deeply.
+Asterisk has an issue in it's alsa_channel implementation, it works accessing pcm directly (plughw:0,0) with stuttered audio, while is not capable of sound output if using dmix/dsnoop. The last is needed both for let asterisk access alsa togheter with other applications and to have smooth audio without changing it deeply.
 There is a package with a quick workaround (just 2 lines of code changed) that you have to use while waiting for a full patch, warning it works only with dmix/dnsoop!
-
 ==Sound configuration==
 A good asound.conf with multiplex dmix/dsnoop configuration is available at www.koolu.org
  wget http://www.koolu.org/asound.conf
  mv /etc/asound.conf asound.conf.old
  mv asound.conf /etc/
-
 ==Asterisk SHR Testing Installation==
 To install the patched asterisk:
  opkg install http://noko.sourceforge.net/shr/shr-testing/asterisk_1.4.17-r1_armv4t.ipk
 edit /etc/asterisk/alsa.conf and be sure to have:
  autoanswer=no
- context=default
-and input_device/output_device be commented (so they will use the default multiplexed pcm), then edit /etc/asterisk/modules.conf and change it to load alsa instead of oss at startup, modifying last lines:
+and input_device/output_device be commented (so they will use the default multiplexed pcm), then edit /etc/asterisk/alsa.conf and change it to load alsa instead of oss at startup, modifying last lines:
  ;noload => chan_alsa.so
  noload => chan_oss.so
 install demo sounds (if you do not want to do tests you may skip this)
@@ -36,7 +31,6 @@ install demo sounds (if you do not want to do tests you may skip this)
  gunzip < asterisk-core-sounds-en-gsm-1.4.8.tar.gz |tar -xvf - -C /var/lib/asterisk/sounds/
 optional:
  remove or move /etc/asterisk/extensions.ael
-
 ==Quick asterisk test with stereoout==
 Be sure the current alsa scenario is stereoout:
  mdbus -s org.freesmartphone.odeviced /org/freesmartphone/Device/Audio org.freesmartphone.Device.Audio.SetScenario stereoout
@@ -48,7 +42,6 @@ make a "call" to the special "#" extension:
  console dial #@demo
 You should hear some greetings and after a bit the busy tone, to stop it type:
  console hangup
-
 ==Asterisk echo test==
 Switch to voip-handset scenario:
  mdbus -s org.freesmartphone.odeviced /org/freesmartphone/Device/Audio org.freesmartphone.Device.Audio.SetScenario voip-handset
@@ -57,69 +50,29 @@ launch alsamixer and bring to max "Speaker" control, then launch asterisk and ty
 follow instruction and do the demo test, all should work nicely.
 
 ''I do not know if bringing up Speaker control is correct as other applications seems to work without it.''
-
-==Asterisk Management Interface (AMI)==
+==Asterisk AMI==
 To enable AMI edit /etc/asterisk/manager.conf:
  enabled=yes
 change your bindaddress to 127.0.0.1, or to 192.168.0.202 if you want to test it by your usb connected box, then create an asterisk manager account appending:
  [manager]
- secret = changeme
+ secret = somestring
  read = system,call,log,verbose,command,agent,user,config
  write = system,call,log,verbose,command,agent,user,config
  deny=0.0.0.0/0.0.0.0
  permit=127.0.0.1/255.0.0.0
 or
  permit=192.168.0.200/255.255.255.255
-
 =Configure Asterisk=
 Finally it's the time to configure asterisk for your needs, good docs at www.voip-info.org, take care about security.
 
 '''FIXME please fill this part with some stripped down configuration and any other setting useful on the freerunner'''
-
-''Asterisk writes a lot of files, we should avoid to write too many to flash or sd, and be sure they will not grow too much if we put them in tmpfs''
-
 ==Adding some sip users==
-You may use your freerunner as a sip provider and connect other hw/sw voip phones to it. To add a sip user, you have to modify /etc/asterisk/sip.conf.
+You may use your freerunner as a sip provider and connect other hw/sw voip phones to it.
 
-Example to add the sip user ''ekiga'':
-
- [ekiga]
- type=friend
- host=dynamic
- secret=ekiga
-
+TBD
 ==Adding some sip peers==
 If you have a sip provider you may add it to asterisk to join VoIP or PSTN networks 
 
 TBD
-
-==The dialplan==
-To modify the dialplan you have to edit /etc/asterisk/extension.conf. This is a very simple example to place/receive calls between the above mentioned ekiga test account and the alsa console.
-
-<pre>
-[general]
-[globals]
-[demo]
-exten => #,1,Playback(demo-thanks)      ; "Thanks for trying the demo"
-exten => #,n,Hangup                     ; Hang them up.
-exten => 600,1,Playback(demo-echotest)  ; Let them know what's going on
-exten => 600,n,Echo                     ; Do the echo test
-exten => 600,n,Playback(demo-echodone)  ; Let them know it's over
-exten => 600,n,Hangup
-[default]
-exten => 1000,1,Dial(SIP/ekiga)
-exten => 1001,1,Dial(Console/alsa)
-</pre>
-
-===Testing===
-Start ekiga on your linuxbox connected to freerunner with usb, create a new sip account using ''192.168.0.200'' as ''registrar'', ''ekiga'' for account name and password.
-
-Place a call to 1001, your asterisk should begin to ring!
-
-To place a call from the freerunner to ekiga use the Asterisk GUI dialer (when released) or open a ssh shell type asterisk -r to connect to asterisk daemon in console mode and type:
- console dial 1000
-
 =GUI=
 A simple and quite rude GUI is coming, stay tuned!
-
-[[Category:Applications]]
