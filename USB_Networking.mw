@@ -14,6 +14,16 @@ In other words: if your existing router and desktop have addresses 192.168.0.(so
 
 Some scripts do a tail-grep on certain log file. If you have disabled syslog and/or klog, this might be a problem for detecting when the device is connected to your machine via USB. When logging is disabled, it can be enabled on Ubuntu be /etc/init.d/klogd restart; /etc/init.d/sysklog restart
 
+== So is it "usb0" or is it "eth1"? ==
+
+* The documentation below refers to the network interface name on the host side as "usb0".  However, the actual name is determined by your host system, and many host systems will rename the interface based on the mac (or hardware) address presented by the Neo or Freerunner.  Use the "ifconfig -a" command, or use "dmesg" to examine the output from your host's kernel, to find which interface name was actually assigned to your device.  If it wasn't "usb0", it will almost always be the next available "eth''n''" name.
+
+In all the steps below where you see the interface referred to as "usb0", you may need to substitute the interface name that your host assigned.
+
+For those interested in the technical details, the "usb0" interface name is used on the host system when the mac (hardware) address presented by the Freerunner or Neo is a locally-generated (random) address.  Because the address is random, the ability to easily manage the interface with network managment tools is somewhat compromised. In fact, the Freerunner has been assigned official mac addresses, including addresses for the USB network interface.  When these addresses are correctly used on the Freerunner (which is the case with the Qi bootloader, and with certain of the distros for the Freerunner), then the host system sees official mac addresses, and responds by configuring a permanent network interface for that device.  By convention, this permanent interface is one of the "eth" interfaces.  The specific interface name chosen will be remembered, and will be used each time that specific Freerunner is connected, and used only for that Freerunner.  This is a particularly useful feature for users who have multiple USB-networked devices.
+
+As of the time of this writing, the Android and SHR distros will correctly pass the official mac address to the host, and will appear as "eth''n''" interfaces on the host.
+
 = Simple Manual Linux Configuration =
 Try this first (as root on your desktop, with FreeRunner attached via USB cable and booted properly, not at the Boot Menu).  If it works, then you can add permanent configuration or use more sophisticated setups below.
 === The shortest way ===
