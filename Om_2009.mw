@@ -65,5 +65,35 @@ Power status events ignored [http://trac.freesmartphone.org/ticket/381 FSO 381]<
 gsm0710muxd: "Modem does not respond to AT commands" [http://docs.openmoko.org/trac/ticket/2257 OM 2257]<br>
 feeds are incorrectly set to unstable<br>
 
+== Debugging ==
+
+The get persistent logs to a file the a few things need to be changed.<br>
+The logging output needs to be set to DEBUG and sent to a file. Edit /etc/frameworkd.conf and change 
+
+<pre>
+[frameworkd]
+version = 1
+log_level = INFO
+log_to = syslog
+</pre>
+
+to
+
+<pre>
+[frameworkd]
+version = 1
+log_level = DEBUG
+log_to = file
+log_destination = /var/log/frameworkd.log
+</pre>
+
+Now to have persistent logs, ones that remain after a reboot, the /var/log symlink needs to be turned into a directory
+
+<pre>
+rm /var/log
+mkdir /var/log
+</pre>
+
+Your log files should now be full of information and remain there after a reboot.
 
 [[Category:Om 2009]]
