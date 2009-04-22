@@ -1,0 +1,97 @@
+{{FSO Scripts}}
+
+== Why ==
+FSO is a great framework. But at the moment, developers are concentrating on the frameworkd daemon. This leaves us (FSO not SHR users) in a bind. So here are some scripts to help your daily life along.
+
+== GSM ==
+=== Logging calls ===
+Uses SQLlite to log all your calls - missed, received, dialled out.
+At the moment, the database is in roots home. This can be moved to a  standard place
+Example use
+<pre>
+#Most called numbers
+sqlite> select msisdn,sum(duration) from call_log where direction=0  group by msisdn order by sum(duration) desc limit 5;
+073xxxxxxx|16507.622120142
+072xxxxxxx|2735.2764070034
+0722xxxxxx|2689.02251005173
+0751xxxxxx|1292.24268722534
+0721xxxxxx|1139.27544236183
+
+</pre>
+Here's the database schema
+<pre>
+sqlite> .schema call_log
+CREATE TABLE call_log (id integer PRIMARY KEY AUTOINCREMENT ,
+msisdn text,
+direction int,
+duration float,
+active int, eventtime, int);
+sqlite> 
+</pre>
+Here's the script
+<pre>
+import dbus
+import dbus.mainloop 
+import dbus.mainloop.glib
+import gobject 
+import subprocess
+import time
+import sqlite3
+                                                                                                                                                                                                                                               
+starttime=0
+seen=0
+lastrow=0
+def onCallStatus( index, status, properties ):
+        global seen,starttime,lastrow
+        conn = sqlite3.connect('/home/root/.logs.sqlite')
+        c = conn.cursor()
+
+        print "\n","--"*20,"\n","Index:",index,": Status:",status,": Properties:",properties
+        print "seen:",seen,"Startime:",starttime
+
+        if status == "incoming":
+                if not seen:
+                        print "Incoming",properties
+                        sql="insert into call_log (msisdn,direction,duration,active,eventtime) values(?,?,?,?,(SELECT strftime('%s','now')))";
+                        c.execute(sql,(properties['peer'],1,0,0))
+                        sql="SELECT last_insert_rowid()"
+                        lastrow=c.execute(sql).fetchone()[0]
+                        seen=1
+        if status == "outgoing":
+                if not seen:
+                        print "outgoing",properties
+                        sql="insert into call_log (msisdn,direction,duration,active,eventtime) values(?,?,?,?,(SELECT strftime('%s','now')))";
+                        c.execute(sql,(properties['peer'],0,0,0))
+                        sql="SELECT last_insert_rowid()"
+                        lastrow=c.execute(sql).fetchone()[0]
+                        seen=1
+        if status == "release":
+                if starttime:
+                        sql="update call_log set duration=?, active=? where id=?";
+                        talktime = time.time() - starttime
+                        print "Talk time: ",talktime," For row",lastrow
+                        c.execute(sql,(talktime,1,lastrow))
+                        starttime=0
+                seen=0
+        if status == "active":
+                starttime=time.time()
+        conn.commit()
+        c.close()
+
+
+dbus.mainloop.glib.DBusGMainLoop( set_as_default=True )                                                                                                                                                                                        
+mainloop = gobject.MainLoop()                                                                                                                                                                                                                  
+bus = dbus.SystemBus()                                                                                                                                                                                                                         
+bus.add_signal_receiver( onCallStatus,
+                         "CallStatus",
+                         "org.freesmartphone.GSM.Call",
+                         "org.freesmartphone.ogsmd", 
+                         "/org/freesmartphone/GSM/Device" )                                                                                             
+mainloop.run()       
+
+</pre>
+
+== GPS ==
+== Events ==
+== INPUT ==
+Accellerometers go here
