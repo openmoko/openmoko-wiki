@@ -16,7 +16,17 @@ where ''MM'' is the month, 01-12; ''DD'' is the day, 01-31; ''hhmm'' is the time
 
 == Setting date/time from your linux box ==
 
-Following method works independently of locale settings:
+For busybox date (openmoko, shr and so on):
+<pre>
+ssh root@openmoko "date -u -s `date -u +%m%d%H%M%Y.%S`"
+</pre>
+
+To also copy your timezone file, add an echo command:
+<pre>
+ssh root@openmoko "date -u -s `date -u +%m%d%H%M%Y.%S`; echo `cat /etc/timezone` > /etc/timezone"
+</pre>
+
+Following method works independently of locale settings, but only for coreutils `date` on your freerunner (debian distibution):
 <pre>
 ssh root@openmoko "date -us @`date -u +%s`"
 </pre>
