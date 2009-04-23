@@ -1,12 +1,14 @@
-== Howto create an OpenWrt image for the FreeRunner ==
+{{Languages|Howto create an OpenWrt image for the FreeRunner}}
 
 First you have to create a svn checkout of the OpenWrt base system
 
+== Fetching OpenWrt trunk ==
  svn co svn://svn.openwrt.org/openwrt/trunk openwrt
 
 The command will fetch the OpenWrt base system and put it into the openwrt subfolder of your current working directory. From now on this HOWTO assumes that your working direcory will be the newly created openwrt folder. (`cd openwrt`)
 
-Although this is sufficient enough to build an image for the freerunner you will not be able to build a lot of packages useful on your phone. Those packages are in extra feeds. To enable those feeds 
+== Add packages from extra feeds ==
+Although this is sufficient enough to build an image for the freerunner you will not be able to build a lot of packages useful on your phone. Those packages are in extra feeds. To enable those feeds:
 
  cp feeds.conf.default feeds.conf
 
@@ -27,13 +29,14 @@ After that update your feeds to download the OpenWrt-Makefiles of these packages
  scripts/feeds update -a
  scripts/feeds install -a
 
+== Configure target and packages ==
 Now you'll have to select the target platform for the freerunner. Run
 
  make menuconfig
 
 and select s3c24xx as the Target System. As Target Profile you have to choice between 
-* gta02-full. This is the one you probably want since it has enlightenment and paroli preselected.
-* gta02-mini. This profile contains only the basic OpenWrt packages, so you'll only get a shell and some commandline utils.
+* '''Openmoko GTA-02 (full)''': This is the one you probably want since it has enlightenment and paroli preselected.
+* '''Openmoko GTA-02 (minimal)''': This profile contains only the basic OpenWrt packages, so you'll only get a shell and some command-line utils.
 
 You now can also select additional packages you want to be installed in your image. Make sure you select as build in [*] else [M] you'll only get the packages but they will not be in the image, but can be installed later on.
 
@@ -41,16 +44,21 @@ You maybe also want to change the IP address under which the freerunner will be 
 
 Per default OpenWrt is using the uclibc as libc implementation. You can use another libc (e.g. the glibc) by changing that via "[*] Advanced configuration options (for developers)" -> "---   Toolchain Options" -> "LIBC implementation".
 
-
+== Enlightenment requirements ==
 Currently to get the EFL (enlightenment and its libraries) compiled within OpenWrt you need to have recent executables of <eet> and <edje_cc> preinstalled on your host-system. This is just a temporary solution and will be changed soon. Common packages which distribute these binaries are named <edje> and <eet>.
-If your distribution doesn't provide any recent e17 packages you can use [[Image:Openwrt_build_efl_host_tools.sh]] to fetch and build the required tools from e17 svn. Remember to execute `ldconfig` if you have installed e17 tools in "/usr/local".
+If your distribution doesn't provide any recent e17 packages you can use [[Image:Openwrt_build_efl_host_tools.sh]] to fetch and build the required tools from e17 svn. 
+
 
 '''Warning:''' Openwrt_build_efl_host_tools.sh script doesn't halt on error, please check all build process.
 
-'''Tips for Debian Lenny users:''' Install following packages before e17 buiding script : libjpeg62-dev libfreetype6-dev x11proto-xext-dev libxext-dev libpng12-dev
+'''Warning:''' Remember to execute `ldconfig` if you have installed e17 tools in "/usr/local".
 
+'''Tips for Debian Lenny users:''' Install following packages before e17 buiding script : 
+* building tools: automake autoconf autotools-dev libtool pkg-config
+* e17 requirements: libjpeg62-dev libfreetype6-dev x11proto-xext-dev libxext-dev libpng12-dev
 
-If your done configuring the image you can build it by just running
+== Build your OpenWrt image ==
+If your done configuring the image you can build it by just running:
 
  make
 
@@ -62,9 +70,15 @@ If your done configuring the image you can build it by just running
 This will now take some time. Please make sure you have enough free space left (~4 GB for full-profile).
 Instead you can use "make V=99" to get debug output to see what's going on / went wrong.
 
-When the build process is finished you will find a rootfs (openwrt-s3c24xx-2.6-root.jffs2-128k) and a kernel image (openwrt-s3c24xx-2.6-uImage) in the bin/ subfolder of your openwrt installation, which can be installed on your freerunner with the [[Dfu-util|dfu util]] as normal.
+If it fails with an error like ''"Package requirements (eina-0) were not met"'' and you have installed e17 in /usr/local, try to build OpenWrt with:
 
-After flashing both images, reboot your phone and depending on what packages were built into the image (=you've selected) you might be able to initiate / receive phonecalls with your Freerunner running OpenWrt :)
+ PKG_CONFIG_PATH=/usr/local/lib/pkgconfig make V=99
+
+== Flash Neo FreeRunner ==
+When the build process is finished you will find a rootfs (openwrt-s3c24xx-2.6-root.jffs2-128k) and a kernel image (openwrt-s3c24xx-2.6-uImage) in the bin/ subfolder of your OpenWrt installation, which can be installed on your freerunner with the [[Dfu-util|dfu util]] as normal.
+
+== Try it ! ==
+After flashing both images, reboot your phone and depending on what packages were built into the image (=you've selected) you might be able to initiate / receive phonecalls with your FreeRunner running OpenWrt :)
 
 You can also reach the freerunner over [[USB_Networking|usb network]] via telnet. SSH is also available after you have set up password for the root account (Run `passwd` in a telnet session).
 
