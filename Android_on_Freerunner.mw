@@ -69,9 +69,22 @@ You can download images for them both here:
 
 [http://downloads.openmoko.org/distro/unstable/daily/om-gta02/20090330/ Latest Uboot]
 
-The Android kernel image can be more than 2MB in size. The UBoot environment that comes with your FreeRunner is only able to boot a kernel 2MB in size or less. To use a kernel larger than 2MB you need to:
+The Android kernel image can be more than 2MB in size. The UBoot environment that comes with your FreeRunner is only able to boot a kernel 2MB in size or less. To use a kernel larger than 2MB you have two option:
 
-* Change to the [http://wiki.openmoko.org/wiki/Qi Qi Bootloader]. It supports 2MB kernels out of the box.
+* change to Qi as bootloader
+* modify uboot to be able boot a Kernel that has more than 2MB in size
+
+In detail the options will be described as follows:
+
+* Change to the [http://wiki.openmoko.org/wiki/Qi Qi Bootloader]. It supports 2MB kernels out of the box. For GTA02, you want bootloader: 
+   qi-s3c2442-master_....
+and and you install the [[Qi]] with [[dfu-utils]] and that you take for example the following kernel: 
+  uImage-moredrivers-GTA02_andy-tracking_...
+Because Qi tries to boot from the first three partitions of SD Card. If Qi finds a kernel there it start the kernel if there is any ext2 / 3 partition on there in the folder /boot e.g.
+  /boot/uImage-GTA02.bin 
+Qi will try to boot it and use that partition as the rootfs. If none of the first three SD partitions have the kernel file, it will boot
+from the NAND kernel partition as usual.
+
 
 * Adjust your [[Uboot]] environment to [http://meinopenmoko.blogspot.com/2008/12/prepare-uboot-to-boot-android.html support a Kernel of more than 2 MB]
 
