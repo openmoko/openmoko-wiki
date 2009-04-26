@@ -1,23 +1,20 @@
-{{Languages|OpenWrt}}
+{{Languages|Howto create an OpenWrt image for the FreeRunner}}
 
 First you have to create a svn checkout of the OpenWrt base system
 
-== 获取 OpenWrt 主干 ==
+== Fetching OpenWrt trunk ==
  svn co svn://svn.openwrt.org/openwrt/trunk openwrt
 
-这个命令会下载获取OpenWrt的基本系统，并存储在当前目录下的openwrt文件夹中。
-本文档后面将假设你的工作目录为openwrt，所以你要进入openwrt目录：
+The command will fetch the OpenWrt base system and put it into the openwrt subfolder of your current working directory. From now on this HOWTO assumes that your working direcory will be the newly created openwrt folder. 
 
  cd openwrt
 
-== 添加应用程序包(Add packages from extra feeds) ==
-
-虽然基本系统可以build出FreeRunner的Image，但生成的Image缺少一些手机应用程序。这些程序有额外的种子地址，使用这些种子地址的方法如下：
+== Add packages from extra feeds ==
+Although this is sufficient enough to build an image for the freerunner you will not be able to build a lot of packages useful on your phone. Those packages are in extra feeds. To enable those feeds:
 
  cp feeds.conf.default feeds.conf
 
-
-然后编辑feeds.conf文件，并去掉efl(针对enlightenment)或phone(针对fso, paroli, ...)前面的注释符号＃，去掉＃后文件内容可能就像下面：
+Then edit your feeds.conf and enable the efl (for enlightenment) and phone (for fso, paroli, ...) feeds, by removing the '#' at the beginning of these lines, so that it might look like:
 
  src-svn packages svn://svn.openwrt.org/openwrt/packages
  src-svn xwrt http://x-wrt.googlecode.com/svn/trunk/package
@@ -27,58 +24,66 @@ First you have to create a svn checkout of the OpenWrt base system
  src-svn desktop svn://svn.openwrt.org/openwrt/feeds/desktop
  #src-svn xfce svn://svn.openwrt.org/openwrt/feeds/xfce
 
-请注意，这个设置并不表示这些应用程序包会被编译，而只是在后面使用menuconfig命令时会获取这些包的描述信息（OpenWrt-Makefiles）。
+Please mind that this config does not define what packages will be compiled - it just defines which package-descriptions (OpenWrt-Makefiles) will be fetched which will be listed within the menuconfig later.
 
-现在，更新下载这些包的（OpenWrt-Makefiles)并提供（安装）它们：
+After that update your feeds to download the OpenWrt-Makefiles of these packages and provide (install) them
 
  scripts/feeds update -a
  scripts/feeds install -a
 
-== 配置（Configure target and packages） ==
-现在，你需要选择FreeRunner的目标平台。运行命令：
+== Configure target and packages ==
+Now you'll have to select the target platform for the freerunner. Run
 
  make menuconfig
 
-Target System选项选择s3c24xx，Target Profile 你可以选择两者之一： 
-* '''Openmoko GTA-02 (full)''': 你可能会选用这个，因为它包含了enlightenment 和 paroli。
-* '''Openmoko GTA-02 (minimal)''': 这个仅仅包含最基本的OpenWrt packages,可能只有shell和一些命令行程序.
+and select s3c24xx as the Target System. As Target Profile you have to choice between 
+* '''Openmoko GTA-02 (full)''': This is the one you probably want since it has enlightenment and paroli preselected.
+* '''Openmoko GTA-02 (minimal)''': This profile contains only the basic OpenWrt packages, so you'll only get a shell and some command-line utils.
 
-现在你便可以选择一些额外的包安装到你的Image当中，注意要选择为[*]，如果你选择为[M]，这样的包会被编译但不会加入到Image中，你可以在以后再安装它。
+You now can also select additional packages you want to be installed in your image. Make sure you select as build in [*] else [M] you'll only get the packages but they will not be in the image, but can be installed later on.
 
-如果你想改变Freerunner的IP地址，要选择“[*] Image configuration”，在子菜单中可以改变Image的网络配置。
+You maybe also want to change the IP address under which the freerunner will be reachable. To do so select "[*] Image configuration". In its submenu you can change the images network configuration.
 
-OpenWrt默认使用uclibc作为libc，你可以选择其他libc（如glibc)。菜单是："[*] Advanced configuration options (for developers)" -> "---   Toolchain Options" -> "LIBC implementation".
+Per default OpenWrt is using the uclibc as libc implementation. You can use another libc (e.g. the glibc) by changing that via "[*] Advanced configuration options (for developers)" -> "---   Toolchain Options" -> "LIBC implementation".
 
-== Enlightenment需求（Enlightenment requirements） ==
-  请使用最新的subversion(svn)软件。
+== Enlightenment requirements ==
+Currently to get the EFL (enlightenment and its libraries) compiled within OpenWrt you need to have recent executables of <eet> and <edje_cc> preinstalled on your host-system. This is just a temporary solution and will be changed soon. Common packages which distribute these binaries are named <edje> and <eet>.
+If your distribution doesn't provide any recent e17 packages you can use [[Image:Openwrt_build_efl_host_tools.sh]] to fetch and build the required tools from e17 svn. 
 
-== 生成Image（Build your OpenWrt image） ==
-完成Image的配置后，你可以执行下面的命令来生成Image：
+
+'''Warning:''' Openwrt_build_efl_host_tools.sh script doesn't halt on error, please check all build process.
+
+'''Warning:''' Remember to execute `ldconfig` if you have installed e17 tools in "/usr/local".
+
+'''Tips for Debian Lenny users:''' Install following packages before e17 buiding script : 
+* building tools: automake autoconf autotools-dev libtool pkg-config
+* e17 requirements: libjpeg62-dev libfreetype6-dev x11proto-xext-dev libxext-dev libpng12-dev
+
+== Build your OpenWrt image ==
+If your done configuring the image you can build it by just running:
 
  make
 
-'''警告:''' OpenWrt build系统会根据选择的包依赖一些程序，如果选择了GTA-02 full profile, 会用到: 
+'''Warning:''' OpenWrt build system have more or less requirements depends on selected packages. Using GTA-02 full profile, we need: 
 * subversion and git to retrieve some external sources. (On Debian Lenny: subversion git-core)
 * full autotools suite. (On Debian Lenny: automake autoconf autotools-dev libtool pkg-config)
 * dbus-binding-tool to be able to compile "gsm0710muxd". (On Debian Lenny: libdbus-glib-1-dev)
 * autopoint and cvs is used by enlightenment building process. (On Debian Lenny: gettext cvs)
 
-生成Image的过程可能会很久。请确认你有足够的磁盘空间（GTA-02 full profile大约需要4G的空间）
+This will now take some time. Please make sure you have enough free space left (~4 GB for full-profile).
+Instead you can use "make V=99" to get debug output to see what's going on / went wrong.
 
-另外，你可以使用 "make V=99"命令，这个命令会输出build过程中的信息，这样你可以比较清楚的看到运行情况或出错情况。
+== Flash Neo FreeRunner ==
+When the build process is finished you will find a rootfs (openwrt-s3c24xx-2.6-root.jffs2-128k) and a kernel image (openwrt-s3c24xx-2.6-uImage) in the bin/ subfolder of your OpenWrt installation, which can be installed on your freerunner with the [[Dfu-util|dfu util]] as normal.
 
-== 烧写程序（Flash Neo FreeRunner） ==
-Build过程结束后，你会在bin目录下发现生成了一个rootfs文件 (openwrt-s3c24xx-2.6-root.jffs2-128k)和一个内核映像文件 (openwrt-s3c24xx-2.6-uImage) 。此时，你便可以通过[[Dfu-util|dfu util]] 工具来烧写FreeRunner了.
+== Try it ! ==
+After flashing both images, reboot your phone and depending on what packages were built into the image (=you've selected) you might be able to initiate / receive phonecalls with your FreeRunner running OpenWrt :)
 
-== 使用（Try it !） ==
+You can also reach the freerunner over [[USB_Networking|usb network]] via telnet. SSH is also available after you have set up password for the root account (Run `passwd` in a telnet session).
 
-烧写完上面提到的两个文件后，重新启动FreeRunner，进入系统，你便可以拨打或者接收电话了（当然你先前必须选择安装了必要的包）
+Congratulations!
 
-你可以用telnet通过[[USB_Networking|usb network]]连接FreeRunner. 如果你为root用户设置了密码 (在telnet绘画中执行命令： `passwd` )，SSH连接也是可以的。
+Please help us making this site better! Give feedback on the mailinglist (Openmoko as well as OpenWrt), change this site, file bug-reports or just tell us how much you love OpenWrt ;)
 
-祝贺你的成功!
-
-请协助我们把这个网站做的更好！你可以通过邮件列表（OpenMoko或者OpenWrt的）给我们反馈信息，改动和添加网站内容，报告bug，或者告诉我们你有多么的喜欢OpenWrt：）
-
-
-[[Category:OpenWrt]]
+[[Category:Application Developer]]
+[[Category:System Developers]]
