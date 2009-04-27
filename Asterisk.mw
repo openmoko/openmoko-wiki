@@ -82,6 +82,23 @@ Example to add the sip user ''ekiga'':
 If you have a sip provider you may add it to asterisk to join VoIP or PSTN networks 
 
 TBD
+==The dialplan==
+To modify the dialplan you have to edit /etc/asterisk/extension.conf. This is a very simple example to place/receive calls between the above mentioned ekiga test account and the alsa console.
+
+<pre>
+[general]
+[globals]
+[demo]
+exten => #,1,Playback(demo-thanks)      ; "Thanks for trying the demo"
+exten => #,n,Hangup                     ; Hang them up.
+exten => 600,1,Playback(demo-echotest)  ; Let them know what's going on
+exten => 600,n,Echo                     ; Do the echo test
+exten => 600,n,Playback(demo-echodone)  ; Let them know it's over
+exten => 600,n,Hangup
+[default]
+exten => 1000,1,Dial(SIP/ekiga)
+exten => 1001,1,Dial(Console/alsa)
+</pre>
 
 =GUI=
 A simple and quite rude GUI is coming, stay tuned!
