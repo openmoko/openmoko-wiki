@@ -184,50 +184,46 @@ wifi on the LEDs. It is available [http://openmoko.opendevice.org/~dos/ledd here
 
 == Power Status ==
 
-This Perl Script
+The following shell script
 uses the blue and orange LEDs under the power button to show battery power status.  
 
-Install perl using "opkg install perl" to use this script.  The script will indicate high battery with blue, medium battery by purple (blue + orange), and low battery by orange.  Adjust values for your needs.  
+The script will indicate high battery with blue, medium battery by purple (blue + orange), and low battery by orange.  Adjust low_thresh and high_thresh values (as percent of full power) for your needs.  
 
-You can have it autostart by saving the script as /etc/init.d/lights.pl<br>
-then creating a shell script /etc/init.d/startlights.sh with just one line:
- /etc/init.d/lights.pl &
-and then create a symlink to it to auto start by running
- ln -s /etc/init.d/startlights.sh /etc/rc5.d/S15startlights
+You can have it autostart by saving the script as /etc/init.d/lights.sh<br>
+and then create a symlink to it by running
+ ln -s /etc/init.d/lights.sh /etc/rc5.d/S15lights
 
-Don't forget to "chmod +x" all those scripts :)
+Don't forget to "chmod +x" this script. :)
 
-lights.pl:
+lights.sh:
 
- #!/usr/bin/perl
- my $high_thresh = 75;
- my $low_thresh = 30;
- while(1) {
-     my $command = `apm`;
-     if ($command =~ m/battery .*: (\d*)%/) {
-         print("Value: " . $1 . "\n");
-     }
-     if($1 < $low_thresh) {
-         print("Low Battery\n");
-         $command = `echo 1 > /sys/devices/platform/gta02-led.0/leds/gta02-power:orange/brightness`;
-         $command = `echo 0 > /sys/devices/platform/gta02-led.0/leds/gta02-power:blue/brightness`;
-     } 
-     if($1 > $high_thresh) {
-         print("High Battery\n");
-         $command = `echo 1 > /sys/devices/platform/gta02-led.0/leds/gta02-power:blue/brightness`;
-         $command = `echo 0 > /sys/devices/platform/gta02-led.0/leds/gta02-power:orange/brightness`;
-     }
-     if(($1 <= $high_thresh) && ($1 >= $low_thresh)){
-         print("Mid Battery\n");
-         $command = `echo 1 > /sys/devices/platform/gta02-led.0/leds/gta02-power:blue/brightness`;
-         $command = `echo 1 > /sys/devices/platform/gta02-led.0/leds/gta02-power:orange/brightness`;
-     }
-     sleep(15);
- }
-
-
--nvanfossen
-
+ #!/bin/sh
+ high_thresh=75
+ low_thresh=30
+ while :; do
+ 
+    value=$(apm | egrep -o ': [0-9]+%' | egrep -o '[0-9]+')
+    value=$(cut -d' ' -f7 < /proc/apm | cut -d% -f1)
+ 
+    #echo "Value: $value"
+    if [ $value -lt $low_thresh ]; then
+        #echo "Low Battery"
+        echo 1 > /sys/devices/platform/gta02-led.0/leds/gta02-power:orange/brightness
+        echo 0 > /sys/devices/platform/gta02-led.0/leds/gta02-power:blue/brightness
+  
+    elif [ $value -gt $high_thresh ]; then
+        #echo "High Battery"
+        echo 1 > /sys/devices/platform/gta02-led.0/leds/gta02-power:blue/brightness
+        echo 0 > /sys/devices/platform/gta02-led.0/leds/gta02-power:orange/brightness
+    else
+        #echo "Mid Battery"
+        echo 1 > /sys/devices/platform/gta02-led.0/leds/gta02-power:blue/brightness
+        echo 1 > /sys/devices/platform/gta02-led.0/leds/gta02-power:orange/brightness
+    fi
+ 
+    sleep 15
+ 
+ done &
 
 
 
