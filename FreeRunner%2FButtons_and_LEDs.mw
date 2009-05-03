@@ -198,32 +198,32 @@ Don't forget to "chmod +x" this script. :)
 lights.sh:
 
  #!/bin/sh
+ cd /sys/devices/platform/gta02-led.0/leds/
  high_thresh=75
  low_thresh=30
  while :; do
  
     value=$(cut -d' ' -f7 < /proc/apm | cut -d% -f1)
  
-    #echo "Value: $value"
+    echo "Value: $value"
     if [ $value -lt $low_thresh ]; then
-        #echo "Low Battery"
-        echo 1 > /sys/devices/platform/gta02-led.0/leds/gta02-power:orange/brightness
-        echo 0 > /sys/devices/platform/gta02-led.0/leds/gta02-power:blue/brightness
-  
+        echo "Low Battery"
+        echo 1 > gta02-power:orange/brightness
+        echo 0 > gta02-power:blue/brightness
+ 
     elif [ $value -gt $high_thresh ]; then
-        #echo "High Battery"
-        echo 1 > /sys/devices/platform/gta02-led.0/leds/gta02-power:blue/brightness
-        echo 0 > /sys/devices/platform/gta02-led.0/leds/gta02-power:orange/brightness
+        echo "High Battery"
+        echo 1 > gta02-power:blue/brightness
+        echo 0 > gta02-power:orange/brightness
     else
-        #echo "Mid Battery"
-        echo 1 > /sys/devices/platform/gta02-led.0/leds/gta02-power:blue/brightness
-        echo 1 > /sys/devices/platform/gta02-led.0/leds/gta02-power:orange/brightness
+        echo "Mid Battery"
+        echo 1 > gta02-power:blue/brightness
+        echo 1 > gta02-power:orange/brightness
     fi
  
     sleep 15
  
  done &
-
-
+ 
 
 [[Category:Neo FreeRunner Hardware]]
