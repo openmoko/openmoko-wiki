@@ -7,20 +7,17 @@
 The purpose of this software is to log GSM data, together with
 GPS coordinate. This data are sent to the [http://www.openbmap.org openBmap] website,
 in order to build a free database. In order to keep a '''high quality'''
-of data, we store GPS quality, speed, GSM signal strength, etc...
+of data, we store GPS quality, speed, GSM signal strength, etc... This is what makes us different from other similar projects: focus on quality.
 
 At this time, only cellular networks are concerned.
 All the software code is AGPL v3 and data are Creative Commons License
 (creative commons Attribution-Share Alike 3.0 Unported), thus the data 
 is free to use (in the same way as OpenStreetMap).
 
-Map status (last update 2009-03-31 00:45:10)
-Cellular: 7 countries, 10 mobile networks, 390 location area codes, 10375 cells
-
 Privacy note: when you upload, exactly as with [http://www.openstreetmap.org OpenStreetMap], your logs allow to 
 know where and when you were. You have been warned  ;-)  !
 
-==Possible use of this database==
+==Possible uses of this database==
 * get your location based on the current GSM cell you are connected to.
 (GPS needs extra power to function, GSM is always on. Less precise
 than GPS, but enough for a lot of usages. Instant location as database is located on your phone, GPS
@@ -36,17 +33,23 @@ If you want to get located through your GSM data, at the moment you can
 use the Web [http://realtimeblog.free.fr/api/openbmap_api.php API]. There is a [http://realtimeblog.free.fr/cell_map.php Web interface] available to use this API and display zones on a map (e.g. KML for Google Earth).
 
 ==Versions==
-0.2.1 Bug fix release: corrects the application displaying N/A for GSM even when obviously there is coverage.
+===0.3.0===
+* Beta Neighbour cells log now stable and activated!
+* Log files are now much bigger, you should have less files to upload.
+* If logs in memory when exiting, they will be written to disk.
+* Ignore neighbour cell if lac, cid or rxlev is 0.
+* GUI now says: GPS is active, and waiting for 3D fix.
+* Fix: GPS time in log is now based on GPS data.
+Was using the locale time of the phone.
+* When MCC changes, write logs to file.
+This means, a log file, only contains data related to a same MCC,
+that is to say, to one country.
+* Details in CHANGELOG.
 
-==What you should expect==
-* The complete process is done through graphical interface.
-* Requests CPU resource to prevent phone from going to suspend (this depends on the configuration of the phone...).
-* generation of logs (no log during a call)
-* Graphical window to enter login/password before upload (possibility to cancel upload).
-* upload of logs
-* Graphical window proposing to delete all logs already processed.
+===0.2.1===
+Bug fix release: corrects the application displaying N/A for GSM even when obviously there is coverage.
 
-==What's new since 0.1?==
+===0.2.0===
 * The complete process is now done through graphical interface!
 * Neighbour cells logging code is present, but deactivated. The reasons are:
 ** we need to clarify the meaning of some fields
@@ -60,6 +63,15 @@ use the Web [http://realtimeblog.free.fr/api/openbmap_api.php API]. There is a [
 ** org.freesmartphone.GSM.Monitor.GetNeighbourCellInformation() returns garbage when in a call.
 * Software id and version added in generated logs
 
+==What you should expect==
+* The complete process is done through graphical interface.
+* Requests CPU resource to prevent phone from going to suspend (this depends on the configuration of the phone...).
+* generation of logs (no log during a call).
+* logs serving and neighbour cells.
+* Graphical window to enter login/password before upload (possibility to cancel upload).
+* upload of logs.
+* Graphical window proposing to delete all logs already processed.
+
 ==Manual==
 Interface is straightforward.
 
@@ -70,6 +82,7 @@ You have to exit the application in order to stop the GPS.
 
 * A button to start generating logs.
 Values will be displayed when valid. Logs are stored under HOME/.openBmap/Logs by default.
+GPS data is considered valid only when we have a 3D fix.
 
 * A button to stop generating logs.
 
@@ -113,13 +126,13 @@ gps minimal speed for logging (km/h) = 0
 gps maximal speed for logging (km/h) = 150
 * please do not modify other values, this could prevent the logger from working correctly.
 
+==Troubleshooting==
 If you break your configuration file, just exit the application.
 Delete the configuration file (by default: HOME/.openBmap/openBmap.conf).
 Launch the application. The configuration file, if not found is
 generated with default values.
 
-
-==Known bugs:==
+==Known bugs==
 * when you are generating logs, and you press 'Stop' button.
    A popup window let you know you should wait for the logger to
    finish stopping. Under FSO M5, if you press the power
