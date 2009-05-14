@@ -63,3 +63,57 @@ This page is here to list the known issues with [[Paroli]]. If possible, link yo
 * The button to 'go back / go to previous screen' keeps changing: In the menu there's a 'back' button (different size in different views) but in the people etc one has to know to press the top bar to go back.
 
 * Maybe reordering the main menu so that the phone log would not be the first one?
+
+= Reflashing Paroli =
+
+In this development phase its more error prone just reflash the phone as updating the paroli .opk package.
+(Because maybe other bugs are fixed outside of paroli)
+
+First you need to boot into NAND (where you have already a working distribution and you can ssh into).
+To be able to manipulate the sd card (you cant manipulate the sd card, if you booted from it).
+
+00. Install Qi into NAND, and leave the factory installed uboot in NOR
+
+0. Boot into NAND using the factory installed uboot from NOR.
+Press and hold AUX and press power until the uboot menu does not appear.
+Select the boot option by pressing the power button.
+I have SHR in NAND. Any distribution is fine as long as you can ssh in.
+
+
+1. download latest paroli .tar.gz:
+http://downloads.openmoko.org/distro/unstable/NeoFreerunner/fso-paroli-image-om-gta02.tar.gz
+http://downloads.openmoko.org/distro/unstable/NeoFreerunner/uImage-2.6.28-stable+gitr0+f19f259d3c1afde8eae53983fd19f61831927413-r2-om-gta02.bin
+
+2. Boot the phone into NAND
+
+3. scp the .bin and .tar.gz to the phone's /home/root dir.
+(you may need this command to be able to connect to the phone: 
+sudo ip address add 192.168.0.200/24 dev usb0
+)
+
+4. ssh into the phone:
+ssh root@192.168.0.202
+
+5. Umount the sd partition, where you paroli was (for me it was the 2. partition)
+umount /media/mmcblk0p2/
+
+6. recreate ext2 filesystem
+mkfs.ext2 /dev/mmcblk0p2 
+
+7. Remount it
+mount /dev/mmcblk0p2 /media/mmcblk0p2/
+
+8. Untar the fso-paroli...tar.gz into the sd card:
+cd /media/mmcblk0p2/
+gunzip </home/root/fso-paroli-image-om-gta02.tar.gz |tar -xvf -
+
+9. copy the uImage over (assuming you have Qi into NAND):
+cd boot
+cp /home/root/uImage-2.6.28-stable\+gitr0\+f19f259d3c1afde8eae539
+83fd19f61831927413-r2-om-gta02.bin .
+ln -s uImage-2.6.28-stable\+gitr0\+f19f259d3c1afde8eae53983fd19f6
+1831927413-r2-om-gta02.bin uImage-GTA02.bin
+
+10. reboot
+
+11. Have fun
