@@ -1,116 +1,109 @@
-'''Om 2009''' is the next version of the official Openmoko distribution. It is currently under development and should be released in June 2009 to replace [[Om 2008]]. It will be based on [[FSO|freesmartphone.org]] milestone 5.5 framework.
+[[Image:Paroli.png|thumb|Screenshot of Paroli, the GSM app of OM2009]]
+'''Om 2009''' is the next version of the official Openmoko distribution. It is currently under developement and should be released in Summer 2009 to replace [[Om 2008]]. It will be based on [[FSO|freesmartphone.org]] milestone 5.5 framework and use [[Paroli]] as GSM software
 
-== Flashing ==
+=== Features Status ===
 
-The latest images are under [http://downloads.openmoko.org/distro/testing/ testing]. 
+Below is the feature list for Om 2009. It's broken down into features that have been implemented and need testing, and features that still need to be finished. Since [[Paroli]] is the chosen phone application, many of the features come straight from Paroli project.
 
-Updating to the latest uboot or qi is also recommended.
+==== Implemented ====
 
-<b>Make sure your GSM firmware is Moko11 or newer</b>
-If you've not updated it, it's Moko8 and REALLY need's to be updated. See http://wiki.openmoko.org/wiki/GSM/Flashing#uSD-card_Image_.28GTA02_only.29
+* incoming and outgoing phone calls
+* sms incoming and outgoing
+* simple phone book (no images)
+* call log
+* charging
+* suspend and resume
+* resume speed < 2 seconds - this is close but waiting on a kernel bug
+* battery indicator - works for gta02 battery
+* gsm indicator
+* switch to elementary
+* wifi GUI
+* scrolling in UI - fixed by migrating from etk to elementary
+* switching  profiles
+* in-call volume adjustment
+* settings tool (this needs to be enabled by editing /etc/paroli/paroli.cfg)
 
-===Fullscreen===
+==== Not Yet Implemented or Broken ====
 
-====NeoFreerunner====
+* boot time < 2 minutes - currently examining ways to speed this up
+* screen lock
+* user changeable ring tones - works via command line
+* bluetooth - support in FSO milestone 5.5, needs GUI
+* led indication for missed calls or sms
+* GTA01: battery indicator doesn't work for gta01 battery
 
-Download <b>fso-paroli-image</b> from [http://downloads.openmoko.org/distro/testing/NeoFreerunner/fso-paroli-image-om-gta02.jffs2 fso-paroli-image].<br>
-Download <b>uImage.bin</b> from [http://downloads.openmoko.org/distro/testing/NeoFreerunner/uImage-2.6.28-stable+gitr0+f19f259d3c1afde8eae53983fd19f61831927413-r2-om-gta02.bin uImage.bin].<br>
-Download <b>qi.udfu</b> from [http://downloads.openmoko.org/distro/testing/NeoFreerunner/qi-s3c2442-1.0.2+gitr3b8513d8b3d9615ebda605de4bda18371aa3f359.udfu   qi.udfu].<br>
+==== Bug List and Known Issues ====
 
-Detailed instructions for [[Flashing_the_Neo_Freerunner|flashing]] the kernel and uboot. Qi instructions are in the [[Qi#Installation| Qi installation]] wiki.
+* gsm0710muxd: "Modem does not respond to AT commands" [http://docs.openmoko.org/trac/ticket/2257 #2257]
+* illume: exit dialog is only 1 pixel wide (fixed in enlightenment devel version)
+* after using the keyboard in [[Paroli]] it doesn't go away until the window gets closed (fixed in the devel version)
+* In case of ethernet problems, add g_ether to /etc/modules file. (should have been fixed by now)
 
-The image will boot fullscreen into [[Paroli]] and all of the features below will be available<br>
+== Using OM2009 ==
+'''Write your best tips here!!'''
 
-====Neo 1973====
+* Add a bind-home directory to the first partition ( must be ext2 or ext3 ) of your SD card. When the system boots it will mount the bind-home directory as /home/root. This allow you to reflash the phone without losing anything in your home directory ( [[Paroli]] contacts and settings, maps, etc )
+* To have log directory that isn't cleared when you reboot, the /var/log symlink needs to be turned into a directory:
+ rm /var/log
+ mkdir /var/log
 
-The images are under [http://downloads.openmoko.org/distro/testing/Neo1973 testing]. There are some rootfs tarballs for installing onto an SD card. The images and tarballs  have a couple of issues. <br>
+* Link to paroli FAQ/manual?
 
-1) the battery driver is still not working correctly.
+== Installing ==
 
-2) The g_ether driver is not getting loaded at boot so an entry needs to be added to the /etc/modules file.
+* If you've not updated your GSM chip firmware, it's Moko8 and REALLY need's to be updated. See [[Flashing#uSD-card_Image_.28GTA02_only.29|GSM flashing]]
+* Also update to the latest versions of [[qi]] or [[Bootloader|uboot]] bootloaders
 
+The latest OM2009 and qi/uboot images are available at http://downloads.openmoko.org/distro/testing/
 
-The image will boot fullscreen into [[Paroli]] and all of the features below will be available<br>
+Installing OM2009 is simple as flashing an image. Actually that's what you need to do.. 
+
+# Download! You need the correct fso-paroli-image and uImage.bin files for your device. There are also rootfs tarballs for installing onto an SD card. [http://downloads.openmoko.org/distro/testing/NeoFreerunner Freerunner] or [http://downloads.openmoko.org/distro/testing/Neo1973 Neo1973]
+# Flash! Detailed instructions for [[Flashing_the_Neo_Freerunner|Freerunner]] and[[Flashing_the_Neo_1973|Neo1973]].
+# Start! The image will boot into fullscreen Paroli and all of the features listed above will be available. To learn more about Paroli, see [[Paroli]]
 
 == Development ==
+'' When we set the very limited goals of OM2009 we had two goals in mind:''
+ 
+''1. Give those members of the community who only wanted a daily phone, a distro they could use''<br>
+''2. Introduce technology that would allow the community to come together and improve on these basics'' 
+ 
+''Community interaction, open development and user driven decision making are at the core of Om2009. Going forward this will be an effort with the community for the community. I invite you to join the effort to make om2009 with paroli the best Om-labeled distribution for the Freerunner. ''
 
-Currently Om 2009 is starting its beta phase. Testing builds will be generated into the [http://downloads.openmoko.org/distro/testing/ testing] disto.<br>
+'''How can you help?'''
+ 
+''Test the distro, let us know about bugs you find, or even fix them and send us patches.''
+ 
+''Tell us about your experiences using om2009, what should we change, where can we improve?''
+ 
+''Paroli has come a long way but it still needs a lot of love and optimizing, so if you are into python or efl, check out the code from git.paroli.org, join #paroli on irc and let's get crackin'. There is lots of things to do, opimd needs to be integrated and improved, the UI needs polishing, overall speed can be increased etc etc''
+ 
+''More into Chat and email? Feel like writing a jabber/irc/xxx or email client that really fits the screen? Or do you know of one? Let's hear about it. This device has a lot of potential and we are so close to reaching the far corners, the kernel is in good shape, the framework is doing great and telephony apps such as paroli or the shr suite are steadily improving.''
+ 
+''So, get your Freerunner in shape again. Flash it with a nice current distro and let it do what it was meant to do :)''
+ 
+''Let's make Om2009 a community product, something all of us can be proud of and say "we did this".''
 
-The progress of FSO development is documented regularly in the Status updates at [[OpenmokoFramework]]. For the Om 2009 release plan see [http://n2.nabble.com/Om2009-release-plan-tp2410042p2410042.html]. 
+Mirko/Openmoko at http://lists.openmoko.org/pipermail/community/2009-May/048061.html)
+ 
+* [http://n2.nabble.com/Om2009-release-plan-tp2410042p2410042.html OM2009 release plan]
 
-This page will be updated to reflect the status of Om 2009<br>
+* [[Om_2009_get_active]]
+* [[Paroli-issues]]
 
-== Features Status ==
+* Paroli: http://www.paroli-project.org/ and [[Paroli]]
+* FSO: http://www.freesmartphone.org and [[OpenmokoFramework]]
 
-Below is the feature list for Om 2009. It's broken down into features that have been implemented and need testing, and features that still need to be finished
-
-=== Implemented ===
-
-phone calls incoming and outgoing<br>
-sms incoming and outgoing<br>
-simple phone book (no images)<br>
-call log<br>
-charging<br>
-suspend and resume<br>
-alarm clock<br>
-resume speed < 2 seconds - this is close but waiting on a kernel bug<br>
-battery indicator - works for gta02 battery<br>
-gsm indicator<br>
-switch to elementary<br>
-scrolling in UI - fixed by migrating from etk to elementary<br>
-switching  profiles<br>
-in-call volume adjustment<br>
-settings tool (this needs to be enabled by editing /etc/paroli/paroli.cfg)<br>
-
-=== Not Yet Implemented or Broken ===
-
-boot time < 2 minutes - currently examining ways to speed this up<br>
-screen lock<br>
-battery indicator - doesn't work for gta01 battery<br>
-user changeable ring tones - works via command line<br>
-bluetooth - support in FSO milestone 5.5, needs GUI<br>
-wifi - works from the command line, kernels bugs still present<br>
-led indication for missed calls or sms<br>
-
-=== Bug List and Known Issues ===
-
-gsm0710muxd: "Modem does not respond to AT commands" [http://docs.openmoko.org/trac/ticket/2257 OM 2257]
-
-illume: exit dialog is only 1 pixel wide
-
-after using the keyboard in [[Paroli]] it doesn't go away until the window gets closed
-
-== Tweaks ==
-
-Add a bind-home directory to the first partition ( must be ext2 or ext3 ) of your SD card. When the system boots it will mount the bind-home directory as /home/root. This allow you to reflash the phone without losing anything in your home directory ( [[Paroli]] contacts and settings, maps, etc )
-
-== Debugging and Bug Reporting ==
-
-=== Persistent logs ===
-
-To have persistent logs, ones that remain after a reboot, the /var/log symlink needs to be turned into a directory
-
-<pre>
-rm /var/log
-mkdir /var/log
-</pre>
-
-Your log files should now be full of information and remain there after a reboot.
+* BUILDS: [http://downloads.openmoko.org/distro/testing/ Testing] and [http://downloads.openmoko.org/distro/unstable/ Daily/unstable]
 
 === Reporting Bugs ===
 
-Please enable debugging as above. Attaching frameworkd.log and paroli.log will aid in solving the bug. 
+Please enable debugging as [[Om_2009#Using_OM2009|instructed above]]. Attaching frameworkd.log and paroli.log will aid in solving the bug. 
 
 Please search the bug list for you issue before adding it to trac. Some of these issues might be [[Paroli]] or FSO issue so you can also check their tracs for solutions or discussions.
 
-http://trac.freesmartphone.org/wiki
-
-http://www.paroli-project.org/trac
-
-At this point we are looking for bug reports and not feature requests.
-
-Use the Om2009 tag so that we can track it against this release.
-
-https://docs.openmoko.org/trac
+* https://docs.openmoko.org/trac (Use the Om2009 tag so that we can track it against this release.)
+* http://trac.freesmartphone.org/wiki
+* http://www.paroli-project.org/trac
 
 [[Category:Om 2009| ]]
