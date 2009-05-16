@@ -180,14 +180,15 @@ After this, the flashing proceeded as expected. You don't need to do any special
 This works by starting the FreeRunner from a system installed on the uSD, which will automatically apply all needed instructions to flash the GSM firmware to the chip. The uSD image will have to be written on a uSD, which will overwrite all its content, so as to make sure it is repartitioned correctly and that it contains the correct bootable system.
 The procedure has proven to do a reliable job on flashing MOKO11 to GTA02. Chances anything fails are minimal if you _strictly_ follow the instructions. There's no way to do any harm to your device by using this method.
  
-'''Take special care though about the destination of `dd`, it has to be the *physical* device (e.g. foo0), *not* any partition (e.g. foo0p1). Also make sure there are *no* mounted partitions left on the uSD when starting `dd`!'''
+'''Take special care though about the destination of `dd`, it has to be the *physical* device (e.g. foo0) of your uSD-card, *not* any partition (e.g. foo0p1). Also make sure there are *no* mounted partitions left on the uSD when starting `dd`!'''<br>
+''Triple-check you are not accidentally overwriting your system-HD, by e.g using /dev/sda instead of /dev/sdc! Double-check once more! This is the one-typo-kills-system case ;-) You've been warned.''
 
 * Download and ''untar'' http://people.openmoko.org/joerg/calypso_moko_FW/moko11/flash-moko11_uSD-image.tar.gz on your preferred computer.
 * read the "README.txt" file that came with the tarball.
 * (apply `sudo` or use root-terminal according to your taste to get root privileges needed to write to the uSD card;)
 * Insert a uSD to your computer's reader, and `umount` all uSD-partitions that might have been automounted (use `mount` or `df -h` to check). Do not use "safely remove" for this.
 
-* use `dd` to write the image "flash-moko11-2.image" to the '''physical(!)''' uSD-device (this will erase all data from your uSD, including previous partition table and partitions!). `Sync` or `eject <device>` to make sure everything is flushed to the uSD before physically removing it from the reader.
+* use `dd` to write the image "flash-moko11-2.image" to the '''physical(!)''' uSD-device (this will erase all data from your uSD, including previous partition table and partitions! ''It will as well erase all data from your computer's HD, in case you accidentally `dd` to this device instead of uSD''). `Sync` or `eject <device>` to make sure everything is flushed to the uSD before physically removing it from the reader.
 
 * Insert the uSD to your FreeRunner, and boot from '''NOR-U-Boot''' and select the "Boot from uSD" option,
 
