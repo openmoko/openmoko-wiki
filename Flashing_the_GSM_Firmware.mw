@@ -29,7 +29,8 @@ According to mwester, this worked for him to update from MOKO1 on a GTA01Bv4 to 
 
 Any reports on successful update, as well as problems encountered, or SIMs seen to work after update, all highly appreciated. Please add to the "discussion" tab of this wikipage. Thanks!
 
-==Phase 1: Preparations==
+==Manual Update (GTA01, GTA02)==
+===Phase 1: Preparations===
 
 * Download and install a distribution to your device that gives you SSH access. We recommend the fso-console image:
 <pre>
@@ -55,7 +56,7 @@ root@om-gta02:~# cd $HOME
 root@om-gta02:~# wget http://people.openmoko.org/joerg/calypso_moko_FW/moko11/calypso-moko11.m0
 </pre>
 
-==Phase 2: The Lobotomy==
+===Phase 2: The Lobotomy===
 
 * Make sure '''nothing''' is accessing the GSM modem. If you're using the fso-console image from the link above, this will happen automagically on boot. On other systems, kill processes as you see fit (for FSO it's zhone, frameworkd and gsm0710muxd; for SHR it's ophonekitd, frameworkd and gsm0710muxd). If you're using a stable (or andy-tracking) kernel from Feb 26 or later on GTA02, see below for simplified instructions on powering the modem on/off (if you use the simplified method to turn it off, you must also use the simplified method to turn it on; no s3c24xx-gpio invocations are needed).
 
@@ -97,6 +98,8 @@ Flash Detect: (0xEC, 0x22A0) Samsung K5A3240CT ok
 Program: (34 sectors, 267*8k=2136k) (*******************) ok
 </pre>
 
+Congratulations, the update was successful!
+
 '''Note: If you get this instead: MESSAGE: File cmd.m0 not found, then you didn't do the ''cd /usr/sbin''. Please pay attention ;-)'''
 
 If FLUID does nothing, curse your bad luck and repeat the reset sequence, this is the whole 'echo 0/1, b7=0/1 stuff'.
@@ -107,10 +110,11 @@ root@om-gta02:~# stty crtscts -F /dev/ttySAC0
 root@om-gta02:~# cat /dev/ttySAC0 &
 root@om-gta02:~# echo -en 'AT\r' >/dev/ttySAC0; sleep 1; echo -en 'AT+CGMR\r' >/dev/ttySAC0
 +CGMR: "GSM: gsm_ac_gp_fd_pu_em_cph_ds_vc_cal35_ri_36_amd8_ts0-Moko11"
+...
 root@om-gta02:~# kill %1
 </pre>
 
-===Hints===
+====Hints====
 
 In some case you may receive this:
 
@@ -135,7 +139,7 @@ To "start the modem" you need to issue:
 echo 1 >/sys/bus/platform/devices/neo1973-pm-gsm.0/power_on
 </pre>
 
-==Troubleshooting==
+===Troubleshooting===
 
 Some users weren't able to complete the upgrade since they got an error while the firmware was uploading in the GSM chip (like ''Flash operation timeout'').
 
@@ -175,7 +179,7 @@ I recently had to do a special process to recover my GTA01bv4 after breaking the
 
 After this, the flashing proceeded as expected. You don't need to do any special checks to ensure you have successfully flashed; if fluid reports everything is ok, it is actually ok.
 
-== uSD-card Image ==
+== uSD-card Image (GTA02 only)==
 '''We recommend to update all devices by using this uSD-image for flashing MOKO11 to GTA02 Freerunner only (not suitable for GTA01 Neo1973).'''<br>
 This works by starting the FreeRunner from a system installed on the uSD, which will automatically apply all needed instructions to flash the GSM firmware to the chip. The uSD image will have to be written on a uSD, which will overwrite all its content, so as to make sure it is repartitioned correctly and that it contains the correct bootable system.
 The procedure has proven to do a reliable job on flashing MOKO11 to GTA02. Chances anything fails are minimal if you _strictly_ follow the instructions. There's no way to do any harm to your device by using this method.
