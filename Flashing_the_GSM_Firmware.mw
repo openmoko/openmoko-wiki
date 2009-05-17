@@ -28,7 +28,31 @@ GTA02 users are suggested to update using [[GSM/Flashing#uSD-card_Image_.28GTA02
 
 Any reports on successful update, as well as problems encountered, or SIMs seen to work after update, all highly appreciated. Please add to the "discussion" tab of this wikipage. Thanks!
 
-==Manual Update (GTA01, GTA02)==
+== uSD-card Image (GTA02 only)==
+'''We recommend to update all devices by using this uSD-image for flashing MOKO11 to GTA02 Freerunner only (not suitable for GTA01 Neo1973).'''<br>
+This works by starting the FreeRunner from a system installed on the uSD, which will automatically apply all needed instructions to flash the GSM firmware to the chip. The uSD image will have to be written on a uSD, which will overwrite all its content, so as to make sure it is repartitioned correctly and that it contains the correct bootable system.
+The procedure has proven to do a reliable job on flashing MOKO11 to GTA02. Chances anything fails are minimal if you _strictly_ follow the instructions. There's no way to do any harm to your device by using this method.
+ 
+'''Take special care though about the destination of `dd`, it has to be the *physical* device (e.g. foo0) of your uSD-card, *not* any partition (e.g. foo0p1). Also make sure there are *no* mounted partitions left on the uSD when starting `dd`!'''<br>
+''Triple-check you are not accidentally overwriting your system-HD, by e.g using /dev/sda instead of /dev/sdc! Double-check once more! This is the one-typo-kills-system case ;-) You've been warned.''
+
+# Download and ''untar'' http://people.openmoko.org/joerg/calypso_moko_FW/moko11/flash-moko11_uSD-image.tar.gz on your desktop computer. Read the "README.txt" file that came with the tarball.
+# Insert a uSD to your computer's reader, and unmount all uSD-partitions that might have been automounted (use `mount` or `df -h` to check). Do not use "safely remove" for this.
+# use `dd` to write the image "flash-moko11-2.image" to the '''physical(!)''' uSD-device (this will erase all data from your uSD, including previous partition table and partitions! ''It will as well erase all data from your computer's HD, in case you accidentally `dd` to this device instead of uSD''). Use sudo or root-terminal to get root privileges needed to write to the uSD card
+# `Sync` or `eject <device>` to make sure everything is flushed to the uSD before physically removing it from the reader.
+# Insert the uSD to your FreeRunner, and boot from '''[[Booting_the_Neo_FreeRunner#Log_into_U-Boot_in_the_NOR_Flash|NOR-U-Boot]]''' and select the "Boot from uSD" option,
+# See the boot and flashing process happen, and wait until a green "d_o_n_e" message shows on screen (takes some 6min). You may can now remove bat and uSD, or login via ssh and use `mickeyterm` to access the modem and check the firmware version is indeed moko11.
+
+===NOTE===
+If you don't have a uSD reader on your PC, you can `dd` from neo: install task-base-smbfs, u(n)mount /media/card, mount the directory in which you have the "flash-moko11-2.image" file and do the dd stuff. This will take about 12 minutes.
+
+===NOTE 2===
+If you have [[Qi]] installed ((no, *always*, see above!)) as your boot loader, power up to the NoR menu (Hold AUX Key, press Power button) and select Boot from SD (fat/ext2) to begin the installation process (per DocScrutinizer in #openmoko). '''Do not''' let Qi boot the uSD. Although it still seems to flash OK, the green "d_o_n_e" does not show up, to give you the warm feeling that everything is OK.
+
+You can confirm the firmware version number using the [[OpenmokoFramework/mickeyterm|mickeyterm]] (cmd: "AT+CGMR"). In SHR-Settings, Phone/Modem Information will supply the same number.
+
+
+== Manual Update (GTA01, GTA02) / geek way ==
 We recommend you don't update by following this procedure, unless you feel very comfortable with commandline. Don't miss-spell any FLUID command!
 
 According to mwester, this worked for him to update from MOKO1 on a GTA01Bv4 to MOKO10b2, by following the steps described herein (if the main firmware can't be started, see troubleshooting section for additional instructions).
@@ -182,28 +206,6 @@ I recently had to do a special process to recover my GTA01bv4 after breaking the
 
 After this, the flashing proceeded as expected. You don't need to do any special checks to ensure you have successfully flashed; if fluid reports everything is ok, it is actually ok.
 
-== uSD-card Image (GTA02 only)==
-'''We recommend to update all devices by using this uSD-image for flashing MOKO11 to GTA02 Freerunner only (not suitable for GTA01 Neo1973).'''<br>
-This works by starting the FreeRunner from a system installed on the uSD, which will automatically apply all needed instructions to flash the GSM firmware to the chip. The uSD image will have to be written on a uSD, which will overwrite all its content, so as to make sure it is repartitioned correctly and that it contains the correct bootable system.
-The procedure has proven to do a reliable job on flashing MOKO11 to GTA02. Chances anything fails are minimal if you _strictly_ follow the instructions. There's no way to do any harm to your device by using this method.
- 
-'''Take special care though about the destination of `dd`, it has to be the *physical* device (e.g. foo0) of your uSD-card, *not* any partition (e.g. foo0p1). Also make sure there are *no* mounted partitions left on the uSD when starting `dd`!'''<br>
-''Triple-check you are not accidentally overwriting your system-HD, by e.g using /dev/sda instead of /dev/sdc! Double-check once more! This is the one-typo-kills-system case ;-) You've been warned.''
-
-# Download and ''untar'' http://people.openmoko.org/joerg/calypso_moko_FW/moko11/flash-moko11_uSD-image.tar.gz on your desktop computer. Read the "README.txt" file that came with the tarball.
-# Insert a uSD to your computer's reader, and unmount all uSD-partitions that might have been automounted (use `mount` or `df -h` to check). Do not use "safely remove" for this.
-# use `dd` to write the image "flash-moko11-2.image" to the '''physical(!)''' uSD-device (this will erase all data from your uSD, including previous partition table and partitions! ''It will as well erase all data from your computer's HD, in case you accidentally `dd` to this device instead of uSD''). Use sudo or root-terminal to get root privileges needed to write to the uSD card
-# `Sync` or `eject <device>` to make sure everything is flushed to the uSD before physically removing it from the reader.
-# Insert the uSD to your FreeRunner, and boot from '''[[Booting_the_Neo_FreeRunner#Log_into_U-Boot_in_the_NOR_Flash|NOR-U-Boot]]''' and select the "Boot from uSD" option,
-# See the boot and flashing process happen, and wait until a green "d_o_n_e" message shows on screen (takes some 6min). You may can now remove bat and uSD, or login via ssh and use `mickeyterm` to access the modem and check the firmware version is indeed moko11.
-
-===NOTE===
-If you don't have a uSD reader on your PC, you can `dd` from neo: install task-base-smbfs, u(n)mount /media/card, mount the directory in which you have the "flash-moko11-2.image" file and do the dd stuff. This will take about 12 minutes.
-
-===NOTE 2===
-If you have [[Qi]] installed ((no, *always*, see above!)) as your boot loader, power up to the NoR menu (Hold AUX Key, press Power button) and select Boot from SD (fat/ext2) to begin the installation process (per DocScrutinizer in #openmoko). '''Do not''' let Qi boot the uSD. Although it still seems to flash OK, the green "d_o_n_e" does not show up, to give you the warm feeling that everything is OK.
-
-You can confirm the firmware version number using the [[OpenmokoFramework/mickeyterm|mickeyterm]] (cmd: "AT+CGMR"). In SHR-Settings, Phone/Modem Information will supply the same number.
 
 [[Category:GSM]]
 [[Category:GSM]]
