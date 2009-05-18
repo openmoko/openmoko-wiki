@@ -104,15 +104,11 @@ The disadvantage of this speedup is that you won't see any lifesign of your phon
 Qi will try to mount each SD partition as ext2 / 3, if that succeeds it will look for the kernel as /boot/uImage-GTA02.bin.  If that is found, it'll be fetched, its CRC is checked and then it's booted into with a generated kernel commandline.
 
 ===Kernel Commandline Generation===
-[[image:Qi-commandline-composition.png‎|frame|Qi commandline composition]]
-Because Qi has no private stored state, it infers and composes a suitable kernel commandline on each boot.
+[[image:Qi-commandline-composition.png‎|frame|Qi commandline composition]] Because Qi has no private stored state, it infers and composes a suitable kernel commandline on each boot.
 
-One of its tasks is to scan NAND memory using the U-Boot dynparts rules to determine the start offset
-of the NAND partitions on this device, from that it forms the mtdparts kernel parameter that sets Linux's
-view of NAND partitioning.
+One of its tasks is to scan NAND memory using the U-Boot dynparts rules to determine the start offset of the NAND partitions on this device, from that it forms the mtdparts kernel parameter that sets Linux's view of NAND partitioning.
 
-The other thing it does is mount the "identity" partition and get from there the globally unique MAC
-address for the USB over Ethernet function instead of the random one that is otherwise used.
+The other thing it does is mount the "identity" partition and get from there the globally unique MAC address for the USB over Ethernet function instead of the random one that is otherwise used (If this doesn't work (like with a GTA01) you may use kernel-commandline parameters g_ether.dev_addr= and g_ether.host_addr= for the mac in device and host mode of the usb-ether module).
 
 ===LED and Vibrator Signals===
 * AUX LED is turned on either on:
