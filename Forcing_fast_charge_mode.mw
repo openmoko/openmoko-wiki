@@ -8,9 +8,17 @@ If the Neo recognizes the connection as a "smart" USB connection (by communicati
 
 The detection logic is done in software, one can bypass it. If the [[USB charger]] used is not signaling the phone its capacity to deliver 500 or 1000 mA, then one may use these scripts to force fast charge mode anyway. Please double check. Trying to draw 1A from an electric system rated lower will lead to overheating and physical damage.
 
+== OM2009 & Freerunner ==
+
+ echo 500 >$(find /sys/class -name usb_curlim)
+to charge 500mA (currently echoes it to /sys/class/i2c-adapter/i2c-0/0-0073/pcf50633-mbc/usb_curlim)
+
+ cat /sys/class/power_supply/battery/status
+to check the status
+
 == Neo FreeRunner ==
 
-The behaviour is pretty much the same as described below for the Neo 1973. There's also a 1000 mA mode for the Openmoko-provided wall charger. Please note, that the sys-fs path changed slightly. It is now /sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/
+The behaviour is pretty much the same as described below for the Neo 1973. There's also a 1000 mA mode for the Openmoko-provided wall charger. Please note, that the sys-fs path changed slightly. 
 .
 
 See 
@@ -20,6 +28,8 @@ See
  cat /sys/class/i2c-adapter/i2c-0/0-0073/usb_curlim
 
 === The battery package ===
+'''THE /SYS PATHS NEED TO BE UPDATED FOR RECENT DISTRIBUTIONS'''
+
 Here's a nicely packaged battery level and charge state script:
 
 * Package: http://hdr.meetr.de/neo/openmoko/battery/battery_0.20080721_armv4t.ipk
@@ -39,6 +49,8 @@ and replace the ''init'' call by ''_init'', that is add an underscore.
 
 === Nytowl's power center ===
 
+'''THE /SYS PATHS NEED TO BE UPDATED FOR RECENT DISTRIBUTIONS'''
+
 [[User:Nytowl]] wrote a python script to control the fast charge states : ''Power Center''.  
 
 Power Center allows you to force a Neo FreeRunner into Fast charge modes. It can damage your hardware so be careful with what its plugged into. I'm not responsible if you toast the USB port on your brand new laptop.
@@ -52,6 +64,7 @@ To enable fast 500 mA charge "touch /home/root/allow_force_500"
 To enable fast 1000 mA charge "touch /home/root/allow_force_1000" I don't recommend using this one 
 
 === Beni's fast_charge_gta02.sh ===
+'''THE /SYS PATHS NEED TO BE UPDATED FOR RECENT DISTRIBUTIONS'''
 
 [[Special:Emailuser/Beni|Beni]] wrote a small shellscript providing status output and the ability to change charge settings. Just download the script and execute it. You can fetch it here: http://beni.skyforcesystems.de/openmoko/fast_charge_gta02.sh
 
