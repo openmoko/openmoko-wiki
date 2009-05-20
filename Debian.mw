@@ -67,6 +67,33 @@ interface = dbus.Interface(proxy, 'org.freedesktop.Gypsy.Time');
 subprocess.call(['date',time.strftime( '%m%d%H%M%Y.%S', time.localtime(interface.GetTime()))])
 </pre>
 
+If you want to synchronize the internal clock with GPS time and use the program gpsd, you can use this script, also you can use it on another computer to synchronize the time. This script synchronize the hardware clock too. Use it like: "program.rb host port" or change the ARGV[0] and ARGV[1] vars.
+<pre>
+#!/usr/bin/env ruby
+
+require 'socket'
+
+if ARGV.size == 0
+	ARGV[0]="localhost"
+	ARGV[1]="2947"
+end
+
+		@gpsserver = TCPSocket.open(ARGV[0],ARGV[1])
+		sleep(0.1)
+		@gpsserver.puts "r"
+		result = ""
+		while result[0,6] != "$GPZDA"
+			result = @gpsserver.gets
+		end
+		if result[7,1] != ","
+			# Software clock
+			system("date -u #{result[20,2]}#{result[17,2]}#{result[7,2]}#{result[9,2]}#{result[23,4]}")
+			# Hardware clock
+			system("hwclock --set --date=\"#{result[23,4]}-#{result[20,2]}-#{result[17,2]} #{result[7,2]}:#{result[9,2]}:#{result[11,2]}\"")
+		end
+		@gpsserver.close
+</pre>
+
 == Wifi ==
 === Using GUI ===
 
