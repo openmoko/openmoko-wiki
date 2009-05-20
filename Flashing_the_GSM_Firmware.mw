@@ -54,11 +54,15 @@ The procedure has proven to do a reliable job on flashing MOKO11 to GTA02. Chanc
 ===NOTE===
 If you don't have a uSD reader on your PC, you can `dd` from neo: install task-base-smbfs, u(n)mount /media/card, mount the directory in which you have the "flash-moko11-2.image" file and do the dd stuff. This will take about 12 minutes.
 
+You can speed this up by re-gziping just the image file and using the following command to decompress it directly to the flash card:
+ gzip -d < flash-moko11-2.image.gz | dd of=/dev/mmcblk0
+
+Using this gzip method, you can actually do the update with an in place image as long as it is shell enabled and has 92M free on the main file system (all but Android and Neovento right now).  Just get the 92M gzip file to the phone, use the above line to extract it to the card after unmounting.
+
 ===NOTE 2===
 If you have [[Qi]] installed ((no, *always*, see above!)) as your boot loader, power up to the NoR menu (Hold AUX Key, press Power button) and select Boot from SD (fat/ext2) to begin the installation process (per DocScrutinizer in #openmoko). '''Do not''' let Qi boot the uSD. Although it still seems to flash OK, the green "d_o_n_e" does not show up, to give you the warm feeling that everything is OK.
 
 You can confirm the firmware version number using the [[OpenmokoFramework/mickeyterm|mickeyterm]] (cmd: "AT+CGMR"). In SHR-Settings, Phone/Modem Information will supply the same number.
-
 
 == Manual Update (GTA01, GTA02) / geek way ==
 We recommend you don't update by following this procedure, unless you feel very comfortable with commandline. Don't miss-spell any FLUID command!
