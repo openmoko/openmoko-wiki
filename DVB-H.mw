@@ -1,0 +1,28 @@
+== DVB-H on the FreeRunner ==
+
+I have managed to get the Freerunner to reproduce MP4 video over DVB-H received by a Pinnacle nano stick.
+
+=== Steps to follow ===
+
+1.- Configure the Toolchain (http://wiki.openmoko.org/wiki/Toolchain)
+
+2.- Compile the kernel with DVB enabled (in .config CONFIG_DVB_CORE=y, CONFIG_DVB_USB_DIB0700=y) 
+    Because the dib0700 doesnt have PID filtering and the FR has USB1.1 you will have to remove the check in linux-2.6/drivers/media/dvb/dvb-usb/dvb-usb-init.c
+
+    so, comment the check
+
+                /*
+                if (d->udev->speed == USB_SPEED_FULL && !(adap->props.caps & DVB_USB_ADAP_HAS_PID_FILTER)) {
+                  err("This USB2.0 device cannot be run on a USB1.1 port. (it lacks a hardware PID filter)");
+                  return -ENODEV;
+                }
+                */
+
+
+3.- Get DVB utils (the Hackable1 .deb works fine)
+
+4.- Compile Mplayer with Live555.
+
+5.- Follow the instructions here http://dvbh.kilu.de/ to set the DVB iface
+
+6.- Play
