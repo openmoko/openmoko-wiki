@@ -1,187 +1,72 @@
-== Setting up paroli WITH a FreeRunner ==
+To be able to test the latest paroli directly on the phone, the simplest method to 
+mount the local paroli source via nfs. Maybe sshfs works too. Need somebody to 
+document sshfs way.
 
-This section describes how to set things up to run the latest paroli on your phone, or to develop applications and/or settings modules for paroli.
-
-The general process is to get the latest paroli sources onto your phone.  If you are running OM2009, or another distro with paroli already included you can install paroli in a parallel directory.
-
-The recommended approach is to share a filesystem between the FR and your PC.  This allows you to run git and to edit files on your PC, rather than on the FR.   You can do this in several ways - the two ways described here are:
-* use sshfs to mount your FR's filesystem on your PC
-* use nfs to mount your PC's filesystem on your FR
-
-Once you have a shared filesystem, you'll need to use git to get a copy of the latest paroli sources.   If you are looking to develop applications or settings modules for Paroli, you can do them in that source.  Once you are done you'll need to rebuild paroli by running build.sh on the FR.
-
-Some simple projects to help learn about Paroli can be found at [[Paroli-issues#Low_hanging_fruits_to_start_developing_Paroli_with]]
-
-
-=== Link filesystem of the freerunner to your computer ===
-==== Link filesystem of the freerunner to your computer with SSHFS  ====
-* Install sshfs to your computer
-* add your user on this computer to the group fuse
-* Create a dir where you want link the Freerunner to.
- mkdir ~/myFreerunner 
-* Finally link the phone filesystem to your local folder
- sshfs root@192.168.0.202:/ ~/myFreerunner
-
-==== Link filesystem of the freerunner to your computer with NFS  ====
- sudo apt-get install nfs-kernel-server
-
-The /etc/exports file:
- /home/[username]/[path to paroli] 192.168.0.202(rw,sync,no_subtree_check,anonuid=0,anongid=0)
-
-Restart the nfs server:
- /etc/init.d/nfs-kernel-server restart
-
-=== Making connection with the phone ===
-
-* usb networking:
- sudo ip address add 192.168.0.200/24 dev usb0
-
-* ssh in:
- ssh root@192.168.0.202
-
-
-=== Mounting local dir from the phone ===
- mkdir /usr/share/nfs-paroli
- mount -t nfs 192.168.0.200:/home/[username]/[path to paroli] /usr/share/nfs-paroli
-
-=== Compiling the theme ===
- cd /usr/share/nfs-paroli/paroli-applications; ./build.sh
-
-
-=== Running paroli ===
-
-* cd into paroli dir:
- cd /usr/share/nfs-paroli/paroli-scripts
-
-* Set the paroli in testing mode, if you want to start it faster (no sim registration)
-
-Uncomment the line 10 of paroli-scipts/paroli.cfg for testing mode 
-(or comment it for real world mode if you want to call, sms)
-
-Testing mode:
-  [services]
-  defaults = SIM:Test, SMS:Test, GSM:Test, Audio:Test, Gprs:Test,
-
-Real mode:
-  [services]
-  #defaults = SIM:Test, SMS:Test, GSM:Test, Audio:Test, Gprs:Test,
-
-* Launch paroli
- ./paroli-launcher.sh
-
-=== Frequently asked question about nfs ===
-
-==== Can I map the phone's UID(root) with my local UID (notebookuser=1000)? ====
-
-Sadly '''NO'''. There were a map_static option, but it was removed in nfs-kernel-server.
-Here is a '''5''' year old bugreport about this issue:
-https://bugzilla.redhat.com/show_bug.cgi?id=130261
-
-==== Does anongid and anonuid impact the security? ====
-
-Certainly. It permits to anybody (on your local network) to be able create
-files with the remote uid. Root(uid=0) in our freerunner case.
-
-==== Shouldn't I add chmod go+w recursively to that mounted dir, to be able creating files? ====
-
-Yepp, this is the alternative to using anongid/anonuid in /etc/exports.
-
-
-=== Resources: ===
-==== NFS ====
+# Resources: 
 * http://czarism.com/easy-peasy-ubuntu-linux-nfs-file-sharing
 * http://mirror.unej.ac.id/site/blog/2009/05/02/sharing-folder-di-linux.html
 * http://www.linuxconfig.org/HowTo_configure_NFS
 
-==== Paroli Development ====
-* (slightly out of date tutorial): http://paroli-project.org/files/starter-kit.pdf with sample files at http://paroli-project.org/files/startup.tar
+# Setting up nfs on the local computer (laptop)
+{{{
+sudo apt-get install nfs-kernel-server
+}}}
 
-== Setting up Paroli WITHOUT a FreeRunner ==
+The /etc/exports file:
+{{{
+/home/[username]/[path to paroli] 192.168.0.202(rw,sync,no_subtree_check,anonuid=0,anongid=0)
+}}}
 
-Note: This guide is a bit ugly, and if you have better ideas and eg. document how to do everything non-root, feel free to fill in.
+Restart the nfs server:
+{{{
+/etc/init.d/nfs-kernel-server restart
+}}}
 
-=== E17 ===
+# Making connection with the phone
 
-Enlightenment 17 ([[E17]]) used by Paroli is a big bunch of code which is not readily packaged to most distributions (largely because no release is declared stable so it's a moving target). One script to help installing E17 is available at [http://omicron.homeip.net/projects/ omicron], Easy_e17.sh.
+usb networking:
+{{{
+sudo ip address add 192.168.0.200/24 dev usb0
+}}}
 
-Easy_e17 checks out and installs most of E17 automatically, under /opt/e17. If you dislike running random scripts from the web, check the script first before running. You can rerun it with "-u" to update or "-i" to try installing again if for example some dependencies were missing during the first run. If some compilation fails, check out the error message and install needed dependencies. It may get a few iterations of "-i" before you get to the finish without errors, so prepare to spend some time.
-
-Set up your environment to use the installed E17 with something like follows, putting the commands into eg. ~/paroli_environment.sh:
-<pre>
-export PATH=${PATH}:/opt/e17/bin
-export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/e17/lib
-export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/opt/e17/lib/pkgconfig
-export PYTHONPATH=${PYTHONPATH}:/usr/local/lib/python2.6/site-packages
-</pre>
-
-Easy_e17 does not seem to install Python bindings E17, but it does download them. By default you can find them in your home directory under ~/e17_src/BINDINGS/python. Those are required for Paroli. Install them with eg. ''sudo bash; . ~/paroli_environment.sh ; ./build-all.sh /usr/local''.
-
-=== Paroli ===
-
-Check out [http://www.paroli-project.org/running-paroli/ Paroli source code] from the git repository as usual.
-
-Paroli seems to require additional D-BUS rule. Type:
-<pre>
-cat << EOF | sudo tee /etc/dbus-1/system.d/org.tichy.launcher.conf
-
-<?xml version="1.0" encoding="UTF-8"?> <!-- -*- XML -*- -->
-
-<!DOCTYPE busconfig PUBLIC
- "-//freedesktop//DTD D-BUS Bus Configuration 1.0//EN"
- "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
-<busconfig>
-  <!-- Only polkituser can own the service -->
-  <policy user="root">
-    <allow own="org.tichy.launcher"/>
-  </policy>
-
-  <!-- any user can talk to the service -->
-  <policy context="default">
-    <allow send_destination="org.tichy.launcher"/>
-  </policy>
-</busconfig>
-</pre>
-<small>[End with Ctrl-D]</small>
-
-Restart D-Bus (or computer) with ''/etc/init.d/dbus restart''. Run ''build.sh'' under paroli-applications and then ''paroli'' under paroli-scripts.
-
-...XXX getting segmentation fault at the moment at this point, even though Paroli starts running, searching for contacts etc.
+ssh in:
+{{{
+ssh root@192.168.0.202
+}}}
 
 
-= Upgrading Paroli on a uSD card installation of OM2009 =
+# Mounting local dir from the phone
+{{{
+mount -t nfs 192.168.0.200:/home/[username]/[path to paroli] /usr/share/nfs-paroli 
+}}}
 
-In this development phase its more error prone just reflash the phone as updating the paroli .opk package because maybe other bugs are fixed outside of Paroli.
+# Compiling the theme
+{{{
+cd /usr/share/nfs-paroli/paroli-applications; ./build.sh
+}}}
 
-First you need to boot into NAND (where you have already a working distribution and you can ssh into). To be able to manipulate the sd card (you cant manipulate the sd card, if you booted from it).
+# Running paroli
+{{{
+cd /usr/share/nfs-paroli/paroli-scripts; ./paroli-launcher.sh
+}}}
 
-* Install Qi into NAND, and leave the factory installed uboot in NOR
-* Boot into NAND using the factory installed uboot from NOR. Press and hold AUX and press power until the uboot menu does not appear. Select the boot option by pressing the power button. I have SHR in NAND. Any distribution is fine as long as you can ssh in.
-* download latest paroli .tar.gz:
- http://downloads.openmoko.org/distro/unstable/NeoFreerunner/fso-paroli-image-om-gta02.tar.gz
- http://downloads.openmoko.org/distro/unstable/NeoFreerunner/uImage-2.6.28-stable+gitr0+f19f259d3c1afde8eae53983fd19f61831927413-r2-om-gta02.bin
-* Boot the phone into NAND
-* scp the .bin and .tar.gz to the phone's /home/root dir. You may need this command to be able to connect to the phone: 
- sudo ip address add 192.168.0.200/24 dev usb0
-* ssh into the phone:
- ssh root@192.168.0.202
-* Umount the sd partition, where you paroli was (for me it was the 2. partition)
- umount /media/mmcblk0p2/
-* recreate ext2 filesystem
- mkfs.ext2 /dev/mmcblk0p2 
-Note: It is better than erasing everything from the sd card. It does not stress your sd card unnecessary. The alternative method would be using rsync. Never figured it
-out myself the proper steps (using rsync and not formatting the partition)
-* Remount it
- mount /dev/mmcblk0p2 /media/mmcblk0p2/
-* Untar the fso-paroli...tar.gz into the sd card:
- cd /media/mmcblk0p2/
- gunzip </home/root/fso-paroli-image-om-gta02.tar.gz |tar -xvf -
-* copy the uImage over (assuming you have Qi into NAND):
- cd boot
- cp /home/root/uImage-2.6.28-stable\+gitr0\+f19f259d3c1afde8eae53983fd19f61831927413-r2-om-gta02.bin .
- ln -s uImage-2.6.28-stable\+gitr0\+f19f259d3c1afde8eae53983fd19f61831927413-r2-om-gta02.bin uImage-GTA02.bin
-* reboot
-* Have fun
+# Frequently asked question about nfs
 
+* Can I map the phone's UID(root) with my local UID (notebookuser=1000)
 
-[[Category:Paroli]]
-[[Category:Developer resources]]
+Sadly '''NO'''. There were a map_static option, but it was removed in nfs-kernel-server.
+Here is a '''5''' year old bugreport about this issue:
+  https://bugzilla.redhat.com/show_bug.cgi?id=130261
+
+* Does anongid and anonuid impact the security.
+
+Certainly. It permits to anybody (on your local network) to be able create
+files with the remote uid. Root(uid=0) in our freerunner case.
+
+* Shouldn't I add chmod go+w recursively to that mounted dir, to be able creating files?
+
+Yepp, this is the alternative to using anongid/anonuid in /etc/exports.
+
+* Is there an alternative to nfs?
+Yepp, sshfs would be the easiest. Need somebody to figure out the steps, and 
+update this doc.
