@@ -43,6 +43,29 @@ Restart the nfs server:
 === Running paroli ===
  cd /usr/share/nfs-paroli/paroli-scripts; ./paroli-launcher.sh
 
+=== Frequently asked question about nfs ===
+
+==== Can I map the phone's UID(root) with my local UID (notebookuser=1000)? ====
+
+Sadly '''NO'''. There were a map_static option, but it was removed in nfs-kernel-server.
+Here is a '''5''' year old bugreport about this issue:
+https://bugzilla.redhat.com/show_bug.cgi?id=130261
+
+==== Does anongid and anonuid impact the security? ====
+
+Certainly. It permits to anybody (on your local network) to be able create
+files with the remote uid. Root(uid=0) in our freerunner case.
+
+==== Shouldn't I add chmod go+w recursively to that mounted dir, to be able creating files? ====
+
+Yepp, this is the alternative to using anongid/anonuid in /etc/exports.
+
+==== Is there an alternative to nfs? ====
+  Yepp, sshfs would be the easiest. Need somebody to figure out the steps, and 
+  update this doc.
+
+
+
 == Setting up Paroli without a FreeRunner ==
 
 Note: This guide is a bit ugly, and if you have better ideas and eg. document how to do everything non-root, feel free to fill in.
@@ -93,24 +116,3 @@ cat << EOF | sudo tee /etc/dbus-1/system.d/org.tichy.launcher.conf
 Restart D-Bus (or computer) with ''/etc/init.d/dbus restart''. Run ''build.sh'' under paroli-applications and then ''paroli'' under paroli-scripts.
 
 ...XXX getting segmentation fault at the moment at this point, even though Paroli starts running, searching for contacts etc.
-
-== Frequently asked question about nfs ==
-
-=== Can I map the phone's UID(root) with my local UID (notebookuser=1000)? ===
-
-Sadly '''NO'''. There were a map_static option, but it was removed in nfs-kernel-server.
-Here is a '''5''' year old bugreport about this issue:
-https://bugzilla.redhat.com/show_bug.cgi?id=130261
-
-=== Does anongid and anonuid impact the security? ===
-
-Certainly. It permits to anybody (on your local network) to be able create
-files with the remote uid. Root(uid=0) in our freerunner case.
-
-=== Shouldn't I add chmod go+w recursively to that mounted dir, to be able creating files? ===
-
-Yepp, this is the alternative to using anongid/anonuid in /etc/exports.
-
-=== Is there an alternative to nfs? ===
-  Yepp, sshfs would be the easiest. Need somebody to figure out the steps, and 
-  update this doc.
