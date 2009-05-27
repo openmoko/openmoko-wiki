@@ -1,12 +1,9 @@
-{{Warning|
-As long as there are no Qt 4.5 sources for arm this doesn't work on distributions shipping with Qt4.5 e.g. K/Ubuntu 9.04 (Jaunty Jackalope).
-}}
 == Introduction ==
 I created a project called "OpenMokoder" which should help to develop Qt4 projects for freerunner. You only need to copy your sourcecode or use the included sample project run the script and you can easy compile, debug, crosscompile, package your project with Trolltechs QtCreator. QtCreator is a very good lightweight Qt IDE with features like embedded Qt Designer, Code completion, debugging, svn, ...
 
 Note:
 *This tutorial is tested with SHR and FSO
-*The installation process is based on Kubuntu 8.10 (Intrepid)
+*The installation process is based on Kubuntu 8.10 (Jaunty)
 
 === 1. install Toolchain ===
 First of all you have to install the toolchain. If you have already done this skip this step. I will just give a summary of how to do that for copy paste the detailed information can be found at [[Toolchain]]
@@ -48,9 +45,9 @@ or
  opkg-target update
  opkg-target install libpng12-0 libpng12-dev libgcc1 libglib-2.0-0 libgmodule-2.0-0 libgobject-2.0-0 libgthread-2.0-0 libpng-dev libpng3  libxrender-dev libxrender1 libxrandr-dev libxrandr2 libfontconfig-dev libfontconfig1 
 
-* Add SHR Repo and QT4 libs  to toolchain
+* Add Angström Repo and QT4.5 libs  to toolchain
  echo arch base 50 >> /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/etc/opkg.conf
- echo src/gz base http://build.shr-project.org/shr-unstable/ipk/armv4t >>/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/etc/opkg.conf
+ echo src/gz base http://www.angstrom-distribution.org/feeds/unstable/ipk/glibc/armv4t/base/ >>/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/etc/opkg.conf
  opkg-target update
 
  opkg-target install libgcc1 libglib-2.0-0 libgmodule-2.0-0 libgobject-2.0-0 libgthread-2.0-0 libpng12-0 
@@ -64,20 +61,20 @@ or
 
 === 3. configure Freerunner ===
 
-==== SHR ====
-# SHR has Qt libs in the feeds you only need to install
- opkg install qt4-x11-free
-
 ==== If Qt libs are not in the feeds ====
 You shlould install the libs like this without adding the angstrom repository,  
 cause if you install the whole qt4-x11-free it installs dependencies which are 
-not compatible and the Freerunner doesn't boot anymore.
+not compatible and the Freerunner doesn't boot anymore. You may need more Qt4
+libs, you can imstall them the same way. The Filenames and version numbers may 
+change, if opkg cannot find the packages check filenames manualy at
+http://www.angstrom-distribution.org/feeds/unstable/ipk/glibc/armv4t/base/
+and correct the filenames in the wiki here.
 
- opkg -force-depends install  http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqtgui4_4.4.3-r4.1_armv4t.ipk
- opkg -force-depends install  http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqtcore4_4.4.3-r4.1_armv4t.ipk
- opkg -force-depends install  http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqtdbus4_4.4.3-r4.1_armv4t.ipk
- opkg -force-depends install  http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqtxml4_4.4.3-r4.1_armv4t.ipk
- opkg -force-depends install  http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/libqttest4_4.4.3-r4.1_armv4t.ipk
+ opkg -force-depends install  http://www.angstrom-distribution.org/feeds/unstable/ipk/glibc/armv4t/base/libqtgui4_4.5.1-r0.2_armv4t.ipk
+ opkg -force-depends install  http://www.angstrom-distribution.org/feeds/unstable/ipk/glibc/armv4t/base/libqtcore4_4.5.1-r0.2_armv4t.ipk
+ opkg -force-depends install  http://www.angstrom-distribution.org/feeds/unstable/ipk/glibc/armv4t/base/libqtdbus4_4.5.1-r0.2_armv4t.ipk
+ opkg -force-depends install  http://www.angstrom-distribution.org/feeds/unstable/ipk/glibc/armv4t/base/libqtxml4_4.5.1-r0.2_armv4t.ipk
+ opkg -force-depends install  http://www.angstrom-distribution.org/feeds/unstable/ipk/glibc/armv4t/base/libqttest4_4.5.1-r0.2_armv4t.ipk
 
 === 4. install QTCreator ===
 
