@@ -1,0 +1,115 @@
+{{Languages|Om 2009}}
+[[Image:Paroli.png|thumb|Uno Screenshot di Paroli, l'applicazione GSM di OM2009]]
+""Om 2009"" è la futura versione della distribuzione ufficiale Openmoko. E' in sviluppo e dovrebbe essere pubblicata nell'esate 2009 per rimpiazzare [[Om 2008]].
+Sarà basata sul [[FSO|freesmartphone.org]] milestone 5.5 framework e utilizza [[Paroli]] come software GSM.
+
+===Caratteristiche===
+
+Qui sotto c'è la lista delle caratteristiche di Om 2009. Sono tutte sotto sviluppo e devono ancora essere sottoposte a test, e alcune hanno bisogno di essere completate. Molte delle caratteristiche derivano proprio dal progetto [[Paroli]].
+
+==== Implementazioni ====
+
+* chiamate in uscita ed in entrata
+* sms in uscita e in entrata
+* una semplice rubrica(?) (phone book) senza immagini
+* registro chiamate
+*carica
+* stand by 
+* velocità di uscita dallo stand by < 2 s 
+* indicatore batteria- funziona con la batteria del gta02
+* indicatore gsm
+* wifi GUI
+* Profili
+* gestione del volume delle chiamate in arrivo
+* setting tool
+
+==== Not Yet Implemented or Broken ====
+
+* boot time < 2 minutes - currently examining ways to speed this up
+** install udev-static devices - caveat you lose bind-home
+** use readahead to cache python dirs before starting framework and paroli
+** use readahead to cache dirs for X
+** remove uneeded startup programs ( ie portmap )
+** prime GSM during init for paroli's use
+* screen lock
+** currently X screen saver is used during screen blank
+* user changeable ring tones - works via command line
+* bluetooth - support in FSO milestone 5.5, needs GUI
+* led indication for missed calls or sms
+* GTA01: battery indicator doesn't work for gta01 battery
+
+==== Bug List and Known Issues ====
+
+* gsm0710muxd: "Modem does not respond to AT commands" [http://docs.openmoko.org/trac/ticket/2257 #2257]
+* oeventsd rules ignored [http://trac.freesmartphone.org/ticket/381 FSO #381]
+* After some received call or sms, the phone does not suspend anymore [http://trac.freesmartphone.org/ticket/435 FSO #435]
+* Problem at Display->Profile: can't get back to illume, and illume, paroli or paroli-illume all look exactly the same
+** WORKAROUND: Reboot. The first time it boots there is a problem but it's OK after that. If not, let it run for a few hours and then try to launch illume.
+
+== Installing ==
+
+* If you've not updated your GSM chip firmware, it's Moko8 and REALLY needs to be updated. See [[GSM/Flashing#uSD-card_Image_.28GTA02_only.29|GSM flashing]]
+* Also update to the latest versions of [[qi]] or [[Bootloader|uboot]] bootloaders
+* You can add a bind-home directory to the first partition (must be ext2 or ext3 ) of your SD card. On the OM2009 boot it will be mounted as /home/root. This way you can reflash your phone without losing anything in your home directory ( [[Paroli]] contacts and settings, maps, etc )
+
+The latest OM2009 and qi/uboot images are available at http://downloads.openmoko.org/distro/testing/
+
+Installing OM2009 is simple as flashing an image. Actually that's what you need to do.. 
+
+# Download! You need the correct fso-paroli-image and uImage.bin files for your device. There are also rootfs tarballs for installing onto an SD card. [http://downloads.openmoko.org/distro/testing/NeoFreerunner Freerunner] or [http://downloads.openmoko.org/distro/testing/Neo1973 Neo1973]
+# Flash! Detailed instructions for [[Flashing_the_Neo_Freerunner|Freerunner]] and [[Flashing_the_Neo_1973|Neo1973]].
+# Start! The image will boot into fullscreen Paroli and all of the features listed above will be available. To learn more about Paroli, see [[Paroli]]
+
+== Using OM2009 ==
+'''Write your best tips here!!'''
+* To learn to use Paroli, the phone software, go to [[Paroli#FAQ]]
+* To have log directory that isn't cleared when you reboot, the /var/log symlink needs to be turned into a directory:
+ rm /var/log
+ mkdir /var/log
+* To convert vcard -contacts, check http://www.mail-archive.com/support@lists.openmoko.org/msg04770.html
+
+== Development ==
+'' When we set the very limited goals of OM2009 we had two goals in mind:''
+ 
+''1. Give those members of the community who only wanted a daily phone, a distro they could use''<br>
+''2. Introduce technology that would allow the community to come together and improve on these basics'' 
+ 
+''Community interaction, open development and user driven decision making are at the core of Om2009. Going forward this will be an effort with the community for the community. I invite you to join the effort to make om2009 with paroli the best Om-labeled distribution for the Freerunner. ''
+
+'''How can you help?'''
+ 
+''Test the distro, let us know about bugs you find, or even fix them and send us patches.''
+ 
+''Tell us about your experiences using om2009, what should we change, where can we improve?''
+ 
+''Paroli has come a long way but it still needs a lot of love and optimizing, so if you are into python or efl, check out the code from git.paroli.org, join #paroli on irc and let's get crackin'. There are lots of things to do, opimd needs to be integrated and improved, the UI needs polishing, overall speed can be increased etc etc''
+ 
+''More into Chat and email? Feel like writing a jabber/irc/xxx or email client that really fits the screen? Or do you know of one? Let's hear about it. This device has a lot of potential and we are so close to reaching the far corners, the kernel is in good shape, the framework is doing great and telephony apps such as paroli or the shr suite are steadily improving.''
+ 
+''So, get your Freerunner in shape again. Flash it with a nice current distro and let it do what it was meant to do :)''
+ 
+''Let's make Om2009 a community product, something all of us can be proud of and say "we did this".''
+
+Mirko/Openmoko at http://lists.openmoko.org/pipermail/community/2009-May/048061.html)
+ 
+* [http://n2.nabble.com/Om2009-release-plan-tp2410042p2410042.html OM2009 release plan]
+
+* [[Om_2009_get_active]]
+* [[Paroli-issues]]
+
+* Paroli: http://www.paroli-project.org/ and [[Paroli]]
+* FSO: http://www.freesmartphone.org and [[OpenmokoFramework]]
+
+* BUILDS: [http://downloads.openmoko.org/distro/testing/ Testing] and [http://downloads.openmoko.org/distro/unstable/ Daily/unstable]
+
+=== Reporting Bugs ===
+
+Please enable debugging as [[Om_2009#Using_OM2009|instructed above]]. Attaching frameworkd.log and paroli.log will aid in solving the bug. 
+
+Please search the bug list for you issue before adding it to trac. Some of these issues might be [[Paroli]] or FSO issue so you can also check their tracs for solutions or discussions.
+
+* https://docs.openmoko.org/trac (Use the Om2009 tag so that we can track it against this release.)
+* http://trac.freesmartphone.org/wiki
+* http://www.paroli-project.org/trac
+
+[[Category:Om 2009| ]]
