@@ -107,13 +107,29 @@ The above '''Problem:''' appears to be an issue with pasting too quickly.  Tryin
 
 == Installing Android on the Internal Flash ==
 
-Preparing the SD Card with two primary partitions is necessary for installing Android.
+=== Method 1: Koolu Automatic Installation ===
+{{Warning|This install process overwrites *everything* on the NAND in the phone, including the bootloader. If this is not what you would like to do, please use the manual installation instructions (next section) instead.}}
+[http://www.koolu.com/ Koolu] provides an automatic installation for Beta4 images and later. You can get them here:
 
-=== Preparing the SD Card ===
+    [http://freerunner.android.koolu.com/release-files Release files (Android FreeRunner)]
+
+The installation process is simple:
+# Unpack the files on to a FAT formatted SD card.
+# Insert card into the Freerunner, and boot from NOR menu (hold AUX key, then power)
+# Chose boot from SD Card (FAT and ext2)
+
+The automated install process should begin. It installs the Qi bootloader, reboots, the kernel, reboots, then the system image.
+
+
+=== Method 2: Manual Installation (Koolu or other images) ===
+
+Preparing the SD Card with two primary partitions is necessary for manually installing Android.
+
+==== Preparing the SD Card ====
 
 The Micro SD Card in your FreeRunner needs to be configured with two 2 primary partitions before Android will boot. First a VFAT/MSDOS (16 or 32) which acts as the '/sdcard' storage area (for pictures, movies, music, etc). Second an ext3 primary partition which Android uses as '/data' with in which it stores settings, caches, etc.
 
-==== On Linux ====
+===== On Linux =====
 
 Insert the Micro SD Card from your FreeRunner into your Linux desktop then bring up a Terminal and type
 
@@ -147,7 +163,7 @@ Then format like this:
 That's it, you can now remove the SD card from your desktop. If you re-insert it you will have two new usb disk devices.
 {{Note|After Android has booted you will only be able to access the 'data' partition as root.}}There is no need to populate the ext3 partition at all. The VFAT partition can be populated with media content (ring tones etc.) if you so desire. {{Note|It can be worth reformatting the data partition when you upgrade the Android OS on your phone. Old settings can result in problems, wifi for example. But remember that formatting the Data partition will result in your preferences, text messages and contacts etc. being erased.}}
 
-==== On FreeRunner (2008.x) ====
+===== On FreeRunner (2008.x) =====
 
 The SD card can be formatted from within an existing 2008.x installation on your FreeRunner.
 SSH as root into the FreeRunner and use 'fdisk' to partition the device.
@@ -175,11 +191,11 @@ NOTE: In case you are unable to format the partitions because they are already m
 
 Then kill all the processes that were using the card and try formatting again.
 
-==== On other OS's ====
+===== On other OS's =====
 
 There are no open source or free partition editors on Windows or Mac that can manage an ext3 partition. If you do not have Linux installed you can use the [http://gparted.sourceforge.net/ GParted] bootable CD. This CD will boot into a graphical environment with which you can partition your SD Card. You may have to boot with the SD Card inserted for GParted to recognize it as a drive.
 
-=== Downloading Android Images ===
+==== Downloading Android Images ====
 
 Next, Grab yourself the latest Android images. There are two parts you need to flash, the kernel (uImage*.bin) and the root fs (android*.jffs2). [http://www.koolu.com/ Koolu] release images and you can get them here:
 
@@ -199,9 +215,9 @@ Sean McNeil has placed an older 2.6.26 kernel and root fs at:
 
 For Sean McNeil's images the size of uImage > 2.0MB, so you need to update Bootloader uboot or use [[Qi]].
 
-=== Flashing the FreeRunner ===
+==== Flashing the FreeRunner ====
 
-==== On Linux ====
+===== On Linux =====
 
 To flash your FreeRunner, replace what ever phone stack you have on there at the moment with Android, first download [http://wiki.openmoko.org/wiki/Dfu-util dfu-util], this is the program that will flash your phone.
 
@@ -215,7 +231,7 @@ Plug your FreeRunner into a USB port and boot it into the nand boot loader; Hold
 
 Choose one of the following images from (A) Koolu or from (B) Michael Trimarchi.
 
-==== (A) Flashing with the Koolu Images====
+===== (A) Flashing with the Koolu Images=====
 If you flash the freerunner with a kernel image from Koolu, then you must enable u-boot to boot kernel greater than 2MB. If you have done that or you have [[Qi]] installed then proceed with flashing the kernel or use the automated Koolu installation just by putting the images on FAT formated SD-Card and boot from the SD card.  
 
 If you want to flash the kernel image (you will need to be root) with this command:
@@ -228,7 +244,7 @@ and finally the root fs with this one:
 
 If your u-Boot is not configured to handle a 2MB kernel that install the following images of Michael Trimarchi
 
-====(B) Flashing with the  Michael Trimarchi's Images====
+=====(B) Flashing with the  Michael Trimarchi's Images=====
 If you have decided to install Michael Trimarchi's Images you have flash the kernel image (you will need to be root) with this command:
 
     # dfu-util -a kernel -R -D uImage-v17.bin
@@ -239,7 +255,7 @@ and finally the root fs with this one:
 
 See also http://www.newlc.com/en/freerunner-mobile-which-support-android-cupcake for older instructions relating to these.
 
-====DFU-UTIL problems====
+=====DFU-UTIL problems=====
 {{Note|The './' part assumes you are using the binary download and that it was downloaded to the same place as your images. If you are, remember to make the dfu-util binary executable.}}If you find that dfu-util complains about there being more than one USB device available it might be because you have a webcam or some other device plugged in. If you can not remove the other device follow this procedure:
 
 Unplug your FreeRunner and run the command
