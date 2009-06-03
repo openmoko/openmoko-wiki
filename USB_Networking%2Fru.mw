@@ -1,0 +1,917 @@
+{{Languages|USB_Networking}}
+
+{|align=left
+|__TOC__
+|}
+
+= Настройка соединения с Openmoko =
+
+Для того, чтобы связаться с вашим FreeRunner по TCP/IP, нужно понимать, что для этого потребуется. Стороны соединения USB образуют сегмент локальной сети (LAN segment), в котором одним узлом является смартфон, а другим&nbsp;&mdash; ваша настольная машина или ноутбук (будем называть её ПК).
+
+Примем как данность, что ваш ПК имеет настроенное соединение с интернетом, так что на ней тем или иным образом (статически или динамически, посредством DHCP) задан IP-адрес шлюза. Для того, чтобы выход в интернет появился на вашем Freerunner, нужно настроить на ПК маршрутизацию пакетов и маскарадинг.
+
+Как правило, маршрутизация и маскарадинг настраиваются легко, однако если окажется, что подсеть между смартфоном и ПК пересекается с подсетью, в которой находится шлюз, могут возникнуть проблемы, поскольку ПК, скорее всего, не догадается, как правильно перенаправлять пакеты.
+
+Другими словами, если ваши ПК и шлюз имеют IP-адреса вида 192.168.0.Х, то изменение их на что-нибудь вроде 192.168.1.Х избавит вас от множества проблем. Этот вопрос подробно обсуждается в [http://lists.openmoko.org/pipermail/support/2008-August/thread.html#1277 рассылке].
+
+== О чём следует помнить ==
+
+* Когда FreeRunner переходит в ждущий режим, он отключает свой сетевой интерфейс USB. Следовательно, если вы работаете с устройством через USB&nbsp;&mdash; выключите автоматический переход в ждущий режим. Это можно сделать вручную; кроме того, на [https://wiki.muc.ccc.de/openmoko веб-сайте клуба ССС] вы найдёте два скрипта, которые делают это при подключении внешнего источника питания ([https://wiki.muc.ccc.de/openmoko#disable_suspend_if_on_external_power для Om 2007] и [https://wiki.muc.ccc.de/openmoko#disable_suspend_if_on_external_power1 для Om 2008]).
+
+* Некоторые скрипты выполняют tail-grep на файлах журналов. Если syslog и/или klog отключены, то у вас могут быть проблемы с определением, подключено ли устройство к вашему ПК. Если такая проблема есть, убедитесь, что службы журналирования работают (для Debian и Ubuntu это можно сделать командами /etc/init.d/klogd restart; /etc/init.d/sysklog restart).
+
+== &laquo;usb0&raquo; или &laquo;eth1&raquo;? ==
+
+В данном руководстве мы предполагаем, что имя сетевого интерфейса на ПК&nbsp;&mdash; &laquo;usb0&raquo;. Тем не менее, это имя определяется операционной системой вашего ПК, и многие системы назовут этот интерфейс, руководствуясь MAC-адресом смартфона. Выполните ifconfig -a или dmesg, чтобы увидеть список всех сетевых интерфейсов или просмотреть вывод ядра ОС&nbsp;&mdash; в обоих случаях вы увидите, как называется интерфейс, если он вообще был создан. Если имя отличается от &laquo;usb0&raquo;, то оно почти наверняка будет следующим доступным &laquo;eth''N''&raquo;.
+
+Везде, где ниже мы упоминаем интерфейс &laquo;usb0&raquo;, замените его то имя, которое ваша система присвоила интерфейсу.
+
+Для интересующихся технической стороной, имя &laquo;usb0&raquo; выбирается системой в случае, если MAC-адрес устройства является локально сгенерированным (случайным), поскольку если адрес случаен, то возможность управления интерфейсом при помощи соответствующих инструментов оказывается под вопросом. На самом деле, смартфонам Freerunner при изготовлении назначаются MAC-адреса, в том числе и для USB-интерфейса. Если эти адреса правильно используются смартфоном (так делают Qi bootloader и некоторые дистрибутивы, но не все), то ОС вашего ПК получает официальный MAC-адрес и создаёт &laquo;постоянный&raquo; сетевой интерфейс, которому принято давать имя вида &laquo;eth''N''&raquo;. Однажды выданное имя запоминается и в дальнейшем используется только для этого устройства, что особенно удобно, если у вас несколько устройств, для которых вы настраиваете сетевые соединения через USB.
+
+На момент написания этой статьи (оригинальной англоязычной&nbsp;&mdash; прим. phantom) официальный MAC-адрес корректно передавали дистрибутивы Android и SHR.
+
+= Простая настройка вручную на Linux =
+
+Для начала попробуйте этот способ. Если он сработает, вы сможете сохранить настройку или попробовать более сложные способы, описанные ниже.
+
+Вам потребуются привилегии суперпользователя. Включите смартфон в обычном режиме и подключите его к USB-интерфейсу вашего ПК.
+
+=== Кратчайший путь ===
+
+Этот простой способ был испытан на множестве Linux-систем (Fedora, SuSE, Red Hat, Debian и др.) и сетевых конфигураций. Более того, он сработал при подключении к другим КПК под управлением Linux (типа TDS Nomad), так что мы с уверенность рекомендуем его для первой попытки. Мы предполагаем, что на вашем ПК работает достаточно свежий дистрибутив, имеющий поддержку сетевых соединений через USB, и что ваша сетевая конфигурация более или менее стандартна.
+
+Выполните от имени суперпользователя настройку интерфейса usb0:
+<pre>
+sudo ip address add 192.168.0.200/24 dev usb0
+</pre>
+или (устаревшее)
+<pre>
+sudo ifconfig usb0 192.168.0.200 netmask 255.255.255.0
+</pre>
+
+Если ваш интерфейс eth0 находится в том же диапазоне IP-адресов (например, 192.168.0.105), сделайте следующее:
+
+1. Проверьте, что до смартфона доходят пакеты:
+ # ping -I usb0 192.168.0.202
+2. Войдите в консоль смартфона (для этого суперпользователь не нужен):
+ # ssh root@192.168.0.202
+Пароль суперпользователя на смартфоне по умолчанию пуст.
+
+Не забудьте, что для того, чтобы соединиться с устройством по SSH, нужно, чтобы на вашем локальном межсетевом экране (firewall) был разрешён порт 22. Если вы подозреваете, что соединиться с устройством не удаётся из-за работающего экрана, попробуйте физически отключить внешний Ethernet-кабель, после чего временно выключить межсетевой экран.
+
+Кроме того, некоторые старые или специфически настроенные системы могут не иметь поддержки сетевых соединений через USB. В таком случае необходимо обновить систему и добавить соответствующие модули.
+
+=== Более продвинутый путь ===
+
+Если описанный выше простой способ не сработал, попробуйте следующий, более сложный.
+
+<pre>iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
+sysctl -w net.ipv4.ip_forward=1
+ip addr add 192.168.0.200/24 dev usb0</pre>
+
+Если ваше соединение с интернетом использует IP-адрес в той же подсети (192.168.0.Х), попробуйте вместо этого следующее:
+
+<pre>ip addr add 192.168.0.200/28 dev usb0</pre>
+
+Такая команда направит пакеты с адресов в диапазоне от 192.168.0.192 до 192.168.0.207 на интерфейс usb0. Если вы видите сообщение об ошибке 'Cannot find device "usb0"', проверьте, что смартфон включён и присоединён к USB-интерфейсу вашего ПК; если с этим всё в порядке, попробуйте отсоединить и присоединить USB-кабель.
+
+Далее, вам следует включить ARP-прокси для внешнего интерфейса ВМЕСТО того, чтобы применять iptables:
+
+<pre>sysctl net.ipv4.conf.eth2.proxy_arp=1</pre>
+
+Команда дана для случая, когда внешний интерфейс&nbsp;&mdash; eth2.
+
+После этого:
+<pre>ip link set usb0 up</pre>
+или (устаревшее)
+<pre>ifconfig usb0 up</pre>
+
+И наконец (в идеале, не как суперпользователь):
+
+<pre>ssh root@192.168.0.202</pre>
+
+Пароль суперпользователя по умолчанию пуст.
+
+Поскольку в большинстве случаев смартфон будет использовать те же DNS-серверы, что и ПК, можно автоматизировать процесс конфигурирования::
+
+<pre>#!/bin/sh
+/sbin/route add -host 192.168.0.202/32 dev usb0
+iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
+iptables -P FORWARD ACCEPT
+sysctl -w net.ipv4.ip_forward=1
+scp /etc/resolv.conf root@192.168.0.202:/etc/resolv.conf</pre>
+
+Повторимся, если ваша сеть имеет адреса 192.168.0.Х, замените строку с правилом POSTROUTING следующим:
+<pre>iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/28</pre>
+
+Этот простой скрипт настроит маршрутизацию на вашем смартфоне и скопирует на него ваш resolv.conf. Всё, что вам нужно будет сделать, чтобы на смартфоне появился интернет&nbsp;&mdash; это соединить смартфон с ПК и выполнить этот скрипт.
+
+=== Изменение IP-адреса смартфона ===
+
+Как упоминалось выше, если подсеть, используемая смартфоном по умолчанию (192.168.0.X), уже используется, может потребоваться изменить IP-адрес и подсеть самого устройства. Для этого нужно отредактировать /etc/network/interfaces на Freerunner, после чего перезагрузить смартфон.
+
+В следующем примере для устройства задаётся IP-адрес 192.168.100.1 (вместо адреса по умолчанию 192.168.0.202) в подсети 192.168.100.X (вместо 192.168.0.X), другой [http://en.wikipedia.org/wiki/Private_network частной] сети класса C. ([http://en.wikipedia.org/wiki/Subnetwork#Binary_subnet_masks Маска подсети] показывает, что первые три байта используются для адресации подсети, а последний байт&nbsp;&mdash; для адресации машины в подсети.) Шлюз (ПК, к которому подключен смартфон) должен тоже быть узлом подсети, и в данном случае для него задаётся IP-адрес 192.168.100.254 (вместо 192.168.0.200).
+
+Изменения для /etc/network/interfaces:
+
+<pre>
+auto usb0
+iface usb0 inet static
+        address 192.168.100.1
+        netmask 255.255.255.0
+        network 192.168.100.0
+        gateway 192.168.100.254
+</pre>
+
+(Строка network, похоже, избыточна, поскольку эти данные могут быть получены сопоставлением строк address и netmask?) Обратите внимание, что адреса даны для примера, и вам наверняка потребуется изменить их так, чтобы они соответствовали вашей конфигурации.
+
+= Поддержка в ядре Linux =
+
+Необходимо, чтобы ваш Linux-ПК поддерживал необходимые функции, а именно сетевые соединения через USB и маскарадинг. Эти функции включены по умолчанию в большинстве современных дистрибутивов Linux.
+
+== Поддержка сетевых соединений через USB ==
+
+Следующие опции должны быть включены:
+
+* CONFIG_USB_USBNET (''Multi-purpose USB Networking Framework''. Модуль будет называться <tt>usbnet</tt>)
+* CONFIG_USB_NET_CDCETHER (''CDC Ethernet support''. Модуль будет называться <tt>cdc_ether</tt>)
+
+Эти опции находятся в группе ''Device Drivers -> USB support -> USB Network Adapters'' или ''Device Drivers -> Network Device Support -> USB Network Adapters''.
+
+Для того, чтобы соединения через USB заработали, вам нужно будет загрузить модуль <tt>cdc_ether</tt> (при загрузке <tt>cdc_ether</tt> модуль <tt>usbnet</tt> загрузится автоматически). Подробности описаны на [http://www.linux-usb.org/usbnet/ странице, посвящённой драйверу usbnet].
+
+== Поддержка маскарадинга ==
+
+Опции, относящиеся к маскарадингу, находятся в группе ''Networking ---> Networking options --->'' (проверено на Linux 2.6.26.3).
+
+Для того, чтобы включить требуемые опции, сначала вам нужно включить:
+
+* CONFIG_NETFILTER (''Network packet filtering framework (Netfilter)'')
+
+Затем в группе ''Networking ---> Networking options ---> [*] Network packet filtering framework (Netfilter) ---> Core Netfilter Configuration --->''&nbsp;&mdash; как минимум, следующие опции:
+
+* CONFIG_NF_CONNTRACK (''Netfilter connection tracking support'')
+* CONFIG_NF_CONNTRACK_FTP (''FTP protocol support'')
+* CONFIG_NETFILTER_XTABLES (''Netfilter Xtables support'')
+
+Остальные опции находятся в группе ''Networking ---> Networking options ---> [*] Network packet filtering framework (Netfilter) ---> IP: Netfilter Configuration --->''. Вам потребуются опции:
+
+* CONFIG_NF_CONNTRACK_IPV4 (''IPv4 connection tracking support (required for NAT)'')
+* CONFIG_IP_NF_IPTABLES (''IP tables support (required for filtering/masq/NAT)'')
+* CONFIG_NF_NAT (''Full NAT'')
+* CONFIG_IP_NF_TARGET_MASQUERADE (''MASQUERADE target support'')
+
+= Проблемы с межсетевыми экранами =
+
+На некоторых системах настройки межсетевого экрана по умолчанию мешают настройке соединения с Freerunner (как, например, iptables на Fedora). Можно просто отключить экран, либо попытаться найти, какие правила или политики могут вызывать затруднения.
+
+Первое, что нужно проверить&nbsp;&mdash; это таблица маршрутизации NAT, управляющая преобразованием IP-адресов:
+
+iptables -L -t nat -v -n
+
+Если в вашей настройке нет ничего специфического, то вам будут интересны только правило MASQUERADE, которое мы добавим ниже, и правило ACCEPT, являющееся политикой по умолчанию. Взгляните также на таблицу фильтрации:
+
+iptables -L -t filter -v -n
+
+Если эта таблица содержит что-либо в цепи FORWARD, это может помешать передаче пакетов. Сбросить правила можно командой:
+
+iptables -t filter -F FORWARD
+
+= DNS =
+
+Вдобавок к маршрутизации, вообще говоря, надо, чтобы была доступна служба DNS. В некоторых случаях у вас может уже быть настроен локальный сервер DNS, например, dnsmasq или bind9, и это предположение&nbsp;&mdash; что DNS-сервер работает на шлюзе&nbsp;&mdash; Freerunner делает по умолчанию.  В других случаях вам потребуется указать, какой DNS-сервер следует использовать.
+
+== Настройка DNS ==
+
+DNS настраивается в файле /etc/resolv.conf вашего Freerunner.
+
+Добавьте IP-адрес DNS-сервера, предоставляемого вашим интернет-провайдером.
+
+<pre>echo nameserver xxx.xxx.xxx.xxx > /etc/resolv.conf</pre>
+
+Вы можете также добавить публичный DNS-сервер, известный как openDNS:
+
+<pre>echo nameserver 208.67.222.222 > /etc/resolv.conf
+echo nameserver 208.67.220.220 >> /etc/resolv.conf</pre>
+
+Эти настройки будут потеряны при перезагрузке. Можно сделать так, чтобы они сохранялись, добавив следующие строки в файл /etc/network/interfaces в конец секции, относящейся к usb0:
+<pre>up echo nameserver 208.67.222.222 > /etc/resolv.conf
+up echo nameserver 208.67.220.220 >> /etc/resolv.conf</pre>
+
+== Получение DNS с ПК ==
+
+Если вы часто переезжаете с места на место, делать какие-либо заключения о настройке сети может быть не очень удобно. Вместо этого можно настроить получение настроек DNS с вашего ПК, для чего есть несколько способов.
+
+=== dnrd ===
+
+Разработан скрипт для настройки использования [http://dnrd.sourceforge.net/ dnrd] в качестве DNS-прокси. Доступны [http://buildhost.automated.it/gta01 сам скрипт] и [http://buildhost.automated.it/dnrd-2.20.3.tar.gz копия dnrd]. Помимо настройки DNS-прокси, скрипт выполняет первичную настройку соединения согласно разделу [[USB_Networking#Manual_method]] выше.
+
+=== Пересылка UDP-пакетов (UDP forwarding) ===
+
+Другой простой способ заключается в использовании ПО, осуществляющего пересылку пакетов UDP&nbsp;&mdash; например, [http://www.tapor.com/udpf/ udpf]. Выполните его командой:
+
+<pre>udpf-elf -p=53-f=`awk '$1 == "nameserver"{print $2; exit(0);}' /etc/resolv.conf`:53</pre>
+
+=== iptables ===
+
+Можно перенаправлять запросы DNS при помощи таблиц iptables, используя цель DNAT:
+
+<pre>iptables -t nat -A PREROUTING -p tcp -s 192.168.0.202 -d 192.168.0.200 --dport domain -j DNAT --to-destination 192.168.0.1
+iptables -t nat -A PREROUTING -p udp -s 192.168.0.202 -d 192.168.0.200 --dport domain -j DNAT --to-destination 192.168.0.1</pre>
+
+Здесь <tt>192.168.0.1</tt>&nbsp;&mdash; это IP-адрес вашего маршрутизатора.
+
+Проверьте, что всё работает:
+<pre>ping www.google.com</pre>
+
+Если ping сработал, то вопрос с доступом в интернет в целом можно считать решённым. Однако изменения в resolv.conf, сделанные вручную, могут быть утеряны, например, при использовании DHCP (а в особенности&nbsp;&mdash; WiFi), поэтому ручная настройка может оказаться неудобной.
+
+= Проверка соединения =
+
+У вас должна быть возможность соединиться с вашим Freerunner! Для начала убедитесь, что пакеты вообще проходят:
+
+ping 192.168.0.202
+
+После этого войдите в консоль по SSH:
+
+ssh root@192.168.0.202
+
+Пароль по умолчанию пуст (просто нажмите enter).
+
+Вы можете передавать файлы в обе стороны с помощью [[scp]]. Вы можете использовать telnet, SSH, SMB и всё остальное, что вам потребуется.
+
+Теперь убедитесь, что пакеты передаются в обратную сторону. Следующие команды нужно выполнить в консоли смартфона:
+
+ping 192.168.0.200
+
+(Имейте в виду, что некоторые системы, например, Vista, по умолчанию не отвечают на ICMP ping.)
+
+Проверьте доступ к внешнему миру (IP-адрес Google):
+
+ping 74.125.19.147
+
+Последняя команда покажет, работает ли маскарадинг на вашем ПК.
+
+Наконец, проверьте, что смартфон имеет доступ к DNS:
+
+ping www.google.com
+
+= Автоматическая и специфическая для ОС настройка =
+
+Раздел основывается на статье [http://blog.haerwu.biz/2007/03/22/hotpluging-usbnet/ Hotplugging usbnet] Маркина Юшкевича, известного под псевдонимом &laquo;Hrw&raquo; (Marcin 'Hrw' Juszkiewicz). Приведённые ниже рекомендации помогут вам настроить соединение один раз и пользоваться им в дальнейшем.
+
+Кроме того, в этом разделе вы можете найти полезную информацию на случай, если по каким-либо причинам описанные выше способы не работают в вашей операционной системе или в вашем дистрибутиве.
+
+== MacOS X ==
+См. [[MacOS_X#USB_Networking|MacOS X USB Networking]].
+
+== Windows ==
+См. [[Neo1973_and_Windows#USB_Ethernet_emulation|Windows USB Ethernet emulation for Neo1973]].
+
+Также есть очень полезное [http://sam.curren.ws/index.cfm/2008/7/14/Using-the-Neo-FreeRunner-with-Windows-XPVista руководство по настройке на Windows Vista].
+
+== FreeBSD ==
+Вам потребуется загрузить модуль cdce, если он ещё не загружен. Выполните от имени суперпользователя:
+
+# kldload cdce
+
+После этого Neo должен появиться в системе как интерфейс cdce0, и вы сможете выполнить остальную настройку так же, как описано для устройства usb0 под Linux. Дополнительную информацию вы найдёте в руководстве по cdce. Простой способ назначить IP-адрес интерфейсу cdce0 задействует демон devd(8). Создайте два файла:
+
+<tt>/usr/local/etc/devd/cdce.conf</tt>:
+
+<pre>
+notify 1 {
+match "system"          "IFNET";
+match "subsystem"       "cdce0";
+match "type"            "ATTACH";
+action "/usr/local/etc/devd/cdce.sh $subsystem $type";
+};
+</pre>
+
+и <tt>/usr/local/etc/devd/cdce.sh</tt> as:
+
+<pre>
+#!/bin/sh
+case $2 in
+'ATTACH')
+ifconfig cdce0 192.168.0.200 netmask 255.255.255.0
+exit 0 ;
+;;
+esac
+exit 0
+</pre>
+
+После этого перезапустите демон devd(8):
+
+ # /etc/rc.d/devd restart
+
+Теперь, когда вы подключите FreeRunner к USB-интерфейсу вашего ПК, автоматически будет создан интерфейс cdce0, и ему будет назначен IP-адрес.
+
+== Debian, Ubuntu и другие ==
+
+Откройте /etc/network/interfaces и добавьте в него следующие строки:
+
+<pre>
+# freerunner
+allow-hotplug usb0
+iface usb0 inet static
+        address 192.168.0.200
+        netmask 255.255.255.0
+        up iptables -A POSTROUTING -t nat -s 192.168.0.0/24 -j MASQUERADE
+        up echo 1 > /proc/sys/net/ipv4/ip_forward
+        down iptables -D POSTROUTING -t nat -s 192.168.0.0/24 -j MASQUERADE
+</pre>
+
+Этот способ более изящен, чем ручная настройка. Трюк с автоматическим включением завязан на систему Linux hotplug, так что соответствующие действия по конфигурированию интерфейсов выполняются автоматически при подключении и отключении устройства.
+
+Вдобавок маска подсети на стороне ПК ограничена небольшим диапазоном, так что пересечение подсетей не является проблемой: Linux будет пользоваться специальными правилами для перенаправления пакетов.
+
+Альтернативное решение, добавляющее DNS forward и удаляющее изменения в таблице iptables после отключения устройства:
+
+В файле /etc/network/interfaces добавьте:
+<pre>
+# freerunner
+allow-hotplug usb0
+iface usb0 inet static
+        address 192.168.0.200
+        netmask 255.255.255.192
+        post-up /etc/network/freerunner start
+        pre-down /etc/network/freerunner stop
+</pre>
+
+Создайте файл /etc/network/freerunner:
+<pre>
+#!/bin/sh
+#
+# configures the freerunner for internet
+#
+#
+
+DEVICE=usb0
+IPADDR=192.168.0.200
+REMOTE_IPADDR=192.168.0.202
+NETMASK=255.255.255.0
+
+# get first ip for dns
+DNSIP=$(awk '$1 == "nameserver"{print $2; exit(0);}' /etc/resolv.conf)
+
+case "$1" in
+start)
+iptables -A POSTROUTING -t nat -j MASQUERADE -s $REMOTE_IPADDR
+iptables -A PREROUTING -t nat -p tcp -s $REMOTE_IPADDR -d $IPADDR --dport domain -j DNAT --to-destination $DNSIP
+iptables -A PREROUTING -t nat -p udp -s $REMOTE_IPADDR -d $IPADDR --dport domain -j DNAT --to-destination $DNSIP
+
+if [ "$(cat /proc/sys/net/ipv4/ip_forward)" = "0" ]; then
+echo "temoprarely allow ip_forward for openmoko" > /var/run/openmoko.ip_forward
+echo 1 > /proc/sys/net/ipv4/ip_forward
+fi
+;;
+stop)
+iptables -D POSTROUTING -t nat -j MASQUERADE -s $REMOTE_IPADDR
+iptables -D PREROUTING -t nat -p tcp -s $REMOTE_IPADDR -d $IPADDR --dport domain -j DNAT --to-destination $DNSIP
+iptables -D PREROUTING -t nat -p udp -s $REMOTE_IPADDR -d  $IPADDR --dport domain -j DNAT --to-destination $DNSIP
+
+if [ -f /var/run/openmoko.ip_forward ]; then
+rm /var/run/openmoko.ip_forward
+echo 0 > /proc/sys/net/ipv4/ip_forward
+fi
+;;
+esac
+</pre>
+
+Сделайте /etc/network/freerunner исполняемым:
+
+chmod +x /etc/network/freerunner
+
+Можно использовать network-manager, чтобы автоматически соединяться со смартфоном с помощью udev. Предлагаемый ниже способ использует udev для запуска скрипта, когда Freerunner подключается к системе. Скрипт использует команду ip, чтобы установить MAC-адрес сетевого интерфейса USB. Для начала создайте файл /etc/udev/rules.d/80-freerunner.rules :
+
+<pre>
+# This file causes programs to be run on device insertion.
+# See udev(7) for syntax.
+# rule to assign a fixed mac address specified in /
+KERNEL=="usb[0-9]*", DRIVERS=="cdc_ether", ACTION=="add", RUN+="/usr/local/sbin/freerunner-usb-add.sh %k"
+</pre>
+
+Затем создайте файл /usr/local/sbin/freerunner-usb-add.sh :
+
+<pre>
+#!/bin/sh
+(
+busNum=$( printf %.2d $( expr match "$1" "usb\([0-9]*\)") )
+ip link set "$1" address 00:00:22:55:bb:$busNum &> /dev/null
+) &
+exit 0
+</pre>
+
+Наконец, сделайте второй файл исполняемым:
+
+chmod +x /usr/local/sbin/freerunner-usb-add.sh
+
+Теперь вы можете использовать network-manager с настройками, привязанными к MAC-адресу, и настроить автоматическое подключение.
+
+=== Ubuntu 8.10, простой путь === 
+
+:1. Соедините Neo с ПК и подождите примерно минуту, пока NetworkManager не закончит сканирование DHCP на USB (значок в системном лотке должен переключиться в нормальное состояние).
+
+:2. Откройте "nm-connection-editor", выберите "Auto usb0", нажмите "Edit", затем "IPv4 Settings". Выберите для "Method" значение "Manual", нажмите "Add". В поле "Address" напишите "192.168.0.200", "Netmask" - "255.255.255.0", оставьте поле "Gateway" пустым (или 0.0.0.0). Задайте "Connection name" и нажмите "Apply", затем "Close".
+
+:3. Теперь вы можете соединиться по SSH на адрес 192.168.0.202
+
+Внимание: после перепрошивки смартфона потребуется скопировать значение поля "MAC Address" из "Auto usb0" в настройки нового соединения.
+
+После этого, следуя [http://sebastian-bergmann.de/index.php?url=archives/801-OpenMoko-Freerunner-and-Ubuntu.html#feedback инструкциям], у вас должно получиться настроить маскарадинг следующими командами:
+
+<pre>sudo iptables -I INPUT 1 -s 192.168.0.202 -j ACCEPT
+sudo iptables -I OUTPUT 1 -s 192.168.0.200 -j ACCEPT
+sudo iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
+sudo bash -c 'echo 1 > /proc/sys/net/ipv4/ip_forward'</pre>
+
+=== Проблемы Ubuntu ===
+
+* Ubuntu 8.10 не работает, как должно, если вы используете /etc/network/interfaces для автоматизации.
+* Network manager любит ковыряться в настройках сетевого устройства и добавлять маршрут по умолчанию через 192.168.0.202, что нарушает ваше соединение.
+* Network manager также сообщает, что вы не можете изменить это соединение или удалить его. Я думаю вернуться к тому, чтобы устанавливать соединение вручную.
+* Использование следующего скрипта /usr/local/sbin/freerunner-usb-add.sh может служить обходным путём:
+<pre>
+#!/bin/sh
+(
+ip address add 192.168.0.200/26 netmask dev usb0 > /dev/null
+ip link set usb0 up > /dev/null
+/etc/network/freerunner start
+) &
+exit 0
+</pre>
+* Ubuntu Feisty, Gutsy и Hardy имеют проблему: ifdown не срабатывает, если интерфейс отключён. Подробности описаны по адресу: https://bugs.launchpad.net/ubuntu/+source/ifupdown/+bug/130437
+
+Можно исправить /etc/udev/rules.d/85-ifupdown.rules. Перемещение строки DRIVERS=="*?" из верхнего GOTO в строку ACTION=="add" исправляет проблему:
+<pre>
+SUBSYSTEM=="net", GOTO="net_start"
+GOTO="net_end"
+
+LABEL="net_start"
+
+# Bring devices up and down only if they're marked auto.
+# Use start-stop-daemon so we don't wait on dhcp
+ACTION=="add", DRIVERS=="?*",       RUN+="/sbin/start-stop-daemon --start --background --pidfile /var/run/network/bogus --startas /sbin/ifup -- --allow auto $env{INTERFACE}"
+ck
+ACTION=="remove",       RUN+="/sbin/start-stop-daemon --start --background --pidfile /var/run/network/bogus --startas /sbin/ifdown -- --allow auto $env{INTERFACE}"
+
+LABEL="net_end"
+</pre>
+
+Проблема состоит в том, что переменная DRIVERS оказывается не установлена, когда устройство отключено.
+
+This appears to be fixed in Ubuntu 8.04 [[User:Mattt|Mattt]] 11:38, 30 July 2008 (UTC)
+:Actually it appears that it's not fixed, but patching that file and disconnecting and reconnecting the phone works perfectly. --[[User:Johndoesacc|Johndoesacc]] 18:37, 20 August 2008 (UTC)
+:Well, yes, it must be fixed because it worked for me out-of-the-box without tweaking the udev rule on 8.04 --[[User:EtienneG|EtienneG]] November 26th, 2008
+:It wasn't solved in my case, as of 3. February 2009 in 8.04 (AMD64), the patch above solved my problem thou. --[[User:VilleWitt|VilleWitt]] February 3td, 2009.
+
+====Настройка iptables через GUI====
+
+Firestarter пригодится, чтобы дать смартфону выход в интернет без необходимости модифицировать iptables вручную. Firestarter есть в репозитории Ubuntu, установить его можно командой:
+
+<pre>sudo aptitude install firestarter</pre>
+
+В диалоге настроек Firestarter есть раздел Network, в котором вы найдёте раскрывающийся список "Local network connected device". Выберите Freerunner (как правило, его имя будет "Unknown device(usb0)") и установите флаг "Enable internet connection sharing". Снимите флаг, разрешающий локальный DHCP, после чего ваш смартфон должен получить выход в интернет
+
+-Tested in ubuntu 8.10--[[User:makito|Makito]] February 26, 2009
+
+Внимание: Firestarter нужно запускать от имени суперпользователя.
+
+=== Обходное решение для Ubuntu ===
+
+Попробуйте применить [http://wicd.sourceforge.net/ wicd] вместо networkmanager. Этот пакет разработан намного лучше, чем networkmanager, и не создаёт проблем с сетевыми соединениями через USB. С ним вы можете использовать &laquo;нормальные&raquo; установки в /network/interfaces.
+
+Внимание: wicd конфликтует по зависимостям с networkmanager, так что при установке одного пакета другой будет удалён.
+
+=== Ubuntu и QI ===
+
+Если у вас не получается соединиться со смартфоном после установки qi, проверьте, изменилось ли имя устройства на &laquo;eth''N''&raquo;. Как уже отмечалось выше, многие операционные системы присваивают устройству имя вида &laquo;eth''N''&raquo;, если для него обнаружен официальный (не сгенерированный локально) MAC-адрес. Qi, в отличие от u-boot, передаёт официальный MAC-адрес смартфона.
+
+== Mandriva ==
+
+Следующий файл задаёт настройку сетевого интерфейса usb0. Когда вы подключите смартфон к USB-интерфейсу, он автоматически будет настроен.
+
+<tt>/etc/sysconfig/network-scripts/ifcfg-usb0</tt>:
+
+<pre>
+DEVICE=usb0
+BOOTPROTO=static
+IPADDR=192.168.0.200
+NETMASK=255.255.255.0
+NETWORK=192.168.0.0
+BROADCAST=192.168.0.255
+ONBOOT=yes
+METRIC=10
+MII_NOT_SUPPORTED=no
+USERCTL=yes
+</pre>
+
+Следующий файл настраивает статические маршруты, требуемые для связи между подсетями. Поскольку в имени файла присутствует &laquo;usb0&raquo;, система автоматически настроит эти маршруты при конфигурировании интерфейса usb0 (то есть, когда вы подключите смартфон).
+
+<tt>/etc/sysconfig/network-scripts/usb0-routes</tt>:
+
+<pre>
+ADDRESS0=192.168.0.200
+NETMASK0=255.255.255.0
+</pre>
+
+Теперь нужно перезапустить сетевые службы:
+
+service network restart
+
+This didn't work for me (Mandriva 2008.1), giving errors from Shorewall. However, simply using MCC, Network->Sharing Internet Access worked fine. You need to connect Neo when starting it. --[[User:Alih|Alih]] 18:50, 22 September 2008 (UTC)
+
+== SuSE ==
+
+/etc/sysconfig/network/ifcfg-usb0:
+
+ # USB configuration for PDAs (openmoko)
+ IPADDR=192.168.0.200
+ NETMASK=255.255.255.0
+ STARTMODE=onboot
+
+Дополнительную информацию о настройке сети через USB с использованием YaST вы можете получить в статье [[USB Networking with openSUSE]].
+
+== Fedora ==
+
+=== Вариант A. Проверен на FC9, FC8 и FC5 ===
+
+Отредактируйте файл <tt>/etc/sysconfig/network-scripts/ifcfg-usb0</tt> следующим образом:
+
+ # USB configuration for PDAs (openmoko)
+ # from <nowiki>http://www.handhelds.org/moin/moin.cgi/UsbNet</nowiki>
+ DEVICE=usb0
+ BOOTPROTO=none
+ IPADDR=192.168.0.200
+ NETMASK=255.255.255.0
+ ONBOOT=yes
+
+Перезапустите сетевые службы:
+
+ service network restart
+
+Если ваш смартфон был присоединён в момент перезапуска служб, вы должны увидеть сообщение:
+
+<code>Bringing up interface usb0      [OK]</code>
+
+=== Вариант B ===
+
+Этот вариант, вероятно, чересчур сложен:
+
+/etc/sysconfig/network-scripts/ifcfg-usb0:
+
+ DEVICE=usb0
+ IPADDR=192.168.0.200
+ NETMASK=255.255.255.0
+
+/etc/sysconfig/network-scripts/ifup-usb:
+
+ #!/bin/bash
+ ./etc/init.d/functions
+ cd /etc/sysconfig/network-scripts
+ ../network-functions
+ [ -f ../network ] && . ../network
+ CONFIG=${1}
+ need_config ${CONFIG}
+ source_config
+ NETBITS=`ipcalc -p ${IPADDR} ${NETMASK} | awk -F'=' '{print $2;}'`
+ /sbin/ip addr flush dev ${DEVICE} 2>/dev/null
+ /sbin/ip link set dev ${DEVICE} up
+ /sbin/ip addr add dev ${DEVICE} ${IPADDR}/${NETBITS}
+ /sbin/iptables -I POSTROUTING -t nat -j MASQUERADE -s ${IPADDR}/${NETBITS}
+ /sbin/sysctl net.ipv4.ip_forward=1
+ /sbin/iptables -I FORWARD -s ${IPADDR}/${NETBITS} -j ACCEPT
+ /sbin/iptables -I FORWARD -d ${IPADDR}/${NETBITS} -j ACCEPT
+
+Устанавливаем /etc/sysconfig/network-scripts/ifdown-usb:
+
+ #!/bin/bash
+ ./etc/init.d/functions
+ cd /etc/sysconfig/network-scripts
+ ../network-functions
+ [ -f ../network ] && . ../network
+ CONFIG=${1}
+ need_config ${CONFIG}
+ source_config
+ NETBITS=`ipcalc -p ${IPADDR} ${NETMASK} | awk -F'=' '{print $2;}'`
+ /sbin/iptables -D FORWARD -d ${IPADDR}/${NETBITS} -j ACCEPT
+ /sbin/iptables -D FORWARD -s ${IPADDR}/${NETBITS} -j ACCEPT
+ /sbin/sysctl net.ipv4.ip_forward=0
+ /sbin/iptables -D POSTROUTING -t nat -j MASQUERADE -s ${IPADDR}/${NETBITS}
+ /sbin/ip link set dev ${DEVICE} down
+ /sbin/ip addr flush dev ${DEVICE} 2>/dev/null
+
+Если вы используете NetworkManager, перезапустите его и разрешите устройство USB через меню, иначе он запретит ваше соединение вскоре после того, как вы его установили.
+
+ /sbin/service NetworkManager restart
+
+=== Вариант C. Проверен на FC8, FC9 и F10 ===
+
+Подсоедините устройство. NetworkManager должен определить подключение автоматически, но это для нас не имеет значения.
+
+Откройте Network Configuration (System -> Administration -> Network) и выполните следующие шаги:
+
+# Нажмите '''New''' в верхней панели.
+# Нажмите '''Forward'''.
+# Выберите в списке устройств Openmoko.
+# Нажмите '''Forward'''.
+# Выберите 'Statically set IP address:' и введите address: 192.168.0.200, netmask 255.255.255.0 (или 255.255.255.240, если вам нужен только поддиапазон 192.168.0.192-192.168.0.207). Оставьте поле gateway пустым.
+# Нажмите '''Forward'''.
+# Нажмите '''Apply''' (диалог добавления устройства закроется).
+# Выберите вновь добавленное устройство usb0 из списка.
+# Нажмите '''Edit''' в верхней панели.
+# Возможно, вы решите снять флаг 'Activate device when computer starts'.
+# Нажмите '''Ok''' (диалог закроется).
+Сохраните настройки и закройте окно.
+
+Откройте Firewall Configuration (System -> Administration -> Firewall) и включите маскарадинг:
+# Выберите '''Masquerading''' в левой панели.
+# Выберите устройства, для которых вы бы хотели разрешить использование вашего интернет-соединения. Как правило, это устройства eth0 и wlan0.
+# Нажимте '''Apply''' и закройте окно.
+
+Откройте консоль и выполните от имени суперпользователя:
+# ifdown usb0
+# ifup usb0
+Первая команда удалит все текущие настройки, заданные NetworkManager, а вторая включит интерфейс с нужными настройками.
+
+Теперь у вас должна быть связь с внешним миром. Проверьте, так ли это, командой ping (например, 74.125.39.99 [www.google.com]) со смартфона. Настройте /etc/resolv.conf, и у вас будет полноценный доступ в интернет.
+
+==== Решение проблем ====
+
+Если Network Configuration не видит устройство usb0, попробуйте отсоединить USB-кабель и через несколько секунд присоединить его обратно, после чего подождать, пока NetworkManager не найдёт его.
+
+NetworkManager назначит смартфону новый IP-адрес, если соединение пропадёт. Это можно исправить, повторно выполнив '''ifup usb0'''.
+
+== Red Hat и аналоги (проверено на Workstation 5) ==
+
+Исправьте /etc/sysconfig/network-scripts/net.hotplug:
+
+После строк:
+
+<pre>
+case $INTERFACE in
+# interfaces that are registered after being "up" (?)
+</pre>
+
+добавьте
+
+<pre>
+usb0)
+ifconfig usb0 192.168.0.200 netmask 255.255.255.0
+route add 192.168.0.202 usb0
+iptables -I INPUT 1 -s 192.168.0.202 -j ACCEPT
+iptables -I OUTPUT 1 -s 192.168.0.200 -j ACCEPT
+iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
+echo 1 > /proc/sys/net/ipv4/ip_forward
+exit 0
+;;
+</pre>
+
+== Gentoo ==
+
+Откройте /etc/conf.d/net и добавьте:
+
+<pre>
+# Neo
+config_usb0=( "192.168.0.200 netmask 255.255.255.0" )
+routes_usb0=( "192.168.0.202/32 via 192.168.0.200" )
+</pre>
+
+Создайте новый скрипт init:
+
+<pre>
+cd /etc/init.d
+ln -s net.lo net.usb0
+</pre>
+
+=== Ручная настройка ===
+
+Добавьте правила iptables:
+
+<pre>
+iptables -I INPUT 1 -s 192.168.0.202 -j ACCEPT
+iptables -I OUTPUT 1 -s 192.168.0.200 -j ACCEPT
+iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
+</pre>
+
+Сохраните их:
+
+ /etc/init.d/iptables save
+
+Если вы хотите сделать маршрутизацию по умолчанию, выполните:
+
+ rc-update add iptables default
+
+Кроме того, нужно указать ядру, что требуется начать форвардинг:
+
+ echo 1 > /proc/sys/net/ipv4/ip_forward
+
+=== Автоматическая настройка ===
+
+Автоматизировать всё и сразу можно, создав /etc/conf.d/net.usb0 согласно следующему листингу. Такой скрипт включает форвардинг пакетов и маршрутизацию в один приём, а также удаляет правила iptables и выключает форвардинг, когда вы отключаете устройство. Учтите, что служба net.usb0 service должна поддерживать горячее включение (/etc/rc.conf).
+
+<pre>
+preup() {
+echo 1 > /proc/sys/net/ipv4/ip_forward
+iptables -I INPUT 1 -s 192.168.0.202 -j ACCEPT
+iptables -I OUTPUT 1 -s 192.168.0.200 -j ACCEPT
+iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
+return 0
+}
+
+postdown() {
+echo 0 > /proc/sys/net/ipv4/ip_forward
+iptables -D INPUT -s 192.168.0.202 -j ACCEPT
+iptables -D OUTPUT -s 192.168.0.200 -j ACCEPT
+iptables -D POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
+return 0
+}
+</pre>
+
+== Slackware (проверено на 12.1) ==
+
+По мотивам решения, [http://www.enricozini.org/2008/tips/autodock-freerunner.html предложенного Энрико Зини (Enrico Zini)].
+
+Создайте новый файл с правилами для udev <tt>/etc/udev/rules.d/91-openmoko.rules</tt>:
+
+<pre>
+SUBSYSTEM=="net", ACTION=="add", ATTRS{idVendor}=="1457", ATTRS{idProduct}=="5122", RUN+="/sbin/om-usb $env{INTERFACE} start"
+SUBSYSTEM=="net", ACTION=="remove", ENV{INTERFACE}=="usb[0-9]", RUN+="/sbin/om-usb $env{INTERFACE} stop"
+</pre>
+
+Затем создайте файл <tt>/sbin/om-usb</tt>:
+
+<pre>
+#!/bin/sh
+INTERFACE=$1
+ACTION=$2
+
+# udev fails silently when the script fails, e.g. due to commands not
+# being found
+PATH=/usr/sbin:/sbin:/usr/bin:/bin
+
+case $ACTION in
+'start')
+# Put all your setup here
+;;
+'stop')
+# Put all your tear down here
+;;
+*)
+echo "Usage: $0 {start|stop}"
+exit 1
+;;
+esac
+</pre>
+
+<tt>INTERFACE</tt> в большинстве случаев будет <tt>usb0</tt>.
+
+== Archlinux ==
+
+По мотивам решения, [http://xenos.altervista.org/blogs/index.php?blog=3&title=openmoko-usb-networking-su-archlinux предложенного пользователем furester].
+
+Установите [http://aur.archlinux.org/packages.php?ID=20220 openmoko-usb-networking] из AUR:
+
+$ yaourt -S openmoko-usb-networking
+
+= Дополнения по SSH =
+
+Сообщалось, что демон ssh daemon (dropbear 0.49) на FreeRunner содержит ошибку, из-за которой иногда вы можете получить код возврата 255 при выходе.
+
+Чтобы ssh не добавлял новую строку для каждого ssh host-key в ваш файл known_hosts, вы можете добавить в файл ~/.ssh/config в секцию phone следующее (или см. листинг в секции [[USB Networking#Changing_host_keys]] ниже):
+
+UserKnownHostsFile /dev/null
+
+Также вы можете использовать ключи, чтобы не вводить пароль.
+
+== Ключи SSH ==
+
+== С ПК на FreeRunner ==
+
+Чтобы сгенерировать ключи для ssh, выполните:
+
+ user@host$ ssh-keygen -t rsa
+
+При запросе пароля просто нажмите enter, если вы хотите оставить пароль пустым (''не лучший вариант'') или введите пароль для данного ключа. Войдите в консоль смартфона и создайте директорию ~/.ssh:
+
+ root@phone# mkdir ~/.ssh
+
+Потом скопируйте в эту директорию файл '''.pub''', созданный на ПК на предыдущем шаге:
+
+ user@host$ scp ~/.ssh/id_rsa.pub root@phone:~/.ssh/authorized_keys
+
+Теперь вы можете соединяться со смартфоном по SSH от имени user@host без необходимости вводить пароль, поскольку ваш публичный ключ содержится в файле root@phone:~/.ssh/authorized_keys. Если вы делали всё по инструкции, то в данный момент в этом файле только один ключ, но вы можете добавить ключи для других пользователей, например, user@host, user@laptop и т. п.
+
+Чтобы сделать вход по умолчанию с правами суперпользователя, добавьте в файле ~/.ssh/config следующие строки:
+
+ Host phone
+ User root
+
+Замените ''phone'' именем хоста или IP-адресом вашего смартфона. Теперь вы сможете соединяться с устройством по SSH без необходимости каждый раз писать''root@''.
+
+Чтобы запретить вход с паролем ('''после настройки входа с ключом'''), исправьте /etc/init.d/dropbear, изменив следующую строку:
+
+ DROPBEAR_EXTRA_ARGS=
+
+на
+
+ DROPBEAR_EXTRA_ARGS="-s"
+
+После этого перезапустите dropbear, чтобы новые настройки вступили в силу.
+
+=== С Freerunner на ПК ===
+
+Создайте ключ:
+
+ dropbearkey -t rsa -f id_rsa
+
+Выхлоп будет выглядеть приблизительно так:
+
+ Will output 1024 bit rsa secret key to 'id_rsa'
+ Generating key, this may take a while...
+ Public key portion is:
+ ssh-rsa AAAAB3Nza[...]
+ Fingerprint: md5 ca:e8:f0:b7:f6:7b:c2:b6:b9:71:e4:45:86:a9:ff:b8
+
+Скопируйте строку, начинающуюся с 'ssh-rsa', и вставьте её в конец файла authorized_keys на ПК (как правило, этот файл содержится в директории ~/.ssh/).
+
+Со смартфона запустите ssh с ключом -i:
+
+ ssh -i id_rsa user@host
+
+=== Изменение ключей ПК ===
+
+Если вы перепрошьёте устройство, ключи поменяются. Попробуйте следующую конфигурацию ~/.ssh/config на ПК:
+
+ Host moko
+ HostName 192.168.0.202
+ StrictHostKeyChecking no
+ UserKnownHostsFile /dev/null
+ User root
+
+Это рекомендуется сделать, поскольку ssh на ПК может отказать в соединении, если ключ, записанный для определённого IP-адреса, изменился. После того, как вы изменили настройки ssh, как описано выше, вы сможете соединиться с устройством по SSH:
+
+ ssh root@moko
+
+== GUI на ПК через SSH ==
+
+Чтобы вывести GUI со смартфона на экран вашего ПК, выполните на ПК следующее:
+
+ xhost +
+ ssh -l root -X -v 192.168.0.202
+
+Теперь запустите, например, openmoko-finger-demo, и он откроется на ПК. Чтобы переключиться в альбомный режим, просто измените размер окна на ПК.
+
+Если вы получаете ошибку вида:
+
+<tt>
+dbus.exceptions.DBusException: org.freedesktop.DBus.Error.Spawn.ExecFailed: dbus-launch failed to
+autolaunch D-Bus session: Autolaunch requested, but X11 support not compiled in.
+</tt>
+
+то вам нужно установить переменную окружения DBUS_SESSION_BUS_ADDRESS на FreeRunner перед тем, как запускать процессы с ПК. Нужное значение можно узнать, выполнив на Freerunner команду:
+
+ ps auxwwwwe | grep -m 1 DBUS_SESSION_BUS_ADDRESS
+
+Теперь, снова на ПК, запустите нужный вам процесс с установкой переменной окружения, примерно так:
+
+ env DBUS_SESSION_BUS_ADDRESS=''dbus_address'' ''process'' #(вероятно, &laquo;env&raquo; здесь избыточно?)
+
+== Отображение удалённых приложений на FreeRunner ==
+
+Чтобы видеть приложения, запущенные на ПК, на экране смартфона, сначала соединитесь с ним по SSH:
+
+ssh -l root 192.168.0.202
+
+Затем выполните:
+
+DISPLAY=:0 xhost +192.168.0.200
+
+После этого можно закрыть соединение SSH. На ПК выполните:
+
+DISPLAY=openmoko:0 xclock
+
+Имейте в виду, что команда xhost даёт доступ к X-серверу любым приложениям с хоста 192.168.0.200, так что любой желающий, имеющий доступ к ПК сможет, в том числе, подглядывать за вами. Отключить удалённый доступ можно командой:
+
+DISPLAY=:0 xhost -192.168.0.200
+
+== sftp ==
+
+После того, как вы настроили SSH, можно использовать Konqueror, Nautilus или любое другое приложение, поддерживающее sftp, чтобы работать с файлами или загружать тестовые приложения. Просто наберите sftp://root@192.168.0.202 в строке адреса.
+
+== sshfs ==
+
+Вы можете использовать sshfs, чтобы примонтировать файловую систему смартфона к файловой системе ПК. Убедитесь, что установлен пакет fuse-sshfs, и что у вас есть права на использование fuse. После этого выполните:
+
+  sshfs 192.168.0.202:REMOTE_PATH LOCAL_MOUNT_POINT
+
+REMOTE_PATH теперь доступен через LOCAL_PATH.
+
+== Автоматическая настройка сети и монтирование разделов  ==
+
+См. [https://bugs.launchpad.net/ubuntu/+bug/289548 Ubuntu bug report in launchpad].
+
+[[Category:USB]]
+[[Category:Implemented]]
+[[Category:Networking]]
