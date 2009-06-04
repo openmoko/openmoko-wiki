@@ -4,26 +4,19 @@
 
 網路攝影機這裡使用的是Logitech出版的[http://www.logitech.com/index.cfm/webcam_communications/webcams/devices/4224&cl=tw,zh 快看S5500網路攝影機], 使用[[http://en.wikipedia.org/wiki/USB_video_device_class UVC]]驅動程式.
 
-備註 : 此系統運作在[http://wiki.openmoko.org/wiki/Om_2008.8 Om2008.8]上, 請自行下載並燒入手機中
+The method described here is still rather ugly, feel free to improve it.
 
-== 增加Kernel對Webcam的支援 ==
+== Make it work on a PC ==
 
-根據[http://wiki.openmoko.org/wiki/Kernel#Building_the_andy-tracking_branch andy-tracking branch]的方法, 將Kernel下載並切換到andy-tracking branch
+To be safe, you just first ensure the webcam works on a regular PC, and Linux in particular. This will minimise the problems you are likely to face (though it may not eliminate them altogether). The regular documentation applies:
 
-使用"make menuconfig", 選擇 "Device drivers", "Multimedia devices"
+* to [http://linux-uvc.berlios.de/ UVC-compliant webcams]
 
-點選 "Video For Linux", "Video For Linux API 1 compatible Layer", "Video capture adapters", "V4L USB devices", "USB Video Class (UVC)", "GSPCA based webcams", "ZC3XX USB Camera Driver (NEW)"(後面兩項要依使用者所用之WebCam而定)
+== Add video support to the kernel ==
 
-然後使用andy-tracking branch的方法將kernel編譯出來後燒入手機
+The 2.6.24 kernel is provided without video input support enabled. There is a way to add the necessary modules without recompiling everything:
 
-== USB Host與Device模式 ==
-
-如果FreeRunner要支援Webcam, 必須將[http://wiki.openmoko.org/wiki/Neo1973_USB_host USB切換到Host模式], 並使用特殊的USB母對母轉接頭
-
-由於Freerunner的唯一對外界面被切換成Host模式後將會沒有操作介面, 故可以考慮使用[http://blogs.thehumanjourney.net/finds/entry/20080716 USB HUB接出鍵盤]與Webcam, 並安裝[http://www.opkg.org/ opkg]所提供的[http://wiki.openmoko.org/wiki/Vala-terminal Vala-terminal]來自行測試
-
-在[http://www.opkg.org/ opkg]上也有使用圖形介面切換USB模式的應用程式 : [http://www.opkg.org/package_40.html USB Mode Button], 但要修改script的地方 : s3c2410-ohci皆修改成s3c-ohci, 因為新版Kernel已經將這個裝置修改了位置.
-
-== 安裝Viewer ==
-
-一個在Linux上很好的應用程式 : [http://www.quickcamteam.net/software/linux/v4l2-software/luvcview luvcview]. 使用者可自行將之 交叉編譯後複製到Freerunner上執行, 至於要製作成圖形的方法請參考 : [http://wiki.openmoko.org/wiki/Toolchain Toolchain]
+* download the source code for the kernel:
+# wget http://kernel.org/pub/linux/kernel/v2.6/linux-2.6.24.tar.bz2
+* make sure you have bzip2 and development tools installed:
+# apt-get install bzip2 gcc make libc6-dev libncurses5-dev
