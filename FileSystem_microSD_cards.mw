@@ -2,8 +2,17 @@
 
 {{Languages|FileSystem microSD cards}}
 
+{|align=left
+|__TOC__
+|}
+
+= Which file system to use =
+
 I got a new SD card. Which file system is the best?
+
 Short answer: ext3. Other options: ext2, vfat. Don't use wear-aware file systems like jffs2 and ubifs.
+
+= Why ext3 =
 
 Long answer:
 In principle you can use any file system (fs) that is supported by the kernel in your Open Moko, commonly FAT, ext2, and ext3. reiserfs is currently not available in the standard OM kernel. What sets ext3 apart from FAT and ext2 is the journaling (also in reiserfs). 
@@ -13,9 +22,9 @@ The journal is an extra data structure used to make sure that the file system is
 If you check the community list (see note 1 below), you'll see people vouching both for fat and ext2 but also others experiencing corruption and annoyed with both file systems. Even though ext3 is not error-proof, since it does not do a verification of what is written in the disk, ext3 remains as the choice to minimise corruption.
 
 There are three disadvantages with the journaled file system:
-- lower performance at write time, since there is the extra work of the journal
-- increased chance of damaging the SD card due to extra use of the journal causing wearing
-- increased space usage (for the journal)
+# lower performance at write time, since there is the extra work of the journal
+# increased chance of damaging the SD card due to extra use of the journal causing wearing
+# increased space usage (for the journal)
 
 Regarding performance, if you are using the SD mostly for static storage like maps or music files, it should not be a big problem. After the initial storage phase, the reads won't be delayed by the journal. Have also a look at [http://www.debian-administration.org/articles/388 this benchmark] between several Linux file systems. 
 
@@ -25,9 +34,13 @@ FAT might already be the fs in your card when you got a new one. It has the adva
 
 It is also important to note that ext is faster than FAT (benchmark, anyone?) but, most importantly, it supports owner/group concept and permissions, which FAT doesn't. Of course, since FR is in general a single user device, the permissions might be not so important. Another advantage of ext2/3 is support for hard/soft links, which is typically useful to avoid redundant copies of files. For instance, if you are storing maps and you have blank tiles files, you can keep a single blank file and have all the others be just a link to this one (you would need a script for that to make it practical)
 
+= Why not jffs2 or ubifs =
+
 What about file systems like jffs2 and ubifs, which are aware of flash card wearing?
 
 SD cards, according to SanDisk specs, should have wear leveling logic, which controls the number of writes and remaps blocks as needed. Wear-aware file systems might actually play against the logic of the card and are usually not recommendable.
+
+= Notes =
 
 Note 1: this page is mostly based on feedback from the OpenMoko community list: see [http://lists.openmoko.org/pipermail/community/2009-January/040521.html here] and [http://lists.openmoko.org/pipermail/community/2009-February/041072.html here].
 
