@@ -171,7 +171,23 @@ To interact with the middleware you should use Qtopia library (note not qt libra
 * on illume if you open/close a dialog the parent window does not return in active state, this would be useful if you want to filter FSO dbus event api based on it (this has to be checked on other windows manager too)
 * with <=480 horizontal screen resolution QMessageBox::* has serious problems, stalling the calling application, reported to qt issue tracker
 * weird painting/font-rendering on ARM platform due to definition of qreal as float, this was signaled to trolltech, waiting for feedbacks
+=Tip and Tricks=
+==Window Managers==
+Here some tips for a good interaction with window managers.
+===Matchbox===
+With common matchbox configuration (e.g. Hackable:1) you'll have:
+* QMainWindow->show()/showMaximized will show them maximized with visible matchbox-panel
+* QMainWindow->showFullscreen() will show them fullscreen, with hided matchbox-panel
+* QDialog->show()/showFullScreen will be showed normally, centered and with a drag&close titlebar
+* QDialog->showMaximized() will be showed maximized and with titlebar, the last will cover matchbox-panel
+* QWidget's behaviour is the same of QMainWindow
 
+QDialog issues:
+* Creating an unparented QDialog will create an "always on top" window!, if you have a top level widget showed too and switch to another application, you cannot switch to it again until the QDialog is closed.
+
+''So, use always QMainWindow/QWidget for creating the main application form, use QDialog (always parented) for simple user interaction (yes/ok/no/close/messages etc.), and QWidget to show application subwindows and customized maximized dialogs.''
+
+''Use setWindowModality if you want to emulate a QDialog with a Top Level QWidget''
 =News=
  * 16 October 2008, openembedded repository was updated, the preferred version of Qt in "openmoko" distro (used by fso) is 4.4.1
  * 16 October 2008, openembedded version bump from 4.4.1 to 4.4.3
