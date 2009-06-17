@@ -23,7 +23,32 @@ Installing OM2009 is simple as flashing an image. Actually that's what you need 
 
 Boot AND REBOOT! The first time it boots there some problems might occur but they're gone after the second boot. 
 
-==== Bugs / missing features ====
+== Using OM2009 ==
+'''Write your best tips here!!'''
+
+* To '''learn to use Paroli''', the phone software, go to [[Paroli#FAQ]]
+* To '''import vcard -contacts''' to Paroli, check [http://www.mail-archive.com/support@lists.openmoko.org/msg04770.html this]
+* '''To prevent suspending when USB plugged in''': unplug usb until LED goes out, then plug usb in: you need to keep the device awake by touching the screen until the LED comes back on. (bug: http://trac.freesmartphone.org/ticket/381)
+* '''Angstrom feeds''' Contain many useful packages including mplayer and ffmpeg. Run these commands to add the angstrom feeds '''NOTE:''' You will not be able to upgrade OM2009 after this, it will break!
+ echo "arch base 50" > /etc/opkg/angstrom-feed.conf
+ echo "src/gz base http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base" >> /etc/opkg/angstrom-feed.conf
+
+==== Audio quality during call ====
+* Audio quality is good by default for some Freerunners. Some units need a new audio profile:
+ wget http://docs.openmoko.org/trac/raw-attachment/ticket/2121/gsmhandset.state.new -O /usr/share/openmoko/scenarios/gsmhandset.state
+* More info can be found here: http://wiki.openmoko.org/wiki/Neo_Freerunner_audio_subsystem
+
+==== Audio problems ====
+* If you have problems with audio, try this:
+ modprobe snd-pcm-oss
+* If audio works, load this module on boot:
+ echo "snd-pcm-oss" > /etc/modutils/snd-pcm-oss
+ update-modules
+* Problems:
+** Allowing the FR to suspend or having the screen blackout while using mplayer will sometimes crash the FR
+** Plugging in the headset will stop audio from playing out of the phone's speaker. Audio will not return until the phone is shut off or you receive or make a call
+
+== Bugs / missing features ==
 
 * Screen lock is missing
 ** currently X screen saver is used during screen blank
@@ -43,32 +68,6 @@ Boot AND REBOOT! The first time it boots there some problems might occur but the
 * gsm0710muxd: "Modem does not respond to AT commands" [http://docs.openmoko.org/trac/ticket/2257 #2257]
 * oeventsd rules ignored [http://trac.freesmartphone.org/ticket/381 FSO #381]
 
-
-== Using OM2009 ==
-'''Write your best tips here!!'''
-
-* To '''learn to use Paroli''', the phone software, go to [[Paroli#FAQ]]
-* To '''import vcard -contacts''' to Paroli, check [http://www.mail-archive.com/support@lists.openmoko.org/msg04770.html this]
-* '''To prevent suspending when USB plugged in''': unplug usb until LED goes out, then plug usb in: you need to keep the device awake by touching the screen until the LED comes back on. (bug: http://trac.freesmartphone.org/ticket/381)
-* '''Angstrom feeds''' Contain many useful packages including mplayer and ffmpeg. Run this command to add the angstrom feeds:
- echo "arch base 50" > /etc/opkg/angstrom-feed.conf
- echo "src/gz base http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base" >> /etc/opkg/angstrom-feed.conf
-NOTE: YOU WILL NOT BE ABLE TO UPGRADE OM2009 AFTER THIS, IT WILL BREAK!
-
-'''Improve Call Quality'''
-* Audio quality is good by default for some Freerunners. Some units need a new audio profile:
- wget http://docs.openmoko.org/trac/raw-attachment/ticket/2121/gsmhandset.state.new -O /usr/share/openmoko/scenarios/gsmhandset.state
-* More info can be found here: http://wiki.openmoko.org/wiki/Neo_Freerunner_audio_subsystem
-
-'''Audio problems'''
-* If you have problems with audio, try this:
- modprobe snd-pcm-oss
-* If audio works, load this module on boot:
- echo "snd-pcm-oss" > /etc/modutils/snd-pcm-oss
- update-modules
-* Problems:
-** Allowing the FR to suspend or having the screen blackout while using mplayer will sometimes crash the FR
-** Plugging in the headset will stop audio from playing out of the phone's speaker. Audio will not return until the phone is shut off or you receive or make a call
 
 == Development ==
 '' When we set the very limited goals of OM2009 we had two goals in mind:''
