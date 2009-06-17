@@ -16,6 +16,7 @@ and modify the prepare function:
 <pre><nowiki>
     def prepare( self ):
         if not self.ready and not self.busy:
+            logger.info( "retrieving phonebook from addressbook.vcf..." )
             file = open(os.environ.get('HOME')+"/addressbook.vcf", "r")
             entries = []
             entry_nr = 1
@@ -66,7 +67,32 @@ and modify the prepare function:
                 ] )
              """
 </nowiki></pre>
+If you have multiple phone numbers per contact and these are separated with commas (like an export from abook, e.g. "112233,998877,665544") you don't see the name when being called - and you cannot call these "multiple" numbers. You can extend the above:
+<pre><nowiki>
+            for line in file:
+                #if line.startswith("END:VCARD"):
+                if line.startswith("TEL;"):
+                     number = unicode(line.partition(":")[2].strip())
+                     number = number.replace('-','')
+                     number = number.replace(' ','')
+                     if name and number:
+-                    if name and number:
+-                        entry = entry_nr, name, number
+-                        entries.append(entry)
+-                        entry_nr = entry_nr + 1
++                        nums = number.split(",")
++                        for num in nums:
++                            entry = entry_nr, name, num
++                            entries.append(entry)
++                            entry_nr = entry_nr + 1
+</nowiki></pre>
+This makes up one entry for each number - all with the same name.
 
+After exporting from abook ("gcrd GnomeCard (VCard) addressbook" format) you should convert it to utf-8, possibly like this (all.vcf is the abook exported file): 
+<pre><nowiki>
+iconv -f ISO-8859-1 -t utf-8 all.vcf > addressbook.vcf
+</nowiki></pre>
+Then transfer addressbook.vcf to your phone. Make sure the name stays the same, it's hardcoded in the code above. On my phone $HOME/addressbook.vcf resolves to /root/addressbook.vcf.
 ==Installing Zhone on Ubuntu ==
 
 {{Warning|Adding those repositories (or the zhone installation?) may lead to problems on a Kubuntu 8.04 Hardy Heron.
@@ -94,3 +120,4 @@ Removing repositories and launching an "apt-get -f install" fix the problem.
 
 
 [[Category:FSO]]
+[[Image:Beispiel.jpg]]
