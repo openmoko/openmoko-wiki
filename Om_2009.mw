@@ -1,51 +1,11 @@
 {{Languages|Om 2009}}
 [[Image:Paroli.png|thumb|Screenshot of Paroli, the GSM app of OM2009]]
-'''Om 2009''' is the next version of the official Openmoko distribution. It is currently under developement and should be released in Summer 2009 to replace [[Om 2008]]. It will be based on [[FSO|freesmartphone.org]] milestone 5.5 framework and use [[Paroli]] as GSM software.
+'''Om 2009''' is the next version of the official Openmoko distribution. The latest release is testing5 from June 16th, 2009. 
 
-=== Features Status ===
+Om2009 testing5 already has all the features most people need for daily phone usage: SMS, calling, phone book, call log, charging, suspend&resume, wifi gui, audio profiles, etc.
 
-Below is the feature list for Om 2009. It's broken down into features that have been implemented and need testing, and features that still need to be finished. Since [[Paroli]] is the chosen phone application, many of the features come straight from Paroli project.
+Om2009 is currently under developement and should be released in Summer 2009 to replace [[Om 2008]]. It is based on [[FSO|freesmartphone.org]] milestone 5.5 framework and use [[Paroli]] as GSM software.
 
-==== Implemented ====
-
-* incoming and outgoing phone calls
-* sms incoming and outgoing
-* simple phone book (no images)
-* call log
-* charging
-* suspend and resume
-* resume speed < 2 seconds - this is close but waiting on a kernel bug
-* battery indicator - works for gta02 battery
-* gsm indicator
-* switch to elementary
-* wifi GUI
-* scrolling in UI - fixed by migrating from etk to elementary
-* switching  profiles
-* in-call volume adjustment
-* settings tool (read [[Paroli#FAQ]] - or this needs to be enabled by editing /etc/paroli/paroli.cfg)
-
-==== Not Yet Implemented or Broken ====
-
-* boot time < 2 minutes - currently examining ways to speed this up
-** install udev-static devices - caveat you lose bind-home
-** use readahead to cache python dirs before starting framework and paroli
-** use readahead to cache dirs for X
-** remove unneeded startup programs ( ie portmap )
-** prime GSM during init for paroli's use
-* screen lock
-** currently X screen saver is used during screen blank
-* user changeable ring tones - works via command line
-* bluetooth - support in FSO milestone 5.5, needs GUI
-* led indication for missed calls or sms
-* GTA01: battery indicator doesn't work for gta01 battery
-
-==== Bug List and Known Issues ====
-
-* gsm0710muxd: "Modem does not respond to AT commands" [http://docs.openmoko.org/trac/ticket/2257 #2257]
-* oeventsd rules ignored [http://trac.freesmartphone.org/ticket/381 FSO #381]
-* After missed call, which causes resume, the phone and suspend do not work anymore [http://trac.freesmartphone.org/ticket/435 FSO #435]
-* Problem at Display->Profile: can't get back to illume, and illume, paroli or paroli-illume all look exactly the same
-** WORKAROUND: Reboot. The first time it boots there is a problem but it's OK after that. If not, let it run for a few hours and then try to launch illume.
 
 == Installing ==
 
@@ -61,68 +21,53 @@ Installing OM2009 is simple as flashing an image. Actually that's what you need 
 # Flash! Detailed instructions for [[Flashing_the_Neo_Freerunner|Freerunner]] and [[Flashing_the_Neo_1973|Neo1973]].
 # Start! The image will boot into fullscreen Paroli and all of the features listed above will be available. To learn more about Paroli, see [[Paroli]]
 
+Boot AND REBOOT! The first time it boots there some problems might occur but they're gone after the second boot. 
+
+==== Bugs / missing features ====
+
+* Screen lock is missing
+** currently X screen saver is used during screen blank
+
+* (Paroli) GUI to change ring tones missing
+* (Paroli) GUI for Bluetooth missing
+* Led indication for missed calls or sms missing
+* Battery indicator support for GTA01 broken
+
+* Boot time needs to be reduced to less than 2 minutes
+** install udev-static-devices - caveat you lose bind-home
+** use readahead to cache python dirs before starting framework and paroli
+** use readahead to cache dirs for X
+** remove unneeded startup programs ( ie portmap )
+** prime GSM during init for paroli's use
+
+* gsm0710muxd: "Modem does not respond to AT commands" [http://docs.openmoko.org/trac/ticket/2257 #2257]
+* oeventsd rules ignored [http://trac.freesmartphone.org/ticket/381 FSO #381]
+
+
 == Using OM2009 ==
 '''Write your best tips here!!'''
-* To learn to use Paroli, the phone software, go to [[Paroli#FAQ]]
-* To have log directory that isn't cleared when you reboot, the /var/log symlink needs to be turned into a directory:
- rm /var/log
- mkdir /var/log
-* To convert vcard -contacts, check http://www.mail-archive.com/support@lists.openmoko.org/msg04770.html
 
-* To prevent suspending when USB plugged in: unplug usb until LED goes out, then plug usb in: you need to keep the device awake by touching the screen until the LED comes back on. (bug: http://trac.freesmartphone.org/ticket/381)
-
-
-'''Angstrom Distribution'''
-* Contains a lot of useful packages including mplayer and ffmpeg. Run this command to add the distro:
+* To '''learn to use Paroli''', the phone software, go to [[Paroli#FAQ]]
+* To '''import vcard -contacts''' to Paroli, check [http://www.mail-archive.com/support@lists.openmoko.org/msg04770.html this]
+* '''To prevent suspending when USB plugged in''': unplug usb until LED goes out, then plug usb in: you need to keep the device awake by touching the screen until the LED comes back on. (bug: http://trac.freesmartphone.org/ticket/381)
+* '''Angstrom feeds''' Contain many useful packages including mplayer and ffmpeg. Run this command to add the angstrom feeds:
  echo "arch base 50" > /etc/opkg/angstrom-feed.conf
  echo "src/gz base http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base" >> /etc/opkg/angstrom-feed.conf
-
- My experience: Broke Om 2009 GUI and got segmentation fault repeatedly on the given package and date:
- opkg update
- opkg upgrade
- ...
- Downloading  http://www.angstrom-distribution.org/feeds/2008/ipk/glibc/armv4t/base/shared-mime-info_0.51-r2.1_armv4t.ipk
- opkg: fork failed
- Segmentation fault
- root@om-gta02:~#
- --[[User:Glenn|Glenn]] 18:31, 16 June 2009 (UTC)
+NOTE: YOU WILL NOT BE ABLE TO UPGRADE OM2009 AFTER THIS, IT WILL BREAK!
 
 '''Improve Call Quality'''
-* Initially, the call quality using OM2009 is poor. Audio is distorted on the other caller's end and there is an annoying echo.
-* The audio profile for the handset is located in "/usr/share/openmoko/scenarios/gsmhandset.state"
-* Download this file and move it to the scenarios directory:
- wget http://docs.openmoko.org/trac/raw-attachment/ticket/2121/gsmhandset.state.new
- mv gsmhandset.state.new /usr/share/openmoko/scenarios/gsmhandset.state
+* Audio quality is good by default for some Freerunners. Some units need a new audio profile:
+ wget http://docs.openmoko.org/trac/raw-attachment/ticket/2121/gsmhandset.state.new -O /usr/share/openmoko/scenarios/gsmhandset.state
 * More info can be found here: http://wiki.openmoko.org/wiki/Neo_Freerunner_audio_subsystem
 
-
-'''GPS - TangoGPS'''
-* Simply Install tangogps:
-  opkg install tangogps
-* If Tango does not seem to detect your GPS, try installing openmoko-agpsui:
-  opkg install openmoko-agpsui
-* Start openmoko-agpsui, activate the GPS, then open Tango.
-
- My experience: Could not be found - even with Angstrom Distribution package repetoire at the given date:
- root@om-gta02:~# opkg install openmoko-agpsui
- Collected errors:
-  * Cannot find package openmoko-agpsui.
- root@om-gta02:~# 
- --[[User:Glenn|Glenn]] 18:43, 16 June 2009 (UTC)
- Can be built from an address here:
- http://www.mail-archive.com/community@lists.openmoko.org/msg23908.html
- (untested) --[[User:Glenn|Glenn]] 08:23, 17 June 2009 (UTC)
-
-'''Video Player'''
-* Follow the instructions here: http://wiki.openmoko.org/wiki/Video_Player
-* There will likely be no sound in mplayer. Try this:
+'''Audio problems'''
+* If you have problems with audio, try this:
  modprobe snd-pcm-oss
 * If audio works, load this module on boot:
  echo "snd-pcm-oss" > /etc/modutils/snd-pcm-oss
  update-modules
 * Problems:
 ** Allowing the FR to suspend or having the screen blackout while using mplayer will sometimes crash the FR
-** Left edge of the screen has one row of pixels miscolored (Not very noticeable, but it ''is'' there)
 ** Plugging in the headset will stop audio from playing out of the phone's speaker. Audio will not return until the phone is shut off or you receive or make a call
 
 == Development ==
