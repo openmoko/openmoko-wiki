@@ -208,6 +208,147 @@ For some reason, I had to reboot for the id_str settings to take effect.  Howeve
 
 {{todo|Which of the issues that single network configurations suffer from are addressed by WPA roaming mode?  Would ifplugd / guessnet help, or just make things more complicated?}}
 
+=== Manual setup ===
+
+When using wifi-radar (GUI) and not getting any or any decent connection, try the following:
+
+Disclaimer: the code lines below are just suggestions; read them carefully and adjust them to your needs!
+
+First of all, at least when using Distribution Neovento, wifi-radar gets started upon system startup as a daemon; this is no good for manual setup, remove "/etc/rc2.d/S20wifi-radar" (or the like) and reboot (or run "/etc/init.d/wifi-radar stop".
+
+Secondly, get yourself the atheros utility wmiconfig, e.g.:
+<pre><nowiki>
+wget http://meshy.org/~ato/debian/pool/main/w/wmiconfig/wmiconfig_0.0.18-1_armel.deb
+dpkg -i wmiconfig_0.0.18-1_armel.deb
+</nowiki></pre>
+
+Or, even more comfortable:
+
+<pre><nowiki>
+echo "deb http://meshy.org/~ato/debian unstable main" >> /etc/apt/sources.list
+apt-get update # patience required
+apt-get install wmiconfig
+</nowiki></pre>
+
+Then use a script along the lines of:
+<pre><nowiki>
+#!/bin/sh -e
+echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+DEV=${DEV:-"eth1"}
+echo "Wireless device:     ${DEV}"
+DHCP=${DHCP:-"TRUE"}
+IP=${IP:-"192.168.155.159"}
+echo "IPv4 address to set: ${IP}"
+NM=${NM:-"255.255.255.0"}
+echo "IPv4 netmask to set: ${NM}"
+GW=${GW:-"192.168.155.155"}
+echo "IPv4 gateway to set: ${GW}"
+ESSID=${ESSID:-"<YOUR_AP_ESSID_GOES_HERE>"}
+echo "WLAN ESSID to set:   ${ESSID}"
+#
+if ! ifconfig "${DEV}" down; then
+        echo 1>&2 "could not down ${DEV}"
+fi
+if ! wmiconfig -i "${DEV}" --wlan disable; then
+        echo 1>&2 "could not disable ${DEV}"
+fi
+if ! wmiconfig -i "${DEV}" --wlan enable; then
+        echo 1>&2 "could not enable ${DEV}"
+fi
+if ! ifconfig "${DEV}" up; then
+        echo 1>&2 "could not up ${DEV}"
+fi
+if ! iwconfig "${DEV}" power off; then
+        echo 1>&2 "could not disable power management of ${DEV}"
+fi
+if ! iwconfig "${DEV}" txpower off channel 0; then
+        echo 1>&2 "could not reset ${DEV}"
+fi
+if ! wmiconfig -i "${DEV}" --setreassocmode 0; then
+        echo 1>&2 "could not set params on ${DEV}"
+fi
+if ! wmiconfig -i "${DEV}" --power maxperf; then
+        echo 1>&2 "could not set power max on ${DEV}"
+fi
+if ! iwconfig "${DEV}" essid "${ESSID}"; then
+        echo 1>&2 "could not set (e)ssid ${ESSID}"
+fi
+if [[ "X${DHCP}" == X"TRUE" ]]; then
+        if ! dhclient3 "${DEV}"; then
+                echo 1>&2 "could not dhclient3 ${DEV}"
+        fi
+else
+        if ! ifconfig "${DEV}" "${IP}" netmask "${NM}"; then
+                echo 1>&2 "could not set ${IP}, ${NM}"
+        fi
+        if ! route add default gw "${GW}"; then
+                echo 1>&2 "could not set default gw ${GW}"
+        fi
+fi
+echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+if ! ifconfig "${DEV}"; then
+        echo 1>&2 "could not down ${DEV}"
+fi
+echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+if ! iwconfig "${DEV}"; then
+        echo 1>&2 "could not down ${DEV}"
+fi
+echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+if ! netstat -anr; then
+        echo 1>&2 "could not down ${DEV}"
+fi
+echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+sleep 10
+</nowiki></pre>
+
+Put these line in a batch file (e.g. /root/bin/wifi-your_essid.sh) and create a .desktop file in /usr/share/applications, e.g. "/usr/share/applications/wifi-your_essid.desktop", if you will:
+<pre><nowiki>
+Encoding=UTF-8
+Name=wifi-your_essid
+Exec=xterm -ls -e "/root/bin/wifi-your_essid.sh"
+Icon=lxterminal
+Type=Application
+Categories=Network;
+</nowiki></pre>
+
+That should give you a symbol in the start menu. 
+
+To tear wifi back down, use the following:
+<pre><nowiki>
+#!/bin/sh -e
+echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+DEV=${DEV:-"eth1"}
+echo "Wireless device:     ${DEV}"
+GW=${GW:-"192.168.155.155"}
+echo "IPv4 gateway to unset: ${GW}"
+#
+if ! ifconfig "${DEV}" down; then
+        echo 1>&2 "could not down ${DEV}"
+fi
+if ! wmiconfig -i "${DEV}" --wlan disable; then
+        echo 1>&2 "could not wmiconfig-disable ${DEV}"
+fi
+if ! route del default gw "${GW}"; then
+        echo 1>&2 "could not remove default route to ${GW}"
+fi
+echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+if ! ifconfig "${DEV}"; then
+        echo 1>&2 "could not ifconfig ${DEV}"
+fi
+echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+if ! iwconfig "${DEV}"; then
+        echo 1>&2 "could not iwconfig ${DEV}"
+fi
+echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+if ! netstat -anr; then
+        echo 1>&2 "could not netstat -anr"
+fi
+echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+sleep 10
+</nowiki></pre>
+
+Again, make batch file and .desktop file, done. 
+
 === Further reading ===
 
 To use all the possibilities of <code>wpasupplicant</code> like roaming and automatic connection to different networks,
