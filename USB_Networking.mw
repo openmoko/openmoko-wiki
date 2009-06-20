@@ -415,6 +415,9 @@ Next, create the /usr/local/sbin/freerunner-usb-add.sh :
 (
 busNum=$( printf %.2d $( expr match "$1" "usb\([0-9]*\)") )
 ip link set "$1" address 00:00:22:55:bb:$busNum &> /dev/null
+iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
+echo 1 > /proc/sys/net/ipv4/ip_forward
+iptables -P FORWARD ACCEPT
 ) &
 exit 0
 </pre>
@@ -437,7 +440,7 @@ Finally run "chmod +x /usr/local/sbin/freerunner-usb-add.sh" to make it executab
 
 (watch out for this bug: https://bugs.launchpad.net/ubuntu/+source/network-manager/+bug/284298 )
 
-You should now be able to ping/ssh your phone. 
+You should now be able to ping/ssh your phone.
 
 === Ubuntu 9.04 - the Jaunty Jackalope -- udev=== 
 
