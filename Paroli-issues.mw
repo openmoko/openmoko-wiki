@@ -2,8 +2,6 @@ This page is here to list the known issues with [[Paroli]]. If possible, link yo
 
 = Known issues & bug pre-reports =
 
-* Phone sometimes fails to suspend after a received call [http://trac.freesmartphone.org/ticket/435 #435] (in testing, possibly fixed)
-
 * SMS : when sim card became full of SMS cannot receive any new but there no notification about it
 
 * UI: There's nothing (no text/button) telling one should click in the black area to get to phonebook to select recipient in 'msgs' -> '+' or 'Tele'
@@ -18,22 +16,15 @@ This page is here to list the known issues with [[Paroli]]. If possible, link yo
 
 * SIM: Not possible to save on SIM card: all SMS's and phone numbers are now saved in the phone memory, not in the SIM card
 
-* WLAN: Settings -> WIFI -> scan doesn't tell if it's searching or finished search with no results (foster feature)*
-
-* WLAN: Settings -> WIFI -> Show the name of the connected network instead of the small 'scan' text (foster feature)*
-
-* WLAN: Settings -> WIFI -> Scan: show the IP, if connected (foster feature)*
-
-* WLAN hidden networks cannot be connected with GUI yet (foster feature)*
-
 * RESUME: when USB-powered, FR shouldn't suspend, just turn off the backlight. -> (suspending kills the USB/SSH connection)
 
 * SMS: Not possible to call the sender of a SMS
 
-* [http://www.paroli-project.org/trac/ticket/90 Running without SIM card: understandable error message missing]
 
 
 === Already fixed ===
+
+* Phone sometimes fails to suspend after a received call [http://trac.freesmartphone.org/ticket/435 #435] (in testing, possibly fixed)
 
 * SMS and People: cannot write unicode characters e.g cyrillic (Reading is no problem) [http://www.paroli-project.org/trac/ticket/138 #138] (should be fixed 01/06/2009)
 
@@ -71,9 +62,34 @@ This page is here to list the known issues with [[Paroli]]. If possible, link yo
 
 * The button to 'go back / go to previous screen' keeps changing: In the menu there's a 'back' button (different size in different views) but in the people etc one has to know to press the top bar to go back.
 
+== Low hanging fruits to start developing Paroli with ==
+These bugs and feature requests should be quite simple to implement. They will help you learn to understand Paroli and get something useful done at the same time. Pick one, see [Paroli-developer-setup] and get on road! If you need help, join the #paroli IRC channel and feel free to ask!
 
+* WLAN: Settings -> WIFI -> scan doesn't tell if it's searching or finished search with no results
 
-Foster feature : a feature that is looking for a caring, loving developer to implement and maintain it
+* WLAN: Settings -> WIFI -> Show the name of the connected network instead of the small 'scan' text
+
+* WLAN: Settings -> WIFI -> Scan: show the IP, if connected
+
+* WLAN hidden networks cannot be connected with GUI yet
+
+* [http://www.paroli-project.org/trac/ticket/90 Running without SIM card: understandable error message missing]
+
+* GPRS GUI should show data counter and IP address, when connected.
+
+* GPRS GUI messes the status after a while (it shows something like 'dictionary(data(...))' instead of 'active' 
+
+* export\import of all contacts and messages to allow migration from om2008.12 (seee [http://www.mail-archive.com/support@lists.openmoko.org/msg04770.html .vcf importer])
+
+* adding localization support to Paroli python code
+
+* add an option to hide your number on outgoing calls (CLIR); perhaps add a flag in contacts to do this for certain people automatically
+
+* GUI/Setting to change background (maybe under settings>display)
+
+* GUI/Setting to change Paroli theme (currently only 1 theme available, the default one :)
+
+* GUI/Setting to change ringtone (basic things on phone ;)) (maybe under settings>phone)
 
 = Feature wishlist =
 
@@ -81,14 +97,12 @@ Foster feature : a feature that is looking for a caring, loving developer to imp
 
 * Use illume theme by default instead of "paroli"
 
-* export\import of all contacts and messages (with proper handling of non-latin1 characters) to allow migration from om2008.12 (there's a .vcf importer script somewhere available)
-
 * A 'busy' light/icon/something to tell 'We're busy, wait until we're done..' The icon would be shown when the processor load is 90% or more. This would give the user the experience of 'We're doing stuff for you' instead of 'Hmm.. I wonder if this crashed since it doesn't react to my actions any more...'
 ** or a 'watch/sandglass' icon (toolbar applet?) - could turn into 'busyball' on 90% cpu, and could buzz on failure
 
 * Would it be possible to add a SMS button in the 'People' -> contact view. Now clicking the number calls the user (intuitive? Why clicking the name nothing happens?). Maybe adding 'dial' and 'SMS' -buttons there just to make it clear. [http://www.paroli-project.org/trac/ticket/135 #135]
 
-* renaming of I/O, Tele and Msgs in the menu to whatever user wants (use utf8 for non-latin1 names)
+* renaming of SMS, Call-Log, Dialer, People and Settings in the menu to whatever user wants (use utf8 for non-latin1 names)
 
 * The numbers in the home view showing missed calls or received messages could be bigger/colorful/something or even say 'one missed call' or 'new SMS received'
 
@@ -102,8 +116,6 @@ Foster feature : a feature that is looking for a caring, loving developer to imp
 
 * Incoming call / SMS lookup against the People database takes account of the number format (ie, if in People, Fred has the number +441234567890, and a call comes in from 01234567890, which is the same number but in UK-specific not internationalised format, Fred's name is not displayed). Would it be possible to match on the last 9 or 10 digits of the number, rather than the whole number?  The chance of collisions in number space would be pretty small. [http://www.paroli-project.org/trac/ticket/145 #145] .
 
-* add an option to hide your number on outgoing calls (CLIR); perhaps add a flag in contacts to do this for certain people automatically
-
 * ability to configure AUX button usage (for example to set it up as screen lock similar to om2008.12)
 
 * configurable time & date view (e. g. 07 15, 07:15, 07-15, 2009-02-12 07:15 etc)
@@ -111,67 +123,6 @@ Foster feature : a feature that is looking for a caring, loving developer to imp
 * a fullscreen vala-terminal launcher app (with keyboard)
 
 * Paroli topbar is almost useless when illume topbar is used. Only thing is profile and that could be instead Paroli text on illume topbar. I hope that you understand what I mean...
-
-* GUI/Setting to change ringtone (basic things on phone ;)) (maybe under settings>phone)
-
-* GUI/Setting to change background (maybe under settings>display)
-
-= Reflashing Paroli =
-
-In this development phase its more error prone just reflash the phone as updating the paroli .opk package.
-(Because maybe other bugs are fixed outside of paroli)
-
- First you need to boot into NAND (where you have already a working distribution and you can ssh into).
- To be able to manipulate the sd card (you cant manipulate the sd card, if you booted from it).
-
- 00. Install Qi into NAND, and leave the factory installed uboot in NOR
-
- 0. Boot into NAND using the factory installed uboot from NOR.
- Press and hold AUX and press power until the uboot menu does not appear.
- Select the boot option by pressing the power button.
- I have SHR in NAND. Any distribution is fine as long as you can ssh in.
-
-
- 1. download latest paroli .tar.gz:
- http://downloads.openmoko.org/distro/unstable/NeoFreerunner/fso-paroli-image-om-gta02.tar.gz
- http://downloads.openmoko.org/distro/unstable/NeoFreerunner/uImage-2.6.28-stable+gitr0+f19f259d3c1afde8eae53983fd19f61831927413-r2-om-gta02.bin
-
- 2. Boot the phone into NAND
-
- 3. scp the .bin and .tar.gz to the phone's /home/root dir.
- (you may need this command to be able to connect to the phone: 
- sudo ip address add 192.168.0.200/24 dev usb0
- )
-
- 4. ssh into the phone:
- ssh root@192.168.0.202
-
- 5. Umount the sd partition, where you paroli was (for me it was the 2. partition)
- umount /media/mmcblk0p2/
-
- 6. recreate ext2 filesystem
- mkfs.ext2 /dev/mmcblk0p2 
-
-Note: It is better than erasing everything from the sd card. It does not stress
-your sd card unnecessary. The alternative method would be using rsync. Never figured it
-out myself the proper steps (using rsync and not formatting the partition)
-
- 7. Remount it
- mount /dev/mmcblk0p2 /media/mmcblk0p2/
-
- 8. Untar the fso-paroli...tar.gz into the sd card:
- cd /media/mmcblk0p2/
- gunzip </home/root/fso-paroli-image-om-gta02.tar.gz |tar -xvf -
-
- 9. copy the uImage over (assuming you have Qi into NAND):
- cd boot
- cp /home/root/uImage-2.6.28-stable\+gitr0\+f19f259d3c1afde8eae53983fd19f61831927413-r2-om-gta02.bin .
- ln -s uImage-2.6.28-stable\+gitr0\+f19f259d3c1afde8eae53983fd19f61831927413-r2-om-gta02.bin uImage-GTA02.bin
-
- 10. reboot
-
- 11. Have fun
-
 
 == Developer setup ==
 
