@@ -243,37 +243,57 @@ NM=${NM:-"255.255.255.0"}
 echo "IPv4 netmask to set: ${NM}"
 GW=${GW:-"192.168.155.155"}
 echo "IPv4 gateway to set: ${GW}"
-ESSID=${ESSID:-"<YOUR_AP_ESSID_GOES_HERE>"}
+ESSID=${ESSID:-"dax.tor.at"}
 echo "WLAN ESSID to set:   ${ESSID}"
 #
-if ! ifconfig "${DEV}" down; then
-        echo 1>&2 "could not down ${DEV}"
-fi
-if ! wmiconfig -i "${DEV}" --wlan disable; then
-        echo 1>&2 "could not disable ${DEV}"
-fi
-if ! wmiconfig -i "${DEV}" --wlan enable; then
-        echo 1>&2 "could not enable ${DEV}"
-fi
-if ! ifconfig "${DEV}" up; then
-        echo 1>&2 "could not up ${DEV}"
-fi
-if ! iwconfig "${DEV}" power off; then
-        echo 1>&2 "could not disable power management of ${DEV}"
-fi
-if ! iwconfig "${DEV}" txpower off channel 0; then
-        echo 1>&2 "could not reset ${DEV}"
-fi
-if ! wmiconfig -i "${DEV}" --setreassocmode 0; then
-        echo 1>&2 "could not set params on ${DEV}"
-fi
-if ! wmiconfig -i "${DEV}" --power maxperf; then
-        echo 1>&2 "could not set power max on ${DEV}"
-fi
-if ! iwconfig "${DEV}" essid "${ESSID}"; then
-        echo 1>&2 "could not set (e)ssid ${ESSID}"
-fi
+UP_CNT=1
+UP_MAX=2
+while [[ $UP_CNT -le 2 ]]; do
+        echo "upping, ${UP_CNT}/${UP_MAX}"
+        if ! mdbus -s org.freesmartphone.ousaged /org/freesmartphone/Usage org.freesmartphone.Usage.ReleaseResource WiFi; then
+                echo 1>&2 "could not mdbus-release WiFi"
+        fi
+        if ! mdbus -s org.freesmartphone.odeviced /org/freesmartphone/Device/PowerControl/WiFi org.freesmartphone.Resource.Disable; then
+                echo 1>&2 "could not mdbus-disable WiFi"
+        fi
+        if ! ifconfig "${DEV}" down; then
+                echo 1>&2 "could not down ${DEV}"
+        fi
+        if ! wmiconfig -i "${DEV}" --wlan disable; then
+                echo 1>&2 "could not disable ${DEV}"
+        fi
+        if ! mdbus -s org.freesmartphone.odeviced /org/freesmartphone/Device/PowerControl/WiFi org.freesmartphone.Resource.Enable; then
+                echo 1>&2 "could not mdbus-enable WiFi"
+        fi
+        if ! mdbus -s org.freesmartphone.ousaged /org/freesmartphone/Usage org.freesmartphone.Usage.RequestResource WiFi; then
+                echo 1>&2 "could not mdbus-request WiFi"
+        fi
+        if ! wmiconfig -i "${DEV}" --wlan enable; then
+                echo 1>&2 "could not enable ${DEV}"
+        fi
+        if ! ifconfig "${DEV}" up; then
+                echo 1>&2 "could not up ${DEV}"
+        fi
+        if ! iwconfig "${DEV}" power off; then
+                echo 1>&2 "could not disable power management of ${DEV}"
+        fi
+        if ! iwconfig "${DEV}" txpower off channel 0; then
+                echo 1>&2 "could not reset ${DEV}"
+        fi
+        if ! wmiconfig -i "${DEV}" --setreassocmode 0; then
+                echo 1>&2 "could not set params on ${DEV}"
+        fi
+        if ! wmiconfig -i "${DEV}" --power maxperf; then
+                echo 1>&2 "could not set power max on ${DEV}"
+        fi
+        if ! iwconfig "${DEV}" essid "${ESSID}"; then
+                echo 1>&2 "could not set (e)ssid ${ESSID}"
+        fi
+        UP_CNT=$((UP_CNT +1))
+        sleep 2
+done
 if [[ "X${DHCP}" == X"TRUE" ]]; then
+        sleep 5
         if ! dhclient3 "${DEV}"; then
                 echo 1>&2 "could not dhclient3 ${DEV}"
         fi
@@ -287,18 +307,20 @@ else
 fi
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 if ! ifconfig "${DEV}"; then
-        echo 1>&2 "could not down ${DEV}"
+        echo 1>&2 "could not ifconfig ${DEV}"
 fi
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 if ! iwconfig "${DEV}"; then
-        echo 1>&2 "could not down ${DEV}"
+        echo 1>&2 "could not iwconfig ${DEV}"
 fi
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 if ! netstat -anr; then
-        echo 1>&2 "could not down ${DEV}"
+        echo 1>&2 "could not netstat -anr"
 fi
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-sleep 10
+echo "you got 15 seconds to check the above output..."
+sleep 15
+
 </nowiki></pre>
 
 Put these line in a batch file (e.g. /root/bin/wifi-your_essid.sh) and create a .desktop file in /usr/share/applications, e.g. "/usr/share/applications/wifi-your_essid.desktop", if you will:
@@ -313,12 +335,12 @@ Categories=Network;
 
 That should give you a symbol in the start menu. 
 
-To tear wifi back down, use the following:
+To tear wifi back down, use the something like the following:
 <pre><nowiki>
 #!/bin/sh -e
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 DEV=${DEV:-"eth1"}
-echo "Wireless device:     ${DEV}"
+echo "Wireless device:       ${DEV}"
 GW=${GW:-"192.168.155.155"}
 echo "IPv4 gateway to unset: ${GW}"
 #
@@ -327,6 +349,12 @@ if ! ifconfig "${DEV}" down; then
 fi
 if ! wmiconfig -i "${DEV}" --wlan disable; then
         echo 1>&2 "could not wmiconfig-disable ${DEV}"
+fi
+if ! mdbus -s org.freesmartphone.ousaged /org/freesmartphone/Usage org.freesmartphone.Usage.ReleaseResource WiFi; then
+        echo 1>&2 "could not mdbus-release WiFi"
+fi
+if ! mdbus -s org.freesmartphone.odeviced /org/freesmartphone/Device/PowerControl/WiFi org.freesmartphone.Resource.Disable; then
+        echo 1>&2 "could not mdbus-disable ${DEV}"
 fi
 if ! route del default gw "${GW}"; then
         echo 1>&2 "could not remove default route to ${GW}"
@@ -344,7 +372,8 @@ if ! netstat -anr; then
         echo 1>&2 "could not netstat -anr"
 fi
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-sleep 10
+echo "you got 15 seconds to check the above output..."
+sleep 15
 </nowiki></pre>
 
 Again, make batch file and .desktop file, done. 
