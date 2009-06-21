@@ -1,0 +1,32 @@
+=Introduction=
+The freerunner as only two hardware buttons: AUX and Power, here we discuss about a way to use them in the best way.
+=The Problem=
+A lot of distros uses the AUX and Power button in a very poor way: simple locking, suspend the device, and some other little things.
+
+The real problem is that the big part of software read keyboard events from FSO or by the Input Event kernel interface while in some cases   buttons are grabbed by the window manager.
+
+That makes impossible to use the buttons in application contexts.
+
+=Proposals=
+==Virtual keyboard events==
+We may simulate different key events combining short/long press of the two real buttons. For example:
+* short AUX press/release -> AUX itself
+* short POWER press/release -> POWER itself
+* long AUX press/release -> virtual key event "1"
+* long POWER press/release -> virtual key event "2"
+* AUX press, POWER press, AUX release, POWER release -> virtual key event "3"
+* AUX press, POWER press, POWER release, AUX release -> virtual key event "4"
+
+and so on.
+
+We may than use the long/combined press for global shortcuts, eg long AUX for locking, long POWER to bring up settings, etc. etc., and use the short events in application context.
+
+Possible implementations:
+===Virtual uinput device===
+A daemon that grab /dev/input/events* and provide a virtual uinput keyboard, in a trasparent manner for the system.
+===X event daemon===
+A daemon that grab X11 events and iniects fake events in the X server it'self
+
+Improvements:
+
+The above daemons may injects differents events based on the the current running application.
