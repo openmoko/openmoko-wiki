@@ -1,0 +1,58 @@
+=Introduction=
+Actually the freerunner has a poor user interaction, that's due to several reasons:
+
+* small touch screen, you have to look at the device to be sure to press in the right place
+* touch events are not always recognized and you cannot guess if the x11 server really got the event
+* only two hardware button key, they are an important way to interact with users without the need of looking at the display, but they are globally used for locking and suspending, so actually cannot be used in application context
+* no use of accelerometers, those are another important way to interact with the device without the need of looking at the screen, it seems that accellges is not compatible with recent kernels but the real problems is that actually only specific applications may advantage of them
+
+We have other important issues too:
+
+* the scrolling is really a pain, everytime we need to use it we have to calm down and stop walking/driving, applications abuse of it, for example while interacting with shr-settings to show the widget on the down side you may see the entire screen slow flying around and flickering.
+* a lot of applications are python based, they needs several seconds to show up a window
+
+With a mix of all them the freerunner UI usability is really a pain! 
+
+And about X11 and windows managers:
+
+* how to switch fullscreen mode of an application?
+* how to close an x11 fullscreen application?
+* how to kill a freezed x11 application?
+* how to start/resart a freezed X11 server?
+
+=Proposal=
+* the two hardware button need to be used in a better way, see [[Better handling of AUX/Power buttons]], it's '''very important to use them in application contexts''' to have some basic interaction while walking/driving and '''without looking at the screen'''. A Paroli example when idle:
+** Aux answers incoming call
+** Power refuses
+during a call:
+** Aux switchs volume levels
+** Power terminate a call
+in every state:
+** long power switches profiles
+** long aux settings dialog
+* we need a way to interact with a "window manager helper", an applications that reacts to a global shortcut, and bring up a full screen "always on top" window that let you:
+
+** close/kill the last active window
+** switch fullscreen mode
+** rotate the screen
+** shutdown the device
+** suspend the device
+** control resource activation
+** restart X server
+** lock
+
+''These are some of the action available in "neod" the old OM2007.2 device daemon, now improved and maintained in Hackable:1, neod may be easily patched to support FSO framework, but uses EWMH to drive the window manager, that's not compatible with E17/Illume. Fortunately illume may bind key shortcuts to show the "system dialog", able to shutdow, suspend, lock the device and close the current application or trigger a lot of other actions. See [[Windows Managers]]
+
+* accelerometers may be used to simulate key presses when a gesture is recognized, and that may be integrated in the daemon tools proposed in [[Better handling of AUX/Power buttons]]. In that way *all* existing applications may benefit of accelerometers gestures.
+
+* we need sound feedback for touch events, this may be achieved at gui toolkit level, but it would be much better to have it in a transparent way, it may be by grabbing the input device events?
+
+* we should avoid the use of scrolling on freerunner, this does not mean we have to abandone it, toolkit and applications has to be capable of use it as they may run on several hardware platforms, in the case of freerunner it's unuseful to imitate iPhone or other fast scrolling devices at the cost of ridocolous user interaction.
+
+* for large gui adopt multipage widgets or big and easy to use finger friendly horizontal/vertical scrollbars
+
+And in general:
+
+*we should study an interactions schema that minimizes the use of ts/keys for choosing an element in a big list. An example is the pick of a contact in the addressbook, if we suppose n contacts in a balanced 4 tree, we should be able with a 4 button gui to choose one of them in log_4 (n), so with a 256 addressbook we need only 4 click, that's different for slow and pain scrolling on the big list.
+*applications should ported to C/C++
+*many applications should be merged in a single one to save ram and load time<br>this is true above all for system applications, that may be resident in memory and show/hide when needed
