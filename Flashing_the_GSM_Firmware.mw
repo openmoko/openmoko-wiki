@@ -43,24 +43,36 @@ The procedure has proven to do a reliable job on flashing MOKO11 to GTA02. Chanc
 '''Take special care though about the destination of `dd`, it has to be the *physical* device (e.g. foo0) of your uSD-card, *not* any partition (e.g. foo0p1). Also make sure there are *no* mounted partitions left on the uSD when starting `dd`!'''<br>
 ''Triple-check you are not accidentally overwriting your system-HD, by e.g using /dev/sda instead of /dev/sdc! Double-check once more! This is the one-typo-kills-system case ;-) You've been warned.''
 
-# Download and ''untar'' http://people.openmoko.org/joerg/calypso_moko_FW/moko11/flash-moko11_uSD-image.tar.gz on your desktop computer. Read the "README.txt" file that came with the tarball.
-# Insert a uSD to your computer's reader, and unmount all uSD-partitions that might have been automounted (use `mount` or `df -h` to check). Do not use "safely remove" for this.
-# use `dd` to write the image "flash-moko11-2.image" to the '''physical(!)''' uSD-device (this will erase all data from your uSD, including previous partition table and partitions! ''It will as well erase all data from your computer's HD, in case you accidentally `dd` to this device instead of uSD''). Use sudo or root-terminal to get root privileges needed to write to the uSD card. For example:
- sudo dd if=flash-moko11-2.image of=/dev/mmcblk0
-# `Sync` or `eject <device>` to make sure everything is flushed to the uSD before physically removing it from the reader.
-# Insert the uSD to your FreeRunner, and boot from '''[[Booting_the_Neo_FreeRunner#Log_into_U-Boot_in_the_NOR_Flash|NOR-U-Boot]]''' and select the "Boot from uSD" option,
-# See the boot and flashing process happen, and wait until a green "d_o_n_e" message shows on screen (takes some 6min). You may can now remove bat and uSD, or login via ssh and use `mickeyterm` to access the modem and check the firmware version is indeed moko11.
+<ol>
+<li>Download and <tt>untar</tt> http://people.openmoko.org/joerg/calypso_moko_FW/moko11/flash-moko11_uSD-image.tar.gz on your desktop computer. Read the <tt>README.tx</tt> file that came with the tarball.</li>
+
+<li>Insert a uSD to your computer's reader, and unmount all uSD-partitions that might have been automounted (use <tt>mount</tt> or <tt>df -h</tt> to check). Do not use "safely remove" for this.</li>
+
+<li>Use <tt>dd</tt> to write the image <tt>flash-moko11-2.image</tt> to the '''physical'''(!) uSD-device (this will erase all data from your uSD, including previous partition table and partitions! ''It will as well erase all data from your computer's HD, in case you accidentally `dd` to this device instead of uSD''). Log in as root or use sudo to get root privileges needed to write to the uSD card. For example:</li>
+
+ % sudo dd if=flash-moko11-2.image of=/dev/mmcblk0
+
+<li>Execute <tt>sync</tt> or <tt>eject <device></tt> to make sure everything is flushed to the uSD before physically removing it from the reader.</li>
+
+<li>Insert the uSD to your FreeRunner, boot from '''[[Booting_the_Neo_FreeRunner#Log_into_U-Boot_in_the_NOR_Flash|NOR-U-Boot]]''' and select the "Boot from microSD" option.</li>
+
+<li>See the boot and flashing process happen, and wait until a green "d_o_n_e" message shows on screen (takes some 6 min). You may can now remove the uSD or login via ssh and use <tt>mickeyterm</tt> to access the modem and check the firmware version is indeed moko11. Right after flashing, pressing the power button will suspend/resume the Neo, but ''not'' shut it down. If you want to do so, you can either remove the battery by hand, or (more gentle way) log in as root into it through the USB cable (root password is blank), and issue:</li>
+  
+  # shutdown -h now
 
 ===NOTE===
-If you don't have a uSD reader on your PC, you can `dd` from neo: install task-base-smbfs, u(n)mount /media/card, mount the directory in which you have the "flash-moko11-2.image" file and do the dd stuff. This will take about 12 minutes.
+
+If you don't have a uSD reader on your PC, you can <tt>dd</tt> from the Neo: install <tt>task-base-smbfs</tt>, u(n)mount <tt>/media/card</tt>, mount the directory in which you have the <tt>flash-moko11-2.image</tt> file and do the <tt>dd</tt> stuff. This will take about 12 minutes.
 
 You can speed this up by re-gziping just the image file and using the following command to decompress it directly to the flash card:
- gzip -d < flash-moko11-2.image.gz | dd of=/dev/mmcblk0
 
-Using this gzip method, you can actually do the update with an in place image as long as it is shell enabled and has 92M free on the main file system (all but Android and Neovento right now).  Just get the 92M gzip file to the phone, use the above line to extract it to the card after unmounting.
+  % gzip -d < flash-moko11-2.image.gz | dd of=/dev/mmcblk0
+
+Using this gzip method, you can actually do the update with an in place image as long as it is shell enabled and has 92M free on the main file system (all but Android and Neovento right now). Just get the 92M gzip file to the phone, use the above line to extract it to the card after unmounting.
 
 ===NOTE 2===
-If you have [[Qi]] installed ((no, *always*, see above!)) as your boot loader, power up to the NoR menu (Hold AUX Key, press Power button) and select Boot from SD (fat/ext2) to begin the installation process (per DocScrutinizer in #openmoko). '''Do not''' let Qi boot the uSD. Although it still seems to flash OK, the green "d_o_n_e" does not show up, to give you the warm feeling that everything is OK.
+
+Whether you have [[Qi]] installed or not (see above) as your boot loader, you must power up to the NoR menu (Hold AUX Key, press Power button) and select "Boot from microSD (fat/ext2)" to begin the installation process (per DocScrutinizer in #openmoko). '''Do not''' let Qi boot the uSD. Although it still seems to flash OK, the green "d_o_n_e" does not show up, to give you the warm feeling that everything is OK.
 
 You can confirm the firmware version number using the [[OpenmokoFramework/mickeyterm|mickeyterm]] (cmd: "AT+CGMR"). In SHR-Settings, Phone/Modem Information will supply the same number.
 
