@@ -1,80 +1,14 @@
 = Show always the actual characters at the bottom =
 
-When you type words using the illume keyboard, often you dont see what you have typed so far.
-Especially, when there is no similar word in the match list (upper middle).
-You can check the chars, using the top-left button, and wait for the list to appear (it is 
-always the first item at the top), but it is time consuming process, especially, when you
-type a lot.
-
-The goal of this modification, is to always display at the bottom (dead area) the 
-already typed characters as-is. It would be very useful. I (Khiraly) have already 
-done the theme part (illume.edc), there is "only" the C source part left.
-But Im stuck, please help (see sections below).
-
-== Modify the theme (illume.edc) file (DONE) ==
+== Already modified the theme (illume.edc) file ==
 
 Here is the patch and a screenshot:
-[http://wiki.openmoko.org/images/4/4c/Illume-display-char-patch.txt Illume display char patch]
-[[Image:Display char.png|thumb]]
 
 
-== Modify illume C source code (TODO, need help) ==
 
 Checkout the illume source:
   svn co http://svn.enlightenment.org/svn/e/trunk/e/src/modules/illume
 
-Obtaining the current word, is possibly in the e_kbd_int.c file using:
-  e_kbd_buf_actual_string_get(ki->kbuf)
-function call. 
 
-Maybe we should inject our code somewhere around the line 1757:
-<pre>
-   ki->base_obj = _theme_obj_new(ki->win->evas,
-				 ki->themedir,
-				 "e/modules/kbd/base/default");
-</pre>
-
-Because this is the .edc object where our TEXT part is.
-
-== HELP NEEDED ==
-
-* General C source help
-* Setting up openembedded to build the modified sourcecode (to try it out)
-
-= Multiple mode for each dictionaries =
-
-Current situation:
-
-Each kbd file is hardwired. If it is type ALPHA, it cant be changed.
- 1. Terminal type, it echoes the typed char directly.
- 2. Alpha type, it autocorrect the world and inject a space after it
-
-Proposed solution:
-
-DONT hardwire the kbd type, make it selectable instead. 
- 1. Terminal type (like the old)
- 2. Alpha type WITHOUT space (NEW) 
- 3. Alpha type WITH space (like the old)
- 4. SMS - an enhanced Alpha mode
-
-=== SMS-Mode ===
-Send the keystroke directly to the application.
-Show the dictionary lookup at the correct place.
-If a word from the dictionary is chosen, send as many backspaces as keystrokes since the last space and insert this word.
-(Preferable the keyboard layout would include a space key)
-
-= Language specific local dictionaries =
-
-Currently each dicitonary pollutes the same local file, 
-which is memory mapped in illume keyboard.
-Using multiple language concurrently degrades the dictionary accuracy 
-(thats it, it propose german words in english texts and vice-versa)
-
-
-= Make the keyboard bigger =
-In my opinion on an touchscreen the keyboard should be as big as possible.
-It would be nice if one implemented a button to easily extend the keyboard to e.g. 80% of (screen - illume topbar)
-and prevent applications from resizing.
-Making the keyboard a transparent overlay could help if it does not use too much performance
-
-[[Category:Middleware]]
+Decompile illume.edj to obtain illume.edc:
+  edje_decc illume.edj
