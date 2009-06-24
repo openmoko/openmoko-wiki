@@ -1,14 +1,43 @@
 = Show always the actual characters at the bottom =
 
-== Already modified the theme (illume.edc) file ==
+== Modify the theme (illume.edc) file (DONE) ==
 
 Here is the patch and a screenshot:
 [http://wiki.openmoko.org/images/4/4c/Illume-display-char-patch.txt Illume display char patch]
 [[Image:Display char.png|thumb]]
 
+
+== Modify illume C source code (TODO, need help) ==
+
 Checkout the illume source:
   svn co http://svn.enlightenment.org/svn/e/trunk/e/src/modules/illume
 
+Obtaining the current word, is possibly in the e_kbd_int.c file using:
+  e_kbd_buf_actual_string_get(ki->kbuf)
+function call. 
 
-Decompile illume.edj to obtain illume.edc:
-  edje_decc illume.edj
+Maybe we should inject our code somewhere around the line 1757:
+   ki->base_obj = _theme_obj_new(ki->win->evas,
+				 ki->themedir,
+				 "e/modules/kbd/base/default");
+
+Because this is the .edc object where our TEXT part is.
+
+
+= Multiple mode for each dictionaries =
+
+Current situation:
+1. Terminal type, it echoes the typed char directly.
+2. Alpha type, it autocorrect the world and inject a space after it
+
+Proposed solution:
+1. Terminal type (like the old)
+2. Alpha type WITHOUT space (NEW) 
+3. Alpha type WITH space (like the old)
+
+= Language specific local dictionaries =
+
+Currently each dicitonary pollutes the same local file, 
+which is memory mapped in illume keyboard.
+Using multiple language concurrently degrades the dictionary accuracy 
+(thats it, it propose german words in english texts and vice-versa)
