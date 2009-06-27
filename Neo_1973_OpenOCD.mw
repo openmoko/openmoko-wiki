@@ -110,6 +110,30 @@ ft2232_device_desc "Debug Board for Neo1973"
 
 For some versions of the v3 Debug board the vid_pid need to be 0x0403 0x6010.  However, commenting out (with #) the ft2232_ lines altogether makes openocd autodetect the Debug board correctly.
 
+For OpenOCD 0.2.0, the config file format has changed. You can start from this ("works for me"):
+
+<pre>
+interface ft2232
+ft2232_device_desc "Debug Board for Neo1973 A"
+ft2232_layout "jtagkey"
+ft2232_vid_pid 0x1457 0x5118
+
+source [find target/samsung_s3c2440.cfg]
+
+reset_config trst_and_srst
+
+#jtag_khz 0
+
+gdb_port 3333
+tcl_port 6666
+telnet_port 4444
+
+init
+reset run
+sleep 5000
+halt
+</pre>
+
 === Using OpenOCD telnet interface ===
 
 The telnet interface can be accessed using
