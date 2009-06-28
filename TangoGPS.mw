@@ -121,7 +121,30 @@ perl convert2gpx.pl 20080903_111508.log > 20080903_111508.gpx
 
 == Importing Tracks into tangoGPS ==
 
-tangoGPS does not support the import of tracks. You may help yourself by using [http://relet.net/frog/archives/68 this tool] to import GPX trackpoints as a series of POIs directly into the sqlite database which tangoGPS uses to store POIs.
+tangoGPS does not support the import of tracks directly, however the following xslt style sheet can be used to convert gpx tracks to tangogps log files, which can then be imported
+<nowiki>
+
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:g="http://www.topografix.com/GPX/1/1">
+<xsl:output method="text" omit-xml-declaration="yes"/>
+<xsl:template match="g:gpx" >
+<xsl:for-each select="g:wpt">
+<xsl:value-of select="@lat"/>,<xsl:value-of select="@lon"/>,11.8,1.1,346.0,1.4,2008-12-30T06:46:0<xsl:if test="position()!=last()"><xsl:text>1</xsl:text></xsl:if><xsl:if test="position()=last()"><xsl:text>2</xsl:text></xsl:if>Z
+</xsl:for-each>
+</xsl:template>
+</xsl:stylesheet>/nowiki>
+
+save this into a file called 'gpx2log.xslt', then run
+
+$ xsltproc gpx2log.xslt input_file.gpx > output_file.log
+
+move save output_file.log to the traces 
+
+and use the 'Load...' button on the 'Track' tab of tangogps to overlay it on the map
+
+Note: this stylesheet was thrown together in a short time, and makes at least one shortcut - namely, the use of 'dummy' variables for various details, such as the altitude, date, etc. feel free to improve
+
+You may help yourself by using [http://relet.net/frog/archives/68 this tool] to import GPX trackpoints as a series of POIs directly into the sqlite database which tangoGPS uses to store POIs.
 
 == Using the TangoGPS logs == 
 
