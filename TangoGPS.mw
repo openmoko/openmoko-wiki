@@ -122,6 +122,7 @@ perl convert2gpx.pl 20080903_111508.log > 20080903_111508.gpx
 == Importing Tracks into tangoGPS ==
 
 tangoGPS does not support the import of tracks directly. However the following xslt style sheet can be used to convert gpx tracks - e.g from routing software such as maps.cloudmade.com - to tangogps log files, which can then be imported<br>
+At present this style sheet will only convert tracks which make use of the 'wpt' (waypoint) tag. Some software uses the 'trk' (trackpoint) tag. This will be incorporated into the stylesheet at some point. In the meantime, it can be used on the latter type of gpx file by changing 'wpt' to 'trkpt' on line 6.
 
 <pre>
 <nowiki>
@@ -136,17 +137,16 @@ tangoGPS does not support the import of tracks directly. However the following x
 </xsl:stylesheet>
 </nowiki>
 </pre>
+
 save this into a file called 'gpx2log.xslt', then run
 
 <pre>
 $ xsltproc gpx2log.xslt input_file.gpx > output_file.log
 </pre>
 
-move save output_file.log to the traces 
+move output_file.log to the tangogps traces directory, and use the 'Load...' button on the 'Track' tab to overlay it on the map
 
-and use the 'Load...' button on the 'Track' tab of tangogps to overlay it on the map
-
-Note: this stylesheet was thrown together in a short time, and makes at least one shortcut - namely, the use of 'dummy' variables for various details, such as the altitude, date, etc. feel free to improve
+Note: this stylesheet was thrown together in a short time, and makes at least one shortcut - namely, the use of 'dummy' variables for various details, such as the altitude, date, etc. Feel free to improve this if required, although it has no bearing on the display of the track
 
 You may help yourself by using [http://relet.net/frog/archives/68 this tool] to import GPX trackpoints as a series of POIs directly into the sqlite database which tangoGPS uses to store POIs.
 
