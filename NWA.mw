@@ -1,288 +1,33 @@
 =Introduction=
-[[Image:Nwa1.png|245px|right]]
 WiFi on the freerunner has some problems, see [[WiFi Managers]].
 
 So I decided to start a project to concentrate all the ideas about an ideal (but simple) GUI applet to manage WiFi connection.
 
-The project is actually only a ''prealpha prototype'' to discover issues and implementation solutions. When ideas and needs will be clear it may be reimplemented in a more elegant way and with your preferred toolkit, now I'm using what I know better, C++ and QT with fast and dirty coding style!
+The project is actually only a ''prealpha prototype'' to discover issues and implementation solutions. When ideas and needs will be clear it may be reimplemented in a more elegant way and with your preferred toolkit, now I'm using wath I know better, C++ and QT with fast and dirty coding style!
 
-It actually manages wpa_supplicant trough dbus and spawns udhcpc directly, replicating some Network Manager features. When a solid rock network manager will be available for the freerunner, and will handle the specific device capabilities/issues, NWA may be migrated to use it's api.
-
-'''Please partecipate with contributions, ideas, hints as this may become your preferred WiFi manager for a while!!! feel free to edit this or the discussion page, and to contact me by email at nicola.mfb at gmail.com'''
+It actually manages wpa_supplicant with dbus and swapns udhcpc directly, replicating some Network Manager features. When a solid rock network manager will be available for the freerunner, and will handle the specific device capabilities/issues, NWA may be migrated to use it's api.
 
 =Requirements=
 ==A supplicant==
-The main target is to use wpa_supplicant in a decent way, e.g. as a supplicant! You'll add your preferred wifi networks at home, at work, at your friend house and so on, and it will scan silently for them, connect when they are available and show a notification window/sound to alert you.
+The main target is to use wpa_supplicant in a decent way, e.g. as a supplicant! You'll add your preferred networks at home, at works, at your friend house and so on, and it will scan silently for them, will connect when available and show a notification window/sound to alert you.
 
 User has to be able to:
-* enable/disable configured networks (for example any open network sometime is not desiderable)
-* change the networks priority (for example use any open network only if other are not available)
-* add new network manually or from scanning the area
-* configure advanced network properties, WPA enteprise, EAP, LEAP, TTLS etc.
+* enable/disable configured networks
+* change the network priority
+* add new network directly or scanning the area
+* configure advanced network properties, WPA enteprise, EAP, etc.
 
 ==Static IP vs DHCP==
-The user should be able to use dhcp or static ip addresses.
-
-==DNS handling==
-It has to be able to restore some default DNS when exiting dhcp (eg. opendns, last used dns ...), suggestions on possible solutions are appreciated.
+The user may prefer to use static ip address configuration for some networks. This should be possible.
 
 ==System tray applet==
-A sys tray icon should be showed changing it's aspect to reflect connection status.
-It should indicate:
-* inactive state (wifi disabled)
-* scanning
-* associated
-* complete (associated + authenticated)
-* key renewal
-* complete + ip address received from dhcp or set manually
-* signal strenght when associated
-* historical signal strenght (like a graph scrolling every x seconds)
-* foreign networks presence
-
-Some special handling is required for Window Managers that does not support sys tray specification (like E17).
-==Popup messages==
-Popup transient messages should be showed when:
-* connection fully complete, showing the received ip address
-* disconnection
-* wifi card enabled/disabled
-* network found (if not connected)
-
-The last has to be defined better, should you signal a new network only one? only one per session? etc.
-==Sounds/Vibration==
-Popup and/or vibration has to be associated with sounds to warn the user not looking at the device.
-
-''please suggest some free sounds in every format supported by FSO/gstreamer''
-
-As alternative some software synthetizer may be used.
+A sys tray applet should be showed changing it's aspect to reflect connection status and signal quality (possible with an historical rapresentation), and raising a window to change settings, brings actions when you click over it. Some special handling is required for Window Manager that does not support sys tray specification (like E17).
 
 ==Configuration==
-The configuration file should be in xml format, a default one will be provided that scan and connect to any open network, so the user may use NWA out of the box. When the user changes settings, the default file is copied in $HOME/.nwa.conf, that one will override the default.
+The configuration file should be in xml format, a default one will be provided that scan and connect to any open network, so the user may use it out of the box. When the user changes settings the default file has to be copied in $HOME/.nwa.conf.
 
 The GUI must be complete but simple and should not allow the user to break the configuration with random clicks, all advanced tasks may be achieved editing the configuration file manually:
 
 * dhcp client to use
 * custom scripts to launch at iface up/down, ip received
 * ...
-==Device Integration==
-NWA prefers FSO frameworkd based distro but should be capable to run on everywhere, actually it works fine on my laptop too.
-
-==Power Managment==
-With some AP the atheros power managment creates problems, NWA should support disabling it.
-==Suspend/Resume==
-It has to restore automagically the connection on suspend/resume cycles (the prototype does that without any special code as the nature of how it works).
-
-=Development status/issues=
-Wpa_supplicant dbus interface is not complete, if you quit the program in some hard way (signaling, closing X, etc) network definitions will not be deleted and at the next run NWA will be crazy, some workarounds:
-
-* <del>kill wpa_supplicant at startup, it' not nice</del>
-* <del>implement</del> implemented a remove/readadd interface to wpa when NWA is starting (it should delete all network definition, to be tested)
-* <del>bore wpa_supplicant authors to implement the full dbus interface</del> a new version of dbus interface is on the road and I just contacted wpa_supplicant maintainers
-* implements signal handling hooks (howewer a kill -9 will bypass it)
-
-Another problem is that wpa_supplicant when connects to a networks signals only the state change and not the network id or network dbus path. This is a big problem as I would have the dhcp/static ip configuration associated to that and not to the essid as it may be the same between different networks.
-
-Using the bssid to disambiguate the network may not be always possible for example when connecting to two big WDS networks with the same essid and thousand of AP.
-
-'''Please comment the above problem and suggest alternatives. In the mean I added experimental static ip support guessing the net matching essid and bssid and avoiding enabling ambigue network configurations'''
-
-<del>as wpa_supplicant does not signal the connected network we have to retrieve the essid with standard AF_INET ioctl, so qnetutils.cpp has to be improved</del> qnetutils.cpp now read the essid and bssid of the associated network.
-
-The qt stylesheet has to be improved.
-
-A startup script, launched when supplicant association is complete, is already implemented, it's a crude way to disable power management if needed.
-
-
-<del>Actually destroying a running thread when application quits leads an "application crashed" on E, I'm not caring of it now</del> a better clean and quit handler has to be implemented.
-
-To play sounds notification spawning a shell sound player may be weight and slow, so I think it's better to use FSO, while to have speech synthesis the script approach may be acceptable, <del>parameter passing has to be implemented in the configuration file (network name, ip address and so on)</del> just use $IFACE$ and $IP$ when you want it be automagically replaced with their respective values.
-
-It seems as udhcpc when got an ip address set/unset/set_again the ipaddress, this is strange. The problem is not present with dhcpcd. Updates: this happens with udhcpc on a Cisco MDS wifi network and not with common AP.
-
-<del>FSO returns random errors when PlaySound is used while a sound is already played</del> on debian sid there is no default dmix alsa configuration, this has to be declared in NWA prerequisites
-
-Some small coding fixes need to be done, and some stupid comments removed :)
-
-The first prealpha prototype is quite ready, it was developed on debian with Matchbox and matchbox-panel as sys trayer, under E qt balloon sys tray messages are showed in a random position on the screen, <del>so some special work around is needed</del> a primitive and animated "tooltip" was implemented. Multiple not overlapping message showing are not supported a queue handler has to be implemented.
-I preferred to avoid qt sys tray baloon message on not-E wm too, as if the tray icon is in a middle/left position (becouse other tray icon are present), in some cases they are not readable.
-
-It seems that udhcpc at exit does not deconfigure the interface anymore, strange I was quite sure it did before, this results in no "down" sound/notification when nwa disconnects.
-
-Vibration support added, with GUI configuration, note: it does not work on FSO <= 5.1
-
-Make sure your ar6000 kernel module includes the following patch: http://docs.openmoko.org/trac/attachment/ticket/2333/0001-ar6000-minimise-possibility-of-race-in-ar6000_ioctl_.patch otherwise you will experience a random kernel oops when you quit NWA.
-
-=Installation=
-Some guys asked for a preview, if you feel adventurous and want to join and test the prototype do the following:
- echo "src/gz noko-testing-armv4t http://noko.sourceforge.net/testing/om2009/armv4t" >/etc/opkg/noko-feed.conf
- opkg update
- opkg install nwa
-''This was tested only on *clean* OM2009 testing 5 and on *clean* SHR-unstable''
-
-'''You have to disable all your custom scripts, solution, tricks as it may be incompatible with NWA'''
-
-Versioning support was added, now if updates are available just do:
- opkg update
- opkg upgrade
-
-''If you installed the very first preview nwa_svn you should remove it and use the versioned packages''
-
-Source is cooming soon.
-
-=Changelog=
-* 0.01, the wanted preview version
-* 0.02, added support for disabling/enabling sound notifications and/or vibration (work only on fso >= 5.5)
-* 0.03, added support for static ip configuration, some other changes may break usability be warned.
-* 0.04, modified the stylesheet for checkboxes, now easy clickable
-
-=Using it=
-NWA should work out of the box at first startup on the freerunner as it has some hardcoded settings in the xml parser and in the default configuration file targeted for the freerunner, it should connect to any open network as one becomes available without further user intervention.
-
-This is only for demonstration pourpose or when you are traveling :), in normal cases you have to add/remove/edit/enable/disable networks.
-==Adding a network==
-Go on the "scan page" and click on "scan", after a bit available networks should appear, click on one of them and a wizard dialog will help you to configure the network with every kind of parameter wpa supplicant supports. I was able to add my home wpa/psk network and my campus EAP/TTLS/PAP radius enterprise network without problems.
-
-You may click on "manual add" too without scanning, this is the beginning support for some kind of hidden networks (to be done) asap I have a configurable AP in my hands :)
-
-The network is added and enabled, wpa_supplicant will decide how and when connect to it based on it's status priority etc.
-==Enabling/Disabling/Editing/Removing networks==
-Go on the "network page", you'll have two box, the upper contains the enabled network, the bottom the available (disabled) network. Clicking on a network shows a menu that permits you to do the needed operation.
-
-So if you want to ignore open networks simply disable the "Any open" profile, and reenable it when walking around in the world.
-==Enable/Disable/Autoenable WiFi==
-This is the FSO ousaged control, so be warned if you enable wifi from external application you'll see NWA working even if the wifi status is "disabled".
-
-The autoenable button let you choose if autoenable the wifi resource at startup.
-==Tray Icon==
-On WM with a standard trayer, NWA will show an icon with current wpa_supplicant status and historical signal strenght indication. Clicking on the icon will show the main window, to hide the main window use your window manager capability.
-
-=Advanced Configuration=
-NWA read $HOME/.nwa.conf configuration file, if it does not exists it read /usr/share/nwa/defaultconfiguration.xml.
-When you change some configuration with the GUI the default file is copied in $HOME/.nwa.conf.
-
-All common configuration is done in the GUI, for advanced usage you may edit your $HOME/.nwa.conf file (copy it if it does not exists yet)
-==Example configuration file==
-<pre>
-<xml version="1.0">                                                                             
-<!-- This is the default configuration file for nwa, and contains a                             
-     basic configuration for the openmoko freerunner.                                           
-     The user configuration file is $HOME/.nwa.conf and overrides this -->                      
-
-<!-- in the following section we define all possible dhcp clients -->
- <dhcpclients>
-  <dhcpclient name="udhcpc -f -i $IFACE$" default="yes"/>
-  <dhcpclient name="none" />
- </dhcpclients>
-<!-- autoenable wlan interface activation at startup -->
- <autoenable value="yes" />
-<!-- interface card, usually eth0, on some distro is eth1 (hackable1) -->
- <iface name="eth0" maxquality="255"/>
-<!-- here are stored the network definitions, the default allows to connect
-     to every open ap -->
- <networks>
-  <network name="Any Open" key_mgmt="NONE" enabled="yes" disabledhcp="false" upscript="" downscript=""/>
- </networks>
-<!-- scripts that are runned when wpa_supplicant complete authentication and when it disconnects
-     if you run nwa as non privileged user you may define a sudo call to launch/kill the dhcpcd c
-lient
-     (disabiling the main dhcp section setting it to none -->
- <ifupscript path="logger NWA iface $IFACE$ up"/>
- <ifdownscript path="logger NWA iface $IFACE$ down"/>
-<!-- scripts that are runned when the iface get/lose an ip address -->
- <ipupscript path="logger NWA iface $IFACE$ got ip $IP$"/>
- <ipdownscript path="logger NWA iface $IFACE$ losed ip $IP$"/>
- <brokenkernelhack value="no"/>
- <apscan mode="1"/>
- <!-- disable/enable fso use to:
-     * enable/disable wifi
-     * use idlenotifyer to bring up display on popup message and at startup
-     * play notification sound with gstreamer -->
- <usefso value="true"/>
- <upsound path="/usr/share/nwa/sounds/bonus.ogg"/>
- <downsound path="/usr/share/nwa/sounds/gameover.ogg"/>
- <!-- sound profile, 0 no sound, 1 sounds enabled, 2 vibrate, 3 sound + vibrate -->
- <soundprofile value="1"/>
-<!-- alwaysshowwindow if yes it show the window at startup (normally if systray is available it's hided until you click on it) -->
- <alwaysshowwindow value="no" />
-</xml>
-</pre>
-
-==Static ip address==
-<del>It will supported in the GUI asap, I need to study rtnetlink to configure network without spawning externals command, but actually it's possibile to change manually the configuration file to achieve that, here an example:
-
- <network name="my static ip network" key_mgmt="NONE" enabled="yes" disabledhcp="true" upscript="ifconfig $IFACE$ 192.168.1.10 netmask 255.255.255.0" downscript=""></del>
-
-Experimental support for static ip was added, with GUI too.
-
-==Hook scripts==
-NWA support a lot of hook scripts to configure it in specific scenarios. You may start vpn, compute advanced routing or network configuration, play sounds, start applications and so on. You have:
-
-* ifupscript: global scope, launched when the wpa_supplicant associates and authenticates to one of the enabled network
-* ifdownscript: global scope, launched when wpa_supplicant disconnects from a network
-* ipupscript: global scope, launched when the wifi card get an ip address
-* ipdownscript: gloabl scope, launched when the wifi card looses an ip address (actually does not work if multiple ip address are set)
-* upscript: network scope, launched when the specified network associates and authenticates
-* downscript: network scope, launched when the specified network disconnects
-
-==How to setup complex scripts==
-You have two options:
-* create the needed script with how many commands you need and use it in the configuration file
-* use a format compatible with xml and exec call. eg: "sh -c &quote;xxxx; yyyy; zzzz&quote;"
-
-=Test cases=
-This is a list of use cases to help in debugging NWA. I use it, if time is available, before pushing a new version to the feed , If some of there are wrong please retrying after opkg remove nwa, opkg update, opkg install and contact me if the problem persists.
-
-Feel free to add your custom cases.
-
-{| border=1
-!Test!!Status!!Note
-|-
-|First launch after installation, autoconnect to the first open network||{{Unknown}}||
-|-
-|Add WPA PSK network from scan||{{Yes}}||
-|-
-|Add WPA PSK network from scan forcing bssid||{{Yes}}||
-|-
-|Add WPA PSK network manually||{{Yes}}||
-|-
-|Add WPA Radius Enterprise TTLS/PAP network from scan||{{Yes}}||
-|-
-|Add WPA Radius Enterprise TTLS/PAP network manually||{{Unknown}}||
-|-
-|Disable network disconnects if currently connected||{{Yes}}||
-|-
-|Enable network connects if available and currently disconnected||{{Yes}}||
-|-
-|Delete network disconnects if currently connected||{{Yes}}||
-|-
-|Delete all networks make ws inactive||{{Yes}}||
-|-
-|Survive to Suspend/Resume cycle and autoreconnects||{{Yes}}||
-|-
-|Change Passphrase disconnects a network, at least at next key renewal||{{Maybe}}||
-|-
-||Static ip configuration/routing by per-network scripts||{{Yes}}||
-|-
-||Static ip configuration/routing by rtnetlink/GUI||{{Yes}}||
-|-
-||Multiple static ip||{{Unknown}}||
-|-
-|Normal user privilege||{{Maybe}}||You need to globally disable dhcp and launch it with ifaceup and ifacedown setuided scripts, tested on my laptop
-|-
-|Work on systray window manager||{{Yes}}||it shows a systray icon with historical signal strength, clicking on it show the main window, while closing that will only hide
-|-
-|Work on not systray window manager||{{Yes}}||closing the window will quit NWA
-|-
-|Work on OM2009 testing v5||{{Yes}}||Out of the box
-|-
-|Work on OM2009 testing v5 + update/upgrade||{{Yes}}||"
-|-
-|Work on SHR-unstable||{{Yes}}||
-|-
-|Work on debian sid||{{Yes}}||random kernel oops with default kernel (might need patch - see above)
-|-
-|Work on hackable:1||{{Unknown}}
-|}
-
-
-[[Category:Wlan software]]
-[[Category:Settings Applications]]
