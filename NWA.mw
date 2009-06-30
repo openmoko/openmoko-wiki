@@ -62,3 +62,37 @@ Some of the above should be achieved in the next few days when code and binaries
 A 2.6.29 rude workaround was implemented, when you quit the NWA it does not kill udhcpc and deconfigure eth0 from wpa_supplicant (always remove networks) but simply release the FSO WiFi resources, removing the interface without deconfiguring it fixes the problem but for timing reasons on a very busy system it may not work. We may think to rmmod/insmod ar6000 but it's a very crude hack and sometimes kernel opses.
 
 A startup script, launched when supplicant association is complete, is already implemented, it's a crude way to disable power management.
+=Configuring=
+==Example configuration file==
+<pre>
+<xml version="1.0">                                                                             
+<!-- This is the default configuration file for nwa, and contains a                             
+     basic configuration for the openmoko freerunner.                                           
+     The user configuration file is $HOME/.nwa.conf and overrides this -->                      
+
+<!-- in the following section we define all possible dhcp clients -->
+ <dhcpclients>
+  <dhcpclient name="udhcpc -f" default="yes"/>
+  <dhcpclient name="dhcpcd" />
+  <dhcpclient name="dhclient" />
+  <dhcpclient name="none" />
+ </dhcpclients>
+<!-- autoenable wlan interface activation at startup -->
+ <autoenable value="no" />
+<!-- interface card, usually eth0, on some distro is eth1 (hackable1) -->
+ <iface name="eth0" />
+<!-- here are stored the network definitions, the default allows to connect
+     to every open ap -->
+ <networks>
+  <network name="Any Open" key_mgmt="NONE" enabled="yes"/>
+ </networks>
+<!-- scripts that are runned when wpa_supplicant complete authentication and when it disconnects
+     if you run nwa as non privileged user you may define a sudo call to launch/kill the dhcpcd c
+lient
+     (disabiling the main dhcp section setting it to none -->
+ <ifupscript path=""/>
+ <ifdownscript path=""/>
+ <brokenkernelhack value="yes"/>
+ <apscan mode="1"/>
+</xml>
+</pre>
