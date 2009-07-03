@@ -139,9 +139,23 @@ $ patch -p2 < qemu-gcc4.patch
 
 See other available options for the configure script by appending "--help".
 Now you should have a working emulator under the name "arm-softmmu/qemu-system-arm". To run Openmoko you will also need to somehow install Openmoko on your virtual phone, which is totally clean of any software at this moment. There are several block devices to choose from, the best option is probably to do exactly what the Neo1973 manufacturer does before it ships the device to the final user. This process is described in [[Bootloader]], [[Kernel]], [[NAND bad blocks]] and [[Devirginator]] but you don't need to know all the details. Two scripts are provided to generate a firmware for your phone, as realistic as possible. First run
-<pre>$ openmoko/download.sh</pre>
+<pre>
+# Setup openmoko/env prior to running this script
+$ openmoko/download.sh
+</pre>
 which will look up the list of latest available Openmoko snapshot builds from buildhost.openmoko.org and choose the most recent [[u-boot]], Kernel, and root filesystem images, and download the images (unless they are already found in the openmoko/ directory).
-'''Note''' openmoko/env might be broken. It seems to fix it to change it to this instead.
+
+'''Note''' openmoko/env needs to point to a valid URL where kernel and flash images, can be downloaded. This is done using the variables download_dir kernel_wildcard rootfs_wildcard uboot_wildcard. The supplied env file seems to be depricated, but the following will setup the emulator to run the 2007.11 distribution emulationg the gta01 (Neo1973):
+
+<pre>
+kernel_wildcard="uImage-2.6.22.5-moko11+svnr3238-r9-neo1973.bin"
+rootfs_wildcard="openmoko-image-fic-gta01.jffs2"
+uboot_wildcard="u-boot-gta01*.bin"
+download_dir="http://downloads.openmoko.org/distro/obsolete-images/Om2007.11//images/neo1973/"
+</pre>
+
+The following should setup a working gta02 (Freerunner) emulation:
+
 <pre>#The scripts will include this on startup to setup variables
 
 src_dir="`pwd`"
