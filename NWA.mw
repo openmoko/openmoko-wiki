@@ -70,39 +70,35 @@ On OM 2.6.29 kernels wifi is broken, software putting down the interface (e.g. w
 ==Power Managment==
 With some AP the atheros power managment creates problems, NWA should support disabling it.
 =Development status/issues=
-Wpa_supplicant dbus interface is not complete, if you quit the program in some hard way (signaling, closing X, etc) network definitions will not be deleted and at the next run NWA will be crazy.
+Wpa_supplicant dbus interface is not complete, if you quit the program in some hard way (signaling, closing X, etc) network definitions will not be deleted and at the next run NWA will be crazy, some workarounds:
 
-* kill wpa_supplicant at startup :)
+* <del>kill wpa_supplicant at startup, it' not nice</del>
 * <del>implement</del>implemented a remove/readadd interface to wpa when NWA is starting (it should delete all network definition, to be tested)
 * bore wpa_supplicant authors to implement the full dbus interface
 * implements signal handling hooks (howewer a kill -9 will bypass it)
 
-qnetutils.cpp has to be improved to determine the ssid of the network you are connected to as wpa_supplicant does not signal it.
-
-The first prealpha prototype is quite ready, it was developed on debian with Matchbox and matchbox-panel as sys trayer, under E balloon sys tray messages are showed in a random position on the screen, <del>so some special work around is needed</del> a primitive but animated "tooltip" was implemented. Multiple not overlapping message showing has to be implemented.
-I preferred to avoid qt sys tray baloon message completely, as if the tray icon is in a middle/left position (becouse other tray icon are present), in some cases they are not readable.
+<del>qnetutils.cpp has to be improved to determine the ssid of the network you are connected to as wpa_supplicant does not signal it</del>qnetutils.cpp now may read the essid of wifi card, so NWA will show it for the current connected network, some work is needed to associate the essid to the custom "name" associated to the network. Wpa_supplicant signals only status changes not net network id, so actually it's not easy. A possible workaround may be to retrieve the bssid, and make the essid lineedit clickable, when the user click on it the bssid will be added in a private field of the network object, when wpa_supplicant associates if the current bssid is found in any network object the name will be showed, else the essid. Please comment this possible solution or suggest alternatives, as its implementation may be complex to handle in the GUI and should be integrated in the case you define a network connection where the desired bssid is an explicit parameter.
 
 The qt stylesheet has to be improved.
-
-Some small coding fixes need to be done, and some stupid comments removed :)
-
-Some of the above should be achieved in the next few days when code and binaries will be available for first prealpha testing.
 
 A 2.6.29 rude workaround was implemented, when you quit the NWA it does not kill udhcpc and deconfigure eth0 from wpa_supplicant (always remove networks) but simply release the FSO WiFi resources, removing the interface without deconfiguring it fixes the problem but for timing reasons on a very busy system it may not work. We may think to rmmod/insmod ar6000 but it's a very crude hack and sometimes kernel opses.
 
 A startup script, launched when supplicant association is complete, is already implemented, it's a crude way to disable power management.
 
-Actually only dhcp is supported, I have to study a bit more rtnetlink to implement it :) in the mean time I'm planning to support per-network command file execution and dhcp disabling, so you may use some script to configure the interface with a dhcp address. It should be sufficient for a prototype.
+Actually only dhcp is supported, I have to study a bit more rtnetlink to implement static ip without calling exeternals command :) in the mean time I'm planning to support per-network command file execution and dhcp disabling, so you may use some script to configure the interface with a static address. It should be sufficient for a prototype.
 
-Wpa-supplicant does not signal the network name when associates, so I need to implement the ssid retrevial via AF_INET ioctl or rtnetlink (if possible).
+Actually destroying a running thread when application quits leads an "application crashed" on E, I'm not caring of it now, as a better clean and quit handler has to be implemented.
 
-Actually destroying a running thread when application quits leads an "application crashed" on E, I'm not caring of it now.
+To play sounds notification spawning a shell sound player may be weight and slow, so I think it's better to use FSO, while to have speech synthesis the script approach may be acceptable, parameter passing has to be implemented in the configuration file (network name, ip address and so on) just use $IFACE$ and $IP$ when you want it be automagically replaced with their respective values.
 
-To play sounds notification spawning a shell sound player may be weight and slow, so I think it's better to use FSO, while to have speech synthesis the script approach may be acceptable, paramter passing has to be implemented in the configuration file (network name, ip address and so on).
-
-It seems as udhcpc when got an ip address set/unset/set_again the ipaddress, this is strange and cause fso to execute a broken sound. The problem is not present with dhcpcd. Updates: this happens on a Cisco MDS wifi network and not with common AP.
+It seems as udhcpc when got an ip address set/unset/set_again the ipaddress, this is strange. The problem is not present with dhcpcd. Updates: this happens with udhcpc on a Cisco MDS wifi network and not with common AP.
 
 <del>FSO returns random errors when PlaySound is used while a sound is already played</del> on debian sid there is no default dmix alsa configuration, this has to be declared in NWA prerequisites
+
+Some small coding fixes need to be done, and some stupid comments removed :)
+
+The first prealpha prototype is quite ready, it was developed on debian with Matchbox and matchbox-panel as sys trayer, under E balloon sys tray messages are showed in a random position on the screen, <del>so some special work around is needed</del> a primitive but animated "tooltip" was implemented. Multiple not overlapping message showing has to be implemented.
+I preferred to avoid qt sys tray baloon message completely, as if the tray icon is in a middle/left position (becouse other tray icon are present), in some cases they are not readable.
 
 =Configuring=
 ==Example configuration file==
