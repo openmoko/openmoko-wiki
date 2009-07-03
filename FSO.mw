@@ -1,1 +1,138 @@
-#REDIRECT [[OpenmokoFramework]]
+{{Languages|OpenmokoFramework}}
+{{FSO}}
+
+''s/Openmoko/freesmartphone.org/ :)'' 
+
+Openmoko is basing on the freesmartphone.org (FSO) middleware. FSO will be in the forthcoming [[Om 2009]] distribution. For more information see http://www.freesmartphone.org, http://docs.freesmartphone.org, and http://trac.freesmartphone.org. Openmoko is working on a stable system services back-end. Focus is on stable highlevel services that you can access from whatever language or UI that supports [http://dbus.freesmartphone.org/ dbus]. FSO is all about middleware, but if one stacks a bootloader+kernel under it and telephony applications on top, one gets a functional distribution. These are made available as FSO-image milestones. 
+
+==Q/A==
+* ''Question'': Is this an Openmoko-only thing?
+* ''Answer'': No. It's going to be available for all kinds of mobile hardware running Linux, i.e. OpenEZX, HTC, Glosfiish, etc.
+* ''Question'': Is this a part of the current images yet?
+* ''Answer'': Yes. It comes with SHR and Openmoko 2009.x testing images.
+* ''Question'': What's the current status?
+* ''Answer'': See right below or hop over to http://trac.freesmartphone.org .
+** [[OpenmokoFramework/Status Update 1|Status Update 1]]
+** [[OpenmokoFramework/Status Update 2|Status Update 2]]
+** [[OpenmokoFramework/Status Update 3|Status Update 3]]
+** [[OpenmokoFramework/Status Update 4|Status Update 4]]
+** [http://wiki.openmoko.org/wiki/Fso-internal-om.pdf Openmoko Framework Presentation Taipei'08]
+** [[OpenmokoFramework/Status Update 5|Status Update 5]]
+** [[OpenmokoFramework/Status Update 6|Status Update 6]]
+* ''Question'': How do I work the Zhone (FSO demo app) UI?
+* ''Answer'': [[FSO UI Tutorial]]
+* ''Question'': What is the easiest way to build it?
+* ''Answer'':  See [[Building_FSO]] for more information. The feeds are now at http://downloads.freesmartphone.org.
+
+==Phases==
+# Phase I is about getting the APIs right.
+# Phase II is about getting the right APIs fast.
+
+==Timeline (Phase I)==
+* ''2009-07-01: [http://trac.freesmartphone.org/milestone/milestone6 milestone 6]''
+* ''2009-03-31: [http://trac.freesmartphone.org/milestone/milestone5.5 milestone 5.5]''
+* 2009-02-02: [[OpenmokoFramework/Status Update 6|milestone 5]] achieved
+* 2008-11-11: [[OpenmokoFramework/Status Update 5|milestone 4]] achieved
+* 2008-09-10: [[OpenmokoFramework/Status Update 4|milestone 3]] achieved
+* 2008-07-01: [[OpenmokoFramework/Status Update 3|milestone 2]] achieved
+* 2008-06-01: [[OpenmokoFramework/Status Update 2|milestone 1]] achieved
+
+==Timeline (Phase II)==
+
+... to be defined ...
+
+==Purposes==
+* Give people the infrastructure to create solid and exciting software products based on the Openmoko platform
+* Support competing UIs while collaborating on developing services
+* Encourage framework users (e.g. application developers) to also contribute to the framework
+
+==Requirements==
+* Make it simple
+* Concentrate on core services
+* Be programming language agnostic
+* Be UI toolkit agnostic
+* Try to reuse existing technologies as much as possible, but not at the cost of a bad API
+
+==How to achieve that technically==
+* Choose [[D-Bus]] as the collaboration line. Below dbus, we can work together. Above dbus, we can differentiate
+* Expose features through dbus APIs implemented by UI-agnostic and language-agnostic services (daemons)
+* Optimize for Openmoko devices, but support multiple architectures and purposes through plugin interfaces and suitable hardware abstraction mechanisms
+* By not being afraid of reinventing the wheel for a wheelbarrow if all the existing wheels are made for sports cars
+
+==Mandatory Reading==
+* [http://adam.gomaa.us/blog/frameworks-exist-for-conceptual-integrity/ Frameworks exist for conceptual integrity]
+* [http://humanized.com/weblog/2007/10/05/make_oss_humane/ Ten ways to make more humane open source software]
+* [http://www.freesmartphone.org FreeSmartPhone.org Wiki]
+
+==What this is NOT about==
+This initiative does not cover low level services such as
+* Bootloader, Kernel, or System Init.
+
+This initiative does not cover high level services such as
+* X-Window-System, Window Manager, UI Toolkits,
+* Application Launchers, Applications, or Fancy UIs.
+
+==Architectural Overview==
+[[Image:OpenmokoFramework08.png |632px|frontside]]
+
+==Software Components==
+
+Please see the description at http://www.freesmartphone.org/index.php/Architecture
+
+==Known API Consumers==
+
+* [[Zhone]]
+* [[SHR]]
+* [[Tichy]]
+* [[Paroli]]
+
+==Tools==
+* [[OpenmokoFramework/mdbus|mdbus]] -- a dbus introspection and interaction utility,
+* [[OpenmokoFramework/cli|cli-framework]] -- a python dbus command line interface.
+* [[OpenmokoFramework/mickeyterm|mickeyterm]] -- a MUXer-aware minimal terminal emulator.
+==Scripts==
+* Example [[OpenmokoFramework/scripts|Scripts]] that work over dbus
+==How to debug==
+# log in via ssh
+# killall python
+# edit /etc/frameworkd.conf and add to the frameworkd section:
+## log_level = DEBUG
+## log_to = file
+## log_destination = /somewhere/where/you/have/space (preferably SD or NFS, etc.)
+# Read our [http://git.freesmartphone.org/?p=framework.git;a=blob;f=conf/example/frameworkd.conf documented frameworkd.conf] configuration file to learn about the other options.
+# relaunch frameworkd (/etc/init.d/frameworkd stop; /etc/init.d/frameworkd start)
+# log in via ssh (yes, again)
+# export DISPLAY=:0.0
+# run your favourite client (zhone, cli-framework, ...)
+
+Attach the logs to the tickets, please.
+
+==The role of Python==
+
+Where we write new code, we will use Python to implement the dbus services. The reason for that being the rapid prototyping nature of Python and the emphasis on the [[D-Bus]] APIs. Using Python, the turnaround times to experiment with APIs are incredibly faster than for using a compiled language such as C or C++.
+
+Once the APIs have been used by application programmers, we can start profiling and possibly reimplement some of the services with daemons written in Vala, ''if'' necessary. We might as well succeed in improving performance by using Pyrex/Cython/Ctypes to keep the benefits of Python.
+
+==Team & Roadmap==
+
+===Team===
+
+* [[User:Mickey|Michael 'Mickey' Lauer]] (team leader) -- Openmoko freelancer, working in Frankfurt/Main, Germany.
+* [[User:Shoragan|Jan 'Shoragan' Luebbe]] -- Openmoko student, working part-time in Brunswick, Germany.
+* [[User:DanielWillmann|Daniel 'Alphaone' Willmann]] -- Openmoko student, working part-time in Brunswick, Germany.
+* [[User:StefanSchmidt|Stefan Schmidt]] -- Openmoko student, working part-time in Brunswick, Germany.
+
+===Roadmap===
+
+The milestone releases are combined Openmoko Framework and [[Zhone]] releases. Remember: A feature that isn't visible, working, and tested in our framework testing application (Zhone) does ''not'' exist. Until Framework 1.0.0 (early 2009), we will not use any versioning in components. Afterwards, individual components may see individual releases.
+
+'''Note: The milestones and tasks moved over to our [http://trac.freesmartphone.org issue tracker].'''
+
+=== Download and see also ===
+
+* [http://trac.freesmartphone.org/ Development tracker]
+* [http://freesmartphone.org freesmartphone.org]
+* [http://downloads.freesmartphone.org fso-testing and fso-unstable images and feeds] (maintained by Rod Whitby, MokoMakefile author)
+
+[[Category:Framework|Framework]]
+[[Category:FSO]]
