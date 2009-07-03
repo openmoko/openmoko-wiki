@@ -110,9 +110,7 @@ I preferred to avoid qt sys tray baloon message completely, as if the tray icon 
 
 <!-- in the following section we define all possible dhcp clients -->
  <dhcpclients>
-  <dhcpclient name="udhcpc -f" default="yes"/>
-  <dhcpclient name="dhcpcd" />
-  <dhcpclient name="dhclient" />
+  <dhcpclient name="udhcpc -f -i $IFACE$" default="yes"/>
   <dhcpclient name="none" />
  </dhcpclients>
 <!-- autoenable wlan interface activation at startup -->
@@ -128,11 +126,11 @@ I preferred to avoid qt sys tray baloon message completely, as if the tray icon 
      if you run nwa as non privileged user you may define a sudo call to launch/kill the dhcpcd c
 lient
      (disabiling the main dhcp section setting it to none -->
- <ifupscript path=""/>
- <ifdownscript path=""/>
+ <ifupscript path="logger NWA iface $IFACE$ up"/>
+ <ifdownscript path="logger NWA iface $IFACE$ down"/>
 <!-- scripts that are runned when the iface get/lose an ip address -->
- <ipupscript path=""/>
- <ipdownscript path=""/>
+ <ipupscript path="logger NWA iface $IFACE$ got ip $IP$"/>
+ <ipdownscript path="logger NWA iface $IFACE$ losed ip $IP$"/>
  <brokenkernelhack value="yes"/>
  <apscan mode="1"/>
  <!-- disable/enable fso use to:
@@ -142,5 +140,7 @@ lient
  <usefso value="true"/>
  <upsound path="/usr/share/nwa/sounds/bonus.ogg"/>
  <downsound path="/usr/share/nwa/sounds/gameover.ogg"/>
+<!-- alwaysshowwindow if yes it show the window at startup (normally if systray is available it's hided until you click on it) -->
+ <alwaysshowwindow value="yes" />
 </xml>
 </pre>
