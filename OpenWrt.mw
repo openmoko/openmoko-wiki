@@ -50,20 +50,16 @@ You maybe also want to change the IP address under which the freerunner will be 
 
 Per default OpenWrt is using the uclibc as libc implementation. You can use another libc (e.g. the glibc) by changing that via "[*] Advanced configuration options (for developers)" -> "---   Toolchain Options" -> "LIBC implementation".
 
-=== Enlightenment requirements ===
-Since SVN revision 15585 all required tools for getting enlightenment built are built nativly within OpenWrt.
-No need to care about anything anymore here :)
-
 === Build your OpenWrt image ===
 If your done configuring the image you can build it by just running:
 
  make
 
 '''Warning:''' OpenWrt build system have more or less requirements depends on selected packages. Using GTA-02 full profile, we need: 
-* subversion and git to retrieve some external sources. (On Debian Lenny: subversion git-core)
-* full autotools suite. (On Debian Lenny: automake autoconf autotools-dev libtool pkg-config)
-* dbus-binding-tool to be able to compile "gsm0710muxd". (On Debian Lenny: libdbus-glib-1-dev)
-* autopoint and cvs is used by enlightenment building process. (On Debian Lenny: gettext cvs)
+* ''subversion'' and git to retrieve some external sources. (On Debian Lenny: ''subversion git-core'')
+* full ''autotools'' suite. (On Debian Lenny: ''automake autoconf autotools-dev libtool pkg-config'')
+* ''dbus-binding-tool'' to be able to compile "gsm0710muxd". (On Debian Lenny: ''libdbus-glib-1-dev'')
+* ''autopoint'' and ''cvs'' is used by enlightenment building process. (On Debian Lenny: ''gettext cvs'')
 
 This will now take some time. Please make sure you have enough free space left (~4 GB for full-profile).
 Instead you can use "make V=99" to get debug output to see what's going on / went wrong.
@@ -72,9 +68,39 @@ Instead you can use "make V=99" to get debug output to see what's going on / wen
 When the build process is finished you will find a rootfs (openwrt-s3c24xx-2.6-root.jffs2-128k) and a kernel image (openwrt-s3c24xx-2.6-uImage) in the bin/ subfolder of your OpenWrt installation, which can be installed on your freerunner with the [[Dfu-util|dfu util]] as normal.
 
 === Try it ! ===
-After flashing both images, reboot your phone and depending on what packages were built into the image (=you've selected) you might be able to initiate / receive phonecalls with your FreeRunner running OpenWrt :)
+After flashing both images, reboot your phone and depending on what packages were built into the image (which are the packages you've selected) you might be able to initiate and receive phonecalls with your FreeRunner running OpenWrt :)
 
-You can also reach the freerunner over [[USB_Networking|usb network]] via telnet. SSH is also available after you have set up password for the root account (Run `passwd` in a telnet session).
+You can also reach the Freerunner over [[USB_Networking|usb network]] as usual but Freerunner under OpenWrt have 192.168.1.1 IP address as default.
+To be able to SSH your phone, you must setup a password using telnet:
+
+ $ telnet 192.168.1.1
+ Trying 192.168.1.1...
+ Connected to 192.168.1.1.
+ Escape character is '^]'.
+  === IMPORTANT ============================
+   Use 'passwd' to set your login password
+   this will disable telnet and enable SSH
+  ------------------------------------------
+ .
+ BusyBox v1.13.4 (2009-07-06 01:59:55 CEST) built-in shell (ash)
+ Enter 'help' for a list of built-in commands.
+ .
+   _______                     ________        __
+  |       |.-----.-----.-----.|  |  |  |.----.|  |_
+  |   -   ||  _  |  -__|     ||  |  |  ||   _||   _|
+  |_______||   __|_____|__|__||________||__|  |____|
+           |__| W I R E L E S S   F R E E D O M
+  KAMIKAZE (bleeding edge, r16703) -------------------
+   * 10 oz Vodka       Shake well with ice and strain
+   * 10 oz Triple sec  mixture into 10 shot glasses.
+   * 10 oz lime juice  Salute!
+  ---------------------------------------------------
+ root@OpenWrt:/# passwd
+ Changing password for root
+ New password:
+ Retype password:
+ Password for root changed by root
+ root@OpenWrt:/#
 
 ==Congratulations!==
 
