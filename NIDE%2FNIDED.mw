@@ -1,137 +1,17 @@
 =Introduction=
-[[Image:Nide1.png|320px|right]]
-NIDE/NIDED is a client/server application that emulates virtual input device through the network. With that you may transform your freerunner in a virtual keyboard/mouse to control a remote Linux Box and do other nice things. It's similar to [[Remoko]], but uses a different tecnique.
-
+NIDE/NIDED create a network input device emulator. With that you may transform your freerunner in a virtual keyboard/mouse to control a remote Linux Box.
 =How it works=
-NIDE is the client part of the architecture, it's a GUI that show you the virtual device (keyboard, mouse, etc), and recognizes your input actions:
-* press a gui button
-* press an hardware button (AUX, Power)
-* slide your finger on display
-* move the freerunner (accelerometers) TBD
+NIDE is the client part of the architecture, it's a GUI that show you the virtual device (keyboard, mouse, etc), when you trigger some action, eg. button press, it send a command to a remote host where NIDED is installed.
 
-If the input action matches some rules in the configuration file it:
-
-* simulate trough nided a mouse move/click or key press/release on the remote linux box
-* requests nided to start a process on the remote linux box
-* start a local process
-* switch to subpages of virtual device.
-
-The NIDED daemon create a virtual keyboard/mouse registering a new device in "uinput", reads command sent by NIDE, translates and inijects them in the system or execute remote applications.
+The NIDED daemon create a virtual keyboard/mouse registering a new device in "uinput", reads command sent by NIDE, translates and inijects them in the system.
 =Pro=
 * it works with every network, bt, wifi, usb and so on
 * it may request remote command execution (startup application, halt, reboot, etc.)
-* it's xml configurable and stylesheet themable, it's easy to create customized virtual devices
+* it's xml configurable and stylesheet themable, it's easy to create customized devices
 * you may create different pages in the same config file and may switch between them
-* every page may have two layouts (portrait, landscape), it auto switches beetween them if the system display is rotated 
+* every page may have two layouts (portrait, landscape), it auto switches beetween them if you rotate the display (actually with an external application)
 * it may use AUX/POWER button to trigger action (simulate button press, request remote command execution, switch between pages and so on)
-* the gui recognizes simple sliding over a user configurable matrix, with a 3*3 matrix you are able to use 72 different sliding
-* there is no need to "initiate" action on the controlled host (as in Remoko) it needs only nided started
-* it automatically restore the last session at startup, so if you use it to control always the same host you are ready with only one click.
-
+* there is no need to "initiate" action on the controlled host (as in Remoko)
 =Cons=
 * it requires nided to be installed on the controlled host, that need linux 2.6 and uinput kernel module
-* it uses QT library, and that are not provided in OM2009/SHR, you have to build them yourself or take them from the angstrom or my persronal feed
-* '''no authentication is implemented, a stupid and rude security ip access list is used, so you have to use it in highly secure networks'''
-* it may be buggy in some part and may need bug fixing/code restyling
-=Installation=
-'''n.b. nide/nidec is in prealpha state'''
-
-To install nided on the controlled linux box you need subversion and typical build tools:
- svn co https://noko.svn.sourceforge.net/svnroot/noko/trunk/nided
- cd nided
- ./configure
- make
- sudo make install
-
-it will install nided in /usr/local/sbin, and a default nided.conf file in /usr/local/etc/nided.conf, edit this according your needs e.g.  uncommenting allow_commands to allow remote execution, or adding/remove trusted ip address.
-
-The default will permit connection from localhost, from 192.168.0.200 and from 192.168.0.202.
-
-To start nided you have to load the uinput module:
- sudo modprobe -v uinput
-and launch it:
- sudo nided
-
-log goes to syslog.
-
-To install nide on freerunner:
- echo "src/gz noko-testing-armv4t http://noko.sourceforge.net/testing/om2009/armv4t" >/etc/opkg/noko-feed.conf
- opkg update
- opkg install nide
-
-Three example configuration are provided:
-* fullportrait.cfg, full qwerty keyboard + mouse at 480x640, or fullscreen mouse at 640x480
-* fulllandscape.cfg, full qwerty keyboard + mouse at 640x480, or fullscreen mouse at 480x640
-
-The above will autoswitches if you rotate the display with xrandr or other tools.
-
-* mythtv.cfg, example file to use custom icons, remote commands and sub pages, I use it to conrol mythtv and shutdown my linux box from   my bed without tampering with ssh :)
-
-
-'''Nide uses uinput codes to emulate a real keyboard or mouse at uinput level and *not* using X and XFakeKey tecniques, a big advantage is that it work in framebuffer/text mode too (you may switch to text mode from nide as usual, with a simple control-alt-f1), at the same time, it cannot be aware of remote keyboard layout, I created the example above files for my needs e.g. an italian keyboard, you have to modify them to match your layout, share if you want yours to be inlcuded in next releases'''
-
-'''Creating virtual pad to control every kind of software is only a matter of time and fantasy, so contribute with yours, we need to control openoffice impress, kaffeine and so on'''
-
-=Using it=
-At first startup it will show a bare window that let you pickup a virtual device configuration and an hostname or ip address. The connect button will start the virtual device and will connect to nided on your remote linux host.
-To change host or layout simply close the device windows and you'll get back to the main window. On next launch NIDE will remember last  used host/layout and will auto open the virtual device.
-
-'''n.b. communication is done with UDP and is send only, so you'll get errors only for dns resolution and not for network outages or any other reason you cannot connect to remote nided, this is a planned feature and may change if needed'''
-
-=Virtual Devices=
-
-==Community Devices for Download==
-
-===Mplayer Keyboard===
-
-[[Image:Nide-mplayer.png|170px]]
-
-[http://wiki.openmoko.org/images/2/2e/Nide-mplayer.tar.bz2 Download here]
-
-Contents of this archive have to be extracted to /usr/share/
-
-
-==How to create your own new virtual devices==
-Create a file in /usr/share/nide/devices with extension ".cfg". It's an xml file, the following example should be autoexplaining:
-
- <xml>
-  <page name="default">
-   <portrait vsizex="5" vsizey="5" vslidex="2" vslidey="2" stylesheet="/usr/share/nide/styles/freerunnert.style" iconpath="/usr/share/nide/icons" >
-    <button code="1"   x="0"  y="0" width="3" height="3" icon="application-exit.png"/>
-    <button code="10" x="0" y="0" width="2" height="1" text="Esc"/>
-    <button code="2"   x="1"  y="1" width="1" height="1" text="1" stext="!" atext="&#x00b9;" satext="&#x00a1;"/>
-    <button x="0" y="6" text="remote&#xa;commands" width="3" height="3" gotopage="commands"/>
-    <mouse x="3" y="0" width="3" height="4"/>
-    <key keycode="177" code="28"/>
-    <slide x1="0" y1="0" x2="1" y2="1" localcommand="shutdown -r now"/>
-   </portrait>
-  </page>
-  <page name="commands">
-   <portrait vsizex="1" vsizey="5">
-    <button gotopage="default" x="0" y="0" text="return"/>
-    <button x="0" y="3" text="reboot" command="reboot" gotopage="default"/>
-    <button x="0" y="4" text="halt" command="halt" gotopage="default"/>
- </portrait>
- </page>
-
-code is the linux input key code, you can find it in /usr/include/linux/input.h, stext, atext, and satext are shift text, alt text, and shift alt texts.
-
-To mark a key as a modifier add the
- modifier="x"
-attribute to the button element where x is:
-* 1 - left shift
-* 2 - right alt (altgr)
-* 4 - right shift
-* 8 - left alt
-* 16 - leftctrl
-* 32 - leftmeta
-* 64 - rightctrl
-* 128 - rightmeta
-
-Mouse create a virtual mouse, use the right key codes to create button left, right and middle, key is hardware buttons, on the freerunner you may use aux and power.
-
-Slide add a sliding gestures from (x1,y1) to (x2,y2), these coordinates ranges in 0<->vslidex-1, 0<->vslidey-1
-
-[[Category:Applications]]
-[[Category:Networking]]
-[[Category:Keyboards]]
+* '''no authentication is implemented, a stupid and rude security ip access list is used, so you have to use it in secure networks'''
