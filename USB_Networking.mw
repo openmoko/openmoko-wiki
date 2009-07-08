@@ -682,6 +682,32 @@ If Network Configuration tool cannot see the the usb0 try to unplug the usb cabl
 
 NetworkManager will assign a new ip address for the OpenMoko if link goes down for a while. You can fix this by issuing '''ifup usb0''' again.
 
+=== Option D - tested on Fedora 11 (Leonidas) ===
+
+Plug in the usb cable. NetworkManager should detect the phone automatically. Perform following steps:
+# Rightclick NetworkManager Icon
+## Click '''Edit Connections ...'''
+## Type root password when requested
+## Select first entry in List (eg. Auto eth1)
+## Click '''Edit'''
+## Change '''Connectionname''' to '''neo freerunner'''
+## Chose tab '''IPv4 Properties'''
+## Choose '''manual''' in Drop-Down-Box '''Method'''
+## Click '''Add''' at '''Adresses'''
+## Enter this values:
+### Address: 192.168.0.200
+### Netmask: 255.255.255.0
+### Gateway: 0.0.0.0
+## Click '''Apply'''
+## Click '''Close''' on dialog "network connections"
+# Open Shell
+## Enter '''iptables -I FORWARD -j ACCEPT -d 192.168.0.202/32'''
+## Enter '''iptables -I FORWARD -j ACCEPT -s 192.168.0.202/32'''
+## Enter '''iptables -I POSTROUTING -t nat -j MASQUERADE -s 192.168.0.202/32'''
+## Enter '''/etc/init.d/iptables save'''
+## Enter '''chkconfig iptables on'''
+Done!
+
 == Red Hat or Similar (tested with Workstation 5) ==
 
 Edit /etc/sysconfig/network-scripts/net.hotplug:
