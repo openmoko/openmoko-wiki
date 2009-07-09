@@ -8,19 +8,19 @@ For the general motivation, the goals, and the way we are doing our work, please
 
 == People & Organization ==
 
-You all should have heard by now that the FSO team is no longer under the hood of Openmoko. The current team still consists of Mickey, Jan, Daniel, and Stefan, however we pretty much sail under the flag of [http://www.freesmartphone.org freesmartphone.org] now. As such, this is the last official OpenmokoFramework status report -- future reports will appear elsewhere.
+You all should have heard by now that the FSO team is no longer under the hood of Openmoko. The current team still consists of Mickey, Jan, Daniel, and Stefan, however we pretty much sail under the flag of freesmartphone.org. As such, this is the last official OpenmokoFramework status report -- future reports will appear elsewhere.
 
 == DBus APIs ==
 
 All the public DBus API are documented on the official [http://docs.freesmartphone.org freesmartphone.org API reference] site. XML-API files for generating language bindings are available from the [http://git.freesmartphone.org/?p=specs.git;a=tree;f=xml git tree].
 
-The DBus APIs have received little updates and are pretty much considered stable for FSO-1. If your programming language of choice features integrating C libraries, then we recommend using [http://git.freesmartphone.org/?p=libfso-glib.git;a=summary libfso-glib] which handles all the details of dbus communication and ensures that the DBus API contract is respected.
+The DBus APIs have received little updates and are pretty much considered stable for FSO-1.
 
 == Implementations ==
 
 '''Freesmartphone.org Framework Image -- 'In Transit' (Milestone V.5)'''
 
-This is the sixth milestone release of the framework and the diagnostic application '[[Zhone]]'. While we announced that we are going to phase Zhone out as phone application, it remains an important diagnostic application, i.e. for GPS and GSM monitoring.
+This is the sixth milestone release of the framework and the diagnostic application 'Zhone'. While we announced that we are going to phase Zhone out as phone application, it remains an important diagnostic application, i.e. for GPS and GSM monitoring.
 
 Framework milestones currently ships in the following form:
 
@@ -28,17 +28,16 @@ Framework milestones currently ships in the following form:
 # fso-illume-image: An FSO-compliant image featuring the X-Window system with the Enlightenment-based Illume window manager.
 # fso-zhone-image: An FSO-compliant image featuring the X-Window system with the Enlightenment-based Illume and the Zhone diagnostic applications.
 
-Note that FSO milestones are not distributions per se, but rather demonstration images for the middleware release. Real distributions that are using FSO as [http://en.wikipedia.org/wiki/Middleware middleware] are:
-* [[Om 2009|Openmoko 2009]]
-* [[SHR]]
-* [[Neovento]]
-* [[QtMoko]]
-* [[Debian]]
-* [[Gentoo]]
-* Several unreleased homebrewn...
+Note that FSO milestones are not distributions per se, but rather demonstration images for the middleware release. Real distributions that are using FSO as middleware are:
+ * SHR
+ * Neovento
+ * QtMoko
+ * Debian
+ * Gentoo
+
 ===Purpose===
 
-A flashable demonstration image that implements the freesmartphone.org APIs that can serve as the basis for mobile application development.
+A flashable image that implements the freesmartphone.org APIs, serving as the basis for mobile application development.
 
 ===Thanks===
 
@@ -49,80 +48,28 @@ Thanks to all our contributors, especially the testers and the people who build 
 '''Note: These are only the highlights. See the [http://git.freesmartphone.org gitweb] commit logs for the gory details...'''
 
 * General:
-** This is the first milestone release incorporating results from our [http://www.freesmartphone.org/index.php/Cornucopia Cornucopia] project -- the next generation reference implementation of the FSO APIs, this time in [http://www.vala-project.org Vala], which compiles to C. For those who write in Vala, we provide a .vapi file for libfso-glib.
-** Added interactive loophole for live or post-mortem debugging via telnet.
-** For people who flash their device very often, we now try to bind mount /media/card/bind-home to /home/root. Just create that directory on your SD-Card and it will be mounted on the next reboot.
-
-* fsousaged
-** Completely rewritten in Vala with drastically improved performance.
-** The ousaged implementation (Python) has been deprecated, we strongly recommend integrators to no longer use this.
+** This is the first milestone release that incorporates results from our [http://www.freesmartphone.org/index.php/Cornucopia Cornucopia] project -- the 2nd reference implementation of the FSO APIs, this time in [http://www.vala-project.org Vala], which compiles to C.
 
 * ogsmd
-** Improved support for the Freescale Neptune modems as appearing in the Motorola EZX series.
-** Fully support the Qualcomm MSM modems as appearing in the HTC smartphone family, including the Touch Pro, the G1, etc.
-** Added support for extended SMS properties, including SMS delivery reports.
-** Fixed MCC and MNC presentation.
-** Relaxed the PDU decoder to deal with sloppy encoded SMS.
-** Status report messages are auto-acked now.
-** Refresh network status after suspend.
-** Added a cell database (This is *not* the final API, but a simple test to make cellhunter data available. Later this functionality will be exposed differently)
-** Redesigned the low level AT command parser to cope with unsolicited responses woven in solicited responses.
-** Improved datacall support.
-
 * ogpsd
-** Reintroduced Ephemeris and Almanac uploading (~ 16 sec TTFF is possible).
-** Fixed some bugs.
-
-* ophoned
-** Added Bluetooth headset support.
 
 * odeviced
-** Fixed heaps of bugs everywhere.
 
 * oeventsd
-** Bugfixes
 
-* otimed
-** Major bug fixes, especially for multi-zone countries (use network supplied offset there).
-** Improved configurability (NTP server IP).
+* ousaged
 
 * opimd
-** MAJOR overhaul thanks to Sebastian Krzyszkowiak!
-** added new domain Calls (for phone log functionality)
-** working basics of Contacts, Messages and Calls domains
-** working Update/Delete methods and signals
-** added new backends: SQLite-Contacts, SQLite-Messages, SQLite-Calls with full Add/Update/Delete support and ogsmd-Calls (handler)
-** SIM-Messages-FSO and SIM-Contacts-FSO backends: listen to ReadyStatus and AuthStatus signal to init when possible automatically
-** CSV-Contacts and SIM-Contacts-FSO backends: full Add/Update/Delete support
-** SIM-Messages-FSO: full CSM and message receipts handling
-** timestamps and timezones handling in Messages and Calls
-** merging entries - you can store some data for the same contact on SIM backend, others on SQLite, and it'll be merged by opimd into one visible contact
-** avoid duplicating entries on initing backend second time
-** initing backends automatically at boot
-** work on API - lot of new dbus calls (mostly for configuration)
-** make lot of things configurable
-** more error handling
-** A LOT of bugfixes
 
-* Cornucopia
-** fsousaged: Completely done.
-** fsodeviced: Completely done & in testing.
-** fsogsmd: Waiting for async. dbus server support in Vala.
+* onetworkd
 
-===Installation on Flash (for booting with U-Boot or Qi)===
+* otimed
 
-# Grab a uImage and a .jffs2 for your device from freesmartphone.org's download [http://downloads.freesmartphone.org/fso-stable/milestone5.5/ section].
+===Installation===
+
+# Grab a uImage and a .jffs2 for your device from freesmartphone.org's download [http://downloads.freesmartphone.org/fso-stable/milestone5/ section].
 # Flash it to your [[Flashing the Neo 1973|Neo 1973 (om-gta01)]] or [[Flashing the Neo Freerunner|Neo FreeRunner (om-gta02)]] with [[Dfu-util| dfu-util]].
 # Boot and wait until the Zhone main window appears.
-# ''If the [[Zhone]] main window does not appear on first boot or stays with "connecting to dbus..." longer than 1 minute, then please reboot. The base system still has some problems with dbus starting for the first time''
-# Read the [[FSO UI Tutorial]] and have fun. Note though that this has not been updated for this milestone yet (which looks a bit differently and has more features).
-
-===Installation on SD (for booting with Qi)===
-
-# Grab a tar.bz2 for your device from freesmartphone.org's download [http://downloads.freesmartphone.org/fso-stable/milestone5.5/ section].
-# Extract it to a partition on the SD card with the tar utility.
-# Rename the uImage file in /boot to uImage-GTA01.bin (for a Neo 1973) or uImage-GTA02.bin (for a FreeRunner).
-# Insert the SD card, boot, and wait until the Zhone main window appears.
 # ''If the [[Zhone]] main window does not appear on first boot or stays with "connecting to dbus..." longer than 1 minute, then please reboot. The base system still has some problems with dbus starting for the first time''
 # Read the [[FSO UI Tutorial]] and have fun. Note though that this has not been updated for this milestone yet (which looks a bit differently and has more features).
 
@@ -158,11 +105,10 @@ Attach the logs to the tickets, please.
 ==What's next==
 
 * More work on opimd.
-* Moving towards FSO 2.0 reference implementation in Vala.
-* Complete switch to fso-abyss.
 * Connman integration.
-* Streamlining Bluez4 Networking.
-* More Device Support (G1, G2, Palm Pre).
+* Bluetooth4 Networking.
+* FSO 2.0 reference implementation in Vala
+* More Device Support (G1, G2, Palm Pre)
 
 ==The Team==
 
