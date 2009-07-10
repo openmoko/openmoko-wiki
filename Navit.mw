@@ -172,32 +172,32 @@ import sys
 #import math
 
 def doIt(cmd):
-os.system(cmd)
+  os.system(cmd)
 
 def getOsms(basename, minLat, maxLat, minLon, maxLon):
-'''basename - base name of map, maps are named {basename}{count}.osm
-minLat - latitude of the west side of the map
-maxLat - latitude of the east side of the map
-minLon - longitude of the north side of the map
-maxLon - longitude of the south side of the map'''
+  '''basename - base name of map, maps are named {basename}{count}.osm
+  minLat - latitude of the west side of the map
+  maxLat - latitude of the east side of the map
+  minLon - longitude of the north side of the map
+  maxLon - longitude of the south side of the map'''
 
-wgetCmdTemplate = 'wget -O %s%s.osm http://api.openstreetmap.org/api/0.5/map?bbox=%s,%s,%s,%s'
+  wgetCmdTemplate = 'wget -O %s%s.osm http://api.openstreetmap.org/api/0.6/map?bbox=%s,%s,%s,%s'
 
-currLat = minLat
-mapCount = 0
-while currLat < maxLat:
-nextLat = min(currLat + 0.1, maxLat)
+  currLat = minLat
+  mapCount = 0
+  while currLat < maxLat:
+    nextLat = min(currLat + 0.1, maxLat)
 
-currLon = minLon
-while currLon < maxLon:
-nextLon = min(currLon + 0.1, maxLon)
+    currLon = minLon
+    while currLon < maxLon:
+      nextLon = min(currLon + 0.1, maxLon)
 
-doIt(wgetCmdTemplate % (basename, mapCount, currLon, currLat, nextLon, nextLat))
+      doIt(wgetCmdTemplate % (basename, mapCount, currLon, currLat, nextLon, nextLat))
 
-currLon = nextLon
-mapCount = mapCount + 1
+      currLon = nextLon
+      mapCount = mapCount + 1
 
-currLat = nextLat
+    currLat = nextLat
 
 (minLat, maxLat, minLon, maxLon) = map(float, sys.argv[1:])
 getOsms('map', minLat, maxLat, minLon, maxLon)
