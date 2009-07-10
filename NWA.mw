@@ -8,23 +8,23 @@ The project is actually only a ''prealpha prototype'' to discover issues and imp
 
 It actually manages wpa_supplicant trough dbus and spawns udhcpc directly, replicating some Network Manager features. When a solid rock network manager will be available for the freerunner, and will handle the specific device capabilities/issues, NWA may be migrated to use it's api.
 
-'''Please partecipate with contributions, ideas, hints as this may become your preferred WiFi manager for a while!!! edit the discussion page or this if you prefer, or contact me by email at nicola.mfb at gmail.com'''
+'''Please partecipate with contributions, ideas, hints as this may become your preferred WiFi manager for a while!!! feel free to edit this or the discussion page, and to contact me by email at nicola.mfb at gmail.com'''
 
 =Requirements=
 ==A supplicant==
-The main target is to use wpa_supplicant in a decent way, e.g. as a supplicant! You'll add your preferred networks at home, at works, at your friend house and so on, and it will scan silently for them, will connect when available and show a notification window/sound to alert you.
+The main target is to use wpa_supplicant in a decent way, e.g. as a supplicant! You'll add your preferred wifi networks at home, at work, at your friend house and so on, and it will scan silently for them, connect when they are available and show a notification window/sound to alert you.
 
 User has to be able to:
-* enable/disable configured networks
-* change the networks priority
-* add new network manually or scanning the area
-* configure advanced network properties, WPA enteprise, EAP, etc.
+* enable/disable configured networks (for example any open network sometime is not desiderable)
+* change the networks priority (for example use any open network only if other are not available)
+* add new network manually or from scanning the area
+* configure advanced network properties, WPA enteprise, EAP, LEAP, TTLS etc.
 
 ==Static IP vs DHCP==
-The user should choose between static ip address or dhcp.
+The user should be able to use dhcp or static ip addresses.
 
 ==DNS handling==
-It has to be able to restore some default DNS when exiting dhcp, suggestion on possible solutions are appreciated.
+It has to be able to restore some default DNS when exiting dhcp (eg. opendns, last used dns ...), suggestions on possible solutions are appreciated.
 
 ==System tray applet==
 A sys tray icon should be showed changing it's aspect to reflect connection status.
@@ -37,19 +37,19 @@ It should indicate:
 * complete + ip address received from dhcp or set manually
 * signal strenght when associated
 * historical signal strenght (like a graph scrolling every x seconds)
-* if some networks are present in the area
+* foreign networks presence
 
 Some special handling is required for Window Managers that does not support sys tray specification (like E17).
 ==Popup messages==
 Popup transient messages should be showed when:
 * connection fully complete, showing the received ip address
-* connection closed
-* wifi card enabled/disable
+* disconnection
+* wifi card enabled/disabled
 * network found (if not connected)
 
-The last has to be defined better, should you signal a new network only one? only one per session? etc. etc.
+The last has to be defined better, should you signal a new network only one? only one per session? etc.
 ==Sounds==
-Popup has to be associated with sounds to warn the user when not looking at the device.
+Popup has to be associated with sounds to warn the user not looking at the device.
 
 ''please suggest some free sounds in every format supported by FSO/gstreamer''
 
@@ -64,9 +64,9 @@ The GUI must be complete but simple and should not allow the user to break the c
 * custom scripts to launch at iface up/down, ip received
 * ...
 ==Device Integration==
-NWA prefers FSO frameworkd based distro but should be capable to run on everywhere.
+NWA prefers FSO frameworkd based distro but should be capable to run on everywhere, actually it works fine on my laptop too.
 ==2.6.29 kernel workaround==
-On OM 2.6.29 kernels wifi is broken, software putting down the interface (e.g. wpa supplicant when tell it to unmanage eth0) will break ar6000 module. A workaround has to be implemented and activable in the configuration file.
+On OM 2.6.29 kernels wifi is broken, software putting down the interface (e.g. wpa supplicant in some cases) will break ar6000 module. A workaround has to be implemented and activable in the configuration file.
 ==Power Managment==
 With some AP the atheros power managment creates problems, NWA should support disabling it.
 =Development status/issues=
@@ -74,22 +74,28 @@ Wpa_supplicant dbus interface is not complete, if you quit the program in some h
 
 * <del>kill wpa_supplicant at startup, it' not nice</del>
 * <del>implement</del>implemented a remove/readadd interface to wpa when NWA is starting (it should delete all network definition, to be tested)
-* bore wpa_supplicant authors to implement the full dbus interface
+* <del>bore wpa_supplicant authors to implement the full dbus interface</del> a new version of dbus interface is on the road
 * implements signal handling hooks (howewer a kill -9 will bypass it)
 
-<del>qnetutils.cpp has to be improved to determine the ssid of the network you are connected to as wpa_supplicant does not signal it</del>qnetutils.cpp now may read the essid of wifi card, so NWA will show it for the current connected network, some work is needed to associate the essid to the custom "name" associated to the network. Wpa_supplicant signals only status changes not net network id, so actually it's not easy. A possible workaround may be to retrieve the bssid, and make the essid lineedit clickable, when the user click on it the bssid will be added in a private field of the network object, when wpa_supplicant associates if the current bssid is found in any network object the name will be showed, else the essid. Please comment this possible solution or suggest alternatives, as its implementation may be complex to handle in the GUI and should be integrated in the case you define a network connection where the desired bssid is an explicit parameter.
+Another problem is that wpa_supplicant when connects to a networks signal only the state change and not the network id or network dbus path. This is a big problem as I would have the dhcp/static ip configuration associated to that and not to the essid as it may be the same between different networks.
+
+Using the bssid to disambiguate the network may not be always possible for example when connecting to two big WDS networks with the same essid and thousand of AP.
+
+'''Please comment the above problem and suggest alternatives. I'll add dhcp/static ip support when things will be clear'''
+
+<del>as wpa_supplicant does not signal the connected network we have to retrieve the essid with standard AF_INET ioctl, so qnetutils.cpp has to be improved</del>qnetutils.cpp now read the essid of the associated network.
 
 The qt stylesheet has to be improved.
 
-A 2.6.29 rude workaround was implemented, when you quit the NWA it does not kill udhcpc and deconfigure eth0 from wpa_supplicant (always remove networks) but simply release the FSO WiFi resources, removing the interface without deconfiguring it fixes the problem but for timing reasons on a very busy system it may not work. We may think to rmmod/insmod ar6000 but it's a very crude hack and sometimes kernel opses.
+A 2.6.29 rude workaround was implemented, when you quit the NWA it does not kill udhcpc and deconfigure eth0 from wpa_supplicant (always remove networks) but simply release the FSO WiFi resources, removing the interface without deconfiguring. It works only sometimes. We may think to rmmod/insmod ar6000 but it's a very crude hack and sometimes kernel opses.
 
-A startup script, launched when supplicant association is complete, is already implemented, it's a crude way to disable power management.
+A startup script, launched when supplicant association is complete, is already implemented, it's a crude way to disable power management if needed.
 
-Actually only dhcp is supported, I have to study a bit more rtnetlink to implement static ip without calling exeternals command :) in the mean time I'm planning to support per-network command file execution and dhcp disabling, so you may use some script to configure the interface with a static address. It should be sufficient for a prototype.
+The second problem for static ip support is that I have to study a bit more rtnetlink to implement static ip without calling exeternals command :) in the mean time I'm planning to support <del>per-network</del> per-essid command file execution and dhcp disabling, so you may use some script to configure the interface with a static address. It should be sufficient for a prototype.
 
-Actually destroying a running thread when application quits leads an "application crashed" on E, I'm not caring of it now, as a better clean and quit handler has to be implemented.
+<del>Actually destroying a running thread when application quits leads an "application crashed" on E, I'm not caring of it now</del> a better clean and quit handler has to be implemented.
 
-To play sounds notification spawning a shell sound player may be weight and slow, so I think it's better to use FSO, while to have speech synthesis the script approach may be acceptable, parameter passing has to be implemented in the configuration file (network name, ip address and so on) just use $IFACE$ and $IP$ when you want it be automagically replaced with their respective values.
+To play sounds notification spawning a shell sound player may be weight and slow, so I think it's better to use FSO, while to have speech synthesis the script approach may be acceptable, <del>parameter passing has to be implemented in the configuration file (network name, ip address and so on)</del> just use $IFACE$ and $IP$ when you want it be automagically replaced with their respective values.
 
 It seems as udhcpc when got an ip address set/unset/set_again the ipaddress, this is strange. The problem is not present with dhcpcd. Updates: this happens with udhcpc on a Cisco MDS wifi network and not with common AP.
 
@@ -97,8 +103,8 @@ It seems as udhcpc when got an ip address set/unset/set_again the ipaddress, thi
 
 Some small coding fixes need to be done, and some stupid comments removed :)
 
-The first prealpha prototype is quite ready, it was developed on debian with Matchbox and matchbox-panel as sys trayer, under E balloon sys tray messages are showed in a random position on the screen, <del>so some special work around is needed</del> a primitive but animated "tooltip" was implemented. Multiple not overlapping message showing has to be implemented.
-I preferred to avoid qt sys tray baloon message completely, as if the tray icon is in a middle/left position (becouse other tray icon are present), in some cases they are not readable.
+The first prealpha prototype is quite ready, it was developed on debian with Matchbox and matchbox-panel as sys trayer, under E qt balloon sys tray messages are showed in a random position on the screen, <del>so some special work around is needed</del> a primitive and animated "tooltip" was implemented. Multiple not overlapping message showing are not supported a queue handler has to be implemented.
+I preferred to avoid qt sys tray baloon message on not-E wm too, as if the tray icon is in a middle/left position (becouse other tray icon are present), in some cases they are not readable.
 
 =Configuring=
 ==Example configuration file==
