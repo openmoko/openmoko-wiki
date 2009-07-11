@@ -1,36 +1,50 @@
 =Introduction=
-NIDE/NIDED create a network input device emulator. With that you may transform your freerunner in a virtual keyboard/mouse to control a remote Linux Box.
-=How it works=
-NIDE is the client part of the architecture, it's a GUI that show you the virtual device (keyboard, mouse, etc), when you trigger some action, eg. button press, it send a command to a remote host where NIDED is installed.
+NIDE/NIDED is a client/server application that emulates virtual input device through the network. With that you may transform your freerunner in a virtual keyboard/mouse to control a remote Linux Box and do other nice things. It's similar to Remoko, but uses a different tecnique.
 
-The NIDED daemon create a virtual keyboard/mouse registering a new device in "uinput", reads command sent by NIDE, translates and inijects them in the system.
+=How it works=
+NIDE is the client part of the architecture, it's a GUI that show you the virtual device (keyboard, mouse, etc), and recognizes your input actions:
+* press a gui button
+* press an hardware button (AUX, Power)
+* slide your finger on display
+* move the freerunner (accelerometers) TBD
+
+If the input action matches some rules in the configuration file it:
+
+* simulate trough nided a mouse move/click or key press/release on the remote linux box
+* requests nided to start a process on the remote linux box
+* start a local process
+* switch to subpages of virtual device.
+
+The NIDED daemon create a virtual keyboard/mouse registering a new device in "uinput", reads command sent by NIDE, translates and inijects them in the system or execute remote applications.
 =Pro=
 * it works with every network, bt, wifi, usb and so on
 * it may request remote command execution (startup application, halt, reboot, etc.)
-* it's xml configurable and stylesheet themable, it's easy to create customized devices
+* it's xml configurable and stylesheet themable, it's easy to create customized virtual devices
 * you may create different pages in the same config file and may switch between them
-* every page may have two layouts (portrait, landscape), it auto switches beetween them if you rotate the display (actually with an external application)
+* every page may have two layouts (portrait, landscape), it auto switches beetween them if the system display is rotated 
 * it may use AUX/POWER button to trigger action (simulate button press, request remote command execution, switch between pages and so on)
-* there is no need to "initiate" action on the controlled host (as in Remoko)
+* the gui recognizes simple sliding over a user configurable matrix, with a 3*3 matrix you are able to use 72 different sliding
+* there is no need to "initiate" action on the controlled host (as in Remoko) it needs only nided started
 * it automatically restore the last session at startup, so if you use it to control always the same host you are ready with only one click.
 
 =Cons=
 * it requires nided to be installed on the controlled host, that need linux 2.6 and uinput kernel module
-* it uses QT library, and that are not provided in OM2009/SHR, you have to build them yourself or take them from the angstrom feed
-* '''no authentication is implemented, a stupid and rude security ip access list is used, so you have to use it in secure networks'''
+* it uses QT library, and that are not provided in OM2009/SHR, you have to build them yourself or take them from the angstrom or my persronal feed
+* '''no authentication is implemented, a stupid and rude security ip access list is used, so you have to use it in highly secure networks'''
 * it may be buggy in some part and may need bug fixing/code restyling
 =How to create new virtual devices=
 Create a file in /usr/share/nide/devices with extension ".cfg". It's an xml file, the following example should be autoexplaining:
 <pre>
  <xml>
   <page name="default">
-   <portrait vsizex="5" vsizey="5" stylesheet="/usr/share/nide/styles/freerunnert.style" iconpath="/usr/share/nide/icons" >
+   <portrait vsizex="5" vsizey="5" vslidex="2" vslidey="2" stylesheet="/usr/share/nide/styles/freerunnert.style" iconpath="/usr/share/nide/icons" >
     <key uinputcode="1"   x="0"  y="0" width="3" height="3" icon="application-exit.png"/>
     <key uinputcode="10" x="0" y="0" width="2" height="1" text="Esc"/>
     <key uinputcode="2"   x="1"  y="1" width="1" height="1" text="1" stext="!" atext="&#x00b9;" satext="&#x00a1;"/>
     <key x="0" y="6" text="remote&#xa;commands" width="3" height="3" gotopage="commands"/>
     <mouse x="3" y="0" width="3" height="4"/>
     <hwkey keycode="177" uinputcode="28"/>
+    <slide x1="0" y1="0" x2="1" y2="1" localcommand="shutdown -r now"/>
 
    </portrait>
   </page>
@@ -45,5 +59,7 @@ Create a file in /usr/share/nide/devices with extension ".cfg". It's an xml file
 uinputcode is the linux input key code, you can find it in /usr/include/linux/input.h, stext, atext, and satext are shift text, alt text, and shift alt texts. Nide has internal shift/altgr modifiers to handle them, simply add a key with the right uinput code.
 
 Mouse create a virtual mouse, use the right key codes to create button left, right and middle, hwkey is hardware buttons, on the freerunner you may use aux and power.
+
+Slide add a sliding gestures from (x1,y1) to (x2,y2), these coordinates ranges in 0<->vslidex-1, 0<->vslidey-1
 
 [[Category:Applications]]
