@@ -1,20 +1,25 @@
 Opimd is a PIM suite for [[FSO]]. It can be used as a backend to PIM tools with GUI to have unlimited storage space for contact details, SMS's, calendar items and so on. It will also allow all apps using opimd to have access to the same information.
 
 ==Current state==
-'''Contacts''' domain is almost fully implemented and checked to work. Everything should work now, you can only get problems with playing to much with Update() method (adding new fields when backend which stores contacts doesn't support it, removing fields etc.) Available backends: SIM, CSV and SQLite.
+'''Contacts''' domain is almost fully implemented and checked to work. Available backends: SIM, CSV and SQLite.
 
-'''Messages''' domain is under development now. At the moment only querying messages (which are merged when you have long, split messages) stored on SIM is supposed to work.
+'''Messages''' domain is almost fully implemented and checked to work, even with CSM and delivery reports support. At the moment only missing functionality is adding, editing and deleting messages from SIM backend. Available backends: SIM and SQLite.
+
+'''Calls''' domain seems to be fully usable. Available backends: SQLite and ogsmd handler.
+
+There are still things to be done. For instance, handling multiple fields with the same name, sorting and normalizing phone numbers for comparing. Also some things need to be rewritten - for instance quering lot of messages is slow as hell, and doesn't even try to use SQLite speed and abilities. Some changes unvisible for user also need to be done, for instance having GenericDomain, from which other domains can inherit (to avoid duplicating lot of code).
 
 ==Implementation and test scripts==
 
-* ''libframeworkd-phonegui-efl2'' (SHR unstable) will let you test contacts on opimd. It mostly works but sometimes segfaults..
-* [http://openmoko.opendevice.org/svn/trunk/opimd/pim.py pim.py] is general script which can be used for testing, and to understand how it's done (code) :) ATM it supports querying, adding, editing and deleting contacts, and querying messages. I hope --help say everything about usage :)
-* [http://openmoko.opendevice.org/svn/trunk/opimd/opimd-resolve.py opimd-resolve.py] is simple script which can resolve given in arguments phone numbers to names from contacts.
-* [http://openmoko.opendevice.org/svn/trunk/opimd/pimm-gui.py pimm-gui.py] is ATM some kind of playground. It displays messages in elementary Bubbles. It is going to be opimd feeded chat-style messages app.
+* ''libframeworkd-phonegui-efl2'' will bring you opimd support in shr-contacts.
+* ''pyphonelog'' already uses opimd Contacts and Calls domains as data source.
+* ''opimd-utils''. After installing it and changing default Messages backend to SQLite-Messages in opimd-config, you'll have new, opimd based interface for handling incoming messages and missed calls (opimd-notifier), messages app (opimd-messages), command line apps for testing opimd (opimd-cli) and resolving name from phone numbers (opimd-resolve) and SHR Settings based config tool (opimd-config).
 
-'''NOTE:''' You need to have at least latest frameworkd and python-dbus installed to use that python scripts (and for pimm-gui.py also python-elementary).
+'''NOTE:''' opimd-utils isn't announced yet! It can eat your cat!
 
-'''NOTE 2:''' For testing and development opimd recommended distribution is SHR unstable.
+'''NOTE 2:''' In order to have sound and vibration on incoming message when using opimd interface, you have to patch oeventsd with patch available at [http://openmoko.opendevice.org/~dos/opimd/oeventsd/]
+
+'''NOTE 3:''' For testing and development opimd recommended distribution is ''upgraded'' SHR unstable.
 
 == Development ==
 The main developer of opimd is dos1. You can find him at IRC on #openmoko-cdevel freenode channel.
