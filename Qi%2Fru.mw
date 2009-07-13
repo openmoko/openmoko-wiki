@@ -1,34 +1,33 @@
 {{Languages|Qi}}
-[[image:Screenshot-Qi.png|frame|Сообщения Qi]] Qi ( [[http://zh.wikipedia.org/wiki/э| '''#''' ]] ) - легкая и простая замена стандартому загрузчику [[Uboot]]
+[[image:Screenshot-Qi.png|frame|Qi Boot messages]] Qi ( [[http://zh.wikipedia.org/wiki/�| '''#''' ]] ) is a lightweight replacement for the [[Uboot|uBoot]] bootloader with everything that doesn't assist "loading" and "booting" Linux stripped out.
 
-Преимущества:
+Its advantages comparing to the [[Uboot|u-boot Openmoko port]] are:
+* actively developed (u-boot on GTA02 is deprecated)
+* easier configuration, more robust and predictable
+* SD and SDHC cards supported properly with partitions of any size
+* kernel size is detected by checking the start of the kernel image, so large (>2M) kernels are supported without tweaking or loading more than needed
+* Very fast, simple boot direct to Linux
 
-* активно разрабатывается (разработка u-boot на GTA02 прекращена)
-* Простота в настройке и использовании
-* Поддержка карт SD и SDHC любого размера
-* размер ядра считывается из начала образа, т.е. поддерживаются ядра >2 mb
-* Быстрая и простая загрузка Linux
-
-==Информация о Qi==
-===Требования===
+==About Qi==
+===Requirements===
 There is a [[Neo1973|GTA01]] build of Qi, but using it without a debug board is not recommended because Qi itself does not support DFU, so updating or going back to U-Boot is a difficult process.
 
 [[Freerunner|GTA02 Hardware]] has NOR U-Boot always available, so updating to Qi is safe to try it out.
 
-===Скачать===
+===Download===
 
 *GTA01 -> qi-s3c2410
 *GTA02 -> qi-s3c2442
 
-====Новые версии====
+====New Versions====
 
-Версии готовые для использования
+These are the versions we are getting ready for release
 
-Скачивать для  Neo1973 или NeoFreerunner в соответствующих папках.
+Download from either the Neo1973 or NeoFreerunner directory.
 
 http://downloads.openmoko.org/distro/testing
 
-====Нестабильные и экспериментальные версии====
+====Unstable and Experimental Versions====
 
 These are the lastest versions from svn.
 
@@ -38,12 +37,12 @@ http://downloads.openmoko.org/distro/unstable
 
 http://downloads.openmoko.org/distro/experimental
 
-====Старые версии====
+====Older Versions====
 
-С названием ''qi-s3cXXXX-andy_somenumber.udfu'' файлы по адресу http://people.openmoko.org/andy/ .
-Используйте по вашему усмотрению:
+The download is a ''qi-s3cXXXX-andy_somenumber.udfu'' file at http://people.openmoko.org/andy/ .
+Use the file appropriate to your device:
 
-===Установка===
+===Installation===
 The installation should be flashing like (do it in DFU mode of NOR u-boot):
  # dfu-util -a u-boot -R -D qi-s3<version>.udfu
 depending on the file you downloaded. The file you use for flashing is depending on the hardware (see section 'Download'). In detail you have to go through the following procedures:
@@ -56,7 +55,7 @@ and start
   # dfu-util -a u-boot -R -D qi-s3c2442-master-hist_3b8513d8b3d9615e.udfu
 See [[Flashing the Neo FreeRunner]] for more details on flashing your phone.
 
-===Возможности===
+===Features===
 * booting from primary SD partitions (1st, 2nd or 3rd) in /boot directory
 * booting from NAND (compatible with U-Boot's dynparts scheme)
 * configuration per rootfs, by files in /boot in the rootfs
@@ -71,16 +70,16 @@ See [[Flashing the Neo FreeRunner]] for more details on flashing your phone.
 ===Use Case===
 If you want to install [[Android]] on you OpenMoko you can use Qi. The [[Android on Freerunner]] kernel image can be more than 2MB in size. The UBoot environment that comes with your FreeRunner is only able to boot a kernel 2MB in size or less. Qi support kernel images greater than 2MB out of the box.
 
-===Ограничения===
+===Limitations===
 * no DFU-Mode - USB is not initialized at all (but you can always boot [http://wiki.openmoko.org/wiki/Boot#Log_into_U-Boot_in_the_NOR_Flash from NOR])
 * no boot menu (but you can always boot [http://wiki.openmoko.org/wiki/Boot#Log_into_U-Boot_in_the_NOR_Flash from NOR])
-* FAT разделы игноригуются
+* FAT partitions are ignored
 
 Both the lack of DFU and the boot menu are planned to be addressed by the backup / recovery rootfs.
 
 FAT is not supported because it can't provide a rootfs, and Qi wants the kernel to come from the rootfs.
 
-===По умолчанию===
+===Defaults===
 If the kernel is found on uSD, Qi assumes the rootfs to be on the same partition as the kernel. In case of boot from NAND, it assumes that rootfs is also on NAND (just as u-boot does). See [[#/boot-Partition|below]] for help with an extra /boot-partition. The default rootdelay is 1 second.
 
 ===Files===
@@ -95,7 +94,7 @@ If the kernel is found on uSD, Qi assumes the rootfs to be on the same partition
 Since SHR (and perhaps other distributions as well) ouput log messages during resume which slow down the resume process by ca. 3 seconds it make sense there to append the following settings to /boot/append-GTA0[123]:
 : loglevel=1 quiet 
 The disadvantage of this speedup is that you won't see any lifesign of your phone until it starts the graphical user interface after adding these files, though.
-===Порядок загрузки===
+===Boot Order===
 [[image:Qi-drawings-bootsequence.png|frame|Qi GTA02 Booting order]]
 # SD Partition 1
 # SD Partition 2
@@ -130,12 +129,12 @@ The other thing it does is mount the "identity" partition and get from there the
 * One Blue shine every ~10 second: did not find any valid kernel to boot
 * About four RED shines per second: kernel panic.
 
-===Загрузка===
+===Booting===
 A short press on the power button is enough to make Qi start booting. In a few seconds the backlight will be lit, but the kernel will not spew any console messages unless something is wrong. It may take up to 2 minutes (depends on distribution) until X is started during which there will be no visual feedback. Please be patient.
 
 You can force debug messages on the LCM console by holding in the power button before Linux starts.
 
-===Выбор ядра===
+===Choosing a Kernel===
 If a user presses the AUX button after successful partition mount and
 before start of the kernel pull (that is, while the red LED is on),
 this boot possibility is skipped (and GTA02 owners can feel
@@ -144,8 +143,10 @@ vibration).
 On versions newer than Jan 18 if a user holds the POWER button just before start of the kernel,
 debugging parameters are added to the kernel command line and a lot of information is output to the screen.
 
-===Boot меню===
+===Boot Menu===
 Qi's concept is to leave everything possible to Linux, that includes even the video init. Therefore Qi does NOT provide a boot menu. This should rather be implemented by a minimal Kernel, initramfs and menu system. It may be more comfortable for some users and may get them to switch from uboot to Qi. This does not exist yet (it's already implemented for some Angstrom-supported devices and for Zaurus, so porting should be relatively easy).
+
+
 
 ===Source code===
 git://git.openmoko.org/git/qi.git , http://git.openmoko.org/?p=qi.git;a=summary .
@@ -155,12 +156,12 @@ One can also just use strings(1) on the .udfu file to get an idea of where Qi cu
 The latest README file can be found in the git as well:http://git.openmoko.org/?p=qi.git;a=blob;f=README;hb=HEAD
 
 ==Tips, Tricks, Tweaks==
-===Основные проблемы===
+===General troubleshooting===
 Qi does not bring up the LCD backlight.  If the backlight is lit, it means you have succeeded to boot into Linux.
 
 If nothing else is happening or there is a panic, enable debugging messages as described below.
 
-===Включить сообщения в консоли===
+===Enabling console messages===
 
 You can just hold in the power button, this automatically appends verbose debugging to the kernel commandline (loglevel=8).
 
@@ -173,7 +174,7 @@ on the rootfs in question, put in there
  loglevel=8
 and you'll see the messages on boot.  If it's NAND right now you need to edit the default commandline in Qi for gta02.
 
-===/boot-разделы===
+===/boot-Partition===
 If you have a separate partition for /boot, so that your kernel and rootfs are not in fact on the same partition, you will need to append a root= entry on the kernel commandline to override the default action of trying to use the partition where the kernel came from as the rootfs.
 
 Add this in /boot/append-GTA0[123]:
@@ -211,4 +212,4 @@ Booting identical setup with Qi flashed over uBoot:
 
 So for this particular configuration, it reduced time-to-desktop by about 28%, about 44 seconds.  Surprisingly, the later segments of booting (desktop) were also noticeably faster than with uBoot - One would have expected just the first stages up until init (kernel finished establishing itself) to be faster.
 
-[[Category:Bootloaders]]
+[[Category:System Developers]]
