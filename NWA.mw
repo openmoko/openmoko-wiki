@@ -198,9 +198,67 @@ It will supported in the GUI asap, I need to study rtnetlink to configure networ
 
  <network name="my static ip network" key_mgmt="NONE" enabled="yes" disabledhcp="true" upscript="ifconfig $IFACE$ 192.168.1.10 netmask 255.255.255.0" downscript="">
 
+==Hook scripts==
+NWA support a lot of hook scripts to configure it in specific scenarios. You may start vpn, compute advanced routing or network configuration, play sounds, start applications and so on. You have:
+
+* ifupscript: global scope, launched when the wpa_supplicant associates and authenticates to one of the enabled network
+* ifdownscript: global scope, launched when wpa_supplicant disconnects from a network
+* ipupscript: global scope, launched when the wifi card get an ip address
+* ipdownscript: gloabl scope, launched when the wifi card looses an ip address (actually does not work if multiple ip address are set)
+* upscript: network scope, launched when the specified network associates and authenticates
+* downscript: network scope, launched when the specified network disconnects
+
 ==How to setup complex scripts==
 You have two options:
 * create the needed script with how many commands you need and use it in the configuration file
 * use a format compatible with xml and exec call. eg: "sh -c &quote;xxxx; yyyy; zzzz&quote;"
+
+=Test cases=
+This is a list of use cases to help in debugging NWA. I use it, if time is available, before pushing a new version to the feed , If some of there are wrong please retrying after opkg remove nwa, opkg update, opkg install and contact me if the problem persists.
+
+Feel free to add your custom cases.
+
+{| border=1
+!Test!!Status!!Note
+|-
+|First launch after installation, autoconnect to the first open network||{{Unknown}}||
+|-
+|Add WPA PSK network from scan||{{Unknown}}||
+|-
+|Add WPA PSK network manually||{{Unknown}}||
+|-
+|Add WPA Radius Enterprise TTLS/PAP network from scan||{{Unknown}}||
+|-
+|Add WPA Radius Enterprise TTLS/PAP network manually||{{Unknown}}||
+|-
+|Disable network disconnects if currently connected||{{Unknown}}||
+|-
+|Enable network connects if available and currently disconnected||{{Unknown}}||
+|-
+|Survive to Suspend/Resume cycle and autoreconnects||{{Unknown}}||
+|-
+|Change Passphrase disconnects a network, at least at next key renewal||{{Unknown}}||
+|-
+||Static ip configuration/routing by per-network scripts||{{Unknown}}||
+|-
+||Multiple static ip||{{Unknown}}||
+|-
+|Normal user privilege||{{Maybe}}||You need to globally disable dhcp and launch it with ifaceup and ifacedown setuided scripts, tested on my laptop
+|-
+|Work on systray window manager||{{Yes}}||it shows a systray icon with historical signal strength, clicking on it show the main window, while closing that will only hide
+|-
+|Work on not systray window manager||{{Yes}}||closing the window will quit NWA
+|-
+|Work on OM2009 testing v5||{{Yes}}||Out of the box
+|-
+|Work on OM2009 testing v5 + update/upgrade||{{Yes}}||"
+|-
+|Work on SHR-unstable||{{Unknown}}||2.6.29 kernel is highly unstable
+|-
+|Work on debian sid||{{Yes}}
+|-
+|Work on hackable:1||{{Unknown}}
+|}
+
 
 [[Category:Wlan software]]
