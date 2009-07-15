@@ -10,7 +10,7 @@ The easy to build JTAG board described in this page requires some knowledge of e
 
 ===== Soldering skills =====
 
-This method requires you to solder a circuit together and also solder wires onto the Neo1973 PCB pads. These are small so require a steady hand. Soldering them is easier with a SMT tip on your iron but any small tip should work fine.
+This method requires you to solder a circuit together and also solder wires onto the Neo1973 PCB pads. These are very small and require a steady hand and a decent quality soldering iron (ideally with an SMT tip).
 
 Care must be taken to not drip or flick solder onto the Neo1973 while working as this could put permanent marks on the LCD or short out components.
 
@@ -21,10 +21,9 @@ Since this method requires connecting directly to the Neo1973 PCB incorrect wiri
 Be careful with the wires that you solder onto the Neo1973 PCB pads. These pads are small and do not require much force on the wires before the whole pad breaks off the PCB.
 
 
-==== The circuit ====
+==== The Board ====
 
 The JTAG circuit required for unbricking a Neo1973 is relatively simple and requires 8 resistors, 1 IC, 1 transistor and 1 capacitor.
-
 It is a modified version of the Olimex ARM JTAG clone found [http://winarm.scienceprog.com/arm-development-tools/jtag-wiggler-clone-for-arm-microcontrollers.html Here]
 
 [[Image:Neo1973_JTAG_circuit.jpg]]
@@ -112,8 +111,6 @@ Before continuing check the following is done.
 
 [[Image:Circle２.gif|10px]] The battery is charged (this may/maynot work with the usb power connected)
 
-===== Loading uboot into memory over JTAG =====
-
 Now start openocd
 
 <pre>
@@ -161,9 +158,11 @@ cpsr: 0x600000d3 pc: 0x33f80000
 MMU: disabled, D-Cache: disabled, I-Cache: enabled
 </pre>
 
+* Download the u-boot RAM image to 0x33f80000 
+
+
 '''NOTE''' This next step may take a while (around 250seconds), the openocd.cfg file on this page has had the speed slowed right down to reduce errors (jtag_speed 15). The speed of 15 seems to work even when the circuit is made on breadboard with wires everywhere :)
 
-* Download the u-boot RAM image to 0x33f80000 
 <pre>
 > load_binary /tmp/uboot.bin 0x33f80000
 downloaded 135692 byte in 6s 567264us
@@ -180,22 +179,22 @@ At this point the uboot text should be showing on the Neo1973 LCD. If not, try a
 Connect the USB cable at this point if not already connected.
 
 
-===== Fixing the NAND partitions/environment =====
+===== Fixing the uboot environment =====
 
-You can try and skip this step but most likely you will need to run the dynpart command below to partition the NAND so dfu-utils knows where to put uboot in it.
+Before a new uboot can be flashed the dynpart command must be run to partition the nand so dfu-utils knows where to put it
 
 <pre>
 cu -l /dev/ttyACM0
 </pre>
 
 <pre>
-GTA01Bv4 # dynpart
+GTA01Bv2 # dynpart
 mtdparts mtdparts=gta01-0:0x00030000(u-boot),0x00004000(u-boot env),0x00208000(kernel),0x00400000(initrd),0x039c4000(rootfs)
 
-GTA01Bv4 # dynenv set u-boot_env
+GTA01Bv2 # dynenv set u-boot_env
 45 4e 56 30 - 00 00 03 00
 
-GTA01Bv4 # saveenv
+TA01Bv2 # saveenv
 Saving Environment to NAND...
 Erasing Nand...Writing to Nand... done
 </pre>
@@ -208,11 +207,11 @@ At this point all that’s left to do is to flash a new uboot to NAND which will
 sudo ./dfu-util -a u-boot -R -D /tmp/uboot.bin 
 </pre> 
 
-Your Neo1973 is now unbricked :)
+Your Neo1973 is now unbricked. :)
 
-The process will probably have reset the uboot environment to a very basic default with only one option to boot from NAND.
-
+The uboot flash will have reset the uboot environment to a very basic default with only one option to boot from NAND.
 Menu items to boot from SD will have to be re-added. See [http://wiki.openmoko.org/wiki/Booting_from_SD here]
+
 
 ==== Final thoughts from the author ====
 
@@ -221,6 +220,3 @@ Menu items to boot from SD will have to be re-added. See [http://wiki.openmoko.o
 [[Image:Circle２.gif|10px]] This JTAG circuit should also work for the Neo Freerunner (GTA02) however the PCB pads may be in a different location and would need checking. 
 
 [[Image:Circle２.gif|10px]] Thanks to Paul Fertser for helping me to unbrick my neo1973 :)
-
-[[Category:Neo1973 Hardware]]
-[[Category:Debug Board]]
