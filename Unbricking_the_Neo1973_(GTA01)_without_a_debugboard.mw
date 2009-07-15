@@ -1,0 +1,222 @@
+This page describes how to recover a Neo1973 (GTA01Bv4a) when the bootloader has been corrupted or wiped. The method described below does NOT use the official openmoko debug board and instead uses an easy to build alternative. This allows Neo1973 owners who have some skill in electronics to unbrick their phones without having to buy a costly debug board for a one-off unbricking.
+
+==== Precautions ====
+
+Do not attempt this process until you have read this entire page and feel comfortable about all steps.
+
+===== Require knowledge =====
+
+The easy to build JTAG board described in this page requires some knowledge of electronic circuits and building them. If you don’t feel comfortable wiring up a circuit containing a few resistors, transistors and one integrated circuit you shouldn’t attempt to perform the unbricking method described below. Find someone who owns an official debug board or buy one yourself.
+
+===== Soldering skills =====
+
+This method requires you to solder a circuit together and also solder wires onto the Neo1973 PCB pads. These are very small and require a steady hand and a decent quality soldering iron (ideally with an SMT tip).
+
+Care must be taken to not drip or flick solder onto the Neo1973 while working as this could put permanent marks on the LCD or short out components.
+
+===== Wiring =====
+
+Since this method requires connecting directly to the Neo1973 PCB incorrect wiring can easily damage the phone. All wiring should be triple checked before connecting the 3.3V power supply.
+
+Be careful with the wires that you solder onto the Neo1973 PCB pads. These pads are small and do not require much force on the wires before the whole pad breaks off the PCB.
+
+
+==== The Board ====
+
+The JTAG circuit required for unbricking a Neo1973 is relatively simple and requires 8 resistors, 1 IC, 1 transistor and 1 capacitor.
+It is a modified version of the Olimex ARM JTAG clone found [http://winarm.scienceprog.com/arm-development-tools/jtag-wiggler-clone-for-arm-microcontrollers.html Here]
+
+[[Image:Neo1973_JTAG_circuit.jpg]]
+
+NOTE: IC1A and IC1B are the same physical IC. The 74HC244N has 20pins.
+
+It is recommended that this circuit be soldered together; a breadboard may work but could cause problems due to loose connections.  The cable to the computers printer port should be kept short to reduce interference, 1 meter is fine.
+
+==== Connecting the circuit to the Neo1973 ====
+
+The wires will need to be soldered to the Neo1973 pads. This should be done carefully with thin wire to reduce the strain on the pads.  For a ground connection the metal GPS antenna cage nearby provides a usable ground point.
+
+
+==== Installing the software required ====
+
+To unbrick the Neo1973 using this circuit openocd is used to make a JTAG connection.
+<pre>
+  sudo apt-get install openocd
+</pre>
+
+More information on installing/using openocd can be found [http://wiki.openmoko.org/wiki/Neo1973_OpenOCD here]
+
+openocd requires a config file, copy the following into a file called openocd.cfg and put it into the folder where you're going to be running openocd from.
+
+<pre>
+#daemon configuration
+telnet_port 4444
+gdb_port 3333
+
+#interface
+interface parport
+parport_port 0
+parport_cable wiggler
+jtag_speed 15
+
+#use combined on interfaces or targets that can't set TRST/SRST separately
+reset_config trst_and_srst #srst_pulls_trst
+
+#jtag scan chain
+#format L IRC IRCM IDCODE (Length, IR Capture, IR Capture Mask, IDCODE)
+jtag_device 4 0x1 0xf 0xe
+
+#target configuration
+daemon_startup attach
+#target <type> <startup mode>
+target arm920t little reset_run 0 arm920t
+#working_area 0 0x200000 0x4000 backup
+run_and_halt_time 0 5000
+
+#flash configuration (K9D1208V0M: 512Mbit, x8, 3.3V, Mode: Normal, 1st gen)
+#NOR flash configuration (SST39VF400A 4Mbit, x16, 3.3V, 128sect, 4k/sect, 8 blocks (64kByte per block)
+# flash bank cfg addr length chip_width bus_width target
+flash bank cfi 0x00000000 0x80000 2 2 0
+</pre>
+
+NOTE: This config file has the word NOR which implies it's for GTA02, however it worked fine for me on GTA01
+
+You will also need a copy of the uboot and lowlevel binaries which can be found [http://downloads.openmoko.org/distro/releases/Om2008.12/ here].
+
+<pre>
+wget http://downloads.openmoko.org/distro/releases/Om2008.12/gta01bv4-lowlevel.bin
+wget http://downloads.openmoko.org/distro/releases/Om2008.12/gta01bv4-u-boot.bin
+cp gta01bv4-lowlevel.bin /tmp/lowlevel.bin
+cp gta01bv4-u-boot.bin /tmp/uboot.bin
+</pre>
+
+==== The unbricking process ====
+
+To unbrick the phone a new uboot needs to be flashed, however to do this uboot needs to be running.
+To get uboot running again a copy of uboot needs to be uploaded to the phone memory over JTAG and executed.
+Then you can get access to /dev/ttyACM0 again and use dfu-util to flash a good copy of uboot.
+
+
+===== Pre checks =====
+
+Before continuing check the following is done.
+
+[[Image:Circle２.gif|10px]] The circuit above is assembled and checked
+
+[[Image:Circle２.gif|10px]] It is wired to the Neo1973 PCB pads correctly
+
+[[Image:Circle２.gif|10px]] It is connected to the computers printer port and the port is enabled in the bios (parport is used)
+
+[[Image:Circle２.gif|10px]] The circuit has 3.3V power from an external power supply
+
+[[Image:Circle２.gif|10px]] The battery is charged (this may/maynot work with the usb power connected)
+
+Now start openocd
+
+<pre>
+sudo openocd
+</pre>
+
+If everything is setup and connected correctly openocd should start.
+If you get errors check your circuit and printer port. You can also try plugging and unplugging the usb cable to the phone (Doing this seems to reset something and allow openocd to start sometimes)
+
+If openocd is running correctly you should be able to open another shell and telnet to it.
+
+<pre>
+telnet localhost 4444
+</pre>
+
+With the telnet session open the following commands should load a new lowlevel and uboot into memory and run them.
+
+* Reset and halt the cpu at PC=0
+<pre>
+> reset halt
+target halted in ARM state due to debug request, current mode: Supervisor
+cpsr: 0x400000d3 pc: 0x00000000
+MMU: disabled, D-Cache: disabled, I-Cache: disabled
+</pre>
+
+* Download a small piece of code for low-level SDRAM timing initialization (overwrite 4k SRAM of steppingstone)
+<pre>
+> load_binary /tmp/lowlevel.bin 0
+downloaded 332 byte in 0s 21899us
+</pre>
+
+* Assert a break point at address 0x33f80000 (which indicates that the low-level code has finished)
+<pre>
+> bp 0x33f80000 4 hw
+breakpoint added at address 0x33f80000
+</pre>
+
+* Run the code up to the break point
+<pre>
+> resume
+Target 0 resumed
+> Target 0 halted
+target halted in ARM state due to breakpoint, current mode: Supervisor
+cpsr: 0x600000d3 pc: 0x33f80000
+MMU: disabled, D-Cache: disabled, I-Cache: enabled
+</pre>
+
+* Download the u-boot RAM image to 0x33f80000 
+
+
+'''NOTE''' This next step may take a while (around 250seconds), the openocd.cfg file on this page has had the speed slowed right down to reduce errors (jtag_speed 15). The speed of 15 seems to work even when the circuit is made on breadboard with wires everywhere :)
+
+<pre>
+> load_binary /tmp/uboot.bin 0x33f80000
+downloaded 135692 byte in 6s 567264us
+</pre>
+
+* Resume processing
+<pre>
+> resume
+Target 0 resumed
+</pre>
+
+At this point the uboot text should be showing on the Neo1973 LCD. If not, try again, it can take a few tries.
+
+Connect the USB cable at this point if not already connected.
+
+
+===== Fixing the uboot environment =====
+
+Before a new uboot can be flashed the dynpart command must be run to partition the nand so dfu-utils knows where to put it
+
+<pre>
+cu -l /dev/ttyACM0
+</pre>
+
+<pre>
+GTA01Bv2 # dynpart
+mtdparts mtdparts=gta01-0:0x00030000(u-boot),0x00004000(u-boot env),0x00208000(kernel),0x00400000(initrd),0x039c4000(rootfs)
+
+GTA01Bv2 # dynenv set u-boot_env
+45 4e 56 30 - 00 00 03 00
+
+TA01Bv2 # saveenv
+Saving Environment to NAND...
+Erasing Nand...Writing to Nand... done
+</pre>
+
+===== Flashing a new uboot =====
+
+At this point all that’s left to do is to flash a new uboot to NAND which will unbrick your Neo1973.
+
+<pre>
+sudo ./dfu-util -a u-boot -R -D /tmp/uboot.bin 
+</pre> 
+
+Your Neo1973 is now unbricked. :)
+
+The uboot flash will have reset the uboot environment to a very basic default with only one option to boot from NAND.
+Menu items to boot from SD will have to be re-added. See [http://wiki.openmoko.org/wiki/Booting_from_SD here]
+
+
+==== Final thoughts from the author ====
+
+[[Image:Circle２.gif|10px]] It may be possible to use this simple JTAG circuit for actual debugging. I don’t know enough about JTAG debugging to be sure.
+
+[[Image:Circle２.gif|10px]] This JTAG circuit should also work for the Neo Freerunner (GTA02) however the PCB pads may be in a different location and would need checking. 
+
+[[Image:Circle２.gif|10px]] Thanks to Paul Fertser for helping me to unbrick my neo1973 :)
