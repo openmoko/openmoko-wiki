@@ -98,6 +98,51 @@ For a list of known APN:s, see the [[GPRS#Some_APN_names_for_reference|main GPRS
 == Using a GUI ==
 [[Framework-settings]]
 
+== SHR (Unstable??) ==
+SHR is based on FSO, so I think its GPRS settings should be found here. Shr has its native setting manager which has Connectivity sub-panel which in turn has settings for GPRS. Its very intutive and your GPRS/FR should be up and running in no time.
+
+To enable gprs on-demand you need to do some manual changes in framework code.
+Alter, /usr/lib/python2.6/site-packages/framework/subsystems/ogsmd/modems/abstract/modem.py
+as:
+ --- orig.modem.py       Sat Jul 18 02:13:29 2009
+ +++ modem.py    Sat Jul 18 02:13:06 2009
+ @@ -76,6 +76,8 @@
+             'proxyarp',
+             'replacedefaultroute',
+             'usepeerdns',
+ +            'demand',
+ +            'idle', '20',
+         ]
+ 
+         self._data["pppd-does-setup-and-teardown"] = True # default
+ is using connect and disconnect scripts
+
+Alter, /usr/lib/python2.6/site-packages/framework/subsystems/ogsmd/modems/abstract/pdp.py
+as:
+ --- orig.pdp.py Sat Jul 18 04:20:13 2009
+ +++ pdp.py      Sat Jul 18 04:19:03 2009
+ @@ -219,7 +219,8 @@
+  """
+ 
+      PPP_DAEMON_SETUP["/etc/ppp/ip-down.d/92removedns"] = """#!/bin/sh -e
+ -echo nameserver 127.0.0.1 > /etc/resolv.conf
+ +echo nameserver 208.67.222.222 > /etc/resolv.conf
+ +echo nameserver 208.67.220.220 >> /etc/resolv.conf
+  """
+ 
+      PPP_DAEMON_SETUP[PPP_PAP_SECRETS_FILENAME] = '* * "%s" *\n' % ''
+
+modem.py needs to be updated to setup idle timeout and auto reconnect. While pdp.py needs to be updated so ppp idle timeout resets /etc/resolv.conf to OpenDNS servers
+
+Now, just fire up settings panel (need to be done once per boot) and
+in connectivity click connect for Gprs...for me it doesn't show
+connected anymore...but then I don't really care about that as long as
+the connection works :)
+
+Note: We are updating the framework file which can be updated by any
+of the frameword update and one need to repeat the update (well..until
+a nifty setting comes into setting panel somewhere :)
+
 == See also ==
 * [[GPRS]]
 * [[OpenmokoFramework/mdbus]]
