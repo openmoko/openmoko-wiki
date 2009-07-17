@@ -109,69 +109,6 @@ apt-get install erlang-base
 </pre>
 </font>
 
-=== Install the GUI package ex11 ===
-Take a look at this example of what you can do with ex11 [http://projects.openmoko.org/docman/view.php/59/22/MAQ01113.MP4]
-
-Download from http://projects.openmoko.org/frs/?group_id=59 It is sufficient if you take the file at http://projects.openmoko.org/frs/download.php/437/ex11lib.zip and unzip it in your source directory.
-
-In home directory file .profile
-<font color="green">
-<pre>
-export DISPLAY=:0
-</pre>
-</font>
-Remove "-nolisten tcp" from /etc/X11/xinit/xservrrc
-
-Install xauth package and create .Xauthority file
-<font color="green">
-<pre>
-debian-gta01:~# apt-get install xauth
-debian-gta01:~# xauth
-xauth:  creating new authority file /root/.Xauthority
-Using authority file /root/.Xauthority
-xauth> q
-</pre>
-</font>
-Copy .Xauthority to /
-
-
-When everything is installed you can try this "hello World" code to verify the platform. It will create an empty window.
-<pre>
--module(test).
--export([start/0]).
--import(ex11_lib,[eMapWindow/1,xDo/2,xFlush/1,xColor/2,xCreateSimpleWindow/7]).
--include("ex11_lib.hrl").
--define (WT,480).
--define (HT,640).
-
-start() -> spawn(fun win/0).
-
-win() ->
-{ok, Display} = ex11_lib:xStart("3.1"),
-Win = xCreateSimpleWindow(Display,0,0,?WT,?HT,?XC_arrow,xColor(Display,?blue)),
-xDo(Display, eMapWindow(Win)),
-xFlush(Display),
-loop().
-
-loop() ->
-receive
-Any -> io:format("Unknown Event~p~n",[Any]), loop()
-end.
-</pre>
-Put this code in a file named test.erl Compile the file with
-<font color="green">
-<pre>
-erlc test.erl
-</pre>
-</font>
-Run from erlang console.
-<font color="green">
-<pre>
-erl
-test:start().
-</pre>
-</font>
-
 == Erlang development environment ==
 You can in fact choose any text editor, and use a terminal window to compile and copy compiled erlang beam-files to the phone. However, I have found SciTE to be a nice choice. It has erlang colour coding, bracket matching, code completion and lots of more stuff you are accustomed to find in a programmers editor. And it's easily configurable to handle compilation and error tracking, click on an error message to go to the line where the error is located.
 
