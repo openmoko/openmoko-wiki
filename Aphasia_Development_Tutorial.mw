@@ -34,6 +34,28 @@ Sound  --->   <*> madplay
 Languages  ---> <*> erlang
 </pre>
 
+=== Configure gpsd and ser2net ===
+To have Aphasia autostart ser2net and gpsd insert a line in /etc/init.d/httpd, last line in desktop section:
+<pre>
+desktop() {
+	config_foreach system_config system
+	hostname="${hostname:-OpenWrt}"
+
+	unset args
+	config_load httpd
+	[ "$?" != "0" ] && {
+		uci_set_default httpd <<EOF
+config 'httpd'
+	option 'port' '80'
+	option 'home' '/www'
+EOF
+		config_load httpd
+	}
+	config_foreach httpd_config httpd
+	/usr/sbin/ser2net ; /usr/sbin/gpsd /dev/ttySAC1
+	
+}
+</pre>
 
 
 === Install the GUI package ex11 ===
