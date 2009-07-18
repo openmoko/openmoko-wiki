@@ -204,13 +204,18 @@ And in the Aphasia system, each service producer is a separate Erlang process. A
 == The GSM Service producer ==
 Where should we start if not with the GSM service producer (I will use the name GSM process from now on). What kind of service can we expect from the GSM process, can we expect it to offer a bearer between our phone and some other. The kind of signals we are sending on that bearer is not stated in the service. 
 
-The GSM process is always on, it's also invisible. Most processes can display themselves on the screen but the GSM process does never show up, it's running in the background listening and reacting to the different signals coming from the Calypso GSM chip. It is also checking it's own mailbox for messages. Every Erlang process have a private mailbox. It can also send messages to other processes. If the Calypso GSM chip gets an incomming call, the GSM process sends a message to the Userland process to start the Dialer process. The Userland process is the mother of all other processes, and can, if something nasty should happen in the Dialer process, kill it off and start a new Dialer process. That's how Erlang can have [http://en.wikipedia.org/wiki/High_availability 5 nines].
+The GSM process is always on, it's also invisible. Most processes can display themselves on the screen but the GSM process does never show up, it's running in the background listening and reacting to the different signals coming from the Calypso GSM chip via the ser2net deamon. It is also checking it's own mailbox for messages. Every Erlang process have a private mailbox. It can also send messages to other processes. If the Calypso GSM chip gets an incomming call, the GSM process sends a message to the Userland process to start the Dialer process. The Userland process is the mother of all other processes, and can, if something nasty should happen in the Dialer process, kill it off and start a new Dialer process. That's how Erlang can have [http://en.wikipedia.org/wiki/High_availability 5 nines].
 
 == Aphasia Userland Process ==
 The mother of all Aphasia processes. This process can display itself on the screen. It's an empty fullscreen window. And that is the first thing it does, displays itself. Then it creates two backend processes, the GSM process that you already know about, and the GPS process I only mentioned before.
 
 Then it goes into it's main loop. All Erlang processes have a main loop where they receive messages and send messages (if they are built to stay alive).
 [TBD]
+
+== The GPS process ==
+Just like GSM, this process is invisible and always on. It can on enquiry reply current Lat/Long. It can also periodically send current position to another process. It is using GPSD as it's source of information. As you probably notice by now, each Erlang process is very small and is compliant to the UNIX pattern "do one thing and do it well". The GPS process is currently only 50 lines of code.
+
+
 
 
 [[Category:Application Developer]]
