@@ -46,12 +46,20 @@ I linked ~/Maps to /media/card/Maps which means the maps are stored on the sd ca
 
 I also like to use the differently stylised [http://developers.cloudmade.com/wiki/tiles tiles from the Cloudmade site] but you have to register for a free API key to get a URL for that. Also trying to enter the URL in tangoGPS crashed it but I was able to use the following command to set it:
 
-<code>
-gconftool-2 -s /apps/tangogps/repos 
-"[OSM|http://tile.cloudmade.com/APIKEYHERE/1/256/%d/%d/%d.png|/media/card/Maps/OSM|0]" 
+<pre>
+gconftool-2 -s /apps/tangogps/repos \
+"[OSM|http://tile.cloudmade.com/APIKEYHERE/1/256/%d/%d/%d.png|/media/card/Maps/OSM|0]" \
 --type list --list-type string
-</code>
+</pre>
 
+This is the python script i use to extract POIs from tangoGPS:
+<pre>
+import sqlite3
+con = sqlite3.connect('/home/root/.tangogps/poi.db')
+cur = con.cursor()
+cur.execute('SELECT * FROM poi')
+print cur.fetchall()
+</pre>
 
 === Video player - mplayer ===
 
