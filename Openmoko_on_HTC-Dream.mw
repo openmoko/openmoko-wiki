@@ -1,108 +1,14 @@
-= Current status =
-* <span style="background:green"> '''The HTC Dream support has been merged in the SHR distribution.'''</span>
-* [http://trac.shr-project.org/trac/wiki/Devices/HTCDream/InstallGuide An Installation guide] is available on the SHR wiki
-
-== Headline text ==
-
-= History =
-
-<span style="background:red">The following page is kept for historical reasons only</span>
-
 == Introduction ==
-
-HTC-Dream is a android based phone.
-Android is running on top of a Linux kernel.
-So we have basically no work to do using this kernel to boot an Openmoko user space.
+HTC-Dream is a android based handy.
+Android is running on top of a linux kernel.
+So we have basically no work to to then using this kernel to boot an OpenMoko userspace.
 This work is done.
-I booted an Openmoko user space.
-The way to do it on your own is described below.
-For questions ask leviathan and GNUtoo in irc://irc.freenode.net/#htc-linux
-
-''If leviathan doesn't answer, he might be smoking ATM or be working elsewhere.''
-''In this case, try to contact him on jabber, or leave him an offline message: leviathan@xmpp.ccczh.ch''
-
-'''If links are down, just try the overlay'n directory. The site is outdated very fast!'''
-
-
-=== Working ===
-* USB-Ethernet
-* Framebuffer console
-* Xorg
-* Wifi
-* Touchscreen
-* Phonecalls
-* ALSA
-
-== Setup the rootfs ==
-* In this example setup I used a SD-Card as root partition.
-* In order to follow this guide format a SD-Card (just like installing Openmoko on Neo Freerunner).
-**  First partition: vfat
-** Second partition: ext3 (root)
-* mount it and extract http://ftp.o2s.ch/pub/openmoko/htcdream/repo/images/htcdream/shr-full-eglibc-ipk--20100509-htcdream.rootfs.tar.bz2 to it.
+I bootet an OpenMoko userspace.
+The way to do it your own is described next.
 
 == Bootloader ==
 You need to install fastboot.
-In order to do this, you will have need to have "root" on the existing Android device or already have a developer version of the bootloader installed.
+In order to do this, you will have need to roo the existing android or have already a developer version installed.
 
-== Kernel ==
-=== Using precompiled image ===
-Download an kernel image from:
-* http://ftp.o2s.ch/pub/openmoko/htcdream/repo/images/htcdream/zImage-2.6.32%2br17%2bgitr636fa4daf243826ef6cebb64dd0509f3b079fcb5-r17-htcdream.bin
-(I had to disable anonymous ftp because some people misused it to upload copyrighted movies and pr0n. Sry. -- leviathan)
-
-=== Building new kernel ===
-Use the kernel from the replicants.
-Fetch the kernel sourcecode from http://gitorious.org/replicant/gnulinuxkernel
-And configure it as you whish.
-
- export HACK_DIR=`pwd`
- git clone git://gitorious.org/htc-msm-2-6-32/leviathan-incoming.git
- cd leviathan-incoming
- git checkout --track -b msm-gnuconform orgigin/msm-gnuconform
- git pull
- wget http://ftp.o2s.ch/defconfig_OE3 -O .config
- make CROSS_COMPILE=/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/ ARCH=arm
- sudo make CROSS_COMPILE=/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/ ARCH=arm modules_install
- sudo mv /lib/modules/2.6.32 /mnt/foo/lib/modules/
- sync
- umount /mnt/foo
-
-=== Building boot.img ===
-
- mkdir $HACK_DIR/mk_boot_img
- cd $HACK_DIR/mk_boot_img
- <nowiki>wget http://wiki.openmoko.org/images/9/92/Mkbootimg.bin</nowiki>
- <nowiki>wget http://wiki.openmoko.org/images/f/f6/Newramdisk.cpio.gz</nowiki>
- mv Newramdisk.cpio.gz newramdisk.cpio.gz
- sudo cp Mkbootimg.bin /usr/bin/mkbootimg
-
-==== For SD-card rootfs ====
- mkbootimg --cmdline "console=tty0 no_console_suspend=1 root=/dev/mmcblk0p2 rootdelay=2 fbcon=rotate:1" \
- --kernel $HACK_DIR/leviathan-incoming/arch/arm/boot/zImage \
- --ramdisk ./newramdisk.cpio.gz -o openmoko-boot.img
-
-==== For internal rootfs ====
- mkbootimg --cmdline "console=tty0 no_console_suspend=1 root=/dev/mtdblock5 rootfstype=yaffs2 rootdelay=2 fbcon=rotate:1 rw" \
- --kernel $HACK_DIR/leviathan-incoming/arch/arm/boot/zImage \
- --ramdisk ./newramdisk.cpio.gz -o openmoko-boot.img
-
-=== Flashing boot.img ===
-* Start into fastboot
-* execute
- fastboot flash boot openmoko-boot.img
-* restart the phone
- fastboot reboot
-
-== WLAN ==
-=== Firmware ===
- mkdir firmware
- cd firmware
- wget http://ftp.o2s.ch/pub/openmoko/htcdream/firmware-wl12xx/wl1251-fw.bin
- wget http://ftp.o2s.ch/pub/openmoko/htcdream/firmware-wl12xx/wl1251-nvs.bin
- scp * root@192.168.0.202:/lib/firmware/
-
-== Screenshots ==
-[[Image:Image.jpg]]
-[[Image:Image2.jpg]]
-
-[[Category:Openmoko distributions]]
+== Building new kernel ==
+Use 2.6.29 from android.git.kernel.org 2.6.27 rebootet after some minutes without reason.
