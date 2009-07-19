@@ -134,7 +134,101 @@ as:
 
 modem.py needs to be updated to setup idle timeout and auto reconnect. While pdp.py needs to be updated so ppp idle timeout resets /etc/resolv.conf to OpenDNS servers
 
-Now, just fire up settings panel (need to be done once per boot) and in connectivity click connect for Gprs...for me it doesn't show connected anymore...but then I don't really care about that as long as the connection works :) --Todo: write a python app to wait for SIM-ready and then fire ActivateContext automatically at bootup
+Now, just fire up settings panel (need to be done once per boot) and in connectivity click connect for Gprs...for me it doesn't show connected anymore...but then I don't really care about that as long as the connection works :). To do this on bootup automatically check out the next section.
+=== Enable on-demand GPRS at boot ===
+* Put init-gprs.py and kill-init-gprs.py in /usr/bin and make them executable.
+* Put bootup-gprs in /etc/init.d and make that executable too.
+* Next execute 'update-rc.d bootup-gprs defaults 99 01' to install the init script on bootup and shutdown
+
+init-gprs.py
+ #!/usr/bin/env python
+ import dbus
+ from dbus.exceptions import DBusException
+ 
+ from dbus.mainloop.glib import DBusGMainLoop
+ import gobject
+ DBusGMainLoop(set_as_default=True)
+ loop = gobject.MainLoop()
+ 
+ bus = dbus.SystemBus()
+ 
+ def activate_gprs():
+         print "Activating GPRS"
+         local_gsm_obj = bus.get_object("org.freesmartphone.ogsmd", "/org/freesmartphone/GSM/Device")
+         pdpIFace = dbus.Interface(local_gsm_obj, "org.freesmartphone.GSM.PDP");
+         pdpIFace.ActivateContext("airtelgprs.com", "x", "x")
+ 
+ def on_sim_ready(ready):
+         print "On ready received: " + str(ready)
+         if not ready:
+                 print "Waiting for SIM to get ready...its still not up"
+                 return
+         if loop.is_running():
+                 loop.quit()
+         activate_gprs()
+ 
+ needLoop = True
+ try:
+         gsm_device_obj = bus.get_object("org.freesmartphone.ogsmd", "/org/freesmartphone/GSM/Device")
+         simIFace = dbus.Interface(gsm_device_obj, "org.freesmartphone.GSM.SIM")
+ 
+         if simIFace.GetSimReady():
+                 print "Sim was already up"
+                 needLoop = False
+                 activate_gprs()
+         else:
+                 print "Sim is not ready...need to wait"
+                 simIFace.connect_to_signal("ReadyStatus", on_sim_ready)
+ except DBusException:
+         print "caught the exception->"
+         bus.add_signal_receiver(on_sim_ready, signal_name='ReadyStatus', \
+                                         dbus_interface='org.freesmartphone.GSM.SIM', \
+                                         bus_name='org.freesmartphone.ogsmd')
+ 
+ if needLoop:
+         loop.run()
+
+kill-init-gprs.py
+ #!/usr/bin/env python
+ import dbus
+ 
+ bus = dbus.SystemBus()
+ gsm_device_obj = bus.get_object("org.freesmartphone.ogsmd", "/org/freesmartphone/GSM/Device")
+ pdpIFace = dbus.Interface(gsm_device_obj, "org.freesmartphone.GSM.PDP")
+ pdpIFace.DeactivateContext()
+
+bootup-gprs
+ #! /bin/sh
+ 
+ NAME=bootup-gprs
+ PATH=/bin:/usr/bin:/sbin:/usr/sbin
+ 
+ echo "1::$1::/var/run/${NAME}"
+ case "$1" in
+     start)
+         if [ -f /var/run/${NAME} ]; then
+                 echo "Initial gprs connection is already running. If you think its not then delete /var/run/${NAME}"
+         else
+                 echo "Starting initial gprs connection"
+                 init-gprs.py > /var/run/${NAME} &
+         fi
+         ;;
+     stop)
+         echo "Stopping initial gprs connection"
+         kill-init-gprs.py
+         rm -f /var/run/${NAME}
+         ;;
+     restart|force-reload)
+         $0 stop
+         $0 start
+         ;;
+     *)
+         echo "Usage: /etc/init.d/bootup-gprs {start|stop|restart|force-reload}"
+         exit 1
+         ;;
+ esac
+ 
+ exit 0
 
 Note: We are updating the framework file which can be updated by any of the frameword update and one need to repeat the update (well..until a nifty setting comes into setting panel somewhere :)
 
