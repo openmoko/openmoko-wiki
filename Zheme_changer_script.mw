@@ -1,11 +1,4 @@
-'''Note: This version is outdated! We are currently working on a better solution to keep this script updated...'''
-
-
 Replace /usr/bin/zheme.py with this block of code:
-
-If you want to create your own Zheme, just copy the directory of an already existing one, rename the directory and put your files (with the same naming convention!! Don't forget to rename the .edj file) in this new directory. (Improvements to come: a combobox instead of buttons, a button to create your Zheme more easily) 
-
-'''This script doesn't change Zhone's background for custom Zhemes (yet...) You'll have to recompile the .edj file in your Zheme's directory if you want to do that.'''
 
 <pre>
 
@@ -30,29 +23,24 @@ If you want to create your own Zheme, just copy the directory of an already exis
 import pygtk
 pygtk.require('2.0')
 import gtk
+import time
+import gobject
+import fcntl
+import struct
+import ConfigParser
 import os.path
-import getpass
+import array
 
 
 class zhemes:
 
-	#check which user is running this script
-	#(taken from the freeyourphone forum, user Sajut)                                                                                                                                                                                
-        global user                                                                                                                                                                                                              
-        global home                                                                                                                                                                                                              
-        user = getpass.getuser()                                                                                                                                                                                                 
-        if user == 'root':                                                                                                                                                                                                       
-                home = '/root/'                                                                                                                                                                                                  
-        else:                                                                                                                                                                                                                    
-                home = '/home/' + user +  '/' 
-
 	def btnClicked(self, widget, data = None):
 		name = widget.get_label()
 
-		os.system("cp " + home + ".fyp/zhemes/" + name + "/" + name + ".edj /usr/share/zhone/zhone.edj")
-                os.system("cp " + home + ".fyp/zhemes/" + name + "/wallpaper.jpg /root/.fyp/wallpaper.jpg")
-                os.system("cp " + home + ".fyp/zhemes/" + name + "/panel.png /usr/share/lxpanel/images/background.png")
-		os.system("cp " + home + ".fyp/zhemes/" + name + "/emblem.png /usr/share/lxde/images/lxde-icon.png")
+		os.system("cp /root/.fyp/zhemes/" + name + "/" + name + ".edj /usr/share/zhone/zhone.edj")
+                os.system("cp /root/.fyp/zhemes/" + name + "/wallpaper.jpg /root/.fyp/wallpaper.jpg")
+                os.system("cp /root/.fyp/zhemes/" + name + "/panel.png /usr/share/lxpanel/images/background.png")
+		os.system("cp /root/.fyp/zhemes/" + name + "/emblem.png /usr/share/lxde/images/lxde-icon.png")
 
 		print "Installed theme: " + name
 		print "Please reboot your device"
@@ -85,12 +73,14 @@ class zhemes:
 		self.winMain.set_size_request(480,480)
 	
 		""" buttons """
+		self.themes = []
 		self.buttons = []
 
-		""" reads the sub-directories in ~/.fyp/zhemes and packs the needed buttons """
-		direc = home + ".fyp/zhemes"
-		for d in os.listdir(direc):
-			if os.path.isdir(os.path.join(direc, d)):
+		""" reads the sub-directories in /root/.fyp/zhemes and packs the needed buttons """
+		dir = "/root/.fyp/zhemes"
+		for d in os.listdir(dir):
+			if os.path.isdir(os.path.join(dir, d)):
+				self.themes.append(d)
 				tmp = gtk.Button( d ) 
 				tmp.connect( "clicked", self.btnClicked)
 				self.vboxBtns.pack_start( tmp )
@@ -120,5 +110,3 @@ if __name__ == "__main__":
 
 
 </pre>
-
-[[Category:Middleware settings]]
