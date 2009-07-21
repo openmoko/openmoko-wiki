@@ -1,0 +1,112 @@
+Replace /usr/bin/zheme.py with this block of code:
+
+<pre>
+
+#!/usr/bin/python
+"""
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+"""
+
+
+import pygtk
+pygtk.require('2.0')
+import gtk
+import time
+import gobject
+import fcntl
+import struct
+import ConfigParser
+import os.path
+import array
+
+
+class zhemes:
+
+	def btnClicked(self, widget, data = None):
+		name = widget.get_label()
+
+		os.system("cp /root/.fyp/zhemes/" + name + "/" + name + ".edj /usr/share/zhone/zhone.edj")
+                os.system("cp /root/.fyp/zhemes/" + name + "/wallpaper.jpg /root/.fyp/wallpaper.jpg")
+                os.system("cp /root/.fyp/zhemes/" + name + "/panel.png /usr/share/lxpanel/images/background.png")
+		os.system("cp /root/.fyp/zhemes/" + name + "/emblem.png /usr/share/lxde/images/lxde-icon.png")
+
+		print "Installed theme: " + name
+		print "Please reboot your device"
+
+		for i in self.buttons:
+			if i.get_label() == name:
+				i.set_sensitive( False )
+			else:
+				i.set_sensitive( True )
+
+		self.winMain.set_title( "Please reboot" )
+
+		return True
+
+		
+	def btnRestartClicked( self, widget, data = None ):
+	
+		exit()
+		
+		return true
+   
+	def __init__( self ):
+        
+		self.winMain = gtk.Window()
+		self.winMain.connect( 'delete-event', gtk.main_quit )
+		self.vboxMain = gtk.VBox( homogeneous = True, spacing = 0 )
+		self.vboxBtns = gtk.VBox( homogeneous = True, spacing = 0 )
+		self.vboxConfig = gtk.VBox( homogeneous = True, spacing = 0 )
+		self.winMain.set_title( "Zhemes" )
+		self.winMain.set_size_request(480,480)
+	
+		""" buttons """
+		self.themes = []
+		self.buttons = []
+
+		""" reads the sub-directories in /root/.fyp/zhemes and packs the needed buttons """
+		dir = "/root/.fyp/zhemes"
+		for d in os.listdir(dir):
+			if os.path.isdir(os.path.join(dir, d)):
+				self.themes.append(d)
+				tmp = gtk.Button( d ) 
+				tmp.connect( "clicked", self.btnClicked)
+				self.vboxBtns.pack_start( tmp )
+				self.buttons.append( tmp )
+		
+		self.btnRestart = gtk.Button( "Restart Zhone" )
+            
+		""" Connect buttons with their functions """    
+		self.btnRestartClicked = self.btnRestart.connect( "clicked", self.btnRestartClicked )
+
+
+		""" Put them on the window """
+		self.vboxMain.pack_start( self.vboxBtns, padding = 1 )
+
+
+		self.winMain.add( self.vboxMain )
+          
+		self.winMain.show_all()
+        
+	def main( self ):
+			gtk.main()
+
+if __name__ == "__main__":
+    zhemes = zhemes()
+    zhemes.main()
+
+
+
+</pre>
