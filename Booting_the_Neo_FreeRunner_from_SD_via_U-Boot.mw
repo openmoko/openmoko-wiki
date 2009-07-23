@@ -379,6 +379,80 @@ Since uboot only supports loading kernel images from the lower 2GB of a physical
 
 Booting a rootfs from an extended partition with uboot has been tested successfully.
 
+===EXperience summary of a Navie windows user now on Moko===
+
+1)If you want to install a DISTRO i.e if you want to boot from an uSD ,I suggest doing a NOR boot and then updating your bootloader to Qi.
+
+2)After this boot the phone with its existing DISTRO.
+
+Set up an SSH access 
+Step by step procedure for this:
+
+quick answer: plug the usb cable in your laptop (with ubuntu) and in
+the freerunner, on ubuntu: type
+
+sudo -i
+
+it will ask password type and it will show "#" (you are root)
+
+type ifconfig -a
+
+it should appear usb0 or some eth1 or eth2 etc.
+
+type ifconfig usb0 192.168.0.200
+
+now type:
+
+ssh root@192.168.0.202
+
+it will ask password, press enter and you'll enter your openmoko!
+
+Now you can type your commands at the phone's root prompt.
+
+3)Then type fdisk /dev/mmcblk0 (for this there should be a uSD kept in the phone)
+You will have to now create two partitions with the help of some command options.And before creating partitions you have to remove all its partitions.Type 'p' to view the current partition table and then type 'd' for deleting partitions.
+
+4)Create partition by pressing n ,then pressing p,then typing number say 1 for kernel partition (1st partition).
+Give 1 as lower cylinder number and +8M as last
+
+5)Create another partition use the same procedure as above :press n then press 2 now enter the lower cylinder number which you can see in (lower-higher) and then the last cylinder number.
+
+6) press 'w' and this should save partition table and quit.It might give a device busy signal to over come that you might say quit and again set up SSH access.
+
+7)type 
+mkfs.vfat /dev/mmcblk0p1
+and then
+mkfs.ext3 /dev/mmcblk0p2
+
+8)Now you have partitions ready.Say if you are loading SHR DISTRO download the rootfs file for SHR and the kernel file (.bin) file.This you can manually download on your desktop or laptop and then copy it into phones memory by saying 
+scp <file-name> ssh@192.168.0.202: (do this opening a new terminal window and when the phone is in SSH access)
+Copy the shr-image-om-gta02.tar.gz and its kernel file uImage-om-gta02-latest.bin. (you can download these two files to your computer from the SHR distro page)
+
+7)When in SSH go to root of phone (this you can do by typing "cd .." and pressing enter for two time.
+Then say cd /mnt ,then type "mkdir shr" and also "mkdir shrkernel".With this you create two mounting directories one for the rootfile system image and the other for kernel .bin file.
+
+8)Then type
+mount /dev/mmcblk0p2 /mnt/shr
+and then type
+tar -C /mnt/moko/ -xzvf openmoko-devel-image-fic-gta01-20070313022035.rootfs.tar.gz
+if the tar doesnot work type
+gunzip -c shr-image-om-gta02.tar.gz | tar -C /mnt -xvf -
+
+This will take some time.
+
+9)Now doing the same for kernel
+mount /dev/mmcblk0p1 /mnt/shrkernel
+cp uImage-fic-gta01-latest.bin /mnt/mokokernel/uimage
+
+10)Now type
+umount /mnt/moko
+umount /mnt/mokokernel
+sync
+
+Note :do step 8 and 9 from the directory of the phone where you have copied the two files using SCP by defualt this should be root@om-gta02 which again /home/root .
+
+Reboot the phone and TADAAAA you have SHR running on the '''Worlds first truly customizable open source phone NEO-FREERUNNER.'''
+
 === Remarks on Kernel Parameters ===
 
 ==== loglevel ====
