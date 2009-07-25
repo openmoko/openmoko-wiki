@@ -243,46 +243,7 @@ loop(Parent,Port) ->
 			os:cmd("amixer -d sset \"PCM\" 255"),
 			os:cmd("amixer -d sset \"Mono Mixer Left\" on"),
 			os:cmd("amixer -d sset \"Mono Mixer Right\" on"),
-			os:cmd("amixer -d sset \"Left Mixer Left\" on"),-module(sound).
--author(skvamme).
--vsn("$Id").
--export([make/1]).
-
-make(Parent) -> 
-	spawn_link(fun() -> init(Parent) end).
-
-init(Parent) ->
-	io:format("Sound process is started~n",[]),
-	loop(Parent,null).
-	
-loop(Parent,Port) ->
-	receive
-		{setsound,cpugsmhandset} ->
-			os:cmd("amixer -d sset \"PCM\" 255"),
-			os:cmd("amixer -d sset \"Mono Mixer Left\" on"),
-			os:cmd("amixer -d sset \"Mono Mixer Right\" on"),
 			os:cmd("amixer -d sset \"Left Mixer Left\" on"),
-			os:cmd("amixer -d sset \"Right Mixer Right\" on"),
-			?MODULE:loop(Parent,Port);
-		{stop} ->
-			os:cmd("killall madplay"),
-			?MODULE:loop(Parent,Port);
-		{play,Tune} ->
-			D = "madplay --output=wave:- /root/" ++ Tune ++ " | aplay --buffer-size=20480",
-			Port1 = open_port({spawn,D}, [stream, use_stdio, stderr_to_stdout]),
-			?MODULE:loop(Parent,Port1);
-		{setsound,Type} ->
-			os:cmd("alsactl -f /usr/share/openmoko/scenarios/" ++ Type ++ ".state restore"),
-			?MODULE:loop(Parent,Port);
-		
-		{volume, up} ->
-			os:cmd("amixer -d sset \"PCM\" 255"),
-			?MODULE:loop(Parent,Port);
-		Any -> io:format("Sound got unknown msg:~p~n",[Any]),
-			?MODULE:loop(Parent,Port)
-	end.
-        
-
 			os:cmd("amixer -d sset \"Right Mixer Right\" on"),
 			?MODULE:loop(Parent,Port);
 		{stop} ->
