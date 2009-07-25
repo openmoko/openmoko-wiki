@@ -76,17 +76,17 @@ It has to restore automagically the connection on suspend/resume cycles (the pro
 Wpa_supplicant dbus interface is not complete, if you quit the program in some hard way (signaling, closing X, etc) network definitions will not be deleted and at the next run NWA will be crazy, some workarounds:
 
 * <del>kill wpa_supplicant at startup, it' not nice</del>
-* <del>implement</del>implemented a remove/readadd interface to wpa when NWA is starting (it should delete all network definition, to be tested)
+* <del>implement</del> implemented a remove/readadd interface to wpa when NWA is starting (it should delete all network definition, to be tested)
 * <del>bore wpa_supplicant authors to implement the full dbus interface</del> a new version of dbus interface is on the road and I just contacted wpa_supplicant maintainers
 * implements signal handling hooks (howewer a kill -9 will bypass it)
 
-Another problem is that wpa_supplicant when connects to a networks signal only the state change and not the network id or network dbus path. This is a big problem as I would have the dhcp/static ip configuration associated to that and not to the essid as it may be the same between different networks.
+Another problem is that wpa_supplicant when connects to a networks signals only the state change and not the network id or network dbus path. This is a big problem as I would have the dhcp/static ip configuration associated to that and not to the essid as it may be the same between different networks.
 
 Using the bssid to disambiguate the network may not be always possible for example when connecting to two big WDS networks with the same essid and thousand of AP.
 
-'''Please comment the above problem and suggest alternatives. I'll add dhcp/static ip support when things will be clear'''
+'''Please comment the above problem and suggest alternatives. In the mean I added experimental static ip support guessing the net matching essid and bssid and avoiding enabling ambigue network configurations'''
 
-<del>as wpa_supplicant does not signal the connected network we have to retrieve the essid with standard AF_INET ioctl, so qnetutils.cpp has to be improved</del>qnetutils.cpp now read the essid of the associated network.
+<del>as wpa_supplicant does not signal the connected network we have to retrieve the essid with standard AF_INET ioctl, so qnetutils.cpp has to be improved</del> qnetutils.cpp now read the essid and bssid of the associated network.
 
 The qt stylesheet has to be improved.
 
@@ -94,7 +94,6 @@ A 2.6.29 rude workaround was implemented, when you quit the NWA it does not kill
 
 A startup script, launched when supplicant association is complete, is already implemented, it's a crude way to disable power management if needed.
 
-The second problem for static ip support is that I have to study a bit more rtnetlink to implement static ip without calling exeternals command :) in the mean time I'm planning to support <del>per-network</del> per-essid command file execution and dhcp disabling, so you may use some script to configure the interface with a static address. It should be sufficient for a prototype.
 
 <del>Actually destroying a running thread when application quits leads an "application crashed" on E, I'm not caring of it now</del> a better clean and quit handler has to be implemented.
 
