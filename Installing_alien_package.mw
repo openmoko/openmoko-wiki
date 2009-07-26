@@ -1,51 +1,17 @@
 ==Problem==
-The problem is that some packages exist in both the fundamental [[distribution]] - and other [[repositories]] - with same names, but (newer) with other dependencies, other source code includes and other compilation options, which can and often will break the installation.
+The problem is that some packages exist in both the fundamental distribution - and other repositories - with same names, but (newer) with other dependencies, other source code includes and other compilation options, which can and often will break the installation.
 
 So e.g. do not use "opkg upgrade" when non-distribution (e.g. non-OM2009) repositories are included. It often breaks the installation.
 
-==Solution hack?==
-Please surround the non-distribution (alien) package install with:
+==Solution?==
+Please surround the non-distribution package (alien) install with:
 # Addition of the required repository
-# [[opkg]] update # Update database.
+# opkg update # Update database.
 # Install the package(s)
 # remove the non-distribution repository from opkg. E.g. "rm /etc/opkg/opkg-feed.conf"
-# ? Is this required?: opkg update # Update database with only the fundamental distribution packages?
+# ? Is this required?: opkg update # Update database with only OM2009?
 
 ==Future package management system wish==
-Wish: Actually the package management system should cope with it. The fundamental distribution with a given version number/revision should have higher precedence, and other repositories should have lesser precedence. Maybe the best would be that the package had a distribution list in which it can be "fundamental".
-
-Maybe the [[package management]] system should consult a check post (by name and some checksum), so an installer can be informed before installation of the package on the given fundamental distribution:
-*Not tested
-*Tested
-** Security:
-*** Installation damage (permanent; system can not (re)boot,...)
-*** Non-permanent damage (uninstall recovers the installation):
-**** Only configuration
-**** Data
-*** Conflicts with package xyz:
-**** Resource (e.g. polling hardware, clearing special interrupts)
-**** Offered services (e.g. using tcp-port 80)
-*** Contains malware
-*** Contains virus
-*** Crashes sometimes
-*** Crashes often
-*** Vulnerable - buffer overflow...
-*** Presently seems ok
-** Feedback work level:
-*** Superficially; can start up and shut down
-*** some crucial features
-*** many crucial features
-*** most crucial features
-*** all features
-** Designed to work with this fundamental distribution with the version number/revision - package maturity level:
-*** Unstable
-*** Testing
-*** Stable
-** ...
-
-===Suggest un-installation of unused packages===
-A package management system should also suggest un-installation of unused packages.
-
-The primary/non-dispensably packages that the user needs should have been marked - either explicitly or semi-automatically. If the user uninstall a package or a package upgrade make some packages unused, they should be suggested to be uninstalled.
+Wish: Actually the package management system should cope with it. The fundamental distribution should have higher precedence, and other repositories should have lesser precedence. Maybe the best would be that the package had a distribution list in which it can be "fundamental".
 
 [[Category:Package management| ]]
