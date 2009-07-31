@@ -475,6 +475,48 @@ Turn Bluetooth on in SHR Settings -> Connectivity, then in terminal run
 
 If you try to change Wallpaper or Theme and Illume keeps on crashing, it might be caused by the whole Illume running in Software_16 mode. Go to Illume Settings, slide the icon bar and select Advanced. There tap on Engine and select Software. After this, you can change your Wallpaper or Theme. Selecting Software_16 later on again will speed up the desktop's response (though causing it to be a bit uglier).
 
+
+'''Improve speed of Elementary applications'''
+
+Set the Elementary rendering engine used for Evas to x11-16 (Software X11 16bpp engine, may have bugs and will be lower quality, but faster):
+ echo "#!/bin/sh"; echo "export ELM_ENGINE=x11-16") > /etc/profile.d/set-elm-engine.sh
+
+
+Additionally in the SHR-Unstable repositories there are theme packages optimized for 16bpp color.  Both packages can be installed with the following command:
+ 
+ opkg install e-wm-theme-illume-sixteen elementary-theme-sixteen
+
+You can then append the /etc/profile.d/set-elm-engine.sh with:
+
+ # Set Optimized theme
+ export ELM_THEME=sixteen
+
+
+You can also then change Illume to use the sixteen theme by clicking the wrench->Look->Theme-illume-sixteen->OK.  Then switch Illume to use the 16bpp Engine by clicking the wrench->Advanced(you will need to drag and slide the top menu)->Engine->Software_16->OK.  This should give you a much faster interface without the low quality look the default SHR themes have at this lower color depth.
+
+Read http://trac.enlightenment.org/e/wiki/Elementary
+
+'''Speedup of suspend and wake up'''
+
+I you are using Qi and installation on µSD card, you can change the kernel parameter loglevel=1 1 in /boot/append-GTA02 . For u-boot and installation in nand just type
+
+ klogd -c 1
+
+into the console. This saves you from 3 seconds worth of console output on every resume.
+
+If you like the effect of this command and want it to be executed at every startup, you just have to log into your phone and type the following:
+
+ cat > /etc/init.d/resumespeedup << EOF
+ #!/bin/sh
+ /sbin/klogd -c 1
+ EOF
+ chmod +x /etc/init.d/resumespeedup
+ ln -s ../init.d/resumespeedup /etc/rc1.d/S06resumespeedup
+ ln -s ../init.d/resumespeedup /etc/rc2.d/S06resumespeedup
+ ln -s ../init.d/resumespeedup /etc/rc3.d/S06resumespeedup
+ ln -s ../init.d/resumespeedup /etc/rc4.d/S06resumespeedup
+ ln -s ../init.d/resumespeedup /etc/rc5.d/S06resumespeedup
+
 ==Installing Software==
 
 [[Category:SHR]]
