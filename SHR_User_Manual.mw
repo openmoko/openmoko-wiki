@@ -300,6 +300,23 @@ After selecting sid tune as ring tone, there are available controls to select tu
 
 [[Image:SHR-Settings-Profiles-Ringtones.png|200px|thumb|Ringtones]]
 
+This is changing settings in /etc/freesmartphone/opreferences/conf/phone/default.yaml
+
+ ring-volume # Ring Volume control 0 (mini) to ? maxi)
+ ring-length # min time for ringtone. Must be greater than the duration of you ringtone
+ ring-loop # define the number of loop of ringtone to play
+ ring-tone: "ringtone_ringnroll.ogg" # .ogg example
+ ring-tone: "Arkanoid_PSID.sid" # .sid example, use default tune
+ ring-tone: "Arkanoid_PSID.sid;tune=2" # .sid example, plays the second tune of that
+
+If you like to test a .sid you can play it using this command on the FR:
+
+ gst-launch filesrc location=Arkanoid_PSID.sid ! siddec tune=2 ! alsasink
+
+Note: it's used a ! not a | to construct the gstreamer pipe command.
+
+ 
+
 ===Connectivity===
 
 [[Image:SHR-Settings-Connectivity.png |200px|thumb|Connectivity top]]
@@ -381,7 +398,14 @@ Here you can turn on or off automatic dimming or suspend after idle timeout (see
 
 ====Timeouts====
 [[Image:SHR-Settings-Timeouts.png |200px|thumb|Timeouts]]
-Here you can set up values of idle timeouts used by device. Timeouts are reached in this order: idle -> idle dim -> idle prelock -> lock -> suspend. Idle, idle prelock and lock aren't used by default in SHR at the moment.
+Here you can set up values of idle timeouts used by device. Timeouts are reached in this order: idle -> idle dim -> idle prelock -> lock -> suspend. Idle, idle prelock and lock aren't used by default in SHR at the moment. This setting changes parameters in /etc/frameworkd.conf :
+
+ [odeviced.idlenotifier]
+ suspend = 20
+ lock = 2
+ idle_prelock = 12
+ idle = 10
+ idle_dim = 20
 
 ===Services===
 
