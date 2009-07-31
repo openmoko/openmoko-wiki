@@ -4,7 +4,8 @@
 
 == Installing to flash ==
 
-You need rootfs and kernel (assuming you're using qi or u-boot):
+As usual, you need rootfs and kernel (assuming you're using qi or u-boot) which are available at :
+http://nanl.de/files/openwrt/openmoko/
 
  wget http://nanl.de/files/openwrt/openmoko/LATEST_openwrt-s3c24xx-2.6-root.jffs2-128k
  wget http://nanl.de/files/openwrt/openmoko/LATEST_openwrt-s3c24xx-2.6-uImage
@@ -15,21 +16,24 @@ You need rootfs and kernel (assuming you're using qi or u-boot):
 
 Then boot from flash. 
 
-== Installing to sd-card ==
+== Installing to SD card ==
 
 For booting from sd-card fetch this rootfs and the kernel image (same than above mentioned):
  wget http://nanl.de/files/openwrt/openmoko/LATEST_openwrt-s3c24xx-rootfs.tgz
  wget http://nanl.de/files/openwrt/openmoko/LATEST_openwrt-s3c24xx-2.6-uImage
 
- Empty sd card.
- Unpack LATEST_openwrt-s3c24xx-rootfs.tgz to card.
- Copy LATEST_openwrt-s3c24xx-2.6-uImage to card /boot/uImage-GTA02.bin
- (Use card reader. Or if you have freerunner running, download images straight on card and run with root privileges:
-  gunzip LATEST_openwrt-s3c24xx-rootfs.tgz
-  tar xf LATEST_openwrt-s3c24xx-rootfs.tar
-  )
-Then boot from sd-card.
-
+Following instructions assume that you are using a SD card reader on host PC.
+* Format SD card using ext2 or ext3.
+ mkfs.ext2 /dev/sdf1
+* Mount this partion 
+ mount /dev/sdf1 /mnt/disk
+* Unpack rootfs archive to card.
+ tar xvzf LATEST_openwrt-s3c24xx-rootfs.tgz -C /mnt/disk
+* Copy kernel to card /boot/uImage-GTA02.bin
+ cp LATEST_openwrt-s3c24xx-2.6-uImage /mnt/disk/boot/uImage-GTA02.bin
+* Umount SD card partition
+ umount /mnt/disk
+* Then boot from SD card with your FreeRunner.
 
 = Usage =
 After flashing both images, reboot your phone and depending on what packages were built into the image (if compiled yourself this means the packages you've selected) you might be able to initiate and receive phonecalls with your FreeRunner running OpenWrt :)
