@@ -753,6 +753,38 @@ Opimd utils is a set of several testing scripts to play with the new opimd backe
 
  opkg install opimd-utils
 
+'''opkg upgrade issues'''
+
+As opkg had some issues recently, installation  might get broken due to that. You can fix it or prevent by using the following scripts
+
+Safe update packages:
+
+ #!/bin/sh
+ 
+ opkg list_upgradable | awk '!/(kernel|Multiple)/ {print $1}' | \
+ 	while read line; do
+ 	echo "installing pack $line"
+ 	opkg install $line -force-reinstall
+ done
+
+
+Force reinstall all installed packages
+
+ #!/bin/sh
+ 
+ opkg list_installed | awk '!/(kernel|Multiple)/ {print $1}' | \
+ 	while read line; do
+ 	echo "installing pack $line"
+ 	opkg install $line -force-reinstall
+ done
+
+
+No icons, no GSM functions etc. - this is mostly due to '''errors on your uSD''' card. Remeve your card and fix it in card reader or by booting to another partition (nand) or by reboot and mount read only, then run fsck.
+
+For reboot into nand and fix 1st partition of etx2 on your card
+
+ fsck.ext2 /dev/mmcblk0p1
+
 ==Installing Software==
 
 You can use opkg for installing software packages or you can try SHR Installer from http://git.shr-project.org/git/?p=shr-installer.git;a=summary . It requires packagekitd
