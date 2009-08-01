@@ -131,6 +131,8 @@ perl convert2gpx.pl 20080903_111508.log > 20080903_111508.gpx
 == Importing Tracks into tangoGPS ==
 
 tangoGPS does not support the import of tracks directly. However the following xslt style sheet can be used to convert gpx tracks - e.g from routing software such as maps.cloudmade.com - to tangogps log files, which can then be imported<br>
+
+=== XSLT ===
 At present this style sheet will only convert tracks which make use of the 'wpt' (waypoint) tag. Some software uses the 'trkpt' (trackpoint) tag. This will be incorporated into the stylesheet at some point. In the meantime, it can be used on the latter type of gpx file by changing 'wpt' to 'trkpt' on line 6.
 
 <pre>
@@ -156,6 +158,39 @@ $ xsltproc gpx2log.xslt input_file.gpx > output_file.log
 move output_file.log to the tangogps traces directory, and use the 'Load...' button on the 'Track' tab to overlay it on the map
 
 Note: this stylesheet was thrown together in a short time, and makes at least one shortcut - namely, the use of 'dummy' variables for various details, such as the altitude, date, etc. Feel free to improve this if required, although it has no bearing on the display of the track
+
+=== python ===
+
+This small python script will convert GPX tracks and routes to tangogps file format.
+
+<pre>
+<nowiki>
+#!/usr/bin/env python
+
+import sys, re
+import xml.etree.cElementTree as ET
+
+tree = ET.parse(sys.argv[1])
+root = tree.getroot()
+ns = re.match('{(.*)}', root.tag).group(1)
+
+for trkpt in root.findall('.//{%s}trkpt' % ns) + root.findall('.//{%s}rtept' % ns):
+    a = trkpt.attrib
+    for key, default in (('ele', 555.55), ('speed', 1.0), ('hdop', 1.0), ('course', 0.0), ('time', '2009-05-16T09:35:58Z')):
+        a[key] = trkpt.findtext('{%s}%s' % (ns, key)) or default
+    print '%(lat)s,%(lon)s,%(ele)s,%(speed)s,%(hdop)s,%(time)s' % a
+
+</nowiki>
+</pre>
+
+Testet with GPX files from bikemap.net, gpsies.com, bikeroutetoaster.com, www.vvs.de/radroutenplaner.
+
+Usage:
+<pre>
+$ ./gpx2tango.py MyTack.gpx > MyTrack.log
+</pre>
+
+=== sqlite ===
 
 You may help yourself by using [http://relet.net/frog/archives/68 this tool] to import GPX trackpoints as a series of POIs directly into the sqlite database which tangoGPS uses to store POIs.
 
