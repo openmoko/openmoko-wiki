@@ -6,83 +6,37 @@ One of the most important aspects of middleware for mobile devices is saving ene
 
 FSO introduces the concept of resources. A resource is a high-level entity with a name and a state. The name is used to identify a resource (e.g. WiFi), the state is describing its condition (e.g. enabled). It is important to understand that a resource not necessarily correlates to a peripheral device. Although enabling a resource such as Bluetooth most likely has the consequence of powering up a device, there may as well be more to it, such as launching a low level device handling services or allocating related resources.
 
-=== Resource Policies ===
-
-Once in a while, reference counted handling of resources gets in your way, for example when you are running legacy applications or want to configure or debug peripherals. In that case it may become necessary for a resource to be always enabled or always disabled. While not recommended, it is possible to switch from automatic resource control to manual control by calling SetResourcePolicy. Valid values are auto (which is the default on system startup), enabled, and disabled.
-
 == List of FSO resources ==
-List of possible FSO resources:
-* Accelerometer - Unless this resource is enabled, the module is unpowered.
-* Bluetooth - You need to have this resource requested, to have bluetooth module powered.
-* CPU - Default rules.yaml checks for this resource, to disable automatic suspend, when it's requested.
-* Display - While this resource is kept, the display won't be blanked.
-* GPS - Same idea as WiFi/Bluetooth
-* GSM - The same for GSM modem
-* TEST - A test resource - this resource is not listed with <tt>fsoraw -l</tt>
-* UsbHost - Unless this resource is enabled, you've no usb host.
-* WiFi - Unless this resource is enabled you've no eth0 and wifi module is completely unpowered.
+=== WiFi ===
+Unless this resource is enabled you've no eth0 and wifi module is completely unpowered.
 
-GTA02 [[Neo FreeRunner]] has:
- root@om-gta02 / $ fsoraw -l
- Resource List:
- CPU
- Display
- UsbHost
- WiFi
- Bluetooth
- GSM
- Accelerometer
- GPS
+=== Display ===
+While this resource is kept the display won't be blanked.
 
-GTA01 [[Neo 1973]] has:
-*...
+=== TEST ===
+A test resource
+
+=== Bluetooth ===
+You need to have this resource requested to have bluetooth module powered.
+
+=== GSM ===
+The same for GSM modem
+
+=== CPU ===
+Default rules.yaml check for this resource to disable automatic suspend when it's requested.
+
+=== GPS ===
+Same idea as WiFi/Bluetooth
 
 == Resource management ==
-
 === Manual way ===
-By default, the policy for every resource is '''auto''', which means that it is enabled only when it has been requested by a currently running application.  However, it is possible to throw a "hard switch" to force the resource to be always '''enabled''' or '''disabled''', regardless of what applications request it.  This can be done with the help of the SHR Settings GUI or from the command line using an appropriate [[OpenmokoFramework/mdbus|mdbus]] call.  For example,
-
- mdbus -s org.freesmartphone.ousaged /org/freesmartphone/Usage \
- org.freesmartphone.Usage.SetResourcePolicy Bluetooth enabled
-
-Do not forget that forcing a resource to be enabled will drain more power since it will leave the corresponding device powered all the time.  And, of course, forcing a resource to be disabled will cause any applications that require it to fail.  Because of this, you are highly discouraged from changing the resource policy from '''auto''' unless you know exactly what you are doing.
+With the help of SHR Settings or an appropriate mdbus call (example: <code>mdbus -s org.freesmartphone.ousaged /org/freesmartphone/Usage org.freesmartphone.Usage.SetResourcePolicy Bluetooth enabled</code>) you set resource policy to "enabled". Do not forget that way you'll lose power since it will leave the corresponding device powered all the time.
 
 === Automatic way ===
-Use the <code>fsoraw</code> (created per Joerg's request [http://trac.freesmartphone.org/ticket/393]) utility. With it you can automatically request the necessary resource before starting a command and release it when it's finished (<em>this will happen even if it was killed with SIGKILL</em>).
-
-Typical basic use:
- fsoraw -r CPU,Display mokomaze
-Start a game (or any other app) and avoid auto-suspend and display-blank
-
-Especially recommended for WiFi since due to the bugs in the firmware and the driver full power-cycle of the module is often advantageous.
+Use the <code>fsoraw</code> utility. With it you can automatically request the necessary resource before starting a command and release it when it's finished. Especially recommended for WiFi since due to the bugs in the firmware and the driver full power-cycle of the module is often advantageous.
 
 Example command (works for open, WEP and WPA/WPA2 networks, automatically determining the network it can connect to, just add all the networks you use to the config):
  fsoraw -r WiFi -- wpa_supplicant -ieth0 -Dwext -c/etc/wpa_supplicant/wpa_supplicant.conf
-To keep wifi useable, due to bug still present currently (2009-08-18) you need to also do (''fixed with the latest SHR kernel, 2009-09-01'', this command is no longer needed):
- rmmod ar6000 && modprobe ar6000
 
 Bluetooth scan for nearby devices example:
- fsoraw -r Bluetooth -- bash -c "sleep 1; hcitool scan"
-
-=== Viewing Resources ===
-
-It would be nice to have a command to list the current state of all
-resources. (See [http://trac.freesmartphone.org/ticket/461].) Unfortunately, such a utility is yet to be written. However, a first take on implementing the desired functionality can already be downloaded from [https://wayback.archive.org/web/20100706161421/http://trac.freesmartphone.org/raw-attachment/ticket/461/lsfsor.py  trac.freesmartphone.org/raw-attachment/ticket/461/lsfsor.py].
-
-To examine the state of a resource manually, there are three <code>org.freesmartphone.Usage</code> methods which are particularly useful.
-
-* '''GetResourcePolicy''' ( s ) → s
-: Get the current resource policy for a given resource.
-* '''GetResourceState''' ( s ) → b
-: Get the current resource state. True if the resource is currently enabled. 
-* '''GetResourceUsers''' ( s ) → as
-: Get the users (an array of bus names) which currently use a given resource.
-
-For example,
- mdbus -s org.freesmartphone.ousaged /org/freesmartphone/Usage \
- org.freesmartphone.Usage.GetResourceState WiFi
-
-==External links==
-*http://www.freesmartphone.org/
-
-[[Category:FSO]]
+ fsoraw-armel -r Bluetooth -- bash -c "sleep 1; hcitool scan"
