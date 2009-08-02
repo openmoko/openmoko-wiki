@@ -1,61 +1,39 @@
+Openmoko devices
+Battery questions and answers
+
 NB: Some of the described behaviour depends on the kernel, the
-relevant code was pushed on 2009-08-02 to andy-tracking. Some older kernel versions may have quite nasty hacks ('reenabling MBC though battery reports full') that seriously wreck your battery within months.
+relevant code was pushed on 02 Aug to andy-tracking
 
 
-== Battery care and safety guidelines ==
+Hardware capabilities
 
-=== How can I break my battery? ===
-To successfully kill your LiIon battery without applying brute force, you simply may disobey any of the following advices:
+Q: What batteries can be used with gta01 and gta02?
+A: Original OM gta01, gta02, Nokia BL-5C, BL-6C and compatibles.
 
-==== Temperature ====
-Never expose or let warm up battery to high temperatures. 70°C might be a limit for safe operation, and >100°C most likely is a killer for the cell. This is especially true during charge/discharge.
+Q: Do other BL-5/6C compatible batteries fit?
+A: If the battery is thicker than BL-6C, you won't be able to close
+the back cover.
 
-==== Drop ====
-Never let the battery drop on a hard surface or by any other means expose to hard impact.
+Q: What is the difference between all those types?
+A: 
 
-==== Wrong storage ====
-LiIon cells don't like to be kept at any extreme for a prolonged time. So *never* store away your device with battery inserted, for a period longer than a few days. Charge battery to a reasonable level prior to extended periods of no usage.
-Do not store battery in charger, as this may cause a permanent charging level of 100% which is as deteriorating to the LiIon cell chemistry as is storage at 0%. Keeping battery in Neo which is powered by external source is safe though, even for months, as the Neo's PMU charger circuit takes care to treat the battery nicely. 
+Capacity:
+gta01, gta02		- 1200 mAh
+BL-5C old (newer/new)	- 850 (970/1050) mAh
+BL-6C			- 1150 mAh
 
-Also see [http://wiki.openmoko.org/wiki/Battery_Questions_and_Answers#I_have_several_compatible_batteries._What_are_the_storage_requirements_for_them.3F Storage]
+Temperature control:
+gta01, BL-5C, BL-6C	- thermistor
+gta02			- bq27000
 
-
-== Hardware capabilities ==
-
-=== What batteries can be used with gta01 and gta02? ===
-Original OM gta01, [[Neo FreeRunner Battery|gta02]], Nokia [http://europe.nokia.com/find-products/accessories/all-accessories/power/batteries/nokia-battery-bl-5c BL-5C], [http://europe.nokia.com/find-products/accessories/all-accessories/power/batteries/nokia-battery-bl-6c BL-6C] and compatibles.
-
-=== Do other BL-5/6C compatible batteries fit? ===
-If the battery is thicker than BL-6C, you won't be able to close
-the back cover. Nokia's BL-4C is a bit thinner than the BL-5C so it also fits, but has noticeably shorter battery life.
-
-=== What is the difference between all those types? ===
-
-==== Capacity ====
-{|border="1" cellspacing="0" cellpadding="5"
-| gta01, gta02		|| 1200 mAh
-|-
-| BL-4C old (new)       || 720 (860) mAh
-|-
-| BL-5C old (newer/new)	|| 850 (970/1020) mAh
-|- 
-| BL-6C			|| 1150 mAh
-|}
-
-==== Temperature control ====
-{|border="1" cellspacing="0" cellpadding="5"
-| gta01, BL-5C, BL-6C	|| thermistor
-|-
-| gta02			|| bq27000
-|}
-
-==== Special features ====
-
+Special features:
 gta02 - accurate and sophisticated reporting of capacity,
 time_to_full, time_to_empty, temperature and battery current during
-both charge and discharge thanks to bq27000 (aka [http://de.wikipedia.org/wiki/Coulomb Coulomb] Counter). More details at [[Neo FreeRunner Battery]].
+both charge and discharge thanks to bq27000 (aka Coloumb Counter)
 
-=== What are hardware capabilities of gta01 and gta02 with regard to battery management? ===
+Q: What are hardware capabilities of gta01 and gta02 with regard to
+battery management?
+A:
 
 gta01: charging all battery types, measuring temperature with
 battery-integrated thermistor (currently charging and measuring
@@ -66,130 +44,110 @@ voltage, very inaccurate and noisy measuring of battery current
 gta02: charging all battery types, measuring battery output voltage,
 communicating with bq27000
 
-=== Can nokia phones use/charge gta01/gta02 batteries? ===
-
-gta01 and gta02 batteries will fit wherever BL-6C fits but they
-can't be charged in nokia phones unless you isolate the phone's battery connector middle pin
-from the battery contact pad and connect a resistor of ~70k to 85k Ohm (actual measured value
+Q: Can nokia phones use/charge gta01/gta02 batteries?
+A: gta01 and gta02 batteries will fit wherever BL-6C fits but they
+can't be charged in nokia phones unless you isolate the middle pin
+from the battery and connect a resistor of ~50k (actual measured value
 on a cold (25C) battery is 75k, on a slightly warm battery - 82k) from
-phone middle pin to the ground (to fake a thermistor presence).
+it to the ground (to fake a thermistor presence).
 
-=== Can third-party chargers charge gta01/gta02 batteries? ===
-
-The "good" ones will most probably require the same trick needed
+Q: Can third-party chargers charge gta01/gta02 batteries?
+A: The "good" ones will most probably require the same trick needed
 for nokia phones. More cheaper ones are more likely to ignore
-thermistor absence.   
+thermistor absence. 
 
-Particularly those with only two pins will charge GTA02 battery without specific problems
+Q: I have several compatible batteries. What are the storage
+requirements for them?
+A: Keep in a dry cool place charged to no more than 75%.
 
-=== I have several compatible batteries. What are the storage requirements for them? ===
 
-Keep in a dry cool place charged to no more than 75% and NEVER under 25%. Check every 3 months and recharge when due, cells will self-discharge over time and once they reach 0% level they are dead within weeks!
+Safety issues
 
-=== That bq27000 chip seems to be pretty cool, how can i read and understand its raw registers? ===
+Q: Do OM devices control temperature to stop charging if the battery
+gets too hot?
+A: No (probably gta01 does, need to check).
 
-[[User:jOERG|DocScrutinizer]] to the rescue! Here's his magic script to do that: [http://people.openmoko.org/joerg/battery/bq27k-detail2]. Also see [http://maemo.cloud-7.de/maemo5/usr/local/sbin/] and [http://maemo.cloud-7.de/maemo5/patches_n_tools/]
-
-== Safety considerations in detail ==
-
-=== Do OM devices control temperature to stop charging if the battery gets too hot? ===
-
-GTA02 Neo FreeRunner:No; GTA01 Neo 1973:Yes (if PMU PCF50606 Main battery charger is configured correctly)
-
-=== Isn't it dangerous? ===
-
-No, since all batteries (not raw cells!) have an integrated
+Q: Isn't it dangerous?
+A: No, since all batteries (not raw cells!) have an integrated
 protection circuits.
 
-=== Can i use that fancy 2800 mAh BL-5C-compatible battery i saw on ebay? ===
-
-Unless you want an explosion in your pocket i wouldn't recommend
+Q: Can i use that fancy 2800 mAh BL-5C-compatible battery i saw on
+ebay?
+A: Unless you want an explosion in your pocket i wouldn't recommend
 using any battery that is not produced by a reputable vendor and
 widely tested. And even reputable vendors make mistakes, nokia once
-had to recall 46 million batteries manufactured by Matsushita ([http://batteryreplacement.nokia.com/batteryreplacement/en/advisory-2007.html]).
+had to recall 46 million batteries manufactured by Matsushita (
+http://batteryreplacement.nokia.com/batteryreplacement/en/advisory-2007.html
+).
 
-=== You say that BL-5C is compatible with my gta02. Does that mean i can use that BL-5C-compatible bat i bought for a buck from a bum? ===
+Q: You say that BL-5C is compatible with my gta02. Does that mean i
+can use that BL-5C-compatible bat i bought for a buck from a bum?
+A: You bet, go ahead.
 
-You bet, go ahead.
 
-== Charging ==
+Charging
 
-=== My battery charges to 100% but then charging stops and the battery keeps discharging, wtf? ===
-
-LiIon batteries don't like to be kept fully charged, so the charger
+Q: My battery charges to 100% but then charging stops and the battery
+keeps discharging, wtf?
+A: LiIon batteries don't like to be kept fully charged, so the charger
 stops as soon as charging current becomes less than threshold. If you
 have GSM on it will discharge the battery.
 
-=== But why doesn't it ever stop charging on my device? ===
-
-The GSM modem is connected directly to the battery terminals so if
+Q: But why doesn't it ever stop charging on my device?
+A: The GSM modem is connected directly to the battery terminals so if
 it's active, charger will think it's still charging the battery and
-won't turn off unless GSM becomes inactive. The default threshold setting of PMU charger is
-about 16mA, the latest [[Qi]] increases the threshold to ~32mA.
+won't turn off unless GSM becomes inactive. The default threshold is
+about 16mA, the latest Qi increases the threshold to ~32mA.
 
-Depending on various factors (GPRS activated, number of cells to observe, band...) the modem may consume an average standby current of 4mA up to >30mA while registered to a network. For normal (AT%SLEEP=2) situation the standby current is ~15mA. So *usually* the charge end detection should work.
-
-Anyway even if the above mentioned charge end threshold never is reached, the PMU stops charging of bat after expire of some emergency cutoff timer (some hours)
-
-=== Does it mean if i leave my phone plugged it will eventually fully discharge the battery? ===
-
-On gta02 the charger will restart the charge automatically once the
-battery voltage reaches ~4V which corresponds to ~76% (If PMU MBC is configured by kernel to enable auto-resume). Not sure about
+Q: Does it mean if i leave my phone plugged it will eventually fully
+discharge the battery?
+A: On gta02 the charger will restart the charge automatically once the
+battery voltage reaches ~4V which corresponds to ~76%. Not sure about
 gta01, requires more investigation. :-/
 
-=== Ok, how to make sure my battery is fully charged before a long trip? ===
-
-Replug the charger at least 90 minutes before you need full battery, it will trigger charging no matter what the
+Q: Ok, how to make sure my battery is fully charged before a long
+trip?
+A: Replug the charger, it will trigger charging no matter what the
 current capacity is.
 
-=== My power/aux LED indicates charging/discharging/whatever, what does that mean (aka why it's still blue even after i unplugged the charger)? ===
-
-Ask FSO guys about it, some of them think that the user shouldn't
+Q: My power/aux LED indicates charging/discharging/whatever, what does
+that mean (aka why it's still blue even after i unplugged the
+charger)?
+A: Ask FSO guys about it, some of them think that the user shouldn't
 really know what's happening and therefore they do some special
 mangling of "status" sysfs node before presenting it to the user. If
 you want to make a decent bugreport please add clear steps to
-reproduce and
-<code>
- cat /sys/class/power_supply/battery/uevent
- cat /sys/class/i2c-adapter/i2c-0/0-0073/gta01_battery/uevent
-</code>
-contents for all
+reproduce and /sys/class/power_supply/battery/uevent contents for all
 relevant states.
 
-== Using compatible batteries with gta02 ==
 
-=== So, how do i use "dumb" batteries with my freerunner? ===
+Using compatible batteries with gta02
+
+Q: So, how do i use "dumb" batteries with my freerunner?
+A:
 
 First you need to unbind bq27000 driver:
- echo bq27000-battery.0 > /sys/bus/platform/drivers/bq27000-battery/unbind
+echo bq27000-battery.0 > /sys/bus/platform/drivers/bq27000-battery/unbind
 
 Then you load the dumb battery driver:
- modprobe gta01_battery
-Since kernel 2.6.34 the module is called platform-battery
- 
+modprobe gta01_battery
 
 If you need to use bq27000 driver again, do:
- rmmod gta01_battery
- echo bq27000-battery.0 > /sys/bus/platform/drivers/bq27000-battery/bind
+rmmod gta01_battery
+echo bq27000-battery.0 > /sys/bus/platform/drivers/bq27000-battery/bind
 
 If you use Enlightment you might need to restart it after that.
 
-=== Is capacity reported for dumb batteries accurate? ===
-
-During discharge it should be pretty (+-10%) accurate, during
+Q: Is capacity reported for dumb batteries accurate?
+A: During discharge it should be pretty (+-10%) accurate, during
 charge the capacity reported is ~20% more than real.
 
-=== Why does /sys/class/power_supply/battery/charge_full says i have a 850 mAh battery no matter what i use? ===
-
-It's a workaround to make popular battery gadgets work with this
+Q: Why does /sys/class/power_supply/battery/charge_full says i have a
+850 mAh battery no matter what i use?
+A: It's a workaround to make popular battery gadgets work with this
 driver.
 
-== This Q&A were prepared by ==
 
-[[User:PaulFertser|Paul Fertser]]
-
-[[User:jOERG|Joerg Reisenweber]]
-
-[[Category:Battery]]
-[[Category:Neo_FreeRunner_Hardware]]
-[[Category:Neo1973_Hardware]]
+This Q&A were prepared by
+Paul Fertser <fercerpav@gmail.com>
+Joerg Reisenweber <joerg@openmoko.org>
