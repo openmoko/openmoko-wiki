@@ -1,0 +1,42 @@
+== Resource management conception ==
+
+Here goes some introductory text shamelessly borrowed from [http://git.freesmartphone.org/?p=specs.git;a=blob_plain;f=html/usage-intro.html;hb=HEAD FSO specs].
+
+One of the most important aspects of middleware for mobile devices is saving energy. To do this, the system needs to make sure that peripherals are only powered when they are actually in use by at least one application. In order to support multiple concurrent applications, it is not possible to leave peripheral control up to individual applications — otherwise one application could shut down e.g. a GPS receiver, while another application still wants to access it.
+
+FSO introduces the concept of resources. A resource is a high-level entity with a name and a state. The name is used to identify a resource (e.g. WiFi), the state is describing its condition (e.g. enabled). It is important to understand that a resource not necessarily correlates to a peripheral device. Although enabling a resource such as Bluetooth most likely has the consequence of powering up a device, there may as well be more to it, such as launching a low level device handling services or allocating related resources.
+
+== List of FSO resources ==
+=== WiFi ===
+Unless this resource is enabled you've no eth0 and wifi module is completely unpowered.
+
+=== Display ===
+While this resource is kept the display won't be blanked.
+
+=== TEST ===
+A test resource
+
+=== Bluetooth ===
+You need to have this resource requested to have bluetooth module powered.
+
+=== GSM ===
+The same for GSM modem
+
+=== CPU ===
+Default rules.yaml check for this resource to disable automatic suspend when it's requested.
+
+=== GPS ===
+Same idea as WiFi/Bluetooth
+
+== Resource management ==
+=== Manual way ===
+With the help of SHR Settings or an appropriate mdbus call (example: <code>mdbus -s org.freesmartphone.ousaged /org/freesmartphone/Usage org.freesmartphone.Usage.SetResourcePolicy Bluetooth enabled</code>) you set resource policy to "enabled". Do not forget that way you'll lose power since it will leave the corresponding device powered all the time.
+
+=== Automatic way ===
+Use the <code>fsoraw</code> utility. With it you can automatically request the necessary resource before starting a command and release it when it's finished. Especially recommended for WiFi since due to the bugs in the firmware and the driver full power-cycle of the module is often advantageous.
+
+Example command (works for open, WEP and WPA/WPA2 networks, automatically determining the network it can connect to, just add all the networks you use to the config):
+ fsoraw -r WiFi -- wpa_supplicant -ieth0 -Dwext -c/etc/wpa_supplicant/wpa_supplicant.conf
+
+Bluetooth scan for nearby devices example:
+ fsoraw-armel -r Bluetooth -- bash -c "sleep 1; hcitool scan"
