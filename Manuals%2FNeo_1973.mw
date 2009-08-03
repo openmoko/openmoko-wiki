@@ -123,3 +123,45 @@ As soon as the phone is connected via USB cable, it will charge.  However, the d
 
 If your USB upstream port is capable of supplying 500mA, then it will configure the Neo1973 accordingly and use 500mA charging mode.  You can notice this by the following line in the kernel log (/var/log/messages) of the Neo1973:
 usb0: full speed config #1: 500 mA, Ethernet Gadget, using CDC Ethernet
+
+==Getting shell access on the phone==
+
+=== By using Ethernet emulation over a USB cable ===
+
+The standard Neo1973 Linux [[kernel]] has support for the "cdc_ether USB gadget", i.e. a standard implementation of how to emulate an Ethernet device over USB.
+
+The following description is for generic *NIX system. For setting up connectivity specifically on a MacOS X machine, refer to [[MacOS_X]]. Older Mac OS X versions did not include a CDC Ethernet driver, you might have to install one first. There are also issues with Leopard.
+
+As soon as the kernel is up and running, and you have the phone connected via USB, you should get a '''usb0''' device on your host.
+
+The Phone will have the IPv4 address 192.168.0.202/24.  You can run `ifconfig` in the terminal on the phone to verify this (this is optional, just check it if it doesn't work given the instructions below)
+
+If you plug a USB cable into a laptop running Linux, you'll likely see the "cdc_ether" kernel module being loaded and a usb0 network interface appear. If not, see [[USB_Networking]] for more details.
+
+On the '''host PC''', you should then configure your interface to 192.168.0.200 by using
+# ifconfig usb0 192.168.0.200 netmask 255.255.255.0
+
+Then you should be able to
+# ping 192.168.0.202
+
+and last, but not least
+# ssh root@192.168.0.202
+
+Once you press 'enter' (empty password), you should now have a root login.
+
+See [[USB_Networking]] for more details, including instructions on how to automatically setup masquerading so that your phone can get access to the internet through the host PC.
+
+Note: If you have a power management profile enabled on your device your ssh connection might appear to freeze when your phone tries to sleep.  To stop this from occuring you need to hold the power button down for a few seconds until you get the menu with the "Power Off" option at the bottom.  Once you do, you should select the "Profile: No PM" option.  If your shell died and you want it back, you can do the following:
+
+# modprobe -r cdc_ether
+# modprobe -r cdc_acm
+
+Then unplug the device and plug it back in after turning power-management off.
+
+=== By using the debug board/serial/JTAG ===
+
+Please see [[Debug Board#Usage_Instructions]]
+
+== Getting access to the bootloader console ==
+
+Please see [[u-boot#Using_usbtty_from_Linux]]
