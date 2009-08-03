@@ -9,6 +9,7 @@ The way to do it on your own is described below.
 === Working ===
 * USB-Ethernet
 * Framebuffer console
+* Xfbdev
 
 == Setup the rootfs ==
 * In this example setup I used a SD-Card as root partition.
@@ -16,6 +17,9 @@ The way to do it on your own is described below.
 **  First partition: vfat
 ** Second partition: ext2 (root)
 * mount it and extract http://downloads.openmoko.org/distro/releases/Om2008.12/Om2008.12-om-gta02.rootfs.tar.gz to it
+Or:
+* download http://downloads.openmoko.org/distro/testing/daily/om-gta02/20090616/openmoko-fso-console-image-glibc-ipk--20090616-om-gta02.rootfs.jffs2
+* fastboot flash system openmoko-fso-console-image-glibc-ipk--20090616-om-gta02.rootfs.jffs2
 
 == Bootloader ==
 You need to install fastboot.
@@ -23,16 +27,18 @@ In order to do this, you will have need to have "root" on the existing Android d
 
 == Kernel ==
 === Building new kernel ===
-Use 2.6.29 from android.git.kernel.org. 2.6.27 rebooted after a few minutes without any reason.
+I forked the android kernel and I'm adding new features daily
+Fetch the kernel sourcecode from http://gitorious.org/openmoko-msm-2-6-29
+And configure it as you whish.
 
  export HACK_DIR=`pwd`
- git clone git://android.git.kernel.org/kernel/msm.git
- <nowiki>wget http://wiki.openmoko.org/images/3/3b/Openmoko-htc-dream-kernel-config.txt</nowiki>
+ git clone git://gitorious.org/openmoko-msm-2-6-29/openmoko-msm-2-6-29.git
+ wget http://wiki.openmoko.org/images/3/3b/Openmoko-htc-dream-kernel-config.txt
  cp Openmoko-htc-dream-kernel-config.txt msm/.config
  cd msm
  make CROSS_COMPILE=/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/ ARCH=arm
  sudo make CROSS_COMPILE=/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/ ARCH=arm modules_install
- sudo mv /lib/modules/2.6-29-openmoko-htc-dream /mnt/foo/lib/modules/
+ sudo mv /lib/modules/2.6-29-openmoko-msm /mnt/foo/lib/modules/
  sync
  umount /mnt/foo
 
@@ -57,5 +63,6 @@ Use 2.6.29 from android.git.kernel.org. 2.6.27 rebooted after a few minutes with
 
 == WLAN ==
 * http://bobcopeland.com/android_wifi.html
+* Look onto this section with the calibration files
 
 [[Category:Distributions]]
