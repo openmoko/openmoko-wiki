@@ -380,6 +380,53 @@ You can also set the hardware clock to the system time:
 
  hwclock --systohc
 
+===Data synchronization===
+
+Although SHR distribution is in early stages, you can synchronize your contacts and appointments data with various sources. The sync can by done by program called PISI http://pisi.projects.openmoko.org/ . SIM contacts and calendar entries are currently possible to sync on SHR.
+
+For calendar install dates
+
+  opkg install dates
+
+
+Supported Contacts data sources:
+* SIM via DBUS (e.g. SHR)
+* QTopia address book (e.g. OM 2008.12)
+* LDAP (read only)
+* VCF files (local / webdav)
+* Google contacts
+
+Supported Calendar data sources:
+* Google calendars
+* ICalendar files (local / webdav)
+
+
+Example, my .pisi/conf to sync my contacts and calendar with google calendar and contacts in my google mail:
+
+ [googleCalendar]
+ description=My Google Calendar
+ module=calendar_google
+ user=user@gmail.com
+ password=secret
+ calendarid=user@gmail.com
+ 
+ [pimlicodates]
+ description= Pimlico Dates
+ module=calendar_ics
+ path=/home/root/.evolution/calendar/local/system/calendar.ics
+ 
+ [googlecontacts]
+ description=Google Contacts Account
+ module=contacts_google
+ user=user@gmail.com
+ password=secret
+
+ [shrsim]
+ description=SHR SIM Card Contacts
+ module=contacts_dbussim
+ max_simentries = 250
+ simentry_name_maxlength=18
+
 ==SHR Settings==
 [[Image:SHR-Settings-main.png|200px|thumb|SHR Settings]]
 
