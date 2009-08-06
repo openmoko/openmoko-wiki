@@ -735,15 +735,51 @@ Please note that reverting back can be done by
  opkg install e-wm-theme-illume-sixteen shr-theme-gtk-e17lookalike  -force-reinstall
  opkg install libframeworkd-phonegui-efl0 e-wm-theme-default etk-theme-shr shr-theme -force-reinstall
 
+==FSO Resources==
+
+FSO is in control of each device. These are called resources. If the software wanting to use the device is capable of requesting this resource via d-bus, FSO will do this, otherwise you might need to power the device manually. SHR Setting provides ways of doing this. Another way is to run fsoraw
+
+ opkg install fsoraw
+
+Example of usage:
+
+ fsoraw -r Display mokomaze
+
+===Wifi===
+
+Unless this resource is enabled you've no eth0 and wifi module is completely unpowered. Mokonnect will power it up automatically when needed.
+
+===Bluetooth===
+
+You need to have this resource requested to have bluetooth module powered.
+
+===GPS===
+
+The fso-gpsd is a daemon waiting for gsmd connections, automatically powering the device on and off. When a connection exists, it powers up the GSM. In SHR Settings you can switch GPS completely off SHR Settings -> GPS -> Manual > Off
+
+===GSM===
+
+You need to have this resource requested to have GSM module powered.
+
+===Display===
+
+While this resource is kept the display won't be blanked and suspend is disabled.
+
+===CPU===
+
+Default rules.yaml checks for this resource to disable automatic suspend when it's requested. While this resource is kept suspend is disabled (but screen can be blanked).
+
+===Test===
+
+A test resource
+
 ==Network manager==
 
 While there are several ways of networking - Wifi, USB, Bluetooth and Gprs - By default, USB networking is enabled in /etc/network/interfaces.
 
 Enhanced configuration is possible through direct editing of /etc/network/interfaces or through Mokonnect.
 
-Connmand daemon with Mokonnect are the recommended user level applications for setting up networking. At the moment, Mokonnect can manage USB, Wifi and Gprs connections. Wifi device is not required to be manually turned on via SHR-Settings as Mokonnect will automatically enable the device when needed and disable after use.
-
-''TODO: screenshots, supported encr. wifi''
+Connmand daemon with Mokonnect are the recommended user level applications for setting up networking. At the moment, Mokonnect can manage USB, Wifi and Gprs connections, as well as routing and NAT. Wifi device is not required to be manually turned on via SHR-Settings as Mokonnect will automatically enable the device when needed and disable after use.
 
 {| class="wikitable" cellspacing="0" cellpadding="0" style="padding: 0%; margin:0em 0em 1em 0em; border:1px solid #c0c0c0; background:#eeeeee; floating="center";width:100%; "
 
