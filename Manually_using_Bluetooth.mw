@@ -312,10 +312,10 @@ How to pair with a bluetooth device, check [http://wiki.bluez.org/wiki/Security 
 
 To ease the task you can try to use [https://launchpad.net/blueman Blueman] GUI software on one or both sides of the link.
 
-==== Preliminary information about bluez4 networking ====
-I couldn't get it working fully (yet, for me bnep0 on PANU disappears immediately after creating) but probably my problems are unrelated, so i'll describe the most important findings. '''I managed to successfully connect from PocketPC PDA (used as PANU) to my FR (both NAP and GN configurations worked)'''.
+==== Information about bluez4 networking ====
+'''I managed to successfully connect from PocketPC PDA (used as PANU) to my FR (both NAP and GN configurations worked). Also i was able to use my laptop as PANU and my FR as GN/NAP, reverse should work too'''.
 
-For some reason quite possibly bluez4 needs ipv6 and ethernet bridging kernel support. So to avoid more problems you better have it. Also you'll need bnep kernel module.
+For some reason bluez4 needs ipv6 (fixed on 2009-03-10) and ethernet bridging kernel support. So to avoid more problems you better have it. Also you'll need bnep kernel module.
 
 ===== How to use bluez4 dbus API =====
 You can do it with [[OpenmokoFramework/mdbus]] or with <code>dbus-send</code>. To introspect with dbus-send you can employ something like this:
@@ -353,10 +353,29 @@ On GN/NAP role you need to ''trust'' the PANU peer:
 Where <code>00_06_6E_17_27_E0</code> is the MAC of peer.
 
 ===== Connection establishing =====
-On PANU you do:
- dbus-send --system --dest=org.bluez --print-reply /org/bluez/`pidof bluetoothd`/hci0/dev_00_16_CE_E4_44_D5 org.bluez.Network.Connect string:00001117-0000-1000-8000-00805f9b34fb
+On PANU you need to have a helper script <code>panu.py</code>:
+<pre>
+#!/usr/bin/python
 
-Where <code>00_16_CE_E4_44_D5</code> is MAC of GN/NAP and <code>00001117-0000-1000-8000-00805f9b34fb</code> is UUID of GN service '''on GN/NAP'''. Instead of UUID you can simply use <code>GN</code> or <code>NAP</code> here.
+import dbus
+import sys
+import os
+
+bus = dbus.SystemBus()
+network = dbus.Interface(bus.get_object("org.bluez",
+                "/org/bluez/"+sys.argv[1]+"/hci0/"+sys.argv[2]),
+                "org.bluez.Network")
+
+network.Connect("GN")
+print "Networking established, exit the shell to end this session"
+os.spawnl(os.P_WAIT, os.environ['SHELL'])
+print "Networking released"
+</pre>
+
+Then you do:
+ ./panu.py `pidof bluetoothd` dev_00_06_6E_17_27_E0
+
+Where <code>00_16_CE_E4_44_D5</code> is MAC of GN/NAP.
 
 Hopefully after this you'll have two new interfaces <code>bnep0</code> created on both sides and it'll be added to the <code>pan0</code> bridge on GN.
 
