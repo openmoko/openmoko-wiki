@@ -1116,6 +1116,27 @@ Remove dropbear and start openssh
 
 You will get disconnected from the ssh session, wait until keys get generated and log in again
 
+'''Video playback'''
+
+Install intone-video
+
+ opkg install elementary libsqlite3-0 http://www.opkg.org/packages/intone-video_0.11_arm.ipk
+
+If intone complaints about missing libraries, please run 
+ #!/bin/sh
+ cd /usr/lib
+ ls *ver-svn-02*|while read nombre
+ do
+ 	final="`echo $nombre | sed s/-ver-svn-02/-ver-pre-svn-01/`"
+ 	ln -s /usr/lib/$nombre /usr/lib/$final
+ done
+
+On your desktop, encode your video:
+
+ mencoder video-file -ovc lavc -lavcopts vcodec=mpeg4:vhq:vbitrate=300 -vf scale=320:240,eq2=1.2:0.5:-.025,rotate=2 -oac mp3lame -lameopts br=64:cbr -o video-file-FR.avi
+
+Transfer encoded files (for example with sftp://root@192.168.0.202 ) onto your freerunner and watch.
+
 ==Installing Software==
 
 You can use opkg for installing software packages or you can try SHR Installer from http://git.shr-project.org/git/?p=shr-installer.git;a=summary . It requires packagekitd
