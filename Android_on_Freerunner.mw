@@ -258,8 +258,36 @@ and finally the root fs with this one:
 
 See also http://www.newlc.com/en/freerunner-mobile-which-support-android-cupcake for older instructions relating to these.
 
+======cupcake snapshot v14-15======
+As of this writing this is the latest versions from Michael Trimarchi. To get incoming calls to work correctly the phone need to be provisioned the following steps explains how.
+
+First you need to setup the android debug bridge(adb) here are instructions for that [[Android debug bridge]].
+After that use adb to connect to the freerunner:
+
+    # ADBHOST=192.168.0.202 ./adb devices
+    # ./adb shell
+
+These instructions may need some alterations depending on how adb is installed on your desktop.
+
+In the shell execute the following commands:
+
+    # sqlite3 /data/data/com.android.providers.settings/databases/settings.db
+    SQLite version 3.5.9
+    Enter ".help" for instructions
+    sqlite> INSERT INTO secure (name, value) VALUES ('device_provisioned', 1);
+    sqlite> .exit
+
+Some more information is available from Michael here:
+http://panicking.kicks-ass.org/download/readme.txt
+
+Amongst other there are some hints on how to get gprs to work.
+
+This should get a phone that can work as a your everyday phone this has been reported on the android-freerunner mailinglist by several people (the author of this entry included).
+
+To get sdcard to work the sdcard fix described bellow may be needed.
+
 ======cupcake snapshot v6======
-The latest image from Michael Trimarchi is <tt>freerunner-cupcake-snapshot-v6.jffs2</tt>, however you might (more than likely will) run into a problem if you install it directly: The FreeRunner boots up but gets stuck when the colours of the "Android" log cycle (it keeps twinkling for ever).
+The cupcake snapshot v6 image from Michael Trimarchi can be found here <tt>freerunner-cupcake-snapshot-v6.jffs2</tt>, however you might (more than likely will) run into a problem if you install it directly: The FreeRunner boots up but gets stuck when the colours of the "Android" log cycle (it keeps twinkling for ever).
 
 This image will work if you follow these steps in the right order:
 
@@ -273,7 +301,6 @@ This image will work if you follow these steps in the right order:
 # flash (rootfs) freerunner-cupcake-snapshot-v6.jffs2
 
 This seems complicated, but it has been reported to work on the [http://android.koolu.org/listinfo.cgi/android-freerunner-koolu.org android-freerunner mailing list from koolu] by several people (the author of this entry included).
-
 
 =====DFU-UTIL problems=====
 {{Note|The './' part assumes you are using the binary download and that it was downloaded to the same place as your images. If you are, remember to make the dfu-util binary executable.}}If you find that dfu-util complains about there being more than one USB device available it might be because you have a webcam or some other device plugged in. If you can not remove the other device follow this procedure:
