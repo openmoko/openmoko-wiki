@@ -1,39 +1,64 @@
-{{outdated}}
-
 === SHR post-installation script===
 
 In the [[SHR User Manual]] there are mentioned some modifications that might help you to improve the features of you SHR distribution.
 
 After flashing your Openmoko Freerunner you can do these modification manually like mentioned in the [[SHR User Manual]] or 
-* modify on your desktop computer according your demands and 
-* execute the following script on your Freerunnner. 
-The selected shell commands of the SHR User Manual are collected in a SHR post-installation so that you can transfer the script to your Freerunner via scp and execute it with sh. Please go through the script and check if the applications to be installed, are the selection that want you really want. If you do not understand, what is going on in the script, proceed with the [[SHR User Manual]] and select every documented step manually. If you understand the following script, it might save you some time.
+* modify and 
+* perform the following script. 
+The selected shell commands of the SHR User Manual are collected in a SHR post-installation so that you can transfer the script to your Freerunner via scp and execute it with sh. Please go through the script and check if the applications to be installed, are the selection that want you really want. If do not understand, what is going on in the script, proceed with the [[SHR User Manual]] and select every documented step manually. If understand the following script, it might save you some time.
 
-Copy and paste the following lines and save them to a file called <tt>SHRpostinstallion.sh</tt>.
-
-  #!/bin/sh
-  echo "SHR (Lite) Post Installation Script" 
-  echo "============================"
-  echo "Version 1.2 - 12.11.2009"
-  
-  # vLANGUAGE="cz"
-  vLANGUAGE="de"
-  
-  echo "SHR-PIS Update Navit Config Files"
-  echo "---------------------------------"
-  cp /media/card/BackupSHR/home/root/.navit/navit.xml /home/root/.navit/navit.xml
-  
-  echo "SHR-PIS Install PIM Apps: Tasks and Dates"
-  echo "-----------------------------------------"
-  opkg install opimd-utils
-  opkg install pisi
-
-===Copy and Execute Script===
-Copy and paste the code into an editor of your choice (KDE kwrite or vi), save the file to <tt>SHRpostinstallation.sh</tt> and upload the file to your freerunner. Execute the shell script on you freerunner:
-  desktop#
-  scp SHRpostinstallation.sh root@192.168.0.202:/home/root/SHRpostinstallation.sh   
-Start the shell script on you Freerunner with:
-  neo# sh /home/root/SHRpostinstallation.sh
-If you want to replace <tt>dropbear</tt> by <tt>openssh</tt> you have to start the script from the terminal on your FR and not via SSH, because the installation restarts the SSH daemon and the script will stop, if you start the script via SSH on your Freerunner from your desktop computer.
-
-[[Category:SHR]]
+	#!/bin/sh
+	echo "SHR Post Installation Script" 
+	echo "============================"
+	echo "Version 1 - 11.08.2009"
+	
+	# vLANGUAGE="cz"
+	vLANGUAGE="de"
+	
+	echo "SHR-PIS Install Navit - Car Navigation"
+	echo "src navit http://download.navit-project.org/navit/openmoko/svn" > /etc/opkg/navit-feed.conf
+	opkg update
+	opkg install navit
+	opkg install navit-locale-$vLANGUAGE
+	mkdir /home/root/.navit
+	echo "Navit: Solve libgps problem"
+	opkg install libgps17
+	ln -s /usr/lib/libgps.so.17 /usr/lib/libgps.so.16
+	
+	
+	
+	echo "SHR-PIS Install a Working Alarm Clock"
+	echo "-------------------------------------"
+	opkg remove -force-depends elementary-alarm
+	opkg install ffalarms
+	
+	echo "SHR-PIS Install Bluetooth Package"
+	echo "---------------------------------"
+	opkg install obexpush
+	mkdir /var/obexpush
+	
+	echo "SHR-PIS Install PIM Apps: Tasks and Dates"
+	opkg install dates tasks
+	opkg install http://www.opkg.org/packages/0_python-ldap_2.3.6_armv4t.ipk python-misc python-netclient python-netserver python-pycairo python-pygobject python-pygtk python-sqlite3 http://www.opkg.org/packages/1_python-vobject_0.8.1_armv4t.ipk http://www.opkg.org/packages/0_python-webdav_0.1.2_armv4t.ipk http://www.opkg.org/packages/1_python-gdata_1.3.0_armv4t.ipk http://www.opkg.org/packages/1_python-dateutil_1.4.1_armv4t.ipk http://www.opkg.org/packages/openldap_2.3.43_armv4t.ipk http://projects.openmoko.org/frs/download.php/841/pisi_0.3_armv4t.ipk
+	mkdir /media/card/pim
+	ln -s /media/card/pim /home/root/pim
+	
+	echo "SHR-PIS Install Litephone"
+	echo "-------------------------"
+	echo "Finger friendly transparent Keybord"
+	opkg install http://pvtrace.com/litephone/libqtcore4_4.4.3-r3_armv4t.ipk
+	opkg install http://pvtrace.com/litephone/libqtxml4_4.4.3-r3_armv4t.ipk
+	opkg install http://pvtrace.com/litephone/libqtdbus4_4.4.3-r3_armv4t.ipk 
+	opkg install http://pvtrace.com/litephone/libqtgui4_4.4.3-r3_armv4t.ipk 
+	opkg install http://pvtrace.com/litephone/qt4-x11-free_4.4.3-r3_armv4t.ipk
+	opkg install http://pvtrace.com/litephone/litephone_0.0.1-r2_armv4t.ipk 
+	
+	echo "SHR-PIS MokoMaze"
+	echo "----------------"
+	opkg install mokomaze
+	echo ""
+	fsoraw -r Display mokomaze
+	
+	echo "SHR-PIS CellHunter"
+	echo "------------------"
+	opkg install cellhunter
