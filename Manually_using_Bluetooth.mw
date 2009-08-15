@@ -8,24 +8,14 @@ We have quite a lot of plans about what exactly Bluetooth should be used for.
 '''Please keep in mind that whenever <code>hcid</code> or <code>pand</code> or <code>hidd</code> are mentioned it means that instructions are applicable only to bluez3 systems which is deprecated ages ago. Modern bluez4 uses only one daemon - <code>bluetoothd</code> and you are supposed to use dbus api directly to configure it. For pairing from command line use simple-agent script.'''
 
 == Power it up ==
+'''Bluez4-compatible'''
 
 Power up the adapter by clicking on the bluetooth icon in the top bar and selecting power on.
 
 For any FSO-based distro (including SHR) you want to consult [[FSO_Resources]] page.
 
-The old way to do it is a shell command (for kernels before 2.6.24):
-
- root@fic-gta01:~# echo 1 > /sys/bus/platform/devices/gta01-pm-bt.0/power_on
-
-For kernel 2.6.24 (or later) use
-
- root@om-gta02:~# echo 1 > /sys/bus/platform/devices/neo1973-pm-bt.0/power_on
-
-and on the GTA02 *only* (i.e. not on the GTA01) also use
-
- root@om-gta02:~# echo 0 > /sys/bus/platform/devices/neo1973-pm-bt.0/reset
-
-But nowadays[http://permalink.gmane.org/gmane.comp.hardware.smartphones.userland/165], one should use [[Dbus device API]]s!
+For others consult your distro's documentation. The most low-level way to power bluetooth on is to
+ echo 1 > /sys/bus/platform/devices/neo1973-pm-bt.0/power_on
 
 At the shell, "hciconfig" should print information about the adapter if it powered up properly:
 
@@ -39,31 +29,52 @@ i.e.
 
  hciconfig hci0 up
 
-== Bluetooth Functions ==
+== How to use bluez4 dbus API ==
+'''Bluez4-compatible'''
 
-===Configuring Bluetooth on Openmoko 2007.2 (August 27 snapshot with kernel 2.6.21.6-moko11) ===
+You can do it with [[OpenmokoFramework/mdbus]] or with <code>dbus-send</code>. To introspect with dbus-send you can employ something like this:
+ dbus-send --system --dest=org.bluez --print-reply /org/bluez/`pidof bluetoothd`/hci0 org.freedesktop.DBus.Introspectable.Introspect
 
-In file /etc/bluetooth/hcid.conf you should change the passkey from BlueZ to something numeric. For testing you may use "0000". Also, you can set the name to "Neo (%d)".
+The next example is how to make your device discoverable:
+ dbus-send --system --dest=org.bluez --print-reply /org/bluez/`pidof bluetoothd`/hci0 org.bluez.Adapter.SetProperty string:Discoverable variant:boolean:true
 
-=== Scanning for bluetooth devices ===
+== Scanning for bluetooth devices ==
+'''Bluez4-compatible'''
 
  hcitool scan
 
 This will list the addresses of any discoverable bluetooth devices in the vicinity
 
-=== passkey agent example ===
+== Pair ==
+'''Bluez4-compatible'''
 
-There should be a passkey agent built into openmoko, but for now you can start up the example passkey agent and set the pin code there. This will allow for new pairings to be made when you attempt a connection.
+Pairing is nothing special, do it with simple-agent [http://git.kernel.org/?p=bluetooth/bluez.git;a=blob_plain;f=test/simple-agent;hb=HEAD] as described here or with any other agent you like as described in that agent's documentation.
 
- passkey-agent --default 0000 &
+Make sure the bluetooth chip is powered up (see below) and that bluetoothd is running.
 
-Note: the passkey-agent is not required in Openmoko 2007.2 with kernel 2.6.21.6 as of at least since August 27 (maybe earlier).
+Now, to actually pair with other device, you will need the simple-agent script. If you do not have that already, download, put it in /usr/local/bin/ and run '''chmod a+x /usr/local/bin/simple-agent'''
 
-In debian there is no passkey-agent binary but the package bluez-utils has its source code at /usr/share/doc/bluez-utils/examples/passkey-agent.c.gz.
+Now put the other device into pairing mode and run '''hcitool scan'''. Find that device and use its address in the command '''simple-agent hci0 XX:XX:XX:XX:XX:XX'''. If you give a third parameter (what it is doesn't matter) to simple-agent, it will disconnect then reconnect. 
 
-=== HID (Human Input Device) ===
+If you give it only one parameter, it will register as an agent and will wait for other devices to initiate pairing. Feel free to tweak that script to your needs (e.g. to hardcode a pin to use).
+
+== HID (Human Input Device) ==
+'''Bluez4-compatible'''
+
+Pair with your device first.
+
+Then do
+ dbus-send --system --dest=org.bluez --print-reply /org/bluez/`pidof bluetoothd`/hci0/dev_00_18_00_00_C2_37 org.bluez.Input.Connect
+
+Where <code>00_18_00_00_C2_37</code> is the address of your HID device.
+
+Then modprobe the <code>uinput</code> kernel module:
+ modprobe uinput
+
+Enjoy.
 
 ==== Being able to use HID devices ====
+'''deprecated bluez3-specific, will be removed'''
 
 If you are trying to connect a keyboard and you have bluez4, see [[Freedom_Slim_Keyboard]].
 
@@ -122,7 +133,8 @@ hidd --connect XX:XX:XX:XX:XX:XX
 
 We want to be able to use the Neo as a HID device, being able to use it as controller for presentations. See [[ReMoko]]
 
-=== RFCOMM ===
+== RFCOMM ==
+'''i guess it's Bluez4-compatible'''
 
 Here's how to connect to an external Bluetooth GPS and read NMEA data (Tested with a Holux GPSSlim236 and a Nokia LD-3W ).
 
@@ -166,7 +178,9 @@ Confirm the connect:
 
 If you have nothing better to do, you can now pinpoint my office :-).
 
-=== OBEX ===
+== OBEX ==
+'''Mostly bluez4-compatible, you don't need to edit hcid.conf at all, bluetoothd will take care of using proper parameters itself'''
+
 OBEX (abbreviation of OBject EXchange, also termed IrOBEX) is a communications protocol that facilitates the exchange of binary objects between devices. Here is the notes about how to use OBEX to send/receive files via bluetooth in NEO.
 
 power on bluetooth.
@@ -306,25 +320,18 @@ obexpush would launch 'opd' and it's a obex data server. It starts OBEX file tra
 
 How to pair with a bluetooth device, check [http://wiki.bluez.org/wiki/Security bluez wiki]
 
-=== Networking ===
+== Networking ==
 
 ''' Please note that whenever <code>hcid</code> or <code>pand</code> is mentioned it means that instructions are applicable only to bluez3 systems which is deprecated ages ago. Modern bluez4 uses only one daemon - <code>bluetoothd</code> and you are supposed to use dbus api directly to configure it to connect as a client or act as a server. The API is described at [http://git.kernel.org/?p=bluetooth/bluez.git;a=blob;f=doc/network-api.txt;hb=HEAD]. Please update other instructions as soon as you get it working.'''
 
 To ease the task you can try to use [https://launchpad.net/blueman Blueman] GUI software on one or both sides of the link.
 
-==== Information about bluez4 networking ====
+=== Information about bluez4 networking ===
 '''I managed to successfully connect from PocketPC PDA (used as PANU) to my FR (both NAP and GN configurations worked). Also i was able to use my laptop as PANU and my FR as GN/NAP, reverse should work too'''.
 
 For some reason bluez4 needs ipv6 (fixed on 2009-03-10) and ethernet bridging kernel support. So to avoid more problems you better have it. Also you'll need bnep kernel module.
 
-===== How to use bluez4 dbus API =====
-You can do it with [[OpenmokoFramework/mdbus]] or with <code>dbus-send</code>. To introspect with dbus-send you can employ something like this:
- dbus-send --system --dest=org.bluez --print-reply /org/bluez/`pidof bluetoothd`/hci0 org.freedesktop.DBus.Introspectable.Introspect
-
-The next example is how to make your device discoverable:
- dbus-send --system --dest=org.bluez --print-reply /org/bluez/`pidof bluetoothd`/hci0 org.bluez.Adapter.SetProperty string:Discoverable variant:boolean:true
-
-===== Bluetooth networking concepts =====
+==== Bluetooth networking concepts ====
 This HOW-TO is directly applicable only to bluez3 but still worth reading to understand PANU/GN/NAP roles: [http://bluez.sourceforge.net/contrib/HOWTO-PAN].
 
 In short, GN is network bridge (aka hub/switch), NAP is network router and PANU is a network client.
@@ -343,16 +350,16 @@ For GN bridge <code>pan0</code> is created automatically on <code>bluetoothd</co
 
 ''I can't see a difference between GN and NAP in the Linux networking context so i suppose GN is the easiest to get going''
 
-===== Pairing =====
-Pairing is nothing special, do it with simple-agent [http://git.kernel.org/?p=bluetooth/bluez.git;a=blob_plain;f=test/simple-agent;hb=HEAD] as described in other sections or by any other pairing agent.
+==== Pairing ====
+Pairing is nothing special, do it with simple-agent as described in other sections or by any other pairing agent.
 
-===== Trust =====
+==== Trust ====
 On GN/NAP role you need to ''trust'' the PANU peer:
  dbus-send --system --dest=org.bluez --print-reply /org/bluez/`pidof bluetoothd`/hci0/dev_00_06_6E_17_27_E0 org.bluez.Device.SetProperty string:Trusted variant:boolean:true
 
 Where <code>00_06_6E_17_27_E0</code> is the MAC of peer.
 
-===== Connection establishing =====
+==== Connection establishing ====
 On PANU you need to have a helper script <code>panu.py</code>:
 <pre>
 #!/usr/bin/python
@@ -384,6 +391,7 @@ Set up packet forwarding, IP addresses etc. as usual.
 ==== Using PC's connection from Neo ====
 
 ===== Bluetooth networking with a Linux system =====
+'''deprecated bluez3-specific, to be removed soon'''
 
 Bluetooth should behave just like our usbnet and provide full TCP/IP access to the phone.  BNEP has to be used.
 
@@ -706,6 +714,7 @@ You may also be able to listen to system audio given the right state file:
  }
 
 == Once Again, Bluetooth Headset on Freerunner ==
+'''Bluez4-compatible'''
 
 === List of known to work headsets ===
 no-name "Jabra", discovered as "Bluetooth headset" -- PaulFertser
