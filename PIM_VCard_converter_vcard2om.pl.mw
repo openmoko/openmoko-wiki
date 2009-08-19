@@ -1,0 +1,388 @@
+Tiis script comverts a VCard vcf-File from the SD card.
+
+Create an icon by copying one <tt>midori.desktop</tt> to <tt>convertvcf.desktop</tt> and change the settings with nano editor. The Exec command is <tt>perl /home/root/bin/vcard2om.pl</tt>. Install perl before with:
+  opkg install perl
+
+An now the script:
+<pre>
+#!/usr/bin/perl
+
+my %options = ();
+$options{infile}  = "/media/card/pim/contacts.vcf";
+$options{outfile} = "/home/root/.evolution/vCards.html";
+my $outformat = "html";
+#-----------------------------------------------------------------
+my $table_begin = "<table border='1'>";
+my $table_end   = "</table>";
+my $row_head_begin = "<TR bgcolor=\"#C0C0C0\">";
+my $row_head_end   = "</TR>\n";
+my $row_begin = "<tr>";
+my $row_end   = "</tr>";
+my $col_begin = "<td><span style=\"font-size:0.3em\">";
+my $col_end   = "</span></td>";
+my $newline   = "<br>";
+#-----------------------------------------------------------------
+#my $table_begin = "\n";
+#my $table_end   = "\n";
+#my $row_head_begin = "\n";
+#my $row_head_end   = "\n";
+#my $row_begin = "\n";
+#my $row_end   = "\n";
+#my $col_begin = "";
+#my $col_end   = "---";
+#my $newline   = "\n";
+#-----------------------------------------------------------------
+my $line;
+my $name;
+my $tel_work_voice;
+my $tel_work_fax;
+my $tel_home;
+my $tel_pager;
+my $tel_cell;
+my $tel_voice;
+my $email;
+
+my $flocking = 1;
+my @FileArray = ();
+my @OutFileArray = ();
+my %OutFileHash  = ();
+my $OUTFORMAT = uc($outformat);
+
+my @SplitArray      = ();
+my @SplitArrayID    = ();
+my @SplitArrayValue = (); 
+my @IDarray         = ();
+my %AdressHash  = ();
+
+#my %options=();
+#&GetOptions( \%options, "help|?", "infile=s", "outfile=s")
+#    or &usage;
+
+if( $options{"help"} ) {
+    &usage("Parameter: --help");
+}
+if( defined $options{"infile"} ) {
+  &load_textfile($options{"infile"},\@FileArray);
+  print "\n Input file:  ".$options{"infile"}." loaded\n";
+} else {
+	&usage("ERROR: You must define an -infile=myfilename.vcf");
+};
+if( defined $options{"outfile"} ) {
+  print "\n Output file:  ".$options{"outfile"}." \n";
+} else {
+	&usage("ERROR: You must define an -outfile=myoutfilename.csv");
+};
+#######################################################################
+print "\nStart parsing file....";
+print "\n----------------------";
+
+print "\n";
+my $newID = "";
+my $count = 0;
+foreach my $line (@FileArray) {
+  if  ( $line  =~ /^BEGIN\:VCARD/ ) {
+      $count = $count + 1;
+      print "\nParse record $count " ;
+      %AdressHash = ();
+  } elsif ($line =~ /^VERSION\:/) {
+      print "in $line";
+  } elsif ( $line =~ /^END\:VCARD/ ) {
+      print "\ndone";
+      #&show_hash(\%AdressHash,"Record $count");
+      my $vID = $AdressHash{LastName}." ".$AdressHash{FirstName};
+      $OutFileHash{$vID} = &create_string_from_hash(\%AdressHash);
+  } else {
+    ## EMAIL;INTERNET;WORK:themail@example.net
+    @SplitArray = split(/\:/,$line);
+    ## SplitArray[0]= EMAIL;INTERNET;WORK
+    ## SplitArray[0]= themail@example.net
+    ## Convert to HTML
+    @SplitArrayID = split(/;/,$SplitArray[0]);
+    ## SplitArray2[0]= EMAIL
+    ## SplitArray2[1]= INTERNET
+    ## SplitArray2[2]= WORKFile
+    @SplitArrayValue = split(/;/,$SplitArray[1]);
+    $SplitArray[1] = &modify_fileline($SplitArray[1]);
+    my $i = 0;
+    foreach (@SplitArrayValue) {
+       $SplitArrayValue[$i] = &modify_fileline($SplitArrayValue[$i]);
+       $i+=1;
+    };
+    ## The Values could also be separated by ";"
+    &append_ID(\@IDarray,$SplitArray[0]);
+    print "\n$count: $line";
+   ##################################################
+   # Now we decide what to do with the vCard Content 
+   ##################################################
+   # e-Mail
+    if ( $SplitArray[0] =~ /^EMAIL/ ) {
+        $AdressHash{EMail} .= $SplitArray[1];
+    } elsif ($SplitArray[1] =~ /([a-zA_Z0-9\_\-\.]+@[a-zA_Z0-9\_\-\.]+)/) {
+        $AdressHash{EMail} .= $1;
+        $SplitArray[1] =~ s/[a-zA_Z0-9\_\-\.]+@[a-zA_Z0-9\_\-\.]+//g;
+    };
+   # Name
+    if ( $SplitArray[0] =~ /^N[;]*/ ) {
+	$AdressHash{LastName}  = $SplitArrayValue[0];
+	$AdressHash{FirstName} = $SplitArrayValue[1];
+    };
+   # Adress
+    if ( $SplitArray[0] =~ /^ADR[;]*/ ) {
+        $SplitArray[1] =~ s/\\n/$newline/g;
+	$SplitArray[1] =~ s/\\,/,/g;
+        $SplitArray[1] =~ s/\\//g;
+        $SplitArray[1] =~ s/\/$//g; 
+	$SplitArray[1] =~ s/ $//g; 
+	$SplitArray[1] =~ s/,$//g; 
+	$AdressHash{Adress}    = $SplitArray[1];
+    };
+   # Fax and Phone
+    if ( $SplitArray[0] =~ /FAX/ ) {
+        $AdressHash{Fax} .= $SplitArrayValue[0];
+    } elsif ($SplitArray[0] =~ /TEL;WORK/) {
+        $AdressHash{TelWork} .= $SplitArrayValue[0];
+    } elsif ( $SplitArray[0] =~ /TEL/ )  {
+        if ($SplitArrayValue[0] =~ /^01/) {
+             $AdressHash{Mobil} .= $SplitArrayValue[0];
+        } else {
+	     $AdressHash{Tel} .= $SplitArrayValue[0];
+        }
+    }
+  }; ## main if-elsif-else
+}; ## end foreach 
+@OutFileArray = ("<html>\n<head>\n","<meta http-equiv=\"content-type\" content=\"text/html; charset=ISO-8859-1\">
+","\n<title>Contacts</title>\n</head>\n<body>","$table_begin");
+my @OutFileIDs = keys(%OutFileHash);
+foreach my $vID (sort @OutFileIDs) {
+    push(@OutFileArray,$OutFileHash{$vID});
+};
+push(@OutFileArray,"$table_end\n</body></html>");
+&save_textfile($options{"outfile"},\@OutFileArray);
+print "\n Output file:  ".$options{"outfile"}." saved\n";
+print "\nUsed ID in vCard file ".$options{infile};
+#@IDarray = ("ID1","ID2","ID3");
+print "\n".&create_array_line("",\@IDarray," ");
+print "\n";
+###########################################################################################
+ 
+#######################################################################
+# show the content of an array as one line splitted in table elements
+#######################################################################
+sub create_string_from_hash {
+	my $ppHash        =  @_[0]; ## p=Parameter,p=Pointer
+        my $vReturnString = $row_head_begin;
+        if ($ppHash->{Tel} eq "") {
+            $ppHash->{Tel} = $ppHash->{Mobil};
+        };
+        if ($ppHash->{Tel} eq "") {
+           $ppHash->{Tel} = "W: ".$ppHash->{TelWork};
+        };
+  	$vReturnString .= $col_begin.$ppHash->{LastName}.", ".$ppHash->{FirstName}.$col_end;
+        $vReturnString .= $col_begin."W: ".$ppHash->{TelWork}.$col_end; 
+        $vReturnString .= $row_head_end;
+        $vReturnString .= $row_begin;
+        $ppHash->{Tel} =~ s/[^ 0-9\-\/ W:]//g;
+        $vReturnString .= $col_begin."T: ".$ppHash->{Tel}.$col_end;
+        if ($ppHash->{Fax} eq "") {
+             $vReturnString .= $col_begin."eM: ".$ppHash->{EMail}.$col_end; 
+        } else { 
+             $vReturnString .= $col_begin."Fax: ".$ppHash->{TelWork}.$col_end;
+        }; 
+        $vReturnString .= $row_end;
+        $vReturnString .= $row_begin;
+        $vReturnString .= $col_begin."Mob: ".$ppHash->{Mobil}.$col_end; 
+        $vReturnString .= $col_begin."Adr: ".$ppHash->{Adress}.$col_end; 
+        $vReturnString .= $row_end;
+        return $vReturnString;
+}
+ 
+################################################
+## usage is displayed, if no parameter inserted
+################################################
+
+sub usage {
+	my $pOutput = "";
+	if (defined $_[0]) {
+		$pOutput = $_[0];
+	};
+    select(STDERR);
+    print <<EOUsage;
+    
+$0 [options]
+  Options:
+
+    --help                    DFileisplay this help message
+    --infile  <filename>      File that will be parsed in vCard format
+    --outfile <filename>      File that will be generated in $OUTFORMAT format
+    
+ 
+  $pOutput
+EOUsage
+
+    exit(1);
+
+}
+
+##############################################################################
+# void* load_textfile ($dateiname, \@zeilen_rueckgabewert)
+#
+# Der Inhalt von $dateiname wird zeilenweise nach @{\@zeilen_rueckgabewert}
+# gepumpt. Scheint dazu gedacht zu sein, Datenbankinhalte in den Speicher
+# zu holen; wird kaum verwendet.
+##############################################################################
+#
+sub load_textfile {
+	my $pFilename =  @_[0];
+	my $ppLines   =  @_[1]; 
+	
+	if(!-e $pFilename) {
+		print "\n ERROR\n$pFilename does not exist.\n";
+		exit(1);
+	} else {
+		open (LOADTEXTFILE, "<$pFilename") or print $!;
+			if($flocking) {flock LOADTEXTFILE, 2;}
+			@{$ppLines} = <LOADTEXTFILE>;
+			if($flocking) {flock LOADTEXTFILE, 8;}
+ 		close LOADTEXTFILE;
+ 		foreach my $fileline(@{$ppLines}) {
+ 			chop($fileline);
+ 			chomp($fileline);
+	}	} 
+}
+
+##############################################################################
+# void* save_textfile ($dateiname, \@dateiinhalt);
+#
+# Schreibt die Daten aus @{\@dateiinhalt} nach $dateiname;
+##############################################################################
+#
+sub save_textfile {
+	my $pFilename = $_[0];
+	my $ppLines   = $_[1]; 
+	
+	if ($pFilename eq "") {
+		print "\n ERROR\nNo Filename specified in parameter (save_textfile():103.\n";
+		exit(1);
+	}
+	open (SAVETEXTFILE, ">$pFilename") or print $!;
+		if($flocking) {flock SAVETEXTFILE, 2;}
+		foreach my $fileline (@{$ppLines}) {
+			print SAVETEXTFILE "$fileline\n";
+		};
+		if($flocking) {flock SAVETEXTFILE, 8;}
+ 	close SAVETEXTFILE;
+}
+
+
+#######################################################################
+# show the content of an array as one line splitted in table elements
+#######################################################################
+sub show_hash {
+	my $ppHash        =  @_[0]; ## p=Parameter,p=Pointer
+	my $pTitle        =  @_[1]; ## p=Parameter
+	print "\nShow Hash:  $pTitle $table_begin";
+        &show_hash_header($ppHash);
+        &show_hash_line($ppHash);
+	print "$table_end\n";
+}
+
+sub show_hash_header {
+	my $ppHash        =  @_[0]; ## p=Parameter,p=Pointer
+	my @lvArrayKeys   = keys(%{$ppHash});
+	print $row_head_begin;
+	foreach my $item(@lvArrayKeys) {
+		print "$col_begin$item$col_end";
+	};
+	print $row_head_end;
+}
+
+
+sub show_hash_line {
+	my $ppHash        =  @_[0]; ## p=Parameter,p=Pointer
+	my @lvArrayValues = values(%{$ppHash});
+	print $row_begin;
+	foreach my $item(@lvArrayValues) {
+		print "$col_begin$item$col_end";
+	};
+	print $row_end;
+}
+#######################################################################
+#### show the content of an array as a table with one column and
+#### as many lines as the length of the array
+#######################################################################
+sub show_array {
+	my $ppArray       =  @_[0]; ## p=Parameter,p=Pointer
+	my $pTitle        =  @_[1]; ## p=Parameter
+	print "Show Array $pTitle $table_begin";
+        print $row_begin;
+	foreach my $item(@{$ppArray}) {
+		print "$col_begin$item$col_end";
+	};
+	print $row_end;
+	print $table_end;
+
+}
+#######################################################################
+#### show the content of an array as a table with one column and
+#### as many lines as the length of the array
+#######################################################################
+sub create_array_line {
+	my $pPreSeparator  =  $_[0]; ## p=Parameter,p=Pointer
+	my $ppArray        =  $_[1]; ## p=Parameter,p=Pointer
+	my $pPostSeparator =  $_[2]; ## p=Parameter,p=Pointer
+	my $ReturnString = "";
+	foreach my $item(@{$ppArray}) {
+		$ReturnString .= "$pPreSeparator$item$pPostSeparator";
+	};
+        return $ReturnString;
+}
+
+
+#################################################
+# Modify Fileline and return modified content	#
+#################################################
+
+sub modify_fileline {
+	my $pFileLine = $_[0];
+	my $BakFileLine = $pFileLine;
+	$pFileLine =~ s/^[ ;]+//g;
+	$pFileLine =~ s/[;]+/, /g;
+	$pFileLine =~ s/\\,$/,/g;
+	$pFileLine =~ s/[ ,]+$//g;
+	$pFileLine =~ s/[\\][n]$/$newline/g;
+	#### CHANGE FILE ##########################
+	$pFileLine =~ s/ä/&auml;/g;
+	$pFileLine =~ s/ö/&ouml;/g;
+	$pFileLine =~ s/ü/&uuml;/g;
+	$pFileLine =~ s/Ä/&Auml;/g;
+	$pFileLine =~ s/Ö/&Ouml;/g;
+	$pFileLine =~ s/Ü/&Uuml;/g;
+	$pFileLine =~ s/ß/&szlig;/g;
+	$pFileLine =~ s/´/'/g;
+	###########################################
+	if ($BakFileLine ne $pFileLine) {
+	    print "\nCHANGES: ".$pFileLine."\n"
+	};
+	return $pFileLine;
+}
+
+#######################################################################
+#### append an ID to an array if the ID is not in the array
+#######################################################################
+sub append_ID {
+    my $ppArray =  $_[0]; ## p=Parameter,p=Pointer
+    my $pNewID  =  $_[1];
+    my $found = 0;
+    #$pNewID =~ s/[^A-Za-z0-9 ]//g; 
+    foreach my $oldID (@{$ppArray}) {
+        if ($pNewID eq $oldID) {
+            $found = 1;
+        }
+    };
+    if ($found == 0) {
+       push(@{$ppArray},$pNewID);
+     } 
+}
+#########################################################################
+
+</pre>
