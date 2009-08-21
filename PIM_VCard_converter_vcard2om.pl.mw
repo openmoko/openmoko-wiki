@@ -57,7 +57,7 @@ if( defined $options{"infile"} ) {
 if( defined $options{"outfile"} ) {
   print "\n Output file:  ".$options{"outfile"}." \n";
 } else {
-	&usage("ERROR: You must define an -outfile=myoutfilename.csv");
+	&usage("ERROR: You must define an -outfile=myoutfilename.$outformat");
 };
 #######################################################################
 print "\nStart parsing file....";
@@ -75,19 +75,19 @@ foreach my $line (@FileArray) {
       print "in $line";
   } elsif ( $line =~ /^END\:VCARD/ ) {
       print "\ndone";
-      #&show_hash(\%AdressHash,"Record $count");
       my $vID = $AdressHash{LastName}." ".$AdressHash{FirstName};
       $OutFileHash{$vID} = &create_string_from_hash(\%AdressHash);
   } else {
     ## EMAIL;INTERNET;WORK:themail@example.net
     @SplitArray = split(/\:/,$line);
     ## SplitArray[0]= EMAIL;INTERNET;WORK
-    ## SplitArray[0]= themail@example.net
+    ## SplitArray[1]= themail@example.net
     ## Convert to HTML
     @SplitArrayID = split(/;/,$SplitArray[0]);
     ## SplitArray2[0]= EMAIL
     ## SplitArray2[1]= INTERNET
     ## SplitArray2[2]= WORKFile
+    ## The Values could also be separated by ";" so split them into array of values
     @SplitArrayValue = split(/;/,$SplitArray[1]);
     $SplitArray[1] = &modify_fileline($SplitArray[1]);
     my $i = 0;
@@ -95,12 +95,13 @@ foreach my $line (@FileArray) {
        $SplitArrayValue[$i] = &modify_fileline($SplitArrayValue[$i]);
        $i+=1;
     };
-    ## The Values could also be separated by ";"
     &append_ID(\@IDarray,$SplitArray[0]);
     print "\n$count: $line";
    ##################################################
    # Now we decide what to do with the vCard Content 
-   # everything is stored in the hash AdressHash
+   # everything is stored in the hash AdressHash e.g.
+   #	$AdressHash{LastName}  = "Miller";
+   #	$AdressHash{FirstName} = "Paul";
    ##################################################
    # e-Mail
     if ( $SplitArray[0] =~ /^EMAIL/ ) {
@@ -116,13 +117,7 @@ foreach my $line (@FileArray) {
     };
    # Adress
     if ( $SplitArray[0] =~ /^ADR[;]*/ ) {
-        $SplitArray[1] =~ s/\\n/$newline/g;
-	$SplitArray[1] =~ s/\\,/,/g;
-        $SplitArray[1] =~ s/\\//g;
-        $SplitArray[1] =~ s/\/$//g; 
-	$SplitArray[1] =~ s/ $//g; 
-	$SplitArray[1] =~ s/,$//g; 
-	$AdressHash{Adress}    = $SplitArray[1];
+  	$AdressHash{Adress}    = &convert_adress($SplitArray[1]);
     };
    # Fax and Phone
     if ( $SplitArray[0] =~ /FAX/ ) {
@@ -141,20 +136,23 @@ foreach my $line (@FileArray) {
 @OutFileArray = ("<html>\n<head>\n","<meta http-equiv=\"content-type\" content=\"text/html; charset=ISO-8859-1\">
 ","\n<title>Contacts</title>\n</head>\n<body>","$table_begin");
 my @OutFileIDs = keys(%OutFileHash);
+### $OutFileHash("Miller Paul") contain the converted vCard record of e.g. Paul Miller
+### Sort the hash IDs (i.e. Names) in alphabetical order 
 foreach my $vID (sort @OutFileIDs) {
     push(@OutFileArray,$OutFileHash{$vID});
 };
+### push the last HTML line
 push(@OutFileArray,"$table_end\n</body></html>");
 &save_textfile($options{"outfile"},\@OutFileArray);
+### print all tags used in the vCard file
 print "\n Output file:  ".$options{"outfile"}." saved\n";
 print "\nUsed ID in vCard file ".$options{infile};
-#@IDarray = ("ID1","ID2","ID3");
 print "\n".&create_array_line("",\@IDarray," ");
 print "\n";
 ###########################################################################################
  
 #######################################################################
-# show the content of an array as one line splitted in table elements
+# create a string from the content the hash of on VCard record
 #######################################################################
 sub create_string_from_hash {
 	my $ppHash        =  @_[0]; ## p=Parameter,p=Pointer
@@ -212,11 +210,7 @@ EOUsage
 }
 
 ##############################################################################
-# void* load_textfile ($dateiname, \@zeilen_rueckgabewert)
-#
-# Der Inhalt von $dateiname wird zeilenweise nach @{\@zeilen_rueckgabewert}
-# gepumpt. Scheint dazu gedacht zu sein, Datenbankinhalte in den Speicher
-# zu holen; wird kaum verwendet.
+# void* load_textfile ($pFilename, \@Pointer_to_Array_of_Strings)
 ##############################################################################
 #
 sub load_textfile {
@@ -239,9 +233,7 @@ sub load_textfile {
 }
 
 ##############################################################################
-# void* save_textfile ($dateiname, \@dateiinhalt);
-#
-# Schreibt die Daten aus @{\@dateiinhalt} nach $dateiname;
+# void* save_textfile ($pFilename, \@Pointer_to_Array_of_Strings)
 ##############################################################################
 #
 sub save_textfile {
@@ -261,70 +253,20 @@ sub save_textfile {
  	close SAVETEXTFILE;
 }
 
+#################################################
+# convert the content of addresses in the vCard record
+#################################################
 
-#######################################################################
-# show the content of an array as one line splitted in table elements
-#######################################################################
-sub show_hash {
-	my $ppHash        =  @_[0]; ## p=Parameter,p=Pointer
-	my $pTitle        =  @_[1]; ## p=Parameter
-	print "\nShow Hash:  $pTitle $table_begin";
-        &show_hash_header($ppHash);
-        &show_hash_line($ppHash);
-	print "$table_end\n";
+sub modify_fileline {
+      my $pAddress = $_[0];
+      $pAddress =~ s/\\n/$newline/g;
+      $pAddress =~ s/\\,/,/g;
+      $pAddress =~ s/\\//g;
+      $pAddress =~ s/\/$//g; 
+      $pAddress =~ s/ $//g; 
+      $pAddress =~ s/,$//g;
+      return $pAddress; 
 }
-
-sub show_hash_header {
-	my $ppHash        =  @_[0]; ## p=Parameter,p=Pointer
-	my @lvArrayKeys   = keys(%{$ppHash});
-	print $row_head_begin;
-	foreach my $item(@lvArrayKeys) {
-		print "$col_begin$item$col_end";
-	};
-	print $row_head_end;
-}
-
-
-sub show_hash_line {
-	my $ppHash        =  @_[0]; ## p=Parameter,p=Pointer
-	my @lvArrayValues = values(%{$ppHash});
-	print $row_begin;
-	foreach my $item(@lvArrayValues) {
-		print "$col_begin$item$col_end";
-	};
-	print $row_end;
-}
-#######################################################################
-#### show the content of an array as a table with one column and
-#### as many lines as the length of the array
-#######################################################################
-sub show_array {
-	my $ppArray       =  @_[0]; ## p=Parameter,p=Pointer
-	my $pTitle        =  @_[1]; ## p=Parameter
-	print "Show Array $pTitle $table_begin";
-        print $row_begin;
-	foreach my $item(@{$ppArray}) {
-		print "$col_begin$item$col_end";
-	};
-	print $row_end;
-	print $table_end;
-
-}
-#######################################################################
-#### show the content of an array as a table with one column and
-#### as many lines as the length of the array
-#######################################################################
-sub create_array_line {
-	my $pPreSeparator  =  $_[0]; ## p=Parameter,p=Pointer
-	my $ppArray        =  $_[1]; ## p=Parameter,p=Pointer
-	my $pPostSeparator =  $_[2]; ## p=Parameter,p=Pointer
-	my $ReturnString = "";
-	foreach my $item(@{$ppArray}) {
-		$ReturnString .= "$pPreSeparator$item$pPostSeparator";
-	};
-        return $ReturnString;
-}
-
 
 #################################################
 # Modify Fileline and return modified content	#
