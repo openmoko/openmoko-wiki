@@ -103,23 +103,23 @@ foreach my $line (@FileArray) {
    #	$AdressHash{LastName}  = "Miller";
    #	$AdressHash{FirstName} = "Paul";
    ##################################################
-   # e-Mail
+   #### e-Mail
     if ( $SplitArray[0] =~ /^EMAIL/ ) {
         $AdressHash{EMail} .= $SplitArray[1];
     } elsif ($SplitArray[1] =~ /([a-zA_Z0-9\_\-\.]+@[a-zA_Z0-9\_\-\.]+)/) {
         $AdressHash{EMail} .= $1;
         $SplitArray[1] =~ s/[a-zA_Z0-9\_\-\.]+@[a-zA_Z0-9\_\-\.]+//g;
     };
-   # Name
+   #### LastName FirstName
     if ( $SplitArray[0] =~ /^N[;]*/ ) {
 	$AdressHash{LastName}  = $SplitArrayValue[0];
 	$AdressHash{FirstName} = $SplitArrayValue[1];
     };
-   # Adress
+   #### Adress
     if ( $SplitArray[0] =~ /^ADR[;]*/ ) {
   	$AdressHash{Adress}    = &convert_adress($SplitArray[1]);
     };
-   # Fax and Phone
+   #### Fax and Phone
     if ( $SplitArray[0] =~ /FAX/ ) {
         $AdressHash{Fax} .= $SplitArrayValue[0];
     } elsif ($SplitArray[0] =~ /TEL;WORK/) {
@@ -130,7 +130,8 @@ foreach my $line (@FileArray) {
         } else {
 	     $AdressHash{Tel} .= $SplitArrayValue[0];
         }
-    }
+    };
+    ###############################################################
   }; ## main if-elsif-else
 }; ## end foreach 
 @OutFileArray = ("<html>\n<head>\n","<meta http-equiv=\"content-type\" content=\"text/html; charset=ISO-8859-1\">
@@ -149,10 +150,12 @@ print "\n Output file:  ".$options{"outfile"}." saved\n";
 print "\nUsed ID in vCard file ".$options{infile};
 print "\n".&create_array_line("",\@IDarray," ");
 print "\n";
-###########################################################################################
+
+#### END of Script
+#######################################################################
  
 #######################################################################
-# create a string from the content the hash of on VCard record
+# create a string from the content of the VCard hash record
 #######################################################################
 sub create_string_from_hash {
 	my $ppHash        =  @_[0]; ## p=Parameter,p=Pointer
