@@ -37,6 +37,8 @@ my $flocking = 1;
 my @FileArray = ();
 my @OutFileArray = ();
 my %OutFileHash  = ();
+my %OutNameHash  = ();
+
 my $OUTFORMAT = uc($outformat);
 
 my @SplitArray      = ();
@@ -76,7 +78,8 @@ foreach my $line (@FileArray) {
   } elsif ( $line =~ /^END\:VCARD/ ) {
       print "\ndone";
       my $vID = $AdressHash{LastName}." ".$AdressHash{FirstName};
-      $OutFileHash{$vID} = &create_string_from_hash(\%AdressHash);
+      $OutFileHash{$vID} = &create_string_from_hash(\%AdressHash,$count)
+      $OutNameHash{$vID} = &create_linklist_from_hash(\%AdressHash,$count);;
   } else {
     ## EMAIL;INTERNET;WORK:themail@example.net
     @SplitArray = split(/\:/,$line);
@@ -137,14 +140,15 @@ foreach my $line (@FileArray) {
 @OutFileArray = ("<html>\n<head>\n","<meta http-equiv=\"content-type\" content=\"text/html; charset=ISO-8859-1\">
 ","\n<title>Contacts</title>\n</head>\n<body>","$table_begin");
 my @OutFileIDs = keys(%OutFileHash);
-### $OutFileHash{"Miller Paul"} contain the converted vCard record of e.g. Paul Miller
-### "Miller Paul" is the ID of the hash content.
-### Sort the hash IDs (i.e. Names) in alphabetical order 
-### and push the hash content to OutFileArray that will be saved
+foreach my $vID (sort @OutFileIDs) {
+    push(@OutFileArray,$OutNameHash{$vID});
+};
+push(@OutFileArray,"$table_end");
+push(@OutFileArray,"<P></P>");
+push(@OutFileArray,"$table_begin");
 foreach my $vID (sort @OutFileIDs) {
     push(@OutFileArray,$OutFileHash{$vID});
 };
-### push the last HTML line
 push(@OutFileArray,"$table_end\n</body></html>");
 &save_textfile($options{"outfile"},\@OutFileArray);
 ### print all tags used in the vCard file
@@ -161,34 +165,57 @@ print "\n";
 # this sub creates the HTML output of one VCard
 # modify this to create a SQL command or CSV from the hash
 #######################################################################
+#
 sub create_string_from_hash {
-	my $ppHash        =  @_[0]; ## p=Parameter,p=Pointer
+	my ($ppHash,$pCount)  =  @_; ## p=Parameter,p=Pointer
         my $vReturnString = $row_head_begin;
-        if ($ppHash->{Tel} eq "") {
-            $ppHash->{Tel} = $ppHash->{Mobil};
-        };
-        if ($ppHash->{Tel} eq "") {
-           $ppHash->{Tel} = "W: ".$ppHash->{TelWork};
-        };
-  	$vReturnString .= $col_begin.$ppHash->{LastName}.", ".$ppHash->{FirstName}.$col_end;
-        $vReturnString .= $col_begin."W: ".$ppHash->{TelWork}.$col_end; 
+        $vReturnString .= $col_begin."<A NAME=\"N$pCount\"><A HREF=\"#L$pCount\">".$ppHash->{LastName}.
+     	                  ", ".$ppHash->{FirstName}."</A>".$col_end;
         $vReturnString .= $row_head_end;
-        $vReturnString .= $row_begin;
-        $ppHash->{Tel} =~ s/[^ 0-9\-\/ W:]//g;
-        $vReturnString .= $col_begin."T: ".$ppHash->{Tel}.$col_end;
-        if ($ppHash->{Fax} eq "") {
-             $vReturnString .= $col_begin."eM: ".$ppHash->{EMail}.$col_end; 
-        } else { 
-             $vReturnString .= $col_begin."Fax: ".$ppHash->{TelWork}.$col_end;
+        if ($ppHash->{Tel} ne "") {
+           $vReturnString .= $row_begin;
+           $vReturnString .= $col_begin."Tel: ".$ppHash->{Tel}.$col_end; 
+           $vReturnString .= $row_end;
+        };
+        if ($ppHash->{TelWork} ne "") {
+           $vReturnString .= $row_begin;
+           $vReturnString .= $col_begin."Work: ".$ppHash->{TelWork}.$col_end; 
+           $vReturnString .= $row_end;
+        };
+        if ($ppHash->{Mobil} ne "") {
+	       $vReturnString .= $row_begin;
+    	   $vReturnString .= $col_begin."Mobile: ".$ppHash->{Mobil}.$col_end; 
+           $vReturnString .= $row_end;
+        };
+        if ($ppHash->{Fax} ne "") {
+           $vReturnString .= $row_begin;
+           $vReturnString .= $col_begin."Fax: ".$ppHash->{TelWork}.$col_end;
         }; 
-        $vReturnString .= $row_end;
-        $vReturnString .= $row_begin;
-        $vReturnString .= $col_begin."Mob: ".$ppHash->{Mobil}.$col_end; 
-        $vReturnString .= $col_begin."Adr: ".$ppHash->{Adress}.$col_end; 
-        $vReturnString .= $row_end;
+        if ($ppHash->{EMail} ne "") {
+           $vReturnString .= $row_begin;
+           $vReturnString .= $col_begin."e-Mail: ".$ppHash->{EMail}.$col_end; 
+           $vReturnString .= $row_end;
+        };
+        if ($ppHash->{Adress} ne "") {
+           $vReturnString .= $row_begin;
+           $vReturnString .= $col_begin."Adr: ".$ppHash->{Adress}.$col_end; 
+           $vReturnString .= $row_end;
+        };
         return $vReturnString;
 }
- 
+
+#######################################################################
+# show the content of a hash as one line in a table
+#######################################################################
+sub create_linklist_from_hash {
+	my ($ppHash,$pCount)  =  @_; ## p=Parameter,p=Pointer
+        my $vReturnString = $row_head_begin;
+        $vReturnString .= $col_begin."<A NAME=\"L$pCount\"><A HREF=\"#N$pCount\">".
+        		$ppHash->{LastName}.", ".$ppHash->{FirstName}."</A>".$col_end;
+        $vReturnString .= $row_head_end;
+        return $vReturnString;
+}
+  
 ################################################
 ## usage is displayed, if no parameter inserted
 ################################################
