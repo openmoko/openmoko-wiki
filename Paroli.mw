@@ -1,6 +1,9 @@
 [[Image:Paroli.png|thumb|Paroli Screenshot]]
-Paroli is a new approach to application development on the Openmoko phones. It is actually able, in combination with [[Om2009]] distribution to make Freerunner work as a simple phone.
-It's based on top of the [[OpenmokoFramework|FSO framework]] and enables the use of it via a core and several services.
+Paroli a phone application for the Openmoko phones.
+
+Originally it was planned to be released with [[Om2009]] distribution but as OM2009 developement slowed down, Paroli was also compiled for [[SHR]]
+
+Paroli is based on top of the [[OpenmokoFramework|FSO framework]] and enables the use of it via a core and several services.
 
 For more information please visit [http://www.paroli-project.org/ Paroli website]
 
@@ -25,7 +28,34 @@ Paroli actually makes FR a simple, very working phone!!
 
 ==Installation / download ==
 
-=== Full distro ===
+=== Paroli on SHR unstable ===
+ If you want to try and run paroli in SHR unstable RFN. Flash the latest shr-unstable image from http://shr.bearstech.com/shr-unstable/images/om-gta02/. 
+
+The image from 08-08-09 has a minor problem with opkg. to fix it
+
+ opkg-cl update
+ opkg-cl upgrade
+
+then install paroli
+
+ opkg install paroli
+
+Fix the conf files that the paroli installer messes with ( I hope to fix the recipe in the next couple of days. )
+
+ cp /etc/old_frameworkd.conf /etc/frameworkd.conf
+ cp /etc/freesmartphone/oevents/old_rules.yaml /etc/freesmartphone/oevents/rules.yaml
+
+now if you want to disable the shr phone apps without removing them comment all of the lines out in
+
+ /etc/X11/Xsession.d/89notifier and /etc/X11/Xsession.d/80ophonekitd
+
+if you want the bind-home to ease upgrades add this line to fstab.
+
+ /media/card/bind-home   /home/root     none        bind                   0  0
+
+You should now have a functional paroli on SHR setup. Once you have a working setup it might be better not to run opkg upgrades but only upgrade specific packages when needed.
+
+=== Paroli on OM2009 ===
 
 To install the [[Om2009]] distribution download the uImage and fso-paroli-image from http://downloads.openmoko.org/distro/testing/NeoFreerunner/
 
