@@ -1250,7 +1250,7 @@ SHR comes with only few preinstalled applications but it's repository provides m
 [[Image:Launcher.png|200px|thumb|SHR Launcher]]
 Launcher is elementary based alternative home screen application and event notifier for SHR. It displays current time, has a user tweak-able launcher with categories and features missed calls and messages applets.
 
- opkg install libsqlite3-0 http://www.opkg.org/packages/launcher_0.23_arm.ipk
+ opkg install libsqlite3-0 http://www.opkg.org/packages/launcher_0.30_arm.ipk
 
 If you dont see some icons, copy all icons from /usr/share/icons/shr/86x86/apps/* to /usr/share/pixmaps.
 
@@ -1260,7 +1260,26 @@ For '''PIM''' applications you can get dates for calendar, tasks for todos, neot
 
  opkg install http://neote.googlecode.com/files/neote_0.2.0-r0_all.ipk
 
-GPE contacts saves the contacts in a SQLite database that can be synchronized with VCard files. Gpe-contacts don't allow you to dial directly via shr-dialer. Install gpe-contacts:
+''Paroli'' is available in SHR images, you can install it:
+
+ opkg install paroli
+
+fix the conf files that the paroli installer messes with (might get fixed in the next couple of days.)
+
+ cp /etc/old_frameworkd.conf /etc/frameworkd.conf
+ cp /etc/freesmartphone/oevents/old_rules.yaml /etc/freesmartphone/oevents/rules.yaml
+
+now if you want to disable the shr phone apps without removing them comment all of the lines out in 
+
+ /etc/X11/Xsession.d/89notifier and /etc/X11/Xsession.d/80ophonekitd
+
+if you want the bind-home to ease upgrades add this line to fstab.
+
+ /media/card/bind-home   /home/root     none        bind                   0  0
+
+You should now have a functional paroli on SHR setup. Once you have a working setup I would advise against doing opkg upgrades and only upgrade specific packages when needed.
+
+''GPE contacts'' saves the contacts in a SQLite database that can be synchronized with VCard files. Gpe-contacts don't allow you to dial directly via shr-dialer. Install gpe-contacts:
 
  opkg install gpe-contacts
 
