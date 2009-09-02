@@ -4,6 +4,17 @@ The '''I2C'''(pronounced I square Cee) is a simple communication standard intend
 
 Note that I2C addresses are 7 bit. The last bit, which is not part of the address, indicates whether this is a read or write operation. So "0001 000x" is 0x8, not 0x10.
 
+== Powering additional I2C devices ==
+
+You have to be careful about selecting the power source for
+additional I2C devices. It is a temptation to use TP1702
+which provides a spare power regulator. But keep in mind that it is steered by i2c.
+So under bad conditions things like internal esd protection diodes
+ of the added hardware pull down the I2C lines so that
+the system cannot communicate with the power regulator
+and cannot power things on (including the additional I2C device)
+but also backlight, etc. The Freerunner will not boot.
+
 = Neo1973 =
 On the Neo1973, we currently use the following addresses on the I2C bus:
 {|
