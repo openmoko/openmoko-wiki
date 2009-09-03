@@ -52,11 +52,32 @@ To install adb, type as a root
 
 *3
 
-adb connects to Android but you need to set up Android on FreeRunner first, otherwise you may skip this step. This will not work on other distributions. Make sure your FreeRunner was booted while being plugged in to a USB port. Then run the following commands in Terminal:
+adb connects to Android but you need to set up Android on FreeRunner first, otherwise you may skip this step. This will not work on other distributions. Make sure your FreeRunner was booted while being plugged in to a USB port. If you have flashed a bootloader, run the following commands in Terminal:
 
  # ifconfig usb0 192.168.0.200 netmask 255.255.255.0
  # adb kill-server
  # ADBHOST=192.168.0.202 adb devices
+
+If you have installed Qi loader, find on which eth device the FreeRunner is located (for me, it is eth2).
+ # ifconfig -a
+
+Then, issue the following (if you hav Qi, and whether you found your eth for FreeRunner. For me it is eth2):
+ # ifconfig eth2 192.168.0.200 netmask 255.255.255.0
+ # adb kill-server
+ # ADBHOST=192.168.0.202 adb devices
+
+You may want to ping the device to make sure it is communicating with the computer
+ # ping 192.168.0.202 
+
+To enter the shell prompt on FreeRunner, enter:
+ # ADBHOST=192.168.0.202 adb shell
+
+To exist the shell prompt, enter:
+ # exit
+
+To install a program to a FreeRunner (lets say SomeProgram.apk file), enter the computer's directory with the apk file and enter:
+ # adb install SomeProgram.apk
+
 
 You should now have no trouble using adb.
 
