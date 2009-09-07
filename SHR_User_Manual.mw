@@ -553,62 +553,7 @@ To report a bug, please go to http://shr-project.org/trac/report
 
 Check if the bug is already reported. If not, add a ticket, be as much precise as you can in the title and the description, in what circumstances the issue happened and so on.
 
-==Car Navigation==
-''Navit'' is a car navigation system with routing engine. It can calculate a route and do on screen and voice road navigation. Maps need to be downloaded beforehand, please check [http://wiki.navit-project.org/index.php/Main_Page#Maps  Navit website]. You can get Openstreetmaps through [http://maps.navit-project.org/download/ Navit map extractor], after you download the map it needs to be specified in the .navit/navit.xml file.
 
-===Add opkg feed===
-To install <tt>navit</tt> as a car navigation system on your phone you have to add the feed for the installer <tt>opkg</tt>
- http://download.navit-project.org/navit/openmoko/svn/
-You can do this by: 
- echo src navit http://download.navit-project.org/navit/openmoko/svn > /etc/opkg/navit-feed.conf
- opkg update
-
-===Install Navit===
-Install [[Navit]]: [[Image:navit1.png|200px|thumb|Navit on SHR with OpenStreetMaps]] 
- opkg install navit
-Navit will be auto-updated when you run <tt>opkg upgrade</tt> later (sometimes not: workaround remove navit and reinstall the new one).
-
-===Workaround libgps for Navit===
-Navit on SHR has in the currently available version (08/2009) a <tt>libgps</tt> problem. You solve this by: 
- opkg install libgps17
- ln -s /usr/lib/libgps.so.17 /usr/lib/libgps.so.16
-(The whole GPS issue didn't work without that).
-
-===Install Maps===
-Use [http://maps.navit-project.org/download/ Navit pre-processed OSM maps]. With your browser on desktop:
-* Navigate to the region you want, 
-* mark a rectangle for your map (e.g. for Germany) and click select the rectanglular map.  [[Image:osmdownload.jpg|200px|thumb|Download OpenStreetMaps]] 
-* then click on download and save the file to <tt>country.bin</tt> (e.g. <tt>germany.bin</tt>) on your desktop computer.
-* copy the file to on your phone. Because of the size of the maps you copy map to the Micro-SD card on your phone. Create a directory for the maps and copy the files from desktop to phone:
- mkdir /media/card/maps
- scp germany.bin root@192.168.0.202:/media/card/maps
-* Create a directory <tt>.navit</tt> and copy the <tt>navit.xml</tt> to this directory:
- mkdir /home/root/.navit  
- cp /usr/share/navit/navit.xml /home/root/.navit/navit.xml
-* Add and enable the map for the application in navit by changing the lines (at approx line number 370)
- <!-- Mapset template for openstreetmaps -->
- <mapset enabled="yes">
-    <map type="binfile" enabled="yes" data="/media/card/maps/*.bin"/>
- </mapset>
-You can explicitly mention the downloaded maps in the mapset, e.g.:
- <!-- Mapset template for openstreetmaps -->
- <mapset enabled="yes">
-    <map type="binfile" enabled="yes" data="/media/card/maps/germany.bin"/>
-    <map type="binfile" enabled="no"  data="/media/card/maps/france.bin"/>
- </mapset>
-Disable unused mapset sections by setting enabled to <tt>no</tt>, e.g. the pre-installed sample maps at line 370 in <tt>navit.xml</tt>.
- <mapset enabled="no">
-    <xi:include href="$NAVIT_SHAREDIR/maps/*.xml"/>
- </mapset>
-
-===Start Navit===
-Start <tt>Navit</tt> on your phone for your first test. For further configuration details see [http://wiki.openmoko.org/index.php?title=Navit OpenMoko Article for Navit] or the project website of [http://wiki.navit-project.org/index.php/Configuring_Navit Navit-Project].
-
-===No sound after installing Navit===
-
-Navit tends to depend on  speech-dispatcher and after a suspend, the phone does not ring anymore for incoming calls or messages, it only vibrates. To correct this remove speech-dispatcher:
-
- opkg remove -force-depends speech-dispatcher
 
 ==Bicycle Navigation with TangoGPS==
 [[TangoGPS]] comes already installed with the SHR-Image. You can use TangoGPS for navigation too, for example with bicycle tour downloaded from http://www.bicirutas.net (see [http://www.bicirutas.net/de/rutas/deutschland/friederspitz/ bicirutas-Example] in Germany). You can also upload your favorite bicycle tour on the web to share the tour with others.
