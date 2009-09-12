@@ -1,0 +1,203 @@
+== News ==
+
+
+{| style="color:#AA2222; background-color:#FAFAFA;" cellpadding="2" cellspacing="10" border="0"
+|2009-08-16
+|first version with austrian stuff, and focus on everyday usability
+|-
+|2009-08-30
+|now with a-gps and cellhunter<br>a-gps uses your GSM cellinfo to get location from cellhunter, then reads a-gps data from u-blox<br>have fun ...
+|-
+|2009-09-01
+|navit svn version was unstable, now fixed. also uses intone as musicplayer
+|}
+
+== Installing ==
+* have at least 1,5 hours of time ready, for the whole procedure
+* have fast internet, you need to download lots of stuff
+* download exactly these versions of '''[[Om 2009]]''' from z0ph
+     '''1.''' [http://work.zoff.cc/openmoko/om2009/de_at/qi.udfu] qi boot loader
+
+     '''2.''' [http://work.zoff.cc/openmoko/om2009/de_at/uImage-2.6.28.bin] kernel (kernöl)
+
+     '''3.''' [http://work.zoff.cc/openmoko/om2009/de_at/rootfs.jffs2] root image
+
+
+these are the original names of the files:
+ qi-s3c2442-1.0.2+gitr3b8513d8b3d9615ebda605de4bda18371aa3f359.udfu
+
+ fso-paroli-image-om-gta02.jffs2 (daily testing image from 16-Jun-2009 04:35   88M)
+
+ uImage-2.6.28-stable+gitr0+f19f259d3c1afde8eae53983fd19f61831927413-r3-om-gta02.bin
+
+* flash '''[[qi]]''', '''[[kernel]]''' and root image to your neo (i tested this on '''[[GTA02]]'''v6). Detailed instructions for [[Flashing_the_Neo_Freerunner|Freerunner]]
+
+* download customize pack from z0ph
+     '''4.''' [http://work.zoff.cc/openmoko/om2009/de_at/customize_pack.tar.gz] customize pack (400 MBytes)
+* if you want it quick, you can instead download customize pack without navit maps, its much smaller
+
+     '''5.''' [http://work.zoff.cc/openmoko/om2009/de_at/customize_pack_no_maps.tar.gz] customize pack without maps (50 MBytes)
+
+to download (or update!!) the austrian map file later do (you need fast internet on your neo):
+ cd /media/card/navit/
+ ./get_austria.map.sh # this will download about 350 MBytes!!
+
+* unpack the customize pack to your SD-Card (to /media/card). my /media/card partition is type VFAT
+
+== Startup ==
+* boot up your neo, and let it run until paroli has logged in to your GSM net
+* then shutdown the neo (press and hold power button for a few seconds)
+* boot up your neo again, and let paroli log in to your GSM network again.
+
+== Localize for AT ==
+* for '''GOD's sake try NOT to get any phonecalls''' while you do this part
+* if at ANY time you get messages "'''Error loading Module''': would you like to unload this module, bla bla" just press "yes" !!
+* if at ANY time you get messages "'''Fehler beim laden des Modules''': möchten sie dieses Modul abschalten, bla bla" just press "yes" !!
+* now connect your neo with usb and login via ssh
+* you '''NEED internet on your neo''' for this, otherwise dependent packages can't be downloaded
+* start (as root on your neo):
+
+ cd /media/card/
+ ./init_om2009.sh
+
+* this will take some time !! have coffee ready :-)
+<strike>* just before this script is done, you have to comfigure [[E17]] again.</strike>
+<strike># select "Deutsch" als language (then press next)</strike>
+<strike># select "paroli-serenity" as profile (then press next)</strike>
+<strike># select "systemstandard" as menüs (then press next)</strike>
+<strike># don't checkbox any applications in Quick Launch (then press next)</strike>
+<strike>* now wait for the customize script to finish</strike>
+* now start (also as root on your neo):
+ cd /media/card/
+ ./do_opkg_upgrade.sh
+* hopefully no errors have occured
+
+== Test it ==
+* reboot your neo, and let paroli settle down and login to your GSM network
+* now navit should have austrian maps, and speak in german to you :-)
+* you can suspend/resume anytime! even when navit is speaking! yeah really, it works
+* date and time should also be correct
+* press AUX button quick and zedlock should come up, draw a big "Z" to unlock again
+* hold POWER button for 2 seconds, and neu will shutown
+* if shutdown with POWER button fails, go to illume home screen, pull down the menu and press the big red "X", a menu should appear
+
+== Test it (german) ==
+* Navit sollte alles in deutsch anzeigen, österreichkarten laden und vor allem der neo sollte beim laufen von Navit nicht blanken oder suspenden
+
+== Startup Times ==
+
+{| style="color:#FCFCFC; cellpadding="4" cellspacing="0" border="1"
+|0:00
+|press button to boot neo
+|-
+|0:12
+|splash logo visible
+|-
+|2:24
+|enlightenment splash screen visible
+|-
+|2:36
+|illume topshelf visible
+|-
+|2:48
+|illume desktop icons visible
+|-
+|3:17
+|paroli visible (GSM not yet logged in!)
+|}
+
+
+those times seem pretty catastophic in comparison to a normal mobile phone
+yet for the neo they are not really bad :-)
+
+== Screenshots ==
+<gallery widths="300px" heights="400px">
+Image:z0ph_om2009_screen_01.png|illume home screen
+Image:z0ph_om2009_screen_02.png|illume home screen (menu open)
+</gallery>
+
+<gallery widths="300px" heights="400px">
+Image:z0ph_om2009_screen_06.png|pressing "X" on illume menu open nice shutdown menu
+Image:z0ph_om2009_screen_05.png|paroli (just charging battery)
+</gallery>
+
+<gallery widths="300px" heights="400px">
+Image:z0ph_om2009_screen_03.png|a-gps cellhunter,u-blox gui - start
+Image:z0ph_om2009_screen_04.png|a-gps cellhunter,u-blox gui - upload OK
+</gallery>
+
+<gallery widths="300px" heights="400px">
+Image:z0ph_om2009_screen_07.png|midori shows HTTPS: webpage
+</gallery>
+
+== Feedback ==
+* please give some [[User_talk:zoff99|feedback]]
+
+
+== Features ==
+
+=== Installed Programs ===
+
+* Cellhunter
+on first start choose language (german i guess), then enter name and password.
+can be anything, and you really don't need to remember it later.
+if you can't get AGPS working where you are, just what for a GPS fix and upload that data to cellhunter. now you can instantly use it for AGPS, isn't that nice ...
+* GPS Off
+turn gps chip off (normally you DON'T need this!!)
+* GPS On
+turn gps chip on (normally you DON'T need this!!)
+* GPS rfh
+refresh agps data from u-blox.com (and cellhunter), you need an
+[[GTA02_GPS#u-blox_Assist_Now_account_application|account]] there (its free)
+you can confiure it in /etc/agps-online.conf
+
+sample /etc/agps-online.conf:
+ [config]
+ user=XX@YY.com
+ password=mypassword
+* KO-Lig...
+wooom,woooooooooom. help me obi-wan ...
+* Midori
+small webbrowser, usable but not really the best
+* Moko...
+mokomaze, you might know it from some mobile phones
+* MooCow
+moooooooooo moooooooooo, just shake the phone
+* Navit
+Navit version from SVN. it shows full austria,german und switzerland map. speaks to you in german. it takes almost all CPU you have, so don't push it too far. otherwise it works very well.
+* Paroli
+main phone,sms,contacts application. real slow to start, but works rather well
+* Settings
+shr-settings from SHR. runs really fine. I just made some small changes to fit to Om2009
+* Terminal
+valaterm
+* USB-M...
+change USB mode
+* Water
+Water level
+* agpsUI
+use this great program ONLY as a last resort. it does NOT play well together with FSO and frameworkd
+
+* omShu...
+omShuffle music player. put your music files in /media/card/music/ directory and omShuffle will play random songs
+* zedlock (no icon, use AUX button)
+great screen locker. draw a big "Z" on the screen in 1 second to unlock screen
+* gpe-scap (no icons, only command line)
+login via ssh to your neo. start "export DISPLAY=:0 ; gpe-scap" on commandline to make a screenshot
+* sms-sentry (no icon, send sms)
+send sms with text "sentry<passwd>:location" to your neo, and get an sms with current position back. default passwd is '12345'. you can confiure it in /etc/sms-sentry
+
+sample /etc/sms-sentry:
+ [config]
+ password=54321
+
+=== Functions / Goodies ===
+
+* AUX button short press
+starts zedlock
+* Power button short press
+suspend/resume
+* Power button hold for 2 seconds
+shutdown
+
+[[Category:SHR]]
