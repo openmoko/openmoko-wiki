@@ -1,254 +1,88 @@
 == News ==
+
+
 {| style="color:#AA2222; background-color:#FAFAFA;" cellpadding="2" cellspacing="10" border="0"
-|2009-09-01
+|2009-08-16
 |first version with austrian stuff, and focus on everyday usability
 |-
-|2009-09-12
-|based on SHR unstable, and with opkg upgrade support
+|2009-08-30
+|now with a-gps and cellhunter<br>a-gps uses your GSM cellinfo to get location from cellhunter, then reads a-gps data from u-blox<br>have fun ...
 |-
-|2009-10-03
-|Cannot satisfy the following dependencies ... libfso-glib0, that is an SHR issue, i hope it will be fixed soon
-|-
-|2009-10-03
-|moved name of page to "German", lots of docu updates, new images uploaded
-|-
-|2009-10-14
-|now with brand new SHR logo (I think I am the first to use it)
-|-
-|2009-10-18
-|geocaching added, it doesn't work too good, so don't expect too much :-)
-|-
-|2009-10-25
-|geocaching now sets route-target in agtl and also in navit, and you can drive with navit to the cache
-|-
-|2009-11-15
-|in a few days i will switch to new (mrmoku)-unstable, with lots of fixes. watch for it here. work has already startet
-|-
-|2009-11-19
-|As of TODAY!!! there is a new version of SHR-unstable out, but this package is still working
+|2009-09-01
+|navit svn version was unstable, now fixed. also uses intone as musicplayer
 |}
-
-== Reminder ==
-Please dont just edit away things without discussion. thanks.
-
---[[User:Zoff99|zoff99]] 17:04, 2 November 2009 (UTC)
-
-== looking for the NEW SHR unstable ==
-if u feel lucky go to this page
-[[Configure_SHR_for_German-speaking_use_UPDATE_2]]
-
-but beware, it could crash or worse (you have been warned)
-
---[[User:Zoff99|zoff99]] 16:24, 9 December 2009 (UTC)
-
-== Overview, what is this page??? ==
-This article focuses on configuring SHR(-unstable) image for a daily use in a german speaking area.
-the author is Austrian so the main focus is on Austrian use.
-with help of other users it is also useable for germany, switzerland.
-
-to-do:
-* get more feedback from people !!!
-* get some of this stuff into main SHR branch
-
-
-focus points (some are not provided by out-of-the-box SHR):
-* GTA02 (sorry i dont have a GTA01)
-* stable use as daily phone (calls, sms)
-* keep install and use as simple as possbile
-* keep reboot and crash frequency at 1/per day maximum (meaning only have to reboot once a day at most!)
-* stable use as navigation device in german-speaking area, with understandable german speech
-* only need to recharge once a day (meaning battery should hold 1 day in normal use)
-* prevent neo usage from driving you crazy, because some litte things just don't work
-* have all show-off and games stuff removed (it's fun for a while, but just a waste for everyday use)
 
 == Installing ==
 * have at least 1,5 hours of time ready, for the whole procedure
 * have fast internet, you need to download lots of stuff
+* download exactly these versions of '''[[Om 2009]]''' from z0ph
+     '''1.''' [http://work.zoff.cc/openmoko/om2009/de_at/qi.udfu] qi boot loader
 
-=== Downloading Bootloader, Kernel, Root Image ===
-{{Note| download exactly these versions of '''[[SHR]]''' from z0ph}}     '''1.''' [http://work.zoff.cc/openmoko/shr/de_at/qi.udfu] qi boot loader (~30 KB)
+     '''2.''' [http://work.zoff.cc/openmoko/om2009/de_at/uImage-2.6.28.bin] kernel (kernöl)
 
-     '''2.''' [http://work.zoff.cc/openmoko/shr/de_at/uImage.bin] kernel (kernöl ~2 MB)
+     '''3.''' [http://work.zoff.cc/openmoko/om2009/de_at/rootfs.jffs2] root image
 
-     '''3.''' [http://work.zoff.cc/openmoko/shr/de_at/rootfs.jffs2] root image (~70 MB)
 
-These are the original names of the files:
- qi-s3c2442-1.0.2+gitr3b8513d8b3d9615ebda605de4bda18371aa3f359.udfu # 09-May-2009 13:23 28K
+these are the original names of the files:
+ qi-s3c2442-1.0.2+gitr3b8513d8b3d9615ebda605de4bda18371aa3f359.udfu
 
- shr-lite-glibc-ipk--20090906-om-gta02.rootfs.jffs2 # 06-Sep-2009 14:08 67M
+ fso-paroli-image-om-gta02.jffs2 (daily testing image from 16-Jun-2009 04:35   88M)
 
- uImage-2.6.29-oe11+gitr119844+a3587e4ed77974adfb057af261aaeea4022018e8-r3.5-om-gta02.bin # 01-Sep-2009 23:13 1.7M
+ uImage-2.6.28-stable+gitr0+f19f259d3c1afde8eae53983fd19f61831927413-r3-om-gta02.bin
 
-===Flashing Neo===
 * flash '''[[qi]]''', '''[[kernel]]''' and root image to your neo (i tested this on '''[[GTA02]]'''v6). Detailed instructions for [[Flashing_the_Neo_Freerunner|Freerunner]]
-The installation should be flashing like (do it in DFU mode of NOR u-boot):
-  dfu-util -a u-boot -R -D qi.udfu
-  dfu-util -a kernel -R -D uImage.bin
-  dfu-util -a rootfs -R -D rootfs.jffs2
 
-{{Note|
-i have found that using the NAND for root-fs is the most relyable way. having the root-fs on the SD-card is slower and also files get suddenly lost or corrupt.
+* download customize pack from z0ph
+     '''4.''' [http://work.zoff.cc/openmoko/om2009/de_at/customize_pack.tar.gz] customize pack (400 MBytes)
+* if you want it quick, you can instead download customize pack without navit maps, its much smaller
 
---> https://docs.openmoko.org/trac/ticket/1802
+     '''5.''' [http://work.zoff.cc/openmoko/om2009/de_at/customize_pack_no_maps.tar.gz] customize pack without maps (50 MBytes)
 
-I - ChrisPZV - experienced this is even not fixed in the latest SHR-U (09. June 2010). When booting from NAND dd-ing back the partition table on resume as described there might bloody fix the problem.}}
-
-== Startup ==
-* boot up your neo, and let it run until you are logged in to your GSM net
-
-{{Note|
-it is recommended to use a working SIM card, and disable PIN number verification. but it will work without SIM card also.}}
-
-[[Image:SHR-Setup-Language.png|200px|thumb|Initial setup]]
-
-{| class="wikitable" cellspacing="0" cellpadding="0" style="padding: 0%; margin:0em 0em 1em 0em; border:1px solid #c0c0c0; background:#eeeeee; floating="center";width:100%; "
-
-! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:25% " |
-[[Image:SHR-Setup-Profile.png|200px|thumb|Theme profile]]
-
-! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:25% " |
-
-[[Image:SHR-Setup-Menu.png|200px|thumb|Menu]]
-
-! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:25% " |
-
-[[Image:SHR-Setup-Add-Icons.png|200px|thumb|Add icons]]
-
-! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:25% " | 
- 
-[[Image:SHR-Setup-Quick-Launch.png|200px|thumb|Quick launch]]
-
-|}
-
-on 1st boot, when asked choose (see images above):
-
- Language --> choose: english --> press next
- Profile --> choose: Illume SHR --> pres next
- Menus --> choose: System Default --> pres next
- Quick Launch --> check NO box !! --> pres next
- Ok :-)
-
-* then shutdown the neo (press and hold power button for a few seconds)
-* boot up your neo again, and let the neo log in to your GSM network again.
-
-==Customization Package==
-===Preparing your SD card (you need to do this!)===
-login to your neo as root
-and make the base dir
- cd /media/card
- mkdir "____shr_testing"
-
-{{Note|
-for this step you must have a working SD-card in your freerunner with at least 1 partition. it can be FAT or ext2 or ext3}}
-
-===Download Customization Pack WITHOUT Maps for Navit===
-* login as root an run
-  cd /media/card/____shr_testing
-  wget http://work.zoff.cc/openmoko/shr/de_at/customize_pack_shr_no_maps.tar.gz # 22 MBytes
-
-===Unpack Customization Pack===
-* login to your neo as root
-
- cd /media/card/____shr_testing/
- gzip -d customize_pack_shr_no_maps.tar.gz
- tar -xf customize_pack_shr_no_maps.tar
-
-===Download the Navit Maps===
-* login to your neo as root
-* to download (or update!!) the austrian map file run (you need fast internet on your neo):
- cd /media/card/____shr_testing/navit/
+to download (or update!!) the austrian map file later do (you need fast internet on your neo):
+ cd /media/card/navit/
  ./get_austria.map.sh # this will download about 350 MBytes!!
 
-* for germany:
+* unpack the customize pack to your SD-Card (to /media/card). my /media/card partition is type VFAT
 
- cd /media/card/____shr_testing/navit/
- ./get_germany.map.sh # this will download about 612M MBytes!!
+== Startup ==
+* boot up your neo, and let it run until paroli has logged in to your GSM net
+* then shutdown the neo (press and hold power button for a few seconds)
+* boot up your neo again, and let paroli log in to your GSM network again.
 
-* for switzerland:
-
- cd /media/card/____shr_testing/navit/
- ./get_switzerland.map.sh # this will download about 80 MBytes!!
-
-* or to download your map manually, visit:
- http://maps.navit-project.org/download/
-and put the bin-file in this directory /media/card/____shr_testing/navit/maps/
-and navit will use it automatically
-
-
-* or have a look at some preconfigured downloads:
- http://maps.navit-project.org/api/map/
-
-at the moment you can have '''ONLY 1 .bin''' map file in that directory.
-so if you already have the german map file and want the austrian map file,
-you have to delete one of them. it's a navit bug.
-
-If you want to use other types of maps you must edit the navit.xml file.
-For further information see http://wiki.navit-project.org/index.php/Configuring_Navit
-
-===_privat-Folder in Customization Pack (this step is optional)===
-The privat folder can contain privat data with an addressbook that you want to copy to 
-   /home/root/.evolution/addressbook/local/system (not implemented yet)
-or calendar data to 
-   /home/root/.evolution/calendar/local/system/calendar.ics (not implemented yet) 
-or an modified navit-files (e.g. navit.xml or bookmark.txt, destinations.txt) that you want to replace with the existing files in:
-   /home/root/.navit/
-or the AGPS-account details.
-So that you can use and restore these files after flashing your phone or checking other distributions and going back to SHR. 
-View the <tt>init_shr_testing.sh</tt> and search for <tt>_PRIVATE_</tt> in the script for further details. For copying files that are not used in the script, write your own small script as a post-installation script that copies all the relevant data from _privat  to the correct location on your FR.
-
-== Localize it ==
-
-=== Preselected country in [[Navit]] ===
-With the current installation you will get Austria as a preselected country. If you want to change that for example to Germany, edit <tt>/usr/bin/navit.sh</tt> and change the following line
-    export LANG=de_AT.utf8
-to the LANG export
-    export LANG=de_DE.utf8
-so that Germany will be the preselected language.
-
-===update package index info (this is important!!)===
-* start (as root on your neo):
- cd /etc/opkg/
- unalias mv
- for i in *.conf ; do cat $i|sed -e 's#shr-unstable#shr-obsolete#g' > ${i}_X ; mv ${i}_X ${i} ;done
-
-===Run init_shr_testing.sh script===
+== Localize for AT ==
+* for '''GOD's sake try NOT to get any phonecalls''' while you do this part
+* if at ANY time you get messages "'''Error loading Module''': would you like to unload this module, bla bla" just press "yes" !!
+* if at ANY time you get messages "'''Fehler beim laden des Modules''': möchten sie dieses Modul abschalten, bla bla" just press "yes" !!
+* now connect your neo with usb and login via ssh
 * you '''NEED internet on your neo''' for this, otherwise dependent packages can't be downloaded
 * start (as root on your neo):
 
- cd /media/card/____shr_testing/
- ./init_shr_testing.sh
+ cd /media/card/
+ ./init_om2009.sh
 
 * this will take some time !! have coffee ready :-)
-* wait for the customize script to finish
-* now at least reboot 1 time (better 2 times)
-* wait at least 3 minutes after reboot (for frameworkd to settle down)
-* '''[UG1]''' now start (also as root on your neo):
-
- mdbus -s org.freesmartphone.ousaged /org/freesmartphone/Usage org.freesmartphone.Usage.SetResourcePolicy Display enabled
- opkg update
- opkg remove -force-depends libfso-glib0
- mdbus -s org.freesmartphone.ousaged /org/freesmartphone/Usage org.freesmartphone.Usage.SetResourcePolicy Display enabled
- opkg install http://build.shr-project.org/shr-obsolete/ipk/armv4t/libfso-glib0_0.2.1+gitr47+7608c8d98bb65bb5beca6621eb86920b71df1bc9-r0_armv4t.ipk
- mdbus -s org.freesmartphone.ousaged /org/freesmartphone/Usage org.freesmartphone.Usage.SetResourcePolicy Display enabled
- opkg upgrade -force-defaults
-
-* '''[UG2]''' when finished start as root:
- cd /media/card/____shr_testing/
- ./do_upgrade_shr.sh
-
+<strike>* just before this script is done, you have to comfigure [[E17]] again.</strike>
+<strike># select "Deutsch" als language (then press next)</strike>
+<strike># select "paroli-serenity" as profile (then press next)</strike>
+<strike># select "systemstandard" as menüs (then press next)</strike>
+<strike># don't checkbox any applications in Quick Launch (then press next)</strike>
+<strike>* now wait for the customize script to finish</strike>
+* now start (also as root on your neo):
+ cd /media/card/
+ ./do_opkg_upgrade.sh
 * hopefully no errors have occured
 
 == Test it ==
-* reboot your neo, and let the neo login to your GSM network
+* reboot your neo, and let paroli settle down and login to your GSM network
 * now navit should have austrian maps, and speak in german to you :-)
 * you can suspend/resume anytime! even when navit is speaking! yeah really, it works
 * date and time should also be correct
 * press AUX button quick and zedlock should come up, draw a big "Z" to unlock again
-* hold POWER button for 2 seconds, and neo will shutdown
+* hold POWER button for 2 seconds, and neu will shutown
 * if shutdown with POWER button fails, go to illume home screen, pull down the menu and press the big red "X", a menu should appear
 
 == Test it (german) ==
-* Navit sollte alles in deutsch anzeigen, österreichkarten laden und vor allem der Neo sollte beim Laufen von Navit nicht blanken oder suspenden.
+* Navit sollte alles in deutsch anzeigen, österreichkarten laden und vor allem der neo sollte beim laufen von Navit nicht blanken oder suspenden
 
 == Startup Times ==
 
@@ -256,106 +90,114 @@ so that Germany will be the preselected language.
 |0:00
 |press button to boot neo
 |-
-|0:17
+|0:12
 |splash logo visible
 |-
-|1:29
+|2:24
 |enlightenment splash screen visible
 |-
-|2:02
+|2:36
 |illume topshelf visible
 |-
-|2:28
+|2:48
 |illume desktop icons visible
 |-
-|3:34
-|GSM logged in
+|3:17
+|paroli visible (GSM not yet logged in!)
 |}
 
 
-those times seem pretty catastrophic in comparison to a normal mobile phone
-yet for the neo they are really not so bad :-)
+those times seem pretty catastophic in comparison to a normal mobile phone
+yet for the neo they are not really bad :-)
 
 == Screenshots ==
-
 <gallery widths="300px" heights="400px">
-Image:z0ph_shr_screen_01.png|illume home screen
-Image:z0ph_shr_screen_03.png|illume home screen (menu open)
+Image:z0ph_om2009_screen_01.png|illume home screen
+Image:z0ph_om2009_screen_02.png|illume home screen (menu open)
 </gallery>
 
 <gallery widths="300px" heights="400px">
-Image:z0ph_shr_screen_02.png|dialer
-Image:z0ph_shr_screen_04.png|german keyboard
+Image:z0ph_om2009_screen_06.png|pressing "X" on illume menu open nice shutdown menu
+Image:z0ph_om2009_screen_05.png|paroli (just charging battery)
 </gallery>
 
 <gallery widths="300px" heights="400px">
-Image:z0ph_shr_screen_05.png|german dictionary
+Image:z0ph_om2009_screen_03.png|a-gps cellhunter,u-blox gui - start
+Image:z0ph_om2009_screen_04.png|a-gps cellhunter,u-blox gui - upload OK
+</gallery>
+
+<gallery widths="300px" heights="400px">
+Image:z0ph_om2009_screen_07.png|midori shows HTTPS: webpage
 </gallery>
 
 == Feedback ==
-* please give some [[Talk:Configure_SHR_for_Austrian_use|feedback]]
+* please give some [[User_talk:zoff99|feedback]]
+
 
 == Features ==
 
 === Installed Programs ===
 
-==== German Keyboard ====
-German keyboard, with German dictionary (word list).
-Gridpad keyboard, bubble-keyboard, literki-keyboard, qwo-keyboard (if you want this you can set it in the enlightenment config "wrench" under Keyboard section)
-
-==== [[Cellhunter]] ====
+* Cellhunter
 on first start choose language (german i guess), then enter name and password.
 can be anything, and you really don't need to remember it later.
-if you can't get AGPS working where you are, just wait for a GPS fix and upload that data to cellhunter. now you can instantly use it for AGPS, isn't that nice ...
-
-==== GPSagps ====
-refresh agps data from u-blox.com (and [[cellhunter]]), you need an
+if you can't get AGPS working where you are, just what for a GPS fix and upload that data to cellhunter. now you can instantly use it for AGPS, isn't that nice ...
+* GPS Off
+turn gps chip off (normally you DON'T need this!!)
+* GPS On
+turn gps chip on (normally you DON'T need this!!)
+* GPS rfh
+refresh agps data from u-blox.com (and cellhunter), you need an
 [[GTA02_GPS#u-blox_Assist_Now_account_application|account]] there (its free)
-
-you can configure it in /etc/agps-online.conf
+you can confiure it in /etc/agps-online.conf
 
 sample /etc/agps-online.conf:
  [config]
  user=XX@YY.com
  password=mypassword
-
-'''Remark:''' Backup this file, if you have to flash your freerunner you just have to copy it to the folder <tt>/etc/</tt>.
-
-==== Htop ==== 
-With Htop you can see the memory usage of CPU processes
- 
-==== Midori ====
+* KO-Lig...
+wooom,woooooooooom. help me obi-wan ...
+* Midori
 small webbrowser, usable but not really the best
-
-==== Mokonnect ==== 
-Mokonnect, scans for WLAN networks, and does some other stuff (i have NOT yet successfully connected to any WLAN networks)
-==== [[Navit]] ====
+* Moko...
+mokomaze, you might know it from some mobile phones
+* MooCow
+moooooooooo moooooooooo, just shake the phone
+* Navit
 Navit version from SVN. it shows full austria,german und switzerland map. speaks to you in german. it takes almost all CPU you have, so don't push it too far. otherwise it works very well.
-==== Settings ==== 
-shr-settings from SHR. runs really fine. I just made some small changes
-==== Terminal ==== 
-Terminal <tt>valaterm</tt> for working from shell, bash
-==== Water ==== 
+* Paroli
+main phone,sms,contacts application. real slow to start, but works rather well
+* Settings
+shr-settings from SHR. runs really fine. I just made some small changes to fit to Om2009
+* Terminal
+valaterm
+* USB-M...
+change USB mode
+* Water
 Water level
-==== agpsUI ====
+* agpsUI
 use this great program ONLY as a last resort. it does NOT play well together with FSO and frameworkd
-==== Intone ==== 
-Intone music player. put your music files in /media/card/music/ directory
-==== zedlock ==== 
-The program zedlock provides no icon. It is used when you press the AUX button to lock the screen. To unlock the screen just draw a big "Z" on the screen within 1 second
 
-==== Screenshots gpe-scap ==== 
-gpe-scap (no icons, only command line)
-login via ssh to your neo. start 
-  export DISPLAY=:0 ; gpe-scap
-on commandline to make a screenshot
-==== Locate Freerunner: sms-sentry ==== 
-sms-sentry  has no icon, it will send an sms with its location on demand.
-Send sms with text "sentry<passwd>:location" to your neo, and get an sms with current position back. default passwd is '12345'. you can confiure it in /etc/sms-sentry
+* omShu...
+omShuffle music player. put your music files in /media/card/music/ directory and omShuffle will play random songs
+* zedlock (no icon, use AUX button)
+great screen locker. draw a big "Z" on the screen in 1 second to unlock screen
+* gpe-scap (no icons, only command line)
+login via ssh to your neo. start "export DISPLAY=:0 ; gpe-scap" on commandline to make a screenshot
+* sms-sentry (no icon, send sms)
+send sms with text "sentry<passwd>:location" to your neo, and get an sms with current position back. default passwd is '12345'. you can confiure it in /etc/sms-sentry
 
-sample <tt>/etc/sms-sentry</tt>:
+sample /etc/sms-sentry:
  [config]
  password=54321
 
+=== Functions / Goodies ===
+
+* AUX button short press
+starts zedlock
+* Power button short press
+suspend/resume
+* Power button hold for 2 seconds
+shutdown
 
 [[Category:SHR]]
