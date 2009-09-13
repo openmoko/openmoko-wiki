@@ -469,77 +469,7 @@ After you have established network connection, it is very easy to access and tra
 
     sftp://root@192.168.0.202
 
-===Data synchronization===
-[[Image:SHR-PISI.png|200px|thumb|PISI contact synchronization]]
-[[Image:SHR-PISI-dates.png|200px|thumb|PISI calendar synchronization]]
 
-You can synchronize your contacts and appointments data with various sources. The sync can by done by program called  [http://pisi.projects.openmoko.org/ PISI] . SIM contacts and calendar entries are currently possible to sync on SHR. You can also synchronize OPIMD contacts, these data are however so far no used in the current shr phone applications, but are used by for example Litephone.
-
-For calendar install dates
-
-  opkg install dates
-
-Supported Contacts data sources:
-* SIM via DBUS (e.g. SHR)
-* QTopia address book (e.g. OM 2008.12)
-* LDAP (read only)
-* VCF files (local / webdav)
-* Google contacts
-* OPIMD
-
-Supported Calendar data sources:
-* Google calendars
-* ICalendar files (local / webdav)
-
-To install PISI, run 
-
-<pre>
-opkg install http://www.opkg.org/packages/1_python-vobject_0.8.1_armv4t.ipk http://www.opkg.org/packages/0_python-webdav_0.1.2_armv4t.ipk \
-python-sqlite3 python-pygtk python-pygobject python-pycairo python-netserver python-netclient python-misc \
-http://www.opkg.org/packages/1_python-gdata_1.3.0_armv4t.ipk http://www.opkg.org/packages/0_python-ldap_2.3.6_armv4t.ipk \
-http://www.opkg.org/packages/1_python-dateutil_1.4.1_armv4t.ipk http://www.opkg.org/packages/openldap_2.3.43_armv4t.ipk \
-http://projects.openmoko.org/frs/download.php/899/pisi_0.4.6_armv4t.ipk
-
-</pre>
-
-
-
-Configuration example, .pisi/conf to sync  contacts and calendar with google calendar and contacts with google mail:
-
- [googleCalendar]
- description=My Google Calendar
- module=calendar_google
- user=user@gmail.com
- password=secret
- calendarid=user@gmail.com
- 
- [pimlicodates]
- description= Pimlico Dates
- module=calendar_ics
- path=/home/root/.evolution/calendar/local/system/calendar.ics
- postprocess=killall e-calendar-factory
- 
- [googlecontacts]
- description=Google Contacts Account
- module=contacts_google
- user=user@gmail.com
- password=secret
- 
- [remoteIcs]
- description= Remote ICS on Webdav
- module=calendar_remoteics
- url=http://webdav.davserver.net/private/pim/
- file=remotecalendar.ics
- username=<LOGIN>
- password=<PASSWORD>
- 
- [shrsim]
- description=SHR SIM Card Contacts
- module=contacts_dbussim
- max_simentries = 250
- simentry_name_maxlength=18
-
-Another way of importing contacts via Vcard file is possible with [gopher://gopher.fnordpol.de/9/data/DbusAccessScripts_0.0.0.tar.gz this] script written by [[User:Zem#DBus_Access_Scripts|Zem]].
 
 ===Reporting bugs===
 
