@@ -16,7 +16,22 @@ The way to do it on your own is described below.
 * In order to follow this guide format a SD-Card (just like installing Openmoko on Neo Freerunner).
 **  First partition: vfat
 ** Second partition: ext2 (root)
-* mount it and extract http://downloads.openmoko.org/distro/testing/daily/om-gta02/20090616/openmoko-fso-console-image-glibc-ipk--20090616-om-gta02.rootfs.tar.gz to it.
+* mount it and extract http://ftp.o2s.ch/pub/fso-console-image-htcdream.tar.gz to it.
+=== Use internal memory ===
+Type root into the login screen and for password just type enter
+then
+ ifup usb0
+Then connect to your htcdream over usb+ssh:
+ ifconfig usb0 192.168.0.200
+ scp fso-console-image-htcdream.tar.gz root@192.168.0.202:~
+ ssh root@192.168.0.202
+ gunzip fso-console-image-htcdream.tar.gz
+Then mount the internal memory with the biggest space make it clean and install your openmoko:
+ mkdir /mnt/foo
+ mount /dev/mtdblock5 /mnt/foo -o noatime -t yaffs2
+ rm -rf /mnt/foo/*
+ tar xvf fso-console-image-htcdream.tar -C /mnt/foo
+
 == Bootloader ==
 You need to install fastboot.
 In order to do this, you will have need to have "root" on the existing Android device or already have a developer version of the bootloader installed.
@@ -45,7 +60,14 @@ And configure it as you whish.
  <nowiki>wget http://wiki.openmoko.org/images/f/f6/Newramdisk.cpio.gz</nowiki>
  mv Newramdisk.cpio.gz newramdisk.cpio.gz
  sudo cp Mkbootimg.bin /usr/bin/mkbootimg
+
+==== For SD-card rootfs ====
  mkbootimg --cmdline "console=tty0 no_console_suspend=1 root=/dev/mmcblk0p2 rootdelay=2 fbcon=rotate:1" \
+ --kernel $HACK_DIR/msm/arch/arm/boot/zImage \
+ --ramdisk ./newramdisk.cpio.gz -o openmoko-boot.img
+
+==== For internal rootfs ====
+ mkbootimg --cmdline "console=tty0 no_console_suspend=1 root=/dev/mtdblock5 rootfstype=yaffs2 rootdelay=2 fbcon=rotate:1" \
  --kernel $HACK_DIR/msm/arch/arm/boot/zImage \
  --ramdisk ./newramdisk.cpio.gz -o openmoko-boot.img
 
