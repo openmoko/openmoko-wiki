@@ -16,11 +16,123 @@ Install from opkg.org:
 
 opkg install http://www.opkg.org/packages/openttd_0.7.2-r0.3_armv4t.opk
 
-=== Source ===
-Look [http://openttd.projects.openmoko.org/  project page] how to compile for Freerunner. 
+Bitbake recipe:
 
-[http://openttd.projects.openmoko.org/openttd_0.6-r0.6_sources.tar.gz bitbake recipe + additional files]
+ === Source ===
+ DESCRIPTION = "Open source clone of the Microprose game 'Transport Tycoon Deluxe' - SDL edition."
+ HOMEPAGE = "http://openttd.sf.net"
+ LICENSE = "GPLv2"
+ DEPENDS = "libsdl-net libpng zlib freetype fontconfig"
+ PV = "0.7.2"
+ PR = "r0.3"
+ 
+ inherit siteinfo sdl
+ 
+ FILES_${PN} += "${datadir}/*"
+ 
+ SRC_URI ="svn://svn.openttd.org/;module=trunk;rev=17558;proto=http"
+ 
+ SRC_URI += "file://openttd.desktop \
+            file://version_check.patch"
+ 
+ 
+ APPIMAGE = "media/openttd.128.png"
+ 
+ do_patch() {
+ mv trunk openttd-0.7.2
+ cd openttd-0.7.2
+ patch  < ../version_check.patch 
+ 
+ # GPL-Graphics! http://dev.openttdcoop.org/
+ cd ..
+ wget http://bundles.openttdcoop.org/opengfx/releases/opengfx-0.1.0-alpha6.zip
+ unzip download.php\?file\=opengfx%2Freleases%2Fopengfx-0.1.0-alpha6.zip
+ 
+ # GPL-Sound files!
+ #this contains also license, readme, changelog
+ wget http://bundles.openttdcoop.org/opensfx/releases/opensfx-0.1.0-alpha2.zip
+ unzip -n download.php\?file\=opensfx%2Freleases%2Fopensfx-0.1.0-alpha2.zip
+ }
+ 
+ 
+ do_configure() {
+ #in r14478 they added icu-library (it is for languages which are typed right to left)
+ #fix: enable icu-library
+ #now it is disabled --without-icu
+ 
+ # The way the OTTD configure system handles the application's directories
+ # isn't the way autotools does it. Mainly prefix is always prepended even if
+ # absolute binary-dir and data-dir is given. Sigh ...
+ 
+ #this cause problem --build=${BUILD_SYS} 
+ #it is mapped to x86_64-linux
+ #this works with me --build=x86_64-linux-gnu \
+ 
+ ./configure \
+    --build=x86_64-linux-gnu \
+    --host=${TARGET_SYS} \
+    --windres=${MACHINE_DISPLAY_WIDTH_PIXELS}x${MACHINE_DISPLAY_HEIGHT_PIXELS} \
+    --os=UNIX \
+    --endian=${SITEINFO_ENDIANESS} \
+    --prefix-dir=${prefix} \
+    --binary-dir=bin \
+    --with-midi=/bin/true \
+    --with-zlib \
+    --with-png \
+    --with-freetype \
+    --without-icu \
+    --without-allegro \
+    --cc-build=gcc \
+    --cc-host=${TARGET_SYS}-gcc \
+    --cxx-build=g++ \
+    --cxx-host=${TARGET_SYS}-g++ \
+    --strip=${TARGET_SYS}-strip \
+    --install-dir=${D}
+ }
+ 
+ do_install() {
+    oe_runmake install
+ 
+    install ${WORKDIR}/openttd.desktop ${D}${datadir}/applications
+ 
+    #add gpl-graphs
+    install ${WORKDIR}/opensfx-0.1.0-alpha2.tar ../image/usr/share/games/openttd/data/
+ 
+    #add gpl-sounds
+    install ${WORKDIR}/opengfx-0.1.0-alpha6.tar ../image/usr/share/games/openttd/data/
+ 
+    #there must be sample.cat-file, even empty
+    touch ../image/usr/share/games/openttd/data/sample.cat
+ 
+    #delete some useless icons
+    cd ${WORKDIR}/image/usr/share
+    rm -r icons
+    rm pixmaps/openttd.32.xpm
+ }
+ 
+ pkg_postinst_${PN}() {
+ mkdir ~/.openttd
+ touch  ~/.openttd/openttd.cfg
+ echo "[misc]"   >>  ~/.openttd/openttd.cfg
+ echo "resolution = 480,640" >> ~/.openttd/openttd.cfg
+ echo "[gui]"  >>  ~/.openttd/openttd.cfg
+ echo "left_mouse_btn_scrolling = true" >> ~/.openttd/openttd.cfg
+ 
+ }
 
+And simple desktop file:
+
+ [Desktop Entry]
+ Name=openttd
+ Comment=Open source clone of the Microprose game 'Transport Tycoon Deluxe'
+ Exec=openttd
+ Icon=openttd
+ Type=Application
+ Categories=Game;
+ StartupNotify=false
+
+
+Look [http://openttd.projects.openmoko.org/  project page] for more information.
 
 == Playing==
 You can move screen with stylus, just point empty place and drag.
