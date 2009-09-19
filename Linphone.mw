@@ -1,7 +1,14 @@
-'''{{Note|These instructions most likely don't work for 2008.8/9. See "discussion" tab.}}'''
+Linphone is a Voice over IP ( VoIP ) application. Its purpose is to make phone calls over the data network, instead of using the telephony network.
 
-Linphone is a Voice over IP ( VoIP ) application. Its purpose is to make phone calls via the Internet, instead of using the telephony network. Here is a way to get the command line linphone working on OE based distros (tested on Qtopia, but should work on 200x.x and others). Ideally this could be interfaced with the dialer somehow.
+===SHR-U===
+Linphone is still not in the SHR-unstable repository but can be built yourself following [http://shr-project.org/trac/wiki/Building%20SHR Building SHR] with <code>cd shr-unstable/openembedded/recipes/libosip2 ; cp libosip2_3.1.0.bb libosip2_3.3.0.bb ; cd ../../.. ; bitbake linphone</code>
 
+My linphone packages is here [http://87.227.108.179/neo/linphone-3.1.0/]
+Because of alsa audio errors printed when running witch can be seen if running from commandline, I had to move away <code>mv /etc/asound.conf /etc/asound.conf.bak</code> and then put it back when done. If this is not done it get overloaded by printing the error message. I also remember there was some problem with the mic audio setting. Maybe some could add this here or maybe the koolu setting below is working. I have not tried it yet.
+
+===Qtopia===
+Here is a way to get the command line linphone working on Qtopia. Ideally this could be interfaced with the dialer somehow.
+Download link broken.
 <pre>
 echo "src/gz celtune http://rabenfrost.net/celtune/ipk/armv4t" >/etc/opkg/general-feed.conf
 opkg update
@@ -21,14 +28,6 @@ soundcard use 0
 proxy add
 </pre>
 
-<pre>
-''Enter proxy sip address:'' sip:sip.provider.com
-''Your identity for this proxy:'' sip:xxxxxxxxxx@sip.provider.com
-''Do you want to register on this proxy (yes/no):'' yes
-''Specify register expiration time in seconds (default is 600):''
-''Expiration:'' 600 seconds or so
-</pre>
-
 Initial testing of this had the audio routed properly through the earpiece and good audio from the microphone. There was some echo on the non-Freerunner side, and on initial connection, a bit of a beeping sound. Otherwise, it's a go. Linphone uses only about 10-12% CPU (was using a PCM codec). Sound was decent to a cell phone in Canada using a Wifi connected Freerunner based in Costa Rica.
 
 Here is a quick and dirty how-to. Enhancements can be made to both the voip-handset.state and asound.conf files (these were my initial working scripts). Thanks to Celtune for the excellent repository that is used below.
@@ -37,8 +36,36 @@ Regards,
 Brian Code,
 Koolu
 
-===Linphone in FDOM===
+
+===FDOM===
 If you want to avoid installing linphone you can use the [[FDOM]] image. This includes the linphone installation. You just have to enter your sip-account details.
+
+== Settings ==
+<pre>
+''Enter proxy sip address:'' sip:sip.provider.com
+''Your identity for this proxy:'' sip:xxxxxxxxxx@sip.provider.com
+''Do you want to register on this proxy (yes/no):'' yes
+''Specify register expiration time in seconds (default is 600):''
+''Expiration:'' 600 seconds or so
+</pre>
+
+===Asterisk===
+In <code>sip.conf</code>
+<pre>
+[jthneo]
+type=friend
+username=jthneo
+callerid= jth <jth>
+secret=thesecret
+qualify=no ; linphone will become unreachable if qualify=yes
+host=dynamic
+nat=yes
+canreinvite=yes
+disallow=all ; allow the sensible codecs you want
+allow=ulaw
+allow=alaw
+;allow=gsm
+;allow=speex</pre>
 
 [[Category:Telephony]]
 [[Category:Internet Applications]]
