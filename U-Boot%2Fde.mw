@@ -13,7 +13,7 @@
 
 Das GTA01 nutzt den [http://u-boot.sourceforge.net/ u-boot] Bootlader.
 
-Mehr Informationen zum u-boot finden Sie unter 
+Mehr Informationen zu u-boot finden Sie unter 
 * http://www.denx.de/wiki/DULG
 * http://www.gumstix.org/tikiwiki/tiki-index.php?page=U-Boot
 * http://linuxdevices.com/articles/AT5085702347.html
@@ -31,19 +31,19 @@ Jedoch unterstützt u-boot einige für das GTA01 erforderliche Funktionen nicht:
 
 == Bootlader Quellcode ==
 
-Die aktuellen Patches des Bootlader sind zu finden unter http://svn.openmoko.org/trunk/src/target/u-boot/patches/.
+Die aktuellen Patches des Bootladers sind zu finden unter http://svn.openmoko.org/trunk/src/target/u-boot/patches/.
 
-Entpacken Sie die Quellen, wenden Sie den Patch an, fühern Sie "make gta01bv3_config" (oder "gta01bv2_config", oder das, welcher Hardwareversion Sie haben) aus und führen Sie "make" aus.
+Entpacken Sie die Quellen, wenden Sie den Patch an, führen Sie "make gta01bv3_config" (oder "gta01bv2_config" bzw. die entsprechende Hardwareversion) aus und führen Sie "make" aus.
 Als Resultat erhalten sie die Binärdatei "u-boot.bin", welche Sie direkt (entweder mit dem vorhandenen Bootlader oder [[sjf2410-linux]]) in den NAND Flash Speicher laden können.
 
 == Bootlader Binärdatei ==
 
-Den aktuellsten Binärimage des Bootladers funden Sie unter http://downloads.openmoko.org/daily/ . Dieses soll auf die Adresse 0x00000000 im NAND Flashspeichers geschrieben werden (Größe 0x30000).
+Das aktuellste Binärimage des Bootladers finden Sie unter http://downloads.openmoko.org/daily/ . Dieses sollte auf die Adresse 0x00000000 im NAND Flashspeichers geschrieben werden (Größe 0x30000).
 
 == Bootloader Entwicklung ==
 
 === QT2410 ===
-Wenn Sie Entwicklung des Bootladers unter QT2410 betreiben möchten, dann ist es einfacher, mit einem Bootlader Image zu arbeiten, das per USB ins Ram geflasht werden kann.
+Wenn Sie de Entwicklung des Bootladers unter QT2410 betreiben möchten, dann ist es einfacher, mit einem Bootlader Image zu arbeiten, das per USB ins Ram geflasht werden kann.
 
 Um dies zu tun, müssen Sie die Datei u-boot/include/configs/qt2410.h editieren ("if 0" in der Zeile 32 auf "if 1" ändern) und danach mit "make" neu übersetzen.
 
@@ -51,7 +51,7 @@ Die resultierende Datei "u-boot.bin" ist _NICHT_ für NAND verwendbar, sondern n
 
 === GTA01 ===
 
-Bootlader Entwicklung unter GTA01 ist etwas trickreich. Zuerst haben wir keinen NOR Flash. Zweitens, es gibt aber keine andere Weise vom NAND zu laden. Folglich haben wir keinen USB Downloader wie das QT2410.
+Bootlader Entwicklung unter GTA01 ist etwas trickreich. Zuerst gibt es keinen NOR Flash. Weiterhin gibt es aber keine andere Weise vom NAND zu laden. Folglich haben wir keinen USB Downloader wie das QT2410.
 
 Das Hauptproblem ist: Das [[S3C2410 Steppingstone]] kopiert unbedingt die ersten 4k des Flashes ins interne SRAM. Das SRAM Segment bleibt an der physischen Adresse allerdings auf null.
 
@@ -153,9 +153,9 @@ In diesem Zustand kann das Neo1973 mit einem üblichen USB Ladegerät aufgeladen
 == Bootlader Kommandozeile ==
 
 === Zugriff auf den Bootlader Prompt ===
-Der Bootlader Prompt steht entweder auf einer seriellen Konsole (über [[Debug Board]]) oder als virtuelles serielle USB Gerät (USB CDC_ACM) zur Verfügung. Ob serielle Schnittstelle oder USB Port verwendet werden, hängt von den u-boot Umgebungsvariablen '''stdin''', '''stdout''' und '''stderr''' ab.
+Der Bootlader Prompt steht entweder auf einer seriellen Konsole (über [[Debug Board]]) oder als virtuelles serielle USB Gerät ([[CDC ACM|USB CDC_ACM]]) zur Verfügung. Ob serielle Schnittstelle oder USB Port verwendet werden, hängt von den u-boot Umgebungsvariablen '''stdin''', '''stdout''' und '''stderr''' ab.
 
-Egal, ob Sie usbtty nutzen oder nicht, die ersten Nachrichten werden immer auf der seriellen Konsole angezeigt.
+Unabhängig davon, ob Sie usbtty nutzen oder nicht, die ersten Nachrichten werden immer auf der seriellen Konsole angezeigt.
 
 Der Bootlader ist so konfiguriert, dass er drei Sekunden wartet. Wenn innerhalb dieser drei Sekunden eine Taste auf '''stdin''' gedrückt wird, wird der automatische Bootvorgang abgebrochen.
 
@@ -727,12 +727,11 @@ else:
 
 === USB Verbindungsprobleme ===
 
-Ich bekam folgenden Fehler (in dmesg or /var/log/messages) auf der Host Seite beim Verbinden des Neo zum u-boot:
+Ich bekam folgenden Fehler (in dmesg or /var/log/messages) auf der Host Seite beim Verbinden des Neo zu u-boot:
  usb 2-1: device descriptor read/64, error -110
  usb usb2: Controller not stopped yet!
 
-The problem disappeared at least for me by the command below on the host side. Please note that if you have usb keyboard or mouse then the command might cause trouble.. I only have PS/2 so I couldn't test it.
-Das Problem verschwindet zumindest auf der Hoste seite durch den Befehl unten. Bitte beachten Sie, dass es möglicherweise zu Problemen führen kann, falls Sie USB Tastatur/Maus haben.
+Das Problem verschwindet zumindest auf Hostseite durch unten genannten Befehl. Bitte beachten Sie, dass es möglicherweise zu Problemen führen kann, falls Sie USB Tastatur/Maus haben. Der Autor konnte dies in Ermangelung der Geräte nicht testen.
  rmmod uhci_hcd ; modprobe uhci_hcd
 
 {{Languages|Bootloader}}
