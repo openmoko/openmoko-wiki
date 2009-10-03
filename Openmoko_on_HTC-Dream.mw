@@ -45,7 +45,9 @@ And configure it as you whish.
  export HACK_DIR=`pwd`
  git clone git://gitorious.org/replicant/gnulinuxkernel.git
  cd gnulinuxkernel
- cp arch/arm/configs/openmoko_msm .config
+ wget http://wiki.openmoko.org/images/1/1e/Replicant_config.txt -O .config
+ wget http://bobcopeland.com/srcs/android/msm_wifi.patch
+ patch -p1 < ./msm_wifi.patch
  make CROSS_COMPILE=/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/ ARCH=arm
  sudo make CROSS_COMPILE=/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/ ARCH=arm modules_install
  sudo mv /lib/modules/2.6-29-openmoko-msm /mnt/foo/lib/modules/
@@ -63,12 +65,12 @@ And configure it as you whish.
 
 ==== For SD-card rootfs ====
  mkbootimg --cmdline "console=tty0 no_console_suspend=1 root=/dev/mmcblk0p2 rootdelay=2 fbcon=rotate:1" \
- --kernel $HACK_DIR/msm/arch/arm/boot/zImage \
+ --kernel $HACK_DIR/gnulinuxkernel/arch/arm/boot/zImage \
  --ramdisk ./newramdisk.cpio.gz -o openmoko-boot.img
 
 ==== For internal rootfs ====
  mkbootimg --cmdline "console=tty0 no_console_suspend=1 root=/dev/mtdblock5 rootfstype=yaffs2 rootdelay=2 fbcon=rotate:1" \
- --kernel $HACK_DIR/msm/arch/arm/boot/zImage \
+ --kernel $HACK_DIR/gnulinuxkernel/arch/arm/boot/zImage \
  --ramdisk ./newramdisk.cpio.gz -o openmoko-boot.img
 
 === Flashing boot.img ===
@@ -79,6 +81,36 @@ And configure it as you whish.
  fastboot reboot
 
 == WLAN ==
+
+Download http://wireless.kernel.org/download/compat-wireless-2.6/compat-wireless-2.6.tar.bz2
+Unpack it.
+Change into the folder.
+
+ make ARCH=arm CROSS_COMPILE=/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/ KLIB=$HACK_DIR/gnulinuxkernel KLIB_BUILD=$HACK_DIR/gnulinuxkernel "$@"
+
+Change up
+
+ cd ..
+
+Run following script
+
+ #!/bin/sh
+ compat=compat-wireless-2009-09-30/
+
+ mkdir modules/
+
+ for i in $compat/net/mac80211/mac80211.ko \
+            $compat/net/wireless/cfg80211.ko \
+            $compat/net/wireless/lib80211.ko \
+            $compat/net/wireless/lib80211_crypt_wep.ko \
+            $compat/net/wireless/lib80211_crypt_ccmp.ko \
+            $compat/net/wireless/lib80211_crypt_tkip.ko \
+            $compat/drivers/net/wireless/wl12xx/wl1251_sdio.ko \
+            $compat/net/rfkill/rfkill_backport.ko \
+            $compat/drivers/net/wireless/wl12xx/wl1251.ko; do
+            cp $i modules/
+ done
+
 * http://bobcopeland.com/android_wifi.html
 * Look onto this section with the calibration files
 * http://htc-linux.org/wiki/index.php?title=WL1251
