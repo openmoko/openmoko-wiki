@@ -1,0 +1,122 @@
+== Overview ==
+Maemo-theremin compiled for Freerunner.
+
+It almost work, but not smooth. Check video: http://cc.oulu.fi/~rantalai/freerunner/theremin/theremin_freerunner_svn233.avi
+
+"Theremin is a musical instrument which allows changing sound pith and volume continuously. This application is an analogue of real theremin, it plays sound of different pitch and volume depending on what screen area you tap."
+
+homepage: http://theremin.garage.maemo.org/
+
+
+== Download ==
+
+=== Release ===
+ 
+Install from opkg.org:
+
+opkg install http://www.opkg.org/packages/theremin_1.4-r1_armv4t.ipk
+
+Opkg.org page:
+
+http://www.opkg.org/package_287.html
+
+
+=== Source ===
+http://cc.oulu.fi/~rantalai/freerunner/theremin/
+
+Bitbake recipe:
+
+ DESCRIPTION = "Theremin virtual instrument"
+ LICENSE = "GPL"
+ HOMEPAGE = "http://theremin.garage.maemo.org/"
+ SECTION = "x11/games"
+ PV = "1.4"
+ PR = "r1"
+ 
+ inherit autotools
+ 
+ 
+ SRC_URI ="svn://garage.maemo.org/svn/theremin/;module=trunk;rev=223;proto=https"
+ SRC_URI += "file://makefile.patch"
+ SRC_URI += "file://theremin.desktop"
+ 
+ do_patch() {
+ patch  -p0 < makefile.patch 
+ }
+ 
+ do_compile() {
+ cd ../trunk
+ make
+ }
+ 
+ do_install(){
+         install -d ${D}${bindir}
+         install -d ${D}${datadir}/pixmaps
+         install -d ${D}${datadir}/applications
+         install ${WORKDIR}/trunk/gfx/icon_64x64.png ${D}/${datadir}/pixmaps/theremin.png
+         install ${WORKDIR}/theremin.desktop ${D}${datadir}/applications
+         install ${WORKDIR}/trunk/theremin ${D}${bindir}/
+ }
+
+
+makefile.patch
+ --- old_trunk/makefile	2009-10-03 17:48:25.000000000 +0300
+ +++ trunk/makefile	2009-10-03 18:04:08.000000000 +0300
+ @@ -14,7 +14,7 @@
+ #    win32
+ #    linux
+ #    win32cross
+ -platform := maemo_linux
+ +platform := linux
+ 
+ ifeq ($(platform), linux)
+     name := theremin
+ @@ -62,7 +62,7 @@
+                 #-P -E#-Wnon-virtual-dtor -Wreorder #-Wall #turn on all warnings
+                 #-O3 -funroll-loops -fomit-frame-pointer
+ 
+ -linker_flags := -s
+ +linker_flags := -s -lrt
+ 
+ ifeq ($(platform), linux)
+     compiler_flags += `pkg-config gtkmm-2.4 --cflags`
+ @@ -120,7 +120,7 @@
+ endif
+ 
+ obj_dir := obj/1
+ -compiler := g++
+ +compiler := arm-angstrom-linux-gnueabi-g++
+ 
+ include_dirs += -I./src
+ 
+
+And simple desktop file:
+
+ [Desktop Entry]
+ Name=Theremin
+ Comment=Maemo-theremin
+ Exec=theremin
+ Icon=theremin
+ Type=Application
+ Categories=Multimedia
+
+== Playing==
+Works portrait or landscaped.
+
+Network game is under developing.
+
+You can change octave with arrow-keys and esc for navigating back.
+
+Play with stylus or finger. 
+
+<onlyinclude>
+{{ApplicationBox|
+Name=[[Theremin]]|
+Description=Virtual instrument|
+Homepage=http://theremin.garage.maemo.org/ |
+TestedOn=SHR-U|
+PackageName=[http://www.opkg.org/packages/theremin_1.4-r1_armv4t.ipk]
+}}
+</onlyinclude>
+
+[[Category:Audio]]
