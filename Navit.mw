@@ -284,9 +284,95 @@ note: running 2008.8 updating from zecke's "testing" repo does not require "dotc
 
 or "spd-say -l fr '%s'" for using the French voice for example.
 
-'''Note: Package speech-dispatcher broke my audio after suspend with current SHR (2009-04-13, though the problem's not shr, but speech-dispatcher itself).''' See this [http://trac.shr-project.org/trac/ticket/494 bug report]. A solution is to disable starting of speech-dispatcher with:
- update-rc.d -f speech-dispatcher remove
-And then edit /usr/bin/navit, so that it starts speech-dispatcher before navit, and stops it afterwards. See http://lists.openmoko.org/nabble.html#nabble-td1088795
+The speech-dispatcher is blocking the audio after suspend. So after a suspend you will hear no ringtone, when a phone call is coming in and you cannot listen do audio files.
+A solution is to disable starting of speech-dispatcher with:
+  update-rc.d -f speech-dispatcher remove
+Then the speech-dispatcher should be started if and only if navit is running and shut down when navit is closed.
+
+Furthermore navit should be started indirect with a script <tt>navit.sh</tt> instead of an direct start with the binary <tt>/usr/bin/navit</tt>, so that this script starts speech-dispatcher before navit, and stops it afterwards. See http://lists.openmoko.org/nabble.html#nabble-td1088795
+
+The following script is doing the suggested procedure. This script includes a language fix for Austria (see [[Configure SHR for German-speaking use]]).
+  export LANG=de_AT.utf8
+Replace '''<tt>de_AT</tt>''' in this line with the appropriate language variable.
+<pre>
+#! /bin/sh
+#
+# Copyright Matthias Hentges <devel@hentges.net> (c) 2008
+# License: GPL (see http://www.gnu.org/licenses/gpl.txt for a copy of the license)
+#
+# Filename: navit.sh
+# Date: 20080105 (YMD)
+#
+#################################################################################
+#
+# 20080105 - v0.0.1	- Initial release
+# 20090818 -            - Zoff <zoff@zoff.cc> addons and fixes
+#
+#
+#################################################################################
+
+
+#################################################################################
+#
+# On devices with low memory (< 512Mb?) Navit will segfault on start.
+# This can be worked around by doing
+# "echo 1 > /proc/sys/vm/overcommit_memory"
+#
+#################################################################################
+
+
+. /etc/profile
+
+set|grep LC
+
+#### Stop the speech dispatcher ####
+/etc/init.d/speech-dispatcher stop
+
+#### Language Fix #################
+set|grep LC
+
+
+export LC_ALL=''
+unset LC_ALL
+export LANG=de_AT.utf8
+
+set|grep LC
+
+#### Start the speech dispatcher ####
+/etc/init.d/speech-dispatcher start &
+
+
+set|grep LC
+
+
+# need cpu and display
+mdbus -s org.freesmartphone.ousaged /org/freesmartphone/Usage org.freesmartphone.Usage.SetResourcePolicy Display enabled
+
+
+if test "`cat /proc/meminfo | grep ^MemTotal | awk '{print $2}'`" -lt "500000"
+then
+	if test "$USER" = "root"
+	then
+		echo "Enabling low-mem workaround..."
+		echo 1 > /proc/sys/vm/overcommit_memory
+	else
+		echo "I need root-privs to enable the low-mem workaround!"
+	fi
+fi
+
+######### Start NAVIT NOW ############
+
+navit $*
+	
+#### Stop the speech dispatcher ####
+
+/etc/init.d/speech-dispatcher stop
+
+# release cpu and display
+mdbus -s org.freesmartphone.ousaged /org/freesmartphone/Usage org.freesmartphone.Usage.SetResourcePolicy Display auto
+
+</pre>
+
 
 '''Alternatively''', you can make speech-dispatcher restart on resume, see http://trac.shr-project.org/trac/ticket/494
 
