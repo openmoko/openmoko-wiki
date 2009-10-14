@@ -7,6 +7,30 @@ Furthermore, it has been suggested than a change in the sqlite backend db design
 
 Info about those changes will be shown here as soon as we'll have time to write it down.
 
+= Changes in fields =
+ATM opimd just lets you add fields as you wish, this is bad, since you can't really categorize fields and have to use weird hacks like the "tel:" prefix.
+
+I'm suggesting a move to a configuration you'll have the following dbus methods:
+* ListFields
+* AddFiled
+* DelField
+* GetField 
+
+each field will have a type (phone number would be a type for instance) that will guide opimd on how to compare items of this type, again, in the case of phone numbers, use normalization.
+
+The user of the API will be able to add fields and their types whenever he wants (and also remove such) and that will let us control opimd in a sane manner.
+
+I think we also need a couple of default fields of special types:
+* Phone - returns the default phone (of all the cells with type phone)
+* Name - returns  "First Last, nick" or something like that.
+* SIP - returns default contact info for sip
+* SMS - returns default phone number for SMS etc etc.
+
+This will make everything easier for the users of the API to handle and will be sane!
+
+= Changes in query method =
+I don't get why we use this querying method, it jsut makes everything weird hard to handle.
+
 [[Category:FSO]]
 [[Category:Middleware]]
 [[Category:PIM]]
