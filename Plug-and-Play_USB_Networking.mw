@@ -4,164 +4,18 @@ I provide here an example setup which are more complicated than your setup proba
 
 = Use case= 
 
-I have 1 laptop and 2 freerunners. Whenever I plug my freerunner, I want my laptop recognize 
+I have 1 laptop and 2 freerunners. Whenever I plug my freerunner, I want that my recognize 
 which freerunner was plugged in and act accordingly. Also automagically set up the networking for me.
 
 = Prerequisites = 
 
 You need a linux/unix computer with working NetworkManager setup.
 I have successfully use this method more than a month now, with Ubuntu 9.04 (jaunty), 
-I will test it also on Ubuntu 8.10 (intrepid), and report back here.(I tested, and it does not work, however 9.10 works great)
-
-== Tested distributions ==
-{| border="1" cellspacing=0 cellpadding=4
- !Distribution
- !NetworkManager version
- !Known to work
- |-
- |Ubuntu 8.10 (Intrepid)
- |?
- |style="background-color:Red"|NO
- |-
- |Ubuntu 9.04 (Jaunty)
- |0.7.1~rc4-0ubuntu1
- |style="background-color:Green"|YES
- |-
- |Ubuntu 9.10 (Karmic)
- |?
- |style="background-color:Green"|YES
- |}
-
+I will test it also on Ubuntu 8.10 (intrepid), and report back here.
 
 The NetworkManager on jaunty is:
-<pre>
 ii  network-manager                            0.7.1~rc4-0ubuntu1 
 ii  network-manager-gnome                      0.7.1~rc4.1-0ubuntu1
-</pre>
+
 
 = File/directory structure =
-
- /etc/NetworkManager/system-connections/freerunner_bob   (owner: root, rights: 600)
- /etc/NetworkManager/system-connections/freerunner_bobek (owner: root, rights: 600)
- /etc/NetworkManager/dispatcher.d/10myiptables           (owner: root, rights: 755)
-
-= File contents = 
-
-/etc/NetworkManager/system-connections/freerunner_bob:
-<pre>
-[connection]
-id=Bob's moko
-uuid=27afa607-ee36-43f0-b8c3-9d245cdc4bb4
-type=802-3-ethernet
-autoconnect=true
-timestamp=0
-[ipv4]
-method=manual
-never-default=true
-address1=192.168.0.200;24
-[802-3-ethernet]
-mac-address=00:1f:11:01:5d:13  
-</pre>
-
-/etc/NetworkManager/system-connections/freerunner_bobek:
-<pre>
-[connection]
-id=Bobek's moko
-uuid=27afa607-ee36-43f0-b8c3-9d245cdc4bb3
-type=802-3-ethernet
-autoconnect=true
-timestamp=0
-[ipv4]
-method=manual
-never-default=true
-address1=192.168.0.200;24
-[802-3-ethernet]
-mac-address=00:1f:11:01:6e:12
-</pre>
-
-/etc/NetworkManager/dispatcher.d/10myiptables:
-<pre>
-#!/bin/sh -e
-# Script to dispatch NetworkManager events
-#
-# Runs ifupdown scripts when NetworkManager fiddles with interfaces.
-
-# Bobek's freerunner
-export MYUUID1="27afa607-ee36-43f0-b8c3-9d245cdc4bb3"
-
-# Bob's freerunner
-export MYUUID2="27afa607-ee36-43f0-b8c3-9d245cdc4bb4"
-
-# The computer's username
-export USERNAME="lolza"
-
-if [ -z "$1" ]; then
-    echo "$0: called with no interface" 1>&2
-    exit 1;
-fi
-
-# Fake ifupdown environment
-export IFACE="$1"
-export LOGICAL="$1"
-export ADDRFAM="NetworkManager"
-export METHOD="NetworkManager"
-export VERBOSITY="0"
-
-# Run the right scripts
-case "$2" in
-    up)
-	export MODE="start"
-	export PHASE="up"
-
-	if [ -f /sys/class/net/$IFACE/address ] ; then
-		tmpfile=`mktemp -t`
-		echo $CONNECTION_UUID > $tmpfile
-		if [ "X${CONNECTION_UUID}" = "X${MYUUID1}" ] ; then
-			echo "Bobek's Freerunner connected..." >> $tmpfile
-			date >> $tmpfile
-			iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
-			iptables -P FORWARD ACCEPT
-			sysctl -w net.ipv4.ip_forward=1
-			sudo -u ${USERNAME} ssh-keygen -R 192.168.0.202
-		else
-			if [ "X${CONNECTION_UUID}" = "X${MYUUID2}" ] ; then
-				echo "Bob's Freerunner connected..." >> $tmpfile
-				date >> $tmpfile
-				iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
-				iptables -P FORWARD ACCEPT
-				sysctl -w net.ipv4.ip_forward=1
-				sudo -u ${USERNAME} ssh-keygen -R 192.168.0.202
-			fi
-		fi
-	fi
-	;;
-    down)
-	export MODE="stop"
-	export PHASE="down"
-
-	tmpfile=`mktemp -t`
-	echo "down called..." >> $tmpfile
-	tmpfile=`mktemp -t`
-	echo $CONNECTION_UUID > $tmpfile
-	if [ "X${CONNECTION_UUID}" = "X${MYUUID1}" ] ; then
-		echo "Bobek's Freerunner disconnected..." >> $tmpfile
-		iptables -D POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
-		iptables -P FORWARD ACCEPT
-		sysctl -w net.ipv4.ip_forward=0
-	else
-		if [ "X${CONNECTION_UUID}" = "X${MYUUID2}" ] ; then
-			echo "Bob's Freerunner disconnected..." >> $tmpfile
-			iptables -D POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
-			iptables -P FORWARD ACCEPT
-			sysctl -w net.ipv4.ip_forward=0
-		fi
-	fi
-	;;
-    *)
-	echo "$0: called with unknown action \`$2'" 1>&2
-	exit 1
-	;;
-esac
-</pre>
-
-[[Category:USB]]
