@@ -1,23 +1,36 @@
-This is only an itial edit. Please contribute if you can.
---[[User:Vanous|Vanous]] 08:54, 17 October 2009 (UTC)
+This page is about about bug #1024 aka recamping or oscilating of the Calypso GSM modem used in Openmoko Freerunner.
 
+Hardware bug #1024 creates a condition when the gsm modem is oscillating between registrated / not-registrated. This causes the phone to be unavailable at times. Distribution maintainers have been able to disable suspend of the gsm modem which worked around this bug. The downside is that after this the modem never sleeps and consumer more energy then needed.
 
-On this wiki i have found very little info about bug #1024 aka recamping or oscilating of the Calypso GSM modem used in Openmoko Freerunner.I will try to collect all the info and place it here.
+If you decide to undergo a hardware fix of your phone, you have to reconfigure our distribution to allow the gsm modem to go to sleep in order to actually make use of the modem sleep function and therefore extend your battery life.
 
-Links:
+Bug trac: http://docs.openmoko.org/trac/ticket/1024
 
- Fix: http://www.neofundas.blogspot.com/
- Ticket: http://docs.openmoko.org/trac/ticket/1024
+Not every Freerunner suffers this issue. To check if your phone has the bug #1024, please use [[this]] script (todo: add link, describe output on good and bad behaviour).
 
-To check if you suffer the bug #1024, please use [[this]] script (todo: add link, describe output on good and bad behaviour).
-
-To perform the hardware update, please check description [[here http://www.neofundas.blogspot.com/]].
+To perform the hardware update, please check description here: http://www.neofundas.blogspot.com/ 
 
 After the fix, please recheck again with the script as above.
 
-After the fix, you will have to change setting to allow Calypso deep sleep (todo: describe three possible fixes).
+After the fix, you will have to change setting to allow Calypso deep sleep:
 
- FSO (SHR...) -> editing frameworkd.conf
+'''FSO based distros (SHR, OM2009...)'''
 
- QT ???
+Edit /etc/frameworkd.conf , it should contain:
+
+ ti_calypso_deep_sleep = always
+
+Then restart farmework or reboot the phone.
+
+ /etc/init.d/frameworkd restart
+ 
+
+
+'''QT based distos (Qtopia, QTExtended, QTMoko...)'''
+
+Edit /opt/qtmoko/etc/default/Trolltech/Modem.conf , it should contain:
+ 
+ [DeepSleep]
+ Active=always
+ 
  Android ???
