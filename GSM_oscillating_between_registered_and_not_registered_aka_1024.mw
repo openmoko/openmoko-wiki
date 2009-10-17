@@ -1,138 +1,23 @@
-This page describes how to enable Calypso GSM modem deep sleep after performing a hardware fix of bug [http://docs.openmoko.org/trac/ticket/1024 #1024] aka recamping or oscillating of the Calypso GSM modem used in Openmoko [[Neo Freerunner]].
-
-==Description==
-Hardware bug #1024 creates a condition when the gsm modem is oscillating between registered / not-registered. This causes the phone to be unavailable at times. Distribution maintainers have been able to use a software setting to disable suspend of the gsm modem in order to work around this bug. The downside is that with this workaround the modem never sleeps and consumes more energy than needed.
-
-If you decide to undergo a hardware fix of your phone you have to reconfigure your distribution to allow the gsm modem to go to sleep again in order to actually make use of the modem sleep function and therefore extend your battery life.
-
-Bug trac: http://docs.openmoko.org/trac/ticket/1024
-
-==Bug detection==
-Not every Freerunner suffers this issue. To check if your phone has the bug #1024 please use this test script:
-
-(This script will only work on FSO based distro. Also, this script is not 100% perfect, another way is to use frameworkd with ti_calypso_sleep_mode = 'adaptive' and inspect the logs. Frameworkd will tell you, when a real recamping exists)
-
-<pre>
-#!/usr/bin/python
-
-import dbus
-import dbus.glib
-import gobject
-import datetime
-   
-def onNetworkStatus(status):
-    if 'cid' in status:
-        print '[%s] Signal : cid=%s, lac=%s' %  (datetime.datetime.now(),status['cid'],status['lac'] )
-    else:
-        print 'register first'
-
-bus = dbus.SystemBus();
-
-bus.add_signal_receiver(onNetworkStatus,
-                        "Status",
-                        "org.freesmartphone.GSM.Network",
-                        "org.freesmartphone.ogsmd",
-                        "/org/freesmartphone/GSM/Device")
-
-gobject.threads_init()
-dbus.glib.init_threads()
-main_loop = gobject.MainLoop()
-main_loop.run()
-</pre>
+This is only an itial edit. Please contribute if you can.
+--[[User:Vanous|Vanous]] 08:54, 17 October 2009 (UTC)
 
 
-Run it like this:
+On this wiki i have found very little info about bug #1024 aka recamping or oscilating of the Calypso GSM modem used in Openmoko Freerunner.I will try to collect place information about 1024 here.
 
- root@om-gta02 ~ $ deep-sleep-check.py > dsc.log
+Links:
 
-If you have something like this:
+ Fix: http://www.neofundas.blogspot.com/
+ Ticket: http://docs.openmoko.org/trac/ticket/1024
 
- [2009-09-09 12:36:09.189663] Signal : cid=3BB3, lac=0D48
- [2009-09-09 12:36:15.088936] Signal : cid=3BB3, lac=0D48
- [2009-09-09 12:38:10.442808] Signal : cid=3BB3, lac=0D48
- [2009-09-09 12:38:13.020126] Signal : cid=3BB3, lac=0D48
- [2009-09-09 12:40:25.772918] Signal : cid=3BB3, lac=0D48
- [2009-09-09 12:40:28.620096] Signal : cid=3BB3, lac=0D48
- [2009-09-09 12:41:17.557676] Signal : cid=3BB3, lac=0D48
- [2009-09-09 12:41:20.404582] Signal : cid=3BB3, lac=0D48
+To check if you suffer the bug #1024, please use [[this]] script (todo: add link, describe output on good and bad behaviour).
 
-Then you have the bug (trying to connect to GSM every second). Please note that cid is always the same.
+To perform the hardware update, please check description [[here http://www.neofundas.blogspot.com/]].
 
-Correct output might not show any messages or look like this:
+After the fix, please recheck again with the script as above.
 
- [2009-10-18 07:51:27.107655] Signal : cid=4E91, lac=006A
- [2009-10-18 07:52:45.145288] Signal : cid=4E7B, lac=006A
- [2009-10-18 07:53:18.218122] Signal : cid=4E91, lac=006A
+After the fix, you will have to change setting to allow Calypso deep sleep (todo: describe three possible fixes).
 
-You can see the cid changing.
+ FSO (SHR...) -> editing frameworkd.conf
 
-==Bug detection by fso==
-Just use frameworkd with ti_calypso_sleep_mode = 'adaptive' and inspect 
-the logs. Frameworkd will tell you, when a real recamping exists.
-
-==Hardware bug fixing==
-To perform the hardware update, please check description here:
-http://lists.openmoko.org/pipermail/hardware/2009-May/001192.html
-http://www.neofundas.blogspot.com/ 
-
-[[Image:1024fix.jpg]]
-
-After the fix, please recheck again with the script as above. Under normal circumstances you would only see these messages with a change of cell, so cid would be different.
-
-If your fix was successful you can change setting to allow Calypso deep sleep:
-
-==Enabling/allowing Calypso GSM modem deep sleep==
-===FSO2 based distros (SHR, Debian)===
-
-Edit /etc/freesmartphone/conf/GTA02/fsogsmd.conf 
-
- deep_sleep == "always"
-
-Then kill fsogsmd and restart fsodeviced or reboot the phone. 
-
-===FSO based distros (SHR, Debian, OM2009...)===
-
-Edit /etc/frameworkd.conf , it should contain:
-
- ti_calypso_deep_sleep = always
-
-Then restart framework or reboot the phone.
-
- /etc/init.d/frameworkd restart
-
-
-===QT based distos (Qtopia, QTExtended, QTMoko...)===
-Since qtmoko v24 you can use program called NeoControl which is installed by default.
-
-Or you can edit /opt/qtmoko/etc/default/Trolltech/Modem.conf , it should contain:
- 
- [DeepSleep]
- Active=always
-
-Make sure it's also in users directory:
-
- cp /opt/qtmoko/etc/default/Trolltech/Modem.conf /home/root/Settings/Trolltech/Modem.conf
-
-And reboot.
-
-===Hackable:1 (rev.5)===
-
-As said in http://lists.hackable1.org/pipermail/hackable1-user/2010-January/000718.html and other discussions:
-hackable:1 does not use frameworkd but gsmd.
-
-To enable deep-sleep mode:
-
--download and install (or extract)
- http://build.hackable1.org/debian/dists/wip/main/binary-armel/gsmd_0.0.2+svn1571-1_armel.deb
--edit /etc/default/gsmd and uncomment the "VENDOR=ti-deepsleep" line: this will add a 
- "-v ti-deepsleep" to the deamon command line. 
--Restart gsmd.
- 
-===Android===
-
-Currently Android on Freerunner is hard coded to use AT%SLEEP=2 to avoid deep  sleep mode entirely; there is a discussion about providing editable property in Androids init.rc startup file.
-
-==See also==
-*Golden Delicious Computers offers to handle the rework or provides devices (GTA02A7+) which already have this rework applied: http://lists.openmoko.org/pipermail/community/2010-April/061171.html
-
-[[Category:Neo FreeRunner reworks and mods]]
+ QT ???
+ Android ???
