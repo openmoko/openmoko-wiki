@@ -6,7 +6,35 @@ If you decide to undergo a hardware fix of your phone you have to reconfigure ou
 
 Bug trac: http://docs.openmoko.org/trac/ticket/1024
 
-Not every Freerunner suffers this issue. To check if your phone has the bug #1024, please use [[#test_script]] script. Run it like this:
+Not every Freerunner suffers this issue. To check if your phone has the bug #1024, please use this test script:
+
+<pre>
+#!/usr/bin/python
+
+import dbus
+import dbus.glib
+import gobject
+import datetime
+   
+def onNetworkStatus(status ):
+        print '[%s] Signal : cid=%s, lac=%s' %  (datetime.datetime.now(),status['cid'],status['lac'] )
+
+bus = dbus.SystemBus();
+
+bus.add_signal_receiver( onNetworkStatus,
+                         "Status",
+                         "org.freesmartphone.GSM.Network",
+                         "org.freesmartphone.ogsmd",
+                         "/org/freesmartphone/GSM/Device" )
+
+gobject.threads_init()
+dbus.glib.init_threads()
+main_loop = gobject.MainLoop()
+main_loop.run()
+</pre>
+
+
+Run it like this:
 
  root@om-gta02 ~ $ deep-sleep-check.py > dsc.log
 
@@ -25,7 +53,9 @@ Then you have the bug (trying to connect to GSM every second)
 
 To perform the hardware update, please check description here: http://www.neofundas.blogspot.com/ 
 
-After the fix, please recheck again with the script as above.
+[[Image:1024.jpg]]
+
+After the fix, please recheck again with the script as above. Under normal circumstances you would only see these messages with a change of cell, so cid would be different.
 
 If your fix was successful you can change setting to allow Calypso deep sleep:
 
@@ -55,29 +85,3 @@ Edit /opt/qtmoko/etc/default/Trolltech/Modem.conf , it should contain:
 '''Android'''
 
 Currently Android on Freerunner is hard coded to use AT%SLEEP=2 to avoid deep  sleep mode entirely; there i a discussion about providing editable property in Androids init.rc startup file.
-
-<span id="test_script">Test script</span>
-<pre>
-#!/usr/bin/python
-
-import dbus
-import dbus.glib
-import gobject
-import datetime
-   
-def onNetworkStatus(status ):
-        print '[%s] Signal : cid=%s, lac=%s' %  (datetime.datetime.now(),status['cid'],status['lac'] )
-
-bus = dbus.SystemBus();
-
-bus.add_signal_receiver( onNetworkStatus,
-                         "Status",
-                         "org.freesmartphone.GSM.Network",
-                         "org.freesmartphone.ogsmd",
-                         "/org/freesmartphone/GSM/Device" )
-
-gobject.threads_init()
-dbus.glib.init_threads()
-main_loop = gobject.MainLoop()
-main_loop.run()
-</pre>
