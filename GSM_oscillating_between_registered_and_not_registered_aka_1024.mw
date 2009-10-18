@@ -6,13 +6,28 @@ If you decide to undergo a hardware fix of your phone you have to reconfigure ou
 
 Bug trac: http://docs.openmoko.org/trac/ticket/1024
 
-Not every Freerunner suffers this issue. To check if your phone has the bug #1024, please use [[this]] script (todo: add link, describe output on good and bad behaviour).
+Not every Freerunner suffers this issue. To check if your phone has the bug #1024, please use [[#test_script]] script. Run it like this:
+
+ root@om-gta02 ~ $ deep-sleep-check.py > dsc.log
+
+If you have something like
+
+ [2009-09-09 12:36:09.189663] Signal : cid=3BB3, lac=0D48
+ [2009-09-09 12:36:15.088936] Signal : cid=3BB3, lac=0D48
+ [2009-09-09 12:38:10.442808] Signal : cid=3BB3, lac=0D48
+ [2009-09-09 12:38:13.020126] Signal : cid=3BB3, lac=0D48
+ [2009-09-09 12:40:25.772918] Signal : cid=3BB3, lac=0D48
+ [2009-09-09 12:40:28.620096] Signal : cid=3BB3, lac=0D48
+ [2009-09-09 12:41:17.557676] Signal : cid=3BB3, lac=0D48
+ [2009-09-09 12:41:20.404582] Signal : cid=3BB3, lac=0D48
+
+Then you have the bug (trying to connect to GSM every second)
 
 To perform the hardware update, please check description here: http://www.neofundas.blogspot.com/ 
 
 After the fix, please recheck again with the script as above.
 
-After the fix, you will have to change setting to allow Calypso deep sleep:
+If your fix was successful you can change setting to allow Calypso deep sleep:
 
 
 
@@ -40,3 +55,29 @@ Edit /opt/qtmoko/etc/default/Trolltech/Modem.conf , it should contain:
 '''Android'''
 
 Currently Android on Freerunner is hard coded to use AT%SLEEP=2 to avoid deep  sleep mode entirely; there i a discussion about providing editable property in Androids init.rc startup file.
+
+<span id="test_script">Test script</span>
+<pre>
+#!/usr/bin/python
+
+import dbus
+import dbus.glib
+import gobject
+import datetime
+   
+def onNetworkStatus(status ):
+        print '[%s] Signal : cid=%s, lac=%s' %  (datetime.datetime.now(),status['cid'],status['lac'] )
+
+bus = dbus.SystemBus();
+
+bus.add_signal_receiver( onNetworkStatus,
+                         "Status",
+                         "org.freesmartphone.GSM.Network",
+                         "org.freesmartphone.ogsmd",
+                         "/org/freesmartphone/GSM/Device" )
+
+gobject.threads_init()
+dbus.glib.init_threads()
+main_loop = gobject.MainLoop()
+main_loop.run()
+</pre>
