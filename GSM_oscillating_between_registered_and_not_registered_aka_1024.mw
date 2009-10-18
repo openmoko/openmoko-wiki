@@ -1,11 +1,13 @@
 This page describes how to enable Calypso GSM modem deep sleep after performing a hardware fix of bug [http://docs.openmoko.org/trac/ticket/1024 #1024] aka recamping or oscillating of the Calypso GSM modem used in Openmoko Freerunner.
 
+==Description==
 Hardware bug #1024 creates a condition when the gsm modem is oscillating between registrated / not-registrated. This causes the phone to be unavailable at times. Distribution maintainers have been able to use a software setting to disable suspend of the gsm modem in order to work around this bug. The downside is that with this workaround the modem never sleeps and consumer more energy then needed.
 
 If you decide to undergo a hardware fix of your phone you have to reconfigure your distribution to allow the gsm modem to go to sleep again in order to actually make use of the modem sleep function and therefore extend your battery life.
 
 Bug trac: http://docs.openmoko.org/trac/ticket/1024
 
+==Bug detection==
 Not every Freerunner suffers this issue. To check if your phone has the bug #1024 please use this test script:
 
 <pre>
@@ -59,6 +61,7 @@ Correct output might not show any messages or look like this:
 
 You can see the cid changing. 
 
+==Hardware bug fixing==
 To perform the hardware update, please check description here: http://www.neofundas.blogspot.com/ 
 
 [[Image:1024fix.jpg]]
@@ -67,7 +70,8 @@ After the fix, please recheck again with the script as above. Under normal circu
 
 If your fix was successful you can change setting to allow Calypso deep sleep:
 
-==FSO based distros (SHR, Debian, OM2009...)==
+==Enabling/allowing deep sleep==
+===FSO based distros (SHR, Debian, OM2009...)===
 
 Edit /etc/frameworkd.conf , it should contain:
 
@@ -76,10 +80,8 @@ Edit /etc/frameworkd.conf , it should contain:
 Then restart framework or reboot the phone.
 
  /etc/init.d/frameworkd restart
- 
 
-
-==QT based distos (Qtopia, QTExtended, QTMoko...)==
+===QT based distos (Qtopia, QTExtended, QTMoko...)===
 
 Edit /opt/qtmoko/etc/default/Trolltech/Modem.conf , it should contain:
  
@@ -88,7 +90,7 @@ Edit /opt/qtmoko/etc/default/Trolltech/Modem.conf , it should contain:
 
 And reboot.
  
-==Android==
+===Android===
 
 Currently Android on Freerunner is hard coded to use AT%SLEEP=2 to avoid deep  sleep mode entirely; there is a discussion about providing editable property in Androids init.rc startup file.
 
