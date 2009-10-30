@@ -382,6 +382,75 @@ int main(int argc, char *argv[])
 }
 </pre>
 
+And in Guile Scheme.  (This one is a complete autorotation program.)
+
+<pre>
+;; Open device file for the second accelerometer (whose axes are
+;; aligned with the screen).  Must make Guile's internal buffer small
+;; (16), otherwise it reads too far ahead and this program gets mostly
+;; out of date data.
+(define e (open-file "/dev/input/event3"
+		     "r0"))
+(setvbuf e _IOFBF 16)
+
+;; Uniform vector for reading data from device file.  Must match
+;; sizeof(struct input_event), otherwise the read can get an 'invalid
+;; argument' error.
+(define v (make-u16vector 8))
+
+(define (current-acceleration)
+  (let loop ((x #f) (y #f) (z #f))
+    (uniform-vector-read! v e)
+    (let ((code (u16vector-ref v 4))
+	  (axis (u16vector-ref v 5))
+	  (meas (+ (u16vector-ref v 6)
+		   (* 65536 (u16vector-ref v 7)))))
+      (if (>= meas (expt 2 31))
+	  (set! meas (- meas (expt 2 32))))
+      (case code
+	((2 3)
+	 (case axis
+	   ((0) (loop meas y z))
+	   ((1) (loop x meas z))
+	   ((2) (loop x y meas))
+	   (else (loop x y z))))
+	(else
+	 (if (and x y z)
+	     (list x y z)
+	     (loop x y z)))))))
+
+(define (orientation x y z)
+  (cond ((and (< y -200)
+	      (> (- y) x y))
+	 0)
+	((and (> x 200)
+	      (< (- x) y x))
+	 1)
+	((and (> y 200)
+	      (< (- y) x y))
+	 2)
+	((and (< x -200)
+	      (> (- x) y x))
+	 3)
+	(else #f)))
+
+(define (main)
+  (let loop ((ori #f))
+    (let ((new-ori
+	   (apply orientation
+		  (current-acceleration))))
+      (and ori
+	   new-ori
+	   (not (= ori new-ori))
+	   (system* "xrandr"
+		    "-o"
+		    (number->string new-ori)))
+      (sleep 1)
+      (loop (or new-ori ori)))))
+
+(main)
+</pre>
+
 == The /sys interface ==
 
 To get the sampling rate of the first accelerometer ''lis302dl.1'' :
