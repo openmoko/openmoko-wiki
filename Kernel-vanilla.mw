@@ -106,4 +106,20 @@ This section is about specific drivers.
 |-
 |}
 
+== Building and using a vanilla kernel ==
+
+First you need the sources to a vanilla kernel that supports you phone. The Freerunner is supported from right before 2.6.32-rc6. You can download it from http://kernel.org/ and unpack it or check it out from git if you want the absolute newest version. To check it out from git go to the command line, navigate to the folder you want to download it to and run:
+ git clone git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux-2.6.git
+Then you need a config. You can find one [http://lists.openmoko.org/pipermail/openmoko-kernel/2009-November/010696.html here]. Replace /path/to/config in the make command with where you stored it.
+Now, on the command line, enter the folder where Linux is. To keep the result from the compiling separate from the code create a folder to put it in. I will use GTA02 as the folder name in this example
+ mkdir GTA02
+If you are using a cross compiler you need to specify its prefix. In this example it is arm-linux-gnueabi- but you could have another. (In arm-linux-gnueabi-cpp arm-linux-gnueabi- is the prefix) If not you should remove the CROSS_COMPILE argument.
+Now, run
+ make O=GTA02 ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- oldconfig=/path/to/config
+After it has compiled do
+ arm-linux-gnueabi-objcopy -O binary -R .note -R .comment -S GTA02/arch/arm/boot/compressed/vmlinux GTA02/linux.bin
+Then pack it in an image you can Flash to your Freerunner with
+ mkimage -A arm -O linux -T kernel -C none -a 30008000 -e 30008000 -n "Freerunner GTA02 vanilla" -d GTA02/linux.bin GTA02/uImage-gta02.bin
+You can now [[Flashing_the_Neo_FreeRunner | flash]] it to your phone
+
 [[Category:Kernel]]
