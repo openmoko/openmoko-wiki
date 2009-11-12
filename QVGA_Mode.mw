@@ -1,30 +1,37 @@
-{{Languages|QVGA Mode}}
 Information on getting into QVGA mode successfully
 
 === SHR === 
 
-On SHR-unstable (as of the july 2011 (openembedded)builds) the following worked.
+On SHR-unstable (as of the Sept 2009 builds) the following worked.
 
 Create two new scripts - I put these in /usr/local/bin, and added /usr/local/bin to my PATH in my .profile file - but you can put 'em where ever you like, as long as they are on your PATH, or you use the full path to invoke 'em.
 
 qvga:
 <pre>
 #!/bin/sh
-xrandr --dpi 143
-echo "qvga" > /sys/bus/spi/devices/spi2.0/resolution
+echo "qvga-normal" > /sys/bus/spi/devices/spi2.0/state
 xrandr -s 240x320
+fbset 240x320             
 killall -HUP enlightenment
 </pre>
 
 normal:
 <pre>
 #!/bin/sh
-xrandr --dpi 280
-echo "vga" > /sys/bus/spi/devices/spi2.0/resolution
+echo "normal" > /sys/bus/spi/devices/spi2.0/state
 xrandr -s 480x640
 killall -HUP enlightenment
 </pre>
 
-This usually creates a usable display
+and add to /etc/fb.modes
+<pre>
+mode "240x320"
+       geometry 240 420 240 320 16
+       timings 100000 8 88 2 2 8 2
+       accel false
+endmode
+</pre>
 
-[[Category:SHR]]
+This usually creates a usable display - although occasionally enlightnment get confused and crashes.
+
+Unfortunately there's a problem with the touchscreen, so the upper quarter of the screen maps to the entire screen, so using this for anything real isn't possible.   Apparently this is fixed in the Xorg based X server, which should be available soon, so hopefully this will be resolved soon.
