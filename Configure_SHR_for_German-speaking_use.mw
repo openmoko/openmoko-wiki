@@ -172,12 +172,16 @@ So that you can use and restore these files after flashing your phone or checkin
 View the <tt>init_shr_testing.sh</tt> and search for <tt>_PRIVATE_</tt> in the script for further details. For copying files that are not used in the script, write your own small script as a post-installation script that copies all the relevant data from _privat  to the correct location on your FR.
 
 == Localize it ==
-* for '''GOD's sake try NOT to get any phonecalls''' while you do this part. Use PIN for authentication for your SIM card. You FR-phone will asks you: "Please enter your PIN". Do not enter PIN. the FR will not be able to receive phone calls. The usage of the PIN can be setup on any non-Freerunner phone and PIN usage will be stored on the SIM, so changing phone leaves the PIN-authentication untouched. 
-The PIN procedure is recommended in contrast to powering up your phone without a SIM card.
-* now connect your neo with usb and login via ssh (GSM-network connection is not necessary for that.
 * you '''NEED internet on your neo''' for this, otherwise dependent packages can't be downloaded
+
+===upadate package index info (this is important!!)===
 * start (as root on your neo):
+ cd /etc/opkg/
+ for i in *.conf ; do cat $i|sed -e 's#shr-unstable#shr-obsolete#g' > ${i}_X ; mv ${i}_X ${i} ;done
+
 ===Run init_shr_testing.sh script===
+* start (as root on your neo):
+
  cd /media/card/____shr_testing/
  ./init_shr_testing.sh
 
@@ -193,15 +197,10 @@ The PIN procedure is recommended in contrast to powering up your phone without a
  mdbus -s org.freesmartphone.ousaged /org/freesmartphone/Usage org.freesmartphone.Usage.SetResourcePolicy Display enabled
  opkg upgrade -force-defaults
 
-dependency issue (should be fixed with the above)
-  ERROR: Cannot satisfy the following dependencies for fsousaged:
-    libfso-glib0 (>= 0.2.1+gitr47+7608c8d98bb65bb5beca6621eb86920b71df1bc9)
-
 * '''[UG2]''' when finished start as root:
  cd /media/card/____shr_testing/
  ./do_upgrade_shr.sh
 * hopefully no errors have occured
-* '''[UG1]''' '''[UG2]''' repeat those 2 steps every few days, if you want (dare) to receive all the bleeding edge updates
 
 == Test it ==
 * reboot your neo, and let the neo login to your GSM network
