@@ -33,8 +33,6 @@ Default rules.yaml checks for this resource to disable automatic suspend when it
 Same idea as WiFi/Bluetooth
 
 == Resource management ==
-It would be nice to have a command to list the current state of all
-resources. Unfortunately, such an utility is yet to be written. See [http://trac.freesmartphone.org/ticket/461]. First take on implementing the desired functionality can already be downloaded from [http://trac.freesmartphone.org/raw-attachment/ticket/461/lsfsor.py].
 
 === Manual way ===
 By default, the policy for every resource is '''auto''', which means that it is enabled only when it has been requested by a currently running application.  However, it is possible to throw a "hard switch" to force the resource to be always '''enabled''' or '''disabled''', regardless of what applications request it.  This can be done with the help of the SHR Settings GUI or from the command line using an appropriate [[OpenmokoFramework/mdbus|mdbus]] call.  For example,
@@ -59,5 +57,23 @@ To keep wifi useable, due to bug still present currently (2009-08-18) you need t
 
 Bluetooth scan for nearby devices example:
  fsoraw -r Bluetooth -- bash -c "sleep 1; hcitool scan"
+
+=== Viewing Resources ===
+
+It would be nice to have a command to list the current state of all
+resources. (See [http://trac.freesmartphone.org/ticket/461].) Unfortunately, such an utility is yet to be written. However, a first take on implementing the desired functionality can already be downloaded from [http://trac.freesmartphone.org/raw-attachment/ticket/461/lsfsor.py].
+
+To examine the state of a resource manually, there are three <code>org.freesmartphone.Usage</code> methods which are particularly useful.
+
+* '''GetResourcePolicy''' ( s ) → s
+: Get the current resource policy for a given resource.
+* '''GetResourceState''' ( s ) → b
+: Get the current resource state. True if the resource is currently enabled. 
+* '''GetResourceUsers''' ( s ) → as
+: Get the users (an array of bus names) which currently use a given resource.
+
+For example,
+ mdbus -s org.freesmartphone.ousaged /org/freesmartphone/Usage \
+ org.freesmartphone.Usage.GetResourceState WiFi
 
 [[Category:FSO]]
