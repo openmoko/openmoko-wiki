@@ -7,10 +7,27 @@ The following FSO dbus call starts a DHCP server on the FreeRunner, allowing you
 
  mdbus -s org.freesmartphone.onetworkd /org/freesmartphone/Network org.freesmartphone.Network.StartConnectionSharingWithInterface usb0
 
-I was able to access the DHCP server from my Eee PC running Jaunty by
+I was able to access the DHCP server from my Eee PC (running Jaunty) by
 copying the MAC address from the static entry in network-manager, and
 created a new entry with the same MAC but DHCP rather than a static IP
 address.
+
+=== /etc/.../network/ ===
+
+If you use files in /etc/.../network/ to manage your
+network connections (and not any so-called network manager tools),
+you might need to add a file like the following before the above
+step works:
+
+ # file /etc/sysconfig/network/ifcfg-eth1
+ # USB configuration for PDAs (openmoko)
+ IPADDR='192.168.0.200/24'
+ NETMASK='255.255.255.0'
+ STARTMODE='auto'
+ PREFIXLEN='24'
+ BOOTPROTO=dhcp 
+
+The above worked for openSUSE (11.2).
 
 == tinyproxy ==
 
