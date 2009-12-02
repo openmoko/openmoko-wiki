@@ -30,6 +30,73 @@ I think we also need a couple of default fields of special types:
 
 This will make everything easier for the users of the API to handle and will be sane!
 
+
+'''Explanation of exactly what I meant (TAsn)'''
+
+/org/freesmartphone/PIM/Contacts
+
+org.freesmartphone.PIM.Fields.Add(name, type) <--- Adds the name and type
+
+org.freesmartphone.PIM.Fields.List(name) <---- returns the list of available fields, format name:type.
+
+org.freesmartphone.PIM.Fields.Delete(name) <-- return nothing
+
+org.freesmartphone.PIM.Fields.GroupGet(name) <--- returns type
+
+
+
+name is string, type is string as well.
+
+Name has to be unique (i.e no two fields with the same name in the same domain)
+
+type is one of the types known to opimd (will be explained in a moment)
+
+
+
+This is the part I'm unsure of:
+
+/org/freesmartphone/PIM/FieldTypes (or something like that)
+
+org.freesmartphone.PIM.Types.Add(name, type) <--- Adds the name and type
+
+org.freesmartphone.PIM.Types.List(name) <---- returns the list of available fields, format name:type.
+
+org.freesmartphone.PIM.Types.Delete(name) <-- return nothing
+
+org.freesmartphone.PIM.Types.Get(name) <--- returns type
+
+
+
+I want anyone to be able to add future types (to search by) with no special opimd handling, i.e I want to be able to add IRC although you don't know how to handle it, name of the type will be irc, type of the type will be text(limited to X chars, he should state that when making the type, or maybe unlimited if he wants) or he can also set the type to "numeric", "int" etc etc.
+
+This way he'll bind a type, called "IRC" that can contain text values only, this means that if he'll want to add a field called "Main-nick" he'll be able to set the type to "irc" (the one that we set earlier) that'll let him search in all the irc nicks easily and will also let opimd know what to expect in this type. (string limited to 300 chars for instance).
+
+
+
+Continuing with the IRC example I'll be able to add to the conact tom the following fields:
+
+Main-nick : "TAsn"
+
+Alt-nick  : "TAsnn"
+
+
+
+Though I won't be able to do that before I add the type (like this:
+
+org.freesmartphone.PIM.Fields.Add("Alt-nick", "IRC")
+
+And I won't be able to do that before I do:
+
+org.freesmartphone.PIM.Types.Add("IRC", "text") (phonenumber/text/date/etc will be predefined by opimd, maybe even add a method to expose what's available there, but that can not be changed by API the "text" and etc types are set by opimd and opimd only)
+
+
+
+This lets the APPS to easily set types for fields and for opimd to easily know where to search (When looking for IRC), what to expect when searching (a text field, not a number that's needed to be normalized, etc).
+
+So, in our example in order to know who of the contacts posses the nick "TAsn" we'll just need to search all of the fields with the type IRC (user of the API will know to ask it). That's about it, I think.
+
+I hope it's clean enough, let me know.
+
 = Changes in query method =
 NOTE: keep the old way, but also implement this:
 
