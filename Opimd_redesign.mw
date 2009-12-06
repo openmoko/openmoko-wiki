@@ -10,75 +10,65 @@ Furthermore, it has been suggested than a change in the sqlite backend db design
 Info about those changes will be shown here as soon as we'll have time to write it down.
 
 = Changes in fields =
-ATM opimd just lets you add fields as you wish, this is bad, since you can't really categorize fields and have to use weird hacks like the "tel:" prefix.
+'''UPDATE: What we decided to go with: (now implemented)'''
 
-I'm suggesting a move to a configuration you'll have the following dbus methods:
-* ListFields
-* AddFiled
-* DelField
-* GetField 
-
-each field will have a type (phone number would be a type for instance) that will guide opimd on how to compare items of this type, again, in the case of phone numbers, use normalization.
-
-The user of the API will be able to add fields and their types whenever he wants (and also remove such) and that will let us control opimd in a sane manner.
-
-I think we also need a couple of default fields of special types:
-* Phone - returns the default phone (of all the cells with type phone)
-* Name - returns  "First Last, nick" or something like that.
-* SIP - returns default contact info for sip
-* SMS - returns default phone number for SMS etc etc.
-
-This will make everything easier for the users of the API to handle and will be sane!
-
-
-'''Explanation of exactly what I meant (TAsn)'''
-
-/org/freesmartphone/PIM/Contacts
+Per backend:
 
 org.freesmartphone.PIM.Type.Add(name, type) <--- Adds the name and type
 
 org.freesmartphone.PIM.Type.List() <---- returns the list of available fields, format name:type.
 
-org.freesmartphone.PIM.Type.Delete(name) <-- return nothing
+org.freesmartphone.PIM.Type.Delete(name) <-- returns nothing
 
-org.freesmartphone.PIM.Type.Get(name) <--- returns type
+org.freesmartphone.PIM.Type.Get(name) <--- returns the type of the field.
 
-org.freesmartphone.PIM.Types.List() <---- returns the list of available fields, format name:type.
+General for all of opimd:
 
-Where Types.List() returns the same thing for all the domains.
+org.freesmartphone.PIM.Types.List() <---- returns the list of available types in a tuple.
 
+Types.List() returns the same thing for all the domains.
 
-'''Next section may be outdated:'''
+==API==
+This is the complete API (in freesmartphone docs).
+There are a couple of default fields, those fields can be overwritten, but if no value exists for them, they are used (also listed in the docs)
 
-I want anyone to be able to add future types (to search by) with no special opimd handling, i.e I want to be able to add IRC although you don't know how to handle it, name of the type will be irc, type of the type will be text(limited to X chars, he should state that when making the type, or maybe unlimited if he wants) or he can also set the type to "numeric", "int" etc etc.
+* http://git.freesmartphone.org/?p=specs.git;a=blob_plain;f=html/org.freesmartphone.PIM.Types.html;hb=HEAD
+* http://git.freesmartphone.org/?p=specs.git;a=blob_plain;f=html/org.freesmartphone.PIM.Fields.html;hb=HEAD
 
-This way he'll bind a type, called "IRC" that can contain text values only, this means that if he'll want to add a field called "Main-nick" he'll be able to set the type to "irc" (the one that we set earlier) that'll let him search in all the irc nicks easily and will also let opimd know what to expect in this type. (string limited to 300 chars for instance).
-
-
-
-Continuing with the IRC example I'll be able to add to the conact tom the following fields:
-
-Main-nick : "TAsn"
-
-Alt-nick  : "TAsnn"
-
-
-
-Though I won't be able to do that before I add the type (like this:
-
-org.freesmartphone.PIM.Fields.Add("Alt-nick", "IRC")
-
-And I won't be able to do that before I do:
-
-org.freesmartphone.PIM.Types.Add("IRC", "text") (phonenumber/text/date/etc will be predefined by opimd, maybe even add a method to expose what's available there, but that can not be changed by API the "text" and etc types are set by opimd and opimd only this should probably also include the calculated type type, i.e, create a type that calculates concat(Name, SurName) or something like that, like explained in this document.)
-
+===Existing Types===
+# objectpath
+# phonenumber
+# address
+# email
+# name
+# date
+# uri
+# photo
+# text
+# longtext
+# boolean
+# timezone
+# generic
 
 
-This lets the APPS to easily set types for fields and for opimd to easily know where to search (When looking for IRC), what to expect when searching (a text field, not a number that's needed to be normalized, etc).
+How to use:
+You can just use opimd like you have used it until now. '''BUT''' if you want opimd to work with number resolving (or any other field handling) you should add a matching type.
+So let's say to add support for the "Cellphone" field, we'll just have to:
 
-So, in our example in order to know who of the contacts posses the nick "TAsn" we'll just need to search all of the fields with the type IRC (user of the API will know to ask it). That's about it, I think.
+Fields.Add("Cellphone", "phonenumber")
 
-I hope it's clean enough, let me know.
+or for supporting "Nickname" we'll have to:
+
+Fields.Add("Nickname", "name")
+
+This will let opimd assume things about the values inside (for instance assume that phonenumber is important and should probably be an indexed property). But also will let you (and more importantly the UI apps) work in a sane number knowing the types (and let's say, adding icons per type).
+
+The Types.List() is just for helping you know what's currently supported in opimd.
+
+As I said, you can still use fields without types, but then the apps (and opimd) will not be able to search them correctly.
+
+==Future development==
+* Enable querying by type, i.e, query where "phonenumber" = 123 will search in all the fields that have the type phonenumber.
 
 = Changes in query method =
 NOTE: keep the old way, but also implement this:
