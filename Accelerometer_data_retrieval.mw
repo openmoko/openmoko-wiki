@@ -291,6 +291,34 @@ while (read FILE, $buf,16) {
 
 </pre>
 
+A PHP absolute version
+
+<pre>
+<?php
+
+$x = 0;
+$y = 0;
+$z = 0;
+
+$secondsensorfile = "/dev/input/event3";
+#open file in binary mode
+$dfeed2 = fopen($secondsensorfile, "rb");
+
+while (!feof($dfeed2)) {
+  $contents = fread($dfeed2, 16);
+  $arr = unpack("s4time/S1data/S1code/l1value",$contents);
+  if ($arr[data]=3){
+	if ($arr[code]==0) $x=$arr[value];
+        if ($arr[code]==1) $y=$arr[value];
+        if ($arr[code]==2) $z=$arr[value];
+  }
+ print "x= $x, y= $y, z=$z \n";
+}
+fclose($handle);
+?>
+
+</pre>
+
 Also, for the new absolute interface (Perl) :
 
 <pre>
