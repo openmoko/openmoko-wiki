@@ -35,17 +35,15 @@ Now, we can put in an init script for [[Fyp]] which does this for us everytime w
   # Required-Stop: 
   # Default-Start:     S
   # Default-Stop:
-  # Short-Description: Uses Additional Swap If Available.
+  # Short-Description: Uses Additional Swap If Available. works on SHR distro
   # Description:
   ### END INIT INFO
   
   PATH=/sbin:/bin
-  . /lib/init/vars.sh
-  . /lib/lsb/init-functions
   
   do_start() {
           if [ -e /boot/swapfile ] ; then
-                 for loopdev in `ls /dev/loop* 2>/dev/null` ; do
+                 for loopdev in `ls /dev/loop/* 2>/dev/null` ; do
   		losetup $loopdev /boot/swapfile && swapon $loopdev && echo $loopdev > /var/extswapfile && break
                  done
           fi
