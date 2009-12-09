@@ -42,9 +42,10 @@ Now, we can put in an init script for [[Fyp]] which does this for us everytime w
   PATH=/sbin:/bin
   
   do_start() {
+          modprobe loop
           echo 10 > /proc/sys/vm/swappiness
           if [ -e /boot/swapfile ] ; then
-                 for loopdev in `ls /dev/loop/* 2>/dev/null` ; do
+                 for loopdev in `ls /dev/loop* 2>/dev/null` ; do
   		losetup $loopdev /boot/swapfile && swapon $loopdev && echo $loopdev > /var/extswapfile && break
                  done
           fi
