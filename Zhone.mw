@@ -8,6 +8,31 @@ Zhone is often told to be a demo application for the free softphone framework (F
 
 Since it mainly only sends commands over dbus to the daemons that actually do the work it is rather stable and even able to do multitasking like allowing you to read an SMS whilst using the phone.
 
+== Support for letters ä and ö ==
+
+Apply the following patch to be able to use ä and ö letters in Zhone SMS:s:
+
+<pre>
+--- zhone.orig.withvcf	2009-09-28 13:42:27.000000000 +0300
++++ zhone	2009-09-28 13:47:47.000000000 +0300
+@@ -1888,6 +1888,15 @@
+         key = event.string
+         if key == "\x08":
+             self.text = self.text[:-1]
++	    # Check if the key is aumlaut or oumlaut
++        elif event.key == "adiaeresis":
++            self.text += u"ä"
++        elif event.key == "odiaeresis":
++            self.text += u"ö"
++        elif event.key == "Adiaeresis":
++            self.text += u"Ä"
++        elif event.key == "Odiaeresis":
++            self.text += u"Ö"
+         elif key is not None:
+             self.text += key
+         self.part_text_set( "label", self.text )
+</pre>
+
 ==Using VCF within Zhone==
 Arne sent a small [http://lists.openmoko.org/pipermail/support/2009-January/004394.html patch] that imports phone numbers from a VCF 3.0 address book. Since Zhone has problems with numbers -, the patch below is a sligthly different and removes -.
 
