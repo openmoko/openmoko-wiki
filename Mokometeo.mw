@@ -1,22 +1,25 @@
-= Mokometeo 0.1 / 0.2 =
+= Mokometeo 0.5 =
 [[Image:Capture-MokoMeteo.png]]
+[[Image:Mokometeo_V0.5.png]]
 == Presentation ==
-'''Mokometeo''' is a small python/GTK application fetching the weather forecast from Yahoo weather pages
+'''Mokometeo''' is a small python/elementary application fetching the weather forecast from WeatherUnderground weather pages
 
 == Installation ==
 
 === Dependencies ===
-You need '''python-pygtk''' and '''glade''' to make it work.
+You need '''python-elementary''', '''python-html''' and '''python-netclient''' to make it work.
 
 === OM and SHR ===
 
 So to install it, you can do :
- opkg install python-pygtk python-netclient python-html http://www.opkg.org/packages/0_mokometeo_0.2_arm.ipk
+ opkg install python-elementary python-netclient python-html http://www.opkg.org/packages/mokometeo_0.5_arm.ipk
 
 Also need dependancies (on SHR testing) :
  opkg install python-netclient
 
 == Using Mokometeo ==
+
+* For version 0.5, once the package (and dependencies) is installed, simply click on the desktop icon. A default configuration file <tt>~/.mokometeo.cfg</tt> will be created which can be edited to your liking. Previous and next locations are selected using the buttons at the bottom of the screen, and if a network connection is active the forecast can be updated using the Refresh button. The forecast for all locations is saved in the configuration file so that a network connection is not necessary for switching locations after starting mokometeo.
 
 * In the 0.2 version, there is a bug. To be able to use Mokometeo, please type theses commands before launching it:
  mkdir /home/root/.mokometeo
@@ -39,6 +42,25 @@ Enjoy !
 
 == Configuring Mokometeo ==
 
+=== Version 0.5 ===
+
+The configuration file <tt>~/.mokometeo.cfg</tt> has a section named <tt>[Main]</tt> which looks like:
+
+ [Main]
+ units = celsius
+ lastview = 0
+ locations = Melbourne,AU:Perth,AU:Paris,FR
+
+The locations line can be edited and colon (:) locations of your choice added. I've found that <tt><city>,<country abbreviation></tt> works well with the WeatherUnderground API. It's probably worth checking using this URL:
+
+ http://api.wunderground.com/auto/wui/geo/GeoLookupXML/index.xml?query=Melbourne,AU
+
+to make sure it return the location you're expecting.
+
+The units line can also be changed to <tt>fahrenheit</tt> if desired.
+
+=== Previous versions ===
+
 * By default, 2 cities are configured. You can change the cities and add more in the file
  ~/.mokometeo/mokometeo.conf
 This file must contains at minimum 2 lines. The first line is
@@ -47,6 +69,15 @@ The second and next lines is the name of the city, and the url (tested with fren
  Paris,http://fr.weather.yahoo.com/FRXX/FRXX0076/index_c.html
 
 == Changelog ==
+
+=== 2009-12-14 - v0.5 ===
+
+* Now uses the elementary GUI instead of Gtk+.
+* Now uses the Weather Underground site instead of Yahoo weather (better API).
+* Six days of forecast available.
+* Now uses a single file (<tt>~/.mokometeo.cfg</tt>) for configuration and location history. The .mokometeo directory is no longer needed.
+* Weather icons are not downloaded on the fly, they're part of the package.
+* History is saved for all defined locations
 
 === 2009-03-13 - v0.2 ===
 * added some "print" in the code
@@ -60,10 +91,11 @@ initial version
 
 
 == Future improvements / To do list ==
-* debug the initial copy of /usr/share/mokometeo/question.png into /home/root/.mokometeo/img/
-* improve the way the connection to Yahoo is handled
+* Use the GUI to add/remove locations
+* <s>debug the initial copy of /usr/share/mokometeo/question.png into /home/root/.mokometeo/img/</s>
+* <s>improve the way the connection to Yahoo is handled</s>
 * test with different languages / locations
-* handle backup data for each city in the config file
+* <s>handle backup data for each city in the config file</s>
 
 == Sources and contribution ==
 You can access the sources and participate by commiting patches via the google code mercurial :
