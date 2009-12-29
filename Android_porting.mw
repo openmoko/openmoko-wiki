@@ -161,22 +161,37 @@ To assist in debugging and to gain shell access to the phone with Android, you c
 
 
 === Windows Connectivity ===
-It is possible to get Windows to at least recognize the Android "Ethernet Gadget" and charge the FreeRunner using the Android USB Windows driver (http://dl.google.com/android/android_usb_windows.zip) by modifying the android_usb.inf file in that package before attempting to install the driver.  The following modifications are required:
-
-Add the following to the [Google.NTx86] section of the android_usb.inf file:
+It is possible to get Windows to at least recognize the Android "Ethernet Gadget" and charge the FreeRunner using the Android USB Windows driver (http://dl.google.com/android/android_usb_windows.zip) by modifying the android_usb.inf file in that package before attempting to install the driver.  The following steps are required:
+* connect the device on USB
+* take the Hardware IDs provided by the devicemanager for the unknown device and
+  
+Add these IDs according following example to the [Google.NTx86] section of the android_usb.inf file:
 
 <pre>
 ; Neo FreeRunner
 %USB\VID_1457&PID_5117.DeviceDescRelease%=androidusb.Dev, USB\VID_1457&PID_5117
 %USB\VID_1457&PID_5117&MI_01.DeviceDescRelease%=androidusb.Dev, USB\VID_1457&PID_5117&MI_01
 </pre>
+or 
+<pre>
+; Neo FreeRunner
+%USB\VID_1457&PID_5122.DeviceDescRelease% = USB_Install, USB\VID_1457&PID_5122
+%USB\VID_1457&PID_5122&REV_0312.DeviceDescRelease% = USB_Install, USB\VID_1457&PID_5122&REV_0312
+</pre>
 
-and add the following to the to the [Strings] section of the android_usb.inf file:
-
+and add the IDs according following example to the to the [Strings] section of the android_usb.inf file:
 <pre>
 USB\VID_1457&PID_5117.DeviceDescRelease="Neo FreeRunner"
 USB\VID_1457&PID_5117&MI_01.DeviceDescRelease="Neo FreeRunner Composite ADB Interface"
 </pre>
+or 
+<pre>
+USB\VID_1457&PID_5122.DeviceDescRelease = "Neo FreeRunner"
+USB\VID_1457&PID_5122&REV_0312.DeviceDescRelease = "Neo FreeRunner Composite ADB Interface"
+</pre>
+*point out the installation to the driver directory
+*Vista and XP create a new folder <code>C:\Windows\System32\DriverStore\FileRepository\android_winusb.inf_xxxx</code>
+If there are any errors, refer the <code>C:\Windows\inf\setupapi.app.log</code> or, if VisualStudio is installed  the <code>C:\Windows\inf\setupapi.dev.log</code>. Delete the created directory. In some cases you have to generate a new androidwinusb86.cat - file. Refer the [http://msdn.microsoft.com/en-us/library/aa741204(VS.85).aspx#cat_how MSDN] for further details.
 
 The Windows version of adb does not appear to recognize the connected device yet but at least the FreeRunner charges and the device driver indicates that "This device is working properly."
 
