@@ -1,0 +1,149 @@
+It is really useful to have a list of codes, numbers and methods for each mobile provider so that you can easily do things like balance enquiry checks, voicemail etc wherever you are and with whichever sim and network you have to hand.
+
+A mobile-provider-info package gathering the necessary info into one place would be very useful indeed for a range of applications. It would cover the info for making network connections, checking balances, checking voicemail and no doubt other things.
+
+Feedback on how best to structure this information is hereby sought. Below are some relevant links and a suggestion that the existing format (v2.0) in mobile-broadband-provider-info be extended to add balance check and voicemail info. I don't see any obvious reason why this is not a good idea, but am happy if people can suggest better ways. I also wonder whether port and smtp server should be added?
+
+It seems more efficient to combine the data than to have two separate lists, but the name should probably be changed to indicate its more generic nature ('mobile-provider-info'?)
+
+Below are some relevant documents that deal with some aspect or other of the problem.
+
+----
+
+It would appear that the network-connection aspect of this is already largely solved. A package (mobile-broadband-provider-info exists, containing network-setup info, which is used by Network-manager v0.8, for example. Other lists (lniked below include extra info such as smtp server and connection port - would it be useful to add those in?)
+
+However none of this deals with the other services providers provide, which can be over voice calls using DTMF or via USSD. Toby-churchill has collected a fair amount of data, also in xml format
+
+== mobile-broadband-provider-info ==
+
+Debian already has this package:
+[http://packages.debian.org/squeeze/mobile-broadband-provider-info]
+which contains the info needed for the network-configuration aspect.
+The format is XML as defined here: [http://live.gnome.org/NetworkManager/MobileBroadband/ServiceProviders]
+and includes name, user, password, dns, gateway arranged by country, provider name, network type(GSM/CDMA), and apn
+
+e.g.
+    <country code="ae">
+        <provider>
+                <name>Etisalat</name>
+                <gsm>
+                        <network-id mcc="424" mnc="02"/>
+                        <apn value="mnet">
+                                <name>Etisalat</name>
+                                <username>mnet</username>
+                                <password>mnet</password>
+                                <dns>194.170.1.6</dns>
+                                <dns>194.170.1.7</dns>
+                        </apn>
+                        <apn value="etisalat.ae">
+                                <name>Etisalat 3G</name>
+                                <username>etisalat.ae</username>
+                                <password>etisalat.ae</password>
+                        </apn>
+                </gsm>
+        </provider>
+    </country>
+
+Adding other info beyond broadband networking info to the database, and issues about what keys to use are discussed here:
+[http://www.mail-archive.com/networkmanager-list@gnome.org/msg14449.html]
+
+This list includes port settings not included in mobile-broadband-providers-info - are they in fact not really needed?
+[http://forums.pinstack.com/f24/tcp_apn_wap_gateway_and_port_carrier_settings-360/]
+
+This list includes smtp server info, also not in mobile-broadband-providers-info
+[http://www.taniwha.org.uk/gprs.html]
+
+== mobile-provider-info ==
+
+Here is a snippet of our collection of data. Which shows the sorts of things we have currently being collecting: 
+Balance check (via DTMF, USSD, or SMS) and voicemail number, arranged by network name.
+
+This info could quite easily be put into the format used by mobile-broadband-provider-info. Is there any reason not to arrange it like that?
+
+  <?xml version="1.0" encoding="UTF-8"?>
+  <store created="Nov 05 2009" factory="networkdetails" name="networkdetails" count="10">
+
+  <store_item id="mobiltid">
+      <property name="network">MobilTid</property>
+      <property name="country">denmark</property>
+      <property name="mcc">238</property>
+      <property name="mnc"></property>	
+      <balance_check>
+            <property name="ussd" default="true">*101#</property>
+      </balance_check>
+      <balance_check>
+            <property name="dtmf">40454545</property>
+      </balance_check>
+  </store_item>
+  
+  <store_item id="tele2">
+      <property name="network">Tele2</property>
+      <property name="country">sweden</property>
+      <property name="mcc">240</property>
+      <property name="mnc">07</property>
+      <balance_check>
+            <property name="ussd" default="true">*111#</property>
+      </balance_check>
+      <balance_check>
+            <property name="dtmf">211</property>
+      </balance_check>	
+  </store_item>
+  
+  <store_item id="telstra">
+      <property name="network">Telstra</property>
+      <property name="country">australia</property>
+      <property name="mcc">505</property>
+      <property name="mnc">01</property>
+      <balance_check>
+            <property name="ussd response" default="true">*100#</property>
+      </balance_check>
+      <balance_check>
+            <property name="dtmf">125111</property>
+      </balance_check>
+      <balance_check>
+            <property name="dtmf">1258888</property>
+      </balance_check>
+  </store_item>
+  
+  <store_item id="o2 uk">
+      <property name="network">O2</property>
+      <property name="country">UK</property>
+      <property name="mcc">234</property>
+      <property name="mnc">02</property>
+      <property name="mnc">10</property>
+      <property name="mnc">11</property>
+      <property name="voicemail">901</property>
+      <balance_check>
+            <property name="ussd" default="true">*#10#</property>
+      </balance_check>
+      <balance_check>
+            <property name="dtmf">4444</property>
+      </balance_check>
+  </store_item>
+  
+  <store_item id="t-mobile uk">
+      <property name="network">T-Mobile</property>
+      <property name="country">UK</property>
+      <property name="mcc">234</property>
+      <property name="mnc">30</property>
+      <property name="voicemail">222</property>
+      <balance_check>
+            <property name="dtmf" default="true">150</property>
+      </balance_check>
+      <balance_check>
+            <property name="sms" text="BA">150</property>
+      </balance_check>
+      <balance_check>
+            <property name="sms" text="AL">150</property>
+      </balance_check>
+  </store_item>
+  </store>
+
+Here is a list of USSD codes for making a GPRS/MMS connection, by phone type:
+[http://ota.fetnet.net/fetnet/ussdList_en.jsp]
+
+This is another set of data that might usefully be added?
+
+--[[User:Wookey|Wookey]] 16:38, 29 December 2009 (UTC)
+
+ [[category:GSM]]
