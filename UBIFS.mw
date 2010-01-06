@@ -1,140 +1,85 @@
-== With kernel 2.6.34 ==
+== With kernel 2.6.32 ==
 
-1) booting 2.6.34 kernel on uSD
-
-http://build.shr-project.org/tests/mrmoku/2.6.34/images/om-gta02/
-
-(Please note as of July 2010 unstable is 2.6.32+: http://build.shr-project.org/shr-unstable/images/om-gta02/ )
-
+1) booting 2.6.32 kernel on uSD
+http://build.shr-project.org/tests/mrmoku/2.6.32/images/om-gta02/
 download uImage to /boot 
-
 download modules and untar it to /
-
 update uImage link in /boot
 
-
 2) flash image
-
 flash_eraseall /dev/mtd6
-
 nandwrite -p /dev/mtd6 shr-full-eglibc-ipk--20100105-om-gta02.rootfs.ubi
-
+(almost the same ubinized image will finish build in few mins as
+http://build.shr-project.org/shr-unstable/images/om-gta02/shr-full-eglibc-ipk--20100105-om-gta02.rootfs.ubi)
 
 3) then test if it works 
-
 ubiattach /dev/ubi_ctrl -O 2048 -m 6
-
 mount -t ubifs ubi0:om-gta02-rootfs /media/om
-
 ls /media/om
 
-
-4) Setup bootloader [[U-boot]], [[U-boot-gena2x]] or [[Qi]]:
-
-4.1) configure U-boot [[U-Boot_commands#Environment]]
-
-change kernel parameters from:
-<pre>
-rootfstype=jffs2 root=/dev/mtdblock6
-</pre>
-
-to:
-<pre>
-rootfstype=ubifs ubi.mtd=6,2048 root=ubi0:om-gta02-rootfs
-</pre>
-
-4.2) update Qi with dfu-util
-
+3) update Qi with dfu-util
+qi built here
 http://build.shr-project.org/shr-unstable/images/om-gta02/ 
+is still using jffs2 in kernel params
+but you can use the binary from here
+http://jama.homelinux.org/org.openembedded.shr.images/om-gta02/qi-s3c2442-1.0.2+gitr0+c38b062a609f1442e6a9e13005cfbdfd59a5ac0d.udfu
+or build Qi yourself with bitbake from latest shr/merge branch + this patch:
+http://jama.homelinux.org/org.openembedded.shr.images/om-gta02/0014-qi-update-kernel-params-for-ubi-rootfs.patch
 
-qi-s3c* expects jffs2 as rootfs
+4) flash 2.6.32 also to NAND
 
-qi-ubi-s3c* expects ubifs as rootfs (with rootfs name om-gta02-rootfs which corresponds to name in ubinized image)
+5) boot it, test it, play with it
 
-it is now in OE repository as qi_git.bb and qi-ubi_git.bb.
+(Written by Martin Jansa [http://www.mail-archive.com/community@lists.openmoko.org/msg56825.html])
 
-
-5) flash 2.6.32 also to NAND
-
-
-6) boot it, test it, play with it
-
-(Written by Martin JaMa Jansa [http://www.mail-archive.com/community@lists.openmoko.org/msg56825.html])
-
-=== Alternative === 
-( using slower but always available dfu-util )
-
-# update Qi with dfu-util
-#: <pre>dfu-util -a u-boot -R -D /qi-ubi-s3c2442-1.0.2-r1+gitr0+c38b062a609f1442e6a9e13005cfbdfd59a5ac0d.udfu # for gta02</pre>
-# install kernel
-#: <pre>dfu-util -a kernel -R -D ./uImage-2.6.29-oe11+gitr119862+a15608f241a40b41fed5bffe511355c2067c4e88-r8-om-gta02.bin </pre>
-# install rootfs
-#: <pre>dfu-util -a rootfs -R -D  /home/ew/Desktop/shr-full-eglibc-ipk--20100507-om-gta02.rootfs.ubi #  not the rootfs.ubifs image use rootfs.ubi file!</pre>
-# make shure that Qi is booting the NAND ( remove sd card or touch /boot/noboot-GTA02 )
-#: boot GTA02 with Qi (  switch it on )
-
-(Written by pwgen )
 
 == Performance ==
-How to test:
-Please run 'bonnie++ -u 0:0 -s 32 -m 16 -r 16' on a fresh filesystem. bonnie++ is now in shr-unstable feeds.  (Note that this example uses only a 32MiB file, which easily fits in the GTA02's RAM and does not provide accurate speeds due to Linux's disk cache. For good results, use at least '-s 300').
+=== UBIFS ===
+max_posedon provided some bonnie++ results from UBI (http://pastebin.ca/1739342) using kernel 2.6.29
 
-=== [http://en.wikipedia.org/wiki/UBIFS UBIFS] ===
-max_posedon provided some bonnie++ results using kernel 2.6.29
 <pre>
-=== ubifs ===       ------Sequential Output------ --Sequential Input- --Random-
-                    -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
-Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
-localhost       32M  1531  78  7594  73  4318  76  2195  98 42904  99  2805  87
-                    ------Sequential Create------ --------Random Create--------
-                    -Create-- --Read--- -Delete-- -Create-- --Read--- -Delete--
-              files  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP
-                 16   887  94  2802  99   859  98   914  97 18084  99   659  98
-localhost,32M,1531,78,7594,73,4318,76,2195,98,42904,99,2804.8,87,16,887,94,2802,99,859,98,914,97,18084,99,659,98
-</pre>
-
-[http://build.shr-project.org/shr-unstable/images/om-gta02/qi-ubi-s3c2442-1.0.2-r0+gitr0+c38b062a609f1442e6a9e13005cfbdfd59a5ac0d.udfu qi-ubi] booting [http://build.shr-project.org/shr-unstable/images/om-gta02/uImage-2.6.29-oe11+gitr119862+a15608f241a40b41fed5bffe511355c2067c4e88-r7-om-gta02.bin 2.6.29-oe11] with [http://build.shr-project.org/shr-unstable/images/om-gta02/shr-lite-eglibc-ipk--20100115-om-gta02.rootfs.ubi shr-lite-rootfs.ubi] (parameters as indicated above, boot to desktop in 90sec):
-<pre>
+root@localhost / $ bonnie\+\+ -u 0:0
+Using uid:0, gid:0.
+Writing with putc()...done
+Writing intelligently...done
+Rewriting...done
+Reading with getc()...done
+Reading intelligently...done
+start 'em...done...done...done...
+Create files in sequential order...done.
+Stat files in sequential order...done.
+Delete files in sequential order...done.
+Create files in random order...done.
+Stat files in random order...done.
+Delete files in random order...done.
 Version 1.03c       ------Sequential Output------ --Sequential Input- --Random-
                     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
 Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
-16              32M  1416  69  6874  67  4271  54  2126  97 42582  98  3129  93
+localhost      300M  1512  72  4878  60  2696  58  1587  98  5519  96 640.6  96
                     ------Sequential Create------ --------Random Create--------
                     -Create-- --Read--- -Delete-- -Create-- --Read--- -Delete--
               files  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP
-                 16   936  97  2525  97   853  95   926  96 17800  98   638  95
-16,32M,1416,69,6874,67,4271,54,2126,97,42582,98,3128.9,93,16,936,97,2525,97,853,95,926,96,17800,98,638,95
+                 16   889  98  2619  99   802  95   883  97 15728  87   640  98
+localhost,300M,1512,72,4878,60,2696,58,1587,98,5519,96,640.6,96,16,889,98,2619,99,802,95,883,97,15728,87,640,98
 </pre>
 
-[http://build.shr-project.org/shr-unstable/images/om-gta02/qi-ubi-s3c2442-1.0.2-r0+gitr0+c38b062a609f1442e6a9e13005cfbdfd59a5ac0d.udfu qi-ubi] booting [http://build.shr-project.org/tests/mrmoku/2.6.32/images/om-gta02/uImage-2.6.31-oe1+gitr157549+dd32737aa524e09c1d141a0e735dd58674552244-r6-om-gta02.bin 2.6.31-oe1] with [http://build.shr-project.org/shr-unstable/images/om-gta02/shr-lite-eglibc-ipk--20100115-om-gta02.rootfs.ubi shr-lite-rootfs.ubi] (parameters as indicated above, boot to desktop in 51sec):
-<pre>
-Version 1.03c       ------Sequential Output------ --Sequential Input- --Random-
-                    -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
-Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
-16              32M  2046  86 21393  21  8687  36  2231  94 52556 100  5118  99
-                    ------Sequential Create------ --------Random Create--------
-                    -Create-- --Read--- -Delete-- -Create-- --Read--- -Delete--
-              files  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP
-                 16  1924  94 12296  99  1966  96  1888  93 +++++ +++  1492  95
-16,32M,2046,86,21393,21,8687,36,2231,94,52556,100,5117.9,99,16,1924,94,12296,99,1966,96,1888,93,+++++,+++,1492,95
-</pre>
 
-[http://build.shr-project.org/shr-unstable/images/om-gta02/old/qi-ubi-s3c2442-1.0.2-r5+gitr0+c38b062a609f1442e6a9e13005cfbdfd59a5ac0d.udfu qi-ubi] booting [http://build.shr-project.org/shr-unstable/images/om-gta02/old/uImage-2.6.34-r7-oe17-om-gta02.bin 2.6.34-r7-oe17] with [http://build.shr-project.org/shr-unstable/images/om-gta02/old/shr-lite-eglibc-ipk--20110404-om-gta02.rootfs.ubi shr-lite-rootfs.ubi] (parameters as indicated above):
+=== JFFS2 ===
+Latest 2.6.29-andy-tracking with jffs2 and SHR-testing (by  Dima Kogan[http://www.mail-archive.com/shr-user@lists.shr-project.org/msg02761.html])
 <pre>
-Version 1.03c       ------Sequential Output------ --Sequential Input- --Random-
-                    -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
-Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
-16              32M  2089  88 20845   8  9938  27  2341  98 53687  99  4661  87
-                    ------Sequential Create------ --------Random Create--------
-                    -Create-- --Read--- -Delete-- -Create-- --Read--- -Delete--
-              files  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP
-                 16  2189  96 13423  99  2142  94  2125  93 +++++ +++  1681  97
-16,32M,2089,88,20845,8,9938,27,2341,98,53687,99,4660.5,87,16,2189,96,13423,99,2142,94,2125,93,+++++,+++,1681,97
-</pre>
-
-=== [[JFFS2]] ===
-Latest 2.6.29-andy-tracking with jffs2 and SHR-testing (by  Dima Kogan[http://www.mail-archive.com/shr-user@lists.shr-project.org/msg02761.html], with unknown parameters)
-<pre>
+Using uid:0, gid:0.
+Writing with putc()...done
+Writing intelligently...done
+Rewriting...done
+Reading with getc()...done
+Reading intelligently...done
+start 'em...done...done...done...
+Create files in sequential order...done.
+Stat files in sequential order...done.
+Delete files in sequential order...done.
+Create files in random order...done.
+Stat files in random order...done.
+Delete files in random order...done.
 Version 1.03c       ------Sequential Output------ --Sequential Input- --Random-
                     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
 Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
@@ -146,61 +91,4 @@ om-gta02       300M   844  96  1552  92  1550  94  1508  96  4252  92 462.4  94
 om-gta02,300M,844,96,1552,92,1550,94,1508,96,4252,92,462.4,94,16,174,68,17360,99,275,92,208,80,18970,99,236,79
 </pre>
 
-Kernel 2.6.32, parameters as indicated above.
-<pre>
-Version 1.03c       ------Sequential Output------ --Sequential Input- --Random-
-                    -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
-Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
-16              32M   614  97  1802  96  1776  97  1155  97 33702  98  1282  97
-                    ------Sequential Create------ --------Random Create--------
-                    -Create-- --Read--- -Delete-- -Create-- --Read--- -Delete--
-              files  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP
-                 16   197  96 +++++ +++   209  95   196  95 +++++ +++   207  95
-16,32M,614,97,1802,96,1776,97,1155,97,33702,98,1282.2,97,16,197,96,+++++,+++,209,95,196,95,+++++,+++,207,95
-</pre>
-
-=== Comparsion with ext on uSD ===
-==== [http://en.wikipedia.org/wiki/Ext3 ext3], async ====
-<pre>
-=== ext3, async === ------Sequential Output------ --Sequential Input- --Random-
-                    -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
-Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
-localhost       32M  1122  69  1911  40  2288  28  1832  82 43012  99  2923  98
-                    ------Sequential Create------ --------Random Create--------
-                    -Create-- --Read--- -Delete-- -Create-- --Read--- -Delete--
-              files  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP
-                 16   111  96 18460  95  1315  85   111  95 20824  99   258  75
-localhost,32M,1122,69,1911,40,2288,28,1832,82,43012,99,2923.0,98,16,111,96,18460,95,1315,85,111,95,20824,99,258,75
-</pre>
-
-==== [http://en.wikipedia.org/wiki/Ext2 ext2], sync ====
-<pre>
-=== ext2, sync ===  ------Sequential Output------ --Sequential Input- --Random-
-                    -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
-Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
-localhost       32M    70   5   122   3   970  11  2196  98 42969  99  56.1   1
-                    ------Sequential Create------ --------Random Create--------
-                    -Create-- --Read--- -Delete-- -Create-- --Read--- -Delete--
-              files  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP
-                 16    18  12 17609  89    14   2    18  12 20165  98     6   1
-localhost,32M,70,5,122,3,970,11,2196,98,42969,99,56.1,1,16,18,12,17609,89,14,2,18,12,20165,98,6,1
-</pre>
-
-==== ext2, async ====
-<pre>
-=== ext2, async === ------Sequential Output------ --Sequential Input- --Random-
-                    -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
-Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
-localhost       32M  1319  70  2637  29  1997  16  1904  86 42504  99  3151  98
-                    ------Sequential Create------ --------Random Create--------
-                    -Create-- --Read--- -Delete-- -Create-- --Read--- -Delete--
-              files  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP
-                 16   166  95 19707  98  2588  97   170  96 20644  99   321  63
-localhost,32M,1319,70,2637,29,1997,16,1904,86,42504,99,3151.4,98,16,166,95,19707,98,2588,97,170,96,20644,99,321,63
-</pre>
-
-== Status ==
-=== 12.5.2010 ===
-dfu-util confirmed to work too (by pwgen), but will be slower than nandwrite.
-
-[[Category:Flashing SHR]]
+Please run bonnie++ on jffs2 if you have jffs2 partition (bonnie++ is now in shr-unstable feeds).
