@@ -1,0 +1,94 @@
+== With kernel 2.6.32 ==
+
+1) booting 2.6.32 kernel on uSD
+http://build.shr-project.org/tests/mrmoku/2.6.32/images/om-gta02/
+download uImage to /boot 
+download modules and untar it to /
+update uImage link in /boot
+
+2) flash image
+flash_eraseall /dev/mtd6
+nandwrite -p /dev/mtd6 shr-full-eglibc-ipk--20100105-om-gta02.rootfs.ubi
+(almost the same ubinized image will finish build in few mins as
+http://build.shr-project.org/shr-unstable/images/om-gta02/shr-full-eglibc-ipk--20100105-om-gta02.rootfs.ubi)
+
+3) then test if it works 
+ubiattach /dev/ubi_ctrl -O 2048 -m 6
+mount -t ubifs ubi0:om-gta02-rootfs /media/om
+ls /media/om
+
+3) update Qi with dfu-util
+qi built here
+http://build.shr-project.org/shr-unstable/images/om-gta02/ 
+is still using jffs2 in kernel params
+but you can use the binary from here
+http://jama.homelinux.org/org.openembedded.shr.images/om-gta02/qi-s3c2442-1.0.2+gitr0+c38b062a609f1442e6a9e13005cfbdfd59a5ac0d.udfu
+or build Qi yourself with bitbake from latest shr/merge branch + this patch:
+http://jama.homelinux.org/org.openembedded.shr.images/om-gta02/0014-qi-update-kernel-params-for-ubi-rootfs.patch
+
+4) flash 2.6.32 also to NAND
+
+5) boot it, test it, play with it
+
+(Written by Martin Jansa [http://www.mail-archive.com/community@lists.openmoko.org/msg56825.html])
+
+
+== Performance ==
+=== UBIFS ===
+max_posedon provided some bonnie++ results from UBI (http://pastebin.ca/1739342) using kernel 2.6.29
+
+<pre>
+root@localhost / $ bonnie\+\+ -u 0:0
+Using uid:0, gid:0.
+Writing with putc()...done
+Writing intelligently...done
+Rewriting...done
+Reading with getc()...done
+Reading intelligently...done
+start 'em...done...done...done...
+Create files in sequential order...done.
+Stat files in sequential order...done.
+Delete files in sequential order...done.
+Create files in random order...done.
+Stat files in random order...done.
+Delete files in random order...done.
+Version 1.03c       ------Sequential Output------ --Sequential Input- --Random-
+                    -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+localhost      300M  1512  72  4878  60  2696  58  1587  98  5519  96 640.6  96
+                    ------Sequential Create------ --------Random Create--------
+                    -Create-- --Read--- -Delete-- -Create-- --Read--- -Delete--
+              files  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP
+                 16   889  98  2619  99   802  95   883  97 15728  87   640  98
+localhost,300M,1512,72,4878,60,2696,58,1587,98,5519,96,640.6,96,16,889,98,2619,99,802,95,883,97,15728,87,640,98
+</pre>
+
+
+=== JFFS2 ===
+Latest 2.6.29-andy-tracking with jffs2 and SHR-testing (by  Dima Kogan[http://www.mail-archive.com/shr-user@lists.shr-project.org/msg02761.html])
+<pre>
+Using uid:0, gid:0.
+Writing with putc()...done
+Writing intelligently...done
+Rewriting...done
+Reading with getc()...done
+Reading intelligently...done
+start 'em...done...done...done...
+Create files in sequential order...done.
+Stat files in sequential order...done.
+Delete files in sequential order...done.
+Create files in random order...done.
+Stat files in random order...done.
+Delete files in random order...done.
+Version 1.03c       ------Sequential Output------ --Sequential Input- --Random-
+                    -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+om-gta02       300M   844  96  1552  92  1550  94  1508  96  4252  92 462.4  94
+                    ------Sequential Create------ --------Random Create--------
+                    -Create-- --Read--- -Delete-- -Create-- --Read--- -Delete--
+              files  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP
+                 16   174  68 17360  99   275  92   208  80 18970  99   236  79
+om-gta02,300M,844,96,1552,92,1550,94,1508,96,4252,92,462.4,94,16,174,68,17360,99,275,92,208,80,18970,99,236,79
+</pre>
+
+Please run bonnie++ on jffs2 if you have jffs2 partition (bonnie++ is now in shr-unstable feeds).
