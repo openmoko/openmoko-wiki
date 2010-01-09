@@ -32,11 +32,20 @@ i.e.
 == How to use bluez4 dbus API ==
 '''Bluez4-compatible'''
 
-You can do it with [[OpenmokoFramework/mdbus]] or with <code>dbus-send</code>. To introspect with dbus-send you can employ something like this:
- dbus-send --system --dest=org.bluez --print-reply /org/bluez/`pidof bluetoothd`/hci0 org.freedesktop.DBus.Introspectable.Introspect
+You can do it with [[OpenmokoFramework/mdbus]] or with
+<code>dbus-send</code>. 
+
+First you need to get path to the default bluetooth adapter which
+should appear when you have bluetoothd running and bluetooth device is
+powered on. Do it like this:
+
+ export BTADAPTER=`dbus-send --system --dest=org.bluez --print-reply / org.bluez.Manager.DefaultAdapter | tail -1 | sed 's/^.*"\(.*\)".*$/\1/'`
+
+To introspect with dbus-send you can employ something like this:
+ dbus-send --system --dest=org.bluez --print-reply $BTADAPTER org.freedesktop.DBus.Introspectable.Introspect
 
 The next example is how to make your device discoverable:
- dbus-send --system --dest=org.bluez --print-reply /org/bluez/`pidof bluetoothd`/hci0 org.bluez.Adapter.SetProperty string:Discoverable variant:boolean:true
+ dbus-send --system --dest=org.bluez --print-reply $BTADAPTER org.bluez.Adapter.SetProperty string:Discoverable variant:boolean:true
 
 == Scanning for bluetooth devices ==
 '''Bluez4-compatible'''
@@ -64,11 +73,11 @@ If you give it only one parameter, it will register as an agent and will wait fo
 Pair with your device first.
 
 Then do
- dbus-send --system --dest=org.bluez --print-reply /org/bluez/`pidof bluetoothd`/hci0/dev_00_18_00_00_C2_37 org.bluez.Input.Connect
+ dbus-send --system --dest=org.bluez --print-reply $BTADAPTER/dev_00_18_00_00_C2_37 org.bluez.Input.Connect
 
 Where <code>00_18_00_00_C2_37</code> is the address of your HID device. You can query for the device address with:
 
- dbus-send --system --dest=org.bluez --print-reply /org/bluez/`pidof bluetoothd`/hci0 org.bluez.Adapter.ListDevices
+ dbus-send --system --dest=org.bluez --print-reply $BTADAPTER org.bluez.Adapter.ListDevices
 
 Enjoy.
 
@@ -354,12 +363,12 @@ This HOW-TO is directly applicable only to bluez3 but still worth reading to und
 In short, GN is network bridge (aka hub/switch), NAP is network router and PANU is a network client.
 
 You can enable or disable various roles by setting <code>Enable</code> property to true/false. Example for GN:
- dbus-send --system --dest=org.bluez --print-reply /org/bluez/`pidof bluetoothd`/hci0 org.bluez.NetworkHub.SetProperty string:Enabled variant:boolean:true
+ dbus-send --system --dest=org.bluez --print-reply $BTADAPTER org.bluez.NetworkHub.SetProperty string:Enabled variant:boolean:true
 
 For PANU use org.bluez.NetworkPeer interface and for NAP use org.bluez.NetworkRouter.
 
 You might want to know UUID of GN for later use, so you need to read its properties:
- dbus-send --system --dest=org.bluez --print-reply /org/bluez/`pidof bluetoothd`/hci0 org.bluez.NetworkHub.GetProperties
+ dbus-send --system --dest=org.bluez --print-reply $BTADAPTER org.bluez.NetworkHub.GetProperties
 
 To use NAP you'll need to create bridge device manually with
  brctl addbr pan1
@@ -372,7 +381,7 @@ Pairing is nothing special, do it with simple-agent as described in other sectio
 
 ==== Trust ====
 On GN/NAP role you need to ''trust'' the PANU peer:
- dbus-send --system --dest=org.bluez --print-reply /org/bluez/`pidof bluetoothd`/hci0/dev_00_06_6E_17_27_E0 org.bluez.Device.SetProperty string:Trusted variant:boolean:true
+ dbus-send --system --dest=org.bluez --print-reply $BTADAPTER/dev_00_06_6E_17_27_E0 org.bluez.Device.SetProperty string:Trusted variant:boolean:true
 
 Where <code>00_06_6E_17_27_E0</code> is the MAC of peer.
 
@@ -387,7 +396,7 @@ import os
 
 bus = dbus.SystemBus()
 network = dbus.Interface(bus.get_object("org.bluez",
-                "/org/bluez/"+sys.argv[1]+"/hci0/"+sys.argv[2]),
+                sys.argv[1]),
                 "org.bluez.Network")
 
 network.Connect("GN")
@@ -397,7 +406,7 @@ print "Networking released"
 </pre>
 
 Then you do:
- ./panu.py `pidof bluetoothd` dev_00_06_6E_17_27_E0
+ ./panu.py $BTADAPTER/dev_00_06_6E_17_27_E0
 
 Where <code>00_16_CE_E4_44_D5</code> is MAC of GN/NAP.
 
@@ -852,11 +861,11 @@ example of my /etc/freesmartphone/opreferences/conf/phone/default.yaml:
 
 You might need to get the bluetooth headset connected manually on the beggining and also after suspend:
 
- mdbus -s org.bluez /org/bluez/`pidof bluetoothd`/hci0/dev_xx_xx_xx_xx_xx_xx org.bluez.Headset.Connect
+ mdbus -s org.bluez $BTADAPTER/dev_xx_xx_xx_xx_xx_xx org.bluez.Headset.Connect
 
 where xx_xx_xx_xx_xx_xx is address of the device, for example:
 
- mdbus -s org.bluez /org/bluez/`pidof bluetoothd`/hci0/dev_00_09_DD_31_92_98 org.bluez.Headset.Connect
+ mdbus -s org.bluez $BTADAPTER/dev_00_09_DD_31_92_98 org.bluez.Headset.Connect
 
 Hopefully, your bluetooth headset now works. Good luck!
 
