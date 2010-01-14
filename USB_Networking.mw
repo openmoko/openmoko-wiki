@@ -366,8 +366,92 @@ If you now plugin the FreeRunner into the USB port the cdce0 interface gets crea
 
 == Debian, Ubuntu and others ==
 
-There are two systems which deal with hotplugginng devices, which is what you do when you plug in Freerunner in an <usb port. '''Hotplug''', and more recent system '''udev'''.
+There are two systems which deal with hotplugginng devices, which is what you do when you plug in Freerunner in an USB port. '''udev''' and the older '''Hotplug''' system.
  
+=== Systems using '''udev''' ===
+
+There are 2 common ways the USB networking device can be handled by your systems.
+
+If there is a definition for the USB networking device in /etc/network/interfaces, it is handled by the '''ifupdown''' system. If not, it is handled by NetworkManager.
+
+It is possible to use network-manager to automatically connect to the Freerunner using udev. The process uses udev to run a script when the Freerunner is plugged in.
+
+==== For devices showing as usb0 ====
+
+The script uses the ip command to set the mac address of the usb network interface.
+
+To begin, create /etc/udev/rules.d/80-freerunner.rules :
+
+<pre>
+# This file causes programs to be run on device insertion.
+# See udev(7) for syntax.
+# rule to assign a fixed mac address specified in /
+KERNEL=="usb[0-9]*", DRIVERS=="cdc_ether", ACTION=="add", RUN+="/usr/local/sbin/freerunner-usb-add.sh %k"
+</pre>
+
+Next, create the /usr/local/sbin/freerunner-usb-add.sh :
+
+<pre>
+#!/bin/sh
+(
+busNum=$( printf %.2d $( expr match "$1" "usb\([0-9]*\)") )
+ip link set "$1" address 00:00:22:55:bb:$busNum &> /dev/null
+iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
+echo 1 > /proc/sys/net/ipv4/ip_forward
+iptables -P FORWARD ACCEPT
+) &
+exit 0
+</pre>
+
+==== For devices showing as eth1 ====
+
+This script allows ipforwarding so your device can access the internet through your pc.
+
+To begin, create /etc/udev/rules.d/80-freerunner.rules replacing the mac address with the one from your device (run ifconfig on the pc, or use udevinfo, note that it must match udev's case):
+
+<pre>
+# This file causes programs to be run on device insertion.
+# See udev(7) for syntax.
+# http://www.reactivated.net/writing_udev_rules.html#example-netif
+KERNEL=="eth*", ATTR{address}=="00:1f:11:01:28:d6", RUN+="/usr/local/sbin/freerunner-usb-add.sh"
+</pre>
+
+Next, create the /usr/local/sbin/freerunner-usb-add.sh :
+
+<pre>
+#!/bin/sh
+(
+iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
+echo 1 > /proc/sys/net/ipv4/ip_forward
+iptables -P FORWARD ACCEPT
+) &
+exit 0
+</pre>
+
+==== For all devices ====
+Finally run "chmod +x /usr/local/sbin/freerunner-usb-add.sh" to make it executable. Now you can use network-manager with '''mac-address specific settings''' and get it to automatically connect.
+
+* Plug your phone into your computer's usb port.
+* Note the mac address from "ifconfig usb0" (or eth1)
+* Right-click the network manager icon in the panel.
+* Click "Edit Connections..."
+* Delete the "Auto usb0" entry. (or eth1)
+* Add a new connection named 'freerunner' (or whatever you fancy) 
+* Tick "System setting"
+* Enter the mac address from above.
+* Click the "IPv4 Settings" tab.
+* Change "Method" to "Manual"
+* Add an address of 192.168.0.200, 255.255.255.0 (address and netmask respectively).
+* Click "Ok"
+* Enter your system password (if prompted) to allow changing of this system setting.
+
+(watch out for this bug: https://bugs.launchpad.net/ubuntu/+source/network-manager/+bug/284298 )
+
+You should now be able to ping/ssh your phone.
+
+
+
+
 ===Using the interfaces file- works on systems using''' hotplug''' ===
 Edit /etc/network/interfaces and add:
 
@@ -442,84 +526,6 @@ esac
 
 Make /etc/network/freerunner executable with
  chmod +x /etc/network/freerunner
-
-=== Using network-manager on systems using '''udev''' ===
-It is possible to use network-manager to automatically connect to the Freerunner using udev. The process uses udev to run a script when the Freerunner is plugged in.
-
-Depending on which boot loader your device is running it shows as either usb0 or eth1 (or 2). Choose the next section based on which it is for you. uBoot or old version of Qi show as usb0, the newer versions of Qi show as eth1.
-
-==== For devices showing as usb0 ====
-
-The script uses the ip command to set the mac address of the usb network interface.
-
-To begin, create /etc/udev/rules.d/80-freerunner.rules :
-
-<pre>
-# This file causes programs to be run on device insertion.
-# See udev(7) for syntax.
-# rule to assign a fixed mac address specified in /
-KERNEL=="usb[0-9]*", DRIVERS=="cdc_ether", ACTION=="add", RUN+="/usr/local/sbin/freerunner-usb-add.sh %k"
-</pre>
-
-Next, create the /usr/local/sbin/freerunner-usb-add.sh :
-
-<pre>
-#!/bin/sh
-(
-busNum=$( printf %.2d $( expr match "$1" "usb\([0-9]*\)") )
-ip link set "$1" address 00:00:22:55:bb:$busNum &> /dev/null
-iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
-echo 1 > /proc/sys/net/ipv4/ip_forward
-iptables -P FORWARD ACCEPT
-) &
-exit 0
-</pre>
-
-==== For devices showing as eth1 ====
-
-This script allows ipforwarding so your device can access the internet through your pc.
-
-To begin, create /etc/udev/rules.d/80-freerunner.rules replacing the mac address with the one from your device (run ifconfig on the pc, or use udevinfo, note that it must match udev's case):
-
-<pre>
-# This file causes programs to be run on device insertion.
-# See udev(7) for syntax.
-# http://www.reactivated.net/writing_udev_rules.html#example-netif
-KERNEL=="eth*", ATTR{address}=="00:1f:11:01:28:d6", RUN+="/usr/local/sbin/freerunner-usb-add.sh"
-</pre>
-
-Next, create the /usr/local/sbin/freerunner-usb-add.sh :
-
-<pre>
-#!/bin/sh
-(
-iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
-echo 1 > /proc/sys/net/ipv4/ip_forward
-iptables -P FORWARD ACCEPT
-) &
-exit 0
-</pre>
-
-==== For all devices ====
-Finally run "chmod +x /usr/local/sbin/freerunner-usb-add.sh" to make it executable. Now you can use network-manager with '''mac-address specific settings''' and get it to automatically connect.
-
-* Plug your phone into your computer's usb port.
-* Note the mac address from "ifconfig usb0" (or eth1)
-* Right-click the network manager icon in the panel.
-* Click "Edit Connections..."
-* Delete the "Auto usb0" entry. (or eth1)
-* Add a new connection named 'freerunner' (or whatever you fancy) 
-* Tick "System setting"
-* Enter the mac address from above.
-* Click the "IPv4 Settings" tab.
-* Change "Method" to "Manual"
-* Add an address of 192.168.0.200, 255.255.255.0 (address and netmask respectively).
-* Click "Ok"
-* Enter your system password (if prompted) to allow changing of this system setting.
-
-(watch out for this bug: https://bugs.launchpad.net/ubuntu/+source/network-manager/+bug/284298 )
-
-You should now be able to ping/ssh your phone.
 
 === Ubuntu 9.04 - the Jaunty Jackalope -- udev=== 
 
