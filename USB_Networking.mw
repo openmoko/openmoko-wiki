@@ -524,7 +524,23 @@ esac
 Make /etc/network/freerunner executable with
  chmod +x /etc/network/freerunner
 
-=== Ubuntu 9.04 - the Jaunty Jackalope -- udev=== 
+=== Ubuntu 9.10 - the Karmic Koala ===
+
+Karmic has a bug in one of the upstart scripts, that makes it fail to properly bring down an unplugged network device (not just USB networking).
+
+Edit /etc/init/network-interface.conf and replace this line
+
+<pre>stop on net-device-removed INTERFACE=$INTERFACE</pre>
+
+... with this
+
+<pre>stop on net-device-remove INTERFACE=$INTERFACE</pre>
+
+If you use /etc/network/interfaces, make sure the device is marked 'auto'. Plugging and unplugging will then work automagically. 
+
+('allow-hotplug' doesn't work, because upstart on ubuntu doesn't support 'allow-hotplug' defined devices)
+
+=== Ubuntu 9.04 - the Jaunty Jackalope === 
 
 One can see /etc/udev/rules.d that a device plugged in on USB will be called '''eth1''' (or '''eth2''' etc.). Go to System->Administration->Network (or edit /etc/network/interfaces) and add the parameters for eth1; static ip 192.168.0.200, netmask 255.255.255.192
 
