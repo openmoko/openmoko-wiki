@@ -151,23 +151,19 @@ Zure PCak mikroSD txartelak irakurtzeko gailurik ez badauka, mikroSD txartelera 
 <ol>
 <li> Zure PCan dagoen irudia daukan direktorioa FreeRunnerreko fitxategi sisteman muntatu dezakezu, eta ondoren, <tt>dd</tt> agindu bidez zuzenean FreeRunnerrean dagoen mikroSD txartelera kopia dezakezu. Prozesu horrek 12 minutu inguru iraun ditzake. Eragiketa hau FreeRunnerreko shell batetik egin behar da.
 </li>
-<li>Alderantziz ere jardun daiteke, alegia, PCko shell batean lan egin dezakezu:
+<li>Alderantziz ere jardun daiteke, alegia, PCko shell batean lan egin dezakezu, horretarako, lehenengo FreeRunnerrean mikroSD txartela desmuntatu:<br>
+  root@om-gta02 ~ $ umount /media/card<br>
+Eta ondoren, PCko shell batean (usb edo wifi konexioa eskatzen du honek):<br>
+  scp flash-moko11-2.image root@192.168.0.202:/dev/mmcblk0
 </li>
 </ol>
- mount the directory in which you have the <tt>flash-moko11-2.image</tt> file and do the <tt>dd</tt> stuff. This will take about 12 minutes.
-
-You can speed this up by re-gziping just the image file and using the following command to decompress it directly to the flash card:
+Prozesu horiek azkartu egin daitezke, irudia gzip bidez konprimituz makinatik makinara pasa beharreko informazio-kopurua gutxitu egin daiteke, eta deskonprimitzeko aginduari zuzenean mikroSD txartelera kopiatzeko esan diezaiokegu:
 
   % gzip -d < flash-moko11-2.image.gz > /dev/mmcblk0
 
-Using this gzip method, you can actually do the update with an in place image as long as it is shell enabled and has 92M free on the main file system (all but Android and Neovento right now). Just get the 92M gzip file to the phone, use the above line to extract it to the card after unmounting.
+Agindu honenkin, eta FreeRunnerreko fitxategi sisteman nahikoa leku libre edukiz gero, ez dogo PCa erabili beharrik, alegia, konprimitutako fitxategia FreeRunnerrean bertan jaso daiteke, eta deskonprimitu mikroSD txartelera. Baina 92MB libre behar ditu gutxi gora behera.
 
-Or, maybe in a more simpler manner:
-  root@om-gta02 ~ $ umount /media/card
- and then from desktop:
-  scp flash-moko11-2.image root@192.168.0.202:/dev/mmcblk0
-
-====NOTE 2====
+====2. OHARRA====
 
 Whether you have [[Qi]] installed or not (see above) as your boot loader, you must power up to the NoR menu (Hold AUX Key, press Power button) and select "Boot from microSD (fat/ext2)" to begin the installation process (per DocScrutinizer in #openmoko). '''Do not''' let Qi boot the uSD. Although it still seems to flash OK, the green "d_o_n_e" does not show up, to give you the warm feeling that everything is OK.
 
