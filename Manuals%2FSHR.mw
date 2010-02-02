@@ -13,15 +13,11 @@ Welcome to '''[[SHR]]''', a community driven distribution for (not only) Openmok
 
 SHR users, readers of this manual, please report improvements, discrepancies or missing features on this page to <tt>vanous @ penguin . cz</tt>. Thank you.
 
-[http://shr-project.org SHR Project page]
-
 ==Installation==
 
 ===Getting SHR===
 
-First, determine which model of phone you have, the GTA01 (Neo 1973) or the GTA02 (Neo FreeRunner).
-
-You need to download two files for your version as above: kernel and root filesystem. Depending whether you will be installing into the internal [[NAND memory]] or on [[µSD]] card, you need to either get .jffs2 file for NAND or .tar.gz file for µSD.
+You need to download two files for your version as above: kernel and root filesystem. Depending whether you will be installing into the internal [[NAND memory]] or on the [[microSD]] card, you need to either get .jffs2 file for NAND or .tar.gz file for microSD.
 
 For the '''GTA02 Neo FreeRunner''' you need to download the images of the:
 *testing line: http://build.shr-project.org/shr-testing/images/om-gta02/
@@ -40,7 +36,6 @@ The above are '''full''' images. You can also choose images with less packages, 
 - '''Get the kernel modules.''' From the same page, download the modules to match your kernel (their dates should be the same). Put that file on the FreeRunner and run
 
  # gzip -dc modules-...tar.gz | tar -xf - -C /
- # depmod -a
 
 '''Editors note''': Running depmod should not be necessary, if it's needed, please report a bug. Recommending of the depmod command will be removed in near future.
 
@@ -56,7 +51,6 @@ Please visit [[Flashing the Neo FreeRunner]] for more details about flashing and
 {{Note|Your battery must be charged (sufficiently) before NAND flashing. Symptom of insufficient charge: Your progress bar "####" stops while flashing. If so, you must charge, and later you should be able to make the complete flash.}}
 Commands to flash the filesystem and the kernel:
 
-
 Note that there are some issues using dfu-util with sudo.
 
 '''Don't use sudo with dfu-util. Make sure you are root before using dfu-util!'''
@@ -71,17 +65,17 @@ for the GTA01 Neo 1973:
  # dfu-util -d [[USB Product IDs|0x1457:0x5119]] -a rootfs -R -D full-om-gta01.jffs2
  # dfu-util -d [[USB Product IDs|0x1457:0x5119]] -a kernel -R -D uImage-om-gta01-latest.bin
 
-===Installation on µSD Card===
+===Installation on the microSD Card===
 
-Installing SHR on your µSD Card depends on the Bootloader you are using, ''uBoot'' or ''Qi''.
+Installing SHR on your microSD Card depends on the Bootloader you are using, ''uBoot'' or ''Qi''.
 
-In simply words, difference between both systems resides on how you must prepare your µSD Card and files you use to fill them:
+In simple words, the difference between both systems resides on how you must prepare your microSD Card and files you use to fill them:
 
 * If you use ''uBoot'', you need to create two partitions. First partition, not so big, in FAT16 or ext2 where you have to place the kernel file (<tt>uImage-om-gta02-latest.bin</tt>) and second partition in ext2 or ext3 where you have to uncompress the filesystem file (<tt>shr-image-om-gta02.tar.gz</tt>).
 
 * If you use ''Qi'', you only need an ext2 partition into your µSD Card where you uncompress the filesystem image file (<tt>shr-image-om-gta02.tar.gz</tt>). In this case Qi Bootloader is going to look for the kernel image into the <tt>/boot</tt> directory for file named <tt>uImage-GTA02.bin</tt> .
 
-Please visit links below for detailed information and tips:
+Please visit the links below for detailed information and tips:
 *For [[Booting from SD | uBoot]] and for [[Qi]].
 
 ===SHR version===
@@ -92,14 +86,11 @@ Should you ever later wonder what version of SHR you have actually installed, pl
 
 {{Note|Please note that running opkg update;opkg upgrade does not change the SHR version. Only flashing or a new image download can change the SHR version.}}
 
-===Booting===
-Press the power button shortly to start the phone. The booting splash screen will appear. The first boot after a new installation always takes a bit longer. It is recommended to reboot after this first boot, to make sure all packages got initialized properly.
+===Initial Setup===
 
 [[Image:Shr-boot-preview.png|200px|thumb|center|SHR Boot Splash screen]]
 
-===Initial Setup===
-
-On the first boot, Setup is automatically initiated to walk the user through basic setup of the Enlightenment desktop environment. You are able to choose preferred language of the desktop environment and the theme. However both options are only offering one choice at the moment.
+On the first boot, Setup is automatically initiated to walk the user through basic setup of the Enlightenment desktop environment. You are able to choose preferred language of the desktop environment and the theme. However both options are only offering one choice at the moment. It is recommended to reboot after this first boot, to make sure all packages got initialized properly.
 
 {| class="wikitable"
 | [[Image:SHR-Setup-Language.png|200px|thumb|language selection]]
@@ -107,11 +98,6 @@ On the first boot, Setup is automatically initiated to walk the user through bas
 |}
 
 ==Running SHR==
-
-===SIM Auth===
-
-[[Image:SHR-SIM-Auth.png|200px|thumb|center|SIM Auth]]
-SIM Pin is asked for upon start up.
 
 ===First look===
 [[Image:SHR-First-Look.png|200px|thumb|Desktop screen]]
@@ -121,67 +107,22 @@ SIM Pin is asked for upon start up.
 
 Besides other software, SHR comes with 4 main phone applications: ''Dialer'', ''Contacts'', ''Messages'' and ''Phone log''.
 
-{| class="wikitable" cellspacing="0" cellpadding="0" style="padding: 0%; margin:0em 0em 1em 0em; border:1px solid #c0c0c0; background:#eeeeee; floating="center";width:100%; "
-
-! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:25% " |  
-[[Image:SHR-Dialer.png|200px|thumb|Dialer]]
-! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:25% " |
-[[Image:SHR-Contacts.png|200px|thumb|Contacts]]
-! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:25% " |
-[[Image:SHR-Contacts-Options.png|200px|thumb|Contact options]]
-! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:25% " |
-[[Image:SHR-Contact-Add.png|200px|thumb|Add new contact]]
+{|
+| [[Image:SHR-Dialer.png|200px|thumb|Dialer]]
+| [[Image:SHR-Contacts.png|200px|thumb|Contacts]]
+| [[Image:SHR-Mesages.png|200px|thumb|Messages]]
+| [[Image:SHR-Message-View.png|200px|thumb|View message]]
 |}
-
-{| class="wikitable" cellspacing="0" cellpadding="0" style="padding: 0%; margin:0em 0em 1em 0em; border:1px solid #c0c0c0; background:#eeeeee; floating="center";width:100%; "
-
-! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:25% " |  
-[[Image:SHR-Mesages.png|200px|thumb|Messages]]
-
-! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:25% " |
-
-[[Image:SHR-Messages-Options.png|200px|thumb|Messages options]]
-
-! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:25% " |
-[[Image:SHR-Message-View.png|200px|thumb|View message]]
-
-! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:25% " |
-[[Image:SHR-Message-View-chars.png|200px|thumb|Unicode support]]
-
-|}
-
-{| class="wikitable" cellspacing="0" cellpadding="0" style="padding: 0%; margin:0em 0em 1em 0em; border:1px solid #c0c0c0; background:#eeeeee; floating="center";width:100%; "
-
-! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:25% " |  
-[[Image:SHR-Mesages-Options.png|200px|thumb|Message options]]
-
-! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:25% " |
-
-[[Image:SHR-Phonelog.png|200px|thumb|Phonelog]]
-
-! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:25% " |
-
-[[Image:SHR-Dialer-Active.png|200px|thumb|Active call]]
-
-|}
-
-Upon a missed call or an unread message there is a notifier that presents a screen with button to run Messages or Phonelog application, or you can simply close the Notifier with the Top Shelf cross.
-
-
 
 ===First steps===
 
 Right after installation and first boot you might want to do a few initial steps:
 
-{{Note|In SHR testing 091210 the default max charging current is 100mA. Change it to 500mA via "Settings", if your USB port can supply it or else the charging will be slow. The Openmoko power supply can supply up to 1000mA via the USB port without changing settings.}}
-
 ====Network Connection====
-''Establish network connection'' and SSH into your phone. The <tt>root</tt> account uses no password by default. You can establish connection either via USB to your desktop and enable NAT or you can connect through Wifi. If you use USB, some setup is required on the desktop side, please read [[USB_Networking]]. For Wifi, you can use [[#Network manager|Network Manager]]
-
-If you have trouble logging yourself in via ssh have a lock here: [[USB_Networking#The_login]]
+''Establish network connection'' and SSH into your phone. The <tt>root</tt> account uses no password by default. You can establish connection either via USB to your desktop and enable NAT or you can connect through Wifi. If you use USB, some setup is required on the desktop side, please read [[USB Networking]]. For Wifi, you can use [[#Network manager|Network Manager]]
 
 ====GSM Network====
-''Check if GSM is working correctly'' - observe the GSM gadget in the Top Shelve and see reported signal of your GSM operator. If GSM Gadget seems not be running, click ''Settings'' and later on ''Phone''. Move ''GSM Antenna'' to ''On''.
+''Check if GSM is working correctly'' - observe the GSM gadget in the Top shelf and see reported signal of your GSM operator. If GSM Gadget seems not be running, click ''Settings'' and later on ''Phone''. Move ''GSM Antenna'' to ''On''.
 
 ====Audio: Volume====
 ''Check and set call volume'' - this is handled by alsa state files in <tt>/usr/share/shr/scenarii/</tt> . To customize speaker volume edit <tt>/usr/share/shr/scenarii/gsmhandset.state</tt> and change <tt>control 4</tt>. Values between from 105 to 120 might be sufficient:
@@ -223,13 +164,11 @@ Then you can search quickly for package name, for example for navit:
 
  grep navit packages.txt
 
-
-
 ====SwapSpace====
 {{Main|SwapSpace}}
 When the RAM is used up, applications get killed. This is particularly bad while doing opkg upgrade. Therefore you might want to create a swap space. Read [[SwapSpace]]
 
-====Changing root password====
+====Changing the root password====
 
 Recent images will show up a prompt to change the root password during the first boot wizard.
 If for some reason this prompt doesn't show up you can change the password by using the terminal emulator in your SHR installation.
@@ -242,7 +181,6 @@ This is very dangerous if you connect using wifi, or USB. You need to activate t
  passwd
 
 then type your selected password (2 times)
-
 
 A much more convenient way might be to install your public-key to ~/.ssh/authorized_keys. You can find your public-key of you host at location:
 
@@ -280,7 +218,6 @@ For localized terminal environment (ssh login) set lang variables set /etc/profi
 
  export LANG=cs_CZ
  export LC_ALL=cs_CZ
-
 
 The Illume keyboard offers english dictionary correction by default. You can list all the dictionaries available for installation:
 
@@ -387,13 +324,12 @@ In GSM settings you can turn off and on GSM module. After turning off antenna, w
 
 To list available providers, click on Operators button. Scanning can take some time. After a while, a list of operators should pop up.
 
-You can't connect to operators marked [forbidden]. After a connection failure, a message is displayed.
+You can't connect to operators marked [forbidden].
 
 Selecting an operator from the list also changes modem registration mode to manual. It won't register to other network, even if some is available and has better signal strengh. To return to automatic mode, click "Automatic" button in operator list.
 
 '''Call'''
 {| class="wikitable" cellspacing="0" cellpadding="0" style="padding: 0%; margin:0em 0em 1em 0em; border:1px solid #c0c0c0; background:#eeeeee; floating="center";width:100%; "
-
 
 ! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:50% " |
 
@@ -422,22 +358,13 @@ Here you can select the current profile, which the device should use to determin
 
 '''Current profile'''
 
-Here you can adjust properties of the currently used profile. Available settings: ring tone, ring volume, ring vibration, ring loop, ring length, message tone, message volume, message vibration, message loop, message length.
+Here you can adjust properties of the currently used profile. 
 
 To change the ring tone, click the "Change" button.
 
 To use your own ring tone, place it in /usr/share/sounds directory.
 
 After selecting a sid tune as the ring tone, there are available controls to select tune number from the file.
-
-This is changing settings in /etc/freesmartphone/opreferences/conf/phone/default.yaml
-
- ring-volume # Ring Volume control 0 (mini) to ? maxi)
- ring-length # min time for ringtone. Must be greater than the duration of you ringtone
- ring-loop # define the number of loop of ringtone to play
- ring-tone: "ringtone_ringnroll.ogg" # .ogg example
- ring-tone: "Arkanoid_PSID.sid" # .sid example, use default tune
- ring-tone: "Arkanoid_PSID.sid;tune=2" # .sid example, plays the second tune of that
 
 If you like to test a .sid you can play it using this command on the FR:
 
@@ -470,19 +397,15 @@ Note that it's a ! used and not a | to construct the gstreamer pipe command.
 [[Image:SHR-Settings-Connectivity2.png |200px|thumb|Connectivity bottom]]
 |}
 
-
 '''WiFi'''
 
 With the "WiFi radio" toggle you can set, if the wifi module is powered. WiFi radio has to be turned on before trying to connect to a WiFi network, unless you try to connect through [[Mokonnect]] which is capable of powering it up.
 
 '''GPRS'''
 
-To enter APN, login and password fields, just click on the actual value (default: "internet"). Keyboard will pop up.
-If you don't know APN, login and passwork, ask your provider.}}
+To enter APN, login and password fields, just click on the actual value (default: "internet"). Your phone provider can provide the required configuration options.
 
 {{Note|You can also use Mokonnect to manage your GPRS connection}}
-
-To connect to the GPRS network, just click the "Connect" button. Entered values will be saved after successful connection.
 
 '''USB'''
 
@@ -504,7 +427,7 @@ Here you can also force enable 500mA charging.
 
 With this slider you can easily set the backlight brightness.
 
-{{Note|This setting isn't permanent over sessions. At boot backlight is set back to 100%.}}
+{{Note|This setting isn't permanent over sessions. At boot backlight is set back to 80%.}}
 
 '''Power'''
 
@@ -534,41 +457,11 @@ Here you can set up values of idle timeouts used by the device. Timeouts are rea
 
 ====Settings: Appearance====
 
-
 '''Theming'''
 [[Image:SHR-Neo-Theme.png|200px|thumb|Neo theme]]
 Find available themes by running 
 
  opkg list | grep theme-illume
-
-install it by
-
- opkg install e-wm-theme-illume-sixteen elementary-theme-sixteen
-
-http://opkg.org has a very fast theme called nEo
-
- opkg install http://www.opkg.org/packages/e-wm-theme-neo_0.2_armv4t.ipk
- opkg install http://www.opkg.org/packages/elementary-theme-neo_0.2_armv4t.ipk
- opkg install http://www.opkg.org/packages/etk-theme-neo_0.2_armv4t.ipk
- opkg install -force-overwrite http://www.opkg.org/packages/libframeworkd-phonegui-efl-theme-neo_0.2_armv4t.ipk
-
-If you also want the GTK+ Applications to fit in with the rest of the Systems look execute
-
- opkg install http://www.opkg.org/packages/gtk-theme-neo_0.1_armv4t.ipk
-
-For a completely monolithic look additionally execute
- 
- opkg install -force-overwrite http://www.opkg.org/packages/gpe-theme-neo_0.1_armv4t.ipk
- opkg install http://www.opkg.org/packages/icon-theme-neo_0.2_armv4t.ipk
-
-Please observe the command line output when installing these themes, since it will tell you how to activate the themes.
-
-{{Note|some of the theme packages have to be reinstalled after an opkg upgrade.}}
-
-Reverting back can be done by 
-
- opkg install e-wm-theme-illume-sixteen shr-theme-gtk-e17lookalike  -force-reinstall
- opkg install libframeworkd-phonegui-efl0 e-wm-theme-default etk-theme-shr shr-theme -force-reinstall
 
 ====Settings: Position====
 
@@ -584,15 +477,13 @@ Reverting back can be done by
 [[Image:SHR-Settings-GPS-Satelites.png |200px|thumb|GPS Satelite details]]
 |}
 
-
-
 '''GPS'''
 
 By default, GPS is turned on only when requested (when you turn on TangoGPS, Navit, omgps or other GPS app). That state corresponds to "Auto" setting. After changing to "Manual", you can force set it to on or off.
 
 '''GPS information'''
 
-This page can be used to monitor GPS status. If some value isn't known, then "unknown" is displayed.
+This page can be used to monitor GPS status.
 
 You can also view information about every visible satellite and check, which are used for getting a fix. To do that, click "Satellite details".
 
@@ -602,7 +493,7 @@ Assisted GPS ([[aGPS]]) support GPS receiver to find position by non-satellite i
 
 '''Save downloaded maps of TangoGSP on Memory Card'''
 
-By default, TangoGPS will save your downloaded maps in /home/root/Maps. But it'll be inconvenient if you flashing again. You can change the path of folder Maps into a folder we created in Memory Card by using Config (Map Repositories) of TangoGPS.
+By default, TangoGPS will save your downloaded maps in /home/root/Maps. But it'll be inconvenient if you flash again. You can change the path of folder Maps into a folder we created in Memory Card by using Config (Map Repositories) of TangoGPS.
 
 Otherwise, if you have a problem that can't change in that way. Don't be upset, there's another way. First you create a folder <tt>Maps</tt> on Memory Card: 
   mkdir /media/mmcblk0/Maps
@@ -662,11 +553,9 @@ Here you can either archive or restore your files and configurations.
 
 === Illume settings ===
 
-The Illume desktop can be easily customized - slide the top shelf down and tap the Settings icon (Wrench).
+The Illume desktop can be easily customized - slide the top shelf down and tap the Settings icon (SHR logo).
 
-{{Note|TIP: for better access of the Settings icon, tap and hold the Settings icon, then drag it to the right.}}
-
-'''Illume settings''' (the wrench) provides various options to alter the desktop environment. You can change sizes of elements, single or double click, wallpaper. To access all the various options, open Illume Settings and slide the visible icons to the left, to preview more options on the right hand side.
+'''Illume settings''' (the wrench) provides various options to alter the desktop environment. You can change sizes of elements, single or double click, wallpaper. To access all the various options, open Illume Settings and slide the visible icons to the left, to view more options on the right hand side.
 
 The little applets in the top shelf (for example Battery, GSM, Bluetooth etc.)  are called '''shelf gadgets''' and you can configure whether they are visible (on the front part of the top shelf) or hidden (you can access them by sliding the top shelf) through Illume Settings -> Display -> Shelf gadget.
 
@@ -794,8 +683,6 @@ Find your headset and use its address in the command
 
 If you give a third parameter (what it is doesn't matter) to simple-agent, it will disconnect then reconnect to the headset (reset pairing).
 
-
-
 ===GSM phone calls with bluetooth headset===
 
 Your bluetooth headset device must be paired first.
@@ -866,7 +753,7 @@ and install one of the available themes
 
  opkg install shr-splash-theme-dontpanic
 
-Then go to SHR Settings -> Others -> Themes. Here you can preview installed themes and change the default one.
+Then go to SHR Settings -> Appearance -> Splash settings. Here you can preview installed themes and change the default one.
 
 ===Enable mouse cursor=== 
 
@@ -874,8 +761,6 @@ edit line 121 of /etc/X11/Xinit and erase -hide-cursor
 
  ARGS="$ARGS -dpi ${DPI} -screen ${SCREEN_SIZE} -mouse tslib -root-ppm /usr/share/pixmaps/xsplash-vga.ppm vt1"
             
-
-
 ===Speedup of suspend and wake up===
 
 Some setup types of the bootloader are causing slow suspending and waking up through a long console output. ([http://shr-project.org/trac/ticket/351 bug report]) This occurs when using the the Qi bootloader in combination with an installation on an SD card and when using the u-boot bootloader. 
@@ -938,7 +823,6 @@ Safe update packages:
  	opkg install $pkg -force-reinstall
  done
 
-
 Force reinstall all installed packages:
 
  #!/bin/sh
@@ -956,8 +840,6 @@ For reboot into nand and fix 1st partition of ext2 on your card
 
  fsck.ext2 /dev/mmcblk0p1
 
-
-
 === Adding your phone to your hosts ===
 
 You can add your phone to your hosts file for a name resolving:
@@ -972,7 +854,6 @@ You can then access your phone like this:
 Which is shorter than this:
 
  ssh root@192.168.0.202
-
 
 ==== .ssh/config as an alternative ====
 
@@ -1006,29 +887,5 @@ You can use opkg for installing software packages or you can try SHR Installer f
 If you wan to use opkg after you used the installer, make sure packagekitd is not running
 
  killall packagekitd 
-
-'''Cool applications'''
-
-SHR comes with only a few preinstalled applications but its repository provides more cool stuff. Also, there are applications that are not in SHR repos at the moment but can still be installed. The following few examples are here just to spark your interest:
-
-'''[[Paroli]]''' is available in SHR images, you can install it:
-
- opkg install paroli
-
-fix the conf files that the paroli installer messes with (might get fixed in the next couple of days.)
-
- cp /etc/old_frameworkd.conf /etc/frameworkd.conf
- cp /etc/freesmartphone/oevents/old_rules.yaml /etc/freesmartphone/oevents/rules.yaml
-
-now if you want to disable the shr phone apps without removing them comment all of the lines out in 
-
- /etc/X11/Xsession.d/89notifier and /etc/X11/Xsession.d/80ophonekitd
-
-if you want the bind-home to ease upgrades add this line to fstab.
-
- /media/card/bind-home   /home/root     none        bind                   0  0
-
-You should now have a functional paroli on SHR setup. Once you have a working setup I would advise against doing opkg upgrades and only upgrade specific packages when needed.
-
 
 [[Category:SHR]]
