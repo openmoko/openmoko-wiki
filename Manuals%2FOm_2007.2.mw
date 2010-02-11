@@ -81,4 +81,168 @@ tmpfs                    61928       380     61548   1% /var/volatile
 tmpfs                    61928         0     61928   0% /dev/shm
 </pre>
 
+==Switching Keyboards==
+
+===Fix default===
+Due to a bug, the default keyboard supplied on the 2007.2 doesn't allow you to enter the "/" or "\" characters, which should be on the same key (0?) as "+".
+You can instead add these characters to other keys, in this example ">" and "/" are added to the 1 key.
+You may also insert the tab character \t, which provides tab completion.
+The  | character may also be useful.
+Edit <tt>/etc/multitap-pad/im-multipress.conf</tt>:
+
+ [keys]
+ KP_0 = +;=;/;\\
+ KP_1 = .;,;/;>;-;?;!;@;:;(;)
+ KP_2 = a;b;c;2
+ KP_3 = d;e;f;3
+ KP_4 = g;h;i;4
+ KP_5 = j;k;l;5;\t
+ KP_6 = m;n;o;6
+ KP_7 = p;q;r;s;7
+ KP_8 = t;u;v;8
+ KP_9 = w;x;y;z;9
+ KP_10 = A;B;C;2
+ KP_11 = D;E;F;3
+ KP_12 = G;H;I;4
+ KP_13 = J;K;L;5
+ KP_14 = M;N;O;6
+ KP_15 = P;Q;R;S;7
+ KP_16 = T;U;V;8
+ KP_17 = W;X;Y;Z;9
+
+The buggy key is <tt>KP_0</tt> in the above file.
+
+The ; character is also missing. You can add this character by adding ;\; to any of the lines above.
+
+===Matchbox keyboard===
+
+Another keyboard is available: matchbox-keyboard. It is a full QWERTY keyboard. This howto is based on a blog entry which can be found [http://www.ginguppin.de/node/15 here]
+
+====Considerations====
+
+Pros:
+* All keys can be generated
+* Takes up less space than the keypad (multitap-pad), leaving more space for the application
+
+Cons:
+* You pretty much have to use a stylus.  With difficulty you can hit keys with the corner of a fingernail.
+
+====How to install it?====
+
+ScaredyCat release (http://buildhost.automated.it/OM2007.2/) or others distributions, use the following:
+
+ opkg remove -force-depends multitap-pad
+ opkg install matchbox-keyboard-inputmethod
+ opkg install matchbox-keyboard-im
+ opkg install matchbox-keyboard-applet
+
+Otherwise, you'll have to download the ipk files from [http://www.ginguppin.de/files/keyboard-ipk.tar.bz2 here]. Assuming you have a working internet connection on your FreeRunner, you can do the following:
+
+ cd /tmp
+ mkdir matchbox-keyboard
+ cd matchbox-keyboard
+ wget http://www.ginguppin.de/files/keyboard-ipk.tar.bz2
+ tar -jxf keyboard-ipk.tar.bz2
+ opkg remove -force-depends multitap-pad
+ opkg install matchbox-keyboard-inputmethod*.ipk
+ opkg install matchbox-keyboard-im*.ipk
+ opkg install matchbox-keyboard-applet*.ipk
+ cd ..
+ rm -rf matchbox-keyboard
+
+After that you'll have to restart the X server:
+ /etc/init.d/xserver-nodm restart
+
+====How to add a keyboard toggle button====
+
+To add a button to enable showing / hiding the keyboard, edit <tt>/etc/matchbox/session</tt>. In the list of applets after <tt>--end-applets</tt>, add <tt>keyboard</tt>, and restart your X server
+
+====How to switch between matchbox-keyboard and multitap-pad====
+
+If you want to keep the multitap keyboard, but also be able to start up the matchbox-keyboard, you can follow these ugly instructions:
+
+First you must install matchbox-keyboard.
+ opkg install matchbox-keyboard
+
+Do the following (from the terminal or an ssh session with DISPLAY=:0.0):
+ killall multitap-pad
+ matchbox-keyboard > /dev/null 2>&1 &
+
+(If you type the above commands with multitap, you have to leave off the redirection of matchbox-keyboard output, since several of the keys you need are missing.)
+
+Caveats:  When you start the matchbox-keyboard, it stays up all the time.  This will (among other things) prevent you from unlocking, since the keyboard covers the openmoko logo at the bottom of the lock screen.  You will need to:
+# nohup multitap-pad -d &
+# killall matchbox-keyboard
+to close it down, and at least get the matchbox keyboard going again.  You should do that any time you're going to leave the neo alone for any length of time, so you can unlock it later.
+
+To make sure you don't end up removing all your keyboard input capability, you can create a new .desktop file in /usr/share/applications/ for starting and closing the keyboard.  This is pretty easy to do by copying and editing an existing .desktop file.
+
+===Modified Matchbox Keyboard: finger friendly===
+There is a modified Matchbox keyboard available on http://wiki.harnir.net/openmoko:keyboard-compressed .
+The keyboard can be controlled without stylus and also includes everything needed for terminal-use.
+
+===== Installation =====
+
+Download one of the files below, uncompress and put it in ''/usr/share/matchbox-keyboard/'' on your Neo FreeRunner:
+
+  * [http://wiki.harnir.net/_media/openmoko:file:keyboard-compressed.xml.gz?id=openmoko%3Akeyboard-compressed&cache=cache general keyboard layout] DEAD LINK
+  * [http://wiki.harnir.net/_media/openmoko:file:keyboard-compressed-pl.xml.gz?id=openmoko%3Akeyboard-compressed&cache=cache Polish keyboard layout] DEAD LINK
+
+If you want, you can change the name of the file to ''keyboard.xml'' or make a symlink to it. This way, ''matchbox-keyboard'' will use it automatically after next restart of the X server.
+
+Note: I've installed keyboard layout from [[http://atariland.net/~dreilly/openmoko/]] before making this one. Please inform me if my layout works without these modifications, or if they are needed.
+
+===== How does it look like? =====
+
+==== Default layout ====
+[[Image:Matchbox-keyboard-general.png]]
+  * ^[ - Escape
+  * ⇑ - Shift
+  * ⌫ - Backspace
+  * ⇔ - switch layout to the alternate
+  * ^C - Control
+  * ◆ - write a digit or symbol
+  * ↵ - Enter
+
+
+==== Default Polish layout ====
+[[Image:Matchbox-keyboard-pl.png]]
+
+==== Shifted Polish layout ====
+
+[[Image:Matchbox-keyboard-pl-caps.png]]
+
+  * ⇒ - Tab
+  * ⇑⇑ - Caps Lock
+
+If you use general layout, special characters from the top row stay the same in the shifted layout.
+
+==== Digits and symbols ====
+
+[[Image:Matchbox-keyboard-symbols.png]]
+
+When you select a desired key in this layout, keyboard immediately returns back to the alphabet keys.
+
+==== Alternate keyboard layout ====
+
+[[Image:Matchbox-keyboard-alternate.png]]
+
+This layout is "persistent" - when you select a key it won't disappear by itself - you need to use the <key>⇔</key> key in the bottom-left corner of the keyboard to return to the default keyboard.
+
+Alternate layout is meant for easy writing of medium or long numbers (decimal or hex, hence the A-F letters), IP and MAC addresses, RGB values, etc. You can find here also direction keys (↑, ↓, ←, →) for easier movement operations.
+
+===Switch back to the original Openmoko keypad===
+
+If you for whatever reason need to switch back, here are the steps:
+ opkg remove matchbox-keyboard-inputmethod matchbox-keyboard-im matchbox-keyboard-applet
+ opkg install multitap-pad
+
+Comment or delete the following lines in /etc/gtk-2.0/gtk.immodules :
+ #"/usr/lib/gtk-2.0/2.10.0/immodules/libmb-im-invoker.so"
+ #"matchbox-im-invoker" "Virtual Keyboard" "" "" "*"
+
+Now restart the xserver:
+ /etc/init.d/xserver-nodm restart
+
+[[Category:Om 2007.2]]
 [[Category:Manuals]]
