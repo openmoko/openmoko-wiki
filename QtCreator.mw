@@ -104,7 +104,7 @@ http://www.qtsoftware.com/downloads/
  sudo ./qt-creator-linux-x86-opensource-1.1.0.bin
 </pre>
 
-=== OpenMokoder ===
+=== Method 1: OpenMokoder ===
 
 *OpenMokoder is just a set of folders that contain some scripts, templates and the sample project. 
 
@@ -205,6 +205,59 @@ Don't know how to do that yet feel free to add it here
 ==== What does CreateProject.script do ? (draft)====
 
 To be done
+
+===Method 2: Making your own custom QMake mkspec===
+This method provides a very easy and intuitive way for cross-compiling using a custom QMake mkspec configuration. It uses QMake, so the right libraries are automatically included.
+
+Tested under Kubuntu 9.10
+
+* Make your own mkspec by copying an existing one
+ sudo cp /usr/share/qt4/mkspecs/linux-g++ /usr/share/qt4/mkspec/linux-OM-g++
+* Edit the qmake.conf file (gnome users can use gedit instead of kate):
+ sudo kate /usr/share/qt4/mkspec/linux-OM-g++/qmake.conf
+* Change existing content to this one:
+<pre>
+#
+# qmake configuration for linux-OM-g++
+#
+
+MAKEFILE_GENERATOR	= UNIX
+TEMPLATE		= app
+CONFIG			+= qt warn_on release incremental link_prl
+QT			+= core gui
+QMAKE_INCREMENTAL_STYLE = sublib
+
+include(../common/g++.conf)
+include(../common/linux.conf)
+
+# modifications to g++.conf 
+QMAKE_CC = /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/gcc
+QMAKE_LINK_C = /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/gcc
+QMAKE_LINK_C_SHLIB = /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/gcc
+QMAKE_CXX = /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/g++
+QMAKE_LINK = /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/g++
+QMAKE_LINK_SHLIB = /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/g++
+
+# modifications to linux.conf 
+QMAKE_AR = /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/ar cqs 
+QMAKE_OBJCOPY = /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/objcopy 
+QMAKE_STRIP = /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/strip
+QMAKE_INCDIR_QT = /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/include/qt4
+QMAKE_LIBDIR_QT = /usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/usr/lib
+
+load(qt_config)
+</pre>
+* Now use the following build steps:
+<pre>
+qmake-qt4 /path/to/your/project/project.pro -r -spec linux-armv4-g++
+make -w in /path/to/your/project
+</pre>
+{{Note|
+You can do this once in the console and then you can Import this existing build settings in Qt Creator for future use.
+}}
+* Copy the compiled project to your Neo Freerunner
+ scp /path/to/your/project/project root@192.168.0.202:/usr/bin/.
+* Run the project either by using SSH or by using the terminal on your Neo Freerunner
 
 == Successfully tested with... ==
 (Please add information here if the tutorial succeeds)
