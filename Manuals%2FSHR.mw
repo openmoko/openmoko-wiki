@@ -749,39 +749,7 @@ In '''Illume Settings''' => '''Input''' => '''Key Bindings''', bind the key '''X
 
 
 
-===opkg upgrade issues===
 
-{{Note|<br>Image unstable/testing december and previously:<br>Before upgrading (via opkg), you should go to "Settings"->"Power" and change "Auto-suspend" to "Off", or else your phone will suspend while upgrading.<br><br>Former images:<br>If "Auto-suspend" can not be found, you must prevent the phone from suspending while upgrading. Tap shortly (within 1-2 seconds?) on the just blackened screen to prevent suspending. After the upgrade the "Auto-suspend" settings will be available.<br><br>The unwanted suspending while upgrading can be avoided by using the below alias.
-}}
-
-You can request the CPU resource (temporary non-suspend) while executing opkg by inserting this in file /etc/profile :
- alias opkg="fsoraw -f -r CPU -- opkg"
-
-To make the alias work at once for the current boot execute:
- alias opkg="fsoraw -f -r CPU -- opkg"
-Source: spaetz
-
-As '''opkg''' had some '''issues''' recently, installation  might get broken due to that. You can fix it or prevent by using the following scripts
-
-Safe update packages:
-
- #!/bin/sh
- 
- for pkg in `opkg list_upgradable | awk '!/(kernel|Multiple)/ {print $1}'`
- do
- 	echo "installing pack $pkg"
- 	opkg install $pkg -force-reinstall
- done
-
-Force reinstall all installed packages:
-
- #!/bin/sh
- 
- for pkg in `opkg list_installed | awk '!/(kernel|Multiple)/ {print $1}'`
- do
- 	echo "installing pack $pkg"
- 	opkg install $pkg -force-reinstall
- done
 
 ===Random errors===
 No icons, no GSM functions etc. - this is mostly due to '''errors on your µSD''' card. Remove your card and fix it in card reader or by booting to another partition (nand) or by reboot and mount read only, then run fsck.
