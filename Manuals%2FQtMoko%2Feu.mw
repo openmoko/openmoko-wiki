@@ -1,10 +1,10 @@
-{{Languages|Manuals/QtMoko}}
+{{Languages|Manuals/SHR}}
 ===Qt Moko===
-Qt Moko [[Debian]]-en oinarritutako Openmokoren [[Neo Freerunner]] mugikorrerako banaketa da. Telefonoaren erabilera eta erabiltzailearen interfazea [[Qt Extended Improved]]-en oinarritzen dira, hau gehienetan [[Qtopia / Qt Extended on FreeRunner|Qtopia]] izenaz ezagutzen da. QtMokoren wikia  can [http://qtmoko.org/ honakoan] aurkituko duzu.
+Qt Moko [[Debian]]-en oinarritutako Openmoko [Neo Freerunner]] mugikorrerako banaketa da. Telefonoaren erabilera eta erabiltzailearen interfazea [[Qt Extended Improved]]-en oinarritzen dira, hau gehienetan [[Qtopia / Qt Extended on FreeRunner|Qtopia]] izenaz ezagutzen da. QtMokoren wikia  can [http://qtmoko.org/ honakoan] aurkituko duzu.
 
 
 ===Deskarga===
-Honako fitxategiak deskargatu zure mahaigaineko PCra [https://sourceforge.net/projects/qtmoko/files/ radekp download] gunetik:
+Honako fitxategiak deskargatu zure mahaigaineko konputagailura [https://sourceforge.net/projects/qtmoko/files/ radekp download] gunetik:
 * latest
 ** https://sourceforge.net/projects/qtmoko/files/
 
@@ -24,43 +24,42 @@ Itzali freerunnerra eta sakatu AUX eta pizteko botoia biak batera. Freerrunnerra
 
 Egoera honetan 30 segundo besterik ez da egongo. Denbora tarte horretan  <tt>dfu-util</tt> hasi beharko duzu, bestela beti bezala, betiko sistemarekin, hasiko baita freerunnerra. Kernelaren irudia flasheatu nahi baduzu (zure PCan root baimenekin egon beharko duzu) U-Boot menuak irauten dituen 30 segundo horietan honako agindua eragin beharko duzu:
 
- # Neo FreeRunnerrerako:
+ # for the Neo FreeRunner:
  dfu-util -d [[USB Product IDs|0x1d50:0x5119]] -a kernel -R -D  uImage-v13.bin
 
-Eta bigarrenik, root fitxategi sistema honakoaren bidez:
+and finally the root fs with this one:
 
- # Neo FreeRunnerrerako:
+ # for the Neo FreeRunner:
  dfu-util -d [[USB Product IDs|0x1d50:0x5119]] -a rootfs -R -D qtmoko-debian-v13.jffs2
 
-===Lehendabiziko abiaratzea===
-Instalazioa errorerik gabe egin ondoren FreeRunnerra berrabiarazi behar da, eta ukimenezko pantaila kalibratu behar da. Orduan ikusiko duzu instalatutako ''Qt Moko'' berria zure gailuan.
-[[Image:qtmokomain.png|200px|thumb|Qt Moko lehenengo aldiz abiarazitakoan]]
+===First Boot===
+After finishing the installation without errors you have to start the freerunner and calibrate the  touch screen. The you see the installed ''Qt Moko'' on your device. 
+[[Image:qtmokomain.png|200px|thumb|Qt Moko after first boot]]
 
-===Konektatu===
-FreeRunnerrera konektatu nahi baduzu, sare konexioa ezarri behar duzu (ikusi [[USB Networking]]) USB kable bidez eta honako agindua eragin zure PCko terminalean:
+===Login===
+If you want to login to your freerunner set up network connection (see [[USB Networking]]) with USB cable and start:
    desktop# ssh -X -l root 192.168.0.202
 
-root erabiltzaileak hasieran ez dauka pasahitzik, baina zeuk ezar diezaikoezu segurtasun kontuak kezkatzen bazaituzte, bereziki ssh deabrua martxan jartzen duzunean WLAN sare interfazean. Linux makinetan egin ohi den moduan ezar dezakezu pasahitza: 
+The root password is empty so set it for security reason especially when you open the ssh-daemon on the WLAN network interface. Define root password as usual on a linux box with
    neo# passwd
-USB kable bidezko internet konexioa ezarri baduzu, biltegi edo errepositorioko datuak eguneratzea komeni da:
+If you have established the internet connection via USB cable then update the repository data:
    neo# apt-get update 
-Zure FreeRunnerrean Internet konexioa daukazun edo ez jakiteko OpenMoko sare zerbitzariari ping egin diezaiokezu:I
+If you want to check if the internet connection is available on your freerunner ping the OpenMoko web server with:
    neo# ping 88.198.93.221
    neo# ping wiki.openmoko.org
-Lehenengoak ondo egiten badu, baina bigarrenak gaizki, DNS zerbitzaria da ez dabilkizuna, begira ezazu [[USB Networking]].
+If the first ping works and the second doesn't then check the DNS server settings (see [[USB Networking]]).
 
 
-===Ordua eta data ezarri===
-Data eta ordua zeure Linuxetik ezar ditzakezu honako aginduaren bidez:
+===Setting Time and Date===
+Set the time and date on from your linux box with
 <pre>
 ssh root@openmoko "date -us @`date -u +%s`"
 </pre>
-NTP Bezero baten bidez ezarri nahi baduzu, ondoko paketea instalatu, baldin eta sare konexioren bat baldin badaukazu (ikusi [[USB Networking]])
+If you want to set the time with a NTP Client install the following package, if you have a network connection available (see [[USB Networking]])
 <pre>
 # apt-get install ntpdate
 # ntpdate-debian
 </pre>
-Gehiago jakiteko ikusi [[Setting Date and Time]].
+For further detail see [[Setting Date and Time]].
 
-[[Category:Qt Moko]]
-[[Category:Manuals]]
+[[Category:Qt| ]]
