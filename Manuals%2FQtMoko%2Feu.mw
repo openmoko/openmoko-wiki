@@ -1,0 +1,65 @@
+{{Languages|Manuals/SHR}}
+===Qt Moko===
+Qt Moko [[Debian]]-en oinarritutako Openmoko [Neo Freerunner]] mugikorrerako banaketa da. Telefonoaren erabilera eta erabiltzailearen interfazea [[Qt Extended Improved]]-en oinarritzen dira, hau gehienetan [[Qtopia / Qt Extended on FreeRunner|Qtopia]] izenaz ezagutzen da. QtMokoren wikia  can [http://qtmoko.org/ honakoan] aurkituko duzu.
+
+
+===Deskarga===
+Honako fitxategiak deskargatu zure mahaigaineko konputagailura [https://sourceforge.net/projects/qtmoko/files/ radekp download] gunetik:
+* latest
+** https://sourceforge.net/projects/qtmoko/files/
+
+===Instalazioa===
+QtMoko-tik kernel irudia zure freerunnera flassheatzen baduzu, kernela eta fitxategi sistema instalatu behar dituzu (biak). Baina [[Qi]] instalatuta baldin badaukazu, orduan mikroSD txartelean instala zenezake QtMoko. Azken bide horrek sistema batekin baino gehiagorekin lan egiteko aukera emango dizu,GRUBak ordenagailuetan sistema eragile bat baino gehiago erabiltzeko aukera ematen duenaren antzera. SD txartela aldatzearekin banaketa ezberdin bat erabil baitaiteke.
+
+Itzali freerunnerra eta sakatu AUX eta pizteko botoia biak batera. Freerrunnerrak honako U-Boot menua erakutsiko dizu:
+
+   *** BOOT MENU (NOR) ***
+
+   Boot
+   Boot from Mirco SD (FAT/ext2)
+   Set Console to USB
+   Set Console to Serial
+   Reboot
+   Power Off  
+
+Egoera honetan 30 segundo besterik ez da egongo. Denbora tarte horretan  <tt>dfu-util</tt> hasi beharko duzu, bestela beti bezala, betiko sistemarekin, hasiko baita freerunnerra. Kernelaren irudia flasheatu nahi baduzu (zure PCan root baimenekin egon beharko duzu) U-Boot menuak irauten dituen 30 segundo horietan honako agindua eragin beharko duzu:
+
+ # for the Neo FreeRunner:
+ dfu-util -d [[USB Product IDs|0x1d50:0x5119]] -a kernel -R -D  uImage-v13.bin
+
+and finally the root fs with this one:
+
+ # for the Neo FreeRunner:
+ dfu-util -d [[USB Product IDs|0x1d50:0x5119]] -a rootfs -R -D qtmoko-debian-v13.jffs2
+
+===First Boot===
+After finishing the installation without errors you have to start the freerunner and calibrate the  touch screen. The you see the installed ''Qt Moko'' on your device. 
+[[Image:qtmokomain.png|200px|thumb|Qt Moko after first boot]]
+
+===Login===
+If you want to login to your freerunner set up network connection (see [[USB Networking]]) with USB cable and start:
+   desktop# ssh -X -l root 192.168.0.202
+
+The root password is empty so set it for security reason especially when you open the ssh-daemon on the WLAN network interface. Define root password as usual on a linux box with
+   neo# passwd
+If you have established the internet connection via USB cable then update the repository data:
+   neo# apt-get update 
+If you want to check if the internet connection is available on your freerunner ping the OpenMoko web server with:
+   neo# ping 88.198.93.221
+   neo# ping wiki.openmoko.org
+If the first ping works and the second doesn't then check the DNS server settings (see [[USB Networking]]).
+
+
+===Setting Time and Date===
+Set the time and date on from your linux box with
+<pre>
+ssh root@openmoko "date -us @`date -u +%s`"
+</pre>
+If you want to set the time with a NTP Client install the following package, if you have a network connection available (see [[USB Networking]])
+<pre>
+# apt-get install ntpdate
+# ntpdate-debian
+</pre>
+For further detail see [[Setting Date and Time]].
+
+[[Category:Qt| ]]
