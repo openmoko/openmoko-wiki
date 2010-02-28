@@ -174,115 +174,6 @@ Then you can search quickly for package name, for example for navit:
 
 When the RAM is used up, applications get killed. This is particularly bad while doing opkg upgrade. Therefore you might want to create a swap space. Read [[SwapSpace]] article.
 
-==Localization==
-
-=== Localize SHR manually ===
-
-[[Image:SHR-Illume-Settings-Languages.png|200px|thumb|Setting Language]]
-
-====Desktop environment====
-
-You can change the language of the SHR desktop environment by using the Settings of Illume. For Example, for Czech language: in the Illume top shelf go to Wrench (Settings) -> Language -> Language Settings -> and choose: Čeština. If your language is not in the menu you can install by using opkg.
-
-You can list all available languages by running:
-
- opkg list | grep eglibc-locale-
-
-And install the language of your choice (for example czech):
-
- opkg install eglibc-locale-cs
-
-After this, the Language Settings of Illume will offer Czech. 
-
-This will localize the Illume environment and will also set correct lang environment variable of your desktop. 
-
-====Applications====
-
-If you wish to have other applications localized, you need to install translation for each of them (presuming it is available):
-
-This will install czech localization for SHR phone applications, SHR Settings and TangoGps:
-
- opkg install libframeworkd-phonegui-efl-locale-cs shr-settings-locale-cs tangogps-locale-cs
-
-====Terminal environment====
-
-For localized terminal environment (ssh login) set lang variables in /etc/profile, example for Czech language:
-
- export LANG=cs_CZ
- export LC_ALL=cs_CZ
-
-====Illume keyboard and dictionaries====
-
-The Illume keyboard offers English dictionary correction by default. You can list all the dictionaries available for installation:
-
- opkg list | grep illume-dic
-
-If your language is not available and the English one is bothering you, you can set an empty dictionary:
-
- echo "" > /usr/lib/enlightenment/modules/illume/dicts/None.dic
-
-By using it, it will get filled by the words you use and after time will start helping and correcting your typing.
-
-[[Image:Illume-keyboards-terminal-dutch-nl-screenshot.png| Dutch terminal virtual keyboard|256px|thumb]]
-Furthermore you can install a different keyboard with a layout which fits your language or alternatives for the default keyboards like the numerical one. The localized [[Illume keyboard]]s are available in the SHR repository under the name ''illume-keyboard-LANG''.
-
-Note that sometimes after an upgrade of Illume has taken place, these keyboards have to be installed again before they become available again. Removing these packages will restore the availability of the respective original keyboards.
-
-==== German (and Austria) Language ====
-
-See [[Configure_SHR_for_German-speaking_use]] for detailed customization for german speaking.
-
-===Date and time===
-
-The local timezone is automatically retrieved from the GSM network.
-
-create a symlink named /etc/localtime which points to the appropriate file in /usr/share/zoneinfo. For example, if you're in France., the following command will link the correct zoneinfo file to your /etc/localtime, giving you the correct time:
-
- ln -sf /usr/share/zoneinfo/Europe/Paris /etc/localtime
-
-Afterwards, edit /etc/timezone if necessary [?]
-
-Local timezone work instantly for the current boot when:
-
- TZ="Europe/Paris"
- export TZ
-
-For a permanent timezone change edit /etc/profile and change to:
-
- TZ="Europe/Paris"
-
-Date and time are automatically set from GPS or Network. The easiest way of setting the time for the first time is to run TangoGps (GPS & Map icon) and obtaining GPS fix. Time will then be set automatically after several minutes.
-
-Time can set time also manually.
-
-Via SHR-Settings -> Date/time -> Set time
-
-From linux based desktop:
-
- ssh root@192.168.0.202 "date -u -s `date -u +%m%d%H%M%Y.%S`"
-
-You can also set the hardware clock to the system time:
-
- hwclock --systohc
-
-Is this better?:
-
- hwclock --utc --systohc
-
-It is possible to instruct framework on how to set the time and timezone in /etc/frameworkd.conf :
-
- [otimed]
- # a list of time/zone sources to use or NONE
- timesources = GPS,NTP
- zonesources = GSM
- # use an ip address here, otherwise DNS resolution will block
- ntpserver = 134.169.172.1
- 
-To disable automatic date/zone settings, simply create an empty [otimed] section in /etc/frameworkd.conf
-
-
-
-
 
 ==Settings==
 ===SHR Settings===
@@ -538,6 +429,113 @@ Some setting screens are not resized properly to fit the phone's display - for e
 
 <!-- [[Image:SHR-Top-Shelve.png|200px|thumb|Top Shelf]] -->
 
+
+==Localization==
+
+=== Localize SHR manually ===
+
+[[Image:SHR-Illume-Settings-Languages.png|200px|thumb|Setting Language]]
+
+====Desktop environment====
+
+You can change the language of the SHR desktop environment by using the Settings of Illume. For Example, for Czech language: in the Illume top shelf go to Wrench (Settings) -> Language -> Language Settings -> and choose: Čeština. If your language is not in the menu you can install by using opkg.
+
+You can list all available languages by running:
+
+ opkg list | grep eglibc-locale-
+
+And install the language of your choice (for example czech):
+
+ opkg install eglibc-locale-cs
+
+After this, the Language Settings of Illume will offer Czech. 
+
+This will localize the Illume environment and will also set correct lang environment variable of your desktop. 
+
+====Applications====
+
+If you wish to have other applications localized, you need to install translation for each of them (presuming it is available):
+
+This will install czech localization for SHR phone applications, SHR Settings and TangoGps:
+
+ opkg install libframeworkd-phonegui-efl-locale-cs shr-settings-locale-cs tangogps-locale-cs
+
+====Terminal environment====
+
+For localized terminal environment (ssh login) set lang variables in /etc/profile, example for Czech language:
+
+ export LANG=cs_CZ
+ export LC_ALL=cs_CZ
+
+====Illume keyboard and dictionaries====
+
+The Illume keyboard offers English dictionary correction by default. You can list all the dictionaries available for installation:
+
+ opkg list | grep illume-dic
+
+If your language is not available and the English one is bothering you, you can set an empty dictionary:
+
+ echo "" > /usr/lib/enlightenment/modules/illume/dicts/None.dic
+
+By using it, it will get filled by the words you use and after time will start helping and correcting your typing.
+
+[[Image:Illume-keyboards-terminal-dutch-nl-screenshot.png| Dutch terminal virtual keyboard|256px|thumb]]
+Furthermore you can install a different keyboard with a layout which fits your language or alternatives for the default keyboards like the numerical one. The localized [[Illume keyboard]]s are available in the SHR repository under the name ''illume-keyboard-LANG''.
+
+Note that sometimes after an upgrade of Illume has taken place, these keyboards have to be installed again before they become available again. Removing these packages will restore the availability of the respective original keyboards.
+
+==== German (and Austria) Language ====
+
+See [[Configure_SHR_for_German-speaking_use]] for detailed customization for german speaking.
+
+===Date and time===
+
+The local timezone is automatically retrieved from the GSM network.
+
+create a symlink named /etc/localtime which points to the appropriate file in /usr/share/zoneinfo. For example, if you're in France., the following command will link the correct zoneinfo file to your /etc/localtime, giving you the correct time:
+
+ ln -sf /usr/share/zoneinfo/Europe/Paris /etc/localtime
+
+Afterwards, edit /etc/timezone if necessary [?]
+
+Local timezone work instantly for the current boot when:
+
+ TZ="Europe/Paris"
+ export TZ
+
+For a permanent timezone change edit /etc/profile and change to:
+
+ TZ="Europe/Paris"
+
+Date and time are automatically set from GPS or Network. The easiest way of setting the time for the first time is to run TangoGps (GPS & Map icon) and obtaining GPS fix. Time will then be set automatically after several minutes.
+
+Time can set time also manually.
+
+Via SHR-Settings -> Date/time -> Set time
+
+From linux based desktop:
+
+ ssh root@192.168.0.202 "date -u -s `date -u +%m%d%H%M%Y.%S`"
+
+You can also set the hardware clock to the system time:
+
+ hwclock --systohc
+
+Is this better?:
+
+ hwclock --utc --systohc
+
+It is possible to instruct framework on how to set the time and timezone in /etc/frameworkd.conf :
+
+ [otimed]
+ # a list of time/zone sources to use or NONE
+ timesources = GPS,NTP
+ zonesources = GSM
+ # use an ip address here, otherwise DNS resolution will block
+ ntpserver = 134.169.172.1
+ 
+To disable automatic date/zone settings, simply create an empty [otimed] section in /etc/frameworkd.conf
+
 ==FSO Resources==
 
 FSO is in control of each device. These are called ''resources''. If the software wanting to use the device is capable of requesting this resource via <tt>d-bus</tt>, FSO will do this, otherwise you might need to power the device manually. After the requested resource is released, FSO will power it down. Manual resource request can be done through ''SHR Setting'' or you can use <tt>fsoraw</tt> command. (Using fsoraw is faster and better then running dbus commands)
@@ -577,6 +575,10 @@ While this resource is requested then suspend is disabled. Display will blank as
 '''Test'''
 
 A test resource
+
+'''UsbHost'''
+
+'''Accelerometer'''
 
 ==Network manager==
 
