@@ -5,8 +5,7 @@
 '''
 ----
 
-==Introduction==
-
+== Introduction ==
 To see the version of your GSM firmware, run the following command on a FSO-based distribution like OM2009, SHR, Debian.. 
  mdbus -s org.freesmartphone.ogsmd /org/freesmartphone/GSM/Device org.freesmartphone.GSM.Device.GetInfo
 It'll result something like this. Check the end of the revision line to see the version.
@@ -15,19 +14,18 @@ It'll result something like this. Check the end of the revision line to see the 
      'model': '"Neo1973 GTA01/GTA02 Embedded GSM Modem"',
      'revision': '"GSM: gsm_ac_gp_fd_pu_em_cph_ds_vc_cal35_ri_36_amd8_ts0-Moko11"'}
 
-'''All users are recommended to update to a new GSM firmware version. All GTA02 users are recommended to use the easy [[GSM/Flashing#uSD-card_Image_.28GTA02_only.29|uSD method]]
+'''All users are recommended to update to a new GSM firmware version. All GTA02 users are recommended to use the easy [[GSM/Flashing#µSD-card_Image_.28GTA02_only.29|µSD method]]
 
 * see http://people.openmoko.org/joerg/calypso_moko_FW for more recent FW-images.
 * see http://people.openmoko.org/joerg/calypso_moko_FW/all_version__CHANGELOG.txt
 * see http://lists.openmoko.org/pipermail/devel/2008-November/003150.html for more information
 
 == Moko11 ==
-
 Moko11 should fix [http://docs.openmoko.org/trac/ticket/666 #666] (compatibility with some 3G sim cards), and also has a new command AT+CSIM. It also includes fixes related to hardware flow control and wakeup interrupt [http://docs.openmoko.org/trac/ticket//2231 #2231].
 
 This version is not supposed to fix [http://docs.openmoko.org/trac/ticket/1024 #1024] (constant re-registrations leading to lost calls and messages). For a workaround use a distro where deep sleep mode can be deactivated.
 
-GTA02 users are suggested to update using [[GSM/Flashing#uSD-card_Image_.28GTA02_only.29|uSD method]]. 
+GTA02 users are suggested to update using [[GSM/Flashing#µSD-card_Image_.28GTA02_only.29|µSD method]]. 
 
 The GSM-firmware didn't differ from GTA01 to GTA02, as the GSM-hardware didn't either. This means you can flash MOKO11 (or any other recent GSM-FW) to GTA01 as well but only using the [[GSM/Flashing#Manual_Update_.28GTA01.2C_GTA02.29_.2F_geek_way|manual way]] instructed below.
 
@@ -35,34 +33,35 @@ The GSM-firmware didn't differ from GTA01 to GTA02, as the GSM-hardware didn't e
 
 Any reports on successful update, as well as problems encountered, or SIMs seen to work after update, all highly appreciated. Please add to the "discussion" tab of this wikipage. Thanks!
 
-== uSD-card Image (GTA02 only)==
-'''We recommend to update all devices by using this uSD-image for flashing MOKO11 to GTA02 Freerunner only (not suitable for GTA01 Neo1973).'''<br>
-This works by starting the FreeRunner from a system installed on the uSD, which will automatically apply all needed instructions to flash the GSM firmware to the chip. The uSD image will have to be written on a uSD, which will overwrite all its content, so as to make sure it is repartitioned correctly and that it contains the correct bootable system.
+== µSD-card Image (GTA02 only) ==
+'''We recommend to update all devices by using this µSD-image for flashing MOKO11 to GTA02 Freerunner only (not suitable for GTA01 Neo1973).'''
+
+This works by starting the FreeRunner from a system installed on the µSD, which will automatically apply all needed instructions to flash the GSM firmware to the chip. The µSD image will have to be written on a µSD, which will overwrite all its content, so as to make sure it is repartitioned correctly and that it contains the correct bootable system.
 The procedure has proven to do a reliable job on flashing MOKO11 to GTA02. Chances anything fails are minimal if you _strictly_ follow the instructions. There's no way to do any harm to your device by using this method.
  
-'''Take special care though about the destination of `dd`, it has to be the *physical* device (e.g. foo0) of your uSD-card, *not* any partition (e.g. foo0p1). Also make sure there are *no* mounted partitions left on the uSD when starting `dd`!'''<br>
+'''Take special care though about the destination of `dd`, it has to be the *physical* device (e.g. foo0) of your µSD-card, *not* any partition (e.g. foo0p1). Also make sure there are *no* mounted partitions left on the µSD when starting `dd`!'''<br>
 ''Triple-check you are not accidentally overwriting your system-HD, by e.g using /dev/sda instead of /dev/sdc! Double-check once more! This is the one-typo-kills-system case ;-) You've been warned.''
 
 <ol>
 <li>Download and <tt>untar</tt> http://people.openmoko.org/joerg/calypso_moko_FW/moko11/flash-moko11_uSD-image.tar.gz on your desktop computer. Read the <tt>README.txt</tt> file that came with the tarball.</li>
 
-<li>Insert a uSD to your computer's reader, and unmount all uSD-partitions that might have been automounted (use <tt>mount</tt> or <tt>df -h</tt> to check). Do not use "safely remove" for this.</li>
+<li>Insert a µSD to your computer's reader, and unmount all µSD-partitions that might have been automounted (use <tt>mount</tt> or <tt>df -h</tt> to check). Do not use "safely remove" for this.</li>
 
-<li>Use <tt>dd</tt> to write the image <tt>flash-moko11-2.image</tt> to the '''physical'''(!) uSD-device (this will erase all data from your uSD, including previous partition table and partitions! ''It will as well erase all data from your computer's HD, in case you accidentally `dd` to this device instead of uSD''). Log in as root or use sudo to get root privileges needed to write to the uSD card. For example:</li>
+<li>Use <tt>dd</tt> to write the image <tt>flash-moko11-2.image</tt> to the '''physical'''(!) µSD-device (this will erase all data from your µSD, including previous partition table and partitions! ''It will as well erase all data from your computer's HD, in case you accidentally `dd` to this device instead of µSD''). Log in as root or use sudo to get root privileges needed to write to the µSD card. For example:</li>
 
  % sudo dd if=flash-moko11-2.image of=/dev/mmcblk0
 
-<li>Execute <tt>sync</tt> or <tt>eject <device></tt> to make sure everything is flushed to the uSD before physically removing it from the reader.</li>
+<li>Execute <tt>sync</tt> or <tt>eject <device></tt> to make sure everything is flushed to the µSD before physically removing it from the reader.</li>
 
-<li>Insert the uSD to your FreeRunner, boot from '''[[Booting_the_Neo_FreeRunner#Log_into_U-Boot_in_the_NOR_Flash|NOR-U-Boot]]''' and select the "Boot from microSD" option.</li>
+<li>Insert the µSD to your FreeRunner, boot from '''[[Booting_the_Neo_FreeRunner#Log_into_U-Boot_in_the_NOR_Flash|NOR-U-Boot]]''' and select the "Boot from microSD" option.</li>
 
-<li>See the boot and flashing process happen, and wait until a green "d_o_n_e" message shows on screen (takes some 6 min). You may can now remove the uSD or login via ssh and use <tt>mickeyterm</tt> to access the modem and check the firmware version is indeed moko11. Right after flashing, pressing the power button will suspend/resume the Neo, but ''not'' shut it down. If you want to do so, you can either remove the battery by hand, or (more gentle way) log in as root into it through the USB cable (root password is blank), and issue:</li>
+<li>See the boot and flashing process happen, and wait until a green "d_o_n_e" message shows on screen (takes some 6 min). You may can now remove the µSD or login via ssh and use <tt>mickeyterm</tt> to access the modem and check the firmware version is indeed moko11. Right after flashing, pressing the power button will suspend/resume the Neo, but ''not'' shut it down. If you want to do so, you can either remove the battery by hand, or (more gentle way) log in as root into it through the USB cable (root password is blank), and issue:</li>
   
   # shutdown -h now
 </ol>
-===NOTE===
 
-If you don't have a uSD reader on your PC, you can <tt>dd</tt> from the Neo: install <tt>task-base-smbfs</tt>, u(n)mount <tt>/media/card</tt>, mount the directory in which you have the <tt>flash-moko11-2.image</tt> file and do the <tt>dd</tt> stuff. This will take about 12 minutes.
+=== NOTE ===
+If you don't have a µSD reader on your PC, you can <tt>dd</tt> from the Neo: install <tt>task-base-smbfs</tt>, u(n)mount <tt>/media/card</tt>, mount the directory in which you have the <tt>flash-moko11-2.image</tt> file and do the <tt>dd</tt> stuff. This will take about 12 minutes.
 
 You can speed this up by re-gziping just the image file and using the following command to decompress it directly to the flash card:
 
@@ -75,9 +74,8 @@ Or, maybe in a more simpler manner:
  and then from desktop:
   scp flash-moko11-2.image root@192.168.0.202:/dev/mmcblk0
 
-===NOTE 2===
-
-Whether you have [[Qi]] installed or not (see above) as your boot loader, you must power up to the NoR menu (Hold AUX Key, press Power button) and select "Boot from microSD (fat/ext2)" to begin the installation process (per DocScrutinizer in #openmoko). '''Do not''' let Qi boot the uSD. Although it still seems to flash OK, the green "d_o_n_e" does not show up, to give you the warm feeling that everything is OK.
+=== NOTE 2 ===
+Whether you have [[Qi]] installed or not (see above) as your boot loader, you must power up to the NoR menu (Hold AUX Key, press Power button) and select "Boot from microSD (fat/ext2)" to begin the installation process (per DocScrutinizer in #openmoko). '''Do not''' let Qi boot the µSD. Although it still seems to flash OK, the green "d_o_n_e" does not show up, to give you the warm feeling that everything is OK.
 
 You can confirm the firmware version number using the [[OpenmokoFramework/mickeyterm|mickeyterm]] (cmd: "AT+CGMR"). In SHR-Settings, Phone/Modem Information will supply the same number.
 
@@ -86,8 +84,7 @@ We recommend you don't update by following this procedure, unless you feel very 
 
 According to mwester, this worked for him to update from MOKO1 on a GTA01Bv4 to MOKO10b2, by following the steps described herein (if the main firmware can't be started, see troubleshooting section for additional instructions).
 
-===Phase 1: Preparations===
-
+=== Phase 1: Preparations ===
 * Download and install a distribution to your device that gives you SSH access. We recommend the fso-console image:
 <pre>
 mickey@amethyst$ cd /tmp
@@ -112,8 +109,7 @@ root@om-gta02:~# cd $HOME
 root@om-gta02:~# wget http://people.openmoko.org/joerg/calypso_moko_FW/moko11/calypso-moko11.m0
 </pre>
 
-===Phase 2: The Lobotomy===
-
+=== Phase 2: The Lobotomy ===
 * Make sure '''nothing''' is accessing the GSM modem. If you're using the fso-console image from the link above, this will happen automagically on boot. On other systems, kill processes as you see fit (for FSO it's zhone, frameworkd and gsm0710muxd; for SHR it's ophonekitd, frameworkd and gsm0710muxd -Also note in 2009 that newer version of these distros could have replaced gsm0710muxd by fso-abyss, and then on fso2, ophonekitd is replaced by phonefsod and phoneuid). If you're using a stable (or andy-tracking) kernel from Feb 26 or later on GTA02, see below for simplified instructions on powering the modem on/off (if you use the simplified method to turn it off, you must also use the simplified method to turn it on; no s3c24xx-gpio invocations are needed).
 
 * Power off the modem:
@@ -170,8 +166,7 @@ root@om-gta02:~# echo -en 'AT\r' >/dev/ttySAC0; sleep 1; echo -en 'AT+CGMR\r' >/
 root@om-gta02:~# kill %1
 </pre>
 
-====Hints====
-
+==== Hints ====
 In some case you may receive this:
 
 <pre>
@@ -197,10 +192,7 @@ echo 1 >/sys/bus/platform/devices/neo1973-pm-gsm.0/power_on
 
 ----
 
-
-
-===Troubleshooting===
-
+=== Troubleshooting ===
 Some users weren't able to complete the upgrade since they got an error while the firmware was uploading in the GSM chip (like ''Flash operation timeout'').
 
 However a solution [http://n2.nabble.com/problems-with-calypso-firmware-update-tp1565196p1566012.html has been found] and it allows to use again the GSM modem.
