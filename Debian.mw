@@ -1,4 +1,3 @@
-__NOTOC__
 {{Languages|Debian}}
 
 Debian is a ''universal operating system'' used on many other embedded devices, and also on home computers. Using Debian on the FreeRunner gives access to the Huge army of software packaged in the Debian repositories, already compiled for the Neo's arm(v4) processor. Moreover, one can build one's own source files for programs without having to learn the OpenEmbedded way. For example compiling natively is a snap with Debian, just apt-get gcc&libc-dev.
@@ -9,40 +8,17 @@ For an existing Debian/Ubuntu user, choosing Debian for Neo FreeRunner makes pho
 
 ''The current method of installation, install.sh, is not fail-proof. Work is progressing on a real debian-installer support.''
 
-== Showcase: Desktop Environments And Applications ==
-=== Illume ===
-[[Image:Debian_illume_zhone.png|right|thumb|250px|Debian with illume, and Zhone running]]
-[[Image:Debian_illume_zhone_kb.png|right|thumb|250px|Debian with illume, and Zhone running, with the on-screen keyboard visible]]
-[[Illume]], the desktop environment used in recent openmoko distribution releases, is also available under Debian.  It's part of the Enlightenment window manager version 17 (which is currently in the alpha stage of development), which the Debian FSO package maintainers have placed in their repository.  If you have a Debian FSO system running, you can use the following commands to install illume.
+== Debian Showcase: Desktop Environments And Applications ==
 
- apt-get install e17
+=== fbpanel + Matchbox ===
 
-Then use the following commands to ensure that it starts on boot.
-
- apt-get remove zhone-session
- apt-get install nodm
- 
- mv /root/.xsession /root/.xsession.backup 
- cat << END > /root/.xsession
- #!/bin/sh
- zhone &
- enlightenment_start
- END
-
-<br style="clear:both" />
-
-=== OpenOffice.org ===
-[[Image:Freerunner_Debian_runs_openoffice3.jpg|right|thumb|300px|Debian running OpenOffice.org 3]]
-
-Did we already mention you can install ''anything'' in Debian?
-
-<br style="clear:both" />
-
-=== Matchbox With fbpanel ===
 It is not really a Desktop environment, but using fbpanel with Matchbox you can have a fast, lightweight, gtk2 desktop panel.
-[[Image:Debian_fbpanel_zhone.png|right|thumb|300px|Debian with fbpanel, matchbox-window-manager and Zhone running]]
+[[Image:Debian_fbpanel_zhone.png|right|thumb|300px|Debian with fbpanel, matchbox-window-manager and Zhone running, default settings]]
+[[Image:Debian5.png|right|thumb|300px|Custom matchbox theme and fbpanel configuration.]]
+
+Quick howto:
 <ol><li>Install fbpanel:
-<pre>sudo apt-get install fbpanel</pre></li>
+<pre>sudo apt-get install fbpanel hicolor-icon-theme</pre></li>
 <li>Customize the X startup process:
 <pre>~/.xsession</pre>
 <pre>
@@ -77,8 +53,10 @@ Also, plugin 'genmon' is useful:
 <pre>Plugin {
 type = genmon
 config {
-Command = echo -e $(grep "MemFree" /proc/meminfo | awk '{printf "%0.2f", $2 / 1024}') "|"\
-$(cat /proc/loadavg | awk '{print $3}') "|" $(apm | awk '{print $5}')
+Command = echo -e $(grep "MemFree" /proc/meminfo | \
+ awk '{printf "%0.2f", $2 / 1024}') "|"\
+$(cat /proc/loadavg | awk '{print $3}') "|" \
+ $(apm | awk '{print $5}')
 PollingTime = 60
 TextSize = small
 TextColor = darkblue
@@ -90,13 +68,28 @@ After 'killall fbpanel' it will show: free mem in megabytes | loadavg | battery 
 <pre>sudo apt-cache search gtk2-engines
 sudo apt-get install gtk2-engines gtk-theme-switch
 DISPLAY=:0 gtk-theme-switch2</pre>
-Now choose your theme, font and save it. To see changes do 'killall fbpanel'.</li></ol>
+Now choose your theme, font and save it. To see changes do 'killall fbpanel'. (killall requires psmisc package to be installed)</li></ol>
 
-In order to use killall, install the psmisc package:
- apt-get install psmisc
+=== Illume ===
+[[Image:Debian_illume_zhone.png|right|thumb|250px|Debian with illume, and Zhone running]]
+[[Image:Debian_illume_zhone_kb.png|right|thumb|250px|Debian with illume, and Zhone running, with the on-screen keyboard visible]]
+[[Illume]], the desktop environment used in recent openmoko distribution releases, is also available under Debian.  It's part of the Enlightenment window manager version 17 (which is currently in the alpha stage of development), which the Debian FSO package maintainers have placed in their repository.  If you have a Debian FSO system running, you can use the following commands to install illume.
 
-Some of the icons rely on the hicolor-icon-theme:
- apt-get install hicolor-icon-theme
+ apt-get install e17
+
+Then use the following commands to ensure that it starts on boot.
+
+ apt-get remove zhone-session
+ apt-get install nodm
+ 
+ mv /root/.xsession /root/.xsession.backup 
+ cat << END > /root/.xsession
+ #!/bin/sh
+ zhone &
+ enlightenment_start
+ END
+
+<br style="clear:both" />
 
 === LXDE ===
 
@@ -107,6 +100,13 @@ To install it:
 
 to launch it create a <code>/etc/init.d/lxde</code> script in the same way descripted for xfce4, replacing <code>startxfce4</code> occurrences with <code>startlxde</code>.
 <div style="clear:right;">&nbsp;</div>
+
+=== OpenOffice.org ===
+[[Image:Freerunner_Debian_runs_openoffice3.jpg|right|thumb|300px|Debian running OpenOffice.org 3]]
+
+Did we already mention you can install ''anything'' in Debian?
+
+<br style="clear:both" />
 
 === XFCE ===
 The debian installation script installs by default the matchbox window manager. It doesn't feature a desktop environment. '''xfce''' is a small and lightweight desktop environment and so is quite fast for the FreeRunner.
@@ -146,7 +146,7 @@ and then (re)start xfce.
 If you want to be able to shutdown/restart the device, add the following line to ''/etc/sudoers'' (don't forget to replace ''username'' with your actual username):
 <pre>username localhost = NOPASSWD: /usr/sbin/xfsm-shutdown-helper</pre>
 
-==== Using matchbox-window-manager with XFCE ====
+''' Using matchbox-window-manager with XFCE '''
 
 XFCE's window manager is poorly configured for use with the FreeRunner.  Fortunately, matchbox's window manager is compatible with xfce.  To use the matchbox window manager, modify ~/.xsession as follows:
 
@@ -160,6 +160,7 @@ Several distributions are sharing Debian's infrastructure - this is long known. 
 * [[Fyp]] extends the basic Debian installation while avoiding the need of an SD
 * [[Hackable1]] focuses on GNOME Mobile integration
 * [[Mer]] : based on [[Maemo]] ; see demo and download image at http://www.newlc.com/en/mer-best-maemo-debianubuntu-mobiles-watch-freerunner-demo
+* [[QtMoko]] - Debian with Qt Extended Improved plus configuration changes put manually on top of it
 * [[Telefoninux]] http://telefoninux.projects.openmoko.org/index.html
 
 [[Category:Debian| ]]
