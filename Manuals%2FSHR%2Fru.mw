@@ -1,0 +1,836 @@
+{{Languages|Manuals/SHR}}
+ {| align="right"
+  | __TOC__
+  |}
+
+==SHR Introduction==
+
+Welcome to '''[[SHR]]''', a community driven distribution for (not only) Openmoko Neo phones.
+
+[[Image:SHR-Logo.png|200px|thumb|center|SHR]]
+
+'''SHR'''  (Stable Hybrid Release) is here to provide you with Root FileSystem images that you can easily install into your device to use as a daily phone and PDA.  There are many prepackaged programs available that can be installed upon demand by users, it can also be used by developers as a base image for customized and flavored distribution or release. '''SHR unstable''' is a testing environment before software gets stabilized and it is the main testing ground for [[FSO]] releases. '''SHR testing''' images provide as much stability as possible for day-to-day usage.
+
+SHR users, readers of this manual, please report improvements, discrepancies or missing features on this page to <tt>vanous @ penguin . cz</tt>. Thank you.
+
+==Installation==
+
+===Getting SHR===
+
+You need to download two files for your version as above: kernel and root filesystem. Depending whether you will be installing into the internal [[NAND memory]] or on the [[microSD]] card, you need to either get .jffs2 file for NAND or .tar.gz file for microSD.
+
+For the '''GTA02 Neo FreeRunner''' you need to download the images of the:
+*testing line: http://build.shr-project.org/shr-testing/images/om-gta02/
+*unstable line: http://build.shr-project.org/shr-unstable/images/om-gta02/
+
+- Get the latest kernel from the above linkpage. Starts with uImage-...
+
+- Get the root filesystem, for NAND: full-om-gta02.jffs2,  for µSD: full-om-gta02.tar.gz
+
+The above are '''full''' images. You can also choose images with less packages, marked as '''lite''' which can be upgraded to the full image by running
+
+ opkg update
+ opkg install task-shr-apps task-shr-games task-shr-gtk
+
+- Get the kernel modules. This is only necessary, if you want to flash a new kernel, but not a whole new file system. The image of the filesystems mentioned above, already contain the modules. From the same page as the kernel download the modules to match your kernel (their dates should be the same). Use sftp to put that file on the FreeRunner via the usb connection. Run gzip to unwrap the modules:
+ # gzip -dc modules-...tar.gz | tar -xf - -C /
+
+'''GTA01 Neo 1973''' images are at:
+*testing line: http://build.shr-project.org/shr-testing/images/om-gta01/
+*unstable line: http://build.shr-project.org/shr-unstable/images/om-gta01/
+
+===Installation on Flash===
+
+In order to install your SHR distribution directly to your Freerunner Flash memory (NAND), you need to get the desired filesystem file ( <tt>.jffs2</tt> ) as described above and flash your device using the <tt>dfu-util</tt> tool.
+
+Please visit [[Flashing the Neo FreeRunner]] for more details about flashing and see [[Dfu-util]] for detailed information about the dfu-util.
+
+{{Note|Your battery must be charged (sufficiently) before NAND flashing. Symptom of insufficient charge: Your progress bar "####" stops while flashing. If so, you must charge, and later you should be able to make the complete flash.}}
+Commands to flash the filesystem and the kernel:
+
+Note that there are some issues using dfu-util with sudo.
+
+'''Don't use sudo with dfu-util. Make sure you are root before using dfu-util!'''
+
+for the GTA02 Neo FreeRunner:
+
+ # dfu-util -d [[USB Product IDs|0x1d50:0x5119]] -a rootfs -R -D full-om-gta02.jffs2
+ # dfu-util -d [[USB Product IDs|0x1d50:0x5119]] -a kernel -R -D uImage-om-gta02-latest.bin
+
+for the GTA01 Neo 1973:
+
+ # dfu-util -d [[USB Product IDs|0x1457:0x5119]] -a rootfs -R -D full-om-gta01.jffs2
+ # dfu-util -d [[USB Product IDs|0x1457:0x5119]] -a kernel -R -D uImage-om-gta01-latest.bin
+
+===Installation on the microSD Card===
+
+Installing SHR on your microSD Card depends on the Bootloader you are using, ''uBoot'' or ''Qi''.
+
+In simple words, the difference between both systems resides on how you must prepare your microSD Card and files you use to fill them:
+
+* If you use ''uBoot'', you need to create two partitions. First partition, not so big, in FAT16 or ext2 where you have to place the kernel file (<tt>uImage-om-gta02-latest.bin</tt>) and second partition in ext2 or ext3 where you have to uncompress the filesystem file (<tt>shr-image-om-gta02.tar.gz</tt>).
+
+* If you use ''Qi'', you only need an ext2 partition into your µSD Card where you uncompress the filesystem image file (<tt>shr-image-om-gta02.tar.gz</tt>). In this case Qi Bootloader is going to look for the kernel image into the <tt>/boot</tt> directory for file named <tt>uImage-GTA02.bin</tt> .
+
+Please visit the links below for detailed information and tips:
+*For [[Booting from SD | uBoot]] and for [[Qi]].
+
+===SHR version===
+
+Should you ever later wonder what version of SHR you have actually installed, please run
+
+ cat /etc/shr-version
+
+{{Note|Please note that running opkg update;opkg upgrade does not change the SHR version. Only flashing or a new image download can change the SHR version.}}
+
+==Running SHR==
+
+===First boot===
+[[Image:Shr-boot-preview.png|200px|thumb|center|SHR Boot Splash screen]]
+
+====Booting====
+First boot usually takes a bit longer as your phone's new software needs to do some initial setting up. It is recommended to reboot after this first boot (and after the initial setup), to make sure that all packages get initialized properly.
+
+====Initial Setup====
+
+During the first run, Setup is automatically initiated to walk the user through basic setup of the Enlightenment desktop environment. These steps vary as both Enlightenment desktop and SHR evolve, at this point preferred language and desktop profile options are available. The Profile offers to choose a preconfigured way of displaying the desktop. If unsure, please choose Illume-SHR.
+
+{| class="wikitable"
+| [[Image:SHR-Setup-Language.png|200px|thumb|language selection]]
+| [[Image:SHR-Setup-Profile.png|200px|thumb|theme selection]]
+|}
+
+====SHR Wizard====
+After the initial Setup, SHR Setting Wizard is launched to allow setting up your local phone settings and setting up root password.
+
+Screenshot TBD
+
+===First look===
+[[Image:SHR-First-Look.png|200px|thumb|Desktop screen]]
+'''Illume desktop''' is the default home screen of the SHR desktop. Application files located in /usr/share/applications are displayed here. All applications are ran fullscreen and you can switch between them by using the Task switcher in the Top Shelf or by using the '''<''' left or right '''>''' arrows in the Top Shelf. You can access Task switcher, Illume Settings and more by tapping on the Top Shelve - the shelve will open up by sliding down.
+
+
+====Keyboard====
+
+Keyboard comes up automagically when a text field is tapped or you can also toggle the keyboard by it's icon or 'alpha' in the Top Shelve. In the Keyboard, dictionary switcher is the arrow-up on left side, alternative keyboard layouts are under the ABC button on the right. The Default keyboard has English dictionary enabled. For Space quick slide left-to-right, for Enter, quick slide up-down, to quick change keyboard layout quick slide down-up. While typing with a dictionary enabled keyboard, possible word options start appearing in the keyboard's upper part or more word options are available under the arrow-up on the left. When happy with the word, tap it, it will be pasted into the text field with a space attached. The Keyboard and dictionary can [[#Illume_keyboard_and_dictionaries | easily be localized]].
+
+====Copy & Paste====
+
+In '''E based''' applications (for example the phone suite (messages)) tap and hold down for over two seconds. Select-Paste menu will pop up. By pressing Select, you can now swipe through the text to select desirable part. Tap and hold down again, Copy-Cut-Cancel menu will appear to Copy to clipboard. Another long tap will provide Select-Paste for Paste.
+
+In '''Gtk''' based application you can use keyboard for Ctrl-C (Copy) and Ctrl-V (Paste).
+
+In the Vala '''Terminal''' you can select by keyboard swipe and for Paste there is a icon in the menu bar of this application.
+
+====Alarm====
+
+The Alarms application (installed by default) allows alarm presetting for single or repeatable alarms. If you set an alarm and turn your Openmoko Freerunner off, at the time of the alarm the phone will be powered up and alarm will sound.
+
+====Phone applications====
+
+Besides other software, SHR comes with 4 main phone applications: ''Dialer'', ''Contacts'', ''Messages'' and ''Phone log''.
+
+{|
+| [[Image:SHR-Dialer.png|200px|thumb|Dialer]]
+| [[Image:SHR-Contacts.png|200px|thumb|Contacts]]
+| [[Image:SHR-Mesages.png|200px|thumb|Messages]]
+| [[Image:SHR-Phonelog.png|200px|thumb|Phone log]]
+|}
+
+====Setting applications====
+
+[[#SHR_Settings | SHR Settings]] is accessible by tapping Settings icon on the desktop. [[#Illume_settings |  Illume settings (and Enlightenment desktop settings)]] are accessible by sliding down the Top shelve and then tapping the "SHR Logo" icon.
+
+[[Image:SHR-Top-Shelve.png|200px|thumb|Top Shelve with SHR Logo icon for Illume settings and Desktop with Settings icon for SHR Settings]]
+
+
+====Hardware Buttons====
+
+=====Power Button=====
+
+The '''PWR''' (Power) button is mapped to start [[#quick_settings | Quick Settings]] screen (Illume System menu in older versions) on a short press. 
+
+Mapping of the PWR button be configured via the '''Illume Settings-> Input -> Key Bindings'''.
+
+Pressing the Power button for longer then 8 seconds will force a complete power down of the device. This is hardconfigured in the kernel.
+<div id="quick_settings"> </div>
+The '''Quick Settings''' screen provides several toggles: Airplane mode, Phone profiles, Power settings and Power buttons.
+
+=====Auxiliary Button=====
+The '''AUX''' (Auxiliary) button is mapped to toggle on/off the SHR Idle screen. Mapping of this button is configured in /etc/phonefsod.conf
+
+ idle_screen = aux,lock
+
+You can configure the [[#idle_screen | Idle Screen]] to come up even during active phone call by adding '''phone''' to the setting: 
+
+ idle_screen = aux,lock, phone
+
+<div id="idle_screen"> </div>
+The '''Idle Screen''' shows current date and time, missed calls and messaged and also what [[#FSO_Resources | FSO resources]] are currently being requested - used.
+
+======Replacing idle screen======
+
+If you with to use the previous simple LOCKED screen instead of the new standard Idle Screen
+
+Edit '''/etc/phonefsod.conf''' to this:
+
+ # when to show idle screen
+ # ...
+ # idle_screen = aux,lock
+ idle_screen =
+
+You need to restart phonefsod to make the change happen.
+
+Also, change key mapping for the AUX button by setting '''Illume Settings''' -> '''Input''' -> '''Key Bindings''', bind the key '''XF86Phone''' to '''Desktop Simple Lock'''
+
+===First steps===
+
+Right after installation and first boot you might want to do a few initial steps like adjusting the call volume and some other tasks.
+
+====Audio - Call Volume====
+
+During the first phone call please use the Volume and Mic sliders on the Active Call Screen and adjust them to fit your preferences. When you have found good settings, terminate the test call and reboot the phone. The new improved settings will then be used for all in- and outgoing calls thereafter.
+
+====Network Connection====
+''Establish network connection'' and SSH into your phone. You can establish connection either via USB to your desktop and enable NAT or you can connect through Wifi. If you use USB, some setup is required on the desktop side, please read [[USB Networking]]. For Wifi, you can use [[#Network manager|Network Manager]]
+
+====Initializing the opkg database====
+''Initialize the opkg database'' in order to install some applications from SHR repositories or from other sources, for example [http://opkg.org opkg.org]. While being online, you need to run
+
+ opkg update
+
+Searching in the opkg database can take a long time. You can speed things up by dumping the database into a file and grepping it through. Do this only once or after every opkg update:
+
+ opkg list > packages.txt
+
+Then you can search quickly for package name, for example for navit:
+
+ grep navit packages.txt
+
+====SwapSpace====
+
+When the RAM is used up, applications get killed. This is particularly bad while doing opkg upgrade. Therefore you might want to create a swap space. Read [[SwapSpace]] article.
+
+==Settings==
+===SHR Settings===
+[[Image:SHR-Settings-main.png|200px|thumb|SHR Settings]]
+
+SHR Settings is the main setting application of SHR. It provides an easy way of setting up your phone to your liking - from phone related settings, to requesting resources in order to prevent screen dim or suspend (for example while using GPS).
+
+Please refer to [[#FSO_Resources | this section]] about a better way to manage preventing screen dim or suspend.
+
+While some settings are persistent over reboots, others are not.
+
+====Main Screen====
+The main screen is divided into eight categories, which contain several modules. Every SHR Settings module has a specified task - for example controlling the GSM antenna power, setting the time etc.
+
+====Phone====
+Here you can set if the GSM antenna is on and if your phone number is shown  when you call someone.
+
+'''GSM'''
+In GSM settings you can turn off and on GSM module. After turning off antenna, whole GSM modem is turned off.
+
+To list available providers, click on Operators button. Scanning can take some time. After a while, a list of operators should pop up.
+
+You can't connect to operators marked [forbidden].
+
+Selecting an operator from the list also changes modem registration mode to manual. It won't register to other network, even if some is available and has better signal strengh. To return to automatic mode, click "Automatic" button in operator list.
+
+'''Call'''
+{| class="wikitable" cellspacing="0" cellpadding="0" style="padding: 0%; margin:0em 0em 1em 0em; border:1px solid #c0c0c0; background:#eeeeee; floating="center";width:100%; "
+
+! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:50% " |
+
+[[Image:SHR-Settings-Phone.png|200px|thumb|Phone settings]]
+
+
+! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:50% " | 
+ 
+[[Image:SHR-Settings-List-providers.png|200px|thumb|List providers]]
+
+|}
+
+You can set if your phone number should be displayed to other party. You can either depend on network decision ("By network") or force it manually ("Manual")
+
+'''Phoneutils'''
+
+For the default SHR phone applications to be able to correctly parse incoming calls/messages and match them with your contacts, you will need to set the right country code for your location. (for example 420 for Czech republic) for more info, please go to: http://wiki.openmoko.org/wiki/Phone_Prefixes
+
+'''SIM'''
+
+Here you can view some informations about your SIM card and clean phone and messagebooks.
+
+====Profiles====
+
+Here you can select the current profile, which the device should use to determine ring tone etc.
+
+'''Current profile'''
+
+Here you can adjust properties of the currently used profile. 
+
+To change the ring tone, click the "Change" button.
+
+To use your own ring tone, place it in /usr/share/sounds directory.
+
+After selecting a sid tune as the ring tone, there are available controls to select tune number from the file.
+
+If you like to test a .sid you can play it using this command on the FR:
+
+ gst-launch filesrc location=Arkanoid_PSID.sid ! siddec tune=2 ! alsasink
+
+Note that it's a ! used and not a | to construct the gstreamer pipe command.
+
+{| class="wikitable" cellspacing="0" cellpadding="0" style="padding: 0%; margin:0em 0em 1em 0em; border:1px solid #c0c0c0; background:#eeeeee; floating="center";width:100%; "
+
+! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:50% " |
+
+[[Image:SHR-Settings-Profiles.png|200px|thumb|Profiles]]
+
+! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:50% " | 
+ 
+[[Image:SHR-Settings-Profiles-Ringtones.png|200px|thumb|Ringtones]]
+
+|}
+
+====Connectivity====
+
+{| class="wikitable" cellspacing="0" cellpadding="0" style="padding: 0%; margin:0em 0em 1em 0em; border:1px solid #c0c0c0; background:#eeeeee; floating="center";width:100%; "
+
+! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:50% " |
+
+[[Image:SHR-Settings-Connectivity.png |200px|thumb|Connectivity top]]
+
+! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:50% " | 
+ 
+[[Image:SHR-Settings-Connectivity2.png |200px|thumb|Connectivity bottom]]
+|}
+
+'''WiFi'''
+
+With the "WiFi radio" toggle you can set, if the wifi module is powered. WiFi radio has to be turned on before trying to connect to a WiFi network, unless you try to connect through [[Mokonnect]] which is capable of powering it up.
+
+'''GPRS'''
+
+To enter APN, login and password fields, just click on the actual value (default: "internet"). Your phone provider can provide the required configuration options.
+
+{{Note|You can also use Mokonnect to manage your GPRS connection}}
+
+'''USB'''
+
+With this toggle you can switch USB port between device (Neo to PC) or host (device to Neo) modes.
+
+'''Bluetooth'''
+
+To power up Bluetooth module, switch the "Bluetooth radio" toggle to "On". After that, the "Visibility" toggle should arrive - set it to "On" if you want your FR to be visible by other Bluetooth devices on scanning.
+
+====Power====
+
+'''Battery'''
+
+This module displays informations about battery state - charge, voltage, remaining time etc. To update the data, click the "Update" button.
+
+Here you can also force enable 500mA charging.
+
+'''Display'''
+
+With this slider you can easily set the backlight brightness.
+
+{{Note|This setting isn't permanent over sessions. At boot backlight is set back to 80%.}}
+
+'''Power'''
+
+{| class="wikitable" cellspacing="0" cellpadding="0" style="padding: 0%; margin:0em 0em 1em 0em; border:1px solid #c0c0c0; background:#eeeeee; floating="center";width:100%; "
+
+! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:50% " |
+
+[[Image:SHR-Settings-Power.png |200px|thumb|Power]]
+
+! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:50% " | 
+ 
+[[Image:SHR-Settings-Timeouts.png |200px|thumb|Timeouts]]
+|}
+
+Here you can turn on or off automatic dimming or suspend after idle timeout (see: Timeouts module)
+
+'''Timeouts'''
+
+Timeouts are reached in this order: idle -> idle dim -> idle prelock -> lock -> suspend. 
+
+{{Note|Configuration behavior  has been changed due to FSO rewrite.}}
+
+'''Old behavior''' (delete by Apr 1st):
+
+Here (Timeouts screen of SHR Settings) you can set up values of idle timeouts used by the device. This setting changes parameters in '''/etc/frameworkd.conf''' :
+
+ [fsodevice.kernel_idle]
+ suspend = 20
+ lock = 2
+ idle_prelock = 12
+ idle = 10
+ idle_dim = 20
+
+'''New behavior:'''
+
+Storing of this setting via D-bus calls is not supported in the new API of Vala rewrite of FSO2. SHR Settings doesn't have a setting for this. Configurable values are now stored in '''/etc/freesmartphone/conf/GTA02/fsodeviced.conf''' but you can keep your own config file in your home directory:
+
+ ~/.fsodeviced.conf
+
+====Appearance====
+
+'''Theming'''
+[[Image:SHR-Neo-Theme.png|200px|thumb|Neo theme]]
+
+The Apperance section allows you to change between installed themes. To install more themes, see also [[#Installing themes | Installing themes]].
+
+You can change finger size - this will mainly effect vertical spacing between widgets.
+
+Switching between engines:
+
+E can be switched to use different engines. The default engine is x11. Alternative engine x11-16 is not supported and results in buggy behavior of several applications, for example the phone suite or Ventura browser.
+
+Changing Splash screen is also possible in this module. To install more splash screens, see also [[#Installing splash screen themes|Installing splash themes]].
+
+====Position====
+
+{| class="wikitable" cellspacing="0" cellpadding="0" style="padding: 0%; margin:0em 0em 1em 0em; border:1px solid #c0c0c0; background:#eeeeee; floating="center";width:100%; "
+
+
+! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:50% " |
+
+[[Image:SHR-Settings-GPS.png |200px|thumb|center|GPS]]
+
+! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:50% " | 
+ 
+[[Image:SHR-Settings-GPS-Satelites.png |200px|thumb|GPS Satelite details]]
+|}
+
+'''GPS'''
+
+By default, GPS is turned on only when requested by an application. That state corresponds to "Auto" setting. After changing to "Manual", you can force set it to on or off.
+
+'''GPS information'''
+
+This page can be used to monitor GPS status. You either have to turn GPS on manually or start another application to enable the GPS.
+
+You can also view information about every visible satellite and check, which are used for getting a fix. To do that, click "Satellite details".
+
+'''Remove AGPS data'''
+If you experience problems with GPS, turn it off, click "Remove AGPS data" and reboot your Neo.
+Assisted GPS ([[aGPS]]) support GPS receiver to find position by non-satellite information.
+
+====Date/time====
+
+[[Image:SHR-Settings-Date-Time.png |200px|thumb|Date & Time]]
+
+'''Time'''
+
+Here you can view and set the time. By default, the time is just displayed, To adjust it, click on "Set time".
+
+After finishing adjusting, click the "OK" button.
+
+'''Date'''
+
+This module displays the current date.
+
+====Others====
+
+{| class="wikitable" cellspacing="0" cellpadding="0" style="padding: 0%; margin:0em 0em 1em 0em; border:1px solid #c0c0c0; background:#eeeeee; floating="center";width:100%; "
+
+[[Image:SHR-Settings-Others.png |200px|thumb|Others]]
+
+'''PIM'''
+
+Pim data are stored in opimd domains. Every opimd domain has different backends to store its data to. The domain reads data from every backend and writes data to the default backend. This elector allows you to  choose the backend that stores newly generated data, it doesn't copy or move existing data to a different backend.
+
+'''Services'''
+
+The services selector is listing scripts from /etc/init.d/ directory.
+
+After clicking on a servis, you can either start, restart or stop the service and view the result.
+
+{| class="wikitable" cellspacing="0" cellpadding="0" style="padding: 0%; margin:0em 0em 1em 0em; border:1px solid #c0c0c0; background:#eeeeee; floating="center";width:100%; "
+
+
+! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:50% " |
+
+[[Image:SHR-Settings-Services.png |200px|thumb|center|Services]]
+
+! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:50% " | 
+ 
+[[Image:SHR-Service-restart.png |200px|thumb|Services debug screen]]
+|}
+
+
+'''Userspace backups'''
+
+Here you can either archive or restore your files and configurations.
+
+=== Illume settings ===
+
+The Illume desktop can be easily customized - slide the top shelf down and tap the Settings icon (SHR Logo).
+
+'''Illume settings''' (SHR Logo icon) provides various options to alter the desktop environment. You can change sizes of elements, single or double click, wallpaper. To access all the various options, open Illume Settings and slide the visible icons to the left, to view more options on the right hand side.
+
+The little applets in the top shelf (for example Battery, GSM, Bluetooth etc.)  are called '''shelf gadgets''' and you can configure whether they are visible (on the front part of the top shelf) or hidden (you can access them by sliding the top shelf) through Illume Settings -> Display -> Shelf gadget.
+
+Some setting screens are not resized properly to fit the phone's display - for example the Wallpapper setting. This is a known bug already reported upstream.
+
+<!-- [[Image:SHR-Top-Shelve.png|200px|thumb|Top Shelf]] -->
+
+
+==Localization==
+
+=== Localize SHR manually ===
+
+[[Image:SHR-Illume-Settings-Languages.png|200px|thumb|Setting Language]]
+
+====Desktop environment====
+
+You can change the language of the SHR desktop environment by using the Settings of Illume. For Example, for Czech language: in the Illume top shelf go to Settings (SHR Logo) -> Language -> Language Settings -> and choose: Čeština. If your language is not in the menu you can install by using opkg.
+
+You can list all available languages by running:
+
+ opkg list | grep eglibc-locale-
+
+And install the language of your choice (for example czech):
+
+ opkg install eglibc-locale-cs
+
+After this, the Language Settings of Illume will offer Czech. 
+
+This will localize the Illume environment and will also set correct lang environment variable of your desktop. 
+
+====Applications====
+
+If you wish to have other applications localized, you need to install translation for each of them (presuming it is available):
+
+This will install czech localization for SHR phone applications, SHR Settings and TangoGps:
+
+ opkg install libframeworkd-phonegui-efl-locale-cs shr-settings-locale-cs tangogps-locale-cs
+
+====Terminal environment====
+
+For localized terminal environment (ssh login) set lang variables in /etc/profile, example for Czech language:
+
+ export LANG=cs_CZ
+ export LC_ALL=cs_CZ
+
+====Illume keyboard and dictionaries====
+
+The Illume keyboard offers English dictionary correction by default. You can list all the dictionaries available for installation:
+
+ opkg list | grep illume-dic
+
+If your language is not available and the English one is bothering you, you can set an empty dictionary:
+
+ echo "" > /usr/lib/enlightenment/modules/illume/dicts/None.dic
+
+By using it, it will get filled by the words you use and after time will start helping and correcting your typing.
+
+[[Image:Illume-keyboards-terminal-dutch-nl-screenshot.png| Dutch terminal virtual keyboard|256px|thumb]]
+Furthermore you can install a different keyboard with a layout which fits your language or alternatives for the default keyboards like the numerical one. The localized [[Illume keyboard]]s are available in the SHR repository under the name ''illume-keyboard-LANG''.
+
+Note that sometimes after an upgrade of Illume has taken place, these keyboards have to be installed again before they become available again. Removing these packages will restore the availability of the respective original keyboards.
+
+==== German (and Austria) Language ====
+
+See [[Configure_SHR_for_German-speaking_use]] for detailed customization for german speaking.
+
+===Date and time===
+
+The local timezone is automatically retrieved from the GSM network.
+
+create a symlink named /etc/localtime which points to the appropriate file in /usr/share/zoneinfo. For example, if you're in France., the following command will link the correct zoneinfo file to your /etc/localtime, giving you the correct time:
+
+ ln -sf /usr/share/zoneinfo/Europe/Paris /etc/localtime
+
+Afterwards, edit /etc/timezone if necessary [?]
+
+Local timezone work instantly for the current boot when:
+
+ TZ="Europe/Paris"
+ export TZ
+
+For a permanent timezone change edit /etc/profile and change to:
+
+ TZ="Europe/Paris"
+
+Date and time are automatically set from GPS or Network. The easiest way of setting the time for the first time is to run TangoGps (GPS & Map icon) and obtaining GPS fix. Time will then be set automatically after several minutes.
+
+Time can set time also manually.
+
+Via SHR-Settings -> Date/time -> Set time
+
+From linux based desktop:
+
+ ssh root@192.168.0.202 "date -u -s `date -u +%m%d%H%M%Y.%S`"
+
+You can also set the hardware clock to the system time:
+
+ hwclock --systohc
+
+Is this better?:
+
+ hwclock --utc --systohc
+
+It is possible to instruct framework on how to set the time and timezone in /etc/frameworkd.conf :
+
+ [otimed]
+ # a list of time/zone sources to use or NONE
+ timesources = GPS,NTP
+ zonesources = GSM
+ # use an ip address here, otherwise DNS resolution will block
+ ntpserver = 134.169.172.1
+ 
+To disable automatic date/zone settings, simply create an empty [otimed] section in /etc/frameworkd.conf
+
+==FSO Resources==
+
+[[FSO]] is in control of each device. These are called ''resources''. If the software wanting to use the device is capable of requesting this resource via <tt>d-bus</tt>, FSO will do this, otherwise you might need to power the device manually. After the requested resource is released, FSO will power it down. Manual resource request can be done through ''SHR Setting'' or you can use <tt>fsoraw</tt> command. (Using fsoraw is faster and better then running dbus commands)
+
+ opkg install fsoraw
+
+Example of usage fsoraw:
+
+ fsoraw -r Display mokomaze
+
+See [[FSO Resources]] for more details on using the following resources:
+
+'''Wifi'''
+
+Unless this resource is enabled you've no eth0 and wifi module is completely un-powered. Use the [[Mokonnect]] network manager to set up networks, it will power Wifi up automatically when needed.
+
+'''Bluetooth'''
+
+You need to have this resource requested to have bluetooth module powered.
+
+'''GPS'''
+
+The fso-gpsd is a daemon waiting for gsmd connections, automatically powering the device on and off. When a connection exists, it powers up the GSM. In SHR Settings you can switch GPS completely off SHR Settings -> GPS -> Manual > Off
+
+'''GSM'''
+
+You need to have this resource requested to have GSM module powered.
+
+'''Display'''
+
+While this resource is requested the display won't be blanked and suspend is disabled.
+
+'''CPU'''
+
+While this resource is requested then suspend is disabled. Display will blank as normal.
+
+'''Test'''
+
+A test resource.
+
+'''UsbHost'''
+
+While this resource is requested the USB is turned into powered USB Host mode.
+
+'''Accelerometer'''
+
+You need to have this resource requested to have the Accelerometer module powered.
+
+==Network manager==
+
+While there are several ways of networking - Wifi, USB, Bluetooth and Gprs - By default, USB networking is enabled in <tt>/etc/network/interfaces</tt>.
+
+Enhanced configuration is possible through direct editing of /etc/network/interfaces or through [[Mokonnect]].
+
+The <tt>connmand</tt> daemon with Mokonnect are the recommended user level applications for setting up networking. At the moment, Mokonnect can manage USB, Wifi and Gprs connections, as well as routing and NAT. The Wifi device is not required to be manually turned on via SHR-Settings as Mokonnect will automatically enable the device when needed and disable it after use.
+
+{| class="wikitable" cellspacing="0" cellpadding="0" style="padding: 0%; margin:0em 0em 1em 0em; border:1px solid #c0c0c0; background:#eeeeee; floating="center";width:100%; "
+
+! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:33% " |
+[[Image:SHR-Mokonnect.png|200px|thumb|Mokonnect]]
+
+! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:33% " | 
+ 
+[[Image:SHR-Mokonnect-Wifi.png|200px|thumb|Mokonnect Wifi]]
+
+! style="background:#fcfcfc;border-left:1px solid #9999cc;border-right:1px ; border-top:2px solid 75d806; border:0px solid #222222; width:33% " | 
+ 
+[[Image:SHR-Mokonnect-Wifi-Scan.png|200px|thumb|Mokonnect Wifi Scan]]
+
+
+|}
+
+==Bluetooth==
+
+Bluetooth can be used for several different applications - file transfer (OBEX), networking, input devices (HIDD), music playing (A2DP), calling etc. In some occasions, the devices need to be authorized - paired. At the moment, support for some bluetooth functions is better than for others - it is possible to do all mentioned above with the notice that phone calls with bluetooth headset are always routed to the bluetooth even if the bluetooth headset is not around, making it quite difficult to use.
+
+In the SHR repositories are applications ready to be installed (by opkg) that already do provide bluetooth support. This means that they request the bluetooth resource automatically, can search bluetooth devices around, help you with pairing and can perhaps even reconnect bluetooth headset upon resume from suspend.  From applications that have some bluetooth support some are for example [[Launcher]] (home screen launcher and phone suite), [[Podboy]] (podcast player), [[Elmtooth]] (bluetooth manager). In order to set up bluetooth for phone calls, some manual setup from [[#GSM_phone_calls_with_bluetooth_headset | bellow]] is still required.
+
+===Bluez3 - the manual non D-Bus way===
+
+If you want to use the bluetooth device directly, you need to turn the bluetooth radio on in SHR Settings -> Connectivity -> Bluetooth Radio: On. You can also make the bluetooth device visible here.
+
+====Работы с файлами через OBEX====
+
+There are several obex programs allowing file transfer, all in console at the moment. Obexpush installs obextool, and opd daemon:
+
+ opkg install obexpush
+
+Default receiving path (editable in /etc/default/opd_args ) does not exist, so create it
+
+ mkdir /var/obexpush
+
+Files are then received automatically, no notice, no confirmation... they just silently appear in /var/obexpush
+
+To send some files, first scan for devices:
+
+ hcitool scan
+ Scanning ...
+ 	00:16:41:F5:A5:BC	laptop
+
+Then send the file onto bluetooth address found in the scan:
+
+ obextool push image.jpg 00:16:41:F5:A5:BC 10
+
+====Подключение bluetooth клавиатуры====
+
+ hidd --search
+
+ Editors note: This is the old bluez3 way, but it works. New bluez4 way will replace this.
+
+===Bluez4 - D-Bus based way===
+
+SHR uses bluez4 which is completely different from bluez3. The bluetoothd is taking care of most of the bluetooth now. Please see [[Manually using Bluetooth]] for detailed information about using bluetooth and also for a list of supported devices.
+
+====Pairing====
+
+[[Emtooth]] is a bluetooth manager. It provides setting up bluetooth device name, pairing/unpairing, visibility setting and more. Install Emtooth:
+
+ opkg install emtooth
+
+It will discover nearby devices, double tapping on found device will initiate pairing process.
+
+====GSM с bluetooth гарнитурой====
+
+In order to use bluetooth headset for phone calls, several simple steps need to be done.
+
+1). Your bluetooth headset device must be [[#Pairing | paired]] first.
+
+2). [[#Configuring_FSO | Add]] your bluetooth headset into FSO configuration.
+
+
+ Please note: phonecalls are now always routed to the bluetooth headset. 
+ After startup and after every resume, the headset needs to be [[#Re-Connecting_the_bluetooth_headset |reconnected]].
+
+=====Настройка FSO=====
+
+Now we must tell frameworkd that you have a bluetooth headset. Headset parameters should be set in
+
+ /etc/freesmartphone/opreferences/conf/phone/default.yaml
+
+Parameters bt-headset-enabled and bt-headset-address (see opreferences/schema/phone.yaml for semantics).
+
+You need to restart FSO for the changes to take effect.
+
+ # /etc/init.d/frameworkd restart
+
+example of my /etc/freesmartphone/opreferences/conf/phone/default.yaml:
+
+ message-length: 7
+ message-tone: notify_message.wav
+ message-vibration: 1
+ message-volume: 10
+ ring-loop: 1
+ ring-tone: ringtone_ringnroll.wav
+ ring-vibration: 1
+ ring-volume: 10
+ bt-headset-enabled: 1
+ bt-headset-address: 00:09:DD:31:92:98
+
+=====Переподключение гарнитуры=====
+
+You might need to get the bluetooth headset connected manually on the beginning and also after suspend:
+
+ mdbus -s org.bluez /org/bluez/`pidof bluetoothd`/hci0/dev_xx_xx_xx_xx_xx_xx org.bluez.Headset.Connect
+
+where xx_xx_xx_xx_xx_xx is address of the device, for example:
+
+ mdbus -s org.bluez /org/bluez/`pidof bluetoothd`/hci0/dev_00_09_DD_31_92_98 org.bluez.Headset.Connect
+
+Hopefully, your bluetooth headset now works. Good luck!
+
+==System Customizing==
+
+===Установка тем splash screen===
+
+List available splash screen themes
+
+ opkg list | grep splash-theme
+
+Install one of the available themes
+
+ opkg install shr-splash-theme-dontpanic
+
+Then go to '''SHR Settings -> Appearance -> Splash settings'''. Here you can preview installed themes and change the default one.
+
+===Установка тем===
+
+Every theme is made of several components (a theme for illume, theme for the phone applications, theme for etk and so on). There is a SHR metapackage for each theme that allows installing the complete theme in one go.
+
+List available SHR theme metapackages:
+
+ opkg list | grep shr-theme
+
+Install one of the available themes
+
+ opkg install shr-theme-gry
+
+Then go to '''SHR Settings -> Appearance -> Elementary Settings'''. Here you can preview installed themes and choose the preferred one.
+
+The Illume screen requires to change theme via '''Settings (SHR Logo) -> Look -> Theme'''. Here you can preview installed themes and choose the preferred one.
+
+===Включение курсора мыши=== 
+
+edit line 143 of /etc/X11/Xserver and erase '''-nocursor'''
+
+ ARGS="$ARGS"
+
+
+
+===Случайные ошибки===
+No icons, no GSM functions etc. - this is mostly due to '''errors on your µSD''' card. Remove your card and fix it in card reader or by booting to another partition (nand) or by reboot and mount read only, then run fsck.
+
+For reboot into nand and fix 1st partition of ext2 on your card
+
+ fsck.ext2 /dev/mmcblk0p1
+
+===GSM modem 1024 suspend bug===
+
+The calypso GSM modem suffers a known [[1024]] hardware bug that causes unreliable GSM function. To work it around, SHR by default doesn't suspend the modem completely. If you have undertaken a fix for this bug you can extend your battery time by enabling the modem to fully suspend when possible.
+
+Edit the following in /etc/frameworkd.conf file:
+
+ ti_calypso_deep_sleep = always
+
+Then restart framework or reboot the phone.
+
+==Сообщения об ошибках==
+
+SHR is a work in progress. If you experience issues, please report them back to SHR. With your report provide relevant logs from
+
+ /var/log/
+
+To report a bug, please go to http://shr-project.org/trac/report
+
+Check if the bug is already reported. If not, add a ticket, be as much precise as you can in the title and the description, in what circumstances the issue happened and so on. If bug already exists, see if you can help fixing it by providing some fresh info.
+
+== Дополнительная Информация ==
+
+Посетите:
+* [http://blog.shr-project.org Блог]
+* [http://trac.shr-project.org Домашняя страничка проекта (Bugtracker)]
+* [http://git.shr-project.org Git (Репозиторий исходных кодов)]
+* [http://build.shr-project.org Buildhost (Загрузки)]
+* [http://shr-project.org/trac/wiki/Tweaks Настройки (On the Wiki)]
+* [http://lists.shr-project.org Списки рассылок пользователей и разработчиков]
+
+
+
+[[Category:SHR]]
+[[Category:Manuals]]
