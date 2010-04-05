@@ -532,10 +532,26 @@ By using it, it will get filled by the words you use and after time will start h
 See [[Configure_SHR_for_German-speaking_use]] for detailed customization for german speaking.
 
 ===Date and time===
+{{Note|This needs a complete and correct rewrite.}}
+
+Date and time are automatically set from GPS or Network. The easiest way of setting the time for the first time is to run TangoGps (GPS & Map icon) and obtaining GPS fix. Time will then be set automatically.
 
 The local timezone is automatically retrieved from the GSM network.
 
-create a symlink named /etc/localtime which points to the appropriate file in /usr/share/zoneinfo. For example, if you're in France., the following command will link the correct zoneinfo file to your /etc/localtime, giving you the correct time:
+It is possible to instruct framework on how to set the time and timezone in /etc/frameworkd.conf :
+
+ [otimed]
+ # a list of time/zone sources to use or NONE
+ timesources = GPS,NTP
+ zonesources = GSM
+ # use an ip address here, otherwise DNS resolution will block
+ ntpserver = 134.169.172.1
+ 
+To disable automatic date/zone settings, simply create an empty [otimed] section in /etc/frameworkd.conf
+
+Timezone change
+
+Create a symlink named /etc/localtime which points to the appropriate file in /usr/share/zoneinfo. For example, if you're in France., the following command will link the correct zoneinfo file to your /etc/localtime, giving you the correct time:
 
  ln -sf /usr/share/zoneinfo/Europe/Paris /etc/localtime
 
@@ -550,9 +566,10 @@ For a permanent timezone change edit /etc/profile and change to:
 
  TZ="Europe/Paris"
 
-Date and time are automatically set from GPS or Network. The easiest way of setting the time for the first time is to run TangoGps (GPS & Map icon) and obtaining GPS fix. Time will then be set automatically after several minutes.
 
-Time can set time also manually.
+If you use UTC time, set '''UTC=yes''' in '''/etc/default/rcS'''.
+
+Adjusting time manually:
 
 Via SHR-Settings -> Date/time -> Set time
 
@@ -564,24 +581,13 @@ The above does NOT work from Ubuntu as of 4/2/2010, the proper format is:
 
  ssh root@192.168.0.202 "date -u -s `date -u +%Y.%m.%d-%H:%M:%S`"
 
-You can also set the hardware clock to the system time:
+Set the hardware clock to the system time:
 
  hwclock --systohc
 
 Is this better?:
 
  hwclock --utc --systohc
-
-It is possible to instruct framework on how to set the time and timezone in /etc/frameworkd.conf :
-
- [otimed]
- # a list of time/zone sources to use or NONE
- timesources = GPS,NTP
- zonesources = GSM
- # use an ip address here, otherwise DNS resolution will block
- ntpserver = 134.169.172.1
- 
-To disable automatic date/zone settings, simply create an empty [otimed] section in /etc/frameworkd.conf
 
 ==FSO Resources==
 
