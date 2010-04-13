@@ -20,16 +20,19 @@ import dbus.glib
 import gobject
 import datetime
    
-def onNetworkStatus(status ):
+def onNetworkStatus(status):
+    if 'cid' in status:
         print '[%s] Signal : cid=%s, lac=%s' %  (datetime.datetime.now(),status['cid'],status['lac'] )
+    else:
+        print 'register first'
 
 bus = dbus.SystemBus();
 
-bus.add_signal_receiver( onNetworkStatus,
-                         "Status",
-                         "org.freesmartphone.GSM.Network",
-                         "org.freesmartphone.ogsmd",
-                         "/org/freesmartphone/GSM/Device" )
+bus.add_signal_receiver(onNetworkStatus,
+                        "Status",
+                        "org.freesmartphone.GSM.Network",
+                        "org.freesmartphone.ogsmd",
+                        "/org/freesmartphone/GSM/Device")
 
 gobject.threads_init()
 dbus.glib.init_threads()
