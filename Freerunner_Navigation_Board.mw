@@ -1,3 +1,33 @@
+''Preliminary Information. This page will be moved as soon as it contains the most important imformation about the board. (probably this weekend).''
+
+= Freerunner Navigation Board =
+
+
+The Freerunner Navigation Board is a small PCB which can be mounted inside the case to extend the Freerunner with additional Hardware.
+The Board contains the triaxial [[digital compass]] chip [http://www.honeywell.com/sites/portal?smap=aerospace&page=Magnetic-Sensors3&theme=T15&catID=CF84B17AB-A90F-716D-10BC-A1E75441138E&id=HF916B4E0-4F71-9DB5-DFA8-51B1944918EE&sel=2&sel4=1 HMC5843] from Honeywell and two gyroscope chips from InvenSense ([http://invensense.com/mems/gyro/idg650.html IDG650], [http://invensense.com/mems/gyro/isz650.html ISZ650]) to provide a triaxial gyroscope solution.
+
+Full [http://chonyota.net/freerunner/gyro-V5-schematic.pdf schematics] and layout files are available from [http://chonyota.net/freerunner chonyota.net/freerunner]
+
+== Hardware details ==
+The board can be connected to the [[I2C]] bus which is available on testpads around the debug connector.
+
+The compass chip is directly connected to the I2C bus. The gyroscopes have an analog output which is digitized using a 16-bit A/D converter [http://focus.ti.com/docs/prod/folders/print/ads1115.html ADS1115] from Texas Instruments.
+
+Additional features which were planned but are not implemented yet:
+The board contains the footprint to add an additional MSP430 microcontroller from TI. It would be used to control the offset compensation features of the gyroscopes, read their internal temperature sensors and switch them off when not used. Latter can actually be done using a GPIO line which is available at a testpoint H-TP1516.
+
+== Software support ==
+Right now, this additional hardware is not supported out of the box, but there are some pieces of software available to demonstrate that the hardware actually works.
+
+=== Drivers ===
+Hardware drivers are available from [http://gitorious.org/freerunner-navigation-board gitorious].
+
+==== Digital compass ====
+A kernel driver is available to control the HMC5843 digital compass through sysfs entries. Vala hackers can use a vala library for easier access.
+
+==== Gyroscope ====
+The Gyroscopes need a driver for the ADCs which can be downloaded from the [http://gitorious.org/freerunner-navigation-board/ads1115 ADS1115 repository]. Besides the kernel module, these chips can be accessed from userspace using the i2c-dev driver and a userspace library for easier access. Vala bindings are available.
+
 === End user software ===
 A Vala-based [http://gitorious.org/sensor-monitor/sensor-monitor sensor monitor] developed by [[User:MicVm]] can be used to visualize the sensor values. The software is very experimental. You are using it at your own risk :)
 
@@ -10,3 +40,6 @@ Except for the above mentioned sensors there have been written plugins for:
 This is a screenshot of application monitoring the X and Y gyro-axis of the navigation board as well as the X-axis of the digital compass:
 
 [[Image:Sensmon-screen.png]]
+
+== Hacking ==
+Since each ADC provices two channels and the gyroscope is 'only' triaxial, one channel is free for use. A wire can be soldered onto a tiny testpad or directly to the pin on the chip.
