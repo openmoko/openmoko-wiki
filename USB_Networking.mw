@@ -366,6 +366,29 @@ Then restart the devd(8) daemon with:
 
 If you now plugin the FreeRunner into the USB port the cdce0 interface gets created and the IP addr will be assigned.
 
+== FreeBSD8 ==
+if your kernel report 
+kernel: ugen5.2: <Linux 2.6.29-20100118.gita15608> at usbus5
+
+add to /etc/devd.conf:
+<pre>
+attach 100 {
+        device-name "ugen[0-9]+";
+        match "vendor" "0x1457";
+        match "product" "0x5122";
+        action "perl /usr/local/etc/neo_if.pl /dev/$device-name";
+};
+</pre>
+
+create /usr/local/etc/neo_if.pl:
+<pre>
+#!/usr/bin/perl
+my ($u, $ad) = $ARGV[0] =~ /(\d+).(\d+)$/;
+print ("usage: $0 /dev/ugen4.2\n"), exit unless (length $u and length $ad);
+print `usbconfig -u $u -a $ad set_config 1
+ifconfig ue0 192.168.0.200/24`;
+</pre>
+
 == Debian, Ubuntu and others ==
 
 There are two systems which deal with hotplugginng devices, which is what you do when you plug in Freerunner in an USB port. '''udev''' and the older '''Hotplug''' system.
