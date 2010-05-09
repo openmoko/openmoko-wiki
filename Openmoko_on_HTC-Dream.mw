@@ -10,27 +10,18 @@ For questions ask leviathan and GNUtoo in irc://irc.freenode.net/#htc-linux
 === Working ===
 * USB-Ethernet
 * Framebuffer console
-* Xfbdev
+* Xorg
 * Wifi
 * Touchscreen
-
-=== Should work, but not tested yet ===
-* Phonecalls ( >_< )
-
-=== Not fixed yet ===
-* ALSA ( --> no mplayer -.- )
+* Phonecalls
+* ALSA
 
 == Setup the rootfs ==
 * In this example setup I used a SD-Card as root partition.
 * In order to follow this guide format a SD-Card (just like installing Openmoko on Neo Freerunner).
 **  First partition: vfat
 ** Second partition: ext2 (root)
-* mount it and extract http://ftp.o2s.ch/pub/openmoko/images/shr-full-eglibc-ipk--20091106-htcdream.rootfs.tar.bz2 to it.
-
-=== Use internal memory ===
-Start into fastboot mode
- wget http://ftp.o2s.ch/pub/openmoko/images/shr-fso-console-image-eglibc-ipk--20091106-htcdream.rootfs.yaffs2 -O system.yaffs2
- fastboot flash userdata system.yaffs2
+* mount it and extract http://ftp.o2s.ch/pub/openmoko/htcdream/repo/images/htcdream/shr-full-eglibc-ipk--20100509-htcdream.rootfs.tar.bz2 to it.
 
 == Bootloader ==
 You need to install fastboot.
@@ -39,12 +30,8 @@ In order to do this, you will have need to have "root" on the existing Android d
 == Kernel ==
 === Using precompiled image ===
 Download an kernel image from:
-* http://ftp.o2s.ch/pub/openmoko/kernel/
+* http://ftp.o2s.ch/pub/openmoko/htcdream/repo/images/htcdream/zImage-2.6.32%2br17%2bgitr636fa4daf243826ef6cebb64dd0509f3b079fcb5-r17-htcdream.bin
 (I had to disable anonymous ftp because some people misused it to upload copyrighted movies and pr0n. Sry. -- leviathan)
-
-Select -htcdream-fastboot_sd.bin for SD-card booting or -htcdream-fastboot_mtd.bin for booting from internal flash.
-
-Rename it to openmoko-boot.img (to keep consistent with the howto ;) )
 
 === Building new kernel ===
 Use the kernel from the replicants.
@@ -52,14 +39,14 @@ Fetch the kernel sourcecode from http://gitorious.org/replicant/gnulinuxkernel
 And configure it as you whish.
 
  export HACK_DIR=`pwd`
- git clone git://gitorious.org/replicant/gnulinuxkernel.git
- cd gnulinuxkernel
- git checkout -b leviathan
- git pull git://gitorious.org/replicant/gnulinuxkernel.git leviathan
- cp arch/arm/configs/openmoko .config
+ git clone git://gitorious.org/htc-msm-2-6-32/leviathan-incoming.git
+ cd leviathan-incoming
+ git checkout --track -b msm-gnuconform orgigin/msm-gnuconform
+ git pull
+ wget http://ftp.o2s.ch/defconfig_OE3 -O .config
  make CROSS_COMPILE=/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/ ARCH=arm
  sudo make CROSS_COMPILE=/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/ ARCH=arm modules_install
- sudo mv /lib/modules/2.6.29-openmoko-msm /mnt/foo/lib/modules/
+ sudo mv /lib/modules/2.6.32 /mnt/foo/lib/modules/
  sync
  umount /mnt/foo
 
@@ -74,12 +61,12 @@ And configure it as you whish.
 
 ==== For SD-card rootfs ====
  mkbootimg --cmdline "console=tty0 no_console_suspend=1 root=/dev/mmcblk0p2 rootdelay=2 fbcon=rotate:1" \
- --kernel $HACK_DIR/gnulinuxkernel/arch/arm/boot/zImage \
+ --kernel $HACK_DIR/leviathan-incoming/arch/arm/boot/zImage \
  --ramdisk ./newramdisk.cpio.gz -o openmoko-boot.img
 
 ==== For internal rootfs ====
  mkbootimg --cmdline "console=tty0 no_console_suspend=1 root=/dev/mtdblock5 rootfstype=yaffs2 rootdelay=2 fbcon=rotate:1 rw" \
- --kernel $HACK_DIR/gnulinuxkernel/arch/arm/boot/zImage \
+ --kernel $HACK_DIR/leviathan-incoming/arch/arm/boot/zImage \
  --ramdisk ./newramdisk.cpio.gz -o openmoko-boot.img
 
 === Flashing boot.img ===
@@ -93,66 +80,9 @@ And configure it as you whish.
 === Firmware ===
  mkdir firmware
  cd firmware
- wget http://ftp.o2s.ch/pub/openmoko/firmware-wl12xx/wl1251-fw.bin
- wget http://ftp.o2s.ch/pub/openmoko/firmware-wl12xx/wl1251-nvs.bin
+ wget http://ftp.o2s.ch/pub/openmoko/htcdream/firmware-wl12xx/wl1251-fw.bin
+ wget http://ftp.o2s.ch/pub/openmoko/htcdream/firmware-wl12xx/wl1251-nvs.bin
  scp * root@192.168.0.202:/lib/firmware/
-
-=== Driver ===
-==== Install package ====
- wget http://ftp.o2s.ch/pub/openmoko/packages/compat-wireless-msmwifi_2009-10-28-.4_htcdream.ipk
- scp compat-wireless-msmwifi_2009-10-28-.4_htcdream.ipk root@192.168.0.202:~
- ssh root@192.168.0.202
- <enter>
- opkg install compat-wireless-msmwifi_2009-10-28-.4_htcdream.ipk
-
-==== Compiling ====
-Download http://wireless.kernel.org/download/compat-wireless-2.6/compat-wireless-2.6.tar.bz2 (broken)
-I think now http://wireless.kernel.org/download/compat-wireless-2.6/compat-wireless-old.tar.bz2
-Unpack it.
-Change into the folder.
-
- make ARCH=arm CROSS_COMPILE=/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/bin/ KLIB=$HACK_DIR/gnulinuxkernel KLIB_BUILD=$HACK_DIR/gnulinuxkernel "$@"
-
-Change up
-
- cd ..
-
-Run following script
-
- #!/bin/sh
- compat=compat-wireless-2009-09-30/
- mkdir modules/
- for i in $compat/net/mac80211/mac80211.ko \
-            $compat/net/wireless/cfg80211.ko \
-            $compat/net/wireless/lib80211.ko \
-            $compat/net/wireless/lib80211_crypt_wep.ko \
-            $compat/net/wireless/lib80211_crypt_ccmp.ko \
-            $compat/net/wireless/lib80211_crypt_tkip.ko \
-            $compat/drivers/net/wireless/wl12xx/wl1251_sdio.ko \
-            $compat/net/rfkill/rfkill_backport.ko \
-            $compat/drivers/net/wireless/wl12xx/wl1251.ko; do
-            cp $i modules/
- done
-
-Copy it onto your device
-
- scp -r modules root@192.168.0.202:~
-
-Connect to your device and start the networking:
-
- insmod rfkill_backport.ko
- insmod cfg80211.ko
- insmod mac80211.ko
- insmod lib80211.ko
- insmod lib80211_crypt_tkip.ko
- insmod lib80211_crypt_wep.ko
- insmod lib80211_crypt_ccmp.ko
- insmod wl1251.ko
- insmod wl1251_sdio.ko
-
-* http://bobcopeland.com/android_wifi.html
-* Look onto this section with the calibration files
-* http://htc-linux.org/wiki/index.php?title=WL1251
 
 == Screenshots ==
 [[Image:Image.jpg]]
