@@ -203,6 +203,17 @@ This will rotate the video/DVD, scale it and encode it to mpeg4 with a bitrate o
 
 Works like a charm.
 
+== Some hints on encoding for Neo ==
+* use a mpeg4 codec like in lavc (mencoder -avc lavc -lavcopts vcodec=mpeg4)
+* the video should be pre-rotated (mencoder -vf rotate=1 or 2)
+* the resolution should/must be
+** divisible by 16 (-vf scale=m*16:n*16)
+** x*y= about 150k, some videos even work with 200k (-vf scale=512:384 #=196608)
+** x/y should be lower than 640/480
+** if the video is scaled up to more than 640/480, maybe because of the aspect (-lavcopts autoaspect), video will get slow (sometime up to 684 may work)
+* scaling up seems to be easy for the Glamo
+* video bitrates up to 1000kbit (or more) may work, 400kbit seems to be safe (mencoder -lavcopts vbitrate=400)
+
 =Frontend=
 ==gnome-mplayer==
 '''Source Code released: No'''
