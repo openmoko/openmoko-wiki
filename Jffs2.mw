@@ -1,5 +1,29 @@
+=== Using a loopback device ===
+This method of mounting a jffs2 image file allows you to make modifications to the mounted filesystem, which will take effect in the file itself.
+<pre>
+#!/bin/bash
+if [[ $# != 2 ]] || [[ ! -e "$1" ]] || [[ ! -d "$2" ]]
+then echo Usage: $0 image.jffs2 directory
+     exit 2
+fi
+lodev=$(sudo losetup -f)  # Find unused loop device
+mtnum=0
+mtdev=mtdblock$mtnum
+# If we have udev, the mtd device appears automatically.  Otherwise, create it:
+# [[ -b "/dev/$mtdev" ]] || sudo mknod "/dev/$mtdev" b 31 $mtnum
+sudo losetup "$lodev" "$1"  # Associate the loop device with the image file
+sudo modprobe block2mtd
+echo "$lodev" | sudo tee /sys/module/block2mtd/parameters/block2mtd
+sudo mount -t jffs2 "/dev/$mtdev" "$2"
+</pre>
+To reset everything later, assuming "loop0" was used with mountpoint "mymount":
+ sudo umount mymount
+ sudo rmmod block2mtd
+ sudo losetup -d /dev/loop0
+
 === Using mtdram ===
-An alternative way is used in the following script:
+An alternative way is used in the following script.  Any modifications made in this mount will have no effect on the file itself.
+
  if test `id -u` != 0
  then echo "Must be root"; exit 2
  fi
@@ -18,5 +42,7 @@ An alternative way is used in the following script:
  dd if="$1" of=/dev/mtd0
  mount -t jffs2 /dev/mtdblock0 "$2"
 
-
+To reset this, simply
+ umount mymount
+ rmmod mtdram
 [[Category:Advanced End User]]
