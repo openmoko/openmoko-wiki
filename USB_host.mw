@@ -84,6 +84,45 @@ The paths change slightly since 2.6.28:
 
 Note: For me (2.6.29-rc3), it is /sys/devices/platform/s3c-ohci/usb_mode ...
 
+==== USB-Mode-Script (universal for all kernels) ====
+ #!/bin/sh
+ 
+ USB_MODE=/sys/devices/platform/s3c-ohci/usb_mode
+ if [ ! -f ${USB_MODE} ] ; then
+   USB_MODE=/sys/devices/platform/s3c2410-ohci/usb_mode
+ fi
+ if [ ! -f ${USB_MODE} ] ; then
+   echo "Cannot find usb_mode sysfs node"; exit 2
+ fi
+ 
+ POWER=/sys/devices/platform/neo1973-pm-host.0/hostmode
+ if [ ! -f ${POWER} ] ; then
+   POWER=/sys/devices/platform/s3c2440-i2c/i2c-0/0-0073/pcf50633-gpio/reg-fixed-voltage.2/gta02-pm-usbhost.0/power_on
+ fi
+ if [ ! -f ${POWER} ] ; then
+   POWER=/sys/class/i2c-adapter/i2c-0/0-0073/neo1973-pm-host.0/hostmode
+ fi
+ if [ ! -f ${POWER} ] ; then
+   echo "Cannot find power hostmode sysfs node"; exit 3
+ fi
+ 
+ echo "USB_MODE = ${USB_MODE}"
+ echo "POWER = ${POWER}"
+ 
+ grep -q 'host' ${USB_MODE}
+ if [ $? -eq 0 ]; then
+   echo 0 > ${POWER}
+   echo device > ${USB_MODE}
+   ifconfig usb0 up
+   echo USB-Port is in device-mode now.
+ else
+   ifconfig usb0 down
+   echo host > ${USB_MODE}
+   echo 1 > ${POWER}
+   lsusb
+   echo USB-Port is in host-mode now.
+ fi
+
 ==== Using a GUI ====
 * Using the packaged push button derived from the script above: [http://blogs.thehumanjourney.net/finds/resource/usbmode-button_0.3_armv4t.ipk Download]
 * [[User:Techiem2|Mark D. Montgomery II]]'s [http://techiem2.net/index.php?/archives/10-Freerunner-USB-Mode-Control-Program.html application] controls all the various modes through a GUI
