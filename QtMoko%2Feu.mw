@@ -18,43 +18,50 @@ QtMokoren irudia FreeRunnerraren memorian ezarri (flasheatu) nahi baduzu, bi gau
    Reboot
    Power Off  
 
-Egoera horretan 30 segundu iraungo du, Ezer egiten ez baduzu ohiko abiaratzea egingo du. Menuko aukera bat ala bestea hartzeko AUX botoia erabil daiteke. The FreeRunner will stay in this mode for only 30 sec. Within this time you have to start <tt>dfu-util</tt>. If you want to flash the kernel image (you will need to be root on your PC) then you have to start the following command in the 30sec your see the BOOT MENU:
+Egoera horretan 30 segundu iraungo du, Ezer egiten ez baduzu ohi bezala abiatuko da. Menuko aukera bat ala bestea hartzeko AUX botoia erabil daiteke. Egin beharrekoa honakoa da, hasteko, Set Console to USB aukeratu behar da, horrela, USB konexioa erabiliz mahaigaineko ordenagailu batetik FreeRunnerra kontrolatu ahal izango duzu. Mahaigaineko ordenagailuan root eskubideak beharko dituzu, eta gainera, <tt>dfu-util</tt> aplikazioa instalatuta eduki behar duzu. Gainera, ordenagailuan bertan eduki behar dituzu kernela (uImage-bertsioa.bin) eta root fitxategi sistema (qtmoko-debian-bertsioa.jffs2). 30 segundu horietan <tt>dfu-util</tt> agindua exekutatu behar duzu, eta hainbat parametro pasa behar zaizkio. Neo FreeRunner batean kernela flasheatu nahi baduzu honako agindua exekutatu behar duzu ordenagailuan (betiere FreeRunnerrak USB bidez konektatuta egon behar du ordenagailura):
 
- # for the Neo FreeRunner:
- dfu-util -d [[USB Product IDs|0x1d50:0x5119]] -a kernel -R -D  uImage-v13.bin
+sudo dfu-util -a kernel -R -D uImage-bertsioa.bin
 
-and finally the root fs with this one:
+Agindu horren ordez osotuagoa ere erabili daiteke, izan ere gailua ere zehaztu baitezakegu aginduan, gure kasuan NeoFreeRunnerra denez:
 
- # for the Neo FreeRunner:
- dfu-util -d [[USB Product IDs|0x1d50:0x5119]] -a rootfs -R -D qtmoko-debian-v13.jffs2
+sudo dfu-util -d [[USB Product IDs|0x1d50:0x5119]] -a kernel -R -D  uImage-bertsioa.bin
 
-===First Boot===
-After finishing the installation without errors you have to start the FreeRunner and calibrate the  touch screen. The you see the installed ''QtMoko'' on your device. 
+Ondoren fitxategi sistemaren erroa ere flasheatu beharko dugu, eta horretarako, honako agindua behar dugu:
+
+sudo dfu-util -a rootfs -R -D qtmoko-debian-bertsioa.jffs2
+
+Berriz ere, gailua adierazi nahi izan ezkero beste aukera hau erabil daiteke:
+
+sudo dfu-util -d [[USB Product IDs|0x1d50:0x5119]] -a rootfs -R -D qtmoko-debian-bertsioa.jffs2
+
+===Lehenengo abiaraztea===
+Instalazioaren ondoren (errorerik gabeko instalazioaren ondoren) FreeRunnerra abiarazi behar da. Abiarazitakoan pantaila taktila kalibratzeko eskatuko du. Diana modukoa batzuen gaineak ukitzeko eskatuko digu, eta azkenik instalatu duzun QtMoko banaketa ikusiko duzu zure gailuan.
 [[Image:qtmokomain.png|200px|thumb|QtMoko after first boot]]
 
 ===Login===
-If you want to login to your FreeRunner set up a network connection (see [[USB Networking]]) with USB cable and start:
+FreeRunnerrean login bidez konektatzeko, USB-kable bidezko sare-konexioa erabil daiteke (ikusi [[USB Networking|USB sare konexioa]]), horrela zure ordenagailutik ssh bidez konexioa ezer dezakezu freeRunnerrera honako agindua erabiliz:
+
    desktop# ssh -X -l root 192.168.0.202
 
-The root password is empty so set it for security reason especially when you open the ssh-daemon on the WLAN network interface. Define root password as usual on a linux box with
+FreeRunnerrko root erabiltzaileak ez dauka pasahitzik, beraz, ez dizu pasahitzik eskatuko. Baina, segurtasunagatik komeni da root erabiltzaileari pasahitza jartzea, batez ere WLAN sare interfazean ssh-deabrua abiarazten duzunean. Pasahitza ezartzeko, ssh konexioa egin ondoren, edozein linuxe makinetan bezala,<tt> passwd</tt> agindua exekutatu behar da:
    neo# passwd
-If you have established the internet connection via USB cable then update the repository data:
+USB kablearen bidez internet konexioa ezarri baduzu biltegietako datuak eguneratzea komeni da, horretarako:
    neo# apt-get update 
-If you want to check if the internet connection is available on your freerunner ping the OpenMoko web server with:
+Internet konexioa ba ote dabilen ikusteko, zure FreeRunnerreanOpenMoko web zerbitzariari ping egin diezaiokezu: 
    neo# ping 88.198.93.221
    neo# ping wiki.openmoko.org
-If the first ping works and the second doesn't then check the DNS server settings (see [[USB Networking]]).
+Lehenengoa ondo badabil baina bigarrena ez, orduan DNS zerbitzaria gaizki dabilkizu.(ikusi [[USB Networking]]).
 
-===Setting Time and Date===
-Set the time and date on from your linux box with
+===Ordua eta data ezartzea===
+Zure ordenagailutik ezar ditzakezu ordua eta data, horretarako:
 <pre>
-ssh root@openmoko "date -us @`date -u +%s`"
+ssh root@openmoko "date -fr @`date -u +%s`"
 </pre>
-If you want to set the time with a NTP Client install the following package, if you have a network connection available (see [[USB Networking]])
+NTP Bezero baten bidez ezarri nahi badituzu, instalatu ondoko paketea (sare konexioa edukiz gero, jakina) (ikusi [[USB Networking]])
 <pre>
 # apt-get install ntpdate
 # ntpdate-debian
 </pre>
-For further detail see [[Setting Date and Time]].
+Informazio gehiago [[Setting Date and Time|data eta orduaren ezarpena]].
 
 [[Category:Qt Moko| ]]
