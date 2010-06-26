@@ -113,14 +113,22 @@ When you boot Linux on the smartphone, or if the smartphone powers down, Mac OS 
 
 == USB Networking ==
 
-There are several drivers you can use to talk to the RNDIS/Ethernet Gadget that the Neo1973 presents to its host system. The main difference between them is stability, and all have their own problems. Leopard needs further testing (Apple revised the driver and the Network System Settings).
+There are several drivers you can use to talk to the RNDIS/Ethernet Gadget that the Linux kernel presents when connected as a USB client.
+
+=== AJZaurusUSB driver ===
+
+You can use the open source driver from [http://projects.goldelico.com/p/AJZaurusUSB]. It was originally developed for handheld devices like iPAQ, Sharp Zaurus and Motorola A760, but works for Openmoko as well. Download and install according to the manual found inside the package. The code is GPL'd (source available) and runs on both Intel and PPC Macs with 10.4 to 10.6.
+
+After rebooting or loading the kernel extension by hand, you should have a new Ethernet interface in your System Preferences/Network.
+
+<b>Note</b>: This driver does not have the same problem as the Apple driver does, where it constantly adds to the list of interfaces each time you reboot the Openmoko, because the driver provides a constant Ethernet address independently what the Openmoko says. Only flashing a new kernel version might force you to update.
 
 === Apple CDC Ethernet driver 10.4.10 ===
 MacOS X 10.4.10 and later includes a driver for RNDIS/Ethernet Gadget devices. Launch System Preferences -> Network and you should see "new interface detected enXX". 
 
 <b>Issue</b>: Each time you reboot the Neo, the interface will get a different Ethernet address. This in turn makes Mac OS X create a new configuration record. After a while you'll end up with a load of unusable enXX devices - if you don't periodically clean them out. Open System Preferences and go to Network -> Show(Network Port Configurations) -> Select an enXX -> Delete.
 
-<b>Note</b>: this is not a problem to blame MacOSX for because it tries to make network configuration simpler based on the assumption of stable Ethernet addresses.
+<b>Note</b>: this is not a problem to blame Mac OS X for, because it tries to simplify network configuration based on the assumption of <b>stable</b> Ethernet addresses.
 
 === Apple CDC Ethernet driver 10.5.x ===
 
@@ -133,14 +141,6 @@ The issue of multiple network interfaces showing up whenever the Neo is rebooted
 For example:
 
  modprobe g_ether host_addr=46:0d:9e:67:69:eb dev_addr=46:0d:9e:67:69:ec
-
-=== AJZaurusUSB driver ===
-
-You can also use the open source driver from [http://www.dsitri.de/wiki.php?page=AJZaurusUSB]. It was developed for handheld devices like iPAQ, Sharp Zaurus and Motorola A760, but works for Openmoko as well. Download and install according to the manual found inside the package. The code is GPL'd (source available) and runs on both Intel and PPC Macs with 10.3, 10.4 and 10.5. Recent tests with 10.6 have shown that the latest release 0.5.3 also works there.
-
-After rebooting or loading the kernel extension by hand, you should have a new Ethernet interface in your System Preferences/Network.
-
-<b>Note</b>: This driver does not have the same problem as the Apple driver does, where it constantly adds to the list of interfaces each time you reboot the neo, because the driver provides a constant ethernet address independently what the Neo says. Only flashing a new kernel might force you to update.
 
 === Network Settings ===
 Open System Preferences and go to Network and you should see "new interface detected enXX".  In the Show list box select the new interface - Ethernet Adapter enXX.
@@ -163,27 +163,27 @@ sudo ifconfig en11 192.168.0.200 netmask 255.255.255.248
 </pre>
 
 === Testing Your Connection ===
-You should be able to connect to your Neo! Try using Terminal (Applications->Utilities->Terminal) to ping the Neo at 192.168.0.202 and the roundtrip time should be between 1 and 2 ms.
+You should be able to connect to your Openmoko! Try using Terminal (Applications->Utilities->Terminal) to ping the Neo at 192.168.0.202 and the roundtrip time should be between 1 and 2 ms.
  ping 192.168.0.202
 
-Then log into your Neo using ssh:
+Then log into your Openmoko using ssh:
  ssh root@192.168.0.202
-The default password is blank.
+The default password is blank (depending on the distribution you have on the Openmoko).
 
 You can also [[scp]] files back and forth or share displays with X11.  Additional software and configuration could allow telnet, SMB, or many other possibilities using the TCP/IP network over your USB connection.
 
-Try pinging your Mac PC from the Neo
+Try pinging your Mac PC from the Openmoko
  ping 192.168.0.200
 
 Try pinging the outside world (a Google IP address)
  ping 74.125.19.147
 If that works then your Mac is routing the neo globally--if not see [[MacOS_X#Enabling_the_Mac_as_an_Internet_Router | Sharing Internet Connection with Mac]].
 
-Lastly, verify that DNS is correctly configured between the Neo & Network:
+Lastly, verify that DNS is correctly configured between the Openmoko & Network:
  ping www.google.com
 If that doesn't work then see [[USB_Networking#Configure_Default_Neo_DNS | Configuring Default Neo DNS]] to try and resolve the issue.
 
-Congordulations Elizagreth!!! The Neo is networked together with the Mac and sharing the Mac's interweb connection.
+Congratulations!!! The Neo is networked together with the Mac and sharing the Mac's interweb connection.
 
 == Bluetooth Networking ==
 {{InProgress}}
