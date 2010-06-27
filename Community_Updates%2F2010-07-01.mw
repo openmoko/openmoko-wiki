@@ -23,6 +23,39 @@ Image=http://wiki.openmoko.org/wiki/Debian |
 Works={{Works on Debian}}
 }}
 
+{{DistributionBox|
+Name=SHR [unstable]|
+
+
+Description=SHR is a community driven GNU/Linux distribution for smartphones based on OpenEmbedded using E17 (illume) as window manager and own gui apps on top of FSO.
+
+After hopefully lucky incident we have finally switched to new kernel (based on 2.6.32.13, KMS enabled):
+
+* New images are built with kernel and all needed changes are already included.
+* Images doesn't have udevd installed by default (using devtmpfs), which makes it boot about twice as fast as before (less then 1 min to PIN dialog). But it also won't mount your uSD automatically (it was blacklisted before, but removing it from blacklist won't help now).
+* Included packages contains latest stuff like xserver-1.9 (RC3), foxtrotgps and tangogps 0.99.4, QT 4.7.0-beta1 and QML enabled navit.
+
+* Distribution revision was changed in OE, this means that every package installed from shr-unstable feeds will be upgraded during next opkg upgrade (so be sure that you have enough time and space in /var partition). Consider flashing new image, it can be faster and safer in the end.
+* Used GCC was upgraded from version 4.4.4 to 4.5 (svn revision 160764 from gcc-4.5-branch, because released 4.5.0 has few issues on ARM targets).
+* New GCC brings LTO optimizations, which can give us 30% speedup in some cases see [http://sakrah.dontexist.org/node/1 Benchmark results]. LTO is not enabled by default yet.
+
+* New kernel has some issues, so please try first (on another uSD partition), before upgrading your daily-phone-partition.
+* The kernel is bigger than 2MB so if you're using u-boot, update your environment according to [http://wiki.openmoko.org/wiki/Kernel#.22Verifying_Checksum_..._Bad_Data_CRC.22_with_U-boot this wiki entry]
+* With slower uSD you can see unknown-block-device while booting. Flash newer Qi [http://build.shr-project.org/shr-unstable/images/om-gta02/ from SHR] it is using rootwait instead of rootdelay=1. For u-boot increase rootdelay or use rootwait.
+* Sometimes (and only on some devices) it can show all white (looks like old WSoD, but it's without death). Suspend/Resume should fix this.
+* Vibrations are too weak.
+
+* [http://git.openembedded.org/cgit.cgi/openembedded/log/ Changelog for all libs/apps included in image]
+* [http://git.shr-project.org/git/ Changelog for SHR apps]
+
+|
+Screenshot=SHR-Logo.png|
+Codename=unstable|
+Homepage=http://www.shr-project.org|
+Image=http://build.shr-project.org/shr-unstable/images/|
+Works={{Works on SHR}}
+}}
+
 
 {{DistributionBox|
 Name=Distro Name [version]|
