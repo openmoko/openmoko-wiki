@@ -1,0 +1,122 @@
+{{Languages|Opkg/DOC}}
+
+
+{{Prioritybox|
+'''This project has moved.'''
+
+Mid December, 2008, the project moved to Google code: http://code.google.com/p/opkg/
+* Group:  http://groups.google.com/group/opkg-devel
+* mailto: opkg-devel at googlegroups.com <opkg-devel at googlegroups.com>
+* Checkout Code: http://code.google.com/p/opkg/source/checkout
+
+Prior to that date, a mailing list for discussion was available here: http://lists.openmoko.org/mailman/listinfo/opkg-devel
+Source code was available in the subversion repository: http://svn.openmoko.org/trunk/src/target/opkg/. The repository could also be [http://svnweb.openmoko.org/trunk/src/target/opkg/ viewed online].
+}}
+
+
+
+== Usage ==
+
+opkg (Open PacKaGe Management) is a lightweight package management system based on Ipkg.
+
+ usage: opkg [options...] sub-command [arguments...] 
+opkg must have one sub-command argument where sub-command is one of:
+
+=== Package Manipulation Commands ===
+        update                  Update list of available packages
+        upgrade                 Upgrade installed packages (see also --download-only)
+        install <pkgs>          Install package(s) (see also --download-only)
+        configure <pkgs>        Configure unpacked package(s)
+        remove <pkgs|regexp>    Remove package(s)
+        flag <flag> <pkgs>      Flag package(s)
+         <flag>=hold|noprune|user|ok|installed|unpacked (one per invocation)
+
+
+=== Informational Commands===
+        list                    List available packages
+        list-installed          List installed packages
+        list-upgradable         List installed and upgradable packages
+        files <pkg>             List files belonging to <pkg>
+        search <file|regexp>    List package providing <file>
+        info [pkg|regexp]       Display all info for <pkg>
+        status [pkg|regexp]     Display all status for <pkg>
+        download <pkg>          Download <pkg> to current directory
+        compare-versions <v1> <op> <v2>
+                            compare versions using <= < > >= = << >>
+        print-architecture      List installable package architectures
+
+        whatdepends [-A] [pkgname|pat]+
+        whatdependsrec [-A] [pkgname|pat]+
+        whatprovides [-A] [pkgname|pat]+
+        whatconflicts [-A] [pkgname|pat]+
+        whatreplaces [-A] [pkgname|pat]+
+
+=== RegEx for packages and filenames ===
+ regexp could be something like 'pkgname*' '*file*' or similar
+ e.g. opkg info 'libstd*' or opkg search '*libop*' or opkg remove 'libncur*'
+
+=== Options ===
+        -A                      Query all packages not just those installed
+        --cache <directory>     Use a package cache
+        -d, --dest <dest_name>  Use <dest_name> as the the root directory for
+                                package installation, removal, upgrading.
+                                <dest_name> should be a defined dest name from
+                                the configuration file, (but can also be a
+                                directory name in a pinch).
+        -f, --conf <conf_file>  Use <conf_file> as the opkg configuration file
+        -o, --offline-root <dir> Use <dir> as the root directory for
+                                offline installation of packages.
+        -V, --verbosity <level>  Set verbosity level to <level>.
+                                Verbosity levels:
+                                        0 errors only
+                                        1 normal messages (default)
+                                        2 informative messages
+                                        3 debug
+                                        4 debug level 2
+
+=== Force Options===
+
+        --force-depends         Install/remove despite failed dependencies
+        --force-downgrade       Allow opkg to downgrade packages
+        --force-maintainer      Overwrite preexisting config files
+        --force-overwrite       Overwrite files from other package(s)
+        --force-reinstall       Reinstall package(s)
+        --force-removal-of-dependent-packages
+                                Remove package and all dependencies
+        --force-space           Disable free space checks
+
+=== other options ===
+        --autoremove            Remove packages that were installed
+                                automatically to satisfy dependencies
+        --download-only         No action -- download only
+        --noaction              No action -- test only
+        --nodeps                Do not follow dependencies
+        -t, --tmp-dir           Specify tmp-dir.
+
+
+== configuration files ==
+
+In SHR the files are located in the directory ''/etc/opkg/''
+''opkg.conf'' contains the main config options
+
+''arch.conf'' defines the priorities for different feeds/package trees/architectures
+
+''*-feed.conf'' contain the source type, a name and the path to the packages (comparable to debian)
+
+
+
+== Tricks ==
+
+=== Reinstall all installed packages ===
+
+At one point I ended up doing a complete upgrade before i had updated my opkg. As a result i borked a lot af packages. To reinstall them all, you can use this little sed magic.
+
+ opkg --force-reinstall install `opkg list_installed | sed 's/ - .*//'`
+
+
+=== Upgrade after downloading all needed packages ===
+To make sure that opkg upgrade does not break your system because of an unstable connection do: 
+ opkg update
+ opkg --cache cachedir --download-only upgrade
+ opkg --cache cachedir  upgrade
+Add a line "option cache ''cachedir''" to /etc/opkg/opkg.conf to avoid the --cache option on command line.
