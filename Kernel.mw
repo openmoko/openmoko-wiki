@@ -57,7 +57,63 @@ Another robot but this one only builds the versions picked by our friendly [[Ope
 
 If you understand OpenEmbedded you will get this: Those versions are tied to a specific GIT revision through conf/distro/include/sane-srcrevs.bb.
 
-=== Building the andy-tracking branch (2.6.29) ===
+=== Building the 2.6.32 branch ===
+
+Those are the minimum survival commands.
+
+Get kernel sources from git repository:
+
+ $ git clone git://git.openmoko.org/git/kernel.git linux-2.6
+ $ cd linux-2.6
+
+Next switch to the branch:
+
+ $ git-checkout --track -b om-gta02-2.6.32 origin/om-gta02-2.6.32
+
+Copy the config for the gta02 to be used:
+
+ $ cp arch/arm/configs/gta02_drm_defconfig .
+
+Now you need a few additional patches for the kernel (is there realy no branch with already applied patches?).
+
+Therefor you have to download all patches from http://git.openembedded.org/cgit.cgi/openembedded/tree/recipes/linux/linux-openmoko-2.6.32
+
+I can't get git to download these patches so i did it by hand. ;)
+
+Than you have to apply all patches except for "hs-jack.patch" and "touchscreen_ignoreunexpectedintr29.patch" to the new kernel sources. Copy all patches into the om-gta02-2.6.32 directory. You could apply them with:
+
+ $ git am < 0001-...
+ $ git am < 0002-...
+
+You have to do this with all patch files except for "hs-jack.patch" and "touchscreen_ignoreunexpectedintr29.patch". These two need a bit more care because they lack the needed header for git to import them. You could just copy the four lines header (From, From:, Date, Subject) from any other patch and insert it as header in these two files. After that they could also be applied by the "git am" command as the other.
+
+Now before building this kernel you need to install a Toolchain (http://wiki.openmoko.org/wiki/Toolchain).
+The openmoko Toolchain comes with a setup script to set nearly all environment variables:
+
+ $ . /usr/local/openmoko/arm/setup-env
+
+Also set two other variables which are missing:
+
+ $ export ARCH="arm"
+ $ export CROSS_COMPILE="arm-angstrom-linux-gnueabi-"
+
+Now you can configure the kernel:
+
+ $ make menuconfig
+
+or
+
+ $ make xconfig
+
+To compile the kernel you just do:
+
+ $ mkdir GTA02 
+ $ make
+ $ make modules_install INSTALL_MOD_PATH=GTA02
+
+The new compiled kernel is now "arch/arm/boot/zImage" and the modules are within the "GTA02" directory. Now you just have to copy the "zImage" file to "/boot/uImage" and also copy the modules from within "GTA02" to the same directory structure on the freerunner (/lib/modules/2.6.32).
+
+=== Building the andy-tracking branch (obsolete) ===
 
 Those are the minimum survival commands.
 
@@ -102,6 +158,18 @@ Before reporting that the new kernel does not build please first check for chang
 If you are modifying Linux kernel code and building it quite often you really want to be using [http://ccache.samba.org ccache]. It will save you a lot of time.
 
 TODO: submit a patch for the build script that makes ccache use easier. '''Note''': There is a [http://lists.openmoko.org/pipermail/openmoko-kernel/2009-March/009139.html patch being reviewed].
+
+=== Old troubleshooting information ===
+
+If it fails with error message "arm-angstrom-linux-gnueabi-ld: unrecognized option '-Wl,-rpath-link,/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/lib'" until /usr/local/openmoko/arm/setup-env is modified. LDFLAGS should be changed from:
+
+ export LDFLAGS="-L${OMTOOL_DIR}/arm/arm-angstrom-linux-gnueabi/lib -Wl,-rpath-link,${OMTOOL_DIR}/arm/arm-angstrom-linux-gnueabi/lib -Wl,-O1"
+
+to:
+
+ export LDFLAGS="-L${OMTOOL_DIR}/arm/arm-angstrom-linux-gnueabi/lib -rpath-link ${OMTOOL_DIR}/arm/arm-angstrom-linux-gnueabi/lib -O1"
+
+I also had to change the 'build' script to hardcode the path to the compiler.
 
 == Contributing ==
 
