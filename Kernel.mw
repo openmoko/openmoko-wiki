@@ -78,7 +78,7 @@ Now you need a few additional patches for the kernel (is there realy no branch w
 
 Therefor you have to download all patches from http://git.openembedded.org/cgit.cgi/openembedded/tree/recipes/linux/linux-openmoko-2.6.32
 
-I can't get git to download these patches so i did it by hand. ;)
+I can't get git to download these patches so i did it by hand. Please explain a better way if there is one (there has to be one). ;)
 
 Than you have to apply all patches except for "hs-jack.patch" and "touchscreen_ignoreunexpectedintr29.patch" to the new kernel sources. Copy all patches into the om-gta02-2.6.32 directory. You could apply them with:
 
@@ -87,13 +87,11 @@ Than you have to apply all patches except for "hs-jack.patch" and "touchscreen_i
 
 You have to do this with all patch files except for "hs-jack.patch" and "touchscreen_ignoreunexpectedintr29.patch". These two need a bit more care because they lack the needed header for git to import them. You could just copy the four lines header (From, From:, Date, Subject) from any other patch and insert it as header in these two files. After that they could also be applied by the "git am" command as the other.
 
+I heard that "git am patches/*" should import all patches at once but i never tested it. So feel free to correct my part about importing the patches if there is an easier way. :)
+
 Now before building this kernel you need to install a cross compiler toolchain like [[Toolchain]] from openmoko. Alternatively, feel free to use emdebian toolchain for the deb based systems, or crossdev on gentoo.
 
-The following commands are specific for the openmoko toolchain which comes with a setup script to set nearly all environment variables:
-
- $ . /usr/local/openmoko/arm/setup-env
-
-Also set two other variables which are missing:
+Also set two variables for cross compiling (second one is om toolchain specific):
 
  $ export ARCH="arm"
  $ export CROSS_COMPILE="arm-angstrom-linux-gnueabi-"
