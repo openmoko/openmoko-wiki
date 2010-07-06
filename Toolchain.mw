@@ -283,34 +283,7 @@ Using the external toolchain is an easy way to build applications for your Neo. 
 =Advanced topics=
 ==Building Openmoko Kernel from git repo using Toolchain==
 
-You may build the newest 2.6.28 kernel with these commands:
-
- git clone git://git.openmoko.org/git/kernel.git linux-2.6
- cd linux-2.6
- git checkout -b mystable origin/andy-tracking
- mkdir GTA02
- cp arch/arm/configs/gta02-moredrivers-defconfig GTA02/.config
- ./build GTA02 dummy
-
-The ''dummy'' option is required for the modules to be nicely packaged into a .tar.gz package that can be extracted on the target, in addition to flashing/installing the kernel. The "dummy" just means "some parameter given", for which there is a check in the code eventually for some reason...
-
-You may need to edit the ./build script for the toolchain directory.
-
-Read more information about the different branches of Openmoko's Linux kernel at: http://git.openmoko.org/?p=kernel.git;a=summary
-
-A different approach explained in more detail can be found at [[Howto compile Openmoko kernel for Neo Freerunner]].
-
-=== Old troubleshooting information ===
-
-If it fails with error message "arm-angstrom-linux-gnueabi-ld: unrecognized option '-Wl,-rpath-link,/usr/local/openmoko/arm/arm-angstrom-linux-gnueabi/lib'" until /usr/local/openmoko/arm/setup-env is modified. LDFLAGS should be changed from:
-
- export LDFLAGS="-L${OMTOOL_DIR}/arm/arm-angstrom-linux-gnueabi/lib -Wl,-rpath-link,${OMTOOL_DIR}/arm/arm-angstrom-linux-gnueabi/lib -Wl,-O1"
-
-to:
-
- export LDFLAGS="-L${OMTOOL_DIR}/arm/arm-angstrom-linux-gnueabi/lib -rpath-link ${OMTOOL_DIR}/arm/arm-angstrom-linux-gnueabi/lib -O1"
-
-I also had to change the 'build' script to hardcode the path to the compiler.
+Explained in more detail at [[Kernel#Building_the_2.6.32_branch]].
 
 ==Using toolchain provided libraries==
 Add the necessary libraries to the _LDADD field in src/Makefile.am, for example:
