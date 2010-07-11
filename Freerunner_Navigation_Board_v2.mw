@@ -1,157 +1,26 @@
-<span style="color:#ff0000">
-Note: a new hardware revision will be available soon: the [[Freerunner Navigation Board v3]]!
-</span>
-
-----
-
-The second version of the [[Freerunner Navigation Board]] includes lots of new stuff to play with, while still providing the same feature set as the first version.
-
-[[Image:FRNBv2TopBottom.JPG|Freerunner Navigation Board v2|thumb]]
+The second version of the Freerunner Navigation Board will include lots of new stuff to play with, while still providing the same feature set as the first version.
 
 =Features=
-
-The FRNBv2 realizes all features from the first version on the top side of the PCB. The bottom side is all about further expansion. Most of these chips are not very usable without connecting additional electronics to them. I'll add detailed descriptions of what I did with them to this page.
-
 ==Top side==
-===3D Gyroscope ITG-3200 ===
-The new ITG-3200 digital gyroscope detects rotations and measures their angular velocity. This enables the FR to be used as game controller or to improve navigation capabilities without GPS.
+===3D Gyroscope ITG-3200)===
+The new ITG-3200 digital gyroscope detects rotations and measures their the angular velocicy. This enables the FR to be used as game controller or to improve navigation capabilities without GPS.
 
 ===3D Magnetometer HMC5843===
-A magnetometer senses magnetic fields. It can be used as compass for navigation purposes or to sense fields from other magnetic sources.
+A magnetometer senses magnetic fields. It van be used as compass for navigation purposes or to sense fiels from other magnetic sources.
 
 ===Air pressure/temperature sensor: BMP085===
-A pressure sensor can be used for weather forecast or to measure the height above sea level if the pressure at sea level is known.
-If the height is known from other sources (e.g. GPS), the change in ambient pressure can be used to detect weather changes. This may be useful for gliding.
+[insert nice description here]
 
 ==Bottom side==
-===4ch Programmable LED Controller PCA9632===
-This chip can source or sink current for up to four LEDs with a maximum of 25mA per LED. In addition to simple on/off states it can be programmed to blink or dim individual channels or a group of channels. Since the chip does everything on its own, it will continue to work even if the host cpu suspends. This allows the often requested feature <del>to drain the battery even faster</del> to notify users of incoming SMS or missed phone calls by blinking a LED even if the phone is suspended. A blink frequency down to once every 10 seconds and a widely adjustable duty cycle allows for very short flashes to save battery power.
+===4ch Programmable LED Controller===
+This chip can source or sink current for up to four LEDs with a maximum of 25mA per LED. In addition to simple on/off states it can be programmed to blink or fade individual channels or a group of channels. Since the chip does everything on its own, it will continue to work even if the host cpu suspends. This allows the often requested feature <del>to drain the battery even faster</del> to notify users of incoming SMS or missed phone calls by by blinking a LED even if the phone suspends. A blink frequency down to once every 10 seconds and a widely adjustable duty cycle allows for very short flashes to save battery power.
 
-===1kHz – 68MHz Programmable oscillator LTC6904===
+===1kHz – 68MHz Programmable oscillator===
 This is, well, a programmable oscillator from which one frequency output and the output enable pin are available at testpoints. My intention was to use it as 38kHz oscillator to generate the carrier frequency of common infrared remote controls. The output enable can be connected to a GPIO. After implementing a small driver, this should work as a generic remote control solution using lirc.
 
-===12 bit Analog to Digital Converter ADS1015===
-This is similar to the chip which was used on the FRNBv1 to digitize analog gyroscope outputs. It provides only 12 instead of 16 bits of resolution, but this should be enough for most applications. The FRNBv2 does not use it for own purposes, so it is completely under user's control.
+===16 bit Analog to Digital Converter===
+This chip was used on the FRNBv1 to digitize analog gyroscope outputs. The FRNBv2 does not use it for own purposes, so it is completely under user's control.
 
-===Touch Sensor MPR121===
-The MPR121 from Freescale Semiconductor is a multi channel proximity capacitive touch sensor controller. Up to twelve sensor areas could be connected, but due to space restrictions, only seven channels are accessible at solder pads.
+===Touch Sensor===
+The MPR121 from Freescale Semiconductor is a multi channel proximity capacitive touch sensor controller. Up to twelve sensor areas could be connected, but due to space constraints, only eight channels are accessible at solder pads.
 It is not guaranteed that the chip will work as intended, but I think it's worth to test it.
-The Datasheet can be found [http://www.freescale.com/files/sensors/doc/data_sheet/MPR121.pdf here].
-
-===Expansion pads===
-The supply voltage as well as the I2C bus is routed to testpads at the end of the board. These enable easy further expansion with more I2C devices (e.g. a [[I2C_Humidity_Sensor|digital humidity sensor]])
-
-=Documentation=
-Schematic and board layout files are available in CadSoft EAGLE 5.x format from http://chonyota.net/freerunner/FRNBv2/
-
-
-==Pinout==
-[[Image:FRNBv2-Pinout.jpg|Pinout: Bottom side, Top side|thumb]]
-[[Image:I2C-testpoints.png|I2C testpoints|thumb]]
-* '''VCC''': +3.3V, available at the AUX-Switch
-* '''GND''': Ground, available from the (big) decoupling capacitor next to the accelerometer
-* '''SCL''', '''SDA''': Serial clock and data, get it from testpoints at the debug connector
-* '''OE''': Output enable from the frequency generator. Pull this pin high to enable the CLK output
-* '''CLK''': Clock output from the frequency generator.
-* '''LED controller 0-3''': LED current sinks. Connect LEDs in series with current limiting resistors from VCC to these pads.
-* '''12-Bit A/D 0-3''': Analog to digital converter inputs. They can operate single ended or differencial. The reference voltage is VCC.
-* '''Touch electrodes 0-6''': Connect these pads to a larger conducting area to use it as touch sensor. The inputs 0-3 can also be used to drive LEDs. Refer to the datasheet for more information.
-
-[[Image:FRNBv2-top.JPG|Top side with the BMP085|thumb]]
-[[Image:FRNBv2-bottom.JPG|Bottom side with PCA9632 and LTC6904. The LED controller works :)|thumb]]
-
-==Installation==
-===Hardware installation===
-The best way to connect the FRNBv2 to your Freerunner is to solder four wires to the VCC, GND, SCL and SDA pads at the top side of the board. SDA and SCL are available at test points next to the debug connector. VCC is accessible at the AUX switch. GND is available from the big decoupling capacitor below the backup battery.
-
-The FRNBv2 can be mounted into the free space below the GPS connector. I would reccomend to apply some adhesive tape to the GPS connector and the metallic cover on the main pcb. It prohibits short circuits which cause damage to the Freerunner or the FRNBv2.
-
-Here is a PDF with an overview of the [http://chonyota.net/freerunner/FRNBv2/FRNBv2-Installation.pdf Installation].
-
-===Software installation===
-Boot your OS and run 
-
- i2cdetect 0
-
-It should display a table with all I2C adresses for which a device is connected to your Freerunner:
-(TODO: example)
-
-You should find all adresses listed below.
-
-==Test Status==
-The first PCBs arrived and allows to test single features. The progress will be documented here.
-
-{| border="1"
-!Chip !! I²C address !! Test Result !! Notes
-|-
-|ITG3200 || 0x69 || ok || driver usable but still incomplete
-|-
-|HMC5843 || 0x1E || ok || driver should to degauss sensor to ensure proper operation
-|-
-|BMP085 || 0x77 || ok
-|-
-|PCA9632 || 0x60 || ok
-|-
-|LTC6904 || 0x17 || ok || works with 15pF cap between SCL and SDA (NOR boot fix)
-|-
-|ADS1015 || 0x40 || ok || kernel driver incomplete. Userspace driver incomplete
-|-
-|MPR121 || 0x5A || ok || works, hackish driver available
-|}
-
-==Issues==
-'''Known HW or SW Issues'''
-
-* LTC6904
-: The frequency generator LTC6904 consumes about 0.5mA even if the outputs are turned off. This is not a real bug but it would be nice to turn the chip off while unused. A small modification should make it possible to use one output from the LED controller to control the power.
-
-: The chip works with the NOR-Boot fix described below.
-: <del>Reading exactly two bytes from the LTC6904 causes the I2C bus to lock up. The stop condition is not sent correctly and the master does not stop generating a clock. The chip works fine when programmed with a MSP430 microcontroller. Therefore either the Linux driver or the Samsung SoC (or both) are causing the bug. I'll try to resolve this, but I'm quite busy with other stuff. If someone wants to help, please contact me.</del>
-
-* ITG3200
-: <del>Use *50V* 2.2nF capacitor for C5.</del> fixed.
-
-* General
-: <del>NOR-Boot does not work if the FRNBv2 is connected.</del> If you need the NOR boot only as emergency recovery, hold your finger onto the I2C-SCL pad (pay attention to ESD!) or connect the debug board cable (no need to connect the real board, the cable is enough) to "fix" the issue.
-
-: Of course, this issue can be fixed permanently with an additional capacitor ;-) Solder a 15pF cap between SDA and SCL. A 0402 sized capacitor fits easily onto the test points at the edge of the board.
-
-==Software==
-===Kernel drivers===
-[http://gitorious.org/freerunner-navigation-board This gitorious page] lists all currently available drivers for the FRNBv2. The kernel drivers for the BMP085 and the HMC5843 are already upstream and will be shipped with kernel 2.6.36. All other drivers need some cleanup and more documentation to be accepted. I will try to get this done. If you're bored and want to help, please do so!
-
-====Bugs====
-The compass driver reports wrong values. The latest patch swaps MSB and LSB. Now it returns more meaningful values. There may be more bugs left. For reference you may have a look at another driver which is already upstream: [http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=blob;f=drivers/staging/iio/magnetometer/hmc5843.c;h=92f6c6fb90fee13e89a9d23bd109e0e1e152094c;hb=b4e178224cfdc8aae7dda0baab34a4e4110a2e93 hmc5843.c]
-bvg
-
-===Userspace software===
-====SensMon====
-The [[SensMon|sensor-monitor]] is an excellent application to test the different sensors. Alternatively cat and echo can be used to communicate with them. Right now the interfaces to userspace lack some documentation. Either look at the source code or ask me if you are in trouble.
-
-====Barom====
-This program provides altitude or weather information on Neo Freerunners with bmp085 pressure sensors installed. The bmp085 is available as part of the Freerunner Navigation Board. Source code and binaries can be found [http://jeepingben.homelinux.net/barom here].
-
-====ValaCompass====
-[[ValaCompass]] is a minimalistic 3D compass application written in Vala that displays the North direction considering the pitch and roll orientation of the handheld.
-
-=Availability=
-The [http://handheld-linux.com handheld-linux.com] team kindly offered to retail the FRNBv2. You can find it [http://www.handheld-linux.com/wiki.php?page=Navigation%20Board here].
-
-Two assembly options are available:
-* Complete: everything you (possibly) want. Contains all chips as described above.
-* Standard: contains everything except the frequency generator and the analog to digital converter.
-
-Possible packaging options:
-* CAB: Completely assembled board. Just add some wires and you're ready
-* DIY: Do it yourself! The PCB and all components needed to get your hands dirty
-* PCB: The bare PCB. You are free to buy only what you need.
-
-Right now, only the CAB boards can be ordered online. If you just want the PCB and/or a few parts, contact me or the nice staff at handheld-linux.com.
-
-
-= User Reports =
-
-Please write to the discussion page.
-
-
-[[Category:Neo FreeRunner reworks and mods]]
