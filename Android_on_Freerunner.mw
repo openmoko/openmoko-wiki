@@ -5,13 +5,507 @@
 |}
 [[Image:Freerunner-android-01.png]]
 == Introduction == 
-see [[Android usage]] for more details.
 
 {{Note|The Android for [[Neo_FreeRunner_GTA02_Hardware|FreeRunner]] development now takes place [http://code.google.com/p/android-on-freerunner/ here].}}
 
 
 {{Note|This wiki is outdated. Use the [http://code.google.com/p/android-on-freerunner/wiki/GetIt new wiki]}}
 
+
+
+
+This page is dedicated to the installation of [[Android]] (an [[Open Handset Alliance]] Project) on the [[Neo 1973]] and [[Neo FreeRunner]] handsets.
+
+You can find other information, such as porting, development and day to day usage here : [[Android]]
+
+The easiest way to install Android on the Freerunner at the moment is with Koolu images, because you just need to copy the installation files on an FAT formatted SD card and boot from SD card (see information below).
+
+== Before you start ==
+
+=== Using this guide ===
+
+*1
+
+If you see a command like this, you must run it as root
+
+ #
+
+If you see one like this, you can run it as a regular user
+
+ $
+
+To work as a root, issue a command
+ sudo -s
+
+To exit the root mode, type
+ exit
+
+*2
+
+When you see these commands
+
+ adb
+
+ dfu-util
+
+It is assumed that you have them installed on your system and inside your /usr/bin. 
+
+To install dfu-util, type as a root
+ apt-get install dfu-util
+
+To install adb, type as a root
+ cd /usr/bin
+ wget http://people.openmoko.org/sean_mcneil/adb
+ chmod +x adb
+
+
+*3
+
+adb connects to Android but you need to set up Android on FreeRunner first, otherwise you may skip this step. This will not work on other distributions. Make sure your FreeRunner was booted while being plugged in to a USB port. If you have flashed a '''Uboot''', run the following commands in Terminal:
+
+ # ifconfig usb0 192.168.0.200 netmask 255.255.255.0
+ # adb kill-server
+ # ADBHOST=192.168.0.202 adb devices
+
+If you have installed Qi loader, find on which eth device the FreeRunner is located (for me, it is eth2).
+ # ifconfig -a
+
+Then, issue the following (if you have '''Qi''', and whether you found your eth for FreeRunner. For me it is eth2):
+ # ifconfig eth2 192.168.0.200 netmask 255.255.255.0
+ # adb kill-server
+ # ADBHOST=192.168.0.202 adb devices
+
+You may want to ping the device to make sure it is communicating with the computer
+ # ping 192.168.0.202 
+
+To enter the shell prompt on FreeRunner, enter:
+ # ADBHOST=192.168.0.202 adb shell
+
+To exist the shell prompt, enter:
+ # exit
+
+To install a program to a FreeRunner (lets say SomeProgram.apk file), enter the computer's directory with the apk file and enter:
+ # adb install SomeProgram.apk
+
+
+You should now have no trouble using adb.
+
+=== Registering with the GSM network ===
+
+Before you install Android on your FreeRunner you should check, using the operating system it came with, that your sim card will register with your network.
+
+The version of internal [[GSM]] [[firmware]] that comes preloaded on the FreeRunner has compatibility issues with a feature on newer [[sim]] cards. This effects [[3G]], o2 sims and possibly others. if you have one of those you will probably need to upgrade your GSM firmware to get the sim to register with the network. Doing that first means you know it's working before you install Android.
+* [[GSM/Flashing]]
+
+To flash your GSM firmware you will need to have [[USB]] networking setup between your desktop and the OM distribution installed on your FreeRunner. However, your FreeRunner does not need internet access as you can download the GSM firmware files on your desktop PC and transfer them to your FreeRunner using [http://unixhelp.ed.ac.uk/CGI/man-cgi?scp+1 scp]
+* [[Usb networking|USB Networking]]
+
+== Configuring the Bootloader ==
+
+There are two bootloaders you can use to boot Android; [http://wiki.openmoko.org/wiki/Qi Qi] and [http://wiki.openmoko.org/wiki/Uboot Uboot]. Uboot comes installed on the FreeRunner, Qi is a replacement and is thought to be superior. However there have been, and probably still are, problems when using Qi and Android so Uboot is recommended at this point.
+
+{{Note|If you are installing the latest Koolu images to flash, Koolu provides an automatic installation that includes the [[Qi]] bootloader. You can safely ignore the rest of this section, as your bootloader will be configured automatically.}}
+
+You can download images for them both here:
+
+[http://people.openmoko.org/andy/ Andy Tracking Images] (For Qi on the FreeRunner grab the image starting qi-s3c2442)
+
+[http://downloads.openmoko.org/distro/unstable/daily/om-gta02/ Latest Uboot]
+
+The Android kernel image can be more than 2MB in size. The UBoot environment that comes with your FreeRunner is only able to boot a kernel 2MB in size or less. To use a kernel larger than 2MB you have two option:
+
+* change to Qi as bootloader
+* modify uboot to be able boot a Kernel that has more than 2MB in size
+
+In detail the options will be described as follows:
+
+=== Use Qi as Bootloader ===
+Change to the [http://wiki.openmoko.org/wiki/Qi Qi Bootloader]. It supports 2MB kernels out of the box. For GTA02, you want bootloader: 
+   qi-s3c2442-master_....
+ and you install the [[Qi]] with [[dfu-util]] and that you take for example the following kernel: 
+  uImage-moredrivers-GTA02_andy-tracking_...
+Because Qi tries to boot from the first three partitions of SD Card. If Qi finds a kernel there it start the kernel if there is any ext2 / 3 partition on there in the folder /boot e.g.
+  /boot/uImage-GTA02.bin 
+Qi will try to boot it and use that partition as the rootfs. If none of the first three SD partitions have the kernel file, it will boot
+from the NAND kernel partition as usual.
+
+=== Modify Uboot as Bootloader for more than 2MB ===
+Adjust your [[Uboot]] environment to [http://meinopenmoko.blogspot.com/2008/12/prepare-uboot-to-boot-android.html support a Kernel of more than 2 MB]
+
+Access your Boot-prompt e.g. with ''screen'' from your Linux Desktop-PC with ''U-Boot consol to USB'' in U-Boot:
+ screen /dev/ttyACM0 
+
+In your Boot-prompt type:
+ setenv bootcmd setenv bootargs \${bootargs_base} \${mtdparts}\; nand read.e 0x32000000 kernel 0x300000\; bootm 0x32000000
+ saveenv
+
+
+'''Problem:''' After copy and pasting the commands mentioned above to modify the UBoot environment the prompt hangs up after the first backslash "\". ''Work around:'' install the [http://panicking.kicks-ass.org/download/ kernel-image] and [http://panicking.kicks-ass.org/download/ Android-image] with 1.9MB from Michael Trimarchi.
+
+The above '''Problem:''' appears to be an issue with pasting too quickly.  Trying copying and pasting one thing at a time.
+
+== Installing Android on the Internal Flash ==
+
+=== Method 1: Koolu Automatic Installation ===
+{{Warning|The site specified no longer exists!}}
+{{Warning|This install process overwrites *everything* on the NAND in the phone, including the bootloader. If this is not what you would like to do, please use the manual installation instructions (next section) instead.}}
+[http://www.koolu.com/ Koolu] provides an automatic installation for Beta4 images and later. You can get them here:
+
+    [http://freerunner.android.koolu.com/release-files Release files (Android FreeRunner)]
+
+The installation process is simple:
+# Unpack the files on to a FAT formatted SD card.
+# Insert card into the Freerunner, and boot from NOR menu (hold AUX key, then power)
+# Chose boot from SD Card (FAT and ext2)
+
+The automated install process should begin. It installs the Qi bootloader, reboots, the kernel, reboots, then the system image.
+After "Installed everything.  Rebooting... ", you should remove the SD-Card, or the installation repeats endless.
+
+=== Method 2: Manual Installation (Koolu or other images) ===
+
+Preparing the SD Card with two primary partitions is necessary for manually installing Android.
+
+==== Preparing the SD Card ====
+
+The Micro SD Card in your FreeRunner needs to be configured with two 2 primary partitions before Android will boot. First a VFAT/MSDOS (16 or 32) which acts as the '/sdcard' storage area (for pictures, movies, music, etc). Second an ext3 primary partition which Android uses as '/data' with in which it stores settings, caches, etc.
+
+===== On Linux =====
+
+Insert the Micro SD Card from your FreeRunner into your Linux desktop then bring up a Terminal and type
+
+    $ dmesg | grep sd
+
+You will get an output like this, in this instance we can see that the SD Card has been assigned the device name 'sde'
+
+    ...
+    sd 9:0:0:0: [sde] Attached SCSI removable disk
+    ...
+    
+Now, as root, use 'fdisk' to partition the device.
+
+   # fdisk /dev/sde 
+
+Pressing 'p' will show you the current partitions on the SD Card 'd' will delete them and 'n' will create a new one. Create a primary partition for your media. Then another primary partition for Android to store its data on.
+
+On a 1Gig card I used 768MB for the first partition ('+768MB' in fdisk) and the remainder for Android data. Here is fdisk's partition output:
+
+       Device Boot      Start         End      Blocks   Id  System
+    /dev/sde1               1         769      750513+  83  Linux
+    /dev/sde2             770        1016      241072   83  Linux
+
+Now all that's left to do is format the partitions with the appropriate filesystem But first hit 'w' in fdisk to write the changes to the SD Card.
+
+Then format like this:
+
+    # mkfs.vfat -v -n and-media -F 32 /dev/sde1
+    # mkfs.ext3 -v -L and-data /dev/sde2
+
+That's it, you can now remove the SD card from your desktop. If you re-insert it you will have two new usb disk devices.
+{{Note|After Android has booted you will only be able to access the 'data' partition as root.}}There is no need to populate the ext3 partition at all. The VFAT partition can be populated with media content (ring tones etc.) if you so desire. {{Note|It can be worth reformatting the data partition when you upgrade the Android OS on your phone. Old settings can result in problems, wifi for example. But remember that formatting the Data partition will result in your preferences, text messages and contacts etc. being erased.}}
+
+===== On FreeRunner (2008.x) =====
+
+The SD card can be formatted from within an existing 2008.x installation on your FreeRunner.
+SSH as root into the FreeRunner and use 'fdisk' to partition the device.
+
+   # fdisk /dev/mmcblk0
+
+After this create the partitions as described in the step above.
+
+To format the new vfat partition you will need dosfstools which can be downloaded from
+
+    [http://members.shaw.ca/mmontour/neo/dosfstools_2.11-r0_armv4t.ipk dosfstools_2.11-r0_armv4t.ipk]
+
+Use any SCP client to copy this file to your FreeRunner and install using
+
+    opkg install dosfstools_2.11-r0_armv4t.ipk
+
+Once the installation is complete format the partitions:
+
+    # mkfs.vfat -v -n and-media /dev/mmcblk0p1
+    # mkfs.ext3 -v -L and-data /dev/mmcblk0p2
+
+NOTE: In case you are unable to format the partitions because they are already mounted for some reason you can get a list of process IDs that are using it by running:
+
+    # fuser -m /media/card
+
+Then kill all the processes that were using the card and try formatting again.
+
+===== On other OS's =====
+
+There are no open source or free partition editors on Windows or Mac that can manage an ext3 partition. If you do not have Linux installed you can use the [http://gparted.sourceforge.net/ GParted] bootable CD. This CD will boot into a graphical environment with which you can partition your SD Card. You may have to boot with the SD Card inserted for GParted to recognize it as a drive.
+
+==== Downloading Android Images ====
+
+Next, Grab yourself the latest Android images. There are two parts you need to flash, the kernel (uImage*.bin) and the root fs (android*.jffs2). [http://www.koolu.com/ Koolu] release images and you can get them here:
+
+    [http://freerunner.android.koolu.com/release-files Release files (Android FreeRunner)]
+
+For Koolu the images the size of uImage is bigger than 2.0MB, so you need to update Bootloader uboot or use [[Qi]]. 
+Koolu are not the only people working on porting Android to the FreeRunner and although collaboration is hopefully on the way, there are other places to get images: 
+
+Michael Trimarchi's (panicking) images are the most up to date and functional (see bellow for installation instructions) :
+
+    [http://panicking.kicks-ass.org/download/ Michael Trimarchi's images with latest fixes]
+    [http://www.fragcom.de/android/ Mirror]
+
+Sean McNeil has placed an older 2.6.26 kernel and root fs at:
+
+    [http://people.openmoko.org/sean_mcneil/ Sean McNeil images]
+
+For Sean McNeil's images the size of uImage > 2.0MB, so you need to update Bootloader uboot or use [[Qi]].
+
+At [http://moko.serdar-dere.net/ http://moko.serdar-dere.net/] you can also download Koolu images, that are named  "koolu-1.0-yyyymmmddd.tar.bz2". Actually I thought these are just the same images as provided by Koolu itself, so I never tried them. But since July, 1st you can also download the file [http://moko.serdar-dere.net/cupcake_20090701.tar.bz2 cupcake_20090701.tar.bz2], that has not been provided by Koolu (yet?). Since there are no comments or contact details, I wasn't able to find out whether it's just a personal build.
+
+==== Flashing the FreeRunner ====
+
+===== On Linux =====
+
+To flash your FreeRunner, replace what ever phone stack you have on there at the moment with Android, first download [http://wiki.openmoko.org/wiki/Dfu-util dfu-util], this is the program that will flash your phone.
+
+Once you have that installed (whether by simply downloading the binary or installing an rpm) Open up a terminal and cd to where you downloaded the images too eg.
+
+    # cd /home/joe/Downloads
+
+Plug your FreeRunner into a USB port and boot it into the nand boot loader; Hold down the aux button and then the power button until nor appears.
+
+{{Note|The FreeRunner will only stay in in the nand bootloader stateINSTALLER for about 30 seconds with no activity.}}
+
+Choose one of the following images from (A) Koolu or from (B) Michael Trimarchi.
+
+===== (A) Flashing with the Koolu Images=====
+{{Warning|These instructions are not valid anymore because in last beta releases there are not more *.jffs2 images. The only valid method to install latest betas seem to be to use Koolu automatic installation process.}}
+If you flash the freerunner with a kernel image from Koolu, then you must enable u-boot to boot kernel greater than 2MB. If you have done that or you have [[Qi]] installed then proceed with flashing the kernel or use the automated Koolu installation just by putting the images on FAT formated SD-Card and boot from the SD card.  
+
+If you want to flash the kernel image (you will need to be root) with this command:
+
+    # dfu-util -a kernel -R -D uImage-moredrivers-GTA02.bin
+
+and finally the root fs with this one:
+
+    # dfu-util -a rootfs -R -D androidfs-koolu-beta3.jffs2
+
+If your u-Boot is not configured to handle a 2MB kernel that install the following images of Michael Trimarchi
+
+=====(B) Flashing with the  Michael Trimarchi's Images=====
+If you have decided to install Michael Trimarchi's Images you have flash the kernel image (you will need to be root) with this command:
+
+    # dfu-util -a kernel -R -D uImage-v17.bin
+
+and finally the root fs with this one:
+
+    # dfu-util -a rootfs -R -D freerunner-v14.6.jffs2
+
+See also http://www.newlc.com/en/freerunner-mobile-which-support-android-cupcake for older instructions relating to these.
+
+======cupcake snapshot v14-15======
+As of this writing this is the latest versions from Michael Trimarchi. To get incoming calls to work correctly the phone need to be provisioned the following steps explains how.
+
+First you need to setup the android debug bridge(adb) here are instructions for that [[Android debug bridge]].
+After that use adb to connect to the freerunner:
+
+    # ADBHOST=192.168.0.202 ./adb devices
+    # ./adb shell
+
+These instructions may need some alterations depending on how adb is installed on your desktop.
+
+In the shell execute the following commands:
+
+    # sqlite3 /data/data/com.android.providers.settings/databases/settings.db
+    SQLite version 3.5.9
+    Enter ".help" for instructions
+    sqlite> INSERT INTO secure (name, value) VALUES ('device_provisioned', 1);
+    sqlite> .exit
+
+Some more information is available from Michael here:
+http://panicking.kicks-ass.org/download/readme.txt
+
+Amongst other there are some hints on how to get gprs to work.
+
+This should get a phone that can work as a your everyday phone this has been reported on the android-freerunner mailinglist by several people (the author of this entry included).
+
+To get sdcard to work the sdcard fix described bellow may be needed.
+
+======cupcake snapshot v6======
+The cupcake snapshot v6 image from Michael Trimarchi can be found here <tt>freerunner-cupcake-snapshot-v6.jffs2</tt>, however you might (more than likely will) run into a problem if you install it directly: The FreeRunner boots up but gets stuck when the colours of the "Android" log cycle (it keeps twinkling for ever).
+
+This image will work if you follow these steps in the right order:
+
+[[Image:Cupcake-snapshot-v7.jpeg|thumbnail]]
+# install, or verify that you have, a recent version of qi
+# reformat and prepare your SD card as described above
+# flash (kernel) uImage-v17.bin
+# flash (rootfs) freerunner-v14.6-cupcake.jffs2
+# reboot the FreeRunner, it should start with Android
+# shut it down (hold the power button for 5 sec, "shutdown", "OK")
+# flash (rootfs) freerunner-cupcake-snapshot-v6.jffs2
+
+This seems complicated, but it has been reported to work on the [http://android.koolu.org/listinfo.cgi/android-freerunner-koolu.org android-freerunner mailing list from koolu] by several people (the author of this entry included).
+
+=====DFU-UTIL problems=====
+{{Note|The './' part assumes you are using the binary download and that it was downloaded to the same place as your images. If you are, remember to make the dfu-util binary executable.}}If you find that dfu-util complains about there being more than one USB device available it might be because you have a webcam or some other device plugged in. If you can not remove the other device follow this procedure:
+
+Unplug your FreeRunner and run the command
+
+    # dfu-utils --list
+
+This will list the other connected usb devices. Now plug your FreeRunner back in and run the command again, the new device will be your FreeRunner. You can now go ahead and flash with the added command '-d FREERUNNER_DEVICE' eg.
+
+    # dfu-util -d [[USB Product IDs|0x1d50:0x5119]] -a rootfs -R -D freerunner-v13.jffs2
+
+== Installing Android on an SD card ==
+
+=== Images ===
+
+There are currently a few prebuilt images:
+[http://activationrecord.net/radekp/openmoko/android/ Radek Polak's SD card images] (install on ext3, first partition on SD must be FAT16)
+
+--[[User:Matzehuber|matzehuber]] 12:58, 22 July 2009 (UTC) for u-boot seems to have a ext2 partition, image seems to need to be named uImage.bin
+
+=== Using jffs2 images ===
+
+You can also boot from the SD Card using the pre built images like so :-
+* Mount the image using [http://wiki.openmoko.org/images/8/82/Mntjffs.sh this] script like so 
+   sudo ./Mntjffs.sh freerunner-v5.jffs2 image/
+* Then copy (cp -R) the files in directory image/ to any of the first three partitions on the SD Card (if using Qi) eg cp -R /your-path/image/* /media/android/
+* cd /media/android.
+* wget http://activationrecord.net/radekp/openmoko/android/init.rc .
+* mkdir boot
+* copy the kernel here and name it uImage-GTA02.bin
+
+
+Some notes about booting android from sdcard : 
+
+=== Setup ===
+
+* Build android from source. See [http://trac.koolu.org/ koolu website] for directions.
+* Use the first script in [http://lists.openmoko.org/pipermail/community/2008-December/036982.html this mail] (adapt to your filesystem) to stage your android install.
+* copy the contents of this directory on a ext3 partition on your sdcard.
+* add a /boot directory on your sdcard.
+* copy the uImage-android kernel (see above) and copy it inside your /boot with the exact name '''uImage-GTA02.bin'''
+* I changed the init.rc (in your root on the sd) to remove mounts that could be problematic (/data for example) :
+<pre>
+--- filesystem/root/init.rc	2008-12-15 17:51:14.000000000 +0100
++++ phyce.init.rc	2008-12-19 15:56:25.000000000 +0100
+@@ -24,7 +24,7 @@
+     mkdir /sqlite_stmt_journals 01777 root root
+     mount tmpfs tmpfs /sqlite_stmt_journals size=4m
+ 
+-    mount rootfs rootfs / ro remount
++    mount rootfs rootfs / rw remount
+ 
+     write /proc/sys/kernel/panic_on_oops 1
+     write /proc/sys/kernel/hung_task_timeout_secs 0
+@@ -38,14 +38,14 @@
+ #    mount yaffs2 mtd@system /system ro remount
+ 
+     # We chown/chmod /data again so because mount is run as root + defaults
+-    mount ext3 /dev/block/mmcblk0p2 /data nosuid nodev
+-    chown system system /data
+-    chmod 0771 /data
++#    mount ext3 /dev/block/mmcblk0p2 /data nosuid nodev
++#    chown system system /data
++#    chmod 0771 /data
+ 
+     # Same reason as /data above
+-    mount yaffs2 mtd@cache /cache nosuid nodev
+-    chown system cache /cache
+-    chmod 0770 /cache
++#    mount yaffs2 mtd@cache /cache nosuid nodev
++#    chown system cache /cache
++#    chmod 0770 /cache
+</pre>
+
+* Install [[Qi]] on you NAND flash. You can still boot whatever distro you've got on internal flash using the NOR bootloader. You should try the magic file in /boot to show kernel messages.
+* boot the GTA02, and pray.
+
+
+
+== Remote access to Android (adb) ==
+
+Although this is not technically part of installing Android it is very useful to have set up. Android Debug Bridge (adb) is a versatile tool that lets you manage the state of a device, in this case, your FreeRunner.
+
+Some ways you can use adb include:
+
+* Run shell commands on the phone.
+* Copy files from your desktop to the phone and Vice-versa.
+
+You can find out about it on the [http://developer.android.com/guide/developing/tools/adb.html Android developers page] and a page on this wiki [[Android debug bridge]]
+
+However if you would just like a very quick getting started guide, read on. You can download a binary from [http://people.openmoko.org/sean_mcneil/adb here]. Then if you like copy it to /usr/bin (and don't forget to make it executable).
+
+First you must boot Android while it is plugged in to a USB port, you can unplug it and re-plug it all you like after that but for the USB connection to work it must be connected at boot time.
+
+Next issue this command to set up USB networking...
+
+ # ifconfig usb0 192.168.0.200 netmask 255.255.255.0
+
+Then this one because it helps make sure everything works nicely...
+
+ # adb kill-server
+
+Followed by this to find your phone...
+
+ ADBHOST=192.168.0.202 adb devices
+
+{{Note|Remember that if you didn't copy adb to /usr/bin you will need to run these commands from the directory you downloaded it too and put ./ in front of adb.}}Now you are free to remotely connect to your Android phone, here are a couple of commands you might find useful
+
+*Copy a file to your SD card:
+
+ # adb push YOUR_FILE /sdcard/
+
+*Copy a log file from your phone to your computer:
+
+  # adb logcat -d > android.log
+
+*If you just want to log in to the Android shell:
+
+ # adb shell
+
+== Troubleshooting ==
+=== SD card won't mount ===
+
+There should be a /sdcard directory on your FreeRunner, for some reason this does not always get created (the command is in the 'init.rc' but does not always work). To create the correct dir on your FreeRunner and so enable your SD card, do the following.
+
+* Plug your FreeRunner into a USB port, boot Android and then enter these commands:
+
+ # ifconfig usb0 192.168.0.200 netmask 255.255.255.0
+ # adb kill-server
+ # ADBHOST=192.168.0.202 adb devices
+ # adb shell mount -o remount,rw /dev/root /
+ # adb shell
+
+ # mkdir /sdcard
+ # exit
+
+* Then reboot your FreeRunner
+
+== Tools ==
+=== Busybox ===
+
+Download it from here: [http://diy.zjip.com/busybox http://diy.zjip.com/busybox].
+
+
+Upload it to the device in a directory like /data/local/ by running "adb push busybox /data/local/busybox".
+I did not succeed to install it using busybox --install, so I made a script to create the soft links for each applet inside. As the last step: Update the path variable: export PATH=/data/local/:${PATH} .
+Some attempts for compiling it, but without success: [http://forum.koolu.org/viewtopic.php?f=10&t=108].
+
+Here is another version of busybox [http://verdebreuk.googlecode.com/files/busybox] (compiled for ARMv4 == Freerunner)
+<pre>
+./adb push busybox /data/local/busybox
+./adb shell
+cd /data/local/
+chmod 0777 busybox
+./busybox --install
+export PATH=$PATH:/data/local/
+</pre>
+
+== See also ==
+* [[Android|Main Android page on this wiki]]
+* [http://www.newlc.com/en/freerunner-mobile-which-support-android-cupcake Video of usability]
+* [http://forum.koolu.org/ Koolu forum on freerunner]
+* [http://android.koolu.org/listinfo.cgi/android-freerunner-koolu.org Koolu forum on freerunner subscription page]
+* [http://wiki.openmoko.org/wiki/Android_porting#Windows_Connectivity Charging Neo Freerunner on Windows]
 
 [[Category:Flashing Openmoko]]
 [[Category:Android]]
