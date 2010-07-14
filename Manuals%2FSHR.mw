@@ -850,6 +850,28 @@ Hopefully, your bluetooth headset now works. Good luck!
 
 ==System Customizing==
 
+===Command scheduling===
+
+The traditional ''at'' command in ''SHR'' is modified to work over dbus. This modified ''at_over_dbus'' will run scheduled task at required time - actually it will even automatically wake up the phone from suspend or  start it if the phone was switched off.
+
+To schedule a command to be executed at a particular time, one must:
+
+Place commands in a script in ''/var/spool/at'' and name it like 
+
+TIMESTAMP.NAME.NUMBER
+
+where
+
+where TIMESTAMP is the seconds since 1970-01-01 00:00:00 UTC when the command should be run. 
+The rest (NAME, NUMBER) is up to you. Finally you have to:
+
+ touch /var/spool/at/trigger
+
+Also, make sure to have atd running. You are responsible to remove the script when unnecessary. It will run once more if you/other program write to the trigger file during the execution, so you may consider removing the
+executable flag of the script (if it is long running) or rename the script from within for example like this: 
+
+  mv "$0" "x$0.$$"
+
 ===Installing splash screen themes===
 
 List available splash screen themes
