@@ -16,6 +16,24 @@ One can find general information (porting/development) about Android on Neo phon
 You need the [http://developer.android.com/sdk/installing.html Android SDK] on your PC/Laptop for executing commands on your Android, taking screenshots and
 uploading/downloading files from your [[Freerunner]]. 
 === Prepare SD Card ===
+On Linux Machine backup current data on Micro SD-Card with adapter. If SD-Card is located in <tt>/dev/sde</tt> use the following commands (replace <tt>/dev/sde</tt> by appropriate device name, <tt>sudo df</tt> will help you to identify the device name):
+Create two partitions in the ratio 3 to 1 (e.g. 4000000 sectors): 
+* FAT32 (3/4 of total size of SD - e.g. sector 16-3000000) 
+* ext2  (1/4 of total size of SD - e.g. sector 3000001-4000000)
+Use fdisk to create partitions:
+# <tt>sudo fdisk</tt>
+# <tt>-> p</tt> Check partitions
+# <tt>-> d 1</tt> Delete Partition 1 (repeat for other existing partitions
+# <tt>-> n -> 1 -> </tt> New partition 1 (enter first and last sector)
+# <tt>-> t -> 1 -> c</tt> Set type c for FAT32 (LBA)
+# <tt>-> a -> 1 </tt> Set boot flag for first partition
+# <tt>-> n -> 2 -> </tt> New partition 2 (enter first and last sector)
+# <tt>-> t -> 1 -> 83</tt> Set type 83 for Linux partition
+The format both partitions, if SD-Card is located in <tt>/dev/sde</tt> use the following commands (replace <tt>/dev/sde</tt> by appropriate device name:
+  sudo mkfs.vfat -c -F 32 /dev/sde1
+  sudo mkfs.ext2 /dev/sde2
+If you are root you can remove <tt>sudo</tt> from the command.
+
 === Android SDK on PC/Laptop ===
 Instruction for installing Android SDK can be found on [http://developer.android.com/sdk/installing.html http://developer.android.com/sdk/installing.html]
 === Android on Freerunner ===
