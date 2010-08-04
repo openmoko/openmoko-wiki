@@ -43,7 +43,7 @@ If you want to copy the following script, go to <i>edit</i> of the page and copy
 <pre>
 #!/usr/bin/perl
 
-my %options = ();
+my %options;
 $options{infile}  = "/media/card/pim/contacts.vcf";
 $options{outfile} = "/home/root/.evolution/vCards.html";
 my $outformat = "html";
@@ -60,33 +60,33 @@ my $newline   = "<br>";
 #-----------------------------------------------------------------
 
 my $flocking = 1;
-my @FileArray = ();
-my @OutFileArray = ();
-my %OutFileHash  = ();
-my %OutNameHash  = ();
+my @FileArray;
+my @OutFileArray;
+my %OutFileHash;
+my %OutNameHash;
 
 my $OUTFORMAT = uc($outformat);
 
-my @SplitArray      = ();
-my @SplitArrayID    = ();
-my @SplitArrayValue = (); 
-my @IDarray         = ();
-my %AdressHash  = ();
+my @SplitArray;
+my @SplitArrayID;
+my @SplitArrayValue; 
+my @IDarray;
+my %AdressHash;
 
-if( $options{"help"} ) {
-    &usage("Parameter: --help");
+if( $options{help} ) {
+    usage("Parameter: --help");
 }
-if( defined $options{"infile"} ) {
-  &load_textfile($options{"infile"},\@FileArray);
-  print "\n Input file:  ".$options{"infile"}." loaded\n";
+if( defined $options{infile} ) {
+  load_textfile($options{infile},\@FileArray);
+  print "\n Input file:  $options{infile} loaded\n";
 } else {
-	&usage("ERROR: You must define an -infile=myfilename.vcf");
-};
-if( defined $options{"outfile"} ) {
-  print "\n Output file:  ".$options{"outfile"}." \n";
+	usage("ERROR: You must define an -infile=myfilename.vcf");
+}
+if( defined $options{outfile} ) {
+  print "\n Output file:  $options{outfile} \n";
 } else {
-	&usage("ERROR: You must define an -outfile=myoutfilename.$outformat");
-};
+	usage("ERROR: You must define an -outfile=myoutfilename.$outformat");
+}
 #######################################################################
 print "\nStart parsing file....";
 print "\n----------------------";
@@ -96,7 +96,7 @@ my $newID = "";
 my $count = 0;
 foreach my $line (@FileArray) {
   if  ( $line  =~ /^BEGIN\:VCARD/ ) {
-      $count = $count + 1;
+      $count++;
       print "\nParse record $count " ;
       %AdressHash = ();
   } elsif ($line =~ /^VERSION\:/) {
@@ -104,11 +104,11 @@ foreach my $line (@FileArray) {
   } elsif ( $line =~ /^END\:VCARD/ ) {
       print "\ndone";
       my $vID = $AdressHash{LastName}." ".$AdressHash{FirstName};
-      $OutFileHash{$vID} = &create_string_from_hash(\%AdressHash,$count);
-      $OutNameHash{$vID} = &create_linklist_from_hash(\%AdressHash,$count);
+      $OutFileHash{$vID} = create_string_from_hash(\%AdressHash,$count);
+      $OutNameHash{$vID} = create_linklist_from_hash(\%AdressHash,$count);
   } else {
     ## EMAIL;INTERNET;WORK:themail@example.net
-    @SplitArray = split(/\:/,$line);
+    @SplitArray = split(/:/,$line);
     ## SplitArray[0]= EMAIL;INTERNET;WORK
     ## SplitArray[1]= themail@example.net
     ## Convert to HTML
@@ -118,13 +118,11 @@ foreach my $line (@FileArray) {
     ## SplitArray2[2]= WORKFile
     ## The Values could also be separated by ";" so split them into array of values
     @SplitArrayValue = split(/;/,$SplitArray[1]);
-    $SplitArray[1] = &modify_fileline($SplitArray[1]);
-    my $i = 0;
+    $SplitArray[1] = modify_fileline($SplitArray[1]);
     foreach (@SplitArrayValue) {
-       $SplitArrayValue[$i] = &modify_fileline($SplitArrayValue[$i]);
-       $i+=1;
-    };
-    &append_ID(\@IDarray,$SplitArray[0]);
+       $_ = modify_fileline($_);
+    }
+    append_ID(\@IDarray,$SplitArray[0]);
     print "\n$count: $line";
    ##################################################
    # Now we decide what to do with the vCard Content 
@@ -135,19 +133,19 @@ foreach my $line (@FileArray) {
    #### e-Mail
     if ( $SplitArray[0] =~ /^EMAIL/ ) {
         $AdressHash{EMail} .= $SplitArray[1];
-    } elsif ($SplitArray[1] =~ /([a-zA_Z0-9\_\-\.]+@[a-zA_Z0-9\_\-\.]+)/) {
+    } elsif ($SplitArray[1] =~ /([\w\-\.]+\@[\w\-\.]+)/) {
         $AdressHash{EMail} .= $1;
-        $SplitArray[1] =~ s/[a-zA_Z0-9\_\-\.]+@[a-zA_Z0-9\_\-\.]+//g;
-    };
+        $SplitArray[1] =~ s/[\w\-\.]+\@[\w\-\.]+//g;
+    }
    #### LastName FirstName
-    if ( $SplitArray[0] =~ /^N[;]*/ ) {
+    if ( $SplitArray[0] =~ /^N;*/ ) {
 	$AdressHash{LastName}  = $SplitArrayValue[0];
 	$AdressHash{FirstName} = $SplitArrayValue[1];
-    };
+    }
    #### Adress
-    if ( $SplitArray[0] =~ /^ADR[;]*/ ) {
-  	$AdressHash{Adress}    = &convert_adress($SplitArray[1]);
-    };
+    if ( $SplitArray[0] =~ /^ADR;*/ ) {
+  	$AdressHash{Adress}    = convert_adress($SplitArray[1]);
+    }
    #### Fax and Phone
     if ( $SplitArray[0] =~ /FAX/ ) {
         $AdressHash{Fax} .= $SplitArrayValue[0];
@@ -159,28 +157,24 @@ foreach my $line (@FileArray) {
         } else {
 	     $AdressHash{Tel} .= $SplitArrayValue[0];
         }
-    };
+    }
     ###############################################################
-  }; ## main if-elsif-else
-}; ## end foreach 
+  } ## main if-elsif-else
+} ## end foreach 
 @OutFileArray = ("<html>\n<head>\n","<meta http-equiv=\"content-type\" content=\"text/html; charset=ISO-8859-1\">
 ","\n<title>Contacts</title>\n</head>\n<body>","$table_begin");
-my @OutFileIDs = keys(%OutFileHash);
-foreach my $vID (sort @OutFileIDs) {
-    push(@OutFileArray,$OutNameHash{$vID});
-};
+my @OutFileIDs = sort keys(%OutFileHash);
+push(@OutFileArray,@OutNameHash{@OutFileIDs});
 push(@OutFileArray,"$table_end");
 push(@OutFileArray,"<P></P>");
 push(@OutFileArray,"$table_begin");
-foreach my $vID (sort @OutFileIDs) {
-    push(@OutFileArray,$OutFileHash{$vID});
-};
+push(@OutFileArray,@OutFileHash{@OutFileIDs});
 push(@OutFileArray,"$table_end\n</body></html>");
-&save_textfile($options{"outfile"},\@OutFileArray);
+save_textfile($options{outfile},\@OutFileArray);
 ### print all tags used in the vCard file
-print "\n Output file:  ".$options{"outfile"}." saved\n";
-print "\nUsed ID in vCard file ".$options{infile};
-print "\n".&create_array_line("",\@IDarray," ");
+print "\n Output file:  $options{outfile} saved\n";
+print "\nUsed ID in vCard file $options{infile}";
+print "\n".create_array_line("",\@IDarray," ");
 print "\n";
 
 #### END of Script
@@ -195,38 +189,38 @@ print "\n";
 sub create_string_from_hash {
 	my ($ppHash,$pCount)  =  @_; ## p=Parameter,p=Pointer
         my $vReturnString = $row_head_begin;
-        $vReturnString .= $col_begin."<A NAME=\"N$pCount\"><A HREF=\"#L$pCount\">".$ppHash->{LastName}.
-     	                  ", ".$ppHash->{FirstName}."</A>".$col_end;
+        $vReturnString .= "$col_begin<A NAME=\"N$pCount\"><A HREF=\"#L$pCount\">$ppHash->{LastName}".
+     	                  ", $ppHash->{FirstName}</A>$col_end";
         $vReturnString .= $row_head_end;
         if ($ppHash->{Tel} ne "") {
            $vReturnString .= $row_begin;
            $vReturnString .= $col_begin."Tel: ".$ppHash->{Tel}.$col_end; 
            $vReturnString .= $row_end;
-        };
+        }
         if ($ppHash->{TelWork} ne "") {
            $vReturnString .= $row_begin;
            $vReturnString .= $col_begin."Work: ".$ppHash->{TelWork}.$col_end; 
            $vReturnString .= $row_end;
-        };
+        }
         if ($ppHash->{Mobil} ne "") {
 	       $vReturnString .= $row_begin;
     	   $vReturnString .= $col_begin."Mobile: ".$ppHash->{Mobil}.$col_end; 
            $vReturnString .= $row_end;
-        };
+        }
         if ($ppHash->{Fax} ne "") {
            $vReturnString .= $row_begin;
            $vReturnString .= $col_begin."Fax: ".$ppHash->{TelWork}.$col_end;
-        }; 
+        }
         if ($ppHash->{EMail} ne "") {
            $vReturnString .= $row_begin;
            $vReturnString .= $col_begin."e-Mail: ".$ppHash->{EMail}.$col_end; 
            $vReturnString .= $row_end;
-        };
+        }
         if ($ppHash->{Adress} ne "") {
            $vReturnString .= $row_begin;
            $vReturnString .= $col_begin."Adr: ".$ppHash->{Adress}.$col_end; 
            $vReturnString .= $row_end;
-        };
+        }
         return $vReturnString;
 }
 
@@ -250,7 +244,7 @@ sub usage {
 	my $pOutput = "";
 	if (defined $_[0]) {
 		$pOutput = $_[0];
-	};
+	}
     select(STDERR);
     print <<EOUsage;
     
@@ -274,22 +268,18 @@ EOUsage
 ##############################################################################
 #
 sub load_textfile {
-	my $pFilename =  @_[0];
-	my $ppLines   =  @_[1]; 
+	my ($pFilename, $ppLines) =  @_; 
 	
 	if(!-e $pFilename) {
 		print "\n ERROR\n$pFilename does not exist.\n";
 		exit(1);
 	} else {
-		open (LOADTEXTFILE, "<$pFilename") or print $!;
+		open (LOADTEXTFILE, '<', $pFilename) or print $!;
 			if($flocking) {flock LOADTEXTFILE, 2;}
-			@{$ppLines} = <LOADTEXTFILE>;
+			@$ppLines = <LOADTEXTFILE>;
 			if($flocking) {flock LOADTEXTFILE, 8;}
  		close LOADTEXTFILE;
- 		foreach my $fileline(@{$ppLines}) {
- 			chop($fileline);
- 			chomp($fileline);
-	}	} 
+	}
 }
 
 ##############################################################################
@@ -297,18 +287,17 @@ sub load_textfile {
 ##############################################################################
 #
 sub save_textfile {
-	my $pFilename = $_[0];
-	my $ppLines   = $_[1]; 
+	my ($pFilename, $ppLines) = @_; 
 	
 	if ($pFilename eq "") {
 		print "\n ERROR\nNo Filename specified in parameter (save_textfile():103.\n";
 		exit(1);
 	}
-	open (SAVETEXTFILE, ">$pFilename") or print $!;
+	open (SAVETEXTFILE, '>', $pFilename) or print $!;
 		if($flocking) {flock SAVETEXTFILE, 2;}
-		foreach my $fileline (@{$ppLines}) {
+		foreach my $fileline (@$ppLines) {
 			print SAVETEXTFILE "$fileline\n";
-		};
+		}
 		if($flocking) {flock SAVETEXTFILE, 8;}
  	close SAVETEXTFILE;
 }
@@ -318,7 +307,7 @@ sub save_textfile {
 #################################################
 
 sub convert_adress {
-      my $pAddress = $_[0];
+      my $pAddress = shift;
       $pAddress =~ s/\\n/$newline/g;
       $pAddress =~ s/\\,/,/g;
       $pAddress =~ s/\\//g;
@@ -333,7 +322,7 @@ sub convert_adress {
 #################################################
 
 sub modify_fileline {
-	my $pFileLine = $_[0];
+	my $pFileLine = shift;
 	my $BakFileLine = $pFileLine;
 	$pFileLine =~ s/^[ ;]+//g;
 	$pFileLine =~ s/[;]+/, /g;
@@ -351,8 +340,8 @@ sub modify_fileline {
 	$pFileLine =~ s/´/'/g;
 	###########################################
 	if ($BakFileLine ne $pFileLine) {
-	    print "\nCHANGES: ".$pFileLine."\n"
-	};
+	    print "\nCHANGES: $pFileLine\n"
+	}
 	return $pFileLine;
 }
 
@@ -360,17 +349,11 @@ sub modify_fileline {
 #### append an ID to an array if the ID is not in the array
 #######################################################################
 sub append_ID {
-    my $ppArray =  $_[0]; ## p=Parameter,p=Pointer
-    my $pNewID  =  $_[1];
-    my $found = 0;
-    #$pNewID =~ s/[^A-Za-z0-9 ]//g; 
-    foreach my $oldID (@{$ppArray}) {
-        if ($pNewID eq $oldID) {
-            $found = 1;
-        }
-    };
-    if ($found == 0) {
-       push(@{$ppArray},$pNewID);
+    my $ppArray =  shift; ## p=Parameter,p=Pointer
+    my $pNewID  =  shift;
+    #$pNewID =~ s/[^a-z\d ]//ig; 
+    if (!grep {$pNewID eq $_} @$ppArray) {
+       push(@$ppArray,$pNewID);
      } 
 }
 #########################################################################
