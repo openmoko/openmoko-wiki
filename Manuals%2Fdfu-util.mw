@@ -1,4 +1,4 @@
-This manual describes the usage of [[dfu-util]].
+This manual describes the usage of [[Dfu-util]].
 
 == Reference Documentation ==
 
@@ -16,34 +16,17 @@ usbfs   /proc/bus/usb   usbfs   defaults
 
 
 === Before using dfu-util ===
-
-* Read the other sections of this page first, because you will have 30 seconds to enter the flashing commands, come back here when ready.
-* Do not connect the USB cable from the PC to your Neo yet (disconnect it).
-* Boot your Neo into the NOR uBoot menu for flashing:
-** Turn off the Neo
-** Press and hold the AUX button
-** Press the Power button until the boot menu comes up
-** This menu is labelled '''*** BOOT MENU (NOR) ***'''
-** See also [[Booting the Neo FreeRunner]]
-* Stay in NOR uBoot menu, do not select or enter any item in the menu. Now you will be able to flash, make backups of your FreeRunner or query the FreeRunner with dfu-util.
-* The FreeRunner only stays at the NOR boot prompt for about 30 seconds and then shuts off unless you do something.
+You'll need to boot your phone into the NOR Boot Menu:
+* Ensure your phone is connected directly to the host computer by USB (not the USB-charger! :)
+* Ensure that you execute all dfu-util commands as root
+* Power off the phone
+* Hold down AUX
+* Press POWER and hold it
+* Release AUX, hold POWER until you see the menu
 * Connect your Neo to your computer directly (Using a hub in between could cause problems with the hub and the usb reset)
-* Now you can enter the dfu-util commands on your PC as described below.
-* If the Neo FreeRunner turns off before you press start flashing ('''screen goes black'''), go back to step 2. If you start flashing in time, the phone will not turn off meanwhile.
+see also [[Booting the Neo FreeRunner]]
 
 Note: Some myth existed that dfu-util is not worked with sudo. This is not true of course. It is working from both sudo and su sessions. --[[User:Gena2x|Gena2x]] 12:30, 20 July 2010 (UTC)
-
-Note that the dfu-util connection does '''not''' use Ethernet over USB - that is, you should not attempt to set up a usb0 network interface on your GNU/Linux host desktop (on Windows, you need a DFU class driver, or you can use the LibUSB-Win32 driver described on the [[Dfu-util-windows]] page). The dfu-util utility sets up its own connection to the FreeRunner. In fact, you will not be able to make an Ethernet-over-USB connection to the FreeRunner when it is at the uBoot menu; this type of connection is only available when the FreeRunner has booted fully.
-
-After connecting the FreeRunner to your host via USB cable, you can test whether dfu-util "sees" the FreeRunner by executing:
-
-<pre>dfu-util -l</pre>
-
-If you get error messages from the dfu-util command then try again. Often it works on the second try.
-
-dfu-util uses the DeviceFirmwareUpgrade protocol, and may list more than one device. If so, try unplugging the other device (e.g. a USB mouse) or using the -d switch to tell dfu-util which device it should talk to, as described at the relevant bug report [http://docs.openmoko.org/trac/ticket/2039].
-
-Also, please remember to execute the dfu-util command with sufficient privileges (ie. root) -- you will need complete control over the usb bus.
 
 === Command-line options ===
 
@@ -125,21 +108,17 @@ upload from the DFU device into the given file[name].
 
 == Phrasebook ==
 
-There's no full-fledged manual yet. Instead, some examples:
+There's no full-fledged manual yet.  Instead, some examples:
 
 === Flashing the rootfs ===
 
-The root filesystem has to be an image in jffs2 format. If the file you downloaded is zipped or compressed (has a .gz, bz2, .zip, tar, tar.gz or .tgz extension) you have to uncompress it first.
-
 dfu-util -a rootfs -R -D /path/to/openmoko-devel-image.jffs2
-
-Flashing the rootfs can take up to 15 minutes for a ~70MB image.
 
 === Flashing the kernel ===
 
 dfu-util -a kernel -R -D /path/to/uImage
 
-=== Flashing the bootloader [[U-Boot]] ===
+=== Flashing the bootloader ===
 
 dfu-util -a u-boot -R -D /path/to/u-boot.bin
 
@@ -157,16 +136,9 @@ Once this has finished, the kernel will be available at the default load address
 
 {{note|You cannot transfer more than 2MB of data into RAM using this method}}
 
-=== Success message ===
-
-If flashing was successfull the following will be shown:
-
- status(0) = No error condition is present
- Done!
-
 == Troubleshooting notes ==
 
-If during flashing of an image using dfu-util you're consistently getting an error -110 message, check that the size of the destination NAND [[Partitions|partition]] is big enough to hold the image.  For example the kernel partition is only 2 MB big by default and a kernel with debugging info compiled-in can often exceed this.  It's possible to change the partition layout to enlarge a given partition and shrink other partitions but you have to remember to reflash all partitions whose start offset has changed afterwards.  To adjust partitions layout use the ''mtdparts'' [[U-Boot|u-boot command]].
+If during flashing of an image using dfu-util you're consistently getting an error -110 message, check that the size of the destination NAND [[Partitions|partition]] is big enough to hold the image.  For example the kernel partition is only 2 MB big by default and a kernel with debugging info compiled-in can often exceed this.  It's possible to change the partition layout to enlarge a given partition and shrink other partitions but you have to remember to reflash all partitions whose start offset has changed afterwards.  To adjust partitions layout use the ''mtdparts'' [[Bootloader|u-boot command]].
 
 If in turn you're facing errors in seemingly random places during the flashing of images, most likely the USB hub or cable through which your Neo1973 is connected, is of too poor quality.  It is recommended that you always connect the phone directly to the host when using dfu-util.
 
@@ -180,5 +152,3 @@ If dfu-util complains about not being able to program the device while in runtim
 If dfu-util is too slow on Windows, that's a known bug. A suggestion is to run Linux on a virtual box. An full root image 97MB that is 776Mbit, the USB 1.1 on the Neo FreeRunner is capable of either 1.5 Mbit/s (Low-Speed) and 12 Mbit/s (Full-Speed). So flashing it should take less than 9 minutes with low speed and a bit more than a minute with full-speed. Plus transfer overhead, plus decompression on the Neo side.
 
 Note that any error messages indicate a probable failed transfer, despite latter messages emitted about success, etc.
-
-[[Category:Manuals]]
