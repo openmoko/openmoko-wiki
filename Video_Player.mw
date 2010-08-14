@@ -180,6 +180,7 @@ You may also want to use:
 -autosync 30 -vf scale -zoom -xy 640 -vf rotate=1
 
 = htcdream =
+== Encoding ==
 The htcdream is capable of playing a video like big buck bunny,full screen,with only the CPU(we didn't investigate video/audio decoding offload)
 To encode the video use that command:
  mencoder ../big_buck_bunny_1080p_h264.mov -oac mp3lame -lameopts cbr:br=64 -ovc lavc -lavcopts vcodec=mpeg1video:vbitrate=300 -vf scale=480:320,rotate=1,format=fmt=yv12 -srate 8000 -o bbb.mkv
@@ -188,6 +189,16 @@ The important part are:
 That prevent most of the buffer underruns and make the sound nearly prefect
 * low bit rates,mpeg1video etc... :
 That lower the CPU usage....until less than 80% usage
+* scale=480:320,rotate=1 :
+That rotate big buck bunny at encoding time, that require to rotate the screen to portrait mode
+
+Rotating the screen is described [http://www.shr-project.org/trac/wiki/DreamInstall?version=22#xorgtweaks here]
+
+== Playing ==
+If you have the screen rotated do:
+ mplayer -vo dga bbb.mkv
+else do:
+ mplayer -vo x11 bbb.mkv
 
 =Transcoding=
 To make your videos/DVDs compatible use mencoder like this:
