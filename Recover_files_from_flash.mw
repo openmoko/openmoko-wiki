@@ -1,0 +1,23 @@
+This is what I did to access the file system on the flash memory after that my [[Neo FreeRunner]] did not boot anymore.
+(Note that I'm using Qi and SHR-U on flash memory on jiffs).
+
+= Make a bootable SD card =
+Take an SD card of at least 1 GB from which all information may be deleted.
+I installed Hackable:1 on the SD card by following these instructions:
+http://www.hackable1.org/wiki/Installation
+
+= Boot from your SD card =
+Press and hold AUX button while pressing the power button.
+Select the second option to boot from the SD card.
+
+= Mount the file system that resides on your flash memory =
+ mount -t jffs2 /dev/mtdblock6 /mnt/flash/
+
+= Do your thing to make your phone booting again =
+For example:
+* Check the file system
+* Do an opkg upgrade of a broken operating system
+ chroot /mnt/flash opkg update
+ chroot /mnt/flash opkg upgrade
+* Backup some directories
+ scp -r root@192.168.0.202:/mnt/flash/etc/freesmartphone/opim backupdir
