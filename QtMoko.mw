@@ -89,36 +89,14 @@ For further detail see [[Setting Date and Time]].
 
 == Usage ==
 === Size Root File System ===
-If you want to install e.g. [[Twinkle]] and [[Navit]] on QtMoko the size of internal memory is not sufficient. By creating symbolic links this could be avoided. 
+If you want to install e.g. [[Twinkle]] and [[Navit]] on QtMoko the size of internal NAND memory is not sufficient (Twinkle need > 100MB). By creating symbolic links some memory problems can be avoided. 
 {{Note|'''(Size Root Filesystem)''' Create symbolic links from root file system to SD-card to save internal memory.If some folders are symb-linked to SD-Card (with e.g. ext2 partition), e.g.
   # mkdir /media/card/share
   # mkdir /media/card/share/navit
   # ln -s /media/card/share/navit /usr/share/navit 
-The same can be done for Twinkle
-  # mkdir /media/card/share/twinkle
-  # ln -s /media/card/share/twinkle /usr/share/twinkle 
 It recommended to be an ext2-partition. After creating symb-links install software.}}
 
-The following note is optional. See [http://bash.cyberciti.biz/guide/Main_Page Shell Scripting Tutorial] for further details.
-
-{{Note|<b>(Suggestion)</b> An improvement to QtMoko would be a post-installation script, that copies files  to a Mirco-SD partition and creates symbolic links. E.g. application for the folder <tt>/usr/share/twinkle</tt>, you should
-backup the directory <tt>/usr/share/twinkle</tt> before in case copying the file was not sucessful. The execute the following script, which is mention below.
-  # sh symblink2sd.sh /usr/share /media/card/share  twinkle
-symblink2sd.sh needs 3 parameter. This is the script <tt>symblink2sd.sh</tt>:
-  #!/bin/sh
-  echo "create directory $2$3 on SD-Card"
-  mkdir $2/$3
-  echo "copy files from $1/$3 to $2/$3"
-  cp -R $2/$3/* $1/$3/
-  # (1) the following line deletes the source folder e.g. /usr/share/twinke
-  rm -R $1/$3
-  # (2) the following line move the source folder e.g. /usr/share/twinke 
-  #     to /usr/share/twinkeBAK . Comment (1) and uncomment mv command in (2)
-  # mv $1/$3 $1/$3BAK
-  echo "Create symbolic link from $1/$3 to $2/$3 "
-  ln -s $1/$3 $2/$3
-If you move files you can delete them later. Be careful which directories you are symlinking.
-}}
+Consider installing QtMoko on MircroSD instead, if you want to make use of debian application that exceed NAND memory capacity.
 
 === Login ===
 If you want to login to your FreeRunner set up a network connection (see [[USB Networking]]) with USB cable and start:
