@@ -1,0 +1,125 @@
+{{Languages|Mokosuite}}
+
+<onlyinclude>
+{{ApplicationBox|
+  Name=[[Mokosuite]]|
+  Description=Elementary based phone suite |
+  Screenshot=MokoWM.png |
+  Homepage=svn://svn.casaricci.it/openmoko/trunk|
+  TestedOn=SHR |
+  PackageName=mokosuite2
+}}
+</onlyinclude>
+
+{{application|Mokosuite}}
+
+=Overview=
+
+The mokosuite phone suite package is made up several components. Outside the mokosuite tree there is mokowm-imf-ecore, an input method module for
+Ecore.
+
+{|align=center
+|__TOC__
+|}
+
+
+{|
+| [[Image:Mokohome.png|200px|thumb|Launcher]]
+| [[Image:Mokosettings.png|200px|thumb|Settings]]
+| [[Image:Mokokeyboard.png|200px|thumb|Keyboard]]
+| [[Image:Mokopanel.png|200px|thumb|Panel]]
+|}
+
+=Installation=
+
+Installation on SHR:
+
+ opkg install mokosuite2
+
+=The phone application=
+
+The phone application is used to actually make phone calls. It manages also
+the actual connection to the GSM network.
+The phone app has an integrated call log and contacts list, for now stored in
+SQLite databases. My idea is to write my own implementation of opimd backed by
+mokophone.
+
+When a phone call starts or is incoming, the phone app sends notification
+through D-Bus to the panel, creating a green active call icon and filling the
+notification list with the current active call. If a call gets lost, another
+notification is pushed to the panel (with a red lost call icon :)
+
+
+=The messages application=
+
+There is actually a stub with some builtin messages, but my objective is to
+modify some of the opimd specs to accomplish a more threaded message management.
+This shall be discussed with mickeyl or anyone else is involved. We should find
+a way to make a custom SQL query, optimized for retrieving information about
+SMS threads, not wasting resources.
+
+I still have to decide to integrate e-mail support with sms... but I don't know,
+there are many points of view about this approach.
+
+
+=The settings application=
+
+
+
+This app is in charge to manage much all of the aspects of the suite and of the
+phone itself. For now it manages only a few things, but it's going to be a very
+big application :)
+
+
+=The mail application=
+
+Much TODO :)
+
+
+=The window manager=
+[[Image:Mokodesk2.png|thumb]]
+As of now, mokowm is a veeeery basic X window manager based on Ecore_X APIs,
+which have made things very easy. However, a phone window manager should do
+many things, and this will be a major part of the project.
+The wm right now has also a builtin simple virtual keyboard, not very complete
+yet, but working :)
+It is activable using signals: USR1 to show, USR2 to hide (the input method
+module actually sends a signal to the wm).
+
+
+=Home and desktop=
+[[Image:Mokohome.png|thumb]]
+This app is the home for the application launchers and the desktop, which can
+contain widgets (for now only launcher widgets :). At some point a public API
+will be made available for writing widgets. They should not be D-Bus, but more
+like module API.
+In the close future there is a major issue to be fixed: single instance
+launchers.
+
+
+=The panel application=
+
+The panel is responsible for the upper side panel window, showing push
+notifications to the user as needed. There is also a notification list window,
+activated by clicking the panel window itself at any point.
+Notifications are pushed using a simple dbus API, available in a dbus xml file
+in the source code repository.
+The panel has also a idle screen (or screensaver) that inhibits the touchscreen
+when is active, preventing any user action. Screensaver is hidden by pressing
+the POWER button. The panel manages also display dimming.
+
+
+=Libmokosuite=
+
+The library is used by every app but the window manager. It contains a lot of
+useful functions (primarly UI utilities) connected to notification management,
+windows and dialogs, many fso and misc utilities, etc.
+Actually my aim is to write a complete UI widget library (as extension to the
+Elementary toolkit) for improving UI consinstency and co-operation.
+The library includes a basic interface (not fully working actually) to the bluez
+API, using Eggdbus (I wish to make it the primary Dbus library of the suite).
+
+
+[[User:Daniele Ricci]]
+[[Category:Phone Applications]]
+[[Category:ApplicationsElementary]]
