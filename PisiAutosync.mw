@@ -1,0 +1,28 @@
+
+== Host side ==
+
+=== ICS ===
+
+ #!/bin/bash
+ echo "Syncing ICS data"
+ ssh root@192.168.0.202 pisi ncIcs pimlicodates &
+ echo "PISI command deployed"
+ sleep 10
+ cat /home/leviathan/.kde4/share/apps/korganizer/std.ics | nc 192.168.0.202 1234 -q 0
+ echo "Sending file"
+ sleep 10
+ nc -q 0 -l -p 1235 > /home/leviathan/.kde4/share/apps/korganizer/std.ics 
+ echo "Recieved file"
+
+=== VCF ===
+
+ #!/bin/bash
+ echo "Syncing VCF data"
+ ssh root@192.168.0.202 pisi ncVcf opimd &
+ echo "PISI command deployed"
+ sleep 10
+ cat /home/leviathan/.kde4/share/apps/akonadi_vcard_resource_2/single.vcf | nc 192.168.0.202 1234 -q 0
+ echo "Sending file"
+ sleep 10
+ nc -q 0 -l -p 1235 > /home/leviathan/.kde4/share/apps/akonadi_vcard_resource_2/single.vcf
+ echo "Recieved file"
