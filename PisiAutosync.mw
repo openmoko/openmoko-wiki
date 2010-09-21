@@ -1,76 +1,28 @@
-=Concept=
-== Diagram ==
-[[Image:Pisisync.png|700px]]
 
-== Description ==
-* host side waits for new device
-* if a new device get plugged in, it checks for compatibility
-* if syncing possible, it will ask for permission to sync (unless the user didn't activate autosync/neversync)
-* Also syncing of play lists and photo collections shall be possible in later stages
-
-=Proof of concept=
 == Host side ==
 
 === ICS ===
 
  #!/bin/bash
- ICS_FILE="$HOME/.kde/share/apps/korganizer/std.ics"
- echo "Using file: $ICS_FILE"
  echo "Syncing ICS data"
  ssh root@192.168.0.202 pisi ncIcs pimlicodates &
  echo "PISI command deployed"
  sleep 10
- cat "$ICS_FILE" | nc 192.168.0.202 1234 -q 0
+ cat /home/leviathan/.kde4/share/apps/korganizer/std.ics | nc 192.168.0.202 1234 -q 0
  echo "Sending file"
  sleep 10
- nc -q 0 -l -p 1235 > "$ICS_FILE"
+ nc -q 0 -l -p 1235 > /home/leviathan/.kde4/share/apps/korganizer/std.ics 
  echo "Recieved file"
 
 === VCF ===
 
  #!/bin/bash
- VCF_FILE="$HOME/.kde/share/apps/kontact/std.vcf"
- echo "Using file: $VCF_FILE"
  echo "Syncing VCF data"
  ssh root@192.168.0.202 pisi ncVcf opimd &
  echo "PISI command deployed"
  sleep 10
- cat "$VCF_FILE" | nc 192.168.0.202 1234 -q 0
+ cat /home/leviathan/.kde4/share/apps/akonadi_vcard_resource_2/single.vcf | nc 192.168.0.202 1234 -q 0
  echo "Sending file"
  sleep 10
- nc -q 0 -l -p 1235 > "$VCF_FILE"
+ nc -q 0 -l -p 1235 > /home/leviathan/.kde4/share/apps/akonadi_vcard_resource_2/single.vcf
  echo "Recieved file"
-
-== OM side ==
-
- root@om-gta02 ~ # cat .pisi/conf 
- [pimlicodates]
- description= Pimlico Dates
- module=calendar_ics
- path=/home/root/.evolution/calendar/local/system/calendar.ics
- postprocess=killall e-calendar-factory
- 
- [ncIcs]
- description=ICalendar over NetCat
- module=calendar_ics
- path=/tmp/pisi-tmpcal.ics
- preprocess=nc -l -p 1234 > /tmp/pisi-tmpcal.ics
- postprocess=cat /tmp/pisi-tmpcal.ics | nc 192.168.0.200 1235 && rm /tmp/pisi-tmpcal.ics
- 
- [ncVcf]
- description=VAdress over NetCat
- module=contacts_vcf
- vcfpath=/tmp/pisi-tmpadr.vcf
- preprocess=nc -l -p 1234 > /tmp/pisi-tmpadr.vcf
- postprocess=cat /tmp/pisi-tmpadr.vcf | nc 192.168.0.200 1235 && rm /tmp/pisi-tmpadr.vcf
- 
- [shrsim]
- description=SHR SIM Card Contacts
- module=contacts_dbussim
- 
- [opimd]
- description=OPIMD Contacts
- module=contacts_opimd
- field_support=TRUE
-
-[[Category:PIM]]
