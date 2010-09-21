@@ -1,4 +1,3 @@
-
 == Host side ==
 
 === ICS ===
@@ -26,3 +25,35 @@
  sleep 10
  nc -q 0 -l -p 1235 > /home/leviathan/.kde4/share/apps/akonadi_vcard_resource_2/single.vcf
  echo "Recieved file"
+
+== OM side ==
+
+ root@om-gta02 ~ # cat .pisi/conf 
+ [pimlicodates]
+ description= Pimlico Dates
+ module=calendar_ics
+ path=/home/root/.evolution/calendar/local/system/calendar.ics
+ postprocess=killall e-calendar-factory
+
+ [ncIcs]
+ description=ICalendar over NetCat
+ module=calendar_ics
+ path=/tmp/pisi-tmpcal.ics
+ preprocess=nc -l -p 1234 > /tmp/pisi-tmpcal.ics
+ postprocess=cat /tmp/pisi-tmpcal.ics | nc 192.168.0.200 1235 && rm /tmp/pisi-tmpcal.ics
+
+ [ncVcf]
+ description=VAdress over NetCat
+ module=contacts_vcf
+ vcfpath=/tmp/pisi-tmpadr.vcf
+ preprocess=nc -l -p 1234 > /tmp/pisi-tmpadr.vcf
+ postprocess=cat /tmp/pisi-tmpadr.vcf | nc 192.168.0.200 1235 && rm /tmp/pisi-tmpadr.vcf
+ 
+ [shrsim]
+ description=SHR SIM Card Contacts
+ module=contacts_dbussim
+
+ [opimd]
+ description=OPIMD Contacts
+ module=contacts_opimd
+ field_support=TRUE
