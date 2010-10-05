@@ -144,11 +144,37 @@
 
 ====Копировать - Вставить====
 
-In '''E based''' applications (for example the phone suite (messages)) tap and hold down for over two seconds. Select-Paste menu will pop up. By pressing Select, you can now swipe through the text to select desirable part. Tap and hold down again, Copy-Cut-Cancel menu will appear to Copy to clipboard. Another long tap will provide Select-Paste for Paste.
+В приложениях '''основанных на библиотеках E''', к примеру, из пакетов phoneui-apps-*, меню копировать-вставить можно вызвать нажатием и удерживанием более двух секунд в текстовом поле. Нажали "Select", выделили текст. Затем в меню копировать-вставить нажать на "Copy". Для вставки необходимо вызвать меню копировать-вставить и нажать на "Paste".
 
-In '''Gtk''' based application you can use keyboard for Ctrl-C (Copy) and Ctrl-V (Paste).
+В приложениях '''основанных на Gtk''', можно использовать клавиатуру (Ctrl-C - Ctrl-V) или выбирать соответствующие пункты в контекстном меню. 
 
-In the Vala '''Terminal''' you can select by keyboard swipe and for Paste there is a icon in the menu bar of this application.
+В '''Vala Terminal''', можно просто выделить текст и нажать на соответствующую кнопку в меню терминала.
+
+Копировать-вставить между различными тулкитами имеет некоторые ограничения(см. таблицу). В браузере Ventura эта функция не работает вообще.
+
+{| cellspacing="0" class="wikitable" border="1" style="font-size: 85%; text-align: left;width="100%"
+|-
+! из -> в 
+! в GTK
+! в E
+! в Terminal
+|-
+| в GTK
+|style="background:#88FF88;"|Работает
+|style="background:#88FF88;"|Работает
+|style="background:red"|Не работает
+|-
+| в E
+|style="background:red"|Не работает 
+|style="background:#88FF88;"|Работает 
+|style="background:#88FF88;"|Работает
+|-
+| в Terminal
+|style="background:red"|Не работает
+|style="background:#88FF88;"|Работает 
+|style="background:#88FF88;"|Работает
+|-
+|}
 
 ====Будильник====
 
@@ -164,6 +190,48 @@ In the Vala '''Terminal''' you can select by keyboard swipe and for Paste there 
 | [[Image:SHR-Mesages.png|200px|thumb|Messages]]
 | [[Image:SHR-Phonelog.png|200px|thumb|Phone log]]
 |}
+
+
+=====PIM данные=====
+
+======Хранилище======
+PIM data (contacts, messages etc.) are stored through internal opimd storage mechanism into 
+
+ /etc/freesmartphone/opim/pim.db
+
+This database can easily be copied from one SHR installation to another, for example due to a need for reflashing. The Contacts application can display a picture of the contact. As the pim.db database contains a path to the picture files only but not the pictures themselves, therefore, in case of PIM data backup or transfer, these picture files '''need to be copied too'''.
+
+======Контакты SIM======
+
+SHR phone applications do not read SIM contacts by default but you can use SIM Manager to access your SIM contacts  '''SHR Settings -> Others -> SIM Manager''', which allows you to edit and import the SIM contacts into the internal storage. You can also use Pisi to import your SIM contacts into opimd.
+
+======Синхронизация======
+
+'''[[Pisi]]''' is an application for synchronizing PIM data and can be used for import and export your contacts, calendar entries etc. between various sources, like VCF, LDAP, Google and more. To install Pisi:
+
+ opkg install pisi
+
+After installation, edit Pisi configuration in '''.pisi/conf''' in your home directory. To have a correct opimd fields support, make sure '''field_support=TRUE''' is enabled in opimd section.
+
+With the installed package you have a well-documented sample that is placed at 
+  /usr/share/doc/pisi/conf.example
+You may copy the file and rename this file to
+  /home/root/.pisi/conf
+as a starting point - then edit this file in order to configure your PIM synchronization data sources. Look at section
+
+ [opimd]
+ description=OPIMD Contacts
+ module=contacts_opimd
+ field_support=TRUE
+
+=====Хранитель экрана(экран блокировки)=====
+[[Image:SHR-Idle_Screen.png|200px|thumb|Idle Screen with GSM operator strength and name. GPS, WiFi, Display and CPU are requested, Battery status.]]
+Upon press of the AUX button Idle Screens locks up the display. AUX press or a finger slide on the Slider unlocks the screen.
+
+At the top, status icons are shown to indicate what is going on in the phone:
+
+From left to right:
+GSM strength and operator. Requested Resources (GPS, Display etc., when for example Display is requested, the screen will not dim).  Battery capacity.
 
 ====Настройка приложений====
 
