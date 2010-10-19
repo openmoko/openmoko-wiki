@@ -1,0 +1,30 @@
+On Linux Machine backup current data on Micro SD-Card before using fdisk. If SD-Card is located in <tt>/dev/sde</tt> use the following ''fdisk'' command:
+  fdisk /dev/sde
+Replace <tt>/dev/sde</tt> by appropriate device name. <tt>df</tt> will help you to identify the device name and size of SD card. Use <tt>df</tt>  to display all mounted storage devices:
+  sudo df
+
+Depending on your demands or suggestions in manual, create the number of partitions you need 
+== Partition Ratio == 
+The following in the ratio 3 to 1 (e.g. 4000000 blocks): 
+* '''[http://www.win.tue.nl/~aeb/partitions/partition_types-1.html FAT32]''' (3/4 of total size of SD - e.g. blocks 16-3000000) 
+* '''[http://www.win.tue.nl/~aeb/partitions/partition_types-1.html EXT3]'''  (1/4 of total size of SD - e.g. blocks 3000001-4000000)
+== Create Partions ==
+Use fdisk to create partitions:
+  sudo fdisk /dev/sde
+# '''<tt>-> p</tt>''' Check partitions
+# '''<tt>-> d -> 1</tt>''' Delete Partition 1 (repeat for other existing partitions)
+# '''<tt>-> n -> 1 -> </tt>''' New partition 1 (enter first and last sector)
+# '''<tt>-> t -> 1 -> c</tt>''' Set type c for FAT32 (LBA)
+# '''<tt>-> a -> 1 </tt>''' Set boot flag for first partition
+# '''<tt>-> n -> 2 -> </tt>''' New partition 2 (enter first and last sector)
+# '''<tt>-> t -> 2 -> 83</tt>''' Set [http://www.win.tue.nl/~aeb/partitions/partition_types-1.html type 83 for Linux partition]
+# '''<tt>-> w </tt>''' Write changes
+# '''<tt>-> q </tt>''' quit fdisk
+After fdisk operations, format both partitionss. If SD-Card is located in <tt>/dev/sde</tt> use the following commands (replace <tt>/dev/sde</tt> by appropriate device name:
+   # mkfs.vfat -v -n and-media -F 32 /dev/sde1
+   # mkfs.ext3 -v -L and-data /dev/sde2
+If you are root you can remove <tt>sudo</tt> from the command.
+
+== Swap Partition ==
+If you need a swap partition use partition  [http://www.win.tue.nl/~aeb/partitions/partition_types-1.html type 82 for Linux Linux partition] in fdisk.
+ '''<tt>-> t -> 2 -> 82</tt>''' Set [http://www.win.tue.nl/~aeb/partitions/partition_types-1.html type 82 for Linux partition] where 2 is the number of the swap partition.
