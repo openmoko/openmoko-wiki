@@ -1,50 +1,30 @@
 On Linux Machine backup current data on Micro SD-Card before using fdisk. If SD-Card is located in <tt>/dev/sde</tt> use the following ''fdisk'' command:
   fdisk /dev/sde
-== Determine Device Name of SD Card ==
 Replace <tt>/dev/sde</tt> by appropriate device name. <tt>df</tt> will help you to identify the device name and size of SD card. Use <tt>df</tt>  to display all mounted storage devices:
   sudo df
 
-Depending on your demands or suggestions in manual, create the number of partitions you need
-
-== Partition Ratio SD Card == 
+Depending on your demands or suggestions in manual, create the number of partitions you need 
+== Partition Ratio == 
 The following in the ratio 3 to 1 (e.g. 4000000 blocks): 
-* '''[http://www.win.tue.nl/~aeb/partitions/partition_types-1.html FAT32]''' (3/4 of total size of SD - e.g. blocks 1-3000000) 
+* '''[http://www.win.tue.nl/~aeb/partitions/partition_types-1.html FAT32]''' (3/4 of total size of SD - e.g. blocks 16-3000000) 
 * '''[http://www.win.tue.nl/~aeb/partitions/partition_types-1.html EXT3]'''  (1/4 of total size of SD - e.g. blocks 3000001-4000000)
-* Calculate Blocks for Swap with 256MB for 2GB Mirco-SD Card with 12000 Blocks
-  256/2048 * 12000 = 1500 Blocks needed for Swap with size 256MB
-400000
-
-== Create Partions on SD Card ==
+== Create Partions ==
 Use fdisk to create partitions:
   sudo fdisk /dev/sde
 # '''<tt>-> p</tt>''' Check partitions
 # '''<tt>-> d -> 1</tt>''' Delete Partition 1 (repeat for other existing partitions)
 # '''<tt>-> n -> 1 -> </tt>''' New partition 1 (enter first and last sector)
-# '''<tt>-> t -> 1 -> c</tt>''' Set [http://www.win.tue.nl/~aeb/partitions/partition_types-1.htmltype c for FAT32 (LBA)]
+# '''<tt>-> t -> 1 -> c</tt>''' Set type c for FAT32 (LBA)
 # '''<tt>-> a -> 1 </tt>''' Set boot flag for first partition
 # '''<tt>-> n -> 2 -> </tt>''' New partition 2 (enter first and last sector)
 # '''<tt>-> t -> 2 -> 83</tt>''' Set [http://www.win.tue.nl/~aeb/partitions/partition_types-1.html type 83 for Linux partition]
 # '''<tt>-> w </tt>''' Write changes
 # '''<tt>-> q </tt>''' quit fdisk
-
-== Format Micro SD card partitions ==
-After fdisk operations, format both partitions. If SD-Card is located in <tt>/dev/sde</tt> use the following commands (replace <tt>/dev/sde</tt> by appropriate device name):
+After fdisk operations, format both partitionss. If SD-Card is located in <tt>/dev/sde</tt> use the following commands (replace <tt>/dev/sde</tt> by appropriate device name:
    # mkfs.vfat -v -n and-media -F 32 /dev/sde1
    # mkfs.ext3 -v -L and-data /dev/sde2
-   # mkfs.ext2 -v -L SHR-fs /dev/sde2
-If you are not root you add <tt>sudo</tt> in front of the command. 
-* ''-n'' sets the name of the partition for FAT32
-* ''-L'' sets the Label of the partition for ext3/ext2
-Disk names are useful to distinguish between the partitions from your linux desktop computer especially for storing installation images, files and folders on the correct partition (e.g. two Android partitions for media and data).
+If you are root you can remove <tt>sudo</tt> from the command.
 
 == Swap Partition ==
 If you need a swap partition use partition  [http://www.win.tue.nl/~aeb/partitions/partition_types-1.html type 82 for Linux Linux partition] in fdisk.
- '''<tt>-> t -> 2 -> 82</tt>''' Set [http://www.win.tue.nl/~aeb/partitions/partition_types-1.html type 82 for Linux partition] in fdisk
-where 2 is the number of the swap partition (replace 2 with the appropriate partition number).
-Swap partition on a Mirco-SD card is e.g. necessary for [[QtMoko]] with [[Qi]] and the OpenMobil image.
-
-== Links ==
-* [http://tldp.org/HOWTO/Partition/fdisk_partitioning.html Partitioning with fdisk]
-* [http://www.faqs.org/docs/linux_admin/x1762.html Creating a Swap Space]
-
-[[Category:Flash]]
+ '''<tt>-> t -> 2 -> 82</tt>''' Set [http://www.win.tue.nl/~aeb/partitions/partition_types-1.html type 82 for Linux partition] where 2 is the number of the swap partition.
