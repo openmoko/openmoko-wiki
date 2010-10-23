@@ -1,0 +1,73 @@
+{{Languages|Pisi}}
+
+[[Image:SHR-PISI.png|200px|thumb|PISI contact synchronization]]
+[[Image:SHR-PISI-dates.png|200px|thumb|PISI calendar synchronization]]
+
+Pisi ist ein Programm zur Syncronisation von PIM-Daten (Kontakte, Kalender).
+
+Unterstützte Kontakte:
+* SIM via DBUS (z.B. SHR)
+* QTopia Adressbuch (e.g. OM 2008.12)
+* LDAP (nur lesen)
+* VCF Dateien (lokal / webdav)
+* Google Kontakte
+* OPIMD
+
+Unterstützte Kalender:
+* Google Kalender
+* ICalendar Dateien (lokal / webdav)
+
+Zur Installation von Pisi führe folgenden Befehl durch:
+
+<pre>
+opkg install pisi
+</pre>
+
+Zudem benötigst du eine Konfigurationsdatei .pisi/conf zur synchronisation. Hier ein Beispiel für Google Kalender und Google Kontakte:
+
+ [googleCalendar]
+ description=My Google Calendar
+ module=calendar_google
+ user=user@gmail.com
+ password=secret
+ calendarid=user@gmail.com
+ 
+ [pimlicodates]
+ description= Pimlico Dates
+ module=calendar_ics
+ path=/home/root/.evolution/calendar/local/system/calendar.ics
+ postprocess=killall e-calendar-factory
+ 
+ [googlecontacts]
+ description=Google Contacts Account
+ module=contacts_google
+ user=user@gmail.com
+ password=secret
+ 
+ [remoteIcs]
+ description= Remote ICS on Webdav
+ module=calendar_remoteics
+ url=http://webdav.davserver.net/private/pim/
+ file=remotecalendar.ics
+ username=<LOGIN>
+ password=<PASSWORD>
+ 
+ [shrsim]
+ description=SHR SIM Card Contacts
+ module=contacts_dbussim
+ max_simentries = 250
+ simentry_name_maxlength=18
+
+<onlyinclude>
+{{ApplicationBox|
+  Name=[[Pisi]]|
+  Description=PIM synchronization |
+  Homepage=http://freshmeat.net/projects/pisiom|
+  Screenshot=No-screenshot.png|
+  TestedOn=SHR|
+  PackageName=
+}}
+</onlyinclude>
+
+[[Category:Office Applications]]
+[[Category:PIM]]
