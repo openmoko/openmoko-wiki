@@ -367,7 +367,7 @@ Then restart the devd(8) daemon with:
 If you now plugin the FreeRunner into the USB port the cdce0 interface gets created and the IP addr will be assigned.
 
 == FreeBSD8 ==
-if your kernel report 
+If your kernel report 
 kernel: ugen5.2: <Linux 2.6.29-20100118.gita15608> at usbus5
 
 add to /etc/devd.conf:
@@ -380,7 +380,44 @@ attach 100 {
 };
 </pre>
 
-create /usr/local/etc/neo_if.pl:
+If your kernel report 
+kernel: ugen1.2: <Linux 2.6.34.x.y.z> at usbus5 (it happens for QtMokov28)
+
+add to /etc/devd.conf:
+<pre>
+attach 100 {
+        device-name "ugen[0-9]+";
+        match "vendor" "0x0525";
+        match "product" "0xa4a2";
+        action "perl /usr/local/etc/neo_if.pl /dev/$device-name";
+};
+</pre>
+The two entryes in /etc/devd.con can coexists, so it's a good idea to have both inserted. 
+Anyway you can collect all the required information for your actual distribution with usbconfig. For example:
+<pre>
+# usbconfig | grep -i linux
+ugen1.2: <RNDIS/Ethernet Gadget Linux 2.6.34.2-v28 with s3c2410_udc> at usbus1, cfg=1 md=HOST spd=FULL (12Mbps) pwr=ON
+
+#usbconfig -d ugen1.2 dump_device_desc
+ugen1.2: <RNDIS/Ethernet Gadget Linux 2.6.34.2-v28 with s3c2410_udc> at usbus1, cfg=1 md=HOST spd=FULL (12Mbps) pwr=ON
+
+  bLength = 0x0012 
+  bDescriptorType = 0x0001 
+  bcdUSB = 0x0200 
+  bDeviceClass = 0x0002 
+  bDeviceSubClass = 0x0000 
+  bDeviceProtocol = 0x0000 
+  bMaxPacketSize0 = 0x0008 
+  idVendor = 0x0525 
+  idProduct = 0xa4a2 
+  bcdDevice = 0x0312 
+  iManufacturer = 0x0001  <Linux 2.6.34.2-v28 with s3c2410_udc>
+  iProduct = 0x0002  <RNDIS/Ethernet Gadget>
+  iSerialNumber = 0x0000  <no string>
+  bNumConfigurations = 0x0002 
+</pre>
+
+Create /usr/local/etc/neo_if.pl:
 <pre>
 #!/usr/bin/perl
 my ($u, $ad) = $ARGV[0] =~ /(\d+)\.(\d+)$/;
