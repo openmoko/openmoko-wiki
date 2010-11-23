@@ -223,10 +223,12 @@ A bit more difficult (i.e. more hidden in the menu) is to delete icons from the 
 
 == Error Handling ==
 During the installations above, the following problem occured:
-* '''[Apt-Get] (jffs2)  Couldn't make mmap ...:''' (solved with the following [http://lists.laiskiainen.org/pipermail/apt-rpm-laiskiainen.org/2008-November/000884.html workaround])
-* if that happens regularly, create to scripts <tt>apt-start</tt> and <tt>apt-stop</tt> 
+=== Apt-Get Problem jffs2 ===
+'''[Apt-Get] (jffs2)  Couldn't make mmap ...:''' (solved with the following [http://lists.laiskiainen.org/pipermail/apt-rpm-laiskiainen.org/2008-November/000884.html workaround])
+If that happens regularly, create to scripts <tt>apt-start</tt> and <tt>apt-stop</tt>. that are used before an apt-get use. 
+==== Create an APT-START Script ====
 * start <tt>vi</tt> for the script <tt>apt-start</tt>
-  # vi /usr/local/bin/apt-start 
+  # vi /bin/apt-start 
 * press "I" for insert and enter the following code:
   #!/bin/sh
   mount -t tmpfs none /var/cache/apt
@@ -235,11 +237,24 @@ During the installations above, the following problem occured:
   echo "apt-get can now be used"
   echo "stop with apt-stop"
 * press ESC and then ":w"
-* press "q" for quit.
-* code
+* press ":q" for quit.
+
+==== Create an APT-STOP Script ====
+* if that happens regularly, create to scripts <tt>apt-start</tt> and <tt>apt-stop</tt> 
+* start <tt>vi</tt> for the script <tt>apt-start</tt>
+  # vi /bin/apt-start 
+* press "I" for insert and enter the following code:
   #!/bin/sh
   umount /var/cache/apt
   echo "Now old settings for apt-get are restored"
+* press ESC and then ":w"
+* press ":q" for quit.
+==== Usage of Scripts ====
+If you to install software use the scripts before and after apt-get call:
+  apt-start
+  apt-get install mysoftware
+  apt-stop
+Replace <tt>mysoftware</tt> with the package you want to install e.g. <tt>linphone</tt>.
 
 == Links ==
 * [http://qtmoko.org/wiki/Main_Page QtMoko Wiki]
