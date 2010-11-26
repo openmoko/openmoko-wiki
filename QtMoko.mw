@@ -208,18 +208,78 @@ As visible on [http://qtmoko.org/wiki/Main_Page QtMoko-Wiki] Syncing Calendar da
 ==Favorites==
 [[Image:deletefavorites.png|200px|thumb|Delete Icons from Favorites in Task Manager]]
 
-===Add to Favorites===
+===QtMoko Favorites===
+====Add to Favorites====
 You might prefer some applications and you use them more frequent. Then you might want them to add to your '''favorites'''. 
 * Go the application list and select (highlight, but do not start) application. 
 * click on the paper icon on bottom left and select ''Add to Favorite''. 
 Then you will have this Icon in the favorites menu (yellow star in main menu) too.
 
-===Delete from Favorites===
+====Delete from Favorites====
 A bit more difficult (i.e. more hidden in QtMoko) is to delete icons from the favorites menu.
 * start '''Task Manager''' in main menu by pressing the AUX-Button on you freerunner.
 * You will see the list of favorites
 * Select the application your want to remove from favorites (keep pressed for a few seconds on the application until the context menu appear. The icon you want to delete should not be selected before.
 * select '''delete''' from context menu and the icon disappears from favorites.
+
+===QX Favorites===
+[[QX]] is the X-Server in QtMoko you can add favorites to the QX-Menu too by manual editing the files in:
+  /opt/qtmoko/etc/qx
+The file 
+  favorites.conf
+detemines the list of application you will see after starting [[QX]]. It file looks like this:
+  [Apps]
+  list=navit, tangogps
+The applicationsnames must exist and need an entry in the <tt>profiles.conf</tt> file.
+The file
+  profiles.conf
+defines the QX-settings for the application. E.g. navit needs the GPS-daemon to be started and the auto-dim function of the display is disabled. These settings can be defined for the applications individually. The file contain profile records like the following for <tt>tangogps</tt> and <tt>navit</tt>:
+
+  [tangogps]
+  antidim=true
+  antisuspend=true
+  gps=true
+  init=gpsd /dev/ttySAC1
+  kbd=false
+  qvga=false
+  rotate=false
+  wm=true
+ 
+  [navit]
+  antidim=true
+  antisuspend=true
+  gps=true
+  init=gpsd /dev/ttySAC1
+  kbd=false
+  qvga=false
+  rotate=false
+  wm=true
+
+====Add to Favorites====
+You have installed or programmed an application  with the name <tt>myapp</tt>. Test the application in the QX-terminal if it works properly. Now we add this application to the application list in <tt>favorites.conf</tt>. 
+
+Now we have to add a profile record in file <tt>profiles.conf</tt>. We do this e.g. with vi:
+  # vi /opt/qtmoko/etc/qx/favorites.conf
+
+The file look like this:
+
+  [Apps]
+  list=navit, tangogps, myapp
+
+Now we have to add a profile record in file <tt>profiles.conf</tt>. We do this e.g. with vi:
+  # vi /opt/qtmoko/etc/qx/profiles.conf
+The file depended on 
+you settings could look like this:
+
+  [myapp]
+  antidim=false
+  antisuspend=true
+  gps=false
+  init=
+  kbd=false
+  qvga=false
+  rotate=false
+  wm=false
 
 == Error Handling ==
 During the installations above, the following problem occured:
