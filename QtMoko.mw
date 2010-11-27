@@ -201,6 +201,31 @@ See additional information on the OpenMoko-[[Linphone]] page.
 
 == PIM Storage and Import ==
 As visible on [http://qtmoko.org/wiki/Main_Page QtMoko-Wiki] Syncing Calendar data is not working at the moment. Some work has be done (Thanks to [http://mossroy.free.fr/ics2qtcal/ mossroy]), so that iCal-Files (ics) can be imported to your QtMoko calendar via a perlscript [http://wiki.openmoko.org/wiki/PIM_Storage#Import.2FExport_of_Calendar_Data_for_PIM-Storage ics2qtcal.pl]. Choose the current version from [http://mossroy.free.fr/ics2qtcal/ http://mossroy.free.fr/ics2qtcal/]. 
+
+===Install Script===
+The following installation script downloads the scripts and stores them into the directory <tt>/usr/local/bin/</tt> and makes them executable.
+<pre>
+#!/bin/sh
+# INSTALL SCRIPT FOR ICS2QTCAL
+# ----------------------------
+# Edit the following variable for a new versions
+vURL="http://mossroy.free.fr/ics2qtcal/v0.4"
+cd /usr/local/bin
+wget "$vURL/ics2qtcal.pl"
+wget "$vURL/ics2qtcal.sh"
+wget "$vURL/deleteqtcalappointments.pl"
+wget "$vURL/install_dependencies.sh"
+wget "$vURL/remotesync4ics2openmoko.sh"
+wget "$vURL/sync4ics2openmoko.sh"
+sh ./install_dependencies.sh
+rm ./install_dependencies.sh
+chmod u+x *.sh
+cd /opt/qtmoko/etc/qx/
+# insert sync4openmoko.sh in QX-favourites and make backup of old favourites.conf
+cp ./favourites.conf ./favourites.conf.$$
+cat ./favourites.conf.$$ | sed 's/list=/list=sync4openmoko.sh, /g' | favourites.conf
+</pre>
+Use <tt>
 # install the dependencis for the perl script (see install_dependencies.sh)
 # Export the calendar in an iCal File (e.g. <tt>mycalendar.ics</tt>) and transfer this file to your Neo.
 # import <tt>mycalendar.ics</tt> with scripts into your SQLite Database.
