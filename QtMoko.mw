@@ -290,6 +290,41 @@ You do not need to remove the application profile for your application in <tt>pr
 
 == Error Handling and Workarounds ==
 During the installations above, the following problem occured:
+=== Xdialog Problem with ===
+When encouter a GdK-Warning using Xdialog in scripts you can remove the warning with [http://www.linuxhowtos.org/System/sed_tutorial.htm sed].
+
+  sed 's/Gdk-WARNING ... locale not supported by C library//g
+
+Embedded in a script it will work like this:
+
+  #!/bin/sh
+ 
+  Xdialog --title "INPUT BOX" \
+     --inputbox "Enter URL:" 18 45 \
+     "http://www123.Example-Test.com" 2> /tmp/inputbox.tmp.$$
+  
+  retval=$?
+  input=`cat /tmp/inputbox.tmp.$$`
+  rm -f /tmp/inputbox.tmp.$$
+  
+  
+  input=`echo $input | sed 's/Gdk-WARNING ... locale not supported by C library//g
+'`
+  # remove invalid character from URL
+  input=`echo $input | sed 's/[^a-zA-Z1-9\/:\. \-]//g'`
+  
+  case $retval in
+    0)
+      echo "Input string is '$input'";;
+    1)
+      echo "Cancel pressed.";;
+    255)
+      echo "Box closed.";;
+  esac
+
+To test this script on your freerunner, you have to start it from the terminal in [[QX]]. Source of the xdialog script is used from [http://xdialog.free.fr http://xdialog.free.fr].
+
+
 === Apt-Get Problem jffs2 ===
 '''[Apt-Get] (jffs2)  Couldn't make mmap ...:''' (solved with the following [http://lists.laiskiainen.org/pipermail/apt-rpm-laiskiainen.org/2008-November/000884.html workaround])
 If that happens regularly, create two scripts <tt>apt-start</tt> and <tt>apt-stop</tt>. These scripts are used before and after <tt>apt-get</tt> use. 
