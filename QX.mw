@@ -1,7 +1,10 @@
 QX is a X-Server that runs under [[Qt Extended]]. Especially in the distribution [[QtMoko]] it is used to run applications like:
 * [[Navit]] 
 * [[Linphone]]
-under Qt Extended. You can start applications that need the X-Server with the following steps in [[QtMoko]]:
+under Qt Extended. 
+
+== Starting Applications ==
+You can start applications that need the X-Server with the following steps in [[QtMoko]]:
 # Open Main Menu by clicking on the green Q-Topia "Q"-Box.
 # Open Applications (4 Boxes, red, yellow, green, blue)
 # Scroll down and open QX
@@ -9,6 +12,7 @@ under Qt Extended. You can start applications that need the X-Server with the fo
 # Click on the white Paper Icon on the bottom left to open the context menu of the QX application.
 # Select "Launch" to start application
 With the AUX-Button you can exit the X-Server environment without quitting the application.
+== Screenshots ==
 {| cellspacing="0" class="sortable wikitable" border="0" style="font-size: 85%; text-align: left; width: auto; background:#CCCCC;"
 |-
 ! 
@@ -17,5 +21,71 @@ With the AUX-Button you can exit the X-Server environment without quitting the a
 [[Image:QX_Navit_Launch.png|250px|thumb|Select Launch to start Navit in QX]]
 |-
 |}
+
+==QX Favorites==
+[[Image:qxfavorites.png|200px|thumb|Favorites in QX with Linphone-icon added]]
+
+[[QX]] is the X-Server in QtMoko you can add favorites to the QX-Menu too by manual editing the files in:
+  /opt/qtmoko/etc/qx
+The file 
+  favourites.conf
+detemines the list of application you will see after starting [[QX]]. The file looks like this:
+  [Apps]
+  list=navit, tangogps
+The applicationsnames must exist and need an entry in the <tt>profiles.conf</tt> file.
+The file
+  profiles.conf
+defines the QX-settings for the application. E.g. navit needs the GPS-daemon to be started and the auto-dim function of the display is disabled. These settings can be defined for the applications individually. The file contain profile records like the following for <tt>tangogps</tt> and <tt>navit</tt>:
+
+  [tangogps]
+  antidim=true
+  antisuspend=true
+  gps=true
+  init=gpsd /dev/ttySAC1
+  kbd=false
+  qvga=false
+  rotate=false
+  wm=true
+ 
+  [navit]
+  antidim=true
+  antisuspend=true
+  gps=true
+  init=gpsd /dev/ttySAC1
+  kbd=false
+  qvga=false
+  rotate=false
+  wm=true
+
+===Add to QX-Favourites===
+You have installed or programmed an application  with the name <tt>myapp</tt>. Test the application in the QX-terminal if it works properly. Now we add this application <tt>myapp</tt> to the application list in <tt>favourites.conf</tt>. We do this e.g. with vi:
+  # vi /opt/qtmoko/etc/qx/favourites.conf
+
+The file look like this (press "I" for switching to INSERT mode):
+
+  [Apps]
+  list=navit, tangogps, myapp
+
+add lines press ESC and :w for "write to file" and ":q" for "quit VI".
+Now we have to add a profile record for <tt>myapp</tt> in file <tt>profiles.conf</tt>. We do this e.g. with vi:
+  # vi /opt/qtmoko/etc/qx/profiles.conf
+The file is depended on your settings could look like this  and e.g. the following lines (press "I" for switching to INSERT mode):
+
+  [myapp]
+  antidim=false
+  antisuspend=true
+  gps=false
+  init=
+  kbd=false
+  qvga=false
+  rotate=false
+  wm=false
+
+Then press "ESC" and ":w" for "write to file" and ":q" for "quit VI".
+
+===Remove QX-Favorites===
+You just have to remove the application name from the list of applications in:
+  /opt/qtmoko/etc/qx/favorites.conf
+You do not need to remove the application profile for your application in <tt>profiles.conf</tt>.
 
 [[Category:Qt based distributions]]
