@@ -231,6 +231,28 @@ chmod u+x *.sh
 cd /opt/qtmoko/etc/qx/
 cp ./favourites.conf ./favourites.conf.$$
 cat ./favourites.conf.$$ | sed 's/list=/list=synccal, /g' | favourites.conf
+echo "generate synccal.desktop"
+vSyncCal="/usr/share/applications/synccal.desktop"
+echo "[Desktop Entry]" > $vSyncCal
+echo "Version=1.0" >> $vSyncCal
+echo "Name=SyncCal" >> $vSyncCal
+echo "Name[de]=SyncCal" >> $vSyncCal
+echo "Name[fr]=SyncCal" >> $vSyncCal
+echo "Comment=Syncing remote and local ics-file into Qt-Calendar." >> $vSyncCal
+echo "Comment[de]=Script fuer den Import von ics-Dateien" >> $vSyncCal
+echo "Exec=synccal" >> $vSyncCal
+echo "Icon=synccal" >> $vSyncCal
+echo "StartupNotify=true" >> $vSyncCal
+echo "Terminal=false" >> $vSyncCal
+echo "Type=Application" >> $vSyncCal
+echo "Categories=GTK;Utility;Dialog;" >> $vSyncCal
+echo "GenericName=SyncCal" >> $vSyncCal
+echo "GenericName[de]=SyncCal" >> $vSyncCal
+# Done synccal.desktop ----------
+echo "Generate syncal"
+vSyncCal="/usr/local/bin/syncal"
+echo "#!/bin/sh" > $vSyncCal
+echo "remotesync4ics2openmoko.sh -u myusername -p mysecret https://www.example.org/calendar1.ics" >> $vSyncCal
 </pre>
 You need to add a profile in [[QX]]-favourites and a desktop-definition file in 
   /usr/share/applications/syncal.desktop  
