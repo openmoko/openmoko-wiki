@@ -1,0 +1,69 @@
+I decided to put my version of u-boot here, along with short FAQ and list of known bugs. Please feel free to add your bugs or questions here.
+
+Current version of u-boot fully support uploading and downloading via dfu, booting any know distro, fully configurable, and has no known grave bugs.
+
+== List of changes ==
+
+This version of u-boot is based on openmoko's stable branch of u-boot. Git can be viewed [http://www.bsdmn.com/cgit/cgit/u-boot/ here].
+
+Significant patches are:
+*242 timings
+*GPS should work after resume
+
+== Binaries ==
+Public freerunners should have same bootloader (board v5 and later).
+Latest binary version is here [http://www.bsdmn.com/openmoko/uboot/binary/].
+
+to use u-boot as NAND bootloader, you should flash binary to special partition:
+ sudo dfu-util -a u-boot -D u-boot_g2x_1.udfu
+
+== How to setup ==
+NAND uboot occupies 2 partitions on NAND, one partition for u-boot itself and one for it's configuration.
+
+To setup u-boot, easiest way is to edit simple text file on your host and then upload it to your phone with dfu-util.
+
+Sample text config may be found [http://www.bsdmn.com/openmoko/uboot/config/environment.in here]. This version support various kind of boot options in menu. You may use it as sample for your config.
+
+Then you edited config file to fit your needs, you should prepare it (this adds crc):
+
+get envedit.pl from [http://svn.openmoko.org/trunk/src/host/devirginator/] and run:
+ ./envedit.pl -s 26144 environment.in > u-boot_env.in
+then flash resulting file:
+ sudo dfu-util -a u-boot_env -D u-boot_env.in
+
+== Useful kernel options ==
+{| class="standard"
+|-
+! option || description
+|-
+|root=/dev/mmcblk0p2|| rootfs is second partition on SD card
+|-
+|root=/dev/mtdblock6|| rootfs is on usual location on NAND
+|-
+|rootwait|| need for booting from SD. force kernel to delay boot until sd card will be ready. better than older rootdelay=
+|-
+|panic=20|| on kernel crash, reboot automatically after 20 second delay. useful for lindi's ramconsole patch
+|-
+|hardware_ecc=1|| use hardware ecc support for NAND, this is not defaut option use only if your rootfs NAND is flashed not with rootfs, but with direct copy from sd. this speeds up NAND read on zlib-compressed ubi by 8%.
+|-
+|rootfstype=XX|| need if your rootfs is ext2 to force kernel to use ext2 driver not ext3. use if kernel can't detect partition type
+|-
+|ubi.mtd=6,2048|| claim 6th mtd partition as ubi layer with 2048 page align
+|-
+|rootflags=compr=zlib,no_chk_data_crc|| mount options of rootfs, use no_chk_data_crc to speed up ubifs by 8%
+|-
+|mem=127M|| reserve 1Mb if you using lindi's ramcomsole patch
+|}
+
+== How to use ==
+
+By default if you press 'power' button the "bootcmd" from your config is executed, so setup it accordingly to you default distribution.
+
+To see boot menu and select needed boot method, hold 'power', wait 1 second and hold 'aux', wait 1 more second and release both.
+
+== Known bugs ==
+I am working to fix this bugs now:
+*sd reads correct data only 50% of times, so sd boot 
+*NAND hw ecc is not supported
+Other known bugs:
+*splash screen is not tested, probably not working
