@@ -1,6 +1,7 @@
 In the center of the [[Neo1973]] '''audio subsystem''' is the [[WM8753]] (the "Wolfson Codec"), which implements record (ADCs), playback (DACs), and signal mixing. On the stereo output is the [[LM4857]] amplifier, which drives the stereo speakers, the mono earpiece and the headphones. Sound from and to [[GSM]] is received from and sent to the GSM modem via analog connections. There's a digital mono interface for sound from and to the [[Bluetooth]] chip.
 
-=== ALSA Channels ===
+= ALSA Channels =
+
 The channel numbers shown here are for the Freerunner, not the 1973.
 
 '''Note''': The ALSA channel numbers changed, probably during this change which is just after the release of 2.6.34:
@@ -13,6 +14,8 @@ The channel numbers shown here are for the Freerunner, not the 1973.
 
 See the table below for old & new numbers. At the moment, all of the diagrams reflect the old control numbers. (Most of the diagrams are not SVG so it is difficult to fix this!)
 
+== Diagrams ==
+
 [[Image:WM8753 ALSA Mapping.png]]
 A way more pretty diagram is [http://people.openmoko.org/joerg/ALSA/doc/WM8753_control_diag.pdf here]
 
@@ -22,7 +25,7 @@ Png version with ALSA control names printed over (these are alsa controls like f
 Best of both worlds, Png with the ALSA control names *and* the numid's {in blue}:
 [[Image:WM8753_routing_diagram_alsa_controls_20101112.png|1000px]]
 
-==== List of controls ====
+== List of controls ==
 
 <pre>
 [[Names for aliases in new driver. "NEW"=recommended, "new"=suggested. No kernel uses the NEW/new names at least as of 2010-08-03. Update if some great renaming really happens.]]
@@ -121,7 +124,7 @@ Best of both worlds, Png with the ALSA control names *and* the numid's {in blue}
 |-
 |Playback 6dB Attenuate||44||44||
 |-
-|e-emphasi||45||45||
+|De-emphasis||45||45||
 |-
 |Playback Mono Mix||46||46||
 |-
@@ -261,7 +264,7 @@ We are still wondering what use Mode "01" might have, other than analog mixed mo
 
 *--[[User:MMlosh|MMlosh]] 10:15, 5 April 2009 (GMT) Mono signal has separate volume control for stereo (control #8) and mono (control #13) output. This might be useful when mixing PCM (VoIP call / music) output into GSM call and playing it locally (and you can still have different volume levels)
 
-=== Phase0 Quick Start ===
+= Phase0 Quick Start =
 
 In my experience this works but I have to fiddle with the connection a bit before I get stereo output. The audio also comes out both the speaker and headphones.
 
@@ -276,9 +279,9 @@ If for some reason you're missing stereoout.state, try getting a similar copy (a
 
   wget http://opensource.wolfsonmicro.com/~gg/neo1973/stereoout.state
 
-=== Voice Calls ===
+= Voice Calls =
 
-==== using phone-internal microphone and speaker ====
+== using phone-internal microphone and speaker ==
 
 Actually the diagram below is incorrect (complexity and noise introduced by needless detour for red mic-path, via ACOP ACIN LPGA, should be direct PreAmp MICMUX [control63="Mic 2"] Marked *) below). See http://people.openmoko.org/joerg/ALSA/doc/WM8753_control_diag_gsmhandset_mic_std.png 
 
@@ -296,7 +299,7 @@ This is the default case.
 ** arrives on LM4857 RIN/LIN
 ** routed on LM4856 to EP+/EP-
 
-===== Internal Codec Route =====
+=== Internal Codec Route ===
 
 Neo Mode is GSM Handset
 Amp Mode is Call Speaker
@@ -319,19 +322,19 @@ Amp Mode is Call Speaker
 ** Left Mixer Bypass Playback Switch/Right Mixer Bypass Playback Switch
 ** Headphone Volume
 
-===== Driver Status =====
+=== Driver Status ===
 
 This should be supported by ASoC 0.13rc3 (-moko7 kernel) on.
 
 ASoC 0.13.3 should have same functionality but has renamed the soundcard to neo1973.
 
-===== asound.state =====
+=== asound.state ===
 
 https://people.openmoko.org/laforge/gta01/gta01b_v2/alsa/gsmhandset.state
 
 For ASoC 0.13.3 http://opensource.wolfsonmicro.com/~gg/neo1973/gsmhandset.state
 
-==== using analog (4pin 2.5mm) headset ====
+== using analog (4pin 2.5mm) headset ==
 
 This is also a quite common case, since we ship the headset with the
 phone
@@ -348,7 +351,7 @@ Headset Detection is done via GPIO on S3C2410
 ** arrives on LM4857 RIN/LIN
 ** routed on LM4856 to LHP/RHP
 
-===== Internal Codec Route =====
+=== Internal Codec Route ===
 
 Neo Mode is GSM Headset
 Amp Mode is Headphones
@@ -371,15 +374,15 @@ Amp Mode is Headphones
 ** Left Mixer Bypass Playback Switch/Right Mixer Bypass Playback Switch
 ** Headphone Volume
 
-===== Driver Status =====
+=== Driver Status ===
 
 Supported in ASoC 0.13.3
 
-===== asound.state =====
+=== asound.state ===
 
 http://opensource.wolfsonmicro.com/~gg/neo1973/gsmheadset.state
 
-==== using Bluetooth headset with GSM ====
+== using Bluetooth headset with GSM ==
 
 NOTE none of this works with GTA02. Neo mode has disappeared, and none of the state files are GTA02 compatible.
 
@@ -398,7 +401,7 @@ Headset detection via software
 ** wolfson: routes digital signal to PCM
 ** arrives on bluetooth chip via PCM
 
-===== Internal Codec Route =====
+=== Internal Codec Route ===
 
 Neo Mode is GSM Bluetooth
 Amp Mode is Off
@@ -419,7 +422,7 @@ Amp Mode is Off
 ** Capture Left Mixer [Analogue Mix Left]
 ** Left ADC
 
-===== Driver Status =====
+=== Driver Status ===
 
 Should be support by ASoC 0.13.3
 
@@ -427,7 +430,7 @@ Example of how to setup PCM->BT link.
 
 http://opensource.wolfsonmicro.com/~gg/bluetooth-pcm/bluetooth_pcm.c
 
-===== asound.state =====
+=== asound.state ===
 
 http://opensource.wolfsonmicro.com/~gg/neo1973/gsmbluetooth.state
 
@@ -459,7 +462,7 @@ The above did not work for me; for some reason, the hifi DAC interface must be e
 
 I did a lot of this debugging using [http://www.robsims.com/w8753_dump w8753_dump] which is a quick and dirty hack, but quite useful on a large text window.
 
-=== Bluetooth headset with system audio ===
+= Bluetooth headset with system audio =
 
 For example, using a voip app on the phone with a bt voice headset. This would also be a good way to work on the bluetooth driver without requiring a working GSM and placing a lot of calls.
 
@@ -468,9 +471,9 @@ See ticket 583 for a state file that should route system audio *out* to the head
 NOTE the state file specified does not work for GTA02, and even when modified to be GTA02 compatible still does not route system sound to a BT headset. Modified state file for GTA02 is here 
 [http://wiki.openmoko.org/images/3/3d/Btcpu_gta02.state.txt]
 
-=== Multimedia ===
+= Multimedia =
 
-==== sound playback to speakers ====
+== sound playback to speakers ==
 
 This is an important mode since it is also required for ringtone
 playback
@@ -482,19 +485,19 @@ playback
 ** LM4857: arrives on RIN/LIN
 ** LM4857: route to LLS+-/RLS+-
 
-===== Driver Status =====
+=== Driver Status ===
 
 This is working since ASoC 0.13rc2 (-moko6 kernel)
 
 This should also work on ASoC 0.13.3
 
-===== asound.state =====
+=== asound.state ===
 
 https://people.openmoko.org/laforge/gta01/gta01b_v2/alsa/stereoout.state
 
 For ASoC 0.13.3 http://opensource.wolfsonmicro.com/~gg/neo1973/stereoout.state
 
-==== sound playback to headphone ====
+== sound playback to headphone ==
 
 * speaker path
 ** input: from S3C2410 via IIS interface to wolfson
@@ -503,19 +506,19 @@ For ASoC 0.13.3 http://opensource.wolfsonmicro.com/~gg/neo1973/stereoout.state
 ** LM4857: arrives on RIN/LIN
 ** routed on LM4856 to LHP/RHP
 
-===== Driver Status =====
+=== Driver Status ===
 
 This is working since ASoC 0.13rc2 (-moko6 kernel)
 
-==== sound playback via A2DP ====
+== sound playback via A2DP ==
 
 One way to do this is to use a pulse plugin for bluetooth audio. Pulse would be routed either to the plugin or the default route to the codec. The plugin would watch for headset connect/disconnect events generated by a bluez audio daemon to keep the list of available output devices current.
 
-===== Driver Status =====
+=== Driver Status ===
 
 There is early work on the bluez daemon to handle this. It has been combined with an alsa plugin in the bluez tree but the alsa plugin probably will not be sufficient for neo.
 
-==== voice recording ==== 
+== voice recording == 
 
 This is mainly used to record notes
 
@@ -524,7 +527,7 @@ This is mainly used to record notes
 ** or from headset
 ** or bluetooth headset
 
-===== Driver Status =====
+=== Driver Status ===
 
 UNKNOWN
 
@@ -532,13 +535,13 @@ UNKNOWN
 
 [http://wildsau.enemy.org/~moko/voice-recording.state http://wildsau.enemy.org/~moko/voice-recording.state]
 
-=== Call recording ===
+= Call recording =
 
 This is a nice wishlist item.  The user should be able to receive the
 full-duplex audio from the wolfson codec, and record it using the
 S3C2410 IIS.  
 
-==== recording ====
+== recording ==
 
 It is possible to do PCM recording of a GSM voice call.  In fact, it is even possible to record the local microphone (what you speak) and the remote voice (what is spoken on the other end of the call) to separate channels (L and R of the Stereo ADC).
 
@@ -550,11 +553,11 @@ If you want to record a GSM voice call, please adjust your mixer settings as fol
 
 FIXME: test this. There's currently a ASoC kernel driver bug preventing audio capture from working at all.
 
-===== Driver Status =====
+=== Driver Status ===
 
 UNKNOWN
 
-==== playback ====
+== playback ==
 
 If you want to play PCM audio into a GSM call (i.e. make your remote partner of a voice call hear your PCM audio, e.g. your mp3 or ogg files.
 
@@ -566,11 +569,11 @@ If you are inside a voice call (e.g. FSO/zhone), open amixer or load a state fil
 # PCM Level
 #* adjust the PCM Level up to the desired playback volume
 
-===== Driver Status =====
+=== Driver Status ===
 
 UNKNOWN
 
-==== Recording and Playback .state ====
+== Recording and Playback .state ==
 Here is a state file that allows both recording and playback from and to a gsm call. <br>
 File: [[Image:Callrec.txt]]
 
@@ -593,7 +596,7 @@ amixer sset 'Capture Left Mux' 'Line or RXP-RXN'
 
 to the alsactl -f Callrec.txt restore command.
 
-==== Recording and maintaining a call .state ====
+== Recording and maintaining a call .state ==
 For the actual recording:
 arecord -D hw:0,0 -r 8000 -f S16_LE -c 2 record.wav
 
@@ -605,14 +608,14 @@ The actual state for gsmhandset (gsmhandset.state):
 A patch (diff gsmhandset.txt callrec-gsmhandset.txt) to apply on every state file, including gsmheadset.state and gsmspeakerout.state.
 [[Image:callrec-gsmhandset-patch.txt]]
 
-== Userspace Sound Control Daemon ==
+= Userspace Sound Control Daemon =
 
 The userspace sound control deamon might be a separate process or (more likely) part of some larger general hardware management daemon.
 
 
 It will provide the following features:
 
-=== audio playback ===
+= audio playback =
 
 In order to provide the desired functionality, the daemon first needs to be capable of doing audio playback.
 
@@ -627,7 +630,7 @@ In order to provide the desired functionality, the daemon first needs to be capa
 ** enqueue new sound at end of previous sound
 ** smooth fade-in/fade-out
 
-=== audio event management ===
+= audio event management =
 * manage a set of events (basically just a name for each event)
 * manage a set of audio themes
 ** each theme contains list of event->audio_file_name mappings
@@ -636,15 +639,15 @@ In order to provide the desired functionality, the daemon first needs to be capa
 ** built-in event sources, e.g. touchscreen/button press
 ** external event sources (e.g. gsmd, dbus, ...)
 
-=== audio scenario management ===
+= audio scenario management =
 * e.g. dialer or even gsmd can request audio subsystem to switch to voicecall mode
 * this mainly affects codec/amplifier analog audio routing
 * integrated with bluetooth in case of BT headset or A2DP use
 * How is this management performed currently?
 
-== Important issues/pitfalls ==
+= Important issues/pitfalls =
 
-=== Ringtone while headset playback ===
+== Ringtone while headset playback ==
 
 If the user is listening to music on the headset, we want to mix the
 ring tones only into the headset audio, as we must not interrupt and play it on the speaker. Reason: headset can't be switched off during playback via speaker, so to avoid extremely loud headset playback there must NOT be any speaker playback while headset is inserted.
