@@ -1,6 +1,6 @@
-I decided to put my version of u-boot here, along with short FAQ and list of known bugs. Please feel free to add your bugs or questions here.
+I decided to put my version of u-boot here, along with a short FAQ and list of known bugs. Please feel free to add your bugs or questions here.
 
-Current version of u-boot fully support uploading and downloading via dfu, booting any know distro, fully configurable, and has no known grave bugs.
+The current version of u-boot fully supports uploading and downloading via dfu, booting any know distro, is fully configurable, and has no known grave bugs.
 
 == List of changes ==
 
@@ -16,22 +16,22 @@ Version 1:
 *GPS should work after resume
 
 == Binaries ==
-Public freerunners should have same bootloader (board v5 and later).
+Public freerunners should have the same bootloader (board v5 and later).
 Latest binary version is here [http://www.bsdmn.com/openmoko/uboot/binary/].
 
-to use u-boot as NAND bootloader, you should flash binary to special partition:
+to use u-boot as NAND bootloader, you should flash the binary to the special partition:
  sudo dfu-util -a u-boot -D u-boot_g2x_2.udfu
 
 == How to setup ==
 NAND uboot occupies 2 partitions on NAND, one partition for u-boot itself and one for it's configuration.
 
-To setup u-boot, easiest way is to edit simple text file on your host and then upload it to your phone with dfu-util.
+To setup u-boot, the easiest way is to edit the simple text file on your computer and then upload it to your phone with dfu-util.
 
-Sample text config may be found [http://www.bsdmn.com/openmoko/uboot/config/environment.in here]. This version support various kind of boot options in menu. You may use it as sample for your config.
+Sample text config may be found [http://www.bsdmn.com/openmoko/uboot/config/environment.in here]. This version supports various kinds of boot options in the menu. You may use it as a sample for your config.
 
-If you switching from qi, just run boot your distro with Qi, do cat /proc/cmdline and compare/update parameters in config file.
+If you are switching from qi, just boot your distro with Qi, then do cat /proc/cmdline and compare/update the parameters in your config file.
 
-Then you edited config file to fit your needs, you should prepare it (this adds crc):
+Then you can edit the config file to fit your needs, you should prepare it (this adds crc):
 
 get envedit.pl and crc32.pl from [http://svn.openmoko.org/trunk/src/host/devirginator/] and run:
  ./envedit.pl -s 262144 -f environment.in > u-boot_env.in
@@ -47,13 +47,13 @@ then flash resulting file:
 |-
 |root=/dev/mtdblock6|| rootfs is on usual location on NAND
 |-
-|rootwait|| need for booting from SD. force kernel to delay boot until sd card will be ready. better than older rootdelay=
+|rootwait|| needed for booting from SD. force kernel to delay boot until sd card is ready. better than older rootdelay=
 |-
 |panic=20|| on kernel crash, reboot automatically after 20 second delay. useful for lindi's ramconsole patch
 |-
 |hardware_ecc=1|| use hardware ecc support for NAND, this is not default option use only if your rootfs NAND is flashed not with dfu-util, but with direct copy from sd. this speeds up NAND read on zlib-compressed ubi by 8%.
 |-
-|rootfstype=XX|| need if your rootfs is ext2 to force kernel to use ext2 driver not ext3. use if kernel can't detect partition type
+|rootfstype=XX|| needed if your rootfs is ext2 to force kernel to use ext2 driver not ext3. use if kernel can't detect partition type
 |-
 |ubi.mtd=6,2048|| claim 6th mtd partition as ubi layer with 2048 page align
 |-
@@ -64,14 +64,14 @@ then flash resulting file:
 
 == How to use ==
 
-By default if you press 'power' button the "bootcmd" from your config is executed, so setup it accordingly to you default distribution.
+By default, if you press the 'power' button, the "bootcmd" from your config is executed, so set it up accordingly for your default distribution.
 
-To see boot menu and select needed boot method, hold 'power', wait 1 second and hold 'aux', wait 1 more second and release both.
+To see the boot menu and select desired boot method, hold 'power', wait 1 second and then hold 'aux', wait 1 more second and release both.
 
 == Known bugs ==
-I am working to fix this bugs now:
+I am working to fix these bugs now:
 *sd reads correct data only 50% of times, so sd boot 
 *NAND hw ecc is not supported
-*u-boot can't boot system if battery fully discharged (workaround exist)
+*u-boot can't boot system if battery is fully discharged (workaround exist)
 
 [[Category:Bootloaders]]
