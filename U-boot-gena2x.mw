@@ -39,7 +39,7 @@ then flash resulting file to configuration partition:
  sudo dfu-util -a u-boot_env -D u-boot_env.in
 
 === Examples ===
-==== FAT+ext2 ====
+==== µSD (FAT+ext2) ====
 <pre>
 menu_2=
   Boot from microSD (FAT+ext2):
@@ -50,6 +50,20 @@ menu_2=
     ${mtdparts} ro;
   mmcinit;
   fatload mmc MMC_NUM 0x32000000 ${sd_image_name} 0x300000;
+  bootm 0x32000000
+</pre>
+
+==== µSD (ext2+ext3) ====
+<pre>
+menu_2=
+  Boot from microSD (ext2+ext3):
+  setenv bootargs
+    ${bootargs_base}
+    root=/dev/mmcblk0p1 rootwait
+#    mem=127M panic=20
+    ${mtdparts} ro;
+  mmcinit;
+  ext2load mmc MMC_NUM 0x32000000 ${sd_image_name} 0x300000;
   bootm 0x32000000
 </pre>
 
