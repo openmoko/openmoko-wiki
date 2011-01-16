@@ -38,45 +38,7 @@ get envedit.pl and crc32.pl from [http://svn.openmoko.org/trunk/src/host/devirgi
 then flash resulting file to configuration partition:
  sudo dfu-util -a u-boot_env -D u-boot_env.in
 
-=== Examples ===
-==== µSD (FAT+ext2) ====
-<pre>
-menu_2=
-  Boot from microSD (FAT+ext2):
-  setenv bootargs
-    ${bootargs_base}
-    root=/dev/mmcblk0p1 rootwait
-#    mem=127M panic=20
-    ${mtdparts} ro;
-  mmcinit;
-  fatload mmc MMC_NUM 0x32000000 ${sd_image_name} 0x300000;
-  bootm 0x32000000
-</pre>
 
-==== µSD (ext2+ext3) ====
-<pre>
-menu_2=
-  Boot from microSD (ext2+ext3):
-  setenv bootargs
-    ${bootargs_base}
-    root=/dev/mmcblk0p1 rootwait
-#    mem=127M panic=20
-    ${mtdparts} ro;
-  mmcinit;
-  ext2load mmc MMC_NUM 0x32000000 ${sd_image_name} 0x300000;
-  bootm 0x32000000
-</pre>
-
-==== qtmoko v31 on NAND (ubifs) ====
-<pre>
-menu_3=
-  Boot NAND/ubi-zlib:
-  setenv bootargs ${bootargs_base} ${mtdparts} rootfstype=ubifs
-      ubi.mtd=6,2048 ubi.comp root=ubi0:om-gta02-rootfs
-      rootflags=compr=zlib,no_chk_data_crc;
-  nand read.e 0x32000000 kernel 0x300000;
-  bootm 0x32000000
-</pre>
 
 == Useful kernel options ==
 {| class="standard"
@@ -117,5 +79,43 @@ I am working to fix these bugs now:
 == Booting without battery/with completely discharged battery ==
 
 To workaround the bug that it's not possible boot with discharged/without battery, use following 'trick': insert charger cable and in same moment press 'power' button, add up 'aux' later for menu.
+
+
+== Some examples examples ==
+==== qtmoko v31 on NAND (ubifs) ====
+<pre>
+menu_3=
+  Boot NAND/ubi-zlib:
+  setenv bootargs ${bootargs_base} ${mtdparts} rootfstype=ubifs
+      ubi.mtd=6,2048 ubi.comp root=ubi0:om-gta02-rootfs
+      rootflags=compr=zlib,no_chk_data_crc;
+  nand read.e 0x32000000 kernel 0x300000;
+  bootm 0x32000000
+</pre>
+==== µSD (FAT+ext2) ====
+<pre>
+menu_2=
+  Boot from microSD (FAT+ext2):
+  setenv bootargs
+    ${bootargs_base}
+    root=/dev/mmcblk0p1 rootwait
+    ${mtdparts} ro;
+  mmcinit;
+  fatload mmc MMC_NUM 0x32000000 ${sd_image_name} 0x300000;
+  bootm 0x32000000
+</pre>
+
+==== µSD (ext2+ext3) ====
+<pre>
+menu_2=
+  Boot from microSD (ext2+ext3):
+  setenv bootargs
+    ${bootargs_base}
+    root=/dev/mmcblk0p1 rootwait
+    ${mtdparts} ro;
+  mmcinit;
+  ext2load mmc MMC_NUM 0x32000000 ${sd_image_name} 0x300000;
+  bootm 0x32000000
+</pre>
 
 [[Category:Bootloaders]]
