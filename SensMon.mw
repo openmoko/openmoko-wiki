@@ -1,82 +1,25 @@
-==Description==
+SensMon is a Vala-based monitor for sensors that can be used to visualize the sensor values on the handheld (but not only). The software is very experimental and does not include any kind of exception handling. You are using it at your own risk :) Its main purpose is to test the sensors included in the FRNBv1 and FRNBv2.
 
-SensMon is a Vala-based monitor for sensors that can be used to visualize the sensor values on the handheld (but not only). The software is very experimental and does not include any kind of exception handling. You are using it at your own risk :) Its main purpose is to test the sensors included in the [[Freerunner Navigation Board]] and [[Freerunner Navigation Board v2]].
-
-
-==Supported Sensors==
-The monitor has been developed in order to easily add arbitrary sensors as sources. The monitor uses GTK and Cairo for drawing.
+The monitor has been developed in order to easily add arbitrary sensors as sources. The monitor uses GTK and Cairo for drawing the values.
 
 Included sensors comprise:
 * [http://wiki.openmoko.org/wiki/Freerunner_Navigation_Board ADS1115] Analog Digital converter
 * [http://wiki.openmoko.org/wiki/Freerunner_Navigation_Board_v2 HMC5843] digital 3D compass
 * [http://wiki.openmoko.org/wiki/Freerunner_Navigation_Board_v2 ITG3200] digital 3D gyroscope
-* [http://www.st.com/stonline/products/literature/ds/12726/lis302dl.htm LIS302DL] accelerometers via spi (GTA02) and i2c interface (N900)
+* [http://www.st.com/stonline/products/literature/ds/12726/lis302dl.htm LIS302DL] accelerometers (the ones included in our devices) via spi and i2c interface (N900)
 * [http://wiki.openmoko.org/wiki/I2C_Pressure_Sensor BMP085] pressure sensor
 * [[I2C Humidity Sensor|Senserion SHT21 humidity sensor]]
 * Logged input from text file
-* Streaming sensor data over TCP from the freerunner to e.g. your desktop or another freerunner
-
-IMPORTANT: You need to load the corresponding kernel modules to read from the sensors except for the network and file input source. The corresponding modules can be either found in the kernel tree or under [http://gitorious.org/freerunner-navigation-board http://gitorious.org/freerunner-navigation-board].
-
-NOTE: The Ads1115 is controlled via i2c-dev kernel module.
-
-==Screenshots==
+* Streaming over TCP sensor data from the freerunner to your desktop
 
 This is a screenshot of the application monitoring the X and Y gyro-axis as well as the X-axis of the digital compass included in the navigation board:
 
 [[Image:Sensmon-screen.png|center|thumb|400px]]
 
-Here is a screenshot of the user-interface for monitoring sensors over network socket (socat or nc), text file or hardware:
+Here is a screenshot of the available sensors that SensMon is currently able to monitor:
 
 [[Image:Sensmonv0.2.png|center|thumb|400px]]
 
-==Usage==
-===Network Usage===
-
-To stream the sensor data from your handheld to the desktop version of SensMon do the following:
-
-* enable logging in the handheld's config file under ~/SensMon (set 'logging_enabled=true')
-* set the freerunners ip in your desktop pc config
-* First launch "sensmon | nc -l -p 5353" on the handheld
-* Then launch sensmon on the desktop
-* Then select "Net" checkboxes for the desired sensor on the window of the monitor on your desktop and press the "Start" button
-* Select arbitraty sensors to monitor from the list on your freerunner and press the "Start" button
-* Enjoy
-
-===Textfile Usage===
-
-With SensMon you can persist the sensor data to a text file and replay it whenever you wish. In order to do that you will have to:
-
-* enable logging in the handheld's config file under ~/SensMon
-* Launch "sensmon > test.txt" (or whatever filename you have configured in the config file)
-* Select your sensors and start sensmon on the handheld.
-* Stop sensmon
-* Start sensmon
-* Select the "TXT" box of the sensors you have captured on the txt file.
-
-===Config File Example===
-A config file named "config" should be copied into the folder ~/.SensMon/
-An example for it is listed in the following
-
-<pre>
-[InputSource]
-logging_enabled=true
-
-[Network]
-client_host=192.168.0.10
-client_port=5353
-
-[File]
-filename=test.txt
-</pre>
-
-
-==Sources==
-
-SensMon is currently at version 0.21. SensMon 0.21 and its dependency libsensmon can both be acquired at [http://gitorious.org/sensor-monitor http://gitorious.org/sensor-monitor] or in the SHR-unstable feeds.
-
-===Tested Distributions===
-
 The sensor monitor has been tested on SHR unstable and Debian sid only.
 
-[[Category:Applications]]
+SensMon is currently at version 0.2. The source can be acquired at [http://gitorious.org/sensor-monitor http://gitorious.org/sensor-monitor]
