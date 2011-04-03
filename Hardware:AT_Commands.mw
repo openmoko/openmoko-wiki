@@ -496,6 +496,15 @@ If you try accessing GSM function, you will get an ERROR back. Access to USIM fu
  AT+CSIM=54,"008800812210....."                              // USIM commands
  +CSIM: 4,6985E                                              //
 
+You can use the USIM AUTHENTICATE command in the GSM security context to get SRES and Kc from a given RAND.
+
+ AT+CSIM=46,"008800801110FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00" // USIM AUTHENTICATE command in GSM Context. 0xFF bytes are RAND.
+ +CSIM: 32,"04EEEEEEEE08FFFFFFFFFFFFFFFF9000"                // Expected response. 0xEE bytes are SRES, 0xFF bytes are Kc.
+
+The USIM command APDU consists of the class code 0x00, indicating ISO/IEC 7816-4 communication without secure messaging between terminal and card on logical channel 0 (the only one guaranteed to be always open). The instruction code 0x88 is the simpler of the two designated for use with the AUTHENTICATE command, used for authentication operations without TLV encapsulation. The first parameter byte is pre-defined as 0x00 when used with instruction code 0x88. The second parameter, 0x80, specifies the GSM security context (as opposed to the example above, which uses 0x81 to access the 3G security context). The next parameter is Lc, the length of the command data block. The command data block consists of a single parameter, RAND, preceded by its length, 16 bytes (0x10 in hex). Since RAND is of fixed length, and the GSM security context does not use a second parameter to specify AUTN, Lc will always be 17 bytes (0x11 hex). The trailing 0x00 byte is the expected length of the response. Setting this byte to 0 results in all response data being returned at once. Specifying a different length results in the response being truncated to the specified length before return.
+
+The USIM response is big-endian. The length of SRES is 4 bytes, the length of Kc is 8 bytes, and the status word 0x9000 indicates success. The expected response length parameter does not include the size of the trailing status word, so the trailing 0x00 byte in the example above could be replaced with any value which is at least 0x0E (14 decimal: length of SRES (4) + length of Kc (8) + 2 bytes specifying the aforementioned lengths). 
+
 == Miscellaneous ==
 
  AT+CPAS
