@@ -66,9 +66,6 @@ Here is a PDF with an overview of the [http://chonyota.net/freerunner/FRNBv2/FRN
 
 ===Software installation===
 
-==Issues==
-'''Known HW or SW Issues'''
-
 
 ==Data Sheets==
 * TRF7960: http://focus.ti.com/lit/ds/slou186f/slou186f.pdf
@@ -76,11 +73,34 @@ Here is a PDF with an overview of the [http://chonyota.net/freerunner/FRNBv2/FRN
 
 ==Software==
 ===U-Boot driver===
-some C-code for a U-Boot API is available to do some preliminary SPI communication (e.g. read/write registers).
+some C-code for a U-Boot API is available to do some preliminary SPI communication (e.g. read/write registers). It is tested
+on a BeagleBoard and supports "SPI without SS" by using GPIO mode.
+
 Link: http://projects.goldelico.com/p/fridb/source/tree/master/u-boot
 
 ===Kernel drivers===
 Upcoming.
+
+Here is a very raw Idea for an interface from user space:
+
+Set power mode
+  echo "5" >/sys/.../rfid/power
+
+Set protocol
+  echo "2" >/sys/.../rfid/protocol
+
+Trigger scanning for tags
+  echo >/sys/.../rfid/scan
+
+Get list of found tags
+  ls -l /sys/.../rfid/tags/
+
+Get signal strenght of specific tag
+  cat /sys/.../rfid/tags/uid/rssi
+
+Read data from tag EEPROM
+  cat /sys/.../rfid/tags/uid/data
+
 
 ===Userspace software===
 
