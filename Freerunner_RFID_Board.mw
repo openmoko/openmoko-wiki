@@ -42,15 +42,39 @@ Schematic and board layout files are available in CadSoft EAGLE 5.x format from 
 
 [[Image:FRIDB-Pinout.jpg|Pinout: Bottom side, Top side|thumb]]
 [[Image:I2C-testpoints.png|I2C testpoints|thumb]]
-* '''VCC''': +3.3V, available at the AUX-Switch
-* '''VIO''': +1.8 V - +3.3V, available at the AUX-Switch
-* '''GND''': Ground, available from the (big) decoupling capacitor next to the accelerometer
-* '''SCL''', '''SDA''': Serial clock and data, get it from testpoints at the debug connector
-* '''OE''': Output enable from the frequency generator. Pull this pin high to enable the CLK output
-* '''CLK''': Clock output from the frequency generator.
-* '''LED controller 0-3''': LED current sinks. Connect LEDs in series with current limiting resistors from VCC to these pads.
-* '''12-Bit A/D 0-3''': Analog to digital converter inputs. They can operate single ended or differencial. The reference voltage is VCC.
-* '''Touch electrodes 0-6''': Connect these pads to a larger conducting area to use it as touch sensor. The inputs 0-3 can also be used to drive LEDs. Refer to the datasheet for more information.
+
+=== RFID Tag ===
+
+* '''ANT1''', '''ANT2''' (TP27, TP28): solder two wires to connect the antenna
+* '''VCC''' (TP8): +1.8V - +3.3V, available at the AUX-Switch
+* '''SCL''', '''SDA''' (TP18, TP9): Serial clock and data, get it from testpoints at the debug connector
+* '''GND''' (TP19): Ground, available from the (big) decoupling capacitor next to the accelerometer
+* '''EN0''', '''EN1''' (TP24, TP23): select address; usually connect to GND (I2C address 0x50)
+
+=== RFID Reader ===
+
+==== mandatory ====
+* '''ANT''', '''VSS''' (TP26, TP25): solder two wires to connect the antenna
+* '''VIN''' (TP22): +2.7 - +5.5V, main power available at the AUX-Switch
+* '''VIO''' (TP21): +1.8 V - VIN, IO power available at the AUX-Switch
+* '''SCLK''' (TP14): SPI clock input (mandatory)
+* '''SOMI''' (TP16): SPI data from reader to CPU (mandatory)
+* '''SIMO''' (TP17): SPI data from CPU to reader (mandatory)
+* '''IRQ''' (TP7): positive interrupt impulse (should be connected to a GPIO)
+====optional====
+* '''SS''' (TP14): SPI chip select (only used in SPI with SS mode)
+* '''EN''' (TP15): chip enable (optional to power down chip)
+* '''EN2''' (TP4): second chip enable (optional to power down chip)
+====extended====
+* '''CLK''' (TP3): optional 60kHz / 13 MHz clock output to drive an external MCU
+* '''MOD''' (TP1): external TX modulation input
+* '''ASK''' (TP2): external RX demodulator output
+
+====interface mode selection====
+NOTE: R4, R5, R7, R8 choose the interface mode:
+* R4, R5, R8 soldered: SPI without SS mode (default)
+* R4, R7, R8 soldered: SPI with SS mode - also connect TP14, TP16, TP17
+* none soldered: parallel mode - also connect TP10, TP11, TP12, TP13, TP14, TP15, TP16, TP17
 
 [[Image:FRIDB-top.JPG|Top side with the M24LR64 and the TRF7960|thumb]]
 [[Image:FRIDB-bottom.JPG|Bottom side |thumb]]
