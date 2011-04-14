@@ -15,7 +15,7 @@ Short answer: ext3. Other options: ext2, vfat. Don't use wear-aware file systems
 = Why ext3 =
 
 Long answer:
-In principle you can use any file system (fs) that is supported by the kernel in your Open Moko, commonly FAT, ext2, and ext3. reiserfs is currently not available in the standard OM kernel. What sets ext3 apart from FAT and ext2 is the journaling (also in reiserfs). 
+In principle you can use any file system (fs) that is supported by the kernel in your Openmoko, commonly FAT, ext2, and ext3. reiserfs is currently not available in the standard OM kernel. What sets ext3 apart from FAT and ext2 is the journaling (also in reiserfs). 
 
 The journal is an extra data structure used to make sure that the file system is always in a consistent state. Typically, if a crash happens in the system, the file system might get corrupted and even become unusable. In simple terms, the fs first saves all the data needed to perform the operation in the journal and only then starts updating the file system. If something goes wrong, the fs can rely on the journal to safely repeat the operation and repair the file system. Without a journal, the operation will certainly be lost and it might not even be possible to fix the file system.
 
@@ -28,7 +28,7 @@ There are three disadvantages with the journaled file system:
 
 Regarding performance, if you are using the SD mostly for static storage like maps or music files, it should not be a big problem. After the initial storage phase, the reads won't be delayed by the journal. Have also a look at [http://www.debian-administration.org/articles/388 this benchmark] between several Linux file systems. 
 
-Regarding the extra wearing, the number of write accesses before wearing seem to be sufficiently high not to have to bother with it, and the SD card in itself as automatic wearing leveling which will ensure that the journal will be written in another place after some time. All in all, sd card damage due to the journal should not be a practical issue.
+Regarding the extra wearing, the number of write accesses before wearing seem to be sufficiently high not to have to bother with it, and the SD card in itself has automatic wearing leveling which will ensure that the journal will be written in another place after some time. All in all, sd card damage due to the journal should not be a practical issue.
 
 FAT might already be the fs in your card when you got a new one. It has the advantage of being recognised in many other systems. The data structures are simpler which might mean less writes on the sd-card and less code being executed (unverified) and you'll find more tools available to recover information when you get errors.
 
@@ -43,7 +43,7 @@ It is also important to note that ext is faster than FAT (benchmark, anyone?) bu
 # create new ext3 file system: sudo mkfs.ext3 /dev/xyz
 # disable automated file system checks: sudo tune2fs -c 0 -i 0 /dev/xyz
 # mount the device: mount/dev/xyz or simply eject and re-insert it
-# optinally set some permissions: sudo chown username:username and sudo chmod ug+rw .
+# optionally set some permissions: sudo chown username:username and sudo chmod ug+rw .
 
 = Why not jffs2 or ubifs =
 
