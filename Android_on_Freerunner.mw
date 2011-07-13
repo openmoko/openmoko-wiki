@@ -336,6 +336,20 @@ Followed by this to find your phone...
 
  # adb shell
 
+== Remote access to Android (telnet) ==
+
+After you set up adb and installed busybox you can use telnet to get remote shell access to your Freerunner.
+The big advantage is, that you get a "real" shell access with all features like tab-completion or the expected behaviour when hitting the backspace or cursor keys.
+All you have to do is
+
+<pre>
+> adb shell
+# export PATH=/data/local:$PATH
+# telnetd -l sh
+# exit
+> telnet 192.168.0.202
+</pre>
+
 == Troubleshooting ==
 === SD card won't mount ===
 
@@ -357,20 +371,19 @@ There should be a /sdcard directory on your FreeRunner, for some reason this doe
 == Tools ==
 === Busybox ===
 
-Download it from here: [http://diy.zjip.com/busybox http://diy.zjip.com/busybox].
-
-
-Upload it to the device in a directory like /data/local/ by running "adb push busybox /data/local/busybox".
-I did not succeed to install it using busybox --install, so I made a script to create the soft links for each applet inside. As the last step: Update the path variable: export PATH=/data/local/:${PATH} .
+Download it from here: [http://diy.zjip.com/busybox http://diy.zjip.com/busybox]
+Or alternatively download this one [http://verdebreuk.googlecode.com/files/busybox] (compiled for ARMv4 == Freerunner)
 Some attempts for compiling it, but without success: [http://forum.koolu.org/viewtopic.php?f=10&t=108].
+Than push it to your Freerunner and install it:
 
-Here is another version of busybox [http://verdebreuk.googlecode.com/files/busybox] (compiled for ARMv4 == Freerunner)
 <pre>
 ./adb push busybox /data/local/busybox
 ./adb shell
 cd /data/local/
 chmod 0777 busybox
-./busybox --install
+# You can try to install it the usual way "./busybox --install" but it's likely
+# to not work, so use the following line to create the softlinks manually.
+./busybox | ./busybox sed -n '/^\W.*,/s/,/\n/gp' | ./busybox sed -n '/[^\W]/s/\W//p' | ./busybox xargs -n1 ln -s busybox
 export PATH=$PATH:/data/local/
 </pre>
 
