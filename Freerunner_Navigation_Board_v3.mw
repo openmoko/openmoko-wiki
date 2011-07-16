@@ -152,7 +152,35 @@ To connect the FRNBv3 to your Freerunner, follow the instructions for the [[Free
 If you want to connect the FRNBv3 to other devices such as the Open Pandora, you need 3V-3.6V as supply voltage for the sensors. The I2C interface can work with a different, lower voltage level. Lots of devices use 1.8V here. Connect an additional wire to VCC I/O to specify the voltage level of the I2C interface.
 
 ====with I2C voltage levels up to 5.5V====
-To connect the board to USB<->I2C converters or to your VGA or DVI connector (which uses I2C for DDC) you can use the integrated level shifter on complete assembled boards. Connect the target voltage to VCC/E and the I2C bus lines to SDA/E and SCL/E. Then wire OE to VCC I/O to enable the levle translator. Remember that the board still needs a supply voltage between 3V and 3.6V to power the sensors. Connect the 3V power supply to VCC and short this pad to VCC I/O.
+
+To connect the board I2C busses with higher voltages the integrated level shifter on complete assembled boards comes in handy. Connect the target voltage to VCC/E and the I2C bus lines to SDA/E and SCL/E. Then wire OE to VCC I/O to enable the level translator. Remember that the board still needs a supply voltage between 3V and 3.6V to power the sensors. This can be gained with a simple 3V LDO. Connect the 3V power supply to VCC and short this pad to VCC I/O.
+
+=====Example: connect the board to a graphics card=====
+[[Image:FRBNv3VGA.jpg|thumb]]
+The [http://en.wikipedia.org/wiki/VGA_connector VGA connector] uses an I2C bus for [http://en.wikipedia.org/wiki/Display_Data_Channel DDC]. Since such a connector it is available on most notebooks, it is a good candidate to connect the FRNBv3 to. Luckily the VGA connector also carries 5V which can be used to power the board: a simple LDO will generate the 3V sensor supply voltage. I used the [http://focus.ti.com/docs/prod/folders/print/tps73630.html TPS73630] but any other LDO should be fine too.
+Connect Pin 9 (5V) and 10 (GND) to the LDO and its output to VCC and VCC I/O on the FRNBv3. Then connect the I2C bus:
+
+{|style="border-collapse: separate; border-spacing: 0; border-width: 1px; border-style: solid; border-color: #000; padding: 0"
+|-
+!style="border-style: solid; border-width: 0 1px 1px 0"| VGA connector
+!style="border-style: solid; border-width: 0 1px 1px 0"| FRNBv3
+|-
+|style="border-style: solid; border-width: 0 1px 1px 0"| Pin 9  (+5V DC)
+|style="border-style: solid; border-width: 0 1px 1px 0"| VCC/E
+|-
+|style="border-style: solid; border-width: 0 1px 1px 0"| Pin 10 (GND)
+|style="border-style: solid; border-width: 0 1px 1px 0"| GND
+|-
+|style="border-style: solid; border-width: 0 1px 1px 0"| Pin 12 (SDA)
+|style="border-style: solid; border-width: 0 1px 1px 0"| SDA/E
+|-
+|style="border-style: solid; border-width: 0 1px 1px 0"| Pin 15 (SCL)
+|style="border-style: solid; border-width: 0 1px 1px 0"| SCL/E
+|}
+
+Finally, use a short wire to connect OE to VCC I/O (both solderpads are on the backside) and you are done.
+
+This also works with [http://en.wikipedia.org/wiki/Digital_Visual_Interface DVI] (Pins 6, 7, 14, 15) and [http://en.wikipedia.org/wiki/HDMI HDMI] (Pins 15-18)!
 
 ==Power consumption==
 All sensors on the FRNBv3 support powermanagement. The current consumption of each sensor is listed in the table below. These values are taken from the datasheets, the real current consumption could be different. It often increases with higher sample rates.
