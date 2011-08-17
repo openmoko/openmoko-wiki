@@ -105,6 +105,46 @@ To compile the kernel you just do:
 
 The new compiled kernel is now "arch/arm/boot/zImage" and the modules are within the "GTA02" directory. Now you just have to copy the "zImage" file to "/boot/uImage" and also copy the modules from within "GTA02" to the same directory structure on the freerunner (/lib/modules/2.6.32).
 
+=== Building the 2.6.39 branch ===
+
+Get kernel sources from git repository:
+
+ $ git clone git://git.openmoko.org/git/kernel.git linux-2.6
+ $ cd linux-2.6
+
+Next switch to the branch:
+
+ $ git checkout --track -b om-gta02-2.6.39 origin/om-gta02-2.6.39
+
+The real issue with this branch (at time of writing) is finding a working defconfig.
+My thanks go to PaulFertser who pointed me to OpenEmbedded git and their [http://cgit.openembedded.org/cgit.cgi/openembedded/plain/recipes/linux/linux-2.6.39/om-gta02/defconfig?h=org.openembedded.dev defconfig].
+Don't be alarmed that many options appear as 'NEW' when you build it. When I simply left the default values alone it booted fine for me on the Freerunner.
+
+Copy the downloaded file into the linux-2.6 directory and rename it to .config.
+
+Now before building this kernel you need to install a cross compiler toolchain like [[Toolchain]] from openmoko. Alternatively, feel free to use emdebian toolchain for the deb based systems, or crossdev on gentoo.
+
+Also set two variables for cross compiling (second one is om toolchain specific):
+
+ $ export ARCH="arm"
+ $ export CROSS_COMPILE="arm-angstrom-linux-gnueabi-"
+
+Now you can configure the kernel:
+
+ $ make menuconfig
+
+or
+
+ $ make xconfig
+
+To compile the kernel you just do:
+
+ $ mkdir GTA02 
+ $ make
+ $ make modules_install INSTALL_MOD_PATH=GTA02
+
+The new compiled kernel is now "arch/arm/boot/zImage" and the modules are within the "GTA02" directory. Now you just have to copy the "zImage" file to "/boot/uImage" and also copy the modules from within "GTA02" to the same directory structure on the freerunner (/lib/modules/2.6.32).
+
 === Building the andy-tracking branch (obsolete) ===
 
 Those are the minimum survival commands.
