@@ -82,26 +82,28 @@ Also, some old or narrowly configured Linux distributions may not have USB netwo
 === The more advanced way ===
 If the previously described simple approach does not work, you may try the more complex one.
 
-<pre>iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
-sysctl -w net.ipv4.ip_forward=1
-ip addr add 192.168.0.200/24 dev usb0</pre>
+<pre>
+sudo iptables -A POSTROUTING -t nat -j MASQUERADE -s 192.168.0.0/24
+sudo sysctl -w net.ipv4.ip_forward=1
+sudo ip addr add 192.168.0.200/24 dev usb0
+</pre>
 
 If your Internet connection is also in the range 192.168.0.x then instead you might want to use only:
 
-<pre>ip addr add 192.168.0.200/28 dev usb0</pre>
+<pre>sudo ip addr add 192.168.0.200/28 dev usb0</pre>
 
 (This will just map the net from 192.168.0.192 to 192.168.0.207 onto usb0. If you get the error 'Cannot find device "usb0"', double-check that your FreeRunner is turned on and connected by USB. Ensure also that the uhci_hcd module is loaded on your PC. If that doesn't work, try unplugging and replugging the USB cable.)
 
 And in this case you should enable ARP proxy on internet facing interface INSTEAD of using iptables:
 
-<pre>sysctl net.ipv4.conf.eth2.proxy_arp=1</pre>
+<pre>sudo sysctl net.ipv4.conf.eth2.proxy_arp=1</pre>
 
 This assuming that eth2 is connected to ISP.
 
 Then
-<pre>ip link set usb0 up</pre>
+<pre>sudo ip link set usb0 up</pre>
 or (deprecated)
-<pre>ifconfig usb0 up</pre>
+<pre>sudo ifconfig usb0 up</pre>
 
 Then (ideally, not as root):
 
