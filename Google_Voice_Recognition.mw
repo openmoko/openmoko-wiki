@@ -1,4 +1,23 @@
+Because the performance of your Freerunner is too poor for voice recognition, the Google Voice API can be used to convert an recorded Audio file into a text string. Be aware that the audio file will be transmitted to Google, so  need to have Internet access on your freerunner FR to submit the audio file. 
 
-Because the performance of your Freerunner is too poor for voice recognition, the Google Voice API can be used to convert an recorded Audio file into a text string. Be aware that the audio file will be transmitted to Google, so  need to have Internet access on your freerunner FR to submit the audio file. You must be aware of the fact, that the follow script is running on your freerunner but it is not a standalone voice recognition software and so you might not want to use this tool for personal audio files
+{{Note|You must be aware of the fact, that the follow script is running on your freerunner but it is not a standalone voice recognition software and so you might not want to use this tool for private audio files.}}
 
 ==Google Voice API==
+For using the Google Voice API and the script you need to have the following package installed on your freerunner:
+* SoX [[http://sox.sourceforge.net]] for converting WAV into FLAC files
+* WGET [[http://www.gnu.org/s/wget/]] for submitting the FLAC file to the Google Voice API
+* SED [[http://sed.sourceforge.net/]] for extracting the recognized text in the returned string of the Google Voice API
+
+==Script Usage==
+* The script <tt>googlevoice.sh</tt> uses a audio file <tt>message.wav</tt> in the directory of the script. All files are stored in the same directory, so you need write permissions for the directory.
+* SoX converts <tt>message.wav</tt>  into <tt>message.flac</tt> 
+* wget submits the file <tt>message.flac</tt> to the Google Voice API and writes the return message to <tt>message.ret</tt>. The language variable in the script is set to German by  <tt>lang=de-de</tt>. If you want to submit a recorded file in US-English use <tt>lang=en-us</tt> instead.
+* SED extracts the recognized text <tt>message.ret</tt> by regular expressions and writes the text into <tt>message.txt</tt>.
+* Temporary files <tt>message.flac</tt> and <tt>message.ret</tt> will be deleted after the process.
+
+
+==Script Code==
+The script code can be tested on any Linux machine with SoX, SED, WGET installed. Modifiy the script according to your demands and storage of your audio files
+
+==Links==
+The WGET code was derived from [http://www.commandlinefu.com/commands/view/8043/google-voice-recognition-api]
