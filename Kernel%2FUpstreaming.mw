@@ -1,164 +1,633 @@
-Random notes on SHR kernel patches (v2.6.39.4..shr-2.6.39-nodrm).
+= [https://gitorious.org/shr/linux/commit/f58597e68f36da7d4f4dec08520d3e12258addf2 36 <nowiki>ARM: s3c24xx: Set ARCH_NR_GPIOS according to the selected SoC types.</nowiki>] =
+     ARM: s3c24xx: Set ARCH_NR_GPIOS according to the selected SoC types.
+     
+     Currently the code in gpiolib.c tries to register GPIO BANKA-BANKM.
+     ARCH_NR_GPIOS on the other hand is set only to 256, which would be the
+     equivalent of BANKA-BANKH. Thus the registration of all other banks will fail.
+     
+     This patch fixes this by setting S3C_GPIO_END according to the selected SoC
+     types. S3C_GPIO_END is set to the maximum of the number of GPIOs over all
+     selected SoC types. Thus it is ensured that memory is not wasted if support for
+     SoCs with higher GPIO numbers is not built-in.  When registering the bank it is
+     made sure that banks which are outside of that range are not even tried to be
+     registered.  Otherwise there would be problems with configs where
+     CONFIG_S3C24XX_GPIO_EXTRA is set to a non zero value.
+     
+     Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
 
-= [https://gitorious.org/shr/linux/commit/f58597e68f36da7d4f4dec08520d3e12258addf2?format=patch <nowiki>ARM: s3c24xx: Set ARCH_NR_GPIOS according to the selected SoC types.</nowiki>] =
- lindi: bugfix/feature. sounds sensible. s3c specific
- Seems to be at least partially upstream since v3.2-rc1: http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commit;h=8a8ab2e64e09b56dc1324fd2f7da12346166cad1
+ C: 
+= [https://gitorious.org/shr/linux/commit/56ee57980e903f6fbcac9fd35d0410b7bb363ae5 6 <nowiki>s3c24xx: Fix level irqs on external interrupts.</nowiki>] =
+     s3c24xx: Fix level irqs on external interrupts.
+     
+     Although the external interrupts support level and edge triggered irqs their
+     handler is currently always set to handle_edge_irq().
+     While being technically wrong for a level triggered irq to be handled by
+     handle_edge_irq() it will cause serious problems in combination with a oneshot
+     irq. handle_edge_irq() will unmask the irq immediately and as a result the irq
+     will be triggered again before the threaded irq handler had a chance to run and
+     clear the irq source.
+     
+     Thus level triggered irqs should be handled by handle_level_irq.
+     According to the specs the irq controller will remember if an irq has been
+     triggered while it had been masked and will issue it when the irq gets
+     unmasked. Thus it is sufficient to use handle_level_irq() for edge triggered
+     irqs as well. Hence handle_level_irq() can always be used for external
+     interrupts.
+     
+     Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
 
-= [https://gitorious.org/shr/linux/commit/56ee57980e903f6fbcac9fd35d0410b7bb363ae5?format=patch <nowiki>s3c24xx: Fix level irqs on external interrupts.</nowiki>] =
- lindi: bugfix. s3c specific
-= [https://gitorious.org/shr/linux/commit/f3f81740815d9207356cb4fcddc3196c7cbadb72?format=patch <nowiki>mtd: s3c2410_nand: Add config option to disable hw ecc at runtime</nowiki>] =
- lindi: feature. simple. I personally can live without nand.
- lindi: Lars tried to upstream but it was rejected:
- > Lars-Peter Clausen <lars@metafoo.de> writes:
- >> Not quite. I had for example a 5 liner rejected by a maintainer saying he can't
- >> accept any code which adds new platform code to ARM.
- lindi: however that appears to have been a misunderstanding and this can be resent
+ C: 
+= [https://gitorious.org/shr/linux/commit/f3f81740815d9207356cb4fcddc3196c7cbadb72 7 <nowiki>mtd: s3c2410_nand: Add config option to disable hw ecc at runtime</nowiki>] =
+     mtd: s3c2410_nand: Add config option to disable hw ecc at runtime
+     
+     This patch adds a flag to the s3c2410_nand platform data, which configures
+     whether hardware ecc is used for that chip.
+     
+     Currently hardware ecc is used if it was compiled into the kernel. But if you
+     want to build a kernel which runs on multiple devices you might have a
+     configuration where you have devices which require hw ecc as well as devices
+     which want software ecc.
+     
+     Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
 
-= [https://gitorious.org/shr/linux/commit/25db4ec44e13d7934100eab7860a9e38d5644007?format=patch <nowiki>Add s3c24xx_serial_console_set_silence</nowiki>] =
- lindi: openmoko specific. only for gta01: to have serial console and GSM on the same port.
-= [https://gitorious.org/shr/linux/commit/d38596283fd7b1c92138ac44352f08bb24636e71?format=patch <nowiki>Add c fiq handler.</nowiki>] =
- lindi: feature. tricky! Used by battery hdq queries (temperature, current, capacity etc.) and vibrator. Should just rewrite them in assembler?
- lindi: http://osdevnotes.blogspot.com/2011/10/fiq-debugger-redux.html mentions that google has something similar for their FIQ debugger.
-= [https://gitorious.org/shr/linux/commit/d3048278388b0908e179882587a8b6fcd95f2f50?format=patch <nowiki>Add glamo driver.</nowiki>] =
- lindi: feature. tricky!! This does not include the DRM/3D bits but it is enough for me.
-= [https://gitorious.org/shr/linux/commit/df2b549c2cd45742d7ea63b159b5a23cccd54c9e?format=patch <nowiki>ARM: gta02: Add LED support</nowiki>] =
- lindi: feature. openmoko specific. simple.
- lindi: could this be the next candidate for upstreaming? Is there anything controversial here? has somebody already tried to upstream this?
- lindi: there's a lot of extra whitespace changes, probably because the patch has been rebased many times?
+ C: 
+= [https://gitorious.org/shr/linux/commit/25db4ec44e13d7934100eab7860a9e38d5644007 21 <nowiki>Add s3c24xx_serial_console_set_silence</nowiki>] =
+     Add s3c24xx_serial_console_set_silence
 
-= [https://gitorious.org/shr/linux/commit/ec9382726b6c58494210d0c361b33a0617a39316?format=patch <nowiki>gta02: Disable hardware ECC unless we get instructed to enable it</nowiki>] =
- lindi: openmoko specific. nand. simple.
-= [https://gitorious.org/shr/linux/commit/caa1bc2b4331544a7b3835635e98b7f232dd5e59?format=patch <nowiki>gta02: Remove usage of pcf50633 gpio api</nowiki>] =
- lindi: openmoko specific. cleanup.
-= [https://gitorious.org/shr/linux/commit/4ed282d67df719b6c86ff8e5a180f826cbb7fff7?format=patch <nowiki>s3c2440: gta02: Configure pcf50633 gpios.</nowiki>] =
- lindi: openmoko specific.
-= [https://gitorious.org/shr/linux/commit/146f7ec553fae1e7655cde17802d23b0c6e14a27?format=patch <nowiki>ARM: s3c2440: GTA02: Select SPARSE_IRQ</nowiki>] =
- lindi: openmoko specific. simple.
-= [https://gitorious.org/shr/linux/commit/9bd9379698b85d2baf7b98b5bf59f65a7e709b55?format=patch <nowiki>gta02: Add notify handler to probe device children</nowiki>] =
- lindi: openmoko specific. feature.
-= [https://gitorious.org/shr/linux/commit/0dace283ee622f2cdfa78dac1deee64038841309?format=patch <nowiki>gta02: Add bt power management device</nowiki>] =
- lindi: openmoko specific. simple. is this the right API to use? could we abuse rfkill? what do the androids/n900/N9 use?
-= [https://gitorious.org/shr/linux/commit/5a7eaa51c3e7298416d1faf17ba96678498b6a7e?format=patch <nowiki>gta02: Add gps power management device</nowiki>] =
- lindi: openmoko specific. simple.
-= [https://gitorious.org/shr/linux/commit/c2742ff04d32db3d287c0bc4f7ab090fc957ee49?format=patch <nowiki>gta02: Add gsm power management device</nowiki>] =
- lindi: openmoko specific. simple.
-= [https://gitorious.org/shr/linux/commit/ef27e9c481964789fa7ed703b9d7d53a00ad6036?format=patch <nowiki>gta02: Add wlan power management device</nowiki>] =
- lindi: openmoko specific. simple.
-= [https://gitorious.org/shr/linux/commit/2dc04b2d325cea146f4605cdbc885126ec8c0859?format=patch <nowiki>gta02: Add glamo device</nowiki>] =
- lindi: openmoko specific. relatively simple, real trouble is in the glamo driver itself
-= [https://gitorious.org/shr/linux/commit/cf18c7ef4b91239ff51929d60173afa26627ba51?format=patch <nowiki>Add jbt device.</nowiki>] =
- lindi: openmoko specific. LCD control?
-= [https://gitorious.org/shr/linux/commit/3db6ef4d2bf156826a3c9ee7bd6be334d6696662?format=patch <nowiki>gta02: Add fiq handler</nowiki>] =
- lindi: openmoko specific. depends on the tricky fiq support above.
-= [https://gitorious.org/shr/linux/commit/d639c61f8338dcc221f88f350e2804e12e2dfaaf?format=patch <nowiki>gta02: Add battery driver</nowiki>] =
- lindi: openmoko specific. depends on the tricky fiq support above.
- lindi: mach-gta02.c:595: warning: ‘gta02_get_charger_online_status’ defined but not used
+ C: 
+= [https://gitorious.org/shr/linux/commit/d38596283fd7b1c92138ac44352f08bb24636e71 160 <nowiki>Add c fiq handler.</nowiki>] =
+     Add c fiq handler.
 
-= [https://gitorious.org/shr/linux/commit/6afb7d88356ab738bb469850854df6c4c31f3f3f?format=patch <nowiki>gta02: add support for platform_battery</nowiki>] =
- lindi: openmoko specific. simple.
-= [https://gitorious.org/shr/linux/commit/2111dc5154f0134b173ef122609d7b0e6fb0f6a0?format=patch <nowiki>Add atheros sdio ids.</nowiki>] =
- lindi: trivial. why does AR6003 define this in drivers/net/wireless/ath/ath6kl/hif.h and not this common file?
-= [https://gitorious.org/shr/linux/commit/81c7116b8418aa499ebea9755fc586e8bfc6d91e?format=patch <nowiki>Add ar6000 wireless driver.</nowiki>] =
- lindi: tricky! probably can never be mainlined. Maybe we can build it as a separate module package in debian?
- lindi: gcc seems to inline a lot and use a lot of stack here: ioctl.c:2531: warning: the frame size of 1888 bytes is larger than 1024 bytes
+ C: 
+= [https://gitorious.org/shr/linux/commit/523a54c56f41f233fc4c17fe0c182db43ab59e1c 102 <nowiki>mmc: add none blocking mmc request function</nowiki>] =
+     mmc: add none blocking mmc request function
+     
+     Previously there has only been one function mmc_wait_for_req
+     to start and wait for a request. This patch adds
+      * mmc_start_req - starts a request wihtout waiting
+      * mmc_wait_for_req_done - waits until request is done
+      * mmc_pre_req - asks the host driver to prepare for the next job
+      * mmc_post_req - asks the host driver to clean up after a completed job
+     
+     The intention is to use pre_req() and post_req() to do cache maintenance
+     while a request is active. pre_req() can be called while a request is active
+     to minimize latency to start next job. post_req() can be used after the next
+     job is started to clean up the request. This will minimize the host driver
+     request end latency. post_req() is typically used before ending the block
+     request and handing over the buffer to the block layer.
+     
+     Add a host-private member in mmc_data to be used by
+     pre_req to mark the data. The host driver will then
+     check this mark to see if the data is prepared or not.
+     
+     Signed-off-by: Per Forlin <per.forlin@linaro.org>
 
- From #ath6kl on freenode:
- <pabs3> kvalo: does ath6kl support AR6001/AR6002?
- <kvalo> pabs3: no
- <pabs3> kvalo: do you think it is feasible to add support for them, or are they completely different?
- <kvalo> pabs3: I haven't even seen either of them so I'm not qualified to answer :)
- <pabs3> ok
+ C: 
+= [https://gitorious.org/shr/linux/commit/cce75fcd30b054132ff0f08cc9978b324fc50b1d 32 <nowiki>mmc: mmc_test: add debugfs file to list all tests</nowiki>] =
+     mmc: mmc_test: add debugfs file to list all tests
+     
+     Add a debugfs file "testlist" to print all available tests
+     
+     Signed-off-by: Per Forlin <per.forlin@linaro.org>
 
-= [https://gitorious.org/shr/linux/commit/4e11662e7b95b1a8cdee1f5af9dc5ec49ce3c129?format=patch <nowiki>Add jbt6k74 display driver.</nowiki>] =
- lindi: feature. quite essential. does not look too tricky.
-= [https://gitorious.org/shr/linux/commit/82dfe46f68342b3139b4df33cf3f782ab6d52dd9?format=patch <nowiki>LEDS: leds-pwm: Add init, notfiy and exit callbacks</nowiki>] =
- lindi: feature. not sure how easy this is to mainline
-= [https://gitorious.org/shr/linux/commit/8e99225f5a165b20e25611db3486058d7f4e9dc1?format=patch <nowiki>RTC: PCF50633: Don't request update IRQ</nowiki>] =
- lindi: safe cleanup?
- lindi: seems to be upstream already in 3.0.0 as 3d62b8f59bb8bd08d8e3df3ab3174aab2971d6e6
+ C: 
+= [https://gitorious.org/shr/linux/commit/c7f3951a444728d24d46579cffcc8aa91a668b68 314 <nowiki>mmc: mmc_test: add test for none blocking transfers</nowiki>] =
+     mmc: mmc_test: add test for none blocking transfers
+     
+     Add four tests for read and write performance per
+     different transfer size, 4k to 4M.
+      * Read using blocking mmc request
+      * Read using none blocking mmc request
+      * Write using blocking mmc request
+      * Write using none blocking mmc request
+     
+     The host dirver must support pre_req() and post_req()
+     in order to run the none blocking test cases.
+     
+     Signed-off-by: Per Forlin <per.forlin@linaro.org>
 
-= [https://gitorious.org/shr/linux/commit/0a304203ac7daf36070f8fecd8974bfaf84d9df6?format=patch <nowiki>pcf50633-gpio: Add gpiolib support.</nowiki>] =
- lindi: feature. has some useless whitespace changes. gpio stuff which I don't really understand
- lindi: pcf50633-gpio.c:197: warning: ignoring return value of ‘gpiochip_remove’, declared with attribute warn_
+ C: 
+= [https://gitorious.org/shr/linux/commit/1c340830422f47cfa553dec7c84626016b9b0eea 270 <nowiki>mmc: add member in mmc queue struct to hold request data</nowiki>] =
+     mmc: add member in mmc queue struct to hold request data
+     
+     The way the request data is organized in the mmc queue struct
+     it only allows processing of one request at the time.
+     This patch adds a new struct to hold mmc queue request data such as
+     sg list, request, blk request and bounce buffers, and updates any functions
+     depending on the mmc queue struct. This lies the ground for
+     using multiple active request for one mmc queue.
+     
+     Signed-off-by: Per Forlin <per.forlin@linaro.org>
 
-= [https://gitorious.org/shr/linux/commit/22ce0c31d823e002859fe5ef50f17905ce90471b?format=patch <nowiki>pcf50633: Move pcf50633-gpio driver to the gpio drivers folder</nowiki>] =
- lindi: just moves a file
-= [https://gitorious.org/shr/linux/commit/e583591037796f962d07e935b2a1bdd0f89a61fb?format=patch <nowiki>MFD: pcf50633: Use mfd cells to register 
-child devices</nowiki>] =
- lindi: cleanup? No idea how tricky this really is
-= [https://gitorious.org/shr/linux/commit/780da55e2ad7f9d934e7452fba4340a5f9575a32?format=patch <nowiki>MFD: pcf50633: Use the genirq for irq handling</nowiki>] =
- lindi: has again extra whitespace changes. I guess genirq is some more abstract way to handle IRQs? Can not really judge how tricky this is.
-= [https://gitorious.org/shr/linux/commit/3e77986a22550a8df84d9e78ddbc281488bf1120?format=patch <nowiki>power: implement platform battery driver</nowiki>] =
- lindi: feature. we can live without this if bq27x00 is mainlined or vice versa.
-= [https://gitorious.org/shr/linux/commit/d09e21824bacd5f9ac0285c14c6ddc2d79b96608?format=patch <nowiki>Define machine_is_neo1973_gta01()</nowiki>] =
- lindi: trivial
-= [https://gitorious.org/shr/linux/commit/a73311169fef3284647f3c80748c644abe3c72fb?format=patch <nowiki>glamo-mci: revert changes for Per's patchset</nowiki>] =
- lindi: glamo stuff, no idea
-= [https://gitorious.org/shr/linux/commit/833339cd47295e86e0ca8c838e8997a24ababf6c?format=patch <nowiki>nand/s3c2410: add mising badblocksbits value</nowiki>] =
- lindi: bugfix. trivial. 
- lindi: it seems this was broken in 2.6.36 and fixed again in 3.0.0 but differently: 26d9be11485ea8c1102c3e8eaa7667412eef4950
-= [https://gitorious.org/shr/linux/commit/919ad8a33847d10bb2b6b4f9bb24702346455f1f?format=patch <nowiki>Openmoko resume reason sysfs node ported from 2.6.29</nowiki>] =
- lindi: feature. I personally need this a lot so that I can differentiate between RTC and GSM wakeups
-= [https://gitorious.org/shr/linux/commit/dd73aa36cb4d37d200aead95310df58cfec784d3?format=patch <nowiki>glamo-display: fix WSOD for 242 timming</nowiki>] =
- lindi: openmoko specific. glamo hack. Who said 2-4-2 timings have no drawbacks? ;-)
- gena2x: This is not original name for patch! And not true. I do not know why radek maned it with this way, but actually it JUST fixes WSOD with all kind of timings. Please rename it.
+ C: 
+= [https://gitorious.org/shr/linux/commit/736818523e9fb68c6c9d54ab357b98463b106f31 170 <nowiki>mmc: add a block request prepare function</nowiki>] =
+     mmc: add a block request prepare function
+     
+     Break out code from mmc_blk_issue_rw_rq to create a
+     block request prepare function. This doesn't change
+     any functionallity. This helps when handling more
+     than one active block request.
+     
+     Signed-off-by: Per Forlin <per.forlin@linaro.org>
 
-= [https://gitorious.org/shr/linux/commit/5c7e36859e8e28f9b56a2cb3ceb0ab2c3d079f96?format=patch <nowiki>Enable powering off after 8s POWER press</nowiki>] =
- lindi: openmoko specific. feature. simple. I personally don't really like this much however this should be easy to upstream.
-= [https://gitorious.org/shr/linux/commit/ba207d46b7857f6cae1368f0e62e611eb773505c?format=patch <nowiki>gta02: add support for usb host mode</nowiki>] =
- lindi: openmoko specific feature. looks quite simple.
-= [https://gitorious.org/shr/linux/commit/3066c8798168cb31af999e9d55bca2b445e27cdb?format=patch <nowiki>ar6000_delay.patch</nowiki>] =
- lindi: atheros wifi hack
-= [https://gitorious.org/shr/linux/commit/b3f60f3ed24f503bda64aabf94b62053379c9ca9?format=patch <nowiki>wm8753: use snd_soc_jack on neo1973</nowiki>] =
- lindi: openmoko specific. gta01-only?
-= [https://gitorious.org/shr/linux/commit/d5d5ee9c07ee06174f06255ae3141c368ca48f6a?format=patch <nowiki>Fix high power consumption in suspend</nowiki>] =
- lindi: openmoko specific. bugfix. simple. this should be a good candidate for upstreaming first?
- lindi: gena2x, this needs a better commit message
+ C: 
+= [https://gitorious.org/shr/linux/commit/8fb8a2df77a9813efad8c2bbb26f0857cad1df26 227 <nowiki>mmc: move error code in mmc_block_issue_rw_rq to a separate function.</nowiki>] =
+     mmc: move error code in mmc_block_issue_rw_rq to a separate function.
+     
+     Break out code without functional changes. This simplifies the code and
+     makes way for handle two parallel request.
+     
+     Signed-off-by: Per Forlin <per.forlin@linaro.org>
 
-= [https://gitorious.org/shr/linux/commit/084e5cd3284d499e3c4eb86f26042e7d72df2266?format=patch <nowiki>Force GPS power up on resume if it were powered up on suspend</nowiki>] =
- lindi: openmoko specific. Is this needed at all with qi? (My guess is no, its resume path does not touch serial ports)
-= [https://gitorious.org/shr/linux/commit/edcc8410bc93dcc06b69d57e8b7b47756124cd1e?format=patch <nowiki>lis302dl accelerometer driver</nowiki>] =
- lindi: openmoko specific. feature. hard to say how tricky this is. I can personally live without accelerometers.
- Paul: upstream has a different driver for the hardware: http://lwn.net/Articles/304326/
-= [https://gitorious.org/shr/linux/commit/02e9ff6da8f66701739b5beac43200eb3e0acbd7?format=patch <nowiki>input: lis302dl: fix the resume path</nowiki>] =
- lindi: openmoko specific. bugfix to accelerometer support.
-= [https://gitorious.org/shr/linux/commit/10b4b78dc2081caff1239f229e08a7e829ed3c7d?format=patch <nowiki>lis302dl: use ABS events rather then REL events</nowiki>] =
- lindi: openmoko specific. bugfix to accelerometer support.
-= [https://gitorious.org/shr/linux/commit/9668f02fe2af9dd880d5f83f95bd07bb2d963c56?format=patch <nowiki>Fix compile error for gta02 accelerometer.</nowiki>] =
- lindi: openmoko specific. trivial bugfix to accelerometer support. Why not rebase this to the patch?
-= [https://gitorious.org/shr/linux/commit/f0e6a6317de2567383a543a545cf50e58b3caa3d?format=patch <nowiki>tslib relies on ts pressures events so this hack is needed to get tslib stuff working</nowiki>] =
- lindi: s3c specific. hack? I personally can live with evdev if this really only affects tslib.
- Paul: hm, worth investigating more: is not returning pressure at all a valid thing to do for a TS driver?
- Heiko Stübner <heiko@sntech.de>: 
-  As I'm currently also working on a touchscreen driver I came upon a lot of
-  discussion and documentation about the handling of pressure values.
-  In the end a driver should not use the pressure property at all if it can't
-  provide meaningfull pressure data (i.e. more than 0 and 1) and tslib should be
-  "long fixed", if one does not use an ancient version.
+ C: 
+= [https://gitorious.org/shr/linux/commit/05653b86b740c70f85355de4d810d44c7f03a425 51 <nowiki>mmc: add a second mmc queue request member</nowiki>] =
+     mmc: add a second mmc queue request member
+     
+     Add an additional mmc queue request instance to make way for
+     two active block requests. One request may be active while the
+     other request is being prepared.
+     
+     Signed-off-by: Per Forlin <per.forlin@linaro.org>
 
-= [https://gitorious.org/shr/linux/commit/b05f074d5eb6f77cefcef35f7f2b2aaeb27af069?format=patch <nowiki>touchscreen: ignore unexpected interrupts</nowiki>] =
- lindi: s3c specific. bugfix? hard to say how ready this is for mainlining.
-= [https://gitorious.org/shr/linux/commit/1f3750e2cf3895b269589495147416c61ba523c5?format=patch <nowiki>s3c2410_ts: jitter less touchscreen for glamo, version 4</nowiki>] =
- lindi: openmoko specific. quite essential. hack: read ts during vblank?
- gena2x: it slows down pixclock to read jitterless data. it does that while blank so screen has no artefacts. may be it is possible to do that while blank without slowing pixclock, even that we have no VSYNC-like interrupt we should be able to calculate exact time of VSYNC because pixclock is constant and we always know current position. But this doesn't solve only major concern of this patch - it introduces link (via callbacks) between glamo and ts.
+ C: 
+= [https://gitorious.org/shr/linux/commit/8498759db167586e14267d0585827a19b0ef1dd6 163 <nowiki>mmc: add handling for two parallel block requests in issue_rw_rq</nowiki>] =
+     mmc: add handling for two parallel block requests in issue_rw_rq
+     
+     Change mmc_blk_issue_rw_rq() to become asynchronous.
+     The execution flow looks like this:
+     The mmc-queue calls issue_rw_rq(), which sends the request
+     to the host and returns back to the mmc-queue. The mmc-queue calls
+     isuue_rw_rq() again with a new request. This new request is prepared,
+     in isuue_rw_rq(), then it waits for the active request to complete before
+     pushing it to the host. When to mmc-queue is empty it will call
+     isuue_rw_rq() with req=NULL to finish off the active request
+     without starting a new request.
+     
+     Signed-off-by: Per Forlin <per.forlin@linaro.org>
 
-= [https://gitorious.org/shr/linux/commit/74c481b35be9bf9b7d512de6942c7be345a7db47?format=patch <nowiki>wm8753: allow setting DAI mode even while pcm is active</nowiki>] =
- lindi: bugfix. should be easy to mainline. This basically fixes a bug introduced in 338ee25393a5627e8ded5819147f98b919656ce9 that was mainlined to 2.6.39
- lindi: is there some other driver that needs a similar fix? tlv320dac33.c seems to have a similar if (dac33->fifo_mode == ucontrol->value.integer.value[0]) return 0;
- lindi: why does this return 1?
- lindi: this seems to be called from snd_ctl_elem_write. If we return 1 then it calls snd_ctl_notify, what does this mean?
- lindi-_> gena2x_ptr: "return 1" is a bug in that patch, it needs to be "return 0"
- lindi-_> gena2x_ptr: easy to see
- lindi-_> gena2x_ptr: strace alsamixer
- lindi-_> gena2x_ptr: then while true; do alsactl restore -f somestate; done
- lindi-_> gena2x_ptr: alsamixer gets spammed by bogus DAI change events
- lindi-_> gena2x_ptr: no other alsa control sends notifications ion this test
- lindi: sent upstream: http://mailman.alsa-project.org/pipermail/alsa-devel/2011-November/046036.html
- lindi: ACCEPTED UPSTREAM: http://mailman.alsa-project.org/pipermail/alsa-devel/2011-November/046059.html
+ C: 
+= [https://gitorious.org/shr/linux/commit/e9bea02cb48bbc7ee300ccc9f27185c912fa0f6a 82 <nowiki>mmc: test: add random fault injection in core.c</nowiki>] =
+     mmc: test: add random fault injection in core.c
+     
+     This simple fault injection proved to be very useful to
+     test the error handling in the block.c rw_rq(). It may
+     still be useful to test if the host driver handle
+     pre_req() and post_req() correctly in case of errors.
+     
+     Signed-off-by: Per Forlin <per.forlin@linaro.org>
 
-= [https://gitorious.org/shr/linux/commit/4f1ae92f97c4aaad16567a5101c8b668893a9c91?format=patch <nowiki>Workaround toolchain bug: http://gcc.gnu.org/bugzilla/show_bug.cgi?id=48783</nowiki>] =
- lindi: trivial. Occurs with gcc 4.4 but not 4.6 anymore. No need to mainline :-)
-= [https://gitorious.org/shr/linux/commit/098ed461036a5d9ba027b62c18a85622a055f63d?format=patch <nowiki>First attempt at fixing openmoko bug #2478</nowiki>] =
- lindi: openmoko specific. bugfix. not yet ready. See http://docs.openmoko.org/trac/ticket/2478
+ C: 
+= [https://gitorious.org/shr/linux/commit/d3048278388b0908e179882587a8b6fcd95f2f50 4250 <nowiki>Add glamo driver.</nowiki>] =
+     Add glamo driver.
 
-[[Category:Kernel]]
+ C: 
+= [https://gitorious.org/shr/linux/commit/df2b549c2cd45742d7ea63b159b5a23cccd54c9e 113 <nowiki>ARM: gta02: Add LED support</nowiki>] =
+     ARM: gta02: Add LED support
+     
+     This patch adds support for the LEDs found on the gta02 device.
+     
+     Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/ec9382726b6c58494210d0c361b33a0617a39316 15 <nowiki>gta02: Disable hardware ECC unless we get instructed to enable it</nowiki>] =
+     gta02: Disable hardware ECC unless we get instructed to enable it
+     
+     Early verions off uboot used for the gta02 flashed the nand with ecc information
+     incompatible to s3c2440 hardware ecc. Disable hardware error correction by
+     default, unless the bootloader explicitly enables it.
+     
+     Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/caa1bc2b4331544a7b3835635e98b7f232dd5e59 16 <nowiki>gta02: Remove usage of pcf50633 gpio api</nowiki>] =
+     gta02: Remove usage of pcf50633 gpio api
+     
+     This is the only user of the pcf50633 gpio api. Since the custom interface is
+     going to be replaced with gpiolib all users need to be remove or replaced.
+     It is safe to be remove it in this case since it is used used to turn a gpio
+     off which is never going to be turned on.
+     
+     Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/4ed282d67df719b6c86ff8e5a180f826cbb7fff7 15 <nowiki>s3c2440: gta02: Configure pcf50633 gpios.</nowiki>] =
+     s3c2440: gta02: Configure pcf50633 gpios.
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/146f7ec553fae1e7655cde17802d23b0c6e14a27 3 <nowiki>ARM: s3c2440: GTA02: Select SPARSE_IRQ</nowiki>] =
+     ARM: s3c2440: GTA02: Select SPARSE_IRQ
+     
+     With the conversion of the pcf50633 driver to genirq we need some extra irqs.
+     
+     Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/9bd9379698b85d2baf7b98b5bf59f65a7e709b55 56 <nowiki>gta02: Add notify handler to probe device children</nowiki>] =
+     gta02: Add notify handler to probe device children
+     
+     On the gta02 we often have a child parent relationship between different
+     devices. The child devices can only be probed after their parant has been.
+     Instead of adding a probe completed handler to each device we handle this in a
+     generic way with a bus notifier.
+     
+     Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/0dace283ee622f2cdfa78dac1deee64038841309 287 <nowiki>gta02: Add bt power management device</nowiki>] =
+     gta02: Add bt power management device
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/5a7eaa51c3e7298416d1faf17ba96678498b6a7e 255 <nowiki>gta02: Add gps power management device</nowiki>] =
+     gta02: Add gps power management device
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/c2742ff04d32db3d287c0bc4f7ab090fc957ee49 433 <nowiki>gta02: Add gsm power management device</nowiki>] =
+     gta02: Add gsm power management device
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/ef27e9c481964789fa7ed703b9d7d53a00ad6036 223 <nowiki>gta02: Add wlan power management device</nowiki>] =
+     gta02: Add wlan power management device
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/2dc04b2d325cea146f4605cdbc885126ec8c0859 133 <nowiki>gta02: Add glamo device</nowiki>] =
+     gta02: Add glamo device
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/cf18c7ef4b91239ff51929d60173afa26627ba51 43 <nowiki>Add jbt device.</nowiki>] =
+     Add jbt device.
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/3db6ef4d2bf156826a3c9ee7bd6be334d6696662 152 <nowiki>gta02: Add fiq handler</nowiki>] =
+     gta02: Add fiq handler
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/d639c61f8338dcc221f88f350e2804e12e2dfaaf 539 <nowiki>gta02: Add battery driver</nowiki>] =
+     gta02: Add battery driver
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/6afb7d88356ab738bb469850854df6c4c31f3f3f 115 <nowiki>gta02: add support for platform_battery</nowiki>] =
+     gta02: add support for platform_battery
+     
+     This adds support for platform_battery driver which allows to specify a set
+     of power supply properties and callbacks to acquire them. It is needed to
+     support dumb batteries where all the information about their status can
+     only be obtained by platform-specific actions such as specific ADC
+     measurements, some guessimation etc.
+     
+     Signed-off-by: Paul Fertser <fercerpav@gmail.com>
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/2111dc5154f0134b173ef122609d7b0e6fb0f6a0 7 <nowiki>Add atheros sdio ids.</nowiki>] =
+     Add atheros sdio ids.
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/81c7116b8418aa499ebea9755fc586e8bfc6d91e 33650 <nowiki>Add ar6000 wireless driver.</nowiki>] =
+     Add ar6000 wireless driver.
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/4e11662e7b95b1a8cdee1f5af9dc5ec49ce3c129 936 <nowiki>Add jbt6k74 display driver.</nowiki>] =
+     Add jbt6k74 display driver.
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/82dfe46f68342b3139b4df33cf3f782ab6d52dd9 53 <nowiki>LEDS: leds-pwm: Add init, notfiy and exit callbacks</nowiki>] =
+     LEDS: leds-pwm: Add init, notfiy and exit callbacks
+     
+     This patch adds init, notify and exit callbacks to the leds-pwm driver similar
+     to those seen for the pwm-backlight driver;
+     
+     On certain platforms with pin muxing the output of a pwm pin is bogus until the
+     pwm is been properly configured. On these platforms it is usefull to have the
+     added callbacks, so that the gpio pin can be configured after the pwm device has
+     been successfully configured.
+     
+     Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/8e99225f5a165b20e25611db3486058d7f4e9dc1 25 <nowiki>RTC: PCF50633: Don't request update IRQ</nowiki>] =
+     RTC: PCF50633: Don't request update IRQ
+     
+     Commit 51ba60c5(RTC: Cleanup rtc_class_ops->update_irq_enable()) removed the
+     only user of the update IRQ, so there is no need to manage it anymore.
+     
+     Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/0a304203ac7daf36070f8fecd8974bfaf84d9df6 234 <nowiki>pcf50633-gpio: Add gpiolib support.</nowiki>] =
+     pcf50633-gpio: Add gpiolib support.
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/22ce0c31d823e002859fe5ef50f17905ce90471b 484 <nowiki>pcf50633: Move pcf50633-gpio driver to the gpio drivers folder</nowiki>] =
+     pcf50633: Move pcf50633-gpio driver to the gpio drivers folder
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/e583591037796f962d07e935b2a1bdd0f89a61fb 169 <nowiki>MFD: pcf50633: Use mfd cells to register child devices</nowiki>] =
+     MFD: pcf50633: Use mfd cells to register child devices
+     
+     This patch changes the pcf50633 core code to use mfd cells to register child
+     devices instead of calling platform_device_{alloc,add} for each child.
+     
+     Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/780da55e2ad7f9d934e7452fba4340a5f9575a32 683 <nowiki>MFD: pcf50633: Use the genirq for irq handling</nowiki>] =
+     MFD: pcf50633: Use the genirq for irq handling
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/3e77986a22550a8df84d9e78ddbc281488bf1120 147 <nowiki>power: implement platform battery driver</nowiki>] =
+     power: implement platform battery driver
+     
+     This driver can be used for dumb batteries when all knowledge about
+     their state belongs to the platform that does necessary ADC readings,
+     conversions, guessimations etc.
+     
+     Signed-off-by: Paul Fertser <fercerpav@gmail.com>
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/d09e21824bacd5f9ac0285c14c6ddc2d79b96608 5 <nowiki>Define machine_is_neo1973_gta01()</nowiki>] =
+     Define machine_is_neo1973_gta01()
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/26cda7b3e4bb06d4437c1d0d64d3036a5c298902 82 <nowiki>Revert "mmc: test: add random fault injection in core.c"</nowiki>] =
+     Revert "mmc: test: add random fault injection in core.c"
+     
+     This reverts commit e2f2d8fbcfd43b995f4c205e80ecbb35c8c2bb38.
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/fbc0064a99d508ecf327a3f47d8495411213ee4d 163 <nowiki>Revert "mmc: add handling for two parallel block requests in issue_rw_rq"</nowiki>] =
+     Revert "mmc: add handling for two parallel block requests in issue_rw_rq"
+     
+     This reverts commit a6f554d181bf8bdc06da545aa198aea298feda74.
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/770f45160a6aab68dec31e0bba5796b45b9926fb 51 <nowiki>Revert "mmc: add a second mmc queue request member"</nowiki>] =
+     Revert "mmc: add a second mmc queue request member"
+     
+     This reverts commit 6d08e164f59139f5fc36bfa9957743f377fea37d.
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/5a632ddd621fafb21a413fba5001b9e7d4684c0b 227 <nowiki>Revert "mmc: move error code in mmc_block_issue_rw_rq to a separate function."</nowiki>] =
+     Revert "mmc: move error code in mmc_block_issue_rw_rq to a separate function."
+     
+     This reverts commit 4c7bcaa251685ef3d718117c9e8c47595e3347db.
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/bfb4da06774de342b2f0d131a095386aae25ebf2 170 <nowiki>Revert "mmc: add a block request prepare function"</nowiki>] =
+     Revert "mmc: add a block request prepare function"
+     
+     This reverts commit b6284f0b4f90e8736a775d69712fae570fefbd6f.
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/0b706f9b014158697caaa70cd2f483290724cb36 270 <nowiki>Revert "mmc: add member in mmc queue struct to hold request data"</nowiki>] =
+     Revert "mmc: add member in mmc queue struct to hold request data"
+     
+     This reverts commit 0a52143f49a7cae45c1de07ba08be3687cb7c0e4.
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/9130c204e59a3225bcdaf79dc30747c3f949473c 314 <nowiki>Revert "mmc: mmc_test: add test for none blocking transfers"</nowiki>] =
+     Revert "mmc: mmc_test: add test for none blocking transfers"
+     
+     This reverts commit 39e2e8264c430520dd28372e4155fc0473c2be5c.
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/63d4443310eacd74b8243c64c25b40b3768ba444 32 <nowiki>Revert "mmc: mmc_test: add debugfs file to list all tests"</nowiki>] =
+     Revert "mmc: mmc_test: add debugfs file to list all tests"
+     
+     This reverts commit 1b964818989d1af7c15529eaf2e15da3d251cfd0.
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/abc0b941109ac544fa40127f4ab44575008096c9 102 <nowiki>Revert "mmc: add none blocking mmc request function"</nowiki>] =
+     Revert "mmc: add none blocking mmc request function"
+     
+     This reverts commit 63633272709773487926b8116dbfac918176d07d.
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/a73311169fef3284647f3c80748c644abe3c72fb 174 <nowiki>glamo-mci: revert changes for Per's patchset</nowiki>] =
+     glamo-mci: revert changes for Per's patchset
+     
+     Signed-off-by: Martin Jansa <Martin.Jansa@gmail.com>
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/833339cd47295e86e0ca8c838e8997a24ababf6c 3 <nowiki>nand/s3c2410: add mising badblocksbits value</nowiki>] =
+     nand/s3c2410: add mising badblocksbits value
+     
+     Here is a fix for the issue where badblocks were not being handled
+     correctly with the new kernel. There was an uninitialized value
+     in the nand chip description. There may be others.
+     
+     Signed-off-by: Martin Jansa <Martin.Jansa@gmail.com>
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/919ad8a33847d10bb2b6b4f9bb24702346455f1f 163 <nowiki>Openmoko resume reason sysfs node ported from 2.6.29</nowiki>] =
+     Openmoko resume reason sysfs node ported from 2.6.29
+     
+     Signed-off-by: Martin Jansa <Martin.Jansa@gmail.com>
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/dd73aa36cb4d37d200aead95310df58cfec784d3 4 <nowiki>glamo-display: fix WSOD for 242 timming</nowiki>] =
+     glamo-display: fix WSOD for 242 timming
+     
+     Signed-off-by: Martin Jansa <Martin.Jansa@gmail.com>
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/5c7e36859e8e28f9b56a2cb3ceb0ab2c3d079f96 13 <nowiki>Enable powering off after 8s POWER press</nowiki>] =
+     Enable powering off after 8s POWER press
+     
+     Signed-off-by: Martin Jansa <Martin.Jansa@gmail.com>
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/ba207d46b7857f6cae1368f0e62e611eb773505c 279 <nowiki>gta02: add support for usb host mode</nowiki>] =
+     gta02: add support for usb host mode
+     
+     adds support for usb host mode and adds usb host pm sysfs node. I just
+     copied and modified how modem is powered up and backported changes in
+     ohci-s3c2410.c. No idea if this is the right approach, but it works -
+     my usb keyboard is now working after:
+     
+     echo 1 > /sys/devices/platform/s3c2440-i2c/i2c-0/0-0073/pcf50633-gpio/reg-fixed-voltage.2/gta02-pm-usbhost.0/power_on
+     echo host > /sys/devices/platform/s3c2410-ohci/usb_mode
+     
+     Signed-off-by: Martin Jansa <Martin.Jansa@gmail.com>
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/3066c8798168cb31af999e9d55bca2b445e27cdb 4 <nowiki>ar6000_delay.patch</nowiki>] =
+     ar6000_delay.patch
+     
+     patch from https://docs.openmoko.org/trac/ticket/2327 - wifi is working good
+     (100% until now) for me with this patch.
+     
+     Signed-off-by: Martin Jansa <Martin.Jansa@gmail.com>
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/b3f60f3ed24f503bda64aabf94b62053379c9ca9 45 <nowiki>wm8753: use snd_soc_jack on neo1973</nowiki>] =
+     wm8753: use snd_soc_jack on neo1973
+     
+     Signed-off-by: Martin Jansa <Martin.Jansa@gmail.com>
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/d5d5ee9c07ee06174f06255ae3141c368ca48f6a 4 <nowiki>Fix high power consumption in suspend</nowiki>] =
+     Fix high power consumption in suspend
+     
+     http://docs.openmoko.org/trac/ticket/2349
+     
+     Signed-off-by: Martin Jansa <Martin.Jansa@gmail.com>
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/084e5cd3284d499e3c4eb86f26042e7d72df2266 14 <nowiki>Force GPS power up on resume if it were powered up on suspend</nowiki>] =
+     Force GPS power up on resume if it were powered up on suspend
+     
+     This is needed for proper GPS funciton with u-boot.
+     
+     u-boot needs to be patched with this patch:
+     
+     http://www.bsdmn.com/openmoko/gpsfix/uboot_do_not_touch_serials.patch
+     
+     Idea of above patch is to keep u-boot from controlling serial's GPIO
+     configuration. It turned out that u-boot also touch GSM port
+     configuration on resume. This turns this off.
+     
+     Whole thread can be found here:
+     
+     http://lists.openmoko.org/pipermail/openmoko-kernel/2010-November/011274.html
+     
+     Signed-off-by: Martin Jansa <Martin.Jansa@gmail.com>
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/edcc8410bc93dcc06b69d57e8b7b47756124cd1e 1285 <nowiki>lis302dl accelerometer driver</nowiki>] =
+     lis302dl accelerometer driver
+     
+     This is port from andy-tracking openmoko git. It's not the latest
+     version, because the latest touches core spi functions.
+     
+     This one is the latest version that does bit banging in mach-gta02
+     and is based on 83cf37799009f6a3db4fef141c798c876124954f.
+     
+     Signed-off-by: Martin Jansa <Martin.Jansa@gmail.com>
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/02e9ff6da8f66701739b5beac43200eb3e0acbd7 10 <nowiki>input: lis302dl: fix the resume path</nowiki>] =
+     input: lis302dl: fix the resume path
+     
+     This fix the resume path of the accelerometer. If the accelerometer
+     is not power up, restore to initial status. Move the REG_CTRL1 to the
+     last one position avoid writing on the register when the device is
+     in power down mode.
+     
+     Signed-off-by: Michael Trimarchi <michael@panicking.kicks-ass.org>
+     Signed-off-by: Paul Fertser <fercerpav@gmail.com>
+     Signed-off-by: Martin Jansa <Martin.Jansa@gmail.com>
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/10b4b78dc2081caff1239f229e08a7e829ed3c7d 23 <nowiki>lis302dl: use ABS events rather then REL events</nowiki>] =
+     lis302dl: use ABS events rather then REL events
+     
+     AG: there's some more rationale for changing this here
+       http://lists.openmoko.org/pipermail/openmoko-kernel/2009-March/009387.html
+     
+     Change accelerometers to use ABS events rather than REL events.
+     
+     [Obviously if this patch is accepted we need to tell developers about
+      it.  I have a number of other improvements to the accelerometers I
+      hope to deliver over the next couple of weeks.  They will have minimal
+      or zero disruption to current code. ]
+     
+     REL events should be used when there is no absolute reference, and
+     only changes are meaningful.  The classic example is a "mouse" where
+     the absolute position of the device is not measurable and not
+     particularly meaning, but change in position from one time to the next
+     is interesting.
+     With REL events, a value of '0' is not reported, as 'not change' is
+     not interesting.
+     With REL events, the expectation is that successive values will be
+     eventually summed (possibly with acceleration and clipping
+     adjustments) to get a usable value.
+     
+     ABS events should be used when there is an absolute references against
+     which things that be measured.
+     With ABS events, the 'current value' is meaningful and can be read
+     (EVIOCGABS).
+     With ABS events, the value '0' is very meaningful and is reported.
+     However if consecutive values are the same, the value is only reported
+     once.
+     ABS events can be used as-is or compared with previous events to get
+     some measure of change.
+     An obvious example is a touchscreen where each measure in
+     independently meaningful.
+     
+     Acceleration is an absolute value as it is measuring against a frame
+     of reference.  '0' acceleration is just as meaningful as any other
+     value, and finding the 'current' acceleration is each direction is a
+     potentially useful thing to do.
+     
+     The Freerunner accelerometers currently report REL events.  This is
+     wrong.  So this patch changes them to report ABS events.
+     
+     With this patch, the min/max/level/fuzz values are left at zero.  It
+     might be useful to make use of these in a subsequent patch.
+     min/max/level can be used to calibrate the accelerometers if accuracy
+     is important.
+     fuzz could possibly be used in conjunction with the 'threshold' sysfs
+     value to get less frequent, lower-precision reports.
+     
+     This may well break some applications that read accelerometer data.
+     This cannot be helped, but it is quite easy to write code that copes
+     with the incorrect EV_REL events as well as the more correct and
+     useful EV_ABS events.
+     
+     Signed-off-by: NeilBrown <neilb@suse.de>
+     Signed-off-by: Martin Jansa <Martin.Jansa@gmail.com>
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/9668f02fe2af9dd880d5f83f95bd07bb2d963c56 4 <nowiki>Fix compile error for gta02 accelerometer.</nowiki>] =
+     Fix compile error for gta02 accelerometer.
+     
+     Switched to genirq call for irq_set_handler.  set_irq_handler is
+     deprecated and no longer compiles.
+     
+     Signed-off-by: Martin Jansa <Martin.Jansa@gmail.com>
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/f0e6a6317de2567383a543a545cf50e58b3caa3d 5 <nowiki>tslib relies on ts pressures events so this hack is needed to get tslib stuff working</nowiki>] =
+     tslib relies on ts pressures events so this hack is needed to get tslib stuff working
+     
+     Signed-off-by: Martin Jansa <Martin.Jansa@gmail.com>
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/b05f074d5eb6f77cefcef35f7f2b2aaeb27af069 31 <nowiki>touchscreen: ignore unexpected interrupts</nowiki>] =
+     touchscreen: ignore unexpected interrupts
+     
+     Signed-off-by: Martin Jansa <Martin.Jansa@gmail.com>
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/1f3750e2cf3895b269589495147416c61ba523c5 124 <nowiki>s3c2410_ts: jitter less touchscreen for glamo, version 4</nowiki>] =
+     s3c2410_ts: jitter less touchscreen for glamo, version 4
+     
+     Signed-off-by: Martin Jansa <Martin.Jansa@gmail.com>
+     
+     Conflicts:
+     
+     	arch/arm/mach-s3c2440/mach-gta02.c
+     	drivers/input/touchscreen/s3c2410_ts.c
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/74c481b35be9bf9b7d512de6942c7be345a7db47 5 <nowiki>wm8753: allow setting DAI mode even while pcm is active</nowiki>] =
+     wm8753: allow setting DAI mode even while pcm is active
+     
+     Without this patch the DAI mode can't be set while a pcm stream is
+     running as that might lead to kernel freezing. This patch allows setting
+     it to the same value to make scenario loading work.
+     
+     Signed-off-by: Klaus Kurzmann <mok@fluxnetz.de>
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/37d242a32880093018a8665131e4b3e2b34d5dab 2428 <nowiki>Add .config from http://build.shr-project.org/tests/jama/kernel-nodrm/config-2.6.39.gz</nowiki>] =
+     Add .config from http://build.shr-project.org/tests/jama/kernel-nodrm/config-2.6.39.gz
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/4f1ae92f97c4aaad16567a5101c8b668893a9c91 4 <nowiki>Workaround toolchain bug: http://gcc.gnu.org/bugzilla/show_bug.cgi?id=48783</nowiki>] =
+     Workaround toolchain bug: http://gcc.gnu.org/bugzilla/show_bug.cgi?id=48783
+
+ C: 
+= [https://gitorious.org/shr/linux/commit/098ed461036a5d9ba027b62c18a85622a055f63d 14 <nowiki>First attempt at fixing openmoko bug #2478</nowiki>] =
+     First attempt at fixing openmoko bug #2478
+
+ C:
