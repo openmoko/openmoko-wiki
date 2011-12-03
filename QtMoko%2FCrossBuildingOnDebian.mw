@@ -6,6 +6,88 @@ The builds are done the Debian way, using pbuilder on a Debian Wheezy box.
 Most of the magic is handled by the ''pdebuild-cross'' package:
  $ sudo apt-get install pdebuild-cross
 
+===Building QtMoko v36===
+====Configuration====
+Configuration file for multistrap (/etc/multistrap/armel-sid.conf):
+ [General]
+ arch=
+ directory=
+ # same as --tidy-up option if set to true
+ cleanup=true
+ # same as --no-auth option if set to true
+ # keyring packages listed in each debootstrap will
+ # still be installed.
+ noauth=false
+ # whether to add the /suite to be explicit about where apt
+ # needs to look for packages. Default is false.
+ explicitsuite=true
+ # extract all downloaded archives (default is true)
+ unpack=true
+ 
+ omitrequired=false
+ configscript=
+ setupscript=/usr/share/multistrap/setcrossarch.sh
+ debootstrap=Debian Toolchains
+ aptsources=Debian Toolchains
+ tarballname=pdebuild-cross.tgz
+ 
+ [Toolchains]
+ packages=g++-4.4-arm-linux-gnueabi linux-libc-dev-armel-cross
+ reinstall=binutils-multiarch
+ source=http://www.emdebian.org/debian
+ keyring=emdebian-archive-keyring
+ suite=squeeze
+ 
+ [Debian]
+ packages=dpkg-dev binutils-multiarch build-essential dpkg-cross
+ source=http://ftp.fr.debian.org/debian
+ keyring=debian-archive-keyring
+ suite=unstable
+ omitdebsrc=false
+Configuration file for pdebuild-cross (/etc/pdebuild-cross/pdebuild-cross.rc):
+ # this is your configuration file for pdebuild-cross.
+ # /etc/pdebuild-cross/pdebuild-cross.rc is the one meant for editing.
+ #
+ # read pbuilderrc (5) and pdebuild-cross (1) for notes on specific options.
+ 
+ # remember to change CROSSARCH, DEBBUILDOPTS and MULTISTRAPFILE to
+ # change your target cross-building architecture from armel.
+ 
+ CROSSARCH=armel
+ DEBBUILDOPTS="-aarmel"
+ MULTISTRAPFILE=/etc/multistrap/armel-sid.conf
+ #BASETGZ=/var/lib/pdebuild-cross/pdebuild-cross.tgz
+ BASETGZ=/home/pdebuild-cross.tgz
+ BUILDPLACE=/var/lib/pdebuild-cross/build/
+ BUILDRESULT=..
+ APTCACHE=/var/lib/pdebuild-cross/aptcache/
+ APTCACHEHARDLINK=no
+ PBUILDERSATISFYDEPENDSCMD=/usr/sbin/embuilddeps
+ PBUILDERSATISFYDEPENDSOPT="-m -a armel"
+ USEDEVPTS=yes
+ AUTO_DEBSIGN=no
+ 
+ # Only use when testing Xorg apps, not when building
+ # also remember to copy ~/.Xauthority into /home/$SUDO_USER/
+ # (mkdir /home/$SUDO_USER if necessary).
+ #BINDMOUNTS="/tmp"
+====Creating the pbuilder chroot====
+As simple as:
+ $ sudo pdebuild-cross-create
+ $ sudo pdebuild-cross-update
+====Setting up the git workspace====
+First clone the QtMoko repo:
+ $ git clone --recursive git://github.com/radekp/qtmoko.git
+Check out the v36 tag:
+ $ cd qtmoko
+ $ git checkout v36
+Patch the debian files
+ $ wget -O - -c http://wiki.openmoko.org/images/0/0a/QtMoko-v36-pdebuild-cross-patch.txt | patch -p1
+====Building the QtMoko package====
+Create the orig tarball (once after each git merge):
+ $ tar czf ../qtmoko_36.orig.tar.gz -C .. --exclude .git --exclude .pc --exclude qtmoko/debian --transform 's:\./qtmoko:qtmoko-36:' ./qtmoko
+Build:
+ $ pdebuild-cross -aarmel
 ===Building QtMoko v35===
 QtMoko v35 is the trickiest case since it requires a Debian Squeeze pbuilder chroot which misses the xapt tool. Hopefully a backport will be available soon.
 
@@ -60,7 +142,7 @@ Hook file for multistrap so that it installs the xapt backport for squeeze from 
  fi
 This file must be executable (chmod a+x).
 
-Configuration file for pdebuild-cross (/etc/pdebuild-cross/armel-squeeze.conf):
+Configuration file for pdebuild-cross (/etc/pdebuild-cross/pdebuild-cross.rc):
  # this is your configuration file for pdebuild-cross.
  # /etc/pdebuild-cross/pdebuild-cross.rc is the one meant for editing.
  #
