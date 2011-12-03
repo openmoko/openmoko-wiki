@@ -1,11 +1,12 @@
 ==Cross-building QtMoko on Debian==
 It is possible to cross-build QtMoko on a Debian box using only (em)debian tools.
 
+On my Zotac ZBox (amd64) the whole build takes just less than five hours.
 ===Tools needed===
 The builds are done the Debian way, using pbuilder on a Debian Wheezy box.
 Most of the magic is handled by the ''pdebuild-cross'' package:
  $ sudo apt-get install pdebuild-cross
-
+The toolchain comes from the [http://emdebian.org Emdebian project] and is set up via the ''multistrap'' package (pulled in by pdebuild-cross).
 ===Building QtMoko v36===
 ====Configuration====
 Configuration file for multistrap (/etc/multistrap/armel-sid.conf):
@@ -39,7 +40,8 @@ Configuration file for multistrap (/etc/multistrap/armel-sid.conf):
  suite=squeeze
  
  [Debian]
- packages=dpkg-dev binutils-multiarch build-essential dpkg-cross
+ packages=dpkg-dev binutils-multiarch build-essential dpkg-cross makedev
+ # Choose your preferred mirror
  source=http://ftp.fr.debian.org/debian
  keyring=debian-archive-keyring
  suite=unstable
@@ -92,8 +94,6 @@ Build:
 QtMoko v35 is the trickiest case since it requires a Debian Squeeze pbuilder chroot which misses the xapt tool. Hopefully a backport will be available soon.
 
 ====Configuration====
-The toolchain comes from the [http://emdebian.org Emdebian project] and is set up via the ''multistrap'' package (pulled in by pdebuild-cross).
-
 Configuration file for multistrap (/etc/multistrap/armel-squeeze.conf):
  [General]
  arch=
@@ -126,12 +126,11 @@ Configuration file for multistrap (/etc/multistrap/armel-squeeze.conf):
  
  [Debian]
  packages=dpkg-dev binutils-multiarch build-essential makedev wget
+ # Choose your preferred mirror
  source=http://ftp.fr.debian.org/debian
  keyring=debian-archive-keyring
  suite=squeeze
  omitdebsrc=false
-You may also want to change the Debian mirror URIs in to use one near your location. I use a french one. 
-
 Hook file for multistrap so that it installs the xapt backport for squeeze from my repository (/etc/multistrap/armel-squeeze-hooks/E10-xapt):
  #!/bin/sh
  set -e
@@ -190,4 +189,3 @@ Create the orig tarball (once after each git merge):
  $ tar czf ../qtmoko_35.orig.tar.gz -C .. --exclude .git --exclude .pc --exclude qtmoko/debian --transform 's:\./qtmoko:qtmoko-35:' ./qtmoko
 Build:
  $ pdebuild-cross -aarmel
-On my Zotac ZBox (amd64) the whole build takes just less than five hours.
