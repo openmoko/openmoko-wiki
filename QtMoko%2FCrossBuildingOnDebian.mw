@@ -1,37 +1,18 @@
 ==Cross-building QtMoko on Debian==
 It is possible to cross-build QtMoko on a Debian box using only (em)debian tools.
 
-'''This is a work in progress. The resulting package isn't fully functionnal yet:'''
-* no sound
-* no bluetooth.
 ===Tools needed===
+The builds are done the Debian way, using pbuilder on de Debian Wheezy box.
 Most of the magic is handled by the ''pdebuild-cross'' package:
  $ sudo apt-get install pdebuild-cross
 
-===Configuration===
-The toolchain comes from the [http://emdebian.org Emdebian project]. Two configuration files from the ''multistrap'' package (pulled in by pdebuild-cross) are needed. It is best to copy them because they're not part of /etc:
- $ sudo mkdir /etc/multistrap
- $ sudo cp /usr/share/multistrap/{armel,crosschroot}.conf /etc/multistrap
-Then modify the ''armel.conf'' file to use the Squeeze toolchain (with g++-4.4; the Lenny toolchain with g++-4.2 doesn't work for QtMoko) and to load our copy of ''crosschroot.conf'':
- [General]
- include=/etc/multistrap/crosschroot.conf
- omitrequired=false
- configscript=
- setupscript=/usr/share/multistrap/setcrossarch.sh
- debootstrap=Debian Base Toolchains
- aptsources=Debian Toolchains
- tarballname=pdebuild-cross.tgz
- 
- [Toolchains]
- packages=g++-4.4-arm-linux-gnueabi linux-libc-dev-armel-cross
- reinstall=binutils-multiarch
- source=http://www.emdebian.org/debian
- keyring=emdebian-archive-keyring
- suite=squeeze
-You may also want to change the Debian mirror URIs in ''crosschroot.conf'' to use one near your location. I use a french one:
- # Example multistrap configuration file for a sid build chroot
- # Need to use cascading to select the toolchain for a cross arch.
- 
+===Building QtMoko v35===
+QtMoko v35 is the trickiest case since it requires a Debian Squeeze pbuilder chroot which misses the xapt tool. Hopefully a backport will be available soon.
+
+====Configuration====
+The toolchain comes from the [http://emdebian.org Emdebian project] and is set up via the ''multistrap'' package (pulled in by pdebuild-cross).
+
+Configuration file for multistrap (/etc/multistrap/armel-squeeze.conf):
  [General]
  arch=
  directory=
@@ -46,27 +27,40 @@ You may also want to change the Debian mirror URIs in ''crosschroot.conf'' to us
  explicitsuite=true
  # extract all downloaded archives (default is true)
  unpack=true
- # the order of sections is not important.
- # the debootstrap option determines which repository
- # is used to calculate the list of Priority: required packages.
- debootstrap=Debian Base
- aptsources=Debian Base
  
- # Lenny toolchains need -base from Lenny.
- [Base]
- packages=gcc-4.2-base
- source=http://ftp.fr.debian.org/debian
- keyring=debian-archive-keyring
- suite=lenny
- omitdebsrc=false
+ omitrequired=false
+ configscript=
+ setupscript=/usr/share/multistrap/setcrossarch.sh
+ debootstrap=Debian Toolchains
+ aptsources=Debian Toolchains
+ tarballname=pdebuild-cross.tgz
+ 
+ [Toolchains]
+ packages=g++-4.4-arm-linux-gnueabi linux-libc-dev-armel-cross
+ reinstall=binutils-multiarch
+ source=http://www.emdebian.org/debian
+ keyring=emdebian-archive-keyring
+ suite=squeeze
  
  [Debian]
- packages=dpkg-dev binutils-multiarch build-essential dpkg-cross aptitude
+ packages=dpkg-dev binutils-multiarch build-essential makedev wget
  source=http://ftp.fr.debian.org/debian
  keyring=debian-archive-keyring
- suite=unstable
+ suite=squeeze
  omitdebsrc=false
-Finally update the MULTISTRAPFILE variable in your pdebuild-cross' configuration file (/etc/pdebuild-cross/pdebuild-cross.rc) to point to your multistrap armel config:
+You may also want to change the Debian mirror URIs in to use one near your location. I use a french one. 
+
+Hook file for multistrap so that it installs the xapt backport for squeeze from my repository (/etc/multistrap/armel-squeeze-hooks/E10-xapt):
+ #!/bin/sh
+ set -e
+ if [ ! -f /usr/bin/xapt ]; then
+   wget http://pini.free.fr/debian/pool/main/e/emdebian-crush/xapt_2.2.17~stable_all.deb
+   dpkg -i xapt_2.2.17~stable_all.deb || apt-get -f -y install
+   rm xapt_2.2.17~stable_all.deb
+ fi
+This file must be executable (chmod a+x).
+
+Configuration file for pdebuild-cross (/etc/pdebuild-cross/armel-squeeze.conf):
  # this is your configuration file for pdebuild-cross.
  # /etc/pdebuild-cross/pdebuild-cross.rc is the one meant for editing.
  #
@@ -77,12 +71,13 @@ Finally update the MULTISTRAPFILE variable in your pdebuild-cross' configuration
  
  CROSSARCH=armel
  DEBBUILDOPTS="-aarmel"
- MULTISTRAPFILE=/home/pini/debian/multistrap/armel.conf
- BASETGZ=/var/lib/pdebuild-cross/pdebuild-cross.tgz
+ MULTISTRAPFILE=/etc/multistrap/armel-squeeze.conf
+ #BASETGZ=/var/lib/pdebuild-cross/pdebuild-cross.tgz
+ BASETGZ=/home/pdebuild-cross.tgz
  BUILDPLACE=/var/lib/pdebuild-cross/build/
  BUILDRESULT=..
  APTCACHE=/var/lib/pdebuild-cross/aptcache/
- #HOOKDIR=/usr/share/pdebuild-cross/hookdir/
+ HOOKDIR=/etc/multistrap/armel-squeeze-hooks
  APTCACHEHARDLINK=no
  PBUILDERSATISFYDEPENDSCMD=/usr/sbin/embuilddeps
  PBUILDERSATISFYDEPENDSOPT="-m -a armel"
@@ -94,24 +89,21 @@ Finally update the MULTISTRAPFILE variable in your pdebuild-cross' configuration
  # (mkdir /home/$SUDO_USER if necessary).
  #BINDMOUNTS="/tmp"
 You may want to change the BUILDPLACE path as well in case you're short of space in /var.
-===Creating the pbuilder chroot===
+====Creating the pbuilder chroot====
 As simple as:
  $ sudo pdebuild-cross-create
-===Setting up the git workspace===
+ $ sudo pdebuild-cross-update
+====Setting up the git workspace====
 First clone the QtMoko repo:
- $ git clone -r git://github.com/radekp/qtmoko.git
-Create your own branch:
+ $ git clone --recursive git://github.com/radekp/qtmoko.git
+Check out the v35 tag:
  $ cd qtmoko
- $ git branch <my branch>
-Merge in the ''translations'' branch:
- $ git merge origin/translations
+ $ git checkout v35
 Patch the debian files
- $ wget -c http://wiki.openmoko.org/images/c/c7/QtMoko-pdebuild-cross-patch.txt
- $ patch -p1 < QtMoko-pdebuild-cross-patch.txt
-
-===Building the QtMoko package===
+ $ wget -O - -c http://wiki.openmoko.org/images/f/f6/QtMoko-v35-pdebuild-cross-patch.txt | patch -p1
+====Building the QtMoko package====
 Create the orig tarball (once after each git merge):
- $ tar czf ../qtmoko_36.orig.tar.gz -C .. --exclude .git --exclude .pc --exclude qtmoko/debian --transform 's:\./qtmoko:qtmoko-36:' ./qtmoko
+ $ tar czf ../qtmoko_35.orig.tar.gz -C .. --exclude .git --exclude .pc --exclude qtmoko/debian --transform 's:\./qtmoko:qtmoko-35:' ./qtmoko
 Build:
- $ pdebuild-cross
-On my Zotac ZBox (amd64) the whole build takes five hours.
+ $ pdebuild-cross -aarmel
+On my Zotac ZBox (amd64) the whole build takes just less than five hours.
