@@ -7,7 +7,7 @@ First, a warning. There was a longstanding bug that could eat the partition tabl
 
 == How it Works ==
 
-On the Neo, [[u-boot]] performs a similar role to the 'grub' bootloader on a PC. U-boot loads a kernel image into memory and then passes a list of parameters to the kernel. These parameters specify, among other things, the device on which the root filesystem is located.
+On the Neo, [[U-boot-gena2x]] performs a similar role to the 'grub' bootloader on a PC. U-Boot loads a kernel image into memory and then passes a list of parameters to the kernel. These parameters specify, among other things, the device on which the root filesystem is located.
 
 As the kernel boots, it initializes the hardware and then mounts the root filesystem. The kernel then runs "/sbin/init", which handles the rest of the boot-up sequence (such as displaying the splash screen and progress bar).
 
@@ -94,7 +94,7 @@ See [[Userspace root image]] for more details on how to access contents of a jff
 
 === Partioning the SD card ===
 
-{{Note| This partition procedure it's '''NOT necessary if you use the [[Qi]] Bootloader'''. With [[Qi]] you can have the Kernel Bin in the same partition of the RootFS, there is no need to make this multipartition. Check [[Qi]] page for more information. }}
+{{Note| This partition procedure it's '''NOT necessary if you use the [[Qi]] bootloader'''. With [[Qi]] you can have the Kernel Bin in the same partition of the RootFS, there is no need to make this multipartition. Check [[Qi]] page for more information. }}
 
 This example shows how to do an example partition using the fdisk utility. Feel free to use the partitioning utility of your liking for this task. Also see [[#Partitioning_Hints| Partitioning Hints]] before defining your partition layout.
 
@@ -190,7 +190,7 @@ Or, for some versions of NOR u-boot:
 
 (Yes, lower case i and no extension.)
 
-Make sure your kernel is called ''uImage.bin'' (or ''uimage'' for some versions of NOR u-boot). If the u-boot doesn't find the kernel image during boot, [[Bootloader#Using usbtty from Linux|log into the bootloader]] with ''[http://www.airs.com/ian/uucp.html cu]'', mount the partition with mmcinit and check the presence and the name of the kernel image with ''fatls mmc 1:1'' for FAT filesystem or ''ext2ls mmc 1:1'' for ext2 filesystem. Compare this carefully with the result of ''printenv sd_image_name''. Remember that you can modify the environment in NAND FLASH, but not in NOR FLASH, so if you plan to boot from NOR FLASH you have to modify the file name to match the environment variable.
+Make sure your kernel is called ''uImage.bin'' (or ''uimage'' for some versions of NOR u-boot). If the U-Boot doesn't find the kernel image during boot, [[U-Boot#Using usbtty from Linux|log into the U-Boot]] with ''[http://www.airs.com/ian/uucp.html cu]'', mount the partition with mmcinit and check the presence and the name of the kernel image with ''fatls mmc 1:1'' for FAT filesystem or ''ext2ls mmc 1:1'' for ext2 filesystem. Compare this carefully with the result of ''printenv sd_image_name''. Remember that you can modify the environment in NAND FLASH, but not in NOR FLASH, so if you plan to boot from NOR FLASH you have to modify the file name to match the environment variable.
 
 Unmount both the rootfs partition and the kernel partition and make sure all remaining buffers are written to it:
 
@@ -204,7 +204,7 @@ Unmount both the rootfs partition and the kernel partition and make sure all rem
 Depending on the revision of the phone and the partition type (ext2/ext3) you are using, it might be necessary to add an entry to the bootmenu to be able to boot the system off your SD card.
 If you are using a FreeRunner and have created an FAT kernel/ext2 rootfs partition you should be able to boot from the card right out of the box, because a boot menu entry for this should already exist in the NOR/NAND boot menu.
 In any other case you should at least make sure the needed entry exists in your menu before proceeding.
-You will need to enter the uboot shell of the NAND boot menu for this. A description on how to connect to the uboot loader shell can be found in this article: [[Uboot#Bootloader_prompt]]. Details on howto get into the NAND boot menu can be found [[Booting#Log_into_U-Boot_in_the_NAND_Flash|here]].
+You will need to enter the uboot shell of the NAND boot menu for this. A description on how to connect to the uboot loader shell can be found in this article: [[Uboot#U-Boot_prompt]]. Details on howto get into the NAND boot menu can be found [[Booting#Log_into_U-Boot_in_the_NAND_Flash|here]].
 
 After you read these two references you should be connected to your NAND uboot shell right now. The first thing to do is to set the boot menu timeout to a really high value. Unfortunately if you don't do this, the boot loader will continue booting after the default timeout (60 seconds) even if you are connected to the uboot shell. Just enter the following command to the menu prompt:
 
@@ -225,7 +225,7 @@ If it shows a line beginning with ''menu_'' followed by the commands which are j
 Please make sure you are using the correct configuration based on the decisions you made earlier.  For more information on the uboot prompt, see
 * help
 * help <command>
-* and [[Bootloader]] and [[Bootloader commands]].
+* and [[U-Boot]] and [[U-Boot commands]].
 
 {{Note| The backslashes (\) are important for uboot to set the command as new environment variable (menu_9) instead of just executing them as soon as enter is pressed.}}
 
@@ -340,7 +340,7 @@ Set a new Bootmenu Entry for booting from NAND first
  GTA01Bv4 # setenv menu_6 Boot from NAND: setenv bootargs \${bootargs_base} \${mtdparts}\; nand read.e 0x32000000 kernel\; bootm 0x32000000
  GTA01Bv4 # saveenv
 
-then Power-off, and enter the Bootmenu to test the new Entry.If you can boot from NAND, shutdown, enter Boot menu, connect to bootloader and set the (auto)bootcmd for boot from SDHC:
+then Power-off, and enter the Bootmenu to test the new Entry.If you can boot from NAND, shutdown, enter Boot menu, connect to U-Boot and set the (auto)bootcmd for boot from SDHC:
 
  GTA01Bv4 # setenv bootcmd setenv bootargs root=/dev/mmcblk0p1 rootdelay=10 console=tty0 neo1973-nand:0x00040000(u-boot),0x00004000(u-boot_env),0x00200000(kernel),0x000a0000(splash)\; nand read.e 0x32000000 kernel\; bootm 0x32000000 
  GTA01Bv4 # saveenv
@@ -372,7 +372,7 @@ Since uboot only supports loading kernel images from the lower 2GB of a physical
 
 Booting a rootfs from an extended partition with uboot has been tested successfully.
 
-===(Tutorial)EXperience summary of a Navie windows user now on Moko===
+===(Tutorial)Experience summary of a Navie windows user now on Moko===
 
 1)If you want to install a DISTRO i.e if you want to boot from an uSD ,I suggest doing a NOR boot and then updating your bootloader to Qi.
 
