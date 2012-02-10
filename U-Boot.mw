@@ -16,8 +16,8 @@ Just want to note that I (gena2x) decided to provide and support u-boot as far a
 * Set the console to USB.
 * Connect to /dev/ttyACM0 with a terminal program on the Linux host (you might need to chown uucp.uucp /dev/ttyACM0; see also below)
 * Note that the cdc_acm /dev/ttyACM0 access disappears as soon as the Neo boots, and is replaced by the cdc_ether usb0 network access.
-* You're now at the bootloader prompt.
-* Set the bootdelay uboot environment variable to -1 if you want it to always halt at the bootloader on power-up.
+* You're now at the U-Boot prompt.
+* Set the bootdelay uboot environment variable to -1 if you want it to always halt at the U-Boot on power-up.
 
 == General ==
 
@@ -37,9 +37,9 @@ However, u-boot still doesn't support many of the features that GTA01 needs, suc
 
 [[User:HaraldWelte|HaraldWelte]] is working on those issues, and in fact most of them have already been implemented.
 
-== Bootloader source code ==
+== U-Boot source code ==
 
-The current bootloader source can be found at http://git.openmoko.org/?p=u-boot.git;a=shortlog;h=stable .
+The current U-Boot source can be found at http://git.openmoko.org/?p=u-boot.git;a=shortlog;h=stable .
 
 To get u-boot by git:
 
@@ -61,9 +61,9 @@ All together:
   make gta02v5_config
   make u-boot.udfu
 
-== Bootloader binary ==
+== U-Boot binary ==
 
-The latest bootloader binary builds can be found under:
+The latest U-Boot binary builds can be found under:
 * Before 20100131? Are there any newer that supports ubifs? Can it be replaced by [[Qi]]?:
 ** http://downloads.openmoko.org/distro/unstable/daily/
 
@@ -72,10 +72,10 @@ uboot-gta02v5-latest.bin
 
 The file should be written to the NAND flash address 0x00000000 (size 0x30000) (the first [[Partitions|partition]]).
 
-== Bootloader development ==
+== U-Boot development ==
 
 === QT2410 ===
-If you want to do bootloader development on the QT2410, it's easier to work with a bootloader image that can be downloaded via USB into RAM instead of flashing.
+If you want to do U-Boot development on the QT2410, it's easier to work with a U-Boot image that can be downloaded via USB into RAM instead of flashing.
 
 To do so, you need to edit the u-boot/include/configs/qt2410.h file, and change the "if 0" in Line 32 into a "if 1", then recompile with "make".
 
@@ -83,7 +83,7 @@ The resulting "u-boot.bin" is _NOT SUITABLE_ for NAND flash, but only for direct
 
 === Neo 1973 ===
 
-Doing bootloader development on the [[Neo 1973]] is a bit more tricky.  First, we don't have any NOR flash.  Second, there is no other way to boot _but_ from NAND.  Therefore, we also don't have a USB downloader like the QT2410.
+Doing U-Boot development on the [[Neo 1973]] is a bit more tricky.  First, we don't have any NOR flash.  Second, there is no other way to boot _but_ from NAND.  Therefore, we also don't have a USB downloader like the QT2410.
 
 The main problem is:  The [[S3C2410 Steppingstone]] unconditionally copies the first 4k of flash into its internal SRAM.   That SRAM segment stays unconditionally mapped at physical address zero. How do we get around this
 
@@ -164,7 +164,7 @@ u-boot/tools/mkimage -A arm -O linux -T kernel -C gzip -a 30008000 -e 30008000 -
 == Boot menu ==
 [[Image:Neo1973 uboot menu.jpg|thumb|400px|u-boot boot menu on Neo1973]]
 
-As of the Phase-0 release, our u-boot version now features an on-screen boot menu. The items are defined by [[bootloader environment#menu|menu entries in the environment]].
+As of the Phase-0 release, our u-boot version now features an on-screen boot menu. The items are defined by [[U-Boot environment#menu|menu entries in the environment]].
 
 === Accessing the boot menu ===
 
@@ -174,15 +174,15 @@ You can access the boot menu by pressing and holding the [[Neo1973 AUX Button]] 
 
 By pressing the [[Neo1973 AUX Button]] you can cycle through the menu items.  Use the ''POWER'' button to select one item.
 
-== Bootloader prompt ==
+== U-Boot prompt ==
 
-=== Accessing the bootloader prompt ===
-The bootloader prompt is available either on the serial console (via [[Debug Board]]), or as virtual USB Serial device (USB CDC_ACM).
+=== Accessing the U-Boot prompt ===
+The U-Boot prompt is available either on the serial console (via [[Debug Board]]), or as virtual USB Serial device (USB CDC_ACM).
 Whether the serial port or usb is used depends on the u-boot environment variables '''stdin''', '''stdout''' and '''stderr'''.
 
 Whether or not you use usbtty, the first couple of messages will always be displayed on the serial console.
 
-The bootloader is currently configured to wait for three seconds.  If a key press on the '''stdin''' is received within those three seconds, auto-boot is aborted.
+The U-Boot is currently configured to wait for three seconds.  If a key press on the '''stdin''' is received within those three seconds, auto-boot is aborted.
 
 ==== Using usbtty from Linux ====
 
@@ -317,7 +317,7 @@ Self Powered
 
 Next, you can access it using your favourite terminal program.
 
-Then, if the environment is not set correctly, you will need to use the current console (e.g. serial console) to change the [[bootloader environment#console|console entries in the environment]]:
+Then, if the environment is not set correctly, you will need to use the current console (e.g. serial console) to change the [[U-Boot environment#console|console entries in the environment]]:
 <pre>
 GTA01Bv2 # setenv stderr usbtty
 GTA01Bv2 # setenv stdout usbtty
@@ -341,11 +341,11 @@ Hit any key to stop autoboot:  0
 GTA01Bv3 #
 </pre>
 
-=== Commands on the bootloader prompt ===
+=== Commands on the U-Boot prompt ===
 
-:''See [[bootloader commands]].''
+:''See [[U-Boot commands]].''
 
-=== What if I borked my bootloader environment and don't get a prompt anymore? ===
+=== What if I borked my U-Boot environment and don't get a prompt anymore? ===
 {{Note|This solution applies to a changed u-boot environment which prevents NAND u-boot to successfully boot.  The Debian u-boot configuration script may be a cause of this issue.}}
 Found a solution here:
 [[http://markmail.org/message/gqypwiohdet6x4am?q=almesberger+partition&page=1&refer=xbamkzwwsaobv7wa]]
@@ -464,6 +464,6 @@ Disconnecting the Neo's USB while powering up may prevent this problem in the fu
 
 == Related pages ==
 
-See [[Flashing the Neo 1973]] and [[Flashing the Neo FreeRunner]] for instructions on using dfu-util to install a new bootloader in your phone.
+See [[Flashing the Neo 1973]] and [[Flashing the Neo FreeRunner]] for instructions on using dfu-util to install a new U-Boot in your phone.
 
 [[Category:Bootloaders]]
