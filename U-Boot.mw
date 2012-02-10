@@ -1,15 +1,15 @@
 {{Languages|U-Boot}}
 {{Bootloader}}
 
-Just want to note that I (gena2x) decided to provide and support u-boot as far as I can. To find info on my latest u-boot version with bug-fixes, description how to setup u-boot, list of known bugs please visit [[U-boot-gena2x]]
+Just want to note that I (gena2x) decided to provide and support U-Boot as far as I can. To find info on my latest U-Boot version with bug-fixes, description how to setup u-boot, list of known bugs please visit '''[[U-boot-gena2x]]'''
 
 {{outdated}}
 
-[[Image:GTA01-U-Boot.JPG|thumb|300px|u-boot menu on Neo 1973]] [[Image:Neo1973 uboot splash closeup.jpg|thumb|300px|[[Configuring_the_boot_splash_screens#U-Boot_Splash|U-Boot splash screen]] on Neo 1973]]
+[[Image:GTA01-U-Boot.JPG|thumb|300px|U-Boot menu on Neo 1973]] [[Image:Neo1973 uboot splash closeup.jpg|thumb|300px|[[Configuring_the_boot_splash_screens#U-Boot_Splash|U-Boot splash screen]] on Neo 1973]]
 
 '''U-Boot''' is a [[bootloader]] which can be used on the [[Neo 1973]] and [[Neo FreeRunner]]. It takes care of device functionality until the operating system is booted. This includes [[USB DFU]] for [[Flashing the Neo FreeRunner]], a [[Configuring_the_boot_splash_screens#U-Boot_Splash|splash screen]], a boot menu, a console for [[U-Boot commands]], configuration via [[U-Boot environment]], and loading a [[kernel]].
 
-== Booting into U-boot ==
+== Booting into U-Boot ==
 
 * Make sure that your phone has had the battery and USB cable removed for at least 30 seconds.
 * Hold in the AUX button on power-up to access the boot menu.
@@ -18,22 +18,22 @@ Just want to note that I (gena2x) decided to provide and support u-boot as far a
 * Connect to /dev/ttyACM0 with a terminal program on the Linux host (you might need to chown uucp.uucp /dev/ttyACM0; see also below)
 * Note that the cdc_acm /dev/ttyACM0 access disappears as soon as the Neo boots, and is replaced by the cdc_ether usb0 network access.
 * You're now at the U-Boot prompt.
-* Set the bootdelay uboot environment variable to -1 if you want it to always halt at the U-Boot on power-up.
+* Set the bootdelay U-Boot environment variable to -1 if you want it to always halt at the U-Boot on power-up.
 
 == General ==
 
-More information on u-boot can be found at
+More information on U-Boot can be found at
 * http://www.denx.de/wiki/DULG
 * http://www.gumstix.org/tikiwiki/tiki-index.php?page=U-Boot
 * http://linuxdevices.com/articles/AT5085702347.html
 
-Additions to the vanilla u-boot already implemented include:
+Additions to the vanilla U-Boot already implemented include:
 * Support for boot from NAND flash using [[S3C2410 Steppingstone]]
 * Support for S3C2410 NAND flash
 * Support for downloading programs via S3C2410 USB Device Controller
 * Support to display bootup logo / status on S3C2410 Framebuffer
 
-However, u-boot still doesn't support many of the features that GTA01 needs, such as
+However, U-Boot still doesn't support many of the features that GTA01 needs, such as
 * Support for reading kernel/initrd from SD/Transflash
 
 [[User:HaraldWelte|HaraldWelte]] is working on those issues, and in fact most of them have already been implemented.
@@ -42,11 +42,11 @@ However, u-boot still doesn't support many of the features that GTA01 needs, suc
 
 The current U-Boot source can be found at http://git.openmoko.org/?p=u-boot.git;a=shortlog;h=stable .
 
-To get u-boot by git:
+To get U-Boot by git:
 
   git clone git://git.openmoko.org/git/u-boot.git openmoko/u-boot
 
-To build u-boot:
+To build U-Boot:
 * Clone the git tree and check out the stable branch (commands from above)
    git checkout origin/stable
 * Set the CROSS_COMPILE environment variable to specify the prefix to your toolchain binaries
@@ -69,7 +69,7 @@ The latest U-Boot binary builds can be found under:
 ** http://downloads.openmoko.org/distro/unstable/daily/
 
 All versions of the GTA02 (Neo FreeRunner) that have been sold to the public are version 5 hardware, so look for a file with "gta02" and "v5" in the name, for example:
-uboot-gta02v5-latest.bin
+ uboot-gta02v5-latest.bin
 
 The file should be written to the NAND flash address 0x00000000 (size 0x30000) (the first [[Partitions|partition]]).
 
@@ -125,7 +125,7 @@ cpsr: 0x600000d3 pc: 0x33f80000
 MMU: disabled, D-Cache: disabled, I-Cache: enabled
 </pre>
 
-* Download the u-boot RAM image to 0x33f80000
+* Download the U-Boot RAM image to 0x33f80000
 <pre>
 > load_binary /space/misc/gta01/u-boot.git/u-boot.bin 0x33f80000
 downloaded 135692 byte in 6s 567264us
@@ -154,7 +154,7 @@ GTA01Bv2 #
 
 == Creating bootable images ==
 
-U-boot needs bootable images (such as kernels, but also initrd and others) in form of a so-called ''uImage''.  In order to create a ''uImage'' from e.g. a ''vmlinux'' kernel image, you can proceed as follows:
+U-Boot needs bootable images (such as kernels, but also initrd and others) in form of a so-called ''uImage''.  In order to create a ''uImage'' from e.g. a ''vmlinux'' kernel image, you can proceed as follows:
 
 <pre>
 objcopy -O binary -R .note -R .comment -S vmlinux linux.bin
@@ -163,9 +163,9 @@ u-boot/tools/mkimage -A arm -O linux -T kernel -C gzip -a 30008000 -e 30008000 -
 </pre>
 
 == Boot menu ==
-[[Image:Neo1973 uboot menu.jpg|thumb|400px|u-boot boot menu on Neo1973]]
+[[Image:Neo1973 uboot menu.jpg|thumb|400px|U-Boot boot menu on Neo1973]]
 
-As of the Phase-0 release, our u-boot version now features an on-screen boot menu. The items are defined by [[U-Boot environment#menu|menu entries in the environment]].
+As of the Phase-0 release, our U-Boot version now features an on-screen boot menu. The items are defined by [[U-Boot environment#menu|menu entries in the environment]].
 
 === Accessing the boot menu ===
 
@@ -179,7 +179,7 @@ By pressing the [[Neo1973 AUX Button]] you can cycle through the menu items.  Us
 
 === Accessing the U-Boot prompt ===
 The U-Boot prompt is available either on the serial console (via [[Debug Board]]), or as virtual USB Serial device (USB CDC_ACM).
-Whether the serial port or usb is used depends on the u-boot environment variables '''stdin''', '''stdout''' and '''stderr'''.
+Whether the serial port or usb is used depends on the U-Boot environment variables '''stdin''', '''stdout''' and '''stderr'''.
 
 Whether or not you use usbtty, the first couple of messages will always be displayed on the serial console.
 
@@ -187,7 +187,7 @@ The U-Boot is currently configured to wait for three seconds.  If a key press on
 
 ==== Using usbtty from Linux ====
 
-Just by connecting the phone in u-boot mode to your Linux pc should make it detect a [[CDC ACM]] device, and you should get a new tty device called /dev/ttyACM0. If not, check that module cdc_acm is loaded or CONFIG_USB_ACM=y (Device Drivers -> USB support -> USB Modem (CDC ACM) support). (Instructions for MacOS users are [[MacOS_X#USB_Serial|here]])
+Just by connecting the phone in U-Boot mode to your Linux pc should make it detect a [[CDC ACM]] device, and you should get a new tty device called /dev/ttyACM0. If not, check that module cdc_acm is loaded or CONFIG_USB_ACM=y (Device Drivers -> USB support -> USB Modem (CDC ACM) support). (Instructions for MacOS users are [[MacOS_X#USB_Serial|here]])
 
 Use your favourite terminal emulator (minicom, cu, zc, screen ...) to access it like any other serial port. Clear any modem intialisation strings (minicom).
 
@@ -204,7 +204,7 @@ to get the necessary rights (even as root, must be done each time). For example,
 
 A nice alternative for cu is Werner Almesberger's [[NeoCon|neocon]].
 
-First, you should try to check whether the USB device shows up in 'lsusb' while you're running in u-boot mode:
+First, you should try to check whether the USB device shows up in 'lsusb' while you're running in U-Boot mode:
 
 <pre>
 # lsusb -d 1457:5119
@@ -325,7 +325,7 @@ GTA01Bv2 # setenv stdout usbtty
 GTA01Bv2 # setenv stdin usbtty
 </pre>
 
-==== Typical u-boot prompt ====
+==== Typical U-Boot prompt ====
 
 <pre>
 U-Boot 1.2.0-moko1 (Feb 16 2007 - 00:36:13)
@@ -347,7 +347,7 @@ GTA01Bv3 #
 :''See [[U-Boot commands]].''
 
 === What if I borked my U-Boot environment and don't get a prompt anymore? ===
-{{Note|This solution applies to a changed u-boot environment which prevents NAND u-boot to successfully boot.  The Debian u-boot configuration script may be a cause of this issue.}}
+{{Note|This solution applies to a changed U-Boot environment which prevents NAND U-Boot to successfully boot.  The Debian U-Boot configuration script may be a cause of this issue.}}
 Found a solution here:
 [[http://markmail.org/message/gqypwiohdet6x4am?q=almesberger+partition&page=1&refer=xbamkzwwsaobv7wa]]
 
@@ -355,9 +355,9 @@ It works the following way:
 * Get the devirginator:
 svn co http://svn.openmoko.org/trunk/src/host/devirginator
 cd devirginator
-* Read the u-boot environment from the device:
+* Read the U-Boot environment from the device:
 dfu-util -a u-boot_env -R -U env.in
-* Create a file that contains everything you want to change in your u-boot environment or get it by issuing the following command:
+* Create a file that contains everything you want to change in your U-Boot environment or get it by issuing the following command:
 wget http://svn.openmoko.org/trunk/src/host/devirginator/environment.in
 * Now let devirginator generate a new u-boot_env partition for us, - that contains the partition table from our u-boot_env, - and all changes we wanted to make; Note that the -D GTA02 is needed for the neo FreeRunner only, and has to come before the other options.
 ./envedit.pl -D GTA02 -i env.in -f environment.in -o env.out
@@ -371,10 +371,10 @@ dfu-util -a u-boot_env -R -D env.out
 
 == Device Firmware Upgrade ==
 
-Our version of u-boot also implements [[USB DFU]]. This can be useful to
+Our version of U-Boot also implements [[USB DFU]]. This can be useful to
 load files and kernel for quick testing.
 
-To find out whether your version of u-boot supports this, use the output of
+To find out whether your version of U-Boot supports this, use the output of
 $ lsusb -v -d 1457:5119
 while the phone is in u-boot mode.
 
@@ -445,7 +445,7 @@ else:
 
 === USB connectivity problems ===
 
-I once got errors like this (in dmesg or /var/log/messages) on the host side while connecting the neo in u-boot:
+I once got errors like this (in dmesg or /var/log/messages) on the host side while connecting the Neo in U-Boot:
 
 usb 2-1: device descriptor read/64, error -110
 usb usb2: Controller not stopped yet!
