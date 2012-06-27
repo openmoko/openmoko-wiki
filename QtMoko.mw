@@ -450,6 +450,27 @@ If you to install software use the scripts before and after apt-get call:
   apt-stop
 Replace <tt>mysoftware</tt> with the package you want to install e.g. <tt>linphone</tt>.
 
+
+== Data Safety / Boot Errors ==
+=== Boot Errors due to Filesystem Corruption ===
+In case your ext3 partition gets corrupted take out the sdcard from your freerunner, put it in a card reader and insert the card reader in one of the usb slots of your desktop linux system.<br>
+Find out the mount point of the ext3 partition but '''do not mount the partition'''.<br>
+Now you can run from command line where /dev/sdXX is the qtmoko partition on your sd card (/dev/sdc2 in the example below):
+
+  fsck /dev/sdc2
+
+and you will be asked to confirm the error correction. If you just want to have any errors corrected run
+
+  fsck -y /dev/sdc2
+
+=== Backing up whole partitions ===
+To backup whole partitions to your local desktop computer navigate to the directory where you'd like to have the files written to (in this case /home/limo/) open a terminal in that directory and run the two commands below (it assumes the following paritioning of the sdcard: 1st partition = vfat 2nd partition = qtmoko on some ext filesystem):
+
+  ssh -t root@192.168.0.202 dd if=/dev/mmcblk0p1 ibs=512 conv=notrunc,noerror | dd of=/home/limo/qtmoko_vfatpartition.img obs=512
+  ssh -t root@192.168.0.202 dd if=/dev/mmcblk0p2 ibs=512 conv=notrunc,noerror | dd of=/home/limo/qtmoko_rootpartition.img obs=512
+
+the ibs/obs is the bytesize read and and written at once. I guess they have to be the same number though higher values (1024,2048,...) may work as well. Limitations might be the USB1 of the freerunner.
+
 == Links ==
 * [http://sourceforge.net/apps/mediawiki/qtmoko/index.php?title=Main_Page QtMoko Wiki]
 * [http://sourceforge.net/projects/qtmoko/files/ QtMoko Download]
