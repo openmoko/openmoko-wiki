@@ -469,10 +469,13 @@ and you will be asked to confirm the error correction. If you just want to have 
 === Backing up whole partitions ===
 To backup whole partitions to your local desktop computer navigate to the directory where you'd like to have the files written to (in this case /home/limo/) open a terminal in that directory and run the two commands below (it assumes the following paritioning of the sdcard: 1st partition = vfat 2nd partition = qtmoko on some ext filesystem):
 
-  ssh -t root@192.168.0.202 dd if=/dev/mmcblk0p1 ibs=512 conv=notrunc,noerror | dd of=/home/limo/qtmoko_vfatpartition.img obs=512
-  ssh -t root@192.168.0.202 dd if=/dev/mmcblk0p2 ibs=512 conv=notrunc,noerror | dd of=/home/limo/qtmoko_rootpartition.img obs=512
+  ssh -t root@192.168.0.202 dd if=/dev/mmcblk0p1 ibs=4096 conv=notrunc,noerror | dd of=/home/limo/qtmoko_vfatpartition.img obs=4096
+  ssh -t root@192.168.0.202 dd if=/dev/mmcblk0p2 ibs=4096 conv=notrunc,noerror | dd of=/home/limo/qtmoko_rootpartition.img obs=4096
 
-the ibs/obs is the bytesize read and and written at once. I guess they have to be the same number though higher values (1024,2048,...) may work as well. Limitations might be the USB1 of the freerunner.
+or somewhat simpler do the folowing which works with busybox dd:
+
+  ssh -t root@192.168.0.202 dd if=/dev/mmcblk0p1 bs=4096 > ~/qtmoko_vfatpartition.bs4096.img
+  ssh -t root@192.168.0.202 dd if=/dev/mmcblk0p2 bs=4096 > ~/qtmoko_rootpartition.bs4096.img
 
 == Links ==
 * [http://sourceforge.net/apps/mediawiki/qtmoko/index.php?title=Main_Page QtMoko Wiki]
