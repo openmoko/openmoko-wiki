@@ -376,6 +376,14 @@ Store MP3-files in <tt>/media/card/audio/mpeg</tt>
 * Install MP3-codec
 * reboot you freerunner
 
+== Video ==
+=== Transcoding for  240x320 with Gamma Correction===
+The 240x320 mode on freerunner has "odd" colors. To adjust this you can run:
+
+  mencoder -really-quiet -oac pcm -ovc lavc -lavcopts vcodec=ffvhuff -vf eq2=1:1:0:1:1.19:1.19:1.44 -vf scale=320:240,rotate=1 -o - "$@" | ffmpeg2theora -V 256 -A 32 -H 22050 -c 1 -o - - 2> dev/null | dd bs=8192 iflag=fullblock 2> /dev/null
+
+where 1.19, 1.19 and 1.44 are the gamma values for red, green and blue.
+
 == Error Handling and Workarounds ==
 During the installations above, the following problem occured:
 === Xdialog Problem with Gdk-WARNING===
