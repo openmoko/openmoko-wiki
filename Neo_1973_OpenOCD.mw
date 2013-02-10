@@ -81,6 +81,23 @@ Also this one is fixed by unplugging and re-plugging USB.
 If you want to use OpenOCD with our Debug Board v2, and want to use the serial port simultaneously with OpenOCD, you '''need libftdi-0.8 or later'''.  Chances are high that your distribution still ships an earlier version of libftdi, so you might want to download it from http://www.intra2net.com/de/produkte/opensource/ftdi/ and build yourself.
 
 === openocd.cfg ===
+This is an OpenOCD config that was tested with OpenOCD version 0.6.1 and debug board v3 (using new ftdi driver, doesn't require libftdi):
+
+<pre>
+source [find interface/ftdi/neodb.cfg]
+source [find target/samsung_s3c2440.cfg]
+
+adapter_khz 1000
+
+reset_config trst_and_srst
+
+init
+reset run
+sleep 5000
+halt
+</pre>
+
+Here follow configs for some ancient OpenOCD versions:
 
 This is an openocd.cfg that is known to work with [[Debug Board]] (v2/v3), [[Neo1973 Hardware#GTA01Bv3]] and OpenOCD 130:
 <pre>
